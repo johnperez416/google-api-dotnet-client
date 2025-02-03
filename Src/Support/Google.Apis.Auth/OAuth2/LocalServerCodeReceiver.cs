@@ -73,16 +73,6 @@ namespace Google.Apis.Auth.OAuth2
   <head><title>OAuth 2.0 Authentication Token Received</title></head>
   <body>
     Received verification code. You may now close this window.
-    <script type='text/javascript'>
-      // This doesn't work on every browser.
-      window.setTimeout(function() {
-          this.focus();
-          window.opener = this;
-          window.open('', '_self', ''); 
-          window.close(); 
-        }, 1000);
-      //if (window.opener) { window.opener.checkToken(); }
-    </script>
   </body>
 </html>";
 
@@ -280,7 +270,7 @@ namespace Google.Apis.Auth.OAuth2
                     throw new ServerException($"Expected 'GET' request, got '{requestVerb}'");
                 }
                 string requestPath = requestLineParts[1];
-                if (!requestPath.StartsWith(LoopbackCallbackPath))
+                if (!requestPath.StartsWith(LoopbackCallbackPath, StringComparison.Ordinal))
                 {
                     throw new ServerException($"Expected request path to start '{LoopbackCallbackPath}', got '{requestPath}'");
                 }
@@ -423,39 +413,6 @@ namespace Google.Apis.Auth.OAuth2
             }
         }
 
-#if NETSTANDARD1_3
-        internal LimitedLocalhostHttpServer StartListener()
-        {
-            try
-            {
-                return LimitedLocalhostHttpServer.Start(RedirectUri, _closePageResponse);
-            }
-            catch
-            {
-                CallbackUriChooser.Default.ReportFailure(_callbackUriTemplate);
-                throw;
-            }
-        }
-
-
-        private async Task<AuthorizationCodeResponseUrl> GetResponseFromListener(LimitedLocalhostHttpServer server, CancellationToken ct)
-        {
-            Dictionary<string, string> queryParams;
-            try
-            {
-                queryParams = await server.GetQueryParamsAsync(ct).ConfigureAwait(false);
-                CallbackUriChooser.Default.ReportSuccess(_callbackUriTemplate);
-            }
-            catch
-            {
-                CallbackUriChooser.Default.ReportFailure(_callbackUriTemplate);
-                throw;
-            }
-
-            // Create a new response URL with a dictionary that contains all the response query parameters.
-            return new AuthorizationCodeResponseUrl(queryParams);
-        }
-#elif NET45 || NET461 || NETSTANDARD2_0
         private HttpListener StartListener()
         {
             try
@@ -514,12 +471,14 @@ namespace Google.Apis.Auth.OAuth2
             // Create a new response URL with a dictionary that contains all the response query parameters.
             return new AuthorizationCodeResponseUrl(coll.AllKeys.ToDictionary(k => k, k => coll[k]));
         }
-#else
-#error Unsupported target
-#endif
 
-#if NETSTANDARD1_3 || NETSTANDARD2_0
-        private bool OpenBrowser(string url)
+        /// <summary>
+        /// Open a browser and navigate to a URL.
+        /// </summary>
+        /// <param name="url">URL to navigate to</param>
+        /// <returns>true if browser was launched successfully, false otherwise</returns>
+#if NETSTANDARD2_0 || NET6_0_OR_GREATER
+        protected virtual bool OpenBrowser(string url)
         {
             // See https://github.com/dotnet/corefx/issues/10361
             // This is best-effort only, but should work most of the time.
@@ -543,8 +502,8 @@ namespace Google.Apis.Auth.OAuth2
             }
             return false;
         }
-#elif NET45 || NET461
-        private bool OpenBrowser(string url)
+#elif NET462_OR_GREATER
+        protected virtual bool OpenBrowser(string url)
         {
             Process.Start(url);
             return true;
@@ -552,7 +511,7 @@ namespace Google.Apis.Auth.OAuth2
 #else
 #error Unsupported target
 #endif
-    
+
         internal class CallbackUriChooser
         {
             /// <summary>Localhost callback URI, expects a port parameter.</summary>
@@ -676,10 +635,6 @@ namespace Google.Apis.Auth.OAuth2
 
             private static bool FailsHttpListener(string uri)
             {
-#if NETSTANDARD1_3
-                // No check required on NETStandard 1.3, it uses TcpListener which can only use IP adddresses, not DNS names.
-                return false;
-#elif NET45 || NET461 || NETSTANDARD2_0
                 try
                 {
                     // This listener isn't used for anything except to check if it can listen on the given URI.
@@ -698,9 +653,6 @@ namespace Google.Apis.Auth.OAuth2
                     // Ignore any errors here, they will re-occur later.
                 }
                 return false;
-#else
-#error Unsupported target
-#endif
             }
 
             private class UriStatistics

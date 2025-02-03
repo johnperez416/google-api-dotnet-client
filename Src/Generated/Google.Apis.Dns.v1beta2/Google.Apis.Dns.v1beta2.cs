@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,6 +43,8 @@ namespace Google.Apis.Dns.v1beta2
             ResourceRecordSets = new ResourceRecordSetsResource(this);
             ResponsePolicies = new ResponsePoliciesResource(this);
             ResponsePolicyRules = new ResponsePolicyRulesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://dns.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://dns.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -52,23 +54,16 @@ namespace Google.Apis.Dns.v1beta2
         public override string Name => "dns";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://dns.googleapis.com/";
-        #else
-            "https://dns.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://dns.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud DNS API.</summary>
         public class Scope
@@ -343,7 +338,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual CreateRequest Create(Google.Apis.Dns.v1beta2.Data.Change body, string project, string managedZone)
         {
-            return new CreateRequest(service, body, project, managedZone);
+            return new CreateRequest(this.service, body, project, managedZone);
         }
 
         /// <summary>Atomically updates the ResourceRecordSet collection.</summary>
@@ -431,7 +426,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual GetRequest Get(string project, string managedZone, string changeId)
         {
-            return new GetRequest(service, project, managedZone, changeId);
+            return new GetRequest(this.service, project, managedZone, changeId);
         }
 
         /// <summary>Fetches the representation of an existing Change.</summary>
@@ -524,7 +519,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual ListRequest List(string project, string managedZone)
         {
-            return new ListRequest(service, project, managedZone);
+            return new ListRequest(this.service, project, managedZone);
         }
 
         /// <summary>Enumerates Changes to a ResourceRecordSet collection.</summary>
@@ -665,7 +660,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="dnsKeyId">The identifier of the requested DnsKey.</param>
         public virtual GetRequest Get(string project, string managedZone, string dnsKeyId)
         {
-            return new GetRequest(service, project, managedZone, dnsKeyId);
+            return new GetRequest(this.service, project, managedZone, dnsKeyId);
         }
 
         /// <summary>Fetches the representation of an existing DnsKey.</summary>
@@ -771,7 +766,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual ListRequest List(string project, string managedZone)
         {
-            return new ListRequest(service, project, managedZone);
+            return new ListRequest(this.service, project, managedZone);
         }
 
         /// <summary>Enumerates DnsKeys to a ResourceRecordSet collection.</summary>
@@ -893,7 +888,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="operation">Identifies the operation addressed by this request (ID of the operation).</param>
         public virtual GetRequest Get(string project, string managedZone, string operation)
         {
-            return new GetRequest(service, project, managedZone, operation);
+            return new GetRequest(this.service, project, managedZone, operation);
         }
 
         /// <summary>Fetches the representation of an existing Operation.</summary>
@@ -980,7 +975,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="managedZone">Identifies the managed zone addressed by this request.</param>
         public virtual ListRequest List(string project, string managedZone)
         {
-            return new ListRequest(service, project, managedZone);
+            return new ListRequest(this.service, project, managedZone);
         }
 
         /// <summary>Enumerates Operations for the given ManagedZone.</summary>
@@ -1108,7 +1103,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="project">Identifies the project addressed by this request.</param>
         public virtual CreateRequest Create(Google.Apis.Dns.v1beta2.Data.ManagedZone body, string project)
         {
-            return new CreateRequest(service, body, project);
+            return new CreateRequest(this.service, body, project);
         }
 
         /// <summary>Creates a new ManagedZone.</summary>
@@ -1178,7 +1173,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual DeleteRequest Delete(string project, string managedZone)
         {
-            return new DeleteRequest(service, project, managedZone);
+            return new DeleteRequest(this.service, project, managedZone);
         }
 
         /// <summary>Deletes a previously created ManagedZone.</summary>
@@ -1256,7 +1251,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual GetRequest Get(string project, string managedZone)
         {
-            return new GetRequest(service, project, managedZone);
+            return new GetRequest(this.service, project, managedZone);
         }
 
         /// <summary>Fetches the representation of an existing ManagedZone.</summary>
@@ -1327,11 +1322,76 @@ namespace Google.Apis.Dns.v1beta2
             }
         }
 
+        /// <summary>
+        /// Gets the access control policy for a resource. Returns an empty policy if the resource exists and does not
+        /// have a policy set.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="resource">
+        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+        /// </param>
+        public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.Dns.v1beta2.Data.GoogleIamV1GetIamPolicyRequest body, string resource)
+        {
+            return new GetIamPolicyRequest(this.service, body, resource);
+        }
+
+        /// <summary>
+        /// Gets the access control policy for a resource. Returns an empty policy if the resource exists and does not
+        /// have a policy set.
+        /// </summary>
+        public class GetIamPolicyRequest : DnsBaseServiceRequest<Google.Apis.Dns.v1beta2.Data.GoogleIamV1Policy>
+        {
+            /// <summary>Constructs a new GetIamPolicy request.</summary>
+            public GetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.Dns.v1beta2.Data.GoogleIamV1GetIamPolicyRequest body, string resource) : base(service)
+            {
+                Resource = resource;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Resource { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Dns.v1beta2.Data.GoogleIamV1GetIamPolicyRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getIamPolicy";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "dns/v1beta2/{+resource}:getIamPolicy";
+
+            /// <summary>Initializes GetIamPolicy parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "resource",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^projects/[^/]+/managedZones/[^/]+$",
+                });
+            }
+        }
+
         /// <summary>Enumerates ManagedZones that have been created but not yet deleted.</summary>
         /// <param name="project">Identifies the project addressed by this request.</param>
         public virtual ListRequest List(string project)
         {
-            return new ListRequest(service, project);
+            return new ListRequest(this.service, project);
         }
 
         /// <summary>Enumerates ManagedZones that have been created but not yet deleted.</summary>
@@ -1422,7 +1482,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Dns.v1beta2.Data.ManagedZone body, string project, string managedZone)
         {
-            return new PatchRequest(service, body, project, managedZone);
+            return new PatchRequest(this.service, body, project, managedZone);
         }
 
         /// <summary>Applies a partial update to an existing ManagedZone.</summary>
@@ -1500,6 +1560,140 @@ namespace Google.Apis.Dns.v1beta2
             }
         }
 
+        /// <summary>
+        /// Sets the access control policy on the specified resource. Replaces any existing policy. Can return
+        /// `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="resource">
+        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+        /// </param>
+        public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.Dns.v1beta2.Data.GoogleIamV1SetIamPolicyRequest body, string resource)
+        {
+            return new SetIamPolicyRequest(this.service, body, resource);
+        }
+
+        /// <summary>
+        /// Sets the access control policy on the specified resource. Replaces any existing policy. Can return
+        /// `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors.
+        /// </summary>
+        public class SetIamPolicyRequest : DnsBaseServiceRequest<Google.Apis.Dns.v1beta2.Data.GoogleIamV1Policy>
+        {
+            /// <summary>Constructs a new SetIamPolicy request.</summary>
+            public SetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.Dns.v1beta2.Data.GoogleIamV1SetIamPolicyRequest body, string resource) : base(service)
+            {
+                Resource = resource;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Resource { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Dns.v1beta2.Data.GoogleIamV1SetIamPolicyRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "setIamPolicy";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "dns/v1beta2/{+resource}:setIamPolicy";
+
+            /// <summary>Initializes SetIamPolicy parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "resource",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^projects/[^/]+/managedZones/[^/]+$",
+                });
+            }
+        }
+
+        /// <summary>
+        /// Returns permissions that a caller has on the specified resource. If the resource does not exist, this
+        /// returns an empty set of permissions, not a `NOT_FOUND` error. Note: This operation is designed to be used
+        /// for building permission-aware UIs and command-line tools, not for authorization checking. This operation may
+        /// "fail open" without warning.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="resource">
+        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+        /// </param>
+        public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.Dns.v1beta2.Data.GoogleIamV1TestIamPermissionsRequest body, string resource)
+        {
+            return new TestIamPermissionsRequest(this.service, body, resource);
+        }
+
+        /// <summary>
+        /// Returns permissions that a caller has on the specified resource. If the resource does not exist, this
+        /// returns an empty set of permissions, not a `NOT_FOUND` error. Note: This operation is designed to be used
+        /// for building permission-aware UIs and command-line tools, not for authorization checking. This operation may
+        /// "fail open" without warning.
+        /// </summary>
+        public class TestIamPermissionsRequest : DnsBaseServiceRequest<Google.Apis.Dns.v1beta2.Data.GoogleIamV1TestIamPermissionsResponse>
+        {
+            /// <summary>Constructs a new TestIamPermissions request.</summary>
+            public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.Dns.v1beta2.Data.GoogleIamV1TestIamPermissionsRequest body, string resource) : base(service)
+            {
+                Resource = resource;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Resource { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Dns.v1beta2.Data.GoogleIamV1TestIamPermissionsRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "testIamPermissions";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "dns/v1beta2/{+resource}:testIamPermissions";
+
+            /// <summary>Initializes TestIamPermissions parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "resource",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^projects/[^/]+/managedZones/[^/]+$",
+                });
+            }
+        }
+
         /// <summary>Updates an existing ManagedZone.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="project">Identifies the project addressed by this request.</param>
@@ -1508,7 +1702,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.Dns.v1beta2.Data.ManagedZone body, string project, string managedZone)
         {
-            return new UpdateRequest(service, body, project, managedZone);
+            return new UpdateRequest(this.service, body, project, managedZone);
         }
 
         /// <summary>Updates an existing ManagedZone.</summary>
@@ -1606,7 +1800,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="project">Identifies the project addressed by this request.</param>
         public virtual CreateRequest Create(Google.Apis.Dns.v1beta2.Data.Policy body, string project)
         {
-            return new CreateRequest(service, body, project);
+            return new CreateRequest(this.service, body, project);
         }
 
         /// <summary>Creates a new Policy.</summary>
@@ -1676,7 +1870,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="policy">User given friendly name of the policy addressed by this request.</param>
         public virtual DeleteRequest Delete(string project, string policy)
         {
-            return new DeleteRequest(service, project, policy);
+            return new DeleteRequest(this.service, project, policy);
         }
 
         /// <summary>
@@ -1752,7 +1946,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="policy">User given friendly name of the policy addressed by this request.</param>
         public virtual GetRequest Get(string project, string policy)
         {
-            return new GetRequest(service, project, policy);
+            return new GetRequest(this.service, project, policy);
         }
 
         /// <summary>Fetches the representation of an existing Policy.</summary>
@@ -1825,7 +2019,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="project">Identifies the project addressed by this request.</param>
         public virtual ListRequest List(string project)
         {
-            return new ListRequest(service, project);
+            return new ListRequest(this.service, project);
         }
 
         /// <summary>Enumerates all Policies associated with a project.</summary>
@@ -1902,7 +2096,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="policy">User given friendly name of the policy addressed by this request.</param>
         public virtual PatchRequest Patch(Google.Apis.Dns.v1beta2.Data.Policy body, string project, string policy)
         {
-            return new PatchRequest(service, body, project, policy);
+            return new PatchRequest(this.service, body, project, policy);
         }
 
         /// <summary>Applies a partial update to an existing Policy.</summary>
@@ -1984,7 +2178,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="policy">User given friendly name of the policy addressed by this request.</param>
         public virtual UpdateRequest Update(Google.Apis.Dns.v1beta2.Data.Policy body, string project, string policy)
         {
-            return new UpdateRequest(service, body, project, policy);
+            return new UpdateRequest(this.service, body, project, policy);
         }
 
         /// <summary>Updates an existing Policy.</summary>
@@ -2079,7 +2273,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="project">Identifies the project addressed by this request.</param>
         public virtual GetRequest Get(string project)
         {
-            return new GetRequest(service, project);
+            return new GetRequest(this.service, project);
         }
 
         /// <summary>Fetches the representation of an existing Project.</summary>
@@ -2158,7 +2352,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual CreateRequest Create(Google.Apis.Dns.v1beta2.Data.ResourceRecordSet body, string project, string managedZone)
         {
-            return new CreateRequest(service, body, project, managedZone);
+            return new CreateRequest(this.service, body, project, managedZone);
         }
 
         /// <summary>Creates a new ResourceRecordSet.</summary>
@@ -2245,7 +2439,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="type">RRSet type.</param>
         public virtual DeleteRequest Delete(string project, string managedZone, string name, string type)
         {
-            return new DeleteRequest(service, project, managedZone, name, type);
+            return new DeleteRequest(this.service, project, managedZone, name, type);
         }
 
         /// <summary>Deletes a previously created ResourceRecordSet.</summary>
@@ -2351,7 +2545,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="type">RRSet type.</param>
         public virtual GetRequest Get(string project, string managedZone, string name, string type)
         {
-            return new GetRequest(service, project, managedZone, name, type);
+            return new GetRequest(this.service, project, managedZone, name, type);
         }
 
         /// <summary>Fetches the representation of an existing ResourceRecordSet.</summary>
@@ -2455,7 +2649,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual ListRequest List(string project, string managedZone)
         {
-            return new ListRequest(service, project, managedZone);
+            return new ListRequest(this.service, project, managedZone);
         }
 
         /// <summary>Enumerates ResourceRecordSets that you have created but not yet deleted.</summary>
@@ -2578,7 +2772,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="type">RRSet type.</param>
         public virtual PatchRequest Patch(Google.Apis.Dns.v1beta2.Data.ResourceRecordSet body, string project, string managedZone, string name, string type)
         {
-            return new PatchRequest(service, body, project, managedZone, name, type);
+            return new PatchRequest(this.service, body, project, managedZone, name, type);
         }
 
         /// <summary>Applies a partial update to an existing ResourceRecordSet.</summary>
@@ -2702,7 +2896,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="project">Identifies the project addressed by this request.</param>
         public virtual CreateRequest Create(Google.Apis.Dns.v1beta2.Data.ResponsePolicy body, string project)
         {
-            return new CreateRequest(service, body, project);
+            return new CreateRequest(this.service, body, project);
         }
 
         /// <summary>Creates a new Response Policy</summary>
@@ -2773,7 +2967,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="responsePolicy">User assigned name of the Response Policy addressed by this request.</param>
         public virtual DeleteRequest Delete(string project, string responsePolicy)
         {
-            return new DeleteRequest(service, project, responsePolicy);
+            return new DeleteRequest(this.service, project, responsePolicy);
         }
 
         /// <summary>
@@ -2850,7 +3044,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="responsePolicy">User assigned name of the Response Policy addressed by this request.</param>
         public virtual GetRequest Get(string project, string responsePolicy)
         {
-            return new GetRequest(service, project, responsePolicy);
+            return new GetRequest(this.service, project, responsePolicy);
         }
 
         /// <summary>Fetches the representation of an existing Response Policy.</summary>
@@ -2923,7 +3117,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="project">Identifies the project addressed by this request.</param>
         public virtual ListRequest List(string project)
         {
-            return new ListRequest(service, project);
+            return new ListRequest(this.service, project);
         }
 
         /// <summary>Enumerates all Response Policies associated with a project.</summary>
@@ -2997,10 +3191,10 @@ namespace Google.Apis.Dns.v1beta2
         /// <summary>Applies a partial update to an existing Response Policy.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="project">Identifies the project addressed by this request.</param>
-        /// <param name="responsePolicy">User assigned name of the Respones Policy addressed by this request.</param>
+        /// <param name="responsePolicy">User assigned name of the response policy addressed by this request.</param>
         public virtual PatchRequest Patch(Google.Apis.Dns.v1beta2.Data.ResponsePolicy body, string project, string responsePolicy)
         {
-            return new PatchRequest(service, body, project, responsePolicy);
+            return new PatchRequest(this.service, body, project, responsePolicy);
         }
 
         /// <summary>Applies a partial update to an existing Response Policy.</summary>
@@ -3019,7 +3213,7 @@ namespace Google.Apis.Dns.v1beta2
             [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Project { get; private set; }
 
-            /// <summary>User assigned name of the Respones Policy addressed by this request.</summary>
+            /// <summary>User assigned name of the response policy addressed by this request.</summary>
             [Google.Apis.Util.RequestParameterAttribute("responsePolicy", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string ResponsePolicy { get; private set; }
 
@@ -3082,7 +3276,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="responsePolicy">User assigned name of the Response Policy addressed by this request.</param>
         public virtual UpdateRequest Update(Google.Apis.Dns.v1beta2.Data.ResponsePolicy body, string project, string responsePolicy)
         {
-            return new UpdateRequest(service, body, project, responsePolicy);
+            return new UpdateRequest(this.service, body, project, responsePolicy);
         }
 
         /// <summary>Updates an existing Response Policy.</summary>
@@ -3181,7 +3375,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual CreateRequest Create(Google.Apis.Dns.v1beta2.Data.ResponsePolicyRule body, string project, string responsePolicy)
         {
-            return new CreateRequest(service, body, project, responsePolicy);
+            return new CreateRequest(this.service, body, project, responsePolicy);
         }
 
         /// <summary>Creates a new Response Policy Rule.</summary>
@@ -3267,7 +3461,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual DeleteRequest Delete(string project, string responsePolicy, string responsePolicyRule)
         {
-            return new DeleteRequest(service, project, responsePolicy, responsePolicyRule);
+            return new DeleteRequest(this.service, project, responsePolicy, responsePolicyRule);
         }
 
         /// <summary>Deletes a previously created Response Policy Rule.</summary>
@@ -3359,7 +3553,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual GetRequest Get(string project, string responsePolicy, string responsePolicyRule)
         {
-            return new GetRequest(service, project, responsePolicy, responsePolicyRule);
+            return new GetRequest(this.service, project, responsePolicy, responsePolicyRule);
         }
 
         /// <summary>Fetches the representation of an existing Response Policy Rule.</summary>
@@ -3446,7 +3640,7 @@ namespace Google.Apis.Dns.v1beta2
         /// <param name="responsePolicy">User assigned name of the Response Policy to list.</param>
         public virtual ListRequest List(string project, string responsePolicy)
         {
-            return new ListRequest(service, project, responsePolicy);
+            return new ListRequest(this.service, project, responsePolicy);
         }
 
         /// <summary>Enumerates all Response Policy Rules associated with a project.</summary>
@@ -3541,7 +3735,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Dns.v1beta2.Data.ResponsePolicyRule body, string project, string responsePolicy, string responsePolicyRule)
         {
-            return new PatchRequest(service, body, project, responsePolicy, responsePolicyRule);
+            return new PatchRequest(this.service, body, project, responsePolicy, responsePolicyRule);
         }
 
         /// <summary>Applies a partial update to an existing Response Policy Rule.</summary>
@@ -3641,7 +3835,7 @@ namespace Google.Apis.Dns.v1beta2
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.Dns.v1beta2.Data.ResponsePolicyRule body, string project, string responsePolicy, string responsePolicyRule)
         {
-            return new UpdateRequest(service, body, project, responsePolicy, responsePolicyRule);
+            return new UpdateRequest(this.service, body, project, responsePolicy, responsePolicyRule);
         }
 
         /// <summary>Updates an existing Response Policy Rule.</summary>
@@ -3734,11 +3928,11 @@ namespace Google.Apis.Dns.v1beta2
 namespace Google.Apis.Dns.v1beta2.Data
 {
     /// <summary>
-    /// A Change represents a set of ResourceRecordSet additions and deletions applied atomically to a ManagedZone.
+    /// A Change represents a set of `ResourceRecordSet` additions and deletions applied atomically to a ManagedZone.
     /// ResourceRecordSets within a ManagedZone are modified by creating a new Change element in the Changes collection.
-    /// In turn the Changes collection also records the past modifications to the ResourceRecordSets in a ManagedZone.
-    /// The current state of the ManagedZone is the sum effect of applying all Change elements in the Changes collection
-    /// in sequence.
+    /// In turn the Changes collection also records the past modifications to the `ResourceRecordSets` in a
+    /// `ManagedZone`. The current state of the `ManagedZone` is the sum effect of applying all `Change` elements in the
+    /// `Changes` collection in sequence.
     /// </summary>
     public class Change : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3785,20 +3979,17 @@ namespace Google.Apis.Dns.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("changes")]
         public virtual System.Collections.Generic.IList<Change> Changes { get; set; }
 
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         /// <summary>Type of resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
-        /// The presence of this field indicates that there exist more results following your last page of results in
-        /// pagination order. To fetch them, make another list request using this value as your pagination token. This
-        /// lets you retrieve the complete contents of even very large collections one page at a time. However, if the
-        /// contents of the collection change between the first and last paginated list request, the set of all elements
-        /// returned are an inconsistent view of the collection. You cannot retrieve a "snapshot" of collections larger
-        /// than the maximum page size.
+        /// This field indicates that more results are available beyond the last page displayed. To fetch the results,
+        /// make another list request and use this value as your page token. This lets you retrieve the complete
+        /// contents of a very large collection one page at a time. However, if the contents of the collection change
+        /// between the first and last paginated list request, the set of all elements returned are an inconsistent view
+        /// of the collection. You can't retrieve a consistent snapshot of a collection larger than the maximum page
+        /// size.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -3932,23 +4123,344 @@ namespace Google.Apis.Dns.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("dnsKeys")]
         public virtual System.Collections.Generic.IList<DnsKey> DnsKeys { get; set; }
 
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         /// <summary>Type of resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
-        /// The presence of this field indicates that there exist more results following your last page of results in
-        /// pagination order. To fetch them, make another list request using this value as your pagination token. In
-        /// this way you can retrieve the complete contents of even very large collections one page at a time. However,
-        /// if the contents of the collection change between the first and last paginated list request, the set of all
-        /// elements returned are an inconsistent view of the collection. There is no way to retrieve a "snapshot" of
-        /// collections larger than the maximum page size.
+        /// This field indicates that more results are available beyond the last page displayed. To fetch the results,
+        /// make another list request and use this value as your page token. This lets you retrieve the complete
+        /// contents of a very large collection one page at a time. However, if the contents of the collection change
+        /// between the first and last paginated list request, the set of all elements returned are an inconsistent view
+        /// of the collection. You can't retrieve a consistent snapshot of a collection larger than the maximum page
+        /// size.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression
+    /// language. The syntax and semantics of CEL are documented at https://github.com/google/cel-spec. Example
+    /// (Comparison): title: "Summary size limit" description: "Determines if a summary is less than 100 chars"
+    /// expression: "document.summary.size() &amp;lt; 100" Example (Equality): title: "Requestor is owner" description:
+    /// "Determines if requestor is the document owner" expression: "document.owner == request.auth.claims.email"
+    /// Example (Logic): title: "Public documents" description: "Determine whether the document should be publicly
+    /// visible" expression: "document.type != 'private' &amp;amp;&amp;amp; document.type != 'internal'" Example (Data
+    /// Manipulation): title: "Notification string" description: "Create a notification string with a timestamp."
+    /// expression: "'New message received at ' + string(document.create_time)" The exact variables and functions that
+    /// may be referenced within an expression are determined by the service that evaluates it. See the service
+    /// documentation for additional information.
+    /// </summary>
+    public class Expr : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Description of the expression. This is a longer text which describes the expression, e.g. when
+        /// hovered over it in a UI.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Textual representation of an expression in Common Expression Language syntax.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expression")]
+        public virtual string Expression { get; set; }
+
+        /// <summary>
+        /// Optional. String indicating the location of the expression for error reporting, e.g. a file name and a
+        /// position in the file.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>
+        /// Optional. Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs
+        /// which allow to enter the expression.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Specifies the audit configuration for a service. The configuration determines which permission types are logged,
+    /// and what identities, if any, are exempted from logging. An AuditConfig must have one or more AuditLogConfigs. If
+    /// there are AuditConfigs for both `allServices` and a specific service, the union of the two AuditConfigs is used
+    /// for that service: the log_types specified in each AuditConfig are enabled, and the exempted_members in each
+    /// AuditLogConfig are exempted. Example Policy with multiple AuditConfigs: { "audit_configs": [ { "service":
+    /// "allServices", "audit_log_configs": [ { "log_type": "DATA_READ", "exempted_members": [ "user:jose@example.com" ]
+    /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
+    /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
+    /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
+    /// </summary>
+    public class GoogleIamV1AuditConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The configuration for logging of each type of permission.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("auditLogConfigs")]
+        public virtual System.Collections.Generic.IList<GoogleIamV1AuditLogConfig> AuditLogConfigs { get; set; }
+
+        /// <summary>
+        /// Specifies a service that will be enabled for audit logging. For example, `storage.googleapis.com`,
+        /// `cloudsql.googleapis.com`. `allServices` is a special value that covers all services.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("service")]
+        public virtual string Service { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Provides the configuration for logging a type of permissions. Example: { "audit_log_configs": [ { "log_type":
+    /// "DATA_READ", "exempted_members": [ "user:jose@example.com" ] }, { "log_type": "DATA_WRITE" } ] } This enables
+    /// 'DATA_READ' and 'DATA_WRITE' logging, while exempting jose@example.com from DATA_READ logging.
+    /// </summary>
+    public class GoogleIamV1AuditLogConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Specifies the identities that do not cause logging for this type of permission. Follows the same format of
+        /// Binding.members.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exemptedMembers")]
+        public virtual System.Collections.Generic.IList<string> ExemptedMembers { get; set; }
+
+        /// <summary>The log type that this config enables.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("logType")]
+        public virtual string LogType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Associates `members`, or principals, with a `role`.</summary>
+    public class GoogleIamV1Binding : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The condition that is associated with this binding. If the condition evaluates to `true`, then this binding
+        /// applies to the current request. If the condition evaluates to `false`, then this binding does not apply to
+        /// the current request. However, a different role binding might grant the same role to one or more of the
+        /// principals in this binding. To learn which resources support conditions in their IAM policies, see the [IAM
+        /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("condition")]
+        public virtual Expr Condition { get; set; }
+
+        /// <summary>
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
+        /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
+        /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
+        /// service account that has been recently deleted. For example,
+        /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
+        /// this value reverts to `serviceAccount:{emailid}` and the undeleted service account retains the role in the
+        /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
+        /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
+        /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("members")]
+        public virtual System.Collections.Generic.IList<string> Members { get; set; }
+
+        /// <summary>
+        /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("role")]
+        public virtual string Role { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for `GetIamPolicy` method.</summary>
+    public class GoogleIamV1GetIamPolicyRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>OPTIONAL: A `GetPolicyOptions` object for specifying options to `GetIamPolicy`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("options")]
+        public virtual GoogleIamV1GetPolicyOptions Options { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Encapsulates settings provided to GetIamPolicy.</summary>
+    public class GoogleIamV1GetPolicyOptions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The maximum policy version that will be used to format the policy. Valid values are 0, 1, and 3.
+        /// Requests specifying an invalid value will be rejected. Requests for policies with any conditional role
+        /// bindings must specify version 3. Policies with no conditional role bindings may specify any valid value or
+        /// leave the field unset. The policy in the response might use the policy version that you specified, or it
+        /// might use a lower policy version. For example, if you specify version 3, but the policy has no conditional
+        /// role bindings, the response uses version 1. To learn which resources support conditions in their IAM
+        /// policies, see the [IAM documentation](https://cloud.google.com/iam/help/conditions/resource-policies).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestedPolicyVersion")]
+        public virtual System.Nullable<int> RequestedPolicyVersion { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A
+    /// `Policy` is a collection of `bindings`. A `binding` binds one or more `members`, or principals, to a single
+    /// `role`. Principals can be user accounts, service accounts, Google groups, and domains (such as G Suite). A
+    /// `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role.
+    /// For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical
+    /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
+    /// constraints based on attributes of the request, the resource, or both. To learn which resources support
+    /// conditions in their IAM policies, see the [IAM
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
+    /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
+    /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
+    /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
+    /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
+    /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
+    /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// </summary>
+    public class GoogleIamV1Policy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Specifies cloud audit logging configuration for this policy.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("auditConfigs")]
+        public virtual System.Collections.Generic.IList<GoogleIamV1AuditConfig> AuditConfigs { get; set; }
+
+        /// <summary>
+        /// Associates a list of `members`, or principals, with a `role`. Optionally, may specify a `condition` that
+        /// determines how and when the `bindings` are applied. Each of the `bindings` must contain at least one
+        /// principal. The `bindings` in a `Policy` can refer to up to 1,500 principals; up to 250 of these principals
+        /// can be Google groups. Each occurrence of a principal counts towards these limits. For example, if the
+        /// `bindings` grant 50 different roles to `user:alice@example.com`, and not to any other principal, then you
+        /// can add another 1,450 principals to the `bindings` in the `Policy`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bindings")]
+        public virtual System.Collections.Generic.IList<GoogleIamV1Binding> Bindings { get; set; }
+
+        /// <summary>
+        /// `etag` is used for optimistic concurrency control as a way to help prevent simultaneous updates of a policy
+        /// from overwriting each other. It is strongly suggested that systems make use of the `etag` in the
+        /// read-modify-write cycle to perform policy updates in order to avoid race conditions: An `etag` is returned
+        /// in the response to `getIamPolicy`, and systems are expected to put that etag in the request to
+        /// `setIamPolicy` to ensure that their change will be applied to the same version of the policy. **Important:**
+        /// If you use IAM Conditions, you must include the `etag` field whenever you call `setIamPolicy`. If you omit
+        /// this field, then IAM allows you to overwrite a version `3` policy with a version `1` policy, and all of the
+        /// conditions in the version `3` policy are lost.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Specifies the format of the policy. Valid values are `0`, `1`, and `3`. Requests that specify an invalid
+        /// value are rejected. Any operation that affects conditional role bindings must specify version `3`. This
+        /// requirement applies to the following operations: * Getting a policy that includes a conditional role binding
+        /// * Adding a conditional role binding to a policy * Changing a conditional role binding in a policy * Removing
+        /// any role binding, with or without a condition, from a policy that includes conditions **Important:** If you
+        /// use IAM Conditions, you must include the `etag` field whenever you call `setIamPolicy`. If you omit this
+        /// field, then IAM allows you to overwrite a version `3` policy with a version `1` policy, and all of the
+        /// conditions in the version `3` policy are lost. If a policy does not include any conditions, operations on
+        /// that policy may specify any valid version or leave the field unset. To learn which resources support
+        /// conditions in their IAM policies, see the [IAM
+        /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual System.Nullable<int> Version { get; set; }
+    }
+
+    /// <summary>Request message for `SetIamPolicy` method.</summary>
+    public class GoogleIamV1SetIamPolicyRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
+        /// reject them.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policy")]
+        public virtual GoogleIamV1Policy Policy { get; set; }
+
+        /// <summary>
+        /// OPTIONAL: A FieldMask specifying which fields of the policy to modify. Only the fields in the mask will be
+        /// modified. If no mask is provided, the following default mask is used: `paths: "bindings, etag"`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
+        public virtual object UpdateMask { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for `TestIamPermissions` method.</summary>
+    public class GoogleIamV1TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
+        /// are not allowed. For more information see [IAM
+        /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("permissions")]
+        public virtual System.Collections.Generic.IList<string> Permissions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for `TestIamPermissions` method.</summary>
+    public class GoogleIamV1TestIamPermissionsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A subset of `TestPermissionsRequest.permissions` that the caller is allowed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("permissions")]
+        public virtual System.Collections.Generic.IList<string> Permissions { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4138,6 +4650,7 @@ namespace Google.Apis.Dns.v1beta2.Data
 
         /// <summary>
         /// IPv6 address of a target name server. Does not accept both fields (ipv4 &amp;amp; ipv6) being populated.
+        /// Public preview as of November 2022.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ipv6Address")]
         public virtual string Ipv6Address { get; set; }
@@ -4151,20 +4664,17 @@ namespace Google.Apis.Dns.v1beta2.Data
 
     public class ManagedZoneOperationsListResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         /// <summary>Type of resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
-        /// The presence of this field indicates that there exist more results following your last page of results in
-        /// pagination order. To fetch them, make another list request using this value as your page token. This lets
-        /// you retrieve the complete contents of even very large collections one page at a time. However, if the
-        /// contents of the collection change between the first and last paginated list request, the set of all elements
-        /// returned are an inconsistent view of the collection. You cannot retrieve a consistent snapshot of a
-        /// collection larger than the maximum page size.
+        /// This field indicates that more results are available beyond the last page displayed. To fetch the results,
+        /// make another list request and use this value as your page token. This lets you retrieve the complete
+        /// contents of a very large collection one page at a time. However, if the contents of the collection change
+        /// between the first and last paginated list request, the set of all elements returned are an inconsistent view
+        /// of the collection. You can't retrieve a consistent snapshot of a collection larger than the maximum page
+        /// size.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -4205,7 +4715,7 @@ namespace Google.Apis.Dns.v1beta2.Data
 
         /// <summary>
         /// The fully qualified URL of the VPC network to forward queries to. This should be formatted like
-        /// https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}
+        /// `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("networkUrl")]
         public virtual string NetworkUrl { get; set; }
@@ -4255,7 +4765,7 @@ namespace Google.Apis.Dns.v1beta2.Data
 
         /// <summary>
         /// The fully qualified URL of the VPC network to bind to. Format this URL like
-        /// https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}
+        /// `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("networkUrl")]
         public virtual string NetworkUrl { get; set; }
@@ -4301,7 +4811,7 @@ namespace Google.Apis.Dns.v1beta2.Data
 
         /// <summary>
         /// The fully qualified URL of the namespace associated with the zone. Format must be
-        /// https://servicedirectory.googleapis.com/v1/projects/{project}/locations/{location}/namespaces/{namespace}
+        /// `https://servicedirectory.googleapis.com/v1/projects/{project}/locations/{location}/namespaces/{namespace}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("namespaceUrl")]
         public virtual string NamespaceUrl { get; set; }
@@ -4312,9 +4822,6 @@ namespace Google.Apis.Dns.v1beta2.Data
 
     public class ManagedZonesListResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         /// <summary>Type of resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
@@ -4324,12 +4831,12 @@ namespace Google.Apis.Dns.v1beta2.Data
         public virtual System.Collections.Generic.IList<ManagedZone> ManagedZones { get; set; }
 
         /// <summary>
-        /// The presence of this field indicates that there exist more results following your last page of results in
-        /// pagination order. To fetch them, make another list request using this value as your page token. This lets
-        /// you the complete contents of even very large collections one page at a time. However, if the contents of the
-        /// collection change between the first and last paginated list request, the set of all elements returned are an
-        /// inconsistent view of the collection. You cannot retrieve a consistent snapshot of a collection larger than
-        /// the maximum page size.
+        /// This field indicates that more results are available beyond the last page displayed. To fetch the results,
+        /// make another list request and use this value as your page token. This lets you retrieve the complete
+        /// contents of a very large collection one page at a time. However, if the contents of the collection change
+        /// between the first and last paginated list request, the set of all elements returned are an inconsistent view
+        /// of the collection. You can't retrieve a consistent snapshot of a collection larger than the maximum page
+        /// size.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -4423,20 +4930,17 @@ namespace Google.Apis.Dns.v1beta2.Data
 
     public class PoliciesListResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         /// <summary>Type of resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
-        /// The presence of this field indicates that there exist more results following your last page of results in
-        /// pagination order. To fetch them, make another list request using this value as your page token. This lets
-        /// you the complete contents of even very large collections one page at a time. However, if the contents of the
-        /// collection change between the first and last paginated list request, the set of all elements returned are an
-        /// inconsistent view of the collection. You cannot retrieve a consistent snapshot of a collection larger than
-        /// the maximum page size.
+        /// This field indicates that more results are available beyond the last page displayed. To fetch the results,
+        /// make another list request and use this value as your page token. This lets you retrieve the complete
+        /// contents of a very large collection one page at a time. However, if the contents of the collection change
+        /// between the first and last paginated list request, the set of all elements returned are an inconsistent view
+        /// of the collection. You can't retrieve a consistent snapshot of a collection larger than the maximum page
+        /// size.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -4451,9 +4955,6 @@ namespace Google.Apis.Dns.v1beta2.Data
 
     public class PoliciesPatchResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
         public virtual Policy Policy { get; set; }
 
@@ -4463,9 +4964,6 @@ namespace Google.Apis.Dns.v1beta2.Data
 
     public class PoliciesUpdateResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
         public virtual Policy Policy { get; set; }
 
@@ -4490,6 +4988,10 @@ namespace Google.Apis.Dns.v1beta2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual string Description { get; set; }
+
+        /// <summary>Configurations related to DNS64 for this Policy.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dns64Config")]
+        public virtual PolicyDns64Config Dns64Config { get; set; }
 
         /// <summary>
         /// Allows networks bound to this policy to receive DNS queries sent by VMs or applications over VPN
@@ -4552,15 +5054,43 @@ namespace Google.Apis.Dns.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("forwardingPath")]
         public virtual string ForwardingPath { get; set; }
 
-        /// <summary>IPv4 address to forward to.</summary>
+        /// <summary>IPv4 address to forward queries to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ipv4Address")]
         public virtual string Ipv4Address { get; set; }
 
         /// <summary>
-        /// IPv6 address to forward to. Does not accept both fields (ipv4 &amp;amp; ipv6) being populated.
+        /// IPv6 address to forward to. Does not accept both fields (ipv4 &amp;amp; ipv6) being populated. Public
+        /// preview as of November 2022.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ipv6Address")]
         public virtual string Ipv6Address { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>DNS64 policies</summary>
+    public class PolicyDns64Config : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>The scope to which DNS64 config will be applied to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scope")]
+        public virtual PolicyDns64ConfigScope Scope { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class PolicyDns64ConfigScope : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Controls whether DNS64 is enabled globally at the network level.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allQueries")]
+        public virtual System.Nullable<bool> AllQueries { get; set; }
 
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
@@ -4587,7 +5117,7 @@ namespace Google.Apis.Dns.v1beta2.Data
 
     /// <summary>
     /// A project resource. The project is a top level container for resources including Cloud DNS ManagedZones.
-    /// Projects can be created only in the APIs console. Next tag: 7.
+    /// Projects can be created only in the APIs console.
     /// </summary>
     public class Project : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4621,9 +5151,16 @@ namespace Google.Apis.Dns.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("gkeClustersPerManagedZone")]
         public virtual System.Nullable<int> GkeClustersPerManagedZone { get; set; }
 
+        /// <summary>Maximum allowed number of GKE clusters per policy.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gkeClustersPerPolicy")]
+        public virtual System.Nullable<int> GkeClustersPerPolicy { get; set; }
+
         /// <summary>Maximum allowed number of GKE clusters per response policy.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gkeClustersPerResponsePolicy")]
         public virtual System.Nullable<int> GkeClustersPerResponsePolicy { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("internetHealthChecksPerManagedZone")]
+        public virtual System.Nullable<int> InternetHealthChecksPerManagedZone { get; set; }
 
         /// <summary>Maximum allowed number of items per routing policy.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("itemsPerRoutingPolicy")]
@@ -4644,6 +5181,10 @@ namespace Google.Apis.Dns.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("managedZonesPerNetwork")]
         public virtual System.Nullable<int> ManagedZonesPerNetwork { get; set; }
 
+        /// <summary>Maximum number of nameservers per delegation, meant to prevent abuse</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nameserversPerDelegation")]
+        public virtual System.Nullable<int> NameserversPerDelegation { get; set; }
+
         /// <summary>Maximum allowed number of networks to which a privately scoped zone can be attached.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("networksPerManagedZone")]
         public virtual System.Nullable<int> NetworksPerManagedZone { get; set; }
@@ -4652,6 +5193,16 @@ namespace Google.Apis.Dns.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("networksPerPolicy")]
         public virtual System.Nullable<int> NetworksPerPolicy { get; set; }
 
+        /// <summary>Maximum allowed number of networks per response policy.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("networksPerResponsePolicy")]
+        public virtual System.Nullable<int> NetworksPerResponsePolicy { get; set; }
+
+        /// <summary>
+        /// Maximum allowed number of consumer peering zones per target network owned by this producer project
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("peeringZonesPerTargetNetwork")]
+        public virtual System.Nullable<int> PeeringZonesPerTargetNetwork { get; set; }
+
         /// <summary>Maximum allowed number of policies per project.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policies")]
         public virtual System.Nullable<int> Policies { get; set; }
@@ -4659,6 +5210,10 @@ namespace Google.Apis.Dns.v1beta2.Data
         /// <summary>Maximum allowed number of ResourceRecords per ResourceRecordSet.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resourceRecordsPerRrset")]
         public virtual System.Nullable<int> ResourceRecordsPerRrset { get; set; }
+
+        /// <summary>Maximum allowed number of response policies per project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("responsePolicies")]
+        public virtual System.Nullable<int> ResponsePolicies { get; set; }
 
         /// <summary>Maximum allowed number of rules per response policy.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("responsePolicyRulesPerResponsePolicy")]
@@ -4708,8 +5263,18 @@ namespace Google.Apis.Dns.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("geoPolicy")]
         public virtual RRSetRoutingPolicyGeoPolicy GeoPolicy { get; set; }
 
+        /// <summary>
+        /// The selfLink attribute of the HealthCheck resource to use for this RRSetRoutingPolicy.
+        /// https://cloud.google.com/compute/docs/reference/rest/v1/healthChecks
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("healthCheck")]
+        public virtual string HealthCheck { get; set; }
+
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryBackup")]
+        public virtual RRSetRoutingPolicyPrimaryBackupPolicy PrimaryBackup { get; set; }
 
         [Newtonsoft.Json.JsonPropertyAttribute("wrr")]
         public virtual RRSetRoutingPolicyWrrPolicy Wrr { get; set; }
@@ -4721,8 +5286,19 @@ namespace Google.Apis.Dns.v1beta2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Configures a `RRSetRoutingPolicy` that routes based on the geo location of the querying user.</summary>
     public class RRSetRoutingPolicyGeoPolicy : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Without fencing, if health check fails for all configured items in the current geo bucket, we failover to
+        /// the next nearest geo bucket. With fencing, if health checking is enabled, as long as some targets in the
+        /// current geo bucket are healthy, we return only the healthy targets. However, if all targets are unhealthy,
+        /// we don't failover to the next nearest bucket; instead, we return all the items in the current bucket even
+        /// when all targets are unhealthy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableFencing")]
+        public virtual System.Nullable<bool> EnableFencing { get; set; }
+
         /// <summary>
         /// The primary geo routing configuration. If there are multiple items with the same location, an error is
         /// returned instead.
@@ -4737,8 +5313,16 @@ namespace Google.Apis.Dns.v1beta2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>ResourceRecordSet data for one geo location.</summary>
     public class RRSetRoutingPolicyGeoPolicyGeoPolicyItem : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// For A and AAAA types only. Endpoints to return in the query result only if they are healthy. These can be
+        /// specified along with `rrdata` within this item.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("healthCheckedTargets")]
+        public virtual RRSetRoutingPolicyHealthCheckTargets HealthCheckedTargets { get; set; }
+
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4752,7 +5336,10 @@ namespace Google.Apis.Dns.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("rrdatas")]
         public virtual System.Collections.Generic.IList<string> Rrdatas { get; set; }
 
-        /// <summary>DNSSEC generated signatures for the above geo_rrdata.</summary>
+        /// <summary>
+        /// DNSSEC generated signatures for all the `rrdata` within this item. If health checked targets are provided
+        /// for DNSSEC enabled zones, there's a restriction of 1 IP address per item.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("signatureRrdatas")]
         public virtual System.Collections.Generic.IList<string> SignatureRrdatas { get; set; }
 
@@ -4760,6 +5347,109 @@ namespace Google.Apis.Dns.v1beta2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// HealthCheckTargets describes endpoints to health-check when responding to Routing Policy queries. Only the
+    /// healthy endpoints will be included in the response.
+    /// </summary>
+    public class RRSetRoutingPolicyHealthCheckTargets : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The Internet IP addresses to be health checked. The format matches the format of ResourceRecordSet.rrdata as
+        /// defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("externalEndpoints")]
+        public virtual System.Collections.Generic.IList<string> ExternalEndpoints { get; set; }
+
+        /// <summary>Configuration for internal load balancers to be health checked.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("internalLoadBalancers")]
+        public virtual System.Collections.Generic.IList<RRSetRoutingPolicyLoadBalancerTarget> InternalLoadBalancers { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The configuration for an individual load balancer to health check.</summary>
+    public class RRSetRoutingPolicyLoadBalancerTarget : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The frontend IP address of the load balancer to health check.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ipAddress")]
+        public virtual string IpAddress { get; set; }
+
+        /// <summary>The protocol of the load balancer to health check.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ipProtocol")]
+        public virtual string IpProtocol { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>
+        /// The type of load balancer specified by this target. This value must match the configuration of the load
+        /// balancer located at the LoadBalancerTarget's IP address, port, and region. Use the following: -
+        /// *regionalL4ilb*: for a regional internal passthrough Network Load Balancer. - *regionalL7ilb*: for a
+        /// regional internal Application Load Balancer. - *globalL7ilb*: for a global internal Application Load
+        /// Balancer.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loadBalancerType")]
+        public virtual string LoadBalancerType { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the network that the load balancer is attached to. This should be formatted like
+        /// `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("networkUrl")]
+        public virtual string NetworkUrl { get; set; }
+
+        /// <summary>The configured port of the load balancer.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("port")]
+        public virtual string Port { get; set; }
+
+        /// <summary>The project ID in which the load balancer is located.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("project")]
+        public virtual string Project { get; set; }
+
+        /// <summary>The region in which the load balancer is located.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("region")]
+        public virtual string Region { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Configures a RRSetRoutingPolicy such that all queries are responded with the primary_targets if they are
+    /// healthy. And if all of them are unhealthy, then we fallback to a geo localized policy.
+    /// </summary>
+    public class RRSetRoutingPolicyPrimaryBackupPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Backup targets provide a regional failover policy for the otherwise global primary targets. If serving state
+        /// is set to `BACKUP`, this policy essentially becomes a geo routing policy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backupGeoTargets")]
+        public virtual RRSetRoutingPolicyGeoPolicy BackupGeoTargets { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>
+        /// Endpoints that are health checked before making the routing decision. Unhealthy endpoints are omitted from
+        /// the results. If all endpoints are unhealthy, we serve a response based on the `backup_geo_targets`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryTargets")]
+        public virtual RRSetRoutingPolicyHealthCheckTargets PrimaryTargets { get; set; }
+
+        /// <summary>
+        /// When serving state is `PRIMARY`, this field provides the option of sending a small percentage of the traffic
+        /// to the backup targets.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("trickleTraffic")]
+        public virtual System.Nullable<double> TrickleTraffic { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configures a RRSetRoutingPolicy that routes in a weighted round robin fashion.</summary>
     public class RRSetRoutingPolicyWrrPolicy : Google.Apis.Requests.IDirectResponseSchema
     {
         [Newtonsoft.Json.JsonPropertyAttribute("items")]
@@ -4772,22 +5462,35 @@ namespace Google.Apis.Dns.v1beta2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A routing block which contains the routing information for one WRR item.</summary>
     public class RRSetRoutingPolicyWrrPolicyWrrPolicyItem : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Endpoints that are health checked before making the routing decision. The unhealthy endpoints are omitted
+        /// from the result. If all endpoints within a bucket are unhealthy, we choose a different bucket (sampled with
+        /// respect to its weight) for responding. If DNSSEC is enabled for this zone, only one of `rrdata` or
+        /// `health_checked_targets` can be set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("healthCheckedTargets")]
+        public virtual RRSetRoutingPolicyHealthCheckTargets HealthCheckedTargets { get; set; }
+
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         [Newtonsoft.Json.JsonPropertyAttribute("rrdatas")]
         public virtual System.Collections.Generic.IList<string> Rrdatas { get; set; }
 
-        /// <summary>DNSSEC generated signatures for the above wrr_rrdata.</summary>
+        /// <summary>
+        /// DNSSEC generated signatures for all the `rrdata` within this item. Note that if health checked targets are
+        /// provided for DNSSEC enabled zones, there's a restriction of 1 IP address per item.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("signatureRrdatas")]
         public virtual System.Collections.Generic.IList<string> SignatureRrdatas { get; set; }
 
         /// <summary>
-        /// The weight corresponding to this subset of rrdata. When multiple WeightedRoundRobinPolicyItems are
-        /// configured, the probability of returning an rrset is proportional to its weight relative to the sum of
-        /// weights configured for all items. This weight should be non-negative.
+        /// The weight corresponding to this `WrrPolicyItem` object. When multiple `WrrPolicyItem` objects are
+        /// configured, the probability of returning an `WrrPolicyItem` object's data is proportional to its weight
+        /// relative to the sum of weights configured for all items. This weight must be non-negative.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("weight")]
         public virtual System.Nullable<double> Weight { get; set; }
@@ -4807,9 +5510,9 @@ namespace Google.Apis.Dns.v1beta2.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Configures dynamic query responses based on geo location of querying user or a weighted round robin based
-        /// routing policy. A ResourceRecordSet should only have either rrdata (static) or routing_policy (dynamic). An
-        /// error is returned otherwise.
+        /// Configures dynamic query responses based on either the geo location of the querying user or a weighted round
+        /// robin based routing policy. A valid `ResourceRecordSet` contains only `rrdata` (for static resolution) or a
+        /// `routing_policy` (for dynamic resolution).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("routingPolicy")]
         public virtual RRSetRoutingPolicy RoutingPolicy { get; set; }
@@ -4822,7 +5525,7 @@ namespace Google.Apis.Dns.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("signatureRrdatas")]
         public virtual System.Collections.Generic.IList<string> SignatureRrdatas { get; set; }
 
-        /// <summary>Number of seconds that this ResourceRecordSet can be cached by resolvers.</summary>
+        /// <summary>Number of seconds that this `ResourceRecordSet` can be cached by resolvers.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ttl")]
         public virtual System.Nullable<int> Ttl { get; set; }
 
@@ -4836,20 +5539,17 @@ namespace Google.Apis.Dns.v1beta2.Data
 
     public class ResourceRecordSetsListResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         /// <summary>Type of resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
-        /// The presence of this field indicates that there exist more results following your last page of results in
-        /// pagination order. To fetch them, make another list request using this value as your pagination token. This
-        /// lets you retrieve complete contents of even larger collections, one page at a time. However, if the contents
-        /// of the collection change between the first and last paginated list request, the set of elements returned are
-        /// an inconsistent view of the collection. You cannot retrieve a consistent snapshot of a collection larger
-        /// than the maximum page size.
+        /// This field indicates that more results are available beyond the last page displayed. To fetch the results,
+        /// make another list request and use this value as your page token. This lets you retrieve the complete
+        /// contents of a very large collection one page at a time. However, if the contents of the collection change
+        /// between the first and last paginated list request, the set of all elements returned are an inconsistent view
+        /// of the collection. You can't retrieve a consistent snapshot of a collection larger than the maximum page
+        /// size.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -4862,32 +5562,15 @@ namespace Google.Apis.Dns.v1beta2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Elements common to every response.</summary>
-    public class ResponseHeader : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>
-        /// For mutating operation requests that completed successfully. This is the client_operation_id if the client
-        /// specified it, otherwise it is generated by the server (output only).
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("operationId")]
-        public virtual string OperationId { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
     public class ResponsePoliciesListResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         /// <summary>
-        /// The presence of this field indicates that there exist more results following your last page of results in
-        /// pagination order. To fetch them, make another list request using this value as your page token. This lets
-        /// you the complete contents of even very large collections one page at a time. However, if the contents of the
-        /// collection change between the first and last paginated list request, the set of all elements returned are an
-        /// inconsistent view of the collection. You cannot retrieve a consistent snapshot of a collection larger than
-        /// the maximum page size.
+        /// This field indicates that more results are available beyond the last page displayed. To fetch the results,
+        /// make another list request and use this value as your page token. This lets you retrieve the complete
+        /// contents of a very large collection one page at a time. However, if the contents of the collection change
+        /// between the first and last paginated list request, the set of all elements returned are an inconsistent view
+        /// of the collection. You can't retrieve a consistent snapshot of a collection larger than the maximum page
+        /// size.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -4902,9 +5585,6 @@ namespace Google.Apis.Dns.v1beta2.Data
 
     public class ResponsePoliciesPatchResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         [Newtonsoft.Json.JsonPropertyAttribute("responsePolicy")]
         public virtual ResponsePolicy ResponsePolicy { get; set; }
 
@@ -4914,9 +5594,6 @@ namespace Google.Apis.Dns.v1beta2.Data
 
     public class ResponsePoliciesUpdateResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         [Newtonsoft.Json.JsonPropertyAttribute("responsePolicy")]
         public virtual ResponsePolicy ResponsePolicy { get; set; }
 
@@ -4944,6 +5621,10 @@ namespace Google.Apis.Dns.v1beta2.Data
 
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
+
+        /// <summary>User labels.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
         /// <summary>List of network names specifying networks to which this policy is applied.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("networks")]
@@ -4981,7 +5662,7 @@ namespace Google.Apis.Dns.v1beta2.Data
 
         /// <summary>
         /// The fully qualified URL of the VPC network to bind to. This should be formatted like
-        /// https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}
+        /// `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("networkUrl")]
         public virtual string NetworkUrl { get; set; }
@@ -5040,16 +5721,13 @@ namespace Google.Apis.Dns.v1beta2.Data
 
     public class ResponsePolicyRulesListResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         /// <summary>
-        /// The presence of this field indicates that there exist more results following your last page of results in
-        /// pagination order. To fetch them, make another list request using this value as your page token. This lets
-        /// you the complete contents of even very large collections one page at a time. However, if the contents of the
-        /// collection change between the first and last paginated list request, the set of all elements returned are an
-        /// inconsistent view of the collection. You cannot retrieve a consistent snapshot of a collection larger than
-        /// the maximum page size.
+        /// This field indicates that more results are available beyond the last page displayed. To fetch the results,
+        /// make another list request and use this value as your page token. This lets you retrieve the complete
+        /// contents of a very large collection one page at a time. However, if the contents of the collection change
+        /// between the first and last paginated list request, the set of all elements returned are an inconsistent view
+        /// of the collection. You can't retrieve a consistent snapshot of a collection larger than the maximum page
+        /// size.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -5064,9 +5742,6 @@ namespace Google.Apis.Dns.v1beta2.Data
 
     public class ResponsePolicyRulesPatchResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         [Newtonsoft.Json.JsonPropertyAttribute("responsePolicyRule")]
         public virtual ResponsePolicyRule ResponsePolicyRule { get; set; }
 
@@ -5076,9 +5751,6 @@ namespace Google.Apis.Dns.v1beta2.Data
 
     public class ResponsePolicyRulesUpdateResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        [Newtonsoft.Json.JsonPropertyAttribute("header")]
-        public virtual ResponseHeader Header { get; set; }
-
         [Newtonsoft.Json.JsonPropertyAttribute("responsePolicyRule")]
         public virtual ResponsePolicyRule ResponsePolicyRule { get; set; }
 

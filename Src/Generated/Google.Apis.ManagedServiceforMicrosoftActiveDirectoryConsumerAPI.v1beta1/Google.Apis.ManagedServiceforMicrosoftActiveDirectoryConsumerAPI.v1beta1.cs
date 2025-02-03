@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         public ManagedServiceforMicrosoftActiveDirectoryConsumerAPIService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://managedidentities.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://managedidentities.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         public override string Name => "managedidentities";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://managedidentities.googleapis.com/";
-        #else
-            "https://managedidentities.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://managedidentities.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>
         /// Available OAuth 2.0 scopes for use with the Managed Service for Microsoft Active Directory API.
@@ -370,7 +365,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         /// </param>
                         public virtual CreateRequest Create(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.Backup body, string parent)
                         {
-                            return new CreateRequest(service, body, parent);
+                            return new CreateRequest(this.service, body, parent);
                         }
 
                         /// <summary>Creates a Backup for a domain.</summary>
@@ -445,7 +440,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         /// </param>
                         public virtual DeleteRequest Delete(string name)
                         {
-                            return new DeleteRequest(service, name);
+                            return new DeleteRequest(this.service, name);
                         }
 
                         /// <summary>Deletes identified Backup.</summary>
@@ -496,7 +491,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         /// </param>
                         public virtual GetRequest Get(string name)
                         {
-                            return new GetRequest(service, name);
+                            return new GetRequest(this.service, name);
                         }
 
                         /// <summary>Gets details of a single Backup.</summary>
@@ -545,12 +540,13 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         /// exists and does not have a policy set.
                         /// </summary>
                         /// <param name="resource">
-                        /// REQUIRED: The resource for which the policy is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </param>
                         public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                         {
-                            return new GetIamPolicyRequest(service, resource);
+                            return new GetIamPolicyRequest(this.service, resource);
                         }
 
                         /// <summary>
@@ -567,8 +563,9 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                             }
 
                             /// <summary>
-                            /// REQUIRED: The resource for which the policy is being requested. See the operation
-                            /// documentation for the appropriate value for this field.
+                            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value
+                            /// for this field.
                             /// </summary>
                             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                             public virtual string Resource { get; private set; }
@@ -626,7 +623,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         /// </param>
                         public virtual ListRequest List(string parent)
                         {
-                            return new ListRequest(service, parent);
+                            return new ListRequest(this.service, parent);
                         }
 
                         /// <summary>Lists Backup in a given project.</summary>
@@ -646,10 +643,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                             [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                             public virtual string Parent { get; private set; }
 
-                            /// <summary>
-                            /// Optional. Filter specifying constraints of a list operation. For example,
-                            /// `backup.location ="us-west1-a"`.
-                            /// </summary>
+                            /// <summary>Optional. Filter specifying constraints of a list operation.</summary>
                             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                             public virtual string Filter { get; set; }
 
@@ -739,7 +733,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         /// </param>
                         public virtual PatchRequest Patch(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.Backup body, string name)
                         {
-                            return new PatchRequest(service, body, name);
+                            return new PatchRequest(this.service, body, name);
                         }
 
                         /// <summary>Updates the labels for specified Backup.</summary>
@@ -812,12 +806,13 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         /// </summary>
                         /// <param name="body">The body of the request.</param>
                         /// <param name="resource">
-                        /// REQUIRED: The resource for which the policy is being specified. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </param>
                         public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.SetIamPolicyRequest body, string resource)
                         {
-                            return new SetIamPolicyRequest(service, body, resource);
+                            return new SetIamPolicyRequest(this.service, body, resource);
                         }
 
                         /// <summary>
@@ -835,8 +830,9 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                             }
 
                             /// <summary>
-                            /// REQUIRED: The resource for which the policy is being specified. See the operation
-                            /// documentation for the appropriate value for this field.
+                            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value
+                            /// for this field.
                             /// </summary>
                             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                             public virtual string Resource { get; private set; }
@@ -879,12 +875,13 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         /// </summary>
                         /// <param name="body">The body of the request.</param>
                         /// <param name="resource">
-                        /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </param>
                         public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.TestIamPermissionsRequest body, string resource)
                         {
-                            return new TestIamPermissionsRequest(service, body, resource);
+                            return new TestIamPermissionsRequest(this.service, body, resource);
                         }
 
                         /// <summary>
@@ -904,8 +901,9 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                             }
 
                             /// <summary>
-                            /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                            /// documentation for the appropriate value for this field.
+                            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value
+                            /// for this field.
                             /// </summary>
                             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                             public virtual string Resource { get; private set; }
@@ -965,7 +963,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         /// </param>
                         public virtual GetRequest Get(string name)
                         {
-                            return new GetRequest(service, name);
+                            return new GetRequest(this.service, name);
                         }
 
                         /// <summary>Gets details of a single sqlIntegration.</summary>
@@ -1016,7 +1014,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         /// </param>
                         public virtual ListRequest List(string parent)
                         {
-                            return new ListRequest(service, parent);
+                            return new ListRequest(this.service, parent);
                         }
 
                         /// <summary>Lists SqlIntegrations in a given domain.</summary>
@@ -1130,7 +1128,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual AttachTrustRequest AttachTrust(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.AttachTrustRequest body, string name)
                     {
-                        return new AttachTrustRequest(service, body, name);
+                        return new AttachTrustRequest(this.service, body, name);
                     }
 
                     /// <summary>Adds an AD trust to a domain.</summary>
@@ -1181,6 +1179,65 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         }
                     }
 
+                    /// <summary>CheckMigrationPermission API gets the current state of DomainMigration</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="domain">
+                    /// Required. The domain resource name using the form:
+                    /// `projects/{project_id}/locations/global/domains/{domain_name}`
+                    /// </param>
+                    public virtual CheckMigrationPermissionRequest CheckMigrationPermission(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.CheckMigrationPermissionRequest body, string domain)
+                    {
+                        return new CheckMigrationPermissionRequest(this.service, body, domain);
+                    }
+
+                    /// <summary>CheckMigrationPermission API gets the current state of DomainMigration</summary>
+                    public class CheckMigrationPermissionRequest : ManagedServiceforMicrosoftActiveDirectoryConsumerAPIBaseServiceRequest<Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.CheckMigrationPermissionResponse>
+                    {
+                        /// <summary>Constructs a new CheckMigrationPermission request.</summary>
+                        public CheckMigrationPermissionRequest(Google.Apis.Services.IClientService service, Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.CheckMigrationPermissionRequest body, string domain) : base(service)
+                        {
+                            Domain = domain;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The domain resource name using the form:
+                        /// `projects/{project_id}/locations/global/domains/{domain_name}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("domain", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Domain { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.CheckMigrationPermissionRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "checkMigrationPermission";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+domain}:checkMigrationPermission";
+
+                        /// <summary>Initializes CheckMigrationPermission parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("domain", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "domain",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/global/domains/[^/]+$",
+                            });
+                        }
+                    }
+
                     /// <summary>Creates a Microsoft AD domain.</summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="parent">
@@ -1189,7 +1246,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.Domain body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>Creates a Microsoft AD domain.</summary>
@@ -1265,7 +1322,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes a domain.</summary>
@@ -1317,7 +1374,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual DetachTrustRequest DetachTrust(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.DetachTrustRequest body, string name)
                     {
-                        return new DetachTrustRequest(service, body, name);
+                        return new DetachTrustRequest(this.service, body, name);
                     }
 
                     /// <summary>Removes an AD trust.</summary>
@@ -1368,6 +1425,242 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         }
                     }
 
+                    /// <summary>Disable Domain Migration</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="domain">
+                    /// Required. The domain resource name using the form:
+                    /// `projects/{project_id}/locations/global/domains/{domain_name}`
+                    /// </param>
+                    public virtual DisableMigrationRequest DisableMigration(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.DisableMigrationRequest body, string domain)
+                    {
+                        return new DisableMigrationRequest(this.service, body, domain);
+                    }
+
+                    /// <summary>Disable Domain Migration</summary>
+                    public class DisableMigrationRequest : ManagedServiceforMicrosoftActiveDirectoryConsumerAPIBaseServiceRequest<Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new DisableMigration request.</summary>
+                        public DisableMigrationRequest(Google.Apis.Services.IClientService service, Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.DisableMigrationRequest body, string domain) : base(service)
+                        {
+                            Domain = domain;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The domain resource name using the form:
+                        /// `projects/{project_id}/locations/global/domains/{domain_name}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("domain", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Domain { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.DisableMigrationRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "disableMigration";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+domain}:disableMigration";
+
+                        /// <summary>Initializes DisableMigration parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("domain", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "domain",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/global/domains/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>DomainJoinMachine API joins a Compute Engine VM to the domain</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="domain">
+                    /// Required. The domain resource name using the form:
+                    /// projects/{project_id}/locations/global/domains/{domain_name}
+                    /// </param>
+                    public virtual DomainJoinMachineRequest DomainJoinMachine(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.DomainJoinMachineRequest body, string domain)
+                    {
+                        return new DomainJoinMachineRequest(this.service, body, domain);
+                    }
+
+                    /// <summary>DomainJoinMachine API joins a Compute Engine VM to the domain</summary>
+                    public class DomainJoinMachineRequest : ManagedServiceforMicrosoftActiveDirectoryConsumerAPIBaseServiceRequest<Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.DomainJoinMachineResponse>
+                    {
+                        /// <summary>Constructs a new DomainJoinMachine request.</summary>
+                        public DomainJoinMachineRequest(Google.Apis.Services.IClientService service, Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.DomainJoinMachineRequest body, string domain) : base(service)
+                        {
+                            Domain = domain;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The domain resource name using the form:
+                        /// projects/{project_id}/locations/global/domains/{domain_name}
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("domain", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Domain { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.DomainJoinMachineRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "domainJoinMachine";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+domain}:domainJoinMachine";
+
+                        /// <summary>Initializes DomainJoinMachine parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("domain", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "domain",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/global/domains/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Enable Domain Migration</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="domain">
+                    /// Required. The domain resource name using the form:
+                    /// `projects/{project_id}/locations/global/domains/{domain_name}`
+                    /// </param>
+                    public virtual EnableMigrationRequest EnableMigration(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.EnableMigrationRequest body, string domain)
+                    {
+                        return new EnableMigrationRequest(this.service, body, domain);
+                    }
+
+                    /// <summary>Enable Domain Migration</summary>
+                    public class EnableMigrationRequest : ManagedServiceforMicrosoftActiveDirectoryConsumerAPIBaseServiceRequest<Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new EnableMigration request.</summary>
+                        public EnableMigrationRequest(Google.Apis.Services.IClientService service, Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.EnableMigrationRequest body, string domain) : base(service)
+                        {
+                            Domain = domain;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The domain resource name using the form:
+                        /// `projects/{project_id}/locations/global/domains/{domain_name}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("domain", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Domain { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.EnableMigrationRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "enableMigration";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+domain}:enableMigration";
+
+                        /// <summary>Initializes EnableMigration parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("domain", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "domain",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/global/domains/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Extend Schema for Domain</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="domain">
+                    /// Required. The domain resource name using the form:
+                    /// `projects/{project_id}/locations/global/domains/{domain_name}`
+                    /// </param>
+                    public virtual ExtendSchemaRequest ExtendSchema(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.ExtendSchemaRequest body, string domain)
+                    {
+                        return new ExtendSchemaRequest(this.service, body, domain);
+                    }
+
+                    /// <summary>Extend Schema for Domain</summary>
+                    public class ExtendSchemaRequest : ManagedServiceforMicrosoftActiveDirectoryConsumerAPIBaseServiceRequest<Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new ExtendSchema request.</summary>
+                        public ExtendSchemaRequest(Google.Apis.Services.IClientService service, Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.ExtendSchemaRequest body, string domain) : base(service)
+                        {
+                            Domain = domain;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The domain resource name using the form:
+                        /// `projects/{project_id}/locations/global/domains/{domain_name}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("domain", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Domain { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.ExtendSchemaRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "extendSchema";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+domain}:extendSchema";
+
+                        /// <summary>Initializes ExtendSchema parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("domain", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "domain",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/global/domains/[^/]+$",
+                            });
+                        }
+                    }
+
                     /// <summary>Gets information about a domain.</summary>
                     /// <param name="name">
                     /// Required. The domain resource name using the form:
@@ -1375,7 +1668,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets information about a domain.</summary>
@@ -1424,12 +1717,13 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// and does not have a policy set.
                     /// </summary>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                     {
-                        return new GetIamPolicyRequest(service, resource);
+                        return new GetIamPolicyRequest(this.service, resource);
                     }
 
                     /// <summary>
@@ -1446,8 +1740,9 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -1505,7 +1800,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual GetLdapssettingsRequest GetLdapssettings(string name)
                     {
-                        return new GetLdapssettingsRequest(service, name);
+                        return new GetLdapssettingsRequest(this.service, name);
                     }
 
                     /// <summary>Gets the domain ldaps settings.</summary>
@@ -1556,7 +1851,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists domains in a project.</summary>
@@ -1670,7 +1965,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.Domain body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>Updates the metadata and configuration of a domain.</summary>
@@ -1745,7 +2040,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual ReconfigureTrustRequest ReconfigureTrust(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.ReconfigureTrustRequest body, string name)
                     {
-                        return new ReconfigureTrustRequest(service, body, name);
+                        return new ReconfigureTrustRequest(this.service, body, name);
                     }
 
                     /// <summary>Updates the DNS conditional forwarder.</summary>
@@ -1804,7 +2099,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual ResetAdminPasswordRequest ResetAdminPassword(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.ResetAdminPasswordRequest body, string name)
                     {
-                        return new ResetAdminPasswordRequest(service, body, name);
+                        return new ResetAdminPasswordRequest(this.service, body, name);
                     }
 
                     /// <summary>Resets a domain's administrator password.</summary>
@@ -1860,7 +2155,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// <param name="name">Required. resource name for the domain to which the backup belongs</param>
                     public virtual RestoreRequest Restore(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.RestoreDomainRequest body, string name)
                     {
-                        return new RestoreRequest(service, body, name);
+                        return new RestoreRequest(this.service, body, name);
                     }
 
                     /// <summary>RestoreBackup restores domain mentioned in the RestoreBackupRequest</summary>
@@ -1914,12 +2209,13 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.SetIamPolicyRequest body, string resource)
                     {
-                        return new SetIamPolicyRequest(service, body, resource);
+                        return new SetIamPolicyRequest(this.service, body, resource);
                     }
 
                     /// <summary>
@@ -1937,8 +2233,9 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being specified. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -1981,12 +2278,13 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.TestIamPermissionsRequest body, string resource)
                     {
-                        return new TestIamPermissionsRequest(service, body, resource);
+                        return new TestIamPermissionsRequest(this.service, body, resource);
                     }
 
                     /// <summary>
@@ -2006,8 +2304,9 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -2050,7 +2349,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual UpdateLdapssettingsRequest UpdateLdapssettings(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.LDAPSSettings body, string name)
                     {
-                        return new UpdateLdapssettingsRequest(service, body, name);
+                        return new UpdateLdapssettingsRequest(this.service, body, name);
                     }
 
                     /// <summary>Patches a single ldaps settings.</summary>
@@ -2128,7 +2427,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual ValidateTrustRequest ValidateTrust(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.ValidateTrustRequest body, string name)
                     {
-                        return new ValidateTrustRequest(service, body, name);
+                        return new ValidateTrustRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -2206,14 +2505,14 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
                     /// methods to check whether the cancellation succeeded or whether the operation completed despite
                     /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
-                    /// operation with an Operation.error value with a google.rpc.Status.code of 1, corresponding to
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
                     /// `Code.CANCELLED`.
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">The name of the operation resource to be cancelled.</param>
                     public virtual CancelRequest Cancel(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.CancelOperationRequest body, string name)
                     {
-                        return new CancelRequest(service, body, name);
+                        return new CancelRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -2222,7 +2521,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
                     /// methods to check whether the cancellation succeeded or whether the operation completed despite
                     /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
-                    /// operation with an Operation.error value with a google.rpc.Status.code of 1, corresponding to
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
                     /// `Code.CANCELLED`.
                     /// </summary>
                     public class CancelRequest : ManagedServiceforMicrosoftActiveDirectoryConsumerAPIBaseServiceRequest<Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.Empty>
@@ -2277,7 +2576,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// <param name="name">The name of the operation resource to be deleted.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -2329,7 +2628,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// <param name="name">The name of the operation resource.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -2375,27 +2674,17 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
 
                     /// <summary>
                     /// Lists operations that match the specified filter in the request. If the server doesn't support
-                    /// this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to
-                    /// override the binding to use different resource name schemes, such as `users/*/operations`. To
-                    /// override the binding, API services can add a binding such as `"/v1/{name=users/*}/operations"`
-                    /// to their service configuration. For backwards compatibility, the default name includes the
-                    /// operations collection id, however overriding users must ensure the name binding is the parent
-                    /// resource, without the operations collection id.
+                    /// this method, it returns `UNIMPLEMENTED`.
                     /// </summary>
                     /// <param name="name">The name of the operation's parent resource.</param>
                     public virtual ListRequest List(string name)
                     {
-                        return new ListRequest(service, name);
+                        return new ListRequest(this.service, name);
                     }
 
                     /// <summary>
                     /// Lists operations that match the specified filter in the request. If the server doesn't support
-                    /// this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to
-                    /// override the binding to use different resource name schemes, such as `users/*/operations`. To
-                    /// override the binding, API services can add a binding such as `"/v1/{name=users/*}/operations"`
-                    /// to their service configuration. For backwards compatibility, the default name includes the
-                    /// operations collection id, however overriding users must ensure the name binding is the parent
-                    /// resource, without the operations collection id.
+                    /// this method, it returns `UNIMPLEMENTED`.
                     /// </summary>
                     public class ListRequest : ManagedServiceforMicrosoftActiveDirectoryConsumerAPIBaseServiceRequest<Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.ListOperationsResponse>
                     {
@@ -2496,7 +2785,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.Peering body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>Creates a Peering for Managed AD instance.</summary>
@@ -2566,7 +2855,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes identified Peering.</summary>
@@ -2617,7 +2906,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets details of a single Peering.</summary>
@@ -2666,12 +2955,13 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// and does not have a policy set.
                     /// </summary>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                     {
-                        return new GetIamPolicyRequest(service, resource);
+                        return new GetIamPolicyRequest(this.service, resource);
                     }
 
                     /// <summary>
@@ -2688,8 +2978,9 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -2747,7 +3038,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists Peerings in a given project.</summary>
@@ -2860,7 +3151,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.Peering body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>Updates the labels for specified Peering.</summary>
@@ -2932,12 +3223,13 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.SetIamPolicyRequest body, string resource)
                     {
-                        return new SetIamPolicyRequest(service, body, resource);
+                        return new SetIamPolicyRequest(this.service, body, resource);
                     }
 
                     /// <summary>
@@ -2955,8 +3247,9 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being specified. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -2999,12 +3292,13 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1beta1.Data.TestIamPermissionsRequest body, string resource)
                     {
-                        return new TestIamPermissionsRequest(service, body, resource);
+                        return new TestIamPermissionsRequest(this.service, body, resource);
                     }
 
                     /// <summary>
@@ -3024,8 +3318,9 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -3066,7 +3361,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -3111,7 +3406,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -3130,7 +3425,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -3214,9 +3509,46 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
     /// <summary>Represents a Managed Microsoft Identities backup.</summary>
     public class Backup : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the backups was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. A short description of the backup.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
 
         /// <summary>Optional. Resource labels to represent user provided metadata.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
@@ -3243,9 +3575,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Last update time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3265,16 +3630,37 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -3282,15 +3668,19 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -3309,9 +3699,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
     /// <summary>Certificate used to configure LDAPS.</summary>
     public class Certificate : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
         /// <summary>The certificate expire time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The issuer of this certificate.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("issuingCertificate")]
@@ -3328,6 +3751,28 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         /// <summary>The certificate thumbprint which uniquely identifies the certificate.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("thumbprint")]
         public virtual string Thumbprint { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>CheckMigrationPermissionRequest is the request message for CheckMigrationPermission method.</summary>
+    public class CheckMigrationPermissionRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>CheckMigrationPermissionResponse is the response message for CheckMigrationPermission method.</summary>
+    public class CheckMigrationPermissionResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The state of SID filtering of all the domains which has trust established.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("onpremDomains")]
+        public virtual System.Collections.Generic.IList<OnPremDomainSIDDetails> OnpremDomains { get; set; }
+
+        /// <summary>The state of DomainMigration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3351,10 +3796,10 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class Date : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3421,10 +3866,17 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>DisableMigrationRequest is the request message for DisableMigration method.</summary>
+    public class DisableMigrationRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
-    /// If the domain is being changed, it will be placed into the UPDATING state, which indicates that the resource is
-    /// being reconciled. At this point, Get will reflect an intermediate state. Represents a managed Microsoft Active
-    /// Directory domain.
+    /// Represents a managed Microsoft Active Directory domain. If the domain is being changed, it will be placed into
+    /// the UPDATING state, which indicates that the resource is being reconciled. At this point, Get will reflect an
+    /// intermediate state.
     /// </summary>
     public class Domain : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3451,9 +3903,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("authorizedNetworks")]
         public virtual System.Collections.Generic.IList<string> AuthorizedNetworks { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the instance was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The fully-qualified domain name of the exposed domain used by clients to connect to the
@@ -3502,9 +3987,85 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("trusts")]
         public virtual System.Collections.Generic.IList<Trust> Trusts { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The last update time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>DomainJoinMachineRequest is the request message for DomainJoinMachine method</summary>
+    public class DomainJoinMachineRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. force if True, forces domain join even if the computer account already exists.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("force")]
+        public virtual System.Nullable<bool> Force { get; set; }
+
+        /// <summary>
+        /// Optional. OU name to which the VM needs to be domain joined. If the field is not provided, the VM is joined
+        /// to the default OU which is created. The default OU for the domain join api is created as GCE Instances under
+        /// the Cloud OU. Example - OU=GCE Instances,OU=Cloud,DC=ad,DC=test,DC=com If the field is provided, then the
+        /// custom OU is searched for under GCE Instances OU. Example - if ou_name=test_ou then the VM is domain joined
+        /// to the following OU: OU=test_ou,OU=GCE Instances,OU=Cloud,DC=ad,DC=test,DC=com if present. If OU is not
+        /// present under GCE Instances, then error is returned.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ouName")]
+        public virtual string OuName { get; set; }
+
+        /// <summary>
+        /// Required. Full instance id token of compute engine VM to verify instance identity. More about this:
+        /// https://cloud.google.com/compute/docs/instances/verifying-instance-identity#request_signature
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vmIdToken")]
+        public virtual string VmIdToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>DomainJoinMachineResponse is the response message for DomainJoinMachine method</summary>
+    public class DomainJoinMachineResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The response is the offline domain join blob that is returned after running the djoin command. To correctly
+        /// use the response of the API, please refer to the sample usage.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domainJoinBlob")]
+        public virtual string DomainJoinBlob { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3513,11 +4074,28 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>EnableMigrationRequest is the request message for EnableMigration method.</summary>
+    public class EnableMigrationRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Period after which the migration would be auto disabled. If unspecified, a default timeout of 48h
+        /// is used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableDuration")]
+        public virtual object EnableDuration { get; set; }
+
+        /// <summary>Required. List of the on-prem domains to be migrated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("migratingDomains")]
+        public virtual System.Collections.Generic.IList<OnPremDomainDetails> MigratingDomains { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3566,6 +4144,29 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>ExtendSchemaRequest is the request message for ExtendSchema method.</summary>
+    public class ExtendSchemaRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Description for Schema Change.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>File uploaded as a byte stream input.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileContents")]
+        public virtual string FileContents { get; set; }
+
+        /// <summary>
+        /// File stored in Cloud Storage bucket and represented in the form
+        /// projects/{project_id}/buckets/{bucket_name}/objects/{object_name} File should be in the same project as the
+        /// domain.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gcsPath")]
+        public virtual string GcsPath { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Represents the metadata of the long-running operation.</summary>
     public class GoogleCloudManagedidentitiesV1OpMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3573,13 +4174,79 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
         public virtual string ApiVersion { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. The time the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
@@ -3608,13 +4275,79 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
         public virtual string ApiVersion { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. The time the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
@@ -3643,13 +4376,79 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
         public virtual string ApiVersion { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. The time the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
@@ -3671,19 +4470,81 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Instance represents the interface for SLM services to actuate the state of control plane resources. Example
+    /// Instance in JSON, where consumer-project-number=123456, producer-project-id=cloud-sql:
+    /// ```
+    /// json Instance: {
+    /// "name": "projects/123456/locations/us-east1/instances/prod-instance", "create_time": { "seconds": 1526406431, },
+    /// "labels": { "env": "prod", "foo": "bar" }, "state": READY, "software_versions": { "software_update":
+    /// "cloud-sql-09-28-2018", }, "maintenance_policy_names": { "UpdatePolicy":
+    /// "projects/123456/locations/us-east1/maintenancePolicies/prod-update-policy", } "tenant_project_id":
+    /// "cloud-sql-test-tenant", "producer_metadata": { "cloud-sql-tier": "basic", "cloud-sql-instance-size": "1G", },
+    /// "provisioned_resources": [ { "resource-type": "compute-instance", "resource-url":
+    /// "https://www.googleapis.com/compute/v1/projects/cloud-sql/zones/us-east1-b/instances/vm-1", } ],
+    /// "maintenance_schedules": { "csa_rollout": { "start_time": { "seconds": 1526406431, }, "end_time": { "seconds":
+    /// 1535406431, }, }, "ncsa_rollout": { "start_time": { "seconds": 1526406431, }, "end_time": { "seconds":
+    /// 1535406431, }, } }, "consumer_defined_name": "my-sql-instance1", }
+    /// ```
+    /// LINT.IfChange
+    /// </summary>
     public class GoogleCloudSaasacceleratorManagementProvidersV1Instance : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// consumer_defined_name is the name that is set by the consumer. On the other hand Name field represents
-        /// system-assigned id of an instance so consumers are not necessarily aware of it. consumer_defined_name is
-        /// used for notification/UI purposes for consumer to recognize their instances.
+        /// consumer_defined_name is the name of the instance set by the service consumers. Generally this is different
+        /// from the `name` field which reperesents the system-assigned id of the instance which the service consumers
+        /// do not recognize. This is a required field for tenants onboarding to Maintenance Window notifications
+        /// (go/slm-rollout-maintenance-policies#prerequisites).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("consumerDefinedName")]
         public virtual string ConsumerDefinedName { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when the resource was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. The instance_type of this instance of format:
+        /// projects/{project_number}/locations/{location_id}/instanceTypes/{instance_type_id}. Instance Type represents
+        /// a high-level tier or SKU of the service that this instance belong to. When enabled(eg: Maintenance Rollout),
+        /// Rollout uses 'instance_type' along with 'software_versions' to determine whether instance needs an update or
+        /// not.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceType")]
+        public virtual string InstanceType { get; set; }
 
         /// <summary>
         /// Optional. Resource labels to represent user provided metadata. Each label is a key-value pair, where both
@@ -3693,9 +4554,10 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
         /// <summary>
-        /// Deprecated. The MaintenancePolicies that have been attached to the instance. The key must be of the type
-        /// name of the oneof policy name defined in MaintenancePolicy, and the referenced policy must define the same
-        /// policy type. For complete details of MaintenancePolicy, please refer to go/cloud-saas-mw-ug.
+        /// Optional. The MaintenancePolicies that have been attached to the instance. The key must be of the type name
+        /// of the oneof policy name defined in MaintenancePolicy, and the referenced policy must define the same policy
+        /// type. For details, please refer to go/mr-user-guide. Should not be set if
+        /// maintenance_settings.maintenance_policies is set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maintenancePolicyNames")]
         public virtual System.Collections.Generic.IDictionary<string, string> MaintenancePolicyNames { get; set; }
@@ -3713,11 +4575,21 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
 
         /// <summary>
         /// Unique name of the resource. It uses the form:
-        /// `projects/{project_id|project_number}/locations/{location_id}/instances/{instance_id}` Note: Either
-        /// project_id or project_number can be used, but keep it consistent with other APIs (e.g. RescheduleUpdate)
+        /// `projects/{project_number}/locations/{location_id}/instances/{instance_id}` Note: This name is passed,
+        /// stored and logged across the rollout system. So use of consumer project_id or any other consumer PII in the
+        /// name is strongly discouraged for wipeout (go/wipeout) compliance. See
+        /// go/elysium/project_ids#storage-guidance for more details.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Optional. notification_parameter are information that service producers may like to include that is not
+        /// relevant to Rollout. This parameter will only be passed to Gamma and Cloud Logging for notification/logging
+        /// purpose.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("notificationParameters")]
+        public virtual System.Collections.Generic.IDictionary<string, GoogleCloudSaasacceleratorManagementProvidersV1NotificationParameter> NotificationParameters { get; set; }
 
         /// <summary>
         /// Output only. Custom string attributes used primarily to expose producer-specific information in monitoring
@@ -3764,9 +4636,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("tenantProjectId")]
         public virtual string TenantProjectId { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Timestamp when the resource was last modified.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3785,9 +4690,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("canReschedule")]
         public virtual System.Nullable<bool> CanReschedule { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The scheduled end time for the maintenance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The rollout management policy this maintenance schedule is associated with. When doing reschedule update
@@ -3796,17 +4734,85 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("rolloutManagementPolicy")]
         public virtual string RolloutManagementPolicy { get; set; }
 
+        private string _scheduleDeadlineTimeRaw;
+
+        private object _scheduleDeadlineTime;
+
         /// <summary>
         /// schedule_deadline_time is the time deadline any schedule start time cannot go beyond, including reschedule.
         /// It's normally the initial schedule start time plus maintenance window length (1 day or 1 week). Maintenance
         /// cannot be scheduled to start beyond this deadline.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleDeadlineTime")]
-        public virtual object ScheduleDeadlineTime { get; set; }
+        public virtual string ScheduleDeadlineTimeRaw
+        {
+            get => _scheduleDeadlineTimeRaw;
+            set
+            {
+                _scheduleDeadlineTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleDeadlineTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleDeadlineTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleDeadlineTimeDateTimeOffset instead.")]
+        public virtual object ScheduleDeadlineTime
+        {
+            get => _scheduleDeadlineTime;
+            set
+            {
+                _scheduleDeadlineTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleDeadlineTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleDeadlineTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleDeadlineTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleDeadlineTimeRaw);
+            set => ScheduleDeadlineTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>The scheduled start time for the maintenance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3832,9 +4838,8 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         /// <summary>
         /// Optional. The MaintenancePolicies that have been attached to the instance. The key must be of the type name
         /// of the oneof policy name defined in MaintenancePolicy, and the embedded policy must define the same policy
-        /// type. For complete details of MaintenancePolicy, please refer to go/cloud-saas-mw-ug. If only the name is
-        /// needed (like in the deprecated Instance.maintenance_policy_names field) then only populate
-        /// MaintenancePolicy.name.
+        /// type. For details, please refer to go/mr-user-guide. Should not be set if maintenance_policy_names is set.
+        /// If only the name is needed, then only populate MaintenancePolicy.name.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maintenancePolicies")]
         public virtual System.Collections.Generic.IDictionary<string, MaintenancePolicy> MaintenancePolicies { get; set; }
@@ -3864,6 +4869,17 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("perSliEligibility")]
         public virtual GoogleCloudSaasacceleratorManagementProvidersV1PerSliSloEligibility PerSliEligibility { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Contains notification related data.</summary>
+    public class GoogleCloudSaasacceleratorManagementProvidersV1NotificationParameter : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Array of string values. e.g. instance's replica information.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("values")]
+        public virtual System.Collections.Generic.IList<string> Values { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4003,9 +5019,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Last update time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4125,7 +5174,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -4160,9 +5209,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
     /// <summary>Defines policies to service maintenance events.</summary>
     public class MaintenancePolicy : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time when the resource was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. Description of what this policy is for. Create/Update methods return INVALID_ARGUMENT if the
@@ -4196,9 +5278,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("updatePolicy")]
         public virtual UpdatePolicy UpdatePolicy { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time when the resource was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4214,6 +5329,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         /// <summary>Weekly cycle.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("weeklyCycle")]
         public virtual WeeklyCycle WeeklyCycle { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// OnPremDomainDetails is the message which contains details of on-prem domain which is trusted and needs to be
+    /// migrated.
+    /// </summary>
+    public class OnPremDomainDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Option to disable SID filtering.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disableSidFiltering")]
+        public virtual System.Nullable<bool> DisableSidFiltering { get; set; }
+
+        /// <summary>Required. FQDN of the on-prem domain being migrated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domainName")]
+        public virtual string DomainName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// OnPremDomainDetails is the message which contains details of on-prem domain which is trusted and needs to be
+    /// migrated.
+    /// </summary>
+    public class OnPremDomainSIDDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>FQDN of the on-prem domain being migrated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Current SID filtering state.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sidFilteringState")]
+        public virtual string SidFilteringState { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4249,8 +5400,8 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -4271,19 +5422,85 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
 
         /// <summary>
         /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
-        /// been cancelled successfully have Operation.error value with a google.rpc.Status.code of 1, corresponding to
-        /// `Code.CANCELLED`.
+        /// been cancelled successfully have google.longrunning.Operation.error value with a google.rpc.Status.code of
+        /// `1`, corresponding to `Code.CANCELLED`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cancelRequested")]
         public virtual System.Nullable<bool> CancelRequested { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. The time the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Human-readable status of the operation, if any.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("statusDetail")]
@@ -4312,9 +5529,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("authorizedNetwork")]
         public virtual string AuthorizedNetwork { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the instance was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Required. Full domain resource path for the Managed AD Domain involved in peering. The resource path should
@@ -4344,9 +5594,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("statusMessage")]
         public virtual string StatusMessage { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Last update time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4361,18 +5644,26 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4489,7 +5780,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -4502,9 +5793,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
     /// <summary>Represents the Sql instance integrated with AD.</summary>
     public class SqlIntegration : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time sql integration was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The unique name of the sql integration in the form of
@@ -4521,9 +5845,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time sql integration was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4562,7 +5919,7 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>
@@ -4591,23 +5948,26 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
     public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }
@@ -4622,13 +5982,81 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
     /// </summary>
     public class Trust : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the instance was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _lastTrustHeartbeatTimeRaw;
+
+        private object _lastTrustHeartbeatTime;
 
         /// <summary>Output only. The last heartbeat time when the trust was known to be connected.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastTrustHeartbeatTime")]
-        public virtual object LastTrustHeartbeatTime { get; set; }
+        public virtual string LastTrustHeartbeatTimeRaw
+        {
+            get => _lastTrustHeartbeatTimeRaw;
+            set
+            {
+                _lastTrustHeartbeatTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastTrustHeartbeatTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastTrustHeartbeatTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastTrustHeartbeatTimeDateTimeOffset instead.")]
+        public virtual object LastTrustHeartbeatTime
+        {
+            get => _lastTrustHeartbeatTime;
+            set
+            {
+                _lastTrustHeartbeatTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastTrustHeartbeatTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastTrustHeartbeatTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastTrustHeartbeatTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastTrustHeartbeatTimeRaw);
+            set => LastTrustHeartbeatTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The trust authentication type, which decides whether the trusted side has forest/domain wide access or
@@ -4669,9 +6097,42 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         [Newtonsoft.Json.JsonPropertyAttribute("trustType")]
         public virtual string TrustType { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The last update time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4685,9 +6146,8 @@ namespace Google.Apis.ManagedServiceforMicrosoftActiveDirectoryConsumerAPI.v1bet
         public virtual string Channel { get; set; }
 
         /// <summary>
-        /// Deny Maintenance Period that is applied to resource to indicate when maintenance is forbidden. User can
-        /// specify zero or more non-overlapping deny periods. Maximum number of deny_maintenance_periods expected is
-        /// one.
+        /// Deny Maintenance Period that is applied to resource to indicate when maintenance is forbidden. The protocol
+        /// supports zero-to-many such periods, but the current SLM Rollout implementation only supports zero-to-one.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("denyMaintenancePeriods")]
         public virtual System.Collections.Generic.IList<DenyMaintenancePeriod> DenyMaintenancePeriods { get; set; }

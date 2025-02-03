@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,6 +44,8 @@ namespace Google.Apis.SQLAdmin.v1beta4
             SslCerts = new SslCertsResource(this);
             Tiers = new TiersResource(this);
             Users = new UsersResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://sqladmin.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://sqladmin.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -53,23 +55,16 @@ namespace Google.Apis.SQLAdmin.v1beta4
         public override string Name => "sqladmin";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://sqladmin.googleapis.com/";
-        #else
-            "https://sqladmin.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://sqladmin.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud SQL Admin API.</summary>
         public class Scope
@@ -332,7 +327,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// </param>
         public virtual DeleteRequest Delete(string project, string instance, long id)
         {
-            return new DeleteRequest(service, project, instance, id);
+            return new DeleteRequest(this.service, project, instance, id);
         }
 
         /// <summary>Deletes the backup taken by a backup run.</summary>
@@ -408,7 +403,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="id">The ID of this backup run.</param>
         public virtual GetRequest Get(string project, string instance, long id)
         {
-            return new GetRequest(service, project, instance, id);
+            return new GetRequest(this.service, project, instance, id);
         }
 
         /// <summary>Retrieves a resource containing information about a backup run.</summary>
@@ -481,7 +476,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual InsertRequest Insert(Google.Apis.SQLAdmin.v1beta4.Data.BackupRun body, string project, string instance)
         {
-            return new InsertRequest(service, body, project, instance);
+            return new InsertRequest(this.service, body, project, instance);
         }
 
         /// <summary>Creates a new backup run on demand.</summary>
@@ -552,7 +547,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// </param>
         public virtual ListRequest List(string project, string instance)
         {
-            return new ListRequest(service, project, instance);
+            return new ListRequest(this.service, project, instance);
         }
 
         /// <summary>
@@ -662,7 +657,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual GenerateEphemeralCertRequest GenerateEphemeralCert(Google.Apis.SQLAdmin.v1beta4.Data.GenerateEphemeralCertRequest body, string project, string instance)
         {
-            return new GenerateEphemeralCertRequest(service, body, project, instance);
+            return new GenerateEphemeralCertRequest(this.service, body, project, instance);
         }
 
         /// <summary>
@@ -732,7 +727,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual GetRequest Get(string project, string instance)
         {
-            return new GetRequest(service, project, instance);
+            return new GetRequest(this.service, project, instance);
         }
 
         /// <summary>Retrieves connect settings about a Cloud SQL instance.</summary>
@@ -754,9 +749,36 @@ namespace Google.Apis.SQLAdmin.v1beta4
             [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Instance { get; private set; }
 
-            /// <summary>Optional. Optional snapshot read timestamp to trade freshness for performance.</summary>
+            private object _readTime;
+
+            /// <summary>
+            /// String representation of <see cref="ReadTimeDateTimeOffset"/>, formatted for inclusion in the HTTP
+            /// request.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("readTime", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual object ReadTime { get; set; }
+            public virtual string ReadTimeRaw { get; private set; }
+
+            /// <summary><seealso cref="object"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReadTimeDateTimeOffset instead.")]
+            public virtual object ReadTime
+            {
+                get => _readTime;
+                set
+                {
+                    ReadTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                    _readTime = value;
+                }
+            }
+
+            public virtual System.DateTimeOffset? ReadTimeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReadTimeRaw);
+                set
+                {
+                    ReadTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                    _readTime = value;
+                }
+            }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "get";
@@ -819,7 +841,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="database">Name of the database to be deleted in the instance.</param>
         public virtual DeleteRequest Delete(string project, string instance, string database)
         {
-            return new DeleteRequest(service, project, instance, database);
+            return new DeleteRequest(this.service, project, instance, database);
         }
 
         /// <summary>Deletes a database from a Cloud SQL instance.</summary>
@@ -892,7 +914,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="database">Name of the database in the instance.</param>
         public virtual GetRequest Get(string project, string instance, string database)
         {
-            return new GetRequest(service, project, instance, database);
+            return new GetRequest(this.service, project, instance, database);
         }
 
         /// <summary>Retrieves a resource containing information about a database inside a Cloud SQL instance.</summary>
@@ -959,16 +981,22 @@ namespace Google.Apis.SQLAdmin.v1beta4
             }
         }
 
-        /// <summary>Inserts a resource containing information about a database inside a Cloud SQL instance.</summary>
+        /// <summary>
+        /// Inserts a resource containing information about a database inside a Cloud SQL instance. **Note:** You can't
+        /// modify the default character set and collation.
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="project">Project ID of the project that contains the instance.</param>
         /// <param name="instance">Database instance ID. This does not include the project ID.</param>
         public virtual InsertRequest Insert(Google.Apis.SQLAdmin.v1beta4.Data.Database body, string project, string instance)
         {
-            return new InsertRequest(service, body, project, instance);
+            return new InsertRequest(this.service, body, project, instance);
         }
 
-        /// <summary>Inserts a resource containing information about a database inside a Cloud SQL instance.</summary>
+        /// <summary>
+        /// Inserts a resource containing information about a database inside a Cloud SQL instance. **Note:** You can't
+        /// modify the default character set and collation.
+        /// </summary>
         public class InsertRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Operation>
         {
             /// <summary>Constructs a new Insert request.</summary>
@@ -1031,7 +1059,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual ListRequest List(string project, string instance)
         {
-            return new ListRequest(service, project, instance);
+            return new ListRequest(this.service, project, instance);
         }
 
         /// <summary>Lists databases in the specified Cloud SQL instance.</summary>
@@ -1095,7 +1123,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="database">Name of the database to be updated in the instance.</param>
         public virtual PatchRequest Patch(Google.Apis.SQLAdmin.v1beta4.Data.Database body, string project, string instance, string database)
         {
-            return new PatchRequest(service, body, project, instance, database);
+            return new PatchRequest(this.service, body, project, instance, database);
         }
 
         /// <summary>
@@ -1179,7 +1207,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="database">Name of the database to be updated in the instance.</param>
         public virtual UpdateRequest Update(Google.Apis.SQLAdmin.v1beta4.Data.Database body, string project, string instance, string database)
         {
-            return new UpdateRequest(service, body, project, instance, database);
+            return new UpdateRequest(this.service, body, project, instance, database);
         }
 
         /// <summary>Updates a resource containing information about a database inside a Cloud SQL instance.</summary>
@@ -1271,7 +1299,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <summary>Lists all available database flags for Cloud SQL instances.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists all available database flags for Cloud SQL instances.</summary>
@@ -1330,21 +1358,242 @@ namespace Google.Apis.SQLAdmin.v1beta4
         }
 
         /// <summary>
-        /// Add a new trusted Certificate Authority (CA) version for the specified instance. Required to prepare for a
-        /// certificate rotation. If a CA version was previously added but never used in a certificate rotation, this
-        /// operation replaces that version. There cannot be more than one CA version waiting to be rotated in.
+        /// Lists all versions of server certificates and certificate authorities (CAs) for the specified instance.
+        /// There can be up to three sets of certs listed: the certificate that is currently in use, a future that has
+        /// been added but not yet used to sign a certificate, and a certificate that has been rotated out. For
+        /// instances not using Certificate Authority Service (CAS) server CA, use ListServerCas instead.
         /// </summary>
-        /// <param name="project">Project ID of the project that contains the instance.</param>
-        /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
-        public virtual AddServerCaRequest AddServerCa(string project, string instance)
+        /// <param name="project">Required. Project ID of the project that contains the instance.</param>
+        /// <param name="instance">Required. Cloud SQL instance ID. This does not include the project ID.</param>
+        public virtual ListServerCertificatesRequest ListServerCertificates(string project, string instance)
         {
-            return new AddServerCaRequest(service, project, instance);
+            return new ListServerCertificatesRequest(this.service, project, instance);
+        }
+
+        /// <summary>
+        /// Lists all versions of server certificates and certificate authorities (CAs) for the specified instance.
+        /// There can be up to three sets of certs listed: the certificate that is currently in use, a future that has
+        /// been added but not yet used to sign a certificate, and a certificate that has been rotated out. For
+        /// instances not using Certificate Authority Service (CAS) server CA, use ListServerCas instead.
+        /// </summary>
+        public class ListServerCertificatesRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.InstancesListServerCertificatesResponse>
+        {
+            /// <summary>Constructs a new ListServerCertificates request.</summary>
+            public ListServerCertificatesRequest(Google.Apis.Services.IClientService service, string project, string instance) : base(service)
+            {
+                Project = project;
+                Instance = instance;
+                InitParameters();
+            }
+
+            /// <summary>Required. Project ID of the project that contains the instance.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Project { get; private set; }
+
+            /// <summary>Required. Cloud SQL instance ID. This does not include the project ID.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Instance { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "ListServerCertificates";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/listServerCertificates";
+
+            /// <summary>Initializes ListServerCertificates parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "project",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "instance",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Rotates the server certificate version to one previously added with the addServerCertificate method. For
+        /// instances not using Certificate Authority Service (CAS) server CA, use RotateServerCa instead.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="project">Required. Project ID of the project that contains the instance.</param>
+        /// <param name="instance">Required. Cloud SQL instance ID. This does not include the project ID.</param>
+        public virtual RotateServerCertificateRequest RotateServerCertificate(Google.Apis.SQLAdmin.v1beta4.Data.InstancesRotateServerCertificateRequest body, string project, string instance)
+        {
+            return new RotateServerCertificateRequest(this.service, body, project, instance);
+        }
+
+        /// <summary>
+        /// Rotates the server certificate version to one previously added with the addServerCertificate method. For
+        /// instances not using Certificate Authority Service (CAS) server CA, use RotateServerCa instead.
+        /// </summary>
+        public class RotateServerCertificateRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Operation>
+        {
+            /// <summary>Constructs a new RotateServerCertificate request.</summary>
+            public RotateServerCertificateRequest(Google.Apis.Services.IClientService service, Google.Apis.SQLAdmin.v1beta4.Data.InstancesRotateServerCertificateRequest body, string project, string instance) : base(service)
+            {
+                Project = project;
+                Instance = instance;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Required. Project ID of the project that contains the instance.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Project { get; private set; }
+
+            /// <summary>Required. Cloud SQL instance ID. This does not include the project ID.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Instance { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.SQLAdmin.v1beta4.Data.InstancesRotateServerCertificateRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "RotateServerCertificate";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/rotateServerCertificate";
+
+            /// <summary>Initializes RotateServerCertificate parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "project",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "instance",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>Acquire a lease for the setup of SQL Server Reporting Services (SSRS).</summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="project">Required. ID of the project that contains the instance (Example: project-id).</param>
+        /// <param name="instance">
+        /// Required. Cloud SQL instance ID. This doesn't include the project ID. It's composed of lowercase letters,
+        /// numbers, and hyphens, and it must start with a letter. The total length must be 98 characters or less
+        /// (Example: instance-id).
+        /// </param>
+        public virtual AcquireSsrsLeaseRequest AcquireSsrsLease(Google.Apis.SQLAdmin.v1beta4.Data.InstancesAcquireSsrsLeaseRequest body, string project, string instance)
+        {
+            return new AcquireSsrsLeaseRequest(this.service, body, project, instance);
+        }
+
+        /// <summary>Acquire a lease for the setup of SQL Server Reporting Services (SSRS).</summary>
+        public class AcquireSsrsLeaseRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.SqlInstancesAcquireSsrsLeaseResponse>
+        {
+            /// <summary>Constructs a new AcquireSsrsLease request.</summary>
+            public AcquireSsrsLeaseRequest(Google.Apis.Services.IClientService service, Google.Apis.SQLAdmin.v1beta4.Data.InstancesAcquireSsrsLeaseRequest body, string project, string instance) : base(service)
+            {
+                Project = project;
+                Instance = instance;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Required. ID of the project that contains the instance (Example: project-id).</summary>
+            [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Project { get; private set; }
+
+            /// <summary>
+            /// Required. Cloud SQL instance ID. This doesn't include the project ID. It's composed of lowercase
+            /// letters, numbers, and hyphens, and it must start with a letter. The total length must be 98 characters
+            /// or less (Example: instance-id).
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Instance { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.SQLAdmin.v1beta4.Data.InstancesAcquireSsrsLeaseRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "acquireSsrsLease";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/acquireSsrsLease";
+
+            /// <summary>Initializes AcquireSsrsLease parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "project",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "instance",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
         }
 
         /// <summary>
         /// Add a new trusted Certificate Authority (CA) version for the specified instance. Required to prepare for a
         /// certificate rotation. If a CA version was previously added but never used in a certificate rotation, this
-        /// operation replaces that version. There cannot be more than one CA version waiting to be rotated in.
+        /// operation replaces that version. There cannot be more than one CA version waiting to be rotated in. For
+        /// instances that have enabled Certificate Authority Service (CAS) based server CA, use AddServerCertificate to
+        /// add a new server certificate.
+        /// </summary>
+        /// <param name="project">Project ID of the project that contains the instance.</param>
+        /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
+        public virtual AddServerCaRequest AddServerCa(string project, string instance)
+        {
+            return new AddServerCaRequest(this.service, project, instance);
+        }
+
+        /// <summary>
+        /// Add a new trusted Certificate Authority (CA) version for the specified instance. Required to prepare for a
+        /// certificate rotation. If a CA version was previously added but never used in a certificate rotation, this
+        /// operation replaces that version. There cannot be more than one CA version waiting to be rotated in. For
+        /// instances that have enabled Certificate Authority Service (CAS) based server CA, use AddServerCertificate to
+        /// add a new server certificate.
         /// </summary>
         public class AddServerCaRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Operation>
         {
@@ -1397,6 +1646,77 @@ namespace Google.Apis.SQLAdmin.v1beta4
         }
 
         /// <summary>
+        /// Add a new trusted server certificate version for the specified instance using Certificate Authority Service
+        /// (CAS) server CA. Required to prepare for a certificate rotation. If a server certificate version was
+        /// previously added but never used in a certificate rotation, this operation replaces that version. There
+        /// cannot be more than one certificate version waiting to be rotated in. For instances not using CAS server CA,
+        /// use AddServerCa instead.
+        /// </summary>
+        /// <param name="project">Required. Project ID of the project that contains the instance.</param>
+        /// <param name="instance">Required. Cloud SQL instance ID. This does not include the project ID.</param>
+        public virtual AddServerCertificateRequest AddServerCertificate(string project, string instance)
+        {
+            return new AddServerCertificateRequest(this.service, project, instance);
+        }
+
+        /// <summary>
+        /// Add a new trusted server certificate version for the specified instance using Certificate Authority Service
+        /// (CAS) server CA. Required to prepare for a certificate rotation. If a server certificate version was
+        /// previously added but never used in a certificate rotation, this operation replaces that version. There
+        /// cannot be more than one certificate version waiting to be rotated in. For instances not using CAS server CA,
+        /// use AddServerCa instead.
+        /// </summary>
+        public class AddServerCertificateRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Operation>
+        {
+            /// <summary>Constructs a new AddServerCertificate request.</summary>
+            public AddServerCertificateRequest(Google.Apis.Services.IClientService service, string project, string instance) : base(service)
+            {
+                Project = project;
+                Instance = instance;
+                InitParameters();
+            }
+
+            /// <summary>Required. Project ID of the project that contains the instance.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Project { get; private set; }
+
+            /// <summary>Required. Cloud SQL instance ID. This does not include the project ID.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Instance { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "addServerCertificate";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/addServerCertificate";
+
+            /// <summary>Initializes AddServerCertificate parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "project",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "instance",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
         /// Creates a Cloud SQL instance as a clone of the source instance. Using this operation might cause your
         /// instance to restart.
         /// </summary>
@@ -1407,7 +1727,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// </param>
         public virtual CloneRequest Clone(Google.Apis.SQLAdmin.v1beta4.Data.InstancesCloneRequest body, string project, string instance)
         {
-            return new CloneRequest(service, body, project, instance);
+            return new CloneRequest(this.service, body, project, instance);
         }
 
         /// <summary>
@@ -1478,7 +1798,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual DeleteRequest Delete(string project, string instance)
         {
-            return new DeleteRequest(service, project, instance);
+            return new DeleteRequest(this.service, project, instance);
         }
 
         /// <summary>Deletes a Cloud SQL instance.</summary>
@@ -1533,6 +1853,77 @@ namespace Google.Apis.SQLAdmin.v1beta4
         }
 
         /// <summary>
+        /// Demotes an existing standalone instance to be a Cloud SQL read replica for an external database server.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="project">Required. The project ID of the project that contains the instance.</param>
+        /// <param name="instance">Required. The name of the Cloud SQL instance.</param>
+        public virtual DemoteRequest Demote(Google.Apis.SQLAdmin.v1beta4.Data.InstancesDemoteRequest body, string project, string instance)
+        {
+            return new DemoteRequest(this.service, body, project, instance);
+        }
+
+        /// <summary>
+        /// Demotes an existing standalone instance to be a Cloud SQL read replica for an external database server.
+        /// </summary>
+        public class DemoteRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Operation>
+        {
+            /// <summary>Constructs a new Demote request.</summary>
+            public DemoteRequest(Google.Apis.Services.IClientService service, Google.Apis.SQLAdmin.v1beta4.Data.InstancesDemoteRequest body, string project, string instance) : base(service)
+            {
+                Project = project;
+                Instance = instance;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Required. The project ID of the project that contains the instance.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Project { get; private set; }
+
+            /// <summary>Required. The name of the Cloud SQL instance.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Instance { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.SQLAdmin.v1beta4.Data.InstancesDemoteRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "demote";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/demote";
+
+            /// <summary>Initializes Demote parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "project",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "instance",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
         /// Demotes the stand-alone instance to be a Cloud SQL read replica for an external database server.
         /// </summary>
         /// <param name="body">The body of the request.</param>
@@ -1540,7 +1931,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance name.</param>
         public virtual DemoteMasterRequest DemoteMaster(Google.Apis.SQLAdmin.v1beta4.Data.InstancesDemoteMasterRequest body, string project, string instance)
         {
-            return new DemoteMasterRequest(service, body, project, instance);
+            return new DemoteMasterRequest(this.service, body, project, instance);
         }
 
         /// <summary>
@@ -1608,10 +1999,10 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="project">Project ID of the project that contains the instance to be exported.</param>
-        /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
+        /// <param name="instance">The Cloud SQL instance ID. This doesn't include the project ID.</param>
         public virtual ExportRequest Export(Google.Apis.SQLAdmin.v1beta4.Data.InstancesExportRequest body, string project, string instance)
         {
-            return new ExportRequest(service, body, project, instance);
+            return new ExportRequest(this.service, body, project, instance);
         }
 
         /// <summary>
@@ -1632,7 +2023,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
             [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Project { get; private set; }
 
-            /// <summary>Cloud SQL instance ID. This does not include the project ID.</summary>
+            /// <summary>The Cloud SQL instance ID. This doesn't include the project ID.</summary>
             [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Instance { get; private set; }
 
@@ -1686,7 +2077,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual FailoverRequest Failover(Google.Apis.SQLAdmin.v1beta4.Data.InstancesFailoverRequest body, string project, string instance)
         {
-            return new FailoverRequest(service, body, project, instance);
+            return new FailoverRequest(this.service, body, project, instance);
         }
 
         /// <summary>
@@ -1758,7 +2149,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Database instance ID. This does not include the project ID.</param>
         public virtual GetRequest Get(string project, string instance)
         {
-            return new GetRequest(service, project, instance);
+            return new GetRequest(this.service, project, instance);
         }
 
         /// <summary>Retrieves a resource containing information about a Cloud SQL instance.</summary>
@@ -1818,7 +2209,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual ImportRequest Import(Google.Apis.SQLAdmin.v1beta4.Data.InstancesImportRequest body, string project, string instance)
         {
-            return new ImportRequest(service, body, project, instance);
+            return new ImportRequest(this.service, body, project, instance);
         }
 
         /// <summary>Imports data into a Cloud SQL instance from a SQL dump or CSV file in Cloud Storage.</summary>
@@ -1886,7 +2277,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.SQLAdmin.v1beta4.Data.DatabaseInstance body, string project)
         {
-            return new InsertRequest(service, body, project);
+            return new InsertRequest(this.service, body, project);
         }
 
         /// <summary>Creates a new Cloud SQL instance.</summary>
@@ -1940,7 +2331,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="project">Project ID of the project for which to list Cloud SQL instances.</param>
         public virtual ListRequest List(string project)
         {
-            return new ListRequest(service, project);
+            return new ListRequest(this.service, project);
         }
 
         /// <summary>Lists instances under a given project.</summary>
@@ -1967,7 +2358,10 @@ namespace Google.Apis.SQLAdmin.v1beta4
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; set; }
 
-            /// <summary>The maximum number of results to return per response.</summary>
+            /// <summary>
+            /// The maximum number of instances to return. The service may return fewer than this value. If unspecified,
+            /// at most 500 instances are returned. The maximum value is 1000; values above 1000 are coerced to 1000.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("maxResults", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<long> MaxResults { get; set; }
 
@@ -2034,7 +2428,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual ListServerCasRequest ListServerCas(string project, string instance)
         {
-            return new ListServerCasRequest(service, project, instance);
+            return new ListServerCasRequest(this.service, project, instance);
         }
 
         /// <summary>
@@ -2092,16 +2486,22 @@ namespace Google.Apis.SQLAdmin.v1beta4
             }
         }
 
-        /// <summary>Updates settings of a Cloud SQL instance. This method supports patch semantics.</summary>
+        /// <summary>
+        /// Partially updates settings of a Cloud SQL instance by merging the request with the current configuration.
+        /// This method supports patch semantics.
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="project">Project ID of the project that contains the instance.</param>
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual PatchRequest Patch(Google.Apis.SQLAdmin.v1beta4.Data.DatabaseInstance body, string project, string instance)
         {
-            return new PatchRequest(service, body, project, instance);
+            return new PatchRequest(this.service, body, project, instance);
         }
 
-        /// <summary>Updates settings of a Cloud SQL instance. This method supports patch semantics.</summary>
+        /// <summary>
+        /// Partially updates settings of a Cloud SQL instance by merging the request with the current configuration.
+        /// This method supports patch semantics.
+        /// </summary>
         public class PatchRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Operation>
         {
             /// <summary>Constructs a new Patch request.</summary>
@@ -2160,19 +2560,19 @@ namespace Google.Apis.SQLAdmin.v1beta4
         }
 
         /// <summary>
-        /// Promotes the read replica instance to be a stand-alone Cloud SQL instance. Using this operation might cause
-        /// your instance to restart.
+        /// Promotes the read replica instance to be an independent Cloud SQL primary instance. Using this operation
+        /// might cause your instance to restart.
         /// </summary>
         /// <param name="project">ID of the project that contains the read replica.</param>
         /// <param name="instance">Cloud SQL read replica instance name.</param>
         public virtual PromoteReplicaRequest PromoteReplica(string project, string instance)
         {
-            return new PromoteReplicaRequest(service, project, instance);
+            return new PromoteReplicaRequest(this.service, project, instance);
         }
 
         /// <summary>
-        /// Promotes the read replica instance to be a stand-alone Cloud SQL instance. Using this operation might cause
-        /// your instance to restart.
+        /// Promotes the read replica instance to be an independent Cloud SQL primary instance. Using this operation
+        /// might cause your instance to restart.
         /// </summary>
         public class PromoteReplicaRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Operation>
         {
@@ -2191,6 +2591,15 @@ namespace Google.Apis.SQLAdmin.v1beta4
             /// <summary>Cloud SQL read replica instance name.</summary>
             [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Instance { get; private set; }
+
+            /// <summary>
+            /// Set to true to invoke a replica failover to the DR replica. As part of replica failover, the promote
+            /// operation attempts to add the original primary instance as a replica of the promoted DR replica when the
+            /// original primary instance comes back online. If set to false or not specified, then the original primary
+            /// instance becomes an independent Cloud SQL primary instance.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("failover", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> Failover { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "promoteReplica";
@@ -2221,6 +2630,150 @@ namespace Google.Apis.SQLAdmin.v1beta4
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("failover", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "failover",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>Reencrypt CMEK instance with latest key version.</summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="project">ID of the project that contains the instance.</param>
+        /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
+        public virtual ReencryptRequest Reencrypt(Google.Apis.SQLAdmin.v1beta4.Data.InstancesReencryptRequest body, string project, string instance)
+        {
+            return new ReencryptRequest(this.service, body, project, instance);
+        }
+
+        /// <summary>Reencrypt CMEK instance with latest key version.</summary>
+        public class ReencryptRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Operation>
+        {
+            /// <summary>Constructs a new Reencrypt request.</summary>
+            public ReencryptRequest(Google.Apis.Services.IClientService service, Google.Apis.SQLAdmin.v1beta4.Data.InstancesReencryptRequest body, string project, string instance) : base(service)
+            {
+                Project = project;
+                Instance = instance;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>ID of the project that contains the instance.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Project { get; private set; }
+
+            /// <summary>Cloud SQL instance ID. This does not include the project ID.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Instance { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.SQLAdmin.v1beta4.Data.InstancesReencryptRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "reencrypt";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/reencrypt";
+
+            /// <summary>Initializes Reencrypt parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "project",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "instance",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>Release a lease for the setup of SQL Server Reporting Services (SSRS).</summary>
+        /// <param name="project">
+        /// Required. The ID of the project that contains the instance (Example: project-id).
+        /// </param>
+        /// <param name="instance">
+        /// Required. The Cloud SQL instance ID. This doesn't include the project ID. It's composed of lowercase
+        /// letters, numbers, and hyphens, and it must start with a letter. The total length must be 98 characters or
+        /// less (Example: instance-id).
+        /// </param>
+        public virtual ReleaseSsrsLeaseRequest ReleaseSsrsLease(string project, string instance)
+        {
+            return new ReleaseSsrsLeaseRequest(this.service, project, instance);
+        }
+
+        /// <summary>Release a lease for the setup of SQL Server Reporting Services (SSRS).</summary>
+        public class ReleaseSsrsLeaseRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.SqlInstancesReleaseSsrsLeaseResponse>
+        {
+            /// <summary>Constructs a new ReleaseSsrsLease request.</summary>
+            public ReleaseSsrsLeaseRequest(Google.Apis.Services.IClientService service, string project, string instance) : base(service)
+            {
+                Project = project;
+                Instance = instance;
+                InitParameters();
+            }
+
+            /// <summary>Required. The ID of the project that contains the instance (Example: project-id).</summary>
+            [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Project { get; private set; }
+
+            /// <summary>
+            /// Required. The Cloud SQL instance ID. This doesn't include the project ID. It's composed of lowercase
+            /// letters, numbers, and hyphens, and it must start with a letter. The total length must be 98 characters
+            /// or less (Example: instance-id).
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Instance { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "releaseSsrsLease";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/releaseSsrsLease";
+
+            /// <summary>Initializes ReleaseSsrsLease parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "project",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "instance",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
 
@@ -2231,7 +2784,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual ResetSslConfigRequest ResetSslConfig(string project, string instance)
         {
-            return new ResetSslConfigRequest(service, project, instance);
+            return new ResetSslConfigRequest(this.service, project, instance);
         }
 
         /// <summary>
@@ -2292,7 +2845,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual RestartRequest Restart(string project, string instance)
         {
-            return new RestartRequest(service, project, instance);
+            return new RestartRequest(this.service, project, instance);
         }
 
         /// <summary>Restarts a Cloud SQL instance.</summary>
@@ -2354,7 +2907,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual RestoreBackupRequest RestoreBackup(Google.Apis.SQLAdmin.v1beta4.Data.InstancesRestoreBackupRequest body, string project, string instance)
         {
-            return new RestoreBackupRequest(service, body, project, instance);
+            return new RestoreBackupRequest(this.service, body, project, instance);
         }
 
         /// <summary>
@@ -2419,19 +2972,21 @@ namespace Google.Apis.SQLAdmin.v1beta4
 
         /// <summary>
         /// Rotates the server certificate to one signed by the Certificate Authority (CA) version previously added with
-        /// the addServerCA method.
+        /// the addServerCA method. For instances that have enabled Certificate Authority Service (CAS) based server CA,
+        /// use RotateServerCertificate to rotate the server certificate.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="project">Project ID of the project that contains the instance.</param>
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual RotateServerCaRequest RotateServerCa(Google.Apis.SQLAdmin.v1beta4.Data.InstancesRotateServerCaRequest body, string project, string instance)
         {
-            return new RotateServerCaRequest(service, body, project, instance);
+            return new RotateServerCaRequest(this.service, body, project, instance);
         }
 
         /// <summary>
         /// Rotates the server certificate to one signed by the Certificate Authority (CA) version previously added with
-        /// the addServerCA method.
+        /// the addServerCA method. For instances that have enabled Certificate Authority Service (CAS) based server CA,
+        /// use RotateServerCertificate to rotate the server certificate.
         /// </summary>
         public class RotateServerCaRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Operation>
         {
@@ -2495,7 +3050,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL read replica instance name.</param>
         public virtual StartReplicaRequest StartReplica(string project, string instance)
         {
-            return new StartReplicaRequest(service, project, instance);
+            return new StartReplicaRequest(this.service, project, instance);
         }
 
         /// <summary>Starts the replication in the read replica instance.</summary>
@@ -2554,7 +3109,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL read replica instance name.</param>
         public virtual StopReplicaRequest StopReplica(string project, string instance)
         {
-            return new StopReplicaRequest(service, project, instance);
+            return new StopReplicaRequest(this.service, project, instance);
         }
 
         /// <summary>Stops the replication in the read replica instance.</summary>
@@ -2608,13 +3163,87 @@ namespace Google.Apis.SQLAdmin.v1beta4
             }
         }
 
+        /// <summary>Switches over from the primary instance to the DR replica instance.</summary>
+        /// <param name="project">ID of the project that contains the replica.</param>
+        /// <param name="instance">Cloud SQL read replica instance name.</param>
+        public virtual SwitchoverRequest Switchover(string project, string instance)
+        {
+            return new SwitchoverRequest(this.service, project, instance);
+        }
+
+        /// <summary>Switches over from the primary instance to the DR replica instance.</summary>
+        public class SwitchoverRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Operation>
+        {
+            /// <summary>Constructs a new Switchover request.</summary>
+            public SwitchoverRequest(Google.Apis.Services.IClientService service, string project, string instance) : base(service)
+            {
+                Project = project;
+                Instance = instance;
+                InitParameters();
+            }
+
+            /// <summary>ID of the project that contains the replica.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Project { get; private set; }
+
+            /// <summary>Cloud SQL read replica instance name.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Instance { get; private set; }
+
+            /// <summary>
+            /// Optional. (MySQL and PostgreSQL only) Cloud SQL instance operations timeout, which is a sum of all
+            /// database operations. Default value is 10 minutes and can be modified to a maximum value of 24 hours.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("dbTimeout", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual object DbTimeout { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "switchover";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/switchover";
+
+            /// <summary>Initializes Switchover parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "project",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "instance",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("dbTimeout", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "dbTimeout",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
         /// <summary>Truncate MySQL general and slow query log tables MySQL only.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="project">Project ID of the Cloud SQL project.</param>
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual TruncateLogRequest TruncateLog(Google.Apis.SQLAdmin.v1beta4.Data.InstancesTruncateLogRequest body, string project, string instance)
         {
-            return new TruncateLogRequest(service, body, project, instance);
+            return new TruncateLogRequest(this.service, body, project, instance);
         }
 
         /// <summary>Truncate MySQL general and slow query log tables MySQL only.</summary>
@@ -2683,7 +3312,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual UpdateRequest Update(Google.Apis.SQLAdmin.v1beta4.Data.DatabaseInstance body, string project, string instance)
         {
-            return new UpdateRequest(service, body, project, instance);
+            return new UpdateRequest(this.service, body, project, instance);
         }
 
         /// <summary>
@@ -2761,12 +3390,71 @@ namespace Google.Apis.SQLAdmin.v1beta4
             this.service = service;
         }
 
+        /// <summary>Cancels an instance operation that has been performed on an instance.</summary>
+        /// <param name="project">Project ID of the project that contains the instance.</param>
+        /// <param name="operation">Instance operation ID.</param>
+        public virtual CancelRequest Cancel(string project, string operation)
+        {
+            return new CancelRequest(this.service, project, operation);
+        }
+
+        /// <summary>Cancels an instance operation that has been performed on an instance.</summary>
+        public class CancelRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Empty>
+        {
+            /// <summary>Constructs a new Cancel request.</summary>
+            public CancelRequest(Google.Apis.Services.IClientService service, string project, string operation) : base(service)
+            {
+                Project = project;
+                Operation = operation;
+                InitParameters();
+            }
+
+            /// <summary>Project ID of the project that contains the instance.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Project { get; private set; }
+
+            /// <summary>Instance operation ID.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("operation", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Operation { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "cancel";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "sql/v1beta4/projects/{project}/operations/{operation}/cancel";
+
+            /// <summary>Initializes Cancel parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "project",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("operation", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "operation",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
         /// <summary>Retrieves an instance operation that has been performed on an instance.</summary>
         /// <param name="project">Project ID of the project that contains the instance.</param>
         /// <param name="operation">Instance operation ID.</param>
         public virtual GetRequest Get(string project, string operation)
         {
-            return new GetRequest(service, project, operation);
+            return new GetRequest(this.service, project, operation);
         }
 
         /// <summary>Retrieves an instance operation that has been performed on an instance.</summary>
@@ -2827,7 +3515,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="project">Project ID of the project that contains the instance.</param>
         public virtual ListRequest List(string project)
         {
-            return new ListRequest(service, project);
+            return new ListRequest(this.service, project);
         }
 
         /// <summary>
@@ -2942,13 +3630,198 @@ namespace Google.Apis.SQLAdmin.v1beta4
                 this.service = service;
             }
 
+            /// <summary>Get Disk Shrink Config for a given instance.</summary>
+            /// <param name="project">Project ID of the project that contains the instance.</param>
+            /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
+            public virtual GetDiskShrinkConfigRequest GetDiskShrinkConfig(string project, string instance)
+            {
+                return new GetDiskShrinkConfigRequest(this.service, project, instance);
+            }
+
+            /// <summary>Get Disk Shrink Config for a given instance.</summary>
+            public class GetDiskShrinkConfigRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.SqlInstancesGetDiskShrinkConfigResponse>
+            {
+                /// <summary>Constructs a new GetDiskShrinkConfig request.</summary>
+                public GetDiskShrinkConfigRequest(Google.Apis.Services.IClientService service, string project, string instance) : base(service)
+                {
+                    Project = project;
+                    Instance = instance;
+                    InitParameters();
+                }
+
+                /// <summary>Project ID of the project that contains the instance.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Project { get; private set; }
+
+                /// <summary>Cloud SQL instance ID. This does not include the project ID.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Instance { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "getDiskShrinkConfig";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/getDiskShrinkConfig";
+
+                /// <summary>Initializes GetDiskShrinkConfig parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "project",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "instance",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>Get Latest Recovery Time for a given instance.</summary>
+            /// <param name="project">Project ID of the project that contains the instance.</param>
+            /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
+            public virtual GetLatestRecoveryTimeRequest GetLatestRecoveryTime(string project, string instance)
+            {
+                return new GetLatestRecoveryTimeRequest(this.service, project, instance);
+            }
+
+            /// <summary>Get Latest Recovery Time for a given instance.</summary>
+            public class GetLatestRecoveryTimeRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.SqlInstancesGetLatestRecoveryTimeResponse>
+            {
+                /// <summary>Constructs a new GetLatestRecoveryTime request.</summary>
+                public GetLatestRecoveryTimeRequest(Google.Apis.Services.IClientService service, string project, string instance) : base(service)
+                {
+                    Project = project;
+                    Instance = instance;
+                    InitParameters();
+                }
+
+                /// <summary>Project ID of the project that contains the instance.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Project { get; private set; }
+
+                /// <summary>Cloud SQL instance ID. This does not include the project ID.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Instance { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "getLatestRecoveryTime";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/getLatestRecoveryTime";
+
+                /// <summary>Initializes GetLatestRecoveryTime parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "project",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "instance",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>Perform Disk Shrink on primary instance.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="project">Project ID of the project that contains the instance.</param>
+            /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
+            public virtual PerformDiskShrinkRequest PerformDiskShrink(Google.Apis.SQLAdmin.v1beta4.Data.PerformDiskShrinkContext body, string project, string instance)
+            {
+                return new PerformDiskShrinkRequest(this.service, body, project, instance);
+            }
+
+            /// <summary>Perform Disk Shrink on primary instance.</summary>
+            public class PerformDiskShrinkRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Operation>
+            {
+                /// <summary>Constructs a new PerformDiskShrink request.</summary>
+                public PerformDiskShrinkRequest(Google.Apis.Services.IClientService service, Google.Apis.SQLAdmin.v1beta4.Data.PerformDiskShrinkContext body, string project, string instance) : base(service)
+                {
+                    Project = project;
+                    Instance = instance;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>Project ID of the project that contains the instance.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Project { get; private set; }
+
+                /// <summary>Cloud SQL instance ID. This does not include the project ID.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Instance { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.SQLAdmin.v1beta4.Data.PerformDiskShrinkContext Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "performDiskShrink";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/performDiskShrink";
+
+                /// <summary>Initializes PerformDiskShrink parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "project",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "instance",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
             /// <summary>Reschedules the maintenance on the given instance.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="project">ID of the project that contains the instance.</param>
             /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
             public virtual RescheduleMaintenanceRequest RescheduleMaintenance(Google.Apis.SQLAdmin.v1beta4.Data.SqlInstancesRescheduleMaintenanceRequestBody body, string project, string instance)
             {
-                return new RescheduleMaintenanceRequest(service, body, project, instance);
+                return new RescheduleMaintenanceRequest(this.service, body, project, instance);
             }
 
             /// <summary>Reschedules the maintenance on the given instance.</summary>
@@ -3009,13 +3882,80 @@ namespace Google.Apis.SQLAdmin.v1beta4
                 }
             }
 
+            /// <summary>Reset Replica Size to primary instance disk size.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="project">ID of the project that contains the read replica.</param>
+            /// <param name="instance">Cloud SQL read replica instance name.</param>
+            public virtual ResetReplicaSizeRequest ResetReplicaSize(Google.Apis.SQLAdmin.v1beta4.Data.SqlInstancesResetReplicaSizeRequest body, string project, string instance)
+            {
+                return new ResetReplicaSizeRequest(this.service, body, project, instance);
+            }
+
+            /// <summary>Reset Replica Size to primary instance disk size.</summary>
+            public class ResetReplicaSizeRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.Operation>
+            {
+                /// <summary>Constructs a new ResetReplicaSize request.</summary>
+                public ResetReplicaSizeRequest(Google.Apis.Services.IClientService service, Google.Apis.SQLAdmin.v1beta4.Data.SqlInstancesResetReplicaSizeRequest body, string project, string instance) : base(service)
+                {
+                    Project = project;
+                    Instance = instance;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>ID of the project that contains the read replica.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Project { get; private set; }
+
+                /// <summary>Cloud SQL read replica instance name.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Instance { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.SQLAdmin.v1beta4.Data.SqlInstancesResetReplicaSizeRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "resetReplicaSize";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/resetReplicaSize";
+
+                /// <summary>Initializes ResetReplicaSize parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "project",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "instance",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
             /// <summary>Start External primary instance migration.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="project">ID of the project that contains the instance.</param>
             /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
             public virtual StartExternalSyncRequest StartExternalSync(Google.Apis.SQLAdmin.v1beta4.Data.SqlInstancesStartExternalSyncRequest body, string project, string instance)
             {
-                return new StartExternalSyncRequest(service, body, project, instance);
+                return new StartExternalSyncRequest(this.service, body, project, instance);
             }
 
             /// <summary>Start External primary instance migration.</summary>
@@ -3082,7 +4022,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
             /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
             public virtual VerifyExternalSyncSettingsRequest VerifyExternalSyncSettings(Google.Apis.SQLAdmin.v1beta4.Data.SqlInstancesVerifyExternalSyncSettingsRequest body, string project, string instance)
             {
-                return new VerifyExternalSyncSettingsRequest(service, body, project, instance);
+                return new VerifyExternalSyncSettingsRequest(this.service, body, project, instance);
             }
 
             /// <summary>Verify External primary instance external sync settings.</summary>
@@ -3169,7 +4109,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual CreateEphemeralRequest CreateEphemeral(Google.Apis.SQLAdmin.v1beta4.Data.SslCertsCreateEphemeralRequest body, string project, string instance)
         {
-            return new CreateEphemeralRequest(service, body, project, instance);
+            return new CreateEphemeralRequest(this.service, body, project, instance);
         }
 
         /// <summary>
@@ -3243,7 +4183,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="sha1Fingerprint">Sha1 FingerPrint.</param>
         public virtual DeleteRequest Delete(string project, string instance, string sha1Fingerprint)
         {
-            return new DeleteRequest(service, project, instance, sha1Fingerprint);
+            return new DeleteRequest(this.service, project, instance, sha1Fingerprint);
         }
 
         /// <summary>
@@ -3322,7 +4262,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="sha1Fingerprint">Sha1 FingerPrint.</param>
         public virtual GetRequest Get(string project, string instance, string sha1Fingerprint)
         {
-            return new GetRequest(service, project, instance, sha1Fingerprint);
+            return new GetRequest(this.service, project, instance, sha1Fingerprint);
         }
 
         /// <summary>
@@ -3401,7 +4341,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual InsertRequest Insert(Google.Apis.SQLAdmin.v1beta4.Data.SslCertsInsertRequest body, string project, string instance)
         {
-            return new InsertRequest(service, body, project, instance);
+            return new InsertRequest(this.service, body, project, instance);
         }
 
         /// <summary>
@@ -3470,7 +4410,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Cloud SQL instance ID. This does not include the project ID.</param>
         public virtual ListRequest List(string project, string instance)
         {
-            return new ListRequest(service, project, instance);
+            return new ListRequest(this.service, project, instance);
         }
 
         /// <summary>Lists all of the current SSL certificates for the instance.</summary>
@@ -3540,18 +4480,18 @@ namespace Google.Apis.SQLAdmin.v1beta4
         }
 
         /// <summary>
-        /// Lists all available machine types (tiers) for Cloud SQL, for example, db-custom-1-3840. For related
-        /// information, see Pricing.
+        /// Lists all available machine types (tiers) for Cloud SQL, for example, `db-custom-1-3840`. For related
+        /// information, see [Pricing](/sql/pricing).
         /// </summary>
         /// <param name="project">Project ID of the project for which to list tiers.</param>
         public virtual ListRequest List(string project)
         {
-            return new ListRequest(service, project);
+            return new ListRequest(this.service, project);
         }
 
         /// <summary>
-        /// Lists all available machine types (tiers) for Cloud SQL, for example, db-custom-1-3840. For related
-        /// information, see Pricing.
+        /// Lists all available machine types (tiers) for Cloud SQL, for example, `db-custom-1-3840`. For related
+        /// information, see [Pricing](/sql/pricing).
         /// </summary>
         public class ListRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.TiersListResponse>
         {
@@ -3610,7 +4550,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Database instance ID. This does not include the project ID.</param>
         public virtual DeleteRequest Delete(string project, string instance)
         {
-            return new DeleteRequest(service, project, instance);
+            return new DeleteRequest(this.service, project, instance);
         }
 
         /// <summary>Deletes a user from a Cloud SQL instance.</summary>
@@ -3688,13 +4628,98 @@ namespace Google.Apis.SQLAdmin.v1beta4
             }
         }
 
+        /// <summary>Retrieves a resource containing information about a user.</summary>
+        /// <param name="project">Project ID of the project that contains the instance.</param>
+        /// <param name="instance">Database instance ID. This does not include the project ID.</param>
+        /// <param name="name">User of the instance.</param>
+        public virtual GetRequest Get(string project, string instance, string name)
+        {
+            return new GetRequest(this.service, project, instance, name);
+        }
+
+        /// <summary>Retrieves a resource containing information about a user.</summary>
+        public class GetRequest : SQLAdminBaseServiceRequest<Google.Apis.SQLAdmin.v1beta4.Data.User>
+        {
+            /// <summary>Constructs a new Get request.</summary>
+            public GetRequest(Google.Apis.Services.IClientService service, string project, string instance, string name) : base(service)
+            {
+                Project = project;
+                Instance = instance;
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>Project ID of the project that contains the instance.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Project { get; private set; }
+
+            /// <summary>Database instance ID. This does not include the project ID.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Instance { get; private set; }
+
+            /// <summary>User of the instance.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Host of a user of the instance.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("host", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Host { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "get";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "sql/v1beta4/projects/{project}/instances/{instance}/users/{name}";
+
+            /// <summary>Initializes Get parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "project",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "instance",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("host", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "host",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
         /// <summary>Creates a new user in a Cloud SQL instance.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="project">Project ID of the project that contains the instance.</param>
         /// <param name="instance">Database instance ID. This does not include the project ID.</param>
         public virtual InsertRequest Insert(Google.Apis.SQLAdmin.v1beta4.Data.User body, string project, string instance)
         {
-            return new InsertRequest(service, body, project, instance);
+            return new InsertRequest(this.service, body, project, instance);
         }
 
         /// <summary>Creates a new user in a Cloud SQL instance.</summary>
@@ -3760,7 +4785,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Database instance ID. This does not include the project ID.</param>
         public virtual ListRequest List(string project, string instance)
         {
-            return new ListRequest(service, project, instance);
+            return new ListRequest(this.service, project, instance);
         }
 
         /// <summary>Lists users in the specified Cloud SQL instance.</summary>
@@ -3820,7 +4845,7 @@ namespace Google.Apis.SQLAdmin.v1beta4
         /// <param name="instance">Database instance ID. This does not include the project ID.</param>
         public virtual UpdateRequest Update(Google.Apis.SQLAdmin.v1beta4.Data.User body, string project, string instance)
         {
-            return new UpdateRequest(service, body, project, instance);
+            return new UpdateRequest(this.service, body, project, instance);
         }
 
         /// <summary>Updates an existing user in a Cloud SQL instance.</summary>
@@ -3911,14 +4936,49 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     /// <summary>An entry for an Access Control list.</summary>
     public class AclEntry : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _expirationTimeRaw;
+
+        private object _expirationTime;
+
         /// <summary>
         /// The time when this access control entry expires in [RFC 3339](https://tools.ietf.org/html/rfc3339) format,
-        /// for example **2012-11-15T16:19:00.094Z**.
+        /// for example `2012-11-15T16:19:00.094Z`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expirationTime")]
-        public virtual object ExpirationTime { get; set; }
+        public virtual string ExpirationTimeRaw
+        {
+            get => _expirationTimeRaw;
+            set
+            {
+                _expirationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expirationTimeRaw = value;
+            }
+        }
 
-        /// <summary>This is always **sql#aclEntry**.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpirationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpirationTimeDateTimeOffset instead.")]
+        public virtual object ExpirationTime
+        {
+            get => _expirationTime;
+            set
+            {
+                _expirationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expirationTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpirationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpirationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpirationTimeRaw);
+            set => ExpirationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>This is always `sql#aclEntry`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -3929,6 +4989,44 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         /// <summary>The allowlisted value for the access control list.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("value")]
         public virtual string Value { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Acquire SSRS lease context.</summary>
+    public class AcquireSsrsLeaseContext : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Lease duration needed for the SSRS setup.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("duration")]
+        public virtual object Duration { get; set; }
+
+        /// <summary>The report database to be used for the SSRS setup.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reportDatabase")]
+        public virtual string ReportDatabase { get; set; }
+
+        /// <summary>
+        /// The username to be used as the service login to connect to the report database for SSRS setup.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceLogin")]
+        public virtual string ServiceLogin { get; set; }
+
+        /// <summary>
+        /// The username to be used as the setup login to connect to the database server for SSRS setup.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("setupLogin")]
+        public virtual string SetupLogin { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Specifies options for controlling advanced machine features.</summary>
+    public class AdvancedMachineFeatures : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The number of threads per physical core.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("threadsPerCore")]
+        public virtual System.Nullable<int> ThreadsPerCore { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3953,6 +5051,27 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>An available database version. It can be a major or a minor version.</summary>
+    public class AvailableDatabaseVersion : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The database version's display name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>The version's major version name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("majorVersion")]
+        public virtual string MajorVersion { get; set; }
+
+        /// <summary>
+        /// The database version name. For MySQL 8.0, this string provides the database major and minor version.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Database instance backup configuration.</summary>
     public class BackupConfiguration : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3971,7 +5090,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("enabled")]
         public virtual System.Nullable<bool> Enabled { get; set; }
 
-        /// <summary>This is always **sql#backupConfiguration**.</summary>
+        /// <summary>This is always `sql#backupConfiguration`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -3979,7 +5098,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("location")]
         public virtual string Location { get; set; }
 
-        /// <summary>(Postgres only) Whether point in time recovery is enabled.</summary>
+        /// <summary>Whether point in time recovery is enabled.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pointInTimeRecoveryEnabled")]
         public virtual System.Nullable<bool> PointInTimeRecoveryEnabled { get; set; }
 
@@ -3988,7 +5107,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual System.Nullable<bool> ReplicationLogArchivingEnabled { get; set; }
 
         /// <summary>
-        /// Start time for the daily backup configuration in UTC timezone in the 24 hour format - **HH:MM**.
+        /// Start time for the daily backup configuration in UTC timezone in the 24 hour format - `HH:MM`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
         public virtual string StartTime { get; set; }
@@ -3996,6 +5115,13 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         /// <summary>The number of days of transaction logs we retain for point in time restore, from 1-7.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("transactionLogRetentionDays")]
         public virtual System.Nullable<int> TransactionLogRetentionDays { get; set; }
+
+        /// <summary>
+        /// Output only. This value contains the storage location of transactional logs for the database for
+        /// point-in-time recovery.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transactionalLogStorageState")]
+        public virtual string TransactionalLogStorageState { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4008,9 +5134,24 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("backupId")]
         public virtual System.Nullable<long> BackupId { get; set; }
 
-        /// <summary>This is always **sql#backupContext**.</summary>
+        /// <summary>This is always `sql#backupContext`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Backup Reencryption Config</summary>
+    public class BackupReencryptionConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Backup re-encryption limit</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backupLimit")]
+        public virtual System.Nullable<int> BackupLimit { get; set; }
+
+        /// <summary>Type of backups users want to re-encrypt.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backupType")]
+        public virtual string BackupType { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4055,19 +5196,85 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("diskEncryptionStatus")]
         public virtual DiskEncryptionStatus DiskEncryptionStatus { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// The time the backup operation completed in UTC timezone in [RFC 3339](https://tools.ietf.org/html/rfc3339)
-        /// format, for example **2012-11-15T16:19:00.094Z**.
+        /// format, for example `2012-11-15T16:19:00.094Z`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _enqueuedTimeRaw;
+
+        private object _enqueuedTime;
 
         /// <summary>
         /// The time the run was enqueued in UTC timezone in [RFC 3339](https://tools.ietf.org/html/rfc3339) format, for
-        /// example **2012-11-15T16:19:00.094Z**.
+        /// example `2012-11-15T16:19:00.094Z`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("enqueuedTime")]
-        public virtual object EnqueuedTime { get; set; }
+        public virtual string EnqueuedTimeRaw
+        {
+            get => _enqueuedTimeRaw;
+            set
+            {
+                _enqueuedTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _enqueuedTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EnqueuedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EnqueuedTimeDateTimeOffset instead.")]
+        public virtual object EnqueuedTime
+        {
+            get => _enqueuedTime;
+            set
+            {
+                _enqueuedTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _enqueuedTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EnqueuedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EnqueuedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EnqueuedTimeRaw);
+            set => EnqueuedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Information about why the backup operation failed. This is only present if the run has the FAILED status.
@@ -4083,7 +5290,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("instance")]
         public virtual string Instance { get; set; }
 
-        /// <summary>This is always **sql#backupRun**.</summary>
+        /// <summary>This is always `sql#backupRun`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4091,34 +5298,113 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("location")]
         public virtual string Location { get; set; }
 
+        /// <summary>Output only. The maximum chargeable bytes for the backup.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxChargeableBytes")]
+        public virtual System.Nullable<long> MaxChargeableBytes { get; set; }
+
         /// <summary>The URI of this resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("selfLink")]
         public virtual string SelfLink { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>
         /// The time the backup operation actually started in UTC timezone in [RFC
-        /// 3339](https://tools.ietf.org/html/rfc3339) format, for example **2012-11-15T16:19:00.094Z**.
+        /// 3339](https://tools.ietf.org/html/rfc3339) format, for example `2012-11-15T16:19:00.094Z`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The status of this run.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
         public virtual string Status { get; set; }
 
         /// <summary>
-        /// The type of this run; can be either "AUTOMATED" or "ON_DEMAND". This field defaults to "ON_DEMAND" and is
-        /// ignored, when specified for insert requests.
+        /// Backup time zone to prevent restores to an instance with a different time zone. Now relevant only for SQL
+        /// Server.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeZone")]
+        public virtual string TimeZone { get; set; }
+
+        /// <summary>
+        /// The type of this run; can be either "AUTOMATED" or "ON_DEMAND" or "FINAL". This field defaults to
+        /// "ON_DEMAND" and is ignored, when specified for insert requests.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
+        private string _windowStartTimeRaw;
+
+        private object _windowStartTime;
+
         /// <summary>
         /// The start time of the backup window during which this the backup was attempted in [RFC
-        /// 3339](https://tools.ietf.org/html/rfc3339) format, for example **2012-11-15T16:19:00.094Z**.
+        /// 3339](https://tools.ietf.org/html/rfc3339) format, for example `2012-11-15T16:19:00.094Z`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("windowStartTime")]
-        public virtual object WindowStartTime { get; set; }
+        public virtual string WindowStartTimeRaw
+        {
+            get => _windowStartTimeRaw;
+            set
+            {
+                _windowStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _windowStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="WindowStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use WindowStartTimeDateTimeOffset instead.")]
+        public virtual object WindowStartTime
+        {
+            get => _windowStartTime;
+            set
+            {
+                _windowStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _windowStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="WindowStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? WindowStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(WindowStartTimeRaw);
+            set => WindowStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4131,7 +5417,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("items")]
         public virtual System.Collections.Generic.IList<BackupRun> Items { get; set; }
 
-        /// <summary>This is always **sql#backupRunsList**.</summary>
+        /// <summary>This is always `sql#backupRunsList`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4157,7 +5443,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("binLogPosition")]
         public virtual System.Nullable<long> BinLogPosition { get; set; }
 
-        /// <summary>This is always **sql#binLogCoordinates**.</summary>
+        /// <summary>This is always `sql#binLogCoordinates`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4169,17 +5455,33 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     public class CloneContext : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// The name of the allocated ip range for the private ip Cloud SQL instance. For example:
+        /// "google-managed-services-default". If set, the cloned instance ip will be created in the allocated range.
+        /// The range name must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035). Specifically, the name must
+        /// be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?. Reserved for future
+        /// use.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allocatedIpRange")]
+        public virtual string AllocatedIpRange { get; set; }
+
+        /// <summary>
         /// Binary log coordinates, if specified, identify the position up to which the source instance is cloned. If
         /// not specified, the source instance is cloned up to the most recent binary log coordinates.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("binLogCoordinates")]
         public virtual BinLogCoordinates BinLogCoordinates { get; set; }
 
+        /// <summary>
+        /// (SQL Server only) Clone only the specified databases from the source instance. Clone all databases if empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseNames")]
+        public virtual System.Collections.Generic.IList<string> DatabaseNames { get; set; }
+
         /// <summary>Name of the Cloud SQL instance to be created as a clone.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("destinationInstanceName")]
         public virtual string DestinationInstanceName { get; set; }
 
-        /// <summary>This is always **sql#cloneContext**.</summary>
+        /// <summary>This is always `sql#cloneContext`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4187,9 +5489,57 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("pitrTimestampMs")]
         public virtual System.Nullable<long> PitrTimestampMs { get; set; }
 
+        private string _pointInTimeRaw;
+
+        private object _pointInTime;
+
         /// <summary>Timestamp, if specified, identifies the time to which the source instance is cloned.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pointInTime")]
-        public virtual object PointInTime { get; set; }
+        public virtual string PointInTimeRaw
+        {
+            get => _pointInTimeRaw;
+            set
+            {
+                _pointInTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _pointInTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="PointInTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PointInTimeDateTimeOffset instead.")]
+        public virtual object PointInTime
+        {
+            get => _pointInTime;
+            set
+            {
+                _pointInTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _pointInTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PointInTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PointInTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PointInTimeRaw);
+            set => PointInTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. Copy clone and point-in-time recovery clone of a regional instance in the specified zones. If not
+        /// specified, clone to the same secondary zone as the source instance. This value cannot be the same as the
+        /// preferred_zone field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("preferredSecondaryZone")]
+        public virtual string PreferredSecondaryZone { get; set; }
+
+        /// <summary>
+        /// Optional. Copy clone and point-in-time recovery clone of an instance to the specified zone. If no zone is
+        /// specified, clone to the same primary zone as the source instance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("preferredZone")]
+        public virtual string PreferredZone { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4199,22 +5549,30 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     public class ConnectSettings : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// **SECOND_GEN**: Cloud SQL database instance. **EXTERNAL**: A database server that is not managed by Google.
-        /// This property is read-only; use the **tier** property in the **settings** object to determine the database
-        /// type.
+        /// `SECOND_GEN`: Cloud SQL database instance. `EXTERNAL`: A database server that is not managed by Google. This
+        /// property is read-only; use the `tier` property in the `settings` object to determine the database type.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("backendType")]
         public virtual string BackendType { get; set; }
 
+        /// <summary>Custom subject alternative names for the server certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customSubjectAlternativeNames")]
+        public virtual System.Collections.Generic.IList<string> CustomSubjectAlternativeNames { get; set; }
+
         /// <summary>
-        /// The database engine type and version. The **databaseVersion** field cannot be changed after instance
-        /// creation. MySQL instances: **MYSQL_8_0**, **MYSQL_5_7** (default), or **MYSQL_5_6**. PostgreSQL instances:
-        /// **POSTGRES_9_6**, **POSTGRES_10**, **POSTGRES_11** or **POSTGRES_12** (default). SQL Server instances:
-        /// **SQLSERVER_2017_STANDARD** (default), **SQLSERVER_2017_ENTERPRISE**, **SQLSERVER_2017_EXPRESS**, or
-        /// **SQLSERVER_2017_WEB**.
+        /// The database engine type and version. The `databaseVersion` field cannot be changed after instance creation.
+        /// MySQL instances: `MYSQL_8_0`, `MYSQL_5_7` (default), or `MYSQL_5_6`. PostgreSQL instances: `POSTGRES_9_6`,
+        /// `POSTGRES_10`, `POSTGRES_11` or `POSTGRES_12` (default), `POSTGRES_13`, or `POSTGRES_14`. SQL Server
+        /// instances: `SQLSERVER_2017_STANDARD` (default), `SQLSERVER_2017_ENTERPRISE`, `SQLSERVER_2017_EXPRESS`,
+        /// `SQLSERVER_2017_WEB`, `SQLSERVER_2019_STANDARD`, `SQLSERVER_2019_ENTERPRISE`, `SQLSERVER_2019_EXPRESS`, or
+        /// `SQLSERVER_2019_WEB`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("databaseVersion")]
         public virtual string DatabaseVersion { get; set; }
+
+        /// <summary>The dns name of the instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dnsName")]
+        public virtual string DnsName { get; set; }
 
         /// <summary>The assigned IP addresses for the instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ipAddresses")]
@@ -4224,9 +5582,13 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
+        /// <summary>Whether PSC connectivity is enabled for this instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pscEnabled")]
+        public virtual System.Nullable<bool> PscEnabled { get; set; }
+
         /// <summary>
-        /// The cloud region for the instance. e.g. **us-central1**, **europe-west1**. The region cannot be changed
-        /// after instance creation.
+        /// The cloud region for the instance. e.g. `us-central1`, `europe-west1`. The region cannot be changed after
+        /// instance creation.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("region")]
         public virtual string Region { get; set; }
@@ -4234,6 +5596,21 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         /// <summary>SSL configuration.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("serverCaCert")]
         public virtual SslCert ServerCaCert { get; set; }
+
+        /// <summary>Specify what type of CA is used for the server certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serverCaMode")]
+        public virtual string ServerCaMode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Data cache configurations.</summary>
+    public class DataCacheConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Whether data cache is enabled for the instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataCacheEnabled")]
+        public virtual System.Nullable<bool> DataCacheEnabled { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4258,7 +5635,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("instance")]
         public virtual string Instance { get; set; }
 
-        /// <summary>This is always **sql#database**.</summary>
+        /// <summary>This is always `sql#database`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4295,8 +5672,8 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The value of the flag. Booleans are set to **on** for true and **off** for false. This field must be omitted
-        /// if the flag doesn't take a value.
+        /// The value of the flag. Boolean flags are set to `on` for true and `off` for false. This field must be
+        /// omitted if the flag doesn't take a value.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("value")]
         public virtual string Value { get; set; }
@@ -4308,10 +5685,14 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     /// <summary>A Cloud SQL instance resource.</summary>
     public class DatabaseInstance : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Output only. List all maintenance versions applicable on the instance</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("availableMaintenanceVersions")]
+        public virtual System.Collections.Generic.IList<string> AvailableMaintenanceVersions { get; set; }
+
         /// <summary>
-        /// The backend type. **SECOND_GEN**: Cloud SQL database instance. **EXTERNAL**: A database server that is not
-        /// managed by Google. This property is read-only; use the **tier** property in the **settings** object to
-        /// determine the database type.
+        /// The backend type. `SECOND_GEN`: Cloud SQL database instance. `EXTERNAL`: A database server that is not
+        /// managed by Google. This property is read-only; use the `tier` property in the `settings` object to determine
+        /// the database type.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("backendType")]
         public virtual string BackendType { get; set; }
@@ -4320,12 +5701,45 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("connectionName")]
         public virtual string ConnectionName { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Output only. The time when the instance was created in [RFC 3339](https://tools.ietf.org/html/rfc3339)
-        /// format, for example **2012-11-15T16:19:00.094Z**.
+        /// format, for example `2012-11-15T16:19:00.094Z`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The current disk usage of the instance in bytes. This property has been deprecated. Use the
@@ -4337,15 +5751,14 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual System.Nullable<long> CurrentDiskSize { get; set; }
 
         /// <summary>
-        /// Output only. The databaseInstalledVersion stores the current fully resolved database version running on the
-        /// instance including minor version such as MYSQL_5_6_50
+        /// Output only. Stores the current database version running on the instance including minor version such as
+        /// `MYSQL_8_0_18`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("databaseInstalledVersion")]
         public virtual string DatabaseInstalledVersion { get; set; }
 
         /// <summary>
-        /// The database engine type and version. The **databaseVersion** field cannot be changed after instance
-        /// creation.
+        /// The database engine type and version. The `databaseVersion` field cannot be changed after instance creation.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("databaseVersion")]
         public virtual string DatabaseVersion { get; set; }
@@ -4358,9 +5771,13 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("diskEncryptionStatus")]
         public virtual DiskEncryptionStatus DiskEncryptionStatus { get; set; }
 
+        /// <summary>Output only. The dns name of the instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dnsName")]
+        public virtual string DnsName { get; set; }
+
         /// <summary>
         /// This field is deprecated and will be removed from a future version of the API. Use the
-        /// **settings.settingsVersion** field instead.
+        /// `settings.settingsVersion` field instead.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("etag")]
         public virtual string ETag { get; set; }
@@ -4372,9 +5789,14 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         /// <summary>
         /// The Compute Engine zone that the instance is currently serving from. This value could be different from the
         /// zone that was specified when the instance was created if the instance has failed over to its secondary zone.
+        /// WARNING: Changing this might restart the instance.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gceZone")]
         public virtual string GceZone { get; set; }
+
+        /// <summary>Gemini instance configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("geminiConfig")]
+        public virtual GeminiInstanceConfig GeminiConfig { get; set; }
 
         /// <summary>The instance type.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("instanceType")]
@@ -4391,9 +5813,13 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("ipv6Address")]
         public virtual string Ipv6Address { get; set; }
 
-        /// <summary>This is always **sql#instance**.</summary>
+        /// <summary>This is always `sql#instance`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
+
+        /// <summary>The current software version on the instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maintenanceVersion")]
+        public virtual string MaintenanceVersion { get; set; }
 
         /// <summary>The name of the instance which will act as primary in the replication setup.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("masterInstanceName")]
@@ -4418,6 +5844,10 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("outOfDiskReport")]
         public virtual SqlOutOfDiskReport OutOfDiskReport { get; set; }
 
+        /// <summary>Output only. DEPRECATED: please use write_endpoint instead.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryDnsName")]
+        public virtual string PrimaryDnsName { get; set; }
+
         /// <summary>
         /// The project ID of the project containing the Cloud SQL instance. The Google apps domain is prefixed if
         /// applicable.
@@ -4425,10 +5855,14 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("project")]
         public virtual string Project { get; set; }
 
+        /// <summary>Output only. The link to service attachment of PSC instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pscServiceAttachmentLink")]
+        public virtual string PscServiceAttachmentLink { get; set; }
+
         /// <summary>
-        /// The geographical region. Can be: * **us-central** (**FIRST_GEN** instances only) * **us-central1**
-        /// (**SECOND_GEN** instances only) * **asia-east1** or **europe-west1**. Defaults to **us-central** or
-        /// **us-central1** depending on the instance type. The region cannot be changed after instance creation.
+        /// The geographical region of the Cloud SQL instance. It can be one of the
+        /// [regions](https://cloud.google.com/sql/docs/mysql/locations#location-r) where Cloud SQL operates: For
+        /// example, `asia-east1`, `europe-west1`, and `us-central1`. The default value is `us-central1`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("region")]
         public virtual string Region { get; set; }
@@ -4441,11 +5875,31 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("replicaNames")]
         public virtual System.Collections.Generic.IList<string> ReplicaNames { get; set; }
 
-        /// <summary>Initial root password. Use only on creation.</summary>
+        /// <summary>
+        /// A primary instance and disaster recovery (DR) replica pair. A DR replica is a cross-region replica that you
+        /// designate for failover in the event that the primary instance experiences regional failure. Applicable to
+        /// MySQL and PostgreSQL.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("replicationCluster")]
+        public virtual ReplicationCluster ReplicationCluster { get; set; }
+
+        /// <summary>
+        /// Initial root password. Use only on creation. You must set root passwords before you can connect to
+        /// PostgreSQL instances.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rootPassword")]
         public virtual string RootPassword { get; set; }
 
-        /// <summary>The status indicating if instance satisfiesPzs. Reserved for future use.</summary>
+        /// <summary>
+        /// Output only. This status indicates whether the instance satisfies PZI. The status is reserved for future
+        /// use.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzi")]
+        public virtual System.Nullable<bool> SatisfiesPzi { get; set; }
+
+        /// <summary>
+        /// This status indicates whether the instance satisfies PZS. The status is reserved for future use.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzs")]
         public virtual System.Nullable<bool> SatisfiesPzs { get; set; }
 
@@ -4456,7 +5910,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         /// <summary>
         /// The Compute Engine zone that the failover instance is currently serving from for a regional instance. This
         /// value could be different from the zone that was specified when the instance was created if the instance has
-        /// failed over to its secondary/failover zone. Reserved for future use.
+        /// failed over to its secondary/failover zone.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("secondaryGceZone")]
         public virtual string SecondaryGceZone { get; set; }
@@ -4469,13 +5923,17 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("serverCaCert")]
         public virtual SslCert ServerCaCert { get; set; }
 
-        /// <summary>The service account email address assigned to the instance. This property is read-only.</summary>
+        /// <summary>The service account email address assigned to the instance. \This property is read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("serviceAccountEmailAddress")]
         public virtual string ServiceAccountEmailAddress { get; set; }
 
         /// <summary>The user settings.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("settings")]
         public virtual Settings Settings { get; set; }
+
+        /// <summary>The SQL network architecture for the instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlNetworkArchitecture")]
+        public virtual string SqlNetworkArchitecture { get; set; }
 
         /// <summary>The current serving state of the Cloud SQL instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -4484,6 +5942,33 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         /// <summary>If the instance state is SUSPENDED, the reason for the suspension.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suspensionReason")]
         public virtual System.Collections.Generic.IList<string> SuspensionReason { get; set; }
+
+        /// <summary>
+        /// Input only. Whether Cloud SQL is enabled to switch storing point-in-time recovery log files from a data disk
+        /// to Cloud Storage.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("switchTransactionLogsToCloudStorageEnabled")]
+        public virtual System.Nullable<bool> SwitchTransactionLogsToCloudStorageEnabled { get; set; }
+
+        /// <summary>
+        /// Optional. Input only. Immutable. Tag keys and tag values that are bound to this instance. You must represent
+        /// each item in the map as: `"" : ""`. For example, a single resource can have the following tags:
+        /// ```
+        /// "123/environment": "production", "123/costCenter": "marketing",
+        /// ```
+        /// For more information on tag creation and
+        /// management, see https://cloud.google.com/resource-manager/docs/tags/tags-overview.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tags")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Tags { get; set; }
+
+        /// <summary>Output only. All database versions that are available for upgrade.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("upgradableDatabaseVersions")]
+        public virtual System.Collections.Generic.IList<AvailableDatabaseVersion> UpgradableDatabaseVersions { get; set; }
+
+        /// <summary>Output only. The dns name of the primary instance in a replication group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("writeEndpoint")]
+        public virtual string WriteEndpoint { get; set; }
 
         /// <summary>The name and status of the failover replica.</summary>
         public class FailoverReplicaData
@@ -4511,9 +5996,29 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("items")]
         public virtual System.Collections.Generic.IList<Database> Items { get; set; }
 
-        /// <summary>This is always **sql#databasesList**.</summary>
+        /// <summary>This is always `sql#databasesList`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// This context is used to demote an existing standalone instance to be a Cloud SQL read replica for an external
+    /// database server.
+    /// </summary>
+    public class DemoteContext : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>This is always `sql#demoteContext`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>
+        /// Required. The name of the instance which acts as an on-premises primary instance in the replication setup.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceRepresentativeInstanceName")]
+        public virtual string SourceRepresentativeInstanceName { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4522,7 +6027,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     /// <summary>Read-replica configuration for connecting to the on-premises primary instance.</summary>
     public class DemoteMasterConfiguration : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>This is always **sql#demoteMasterConfiguration**.</summary>
+        /// <summary>This is always `sql#demoteMasterConfiguration`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4530,7 +6035,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         /// MySQL specific configuration when replicating from a MySQL on-premises primary instance. Replication
         /// configuration information such as the username, password, certificates, and keys are not stored in the
         /// instance metadata. The configuration information is used only to set up the replication connection and is
-        /// stored by MySQL in a file named **master.info** in the data directory.
+        /// stored by MySQL in a file named `master.info` in the data directory.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mysqlReplicaConfiguration")]
         public virtual DemoteMasterMySqlReplicaConfiguration MysqlReplicaConfiguration { get; set; }
@@ -4542,7 +6047,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     /// <summary>Database instance demote primary instance context.</summary>
     public class DemoteMasterContext : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>This is always **sql#demoteMasterContext**.</summary>
+        /// <summary>This is always `sql#demoteMasterContext`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4563,11 +6068,11 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual System.Nullable<bool> SkipReplicationSetup { get; set; }
 
         /// <summary>
-        /// Verify GTID consistency for demote operation. Default value: **True**. Setting this flag to false enables
-        /// you to bypass GTID consistency check between on-premises primary instance and Cloud SQL instance during the
-        /// demotion operation but also exposes you to the risk of future replication failures. Change the value only if
-        /// you know the reason for the GTID divergence and are confident that doing so will not cause any replication
-        /// issues.
+        /// Verify the GTID consistency for demote operation. Default value: `True`. Setting this flag to `false`
+        /// enables you to bypass the GTID consistency check between on-premises primary instance and Cloud SQL instance
+        /// during the demotion operation but also exposes you to the risk of future replication failures. Change the
+        /// value only if you know the reason for the GTID divergence and are confident that doing so will not cause any
+        /// replication issues.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("verifyGtidConsistency")]
         public virtual System.Nullable<bool> VerifyGtidConsistency { get; set; }
@@ -4588,13 +6093,13 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string ClientCertificate { get; set; }
 
         /// <summary>
-        /// PEM representation of the replica's private key. The corresponsing public key is encoded in the client's
+        /// PEM representation of the replica's private key. The corresponding public key is encoded in the client's
         /// certificate. The format of the replica's private key can be either PKCS #1 or PKCS #8.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("clientKey")]
         public virtual string ClientKey { get; set; }
 
-        /// <summary>This is always **sql#demoteMasterMysqlReplicaConfiguration**.</summary>
+        /// <summary>This is always `sql#demoteMasterMysqlReplicaConfiguration`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4645,7 +6150,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     /// <summary>Disk encryption configuration for an instance.</summary>
     public class DiskEncryptionConfiguration : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>This is always **sql#diskEncryptionConfiguration**.</summary>
+        /// <summary>This is always `sql#diskEncryptionConfiguration`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4660,7 +6165,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     /// <summary>Disk encryption status for an instance.</summary>
     public class DiskEncryptionStatus : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>This is always **sql#diskEncryptionStatus**.</summary>
+        /// <summary>This is always `sql#diskEncryptionStatus`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4672,21 +6177,36 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
+    /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
+    /// </summary>
+    public class Empty : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Database instance export context.</summary>
     public class ExportContext : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Options for exporting data as CSV. **MySQL** and **PostgreSQL** instances only.</summary>
+        /// <summary>Options for exporting BAK files (SQL Server-only)</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bakExportOptions")]
+        public virtual BakExportOptionsData BakExportOptions { get; set; }
+
+        /// <summary>Options for exporting data as CSV. `MySQL` and `PostgreSQL` instances only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("csvExportOptions")]
         public virtual CsvExportOptionsData CsvExportOptions { get; set; }
 
         /// <summary>
-        /// Databases to be exported. **MySQL instances:** If **fileType** is **SQL** and no database is specified, all
-        /// databases are exported, except for the **mysql** system database. If **fileType** is **CSV**, you can
-        /// specify one database, either by using this property or by using the **csvExportOptions.selectQuery**
-        /// property, which takes precedence over this property. **PostgreSQL instances:** You must specify one database
-        /// to be exported. If **fileType** is **CSV**, this database must match the one specified in the
-        /// **csvExportOptions.selectQuery** property. **SQL Server instances:** You must specify one database to be
-        /// exported, and the **fileType** must be **BAK**.
+        /// Databases to be exported. `MySQL instances:` If `fileType` is `SQL` and no database is specified, all
+        /// databases are exported, except for the `mysql` system database. If `fileType` is `CSV`, you can specify one
+        /// database, either by using this property or by using the `csvExportOptions.selectQuery` property, which takes
+        /// precedence over this property. `PostgreSQL instances:` You must specify one database to be exported. If
+        /// `fileType` is `CSV`, this database must match the one specified in the `csvExportOptions.selectQuery`
+        /// property. `SQL Server instances:` You must specify one database to be exported, and the `fileType` must be
+        /// `BAK`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("databases")]
         public virtual System.Collections.Generic.IList<string> Databases { get; set; }
@@ -4695,7 +6215,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("fileType")]
         public virtual string FileType { get; set; }
 
-        /// <summary>This is always **sql#exportContext**.</summary>
+        /// <summary>This is always `sql#exportContext`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4709,8 +6229,8 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
 
         /// <summary>
         /// The path to the file in Google Cloud Storage where the export will be stored. The URI is in the form
-        /// **gs://bucketName/fileName**. If the file already exists, the request succeeds, but the operation fails. If
-        /// **fileType** is **SQL** and the filename ends with .gz, the contents are compressed.
+        /// `gs://bucketName/fileName`. If the file already exists, the request succeeds, but the operation fails. If
+        /// `fileType` is `SQL` and the filename ends with .gz, the contents are compressed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uri")]
         public virtual string Uri { get; set; }
@@ -4718,7 +6238,125 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
 
-        /// <summary>Options for exporting data as CSV. **MySQL** and **PostgreSQL** instances only.</summary>
+        /// <summary>Options for exporting BAK files (SQL Server-only)</summary>
+        public class BakExportOptionsData
+        {
+            /// <summary>Type of this bak file will be export, FULL or DIFF, SQL Server only</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("bakType")]
+            public virtual string BakType { get; set; }
+
+            /// <summary>Deprecated: copy_only is deprecated. Use differential_base instead</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("copyOnly")]
+            public virtual System.Nullable<bool> CopyOnly { get; set; }
+
+            /// <summary>
+            /// Whether or not the backup can be used as a differential base copy_only backup can not be served as
+            /// differential base
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("differentialBase")]
+            public virtual System.Nullable<bool> DifferentialBase { get; set; }
+
+            private string _exportLogEndTimeRaw;
+
+            private object _exportLogEndTime;
+
+            /// <summary>
+            /// Optional. The end timestamp when transaction log will be included in the export operation. [RFC
+            /// 3339](https://tools.ietf.org/html/rfc3339) format (for example, `2023-10-01T16:19:00.094`) in UTC. When
+            /// omitted, all available logs until current time will be included. Only applied to Cloud SQL for SQL
+            /// Server.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("exportLogEndTime")]
+            public virtual string ExportLogEndTimeRaw
+            {
+                get => _exportLogEndTimeRaw;
+                set
+                {
+                    _exportLogEndTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                    _exportLogEndTimeRaw = value;
+                }
+            }
+
+            /// <summary><seealso cref="object"/> representation of <see cref="ExportLogEndTimeRaw"/>.</summary>
+            [Newtonsoft.Json.JsonIgnoreAttribute]
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExportLogEndTimeDateTimeOffset instead.")]
+            public virtual object ExportLogEndTime
+            {
+                get => _exportLogEndTime;
+                set
+                {
+                    _exportLogEndTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                    _exportLogEndTime = value;
+                }
+            }
+
+            /// <summary>
+            /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ExportLogEndTimeRaw"/>.
+            /// </summary>
+            [Newtonsoft.Json.JsonIgnoreAttribute]
+            public virtual System.DateTimeOffset? ExportLogEndTimeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExportLogEndTimeRaw);
+                set => ExportLogEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+            }
+
+            private string _exportLogStartTimeRaw;
+
+            private object _exportLogStartTime;
+
+            /// <summary>
+            /// Optional. The begin timestamp when transaction log will be included in the export operation. [RFC
+            /// 3339](https://tools.ietf.org/html/rfc3339) format (for example, `2023-10-01T16:19:00.094`) in UTC. When
+            /// omitted, all available logs from the beginning of retention period will be included. Only applied to
+            /// Cloud SQL for SQL Server.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("exportLogStartTime")]
+            public virtual string ExportLogStartTimeRaw
+            {
+                get => _exportLogStartTimeRaw;
+                set
+                {
+                    _exportLogStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                    _exportLogStartTimeRaw = value;
+                }
+            }
+
+            /// <summary><seealso cref="object"/> representation of <see cref="ExportLogStartTimeRaw"/>.</summary>
+            [Newtonsoft.Json.JsonIgnoreAttribute]
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExportLogStartTimeDateTimeOffset instead.")]
+            public virtual object ExportLogStartTime
+            {
+                get => _exportLogStartTime;
+                set
+                {
+                    _exportLogStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                    _exportLogStartTime = value;
+                }
+            }
+
+            /// <summary>
+            /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ExportLogStartTimeRaw"/>.
+            /// </summary>
+            [Newtonsoft.Json.JsonIgnoreAttribute]
+            public virtual System.DateTimeOffset? ExportLogStartTimeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExportLogStartTimeRaw);
+                set => ExportLogStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+            }
+
+            /// <summary>
+            /// Option for specifying how many stripes to use for the export. If blank, and the value of the striped
+            /// field is true, the number of stripes is automatically chosen.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("stripeCount")]
+            public virtual System.Nullable<int> StripeCount { get; set; }
+
+            /// <summary>Whether or not the export should be striped.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("striped")]
+            public virtual System.Nullable<bool> Striped { get; set; }
+        }
+
+        /// <summary>Options for exporting data as CSV. `MySQL` and `PostgreSQL` instances only.</summary>
         public class CsvExportOptionsData
         {
             /// <summary>
@@ -4754,6 +6392,14 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
             [Newtonsoft.Json.JsonPropertyAttribute("mysqlExportOptions")]
             public virtual MysqlExportOptionsData MysqlExportOptions { get; set; }
 
+            /// <summary>Optional. Whether or not the export should be parallel.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("parallel")]
+            public virtual System.Nullable<bool> Parallel { get; set; }
+
+            /// <summary>Options for exporting from a Cloud SQL for PostgreSQL instance.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("postgresExportOptions")]
+            public virtual PostgresExportOptionsData PostgresExportOptions { get; set; }
+
             /// <summary>Export only schemas.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("schemaOnly")]
             public virtual System.Nullable<bool> SchemaOnly { get; set; }
@@ -4765,25 +6411,57 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
             [Newtonsoft.Json.JsonPropertyAttribute("tables")]
             public virtual System.Collections.Generic.IList<string> Tables { get; set; }
 
+            /// <summary>Optional. The number of threads to use for parallel export.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("threads")]
+            public virtual System.Nullable<int> Threads { get; set; }
+
             /// <summary>Options for exporting from MySQL.</summary>
             public class MysqlExportOptionsData
             {
                 /// <summary>
-                /// Option to include SQL statement required to set up replication. If set to **1**, the dump file
+                /// Option to include SQL statement required to set up replication. If set to `1`, the dump file
                 /// includes a CHANGE MASTER TO statement with the binary log coordinates, and --set-gtid-purged is set
-                /// to ON. If set to **2**, the CHANGE MASTER TO statement is written as a SQL comment and has no
-                /// effect. If set to any value other than **1**, --set-gtid-purged is set to OFF.
+                /// to ON. If set to `2`, the CHANGE MASTER TO statement is written as a SQL comment and has no effect.
+                /// If set to any value other than `1`, --set-gtid-purged is set to OFF.
                 /// </summary>
                 [Newtonsoft.Json.JsonPropertyAttribute("masterData")]
                 public virtual System.Nullable<int> MasterData { get; set; }
             }
+
+            /// <summary>Options for exporting from a Cloud SQL for PostgreSQL instance.</summary>
+            public class PostgresExportOptionsData
+            {
+                /// <summary>
+                /// Optional. Use this option to include DROP SQL statements. These statements are used to delete
+                /// database objects before running the import operation.
+                /// </summary>
+                [Newtonsoft.Json.JsonPropertyAttribute("clean")]
+                public virtual System.Nullable<bool> Clean { get; set; }
+
+                /// <summary>
+                /// Optional. Option to include an IF EXISTS SQL statement with each DROP statement produced by clean.
+                /// </summary>
+                [Newtonsoft.Json.JsonPropertyAttribute("ifExists")]
+                public virtual System.Nullable<bool> IfExists { get; set; }
+            }
         }
+    }
+
+    /// <summary>The selected object that Cloud SQL migrates.</summary>
+    public class ExternalSyncSelectedObject : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The name of the database that Cloud SQL migrates.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("database")]
+        public virtual string Database { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
     }
 
     /// <summary>Database instance failover context.</summary>
     public class FailoverContext : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>This is always **sql#failoverContext**.</summary>
+        /// <summary>This is always `sql#failoverContext`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -4808,12 +6486,17 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("allowedIntValues")]
         public virtual System.Collections.Generic.IList<System.Nullable<long>> AllowedIntValues { get; set; }
 
-        /// <summary>For **STRING** flags, a list of strings that the value can be set to.</summary>
+        /// <summary>For `STRING` flags, a list of strings that the value can be set to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("allowedStringValues")]
         public virtual System.Collections.Generic.IList<string> AllowedStringValues { get; set; }
 
         /// <summary>
-        /// The database version this flag applies to. Can be **MYSQL_8_0**, **MYSQL_5_6**, or **MYSQL_5_7**.
+        /// The database version this flag applies to. Can be MySQL instances: `MYSQL_8_0`, `MYSQL_8_0_18`,
+        /// `MYSQL_8_0_26`, `MYSQL_5_7`, or `MYSQL_5_6`. PostgreSQL instances: `POSTGRES_9_6`, `POSTGRES_10`,
+        /// `POSTGRES_11` or `POSTGRES_12`. SQL Server instances: `SQLSERVER_2017_STANDARD`,
+        /// `SQLSERVER_2017_ENTERPRISE`, `SQLSERVER_2017_EXPRESS`, `SQLSERVER_2017_WEB`, `SQLSERVER_2019_STANDARD`,
+        /// `SQLSERVER_2019_ENTERPRISE`, `SQLSERVER_2019_EXPRESS`, or `SQLSERVER_2019_WEB`. See [the complete
+        /// list](/sql/docs/mysql/admin-api/rest/v1/SqlDatabaseVersion).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("appliesTo")]
         public virtual System.Collections.Generic.IList<string> AppliesTo { get; set; }
@@ -4822,21 +6505,21 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("inBeta")]
         public virtual System.Nullable<bool> InBeta { get; set; }
 
-        /// <summary>This is always **sql#flag**.</summary>
+        /// <summary>This is always `sql#flag`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
-        /// <summary>For **INTEGER** flags, the maximum allowed value.</summary>
+        /// <summary>For `INTEGER` flags, the maximum allowed value.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maxValue")]
         public virtual System.Nullable<long> MaxValue { get; set; }
 
-        /// <summary>For **INTEGER** flags, the minimum allowed value.</summary>
+        /// <summary>For `INTEGER` flags, the minimum allowed value.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minValue")]
         public virtual System.Nullable<long> MinValue { get; set; }
 
         /// <summary>
         /// This is the name of the flag. Flag names always use underscores, not hyphens, for example:
-        /// **max_allowed_packet**
+        /// `max_allowed_packet`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -4849,8 +6532,8 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual System.Nullable<bool> RequiresRestart { get; set; }
 
         /// <summary>
-        /// The type of the flag. Flags are typed to being **BOOLEAN**, **STRING**, **INTEGER** or **NONE**. **NONE** is
-        /// used for flags which do not take a value, such as **skip_grant_tables**.
+        /// The type of the flag. Flags are typed to being `BOOLEAN`, `STRING`, `INTEGER` or `NONE`. `NONE` is used for
+        /// flags which do not take a value, such as `skip_grant_tables`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
@@ -4866,9 +6549,40 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("items")]
         public virtual System.Collections.Generic.IList<Flag> Items { get; set; }
 
-        /// <summary>This is always **sql#flagsList**.</summary>
+        /// <summary>This is always `sql#flagsList`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Gemini instance configuration.</summary>
+    public class GeminiInstanceConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. Whether the active query is enabled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("activeQueryEnabled")]
+        public virtual System.Nullable<bool> ActiveQueryEnabled { get; set; }
+
+        /// <summary>Output only. Whether Gemini is enabled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entitled")]
+        public virtual System.Nullable<bool> Entitled { get; set; }
+
+        /// <summary>Output only. Whether the flag recommender is enabled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("flagRecommenderEnabled")]
+        public virtual System.Nullable<bool> FlagRecommenderEnabled { get; set; }
+
+        /// <summary>Output only. Whether the vacuum management is enabled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleVacuumMgmtEnabled")]
+        public virtual System.Nullable<bool> GoogleVacuumMgmtEnabled { get; set; }
+
+        /// <summary>Output only. Whether the index advisor is enabled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("indexAdvisorEnabled")]
+        public virtual System.Nullable<bool> IndexAdvisorEnabled { get; set; }
+
+        /// <summary>Output only. Whether canceling the out-of-memory (OOM) session is enabled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oomSessionCancelEnabled")]
+        public virtual System.Nullable<bool> OomSessionCancelEnabled { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4885,9 +6599,42 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("public_key")]
         public virtual string PublicKey { get; set; }
 
+        private string _readTimeRaw;
+
+        private object _readTime;
+
         /// <summary>Optional. Optional snapshot read timestamp to trade freshness for performance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("readTime")]
-        public virtual object ReadTime { get; set; }
+        public virtual string ReadTimeRaw
+        {
+            get => _readTimeRaw;
+            set
+            {
+                _readTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _readTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReadTimeDateTimeOffset instead.")]
+        public virtual object ReadTime
+        {
+            get => _readTime;
+            set
+            {
+                _readTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _readTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ReadTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReadTimeRaw);
+            set => ReadTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Optional. If set, it will contain the cert valid duration.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("validDuration")]
@@ -4920,16 +6667,16 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual CsvImportOptionsData CsvImportOptions { get; set; }
 
         /// <summary>
-        /// The target database for the import. If **fileType** is **SQL**, this field is required only if the import
-        /// file does not specify a database, and is overridden by any database specification in the import file. If
-        /// **fileType** is **CSV**, one database must be specified.
+        /// The target database for the import. If `fileType` is `SQL`, this field is required only if the import file
+        /// does not specify a database, and is overridden by any database specification in the import file. If
+        /// `fileType` is `CSV`, one database must be specified.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("database")]
         public virtual string Database { get; set; }
 
         /// <summary>
-        /// The file type for the specified uri. * **SQL**: The file contains SQL statements. * **CSV**: The file
-        /// contains CSV data. * **BAK**: The file contains backup data for a SQL Server instance.
+        /// The file type for the specified uri. * `SQL`: The file contains SQL statements. * `CSV`: The file contains
+        /// CSV data. * `BAK`: The file contains backup data for a SQL Server instance.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fileType")]
         public virtual string FileType { get; set; }
@@ -4938,13 +6685,17 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("importUser")]
         public virtual string ImportUser { get; set; }
 
-        /// <summary>This is always **sql#importContext**.</summary>
+        /// <summary>This is always `sql#importContext`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
+        /// <summary>Optional. Options for importing data from SQL statements.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlImportOptions")]
+        public virtual SqlImportOptionsData SqlImportOptions { get; set; }
+
         /// <summary>
-        /// Path to the import file in Cloud Storage, in the form **gs://bucketName/fileName**. Compressed gzip files
-        /// (.gz) are supported when **fileType** is **SQL**. The instance must have write permissions to the bucket and
+        /// Path to the import file in Cloud Storage, in the form `gs://bucketName/fileName`. Compressed gzip files
+        /// (.gz) are supported when `fileType` is `SQL`. The instance must have write permissions to the bucket and
         /// read access to the file.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uri")]
@@ -4956,13 +6707,86 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         /// <summary>Import parameters specific to SQL Server .BAK files</summary>
         public class BakImportOptionsData
         {
+            /// <summary>Type of the bak content, FULL or DIFF.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("bakType")]
+            public virtual string BakType { get; set; }
+
             [Newtonsoft.Json.JsonPropertyAttribute("encryptionOptions")]
             public virtual EncryptionOptionsData EncryptionOptions { get; set; }
+
+            /// <summary>
+            /// Whether or not the backup importing will restore database with NORECOVERY option Applies only to Cloud
+            /// SQL for SQL Server.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("noRecovery")]
+            public virtual System.Nullable<bool> NoRecovery { get; set; }
+
+            /// <summary>
+            /// Whether or not the backup importing request will just bring database online without downloading Bak
+            /// content only one of "no_recovery" and "recovery_only" can be true otherwise error will return. Applies
+            /// only to Cloud SQL for SQL Server.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("recoveryOnly")]
+            public virtual System.Nullable<bool> RecoveryOnly { get; set; }
+
+            private string _stopAtRaw;
+
+            private object _stopAt;
+
+            /// <summary>
+            /// Optional. The timestamp when the import should stop. This timestamp is in the [RFC
+            /// 3339](https://tools.ietf.org/html/rfc3339) format (for example, `2023-10-01T16:19:00.094`). This field
+            /// is equivalent to the STOPAT keyword and applies to Cloud SQL for SQL Server only.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("stopAt")]
+            public virtual string StopAtRaw
+            {
+                get => _stopAtRaw;
+                set
+                {
+                    _stopAt = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                    _stopAtRaw = value;
+                }
+            }
+
+            /// <summary><seealso cref="object"/> representation of <see cref="StopAtRaw"/>.</summary>
+            [Newtonsoft.Json.JsonIgnoreAttribute]
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StopAtDateTimeOffset instead.")]
+            public virtual object StopAt
+            {
+                get => _stopAt;
+                set
+                {
+                    _stopAtRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                    _stopAt = value;
+                }
+            }
+
+            /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StopAtRaw"/>.</summary>
+            [Newtonsoft.Json.JsonIgnoreAttribute]
+            public virtual System.DateTimeOffset? StopAtDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StopAtRaw);
+                set => StopAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+            }
+
+            /// <summary>
+            /// Optional. The marked transaction where the import should stop. This field is equivalent to the
+            /// STOPATMARK keyword and applies to Cloud SQL for SQL Server only.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("stopAtMark")]
+            public virtual string StopAtMark { get; set; }
+
+            /// <summary>
+            /// Whether or not the backup set being restored is striped. Applies only to Cloud SQL for SQL Server.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("striped")]
+            public virtual System.Nullable<bool> Striped { get; set; }
 
             public class EncryptionOptionsData
             {
                 /// <summary>
-                /// Path to the Certificate (.cer) in Cloud Storage, in the form **gs://bucketName/fileName**. The
+                /// Path to the Certificate (.cer) in Cloud Storage, in the form `gs://bucketName/fileName`. The
                 /// instance must have write permissions to the bucket and read access to the file.
                 /// </summary>
                 [Newtonsoft.Json.JsonPropertyAttribute("certPath")]
@@ -4973,9 +6797,8 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
                 public virtual string PvkPassword { get; set; }
 
                 /// <summary>
-                /// Path to the Certificate Private Key (.pvk) in Cloud Storage, in the form
-                /// **gs://bucketName/fileName**. The instance must have write permissions to the bucket and read access
-                /// to the file.
+                /// Path to the Certificate Private Key (.pvk) in Cloud Storage, in the form `gs://bucketName/fileName`.
+                /// The instance must have write permissions to the bucket and read access to the file.
                 /// </summary>
                 [Newtonsoft.Json.JsonPropertyAttribute("pvkPath")]
                 public virtual string PvkPath { get; set; }
@@ -5016,6 +6839,40 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
             /// <summary>The table to which CSV data is imported.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("table")]
             public virtual string Table { get; set; }
+        }
+
+        /// <summary>Optional. Options for importing data from SQL statements.</summary>
+        public class SqlImportOptionsData
+        {
+            /// <summary>Optional. Whether or not the import should be parallel.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("parallel")]
+            public virtual System.Nullable<bool> Parallel { get; set; }
+
+            /// <summary>Optional. Options for importing from a Cloud SQL for PostgreSQL instance.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("postgresImportOptions")]
+            public virtual PostgresImportOptionsData PostgresImportOptions { get; set; }
+
+            /// <summary>Optional. The number of threads to use for parallel import.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("threads")]
+            public virtual System.Nullable<int> Threads { get; set; }
+
+            /// <summary>Optional. Options for importing from a Cloud SQL for PostgreSQL instance.</summary>
+            public class PostgresImportOptionsData
+            {
+                /// <summary>
+                /// Optional. The --clean flag for the pg_restore utility. This flag applies only if you enabled Cloud
+                /// SQL to import files in parallel.
+                /// </summary>
+                [Newtonsoft.Json.JsonPropertyAttribute("clean")]
+                public virtual System.Nullable<bool> Clean { get; set; }
+
+                /// <summary>
+                /// Optional. The --if-exists flag for the pg_restore utility. This flag applies only if you enabled
+                /// Cloud SQL to import files in parallel.
+                /// </summary>
+                [Newtonsoft.Json.JsonPropertyAttribute("ifExists")]
+                public virtual System.Nullable<bool> IfExists { get; set; }
+            }
         }
     }
 
@@ -5078,6 +6935,17 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Request to acquire an SSRS lease for an instance.</summary>
+    public class InstancesAcquireSsrsLeaseRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Contains details about the acquire SSRS lease operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("acquireSsrsLeaseContext")]
+        public virtual AcquireSsrsLeaseContext AcquireSsrsLeaseContext { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Database instance clone request.</summary>
     public class InstancesCloneRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5095,6 +6963,23 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         /// <summary>Contains details about the demoteMaster operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("demoteMasterContext")]
         public virtual DemoteMasterContext DemoteMasterContext { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// This request is used to demote an existing standalone instance to be a Cloud SQL read replica for an external
+    /// database server.
+    /// </summary>
+    public class InstancesDemoteRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. This context is used to demote an existing standalone instance to be a Cloud SQL read replica for
+        /// an external database server.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("demoteContext")]
+        public virtual DemoteContext DemoteContext { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5140,7 +7025,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("items")]
         public virtual System.Collections.Generic.IList<DatabaseInstance> Items { get; set; }
 
-        /// <summary>This is always **sql#instancesList**.</summary>
+        /// <summary>This is always `sql#instancesList`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5169,9 +7054,45 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("certs")]
         public virtual System.Collections.Generic.IList<SslCert> Certs { get; set; }
 
-        /// <summary>This is always **sql#instancesListServerCas**.</summary>
+        /// <summary>This is always `sql#instancesListServerCas`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Instances ListServerCertificatess response.</summary>
+    public class InstancesListServerCertificatesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The `sha1_fingerprint` of the active certificate from `server_certs`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("activeVersion")]
+        public virtual string ActiveVersion { get; set; }
+
+        /// <summary>List of server CA certificates for the instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("caCerts")]
+        public virtual System.Collections.Generic.IList<SslCert> CaCerts { get; set; }
+
+        /// <summary>This is always `sql#instancesListServerCertificates`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>
+        /// List of server certificates for the instance, signed by the corresponding CA from the `ca_certs` list.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serverCerts")]
+        public virtual System.Collections.Generic.IList<SslCert> ServerCerts { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Database Instance reencrypt request.</summary>
+    public class InstancesReencryptRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Configuration specific to backup re-encryption</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backupReencryptionConfig")]
+        public virtual BackupReencryptionConfig BackupReencryptionConfig { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5199,6 +7120,17 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Rotate Server Certificate request.</summary>
+    public class InstancesRotateServerCertificateRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Contains details about the rotate server CA operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rotateServerCertificateContext")]
+        public virtual RotateServerCertificateContext RotateServerCertificateContext { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Instance truncate log request.</summary>
     public class InstancesTruncateLogRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5214,7 +7146,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     public class IpConfiguration : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The name of the allocated ip range for the private ip CloudSQL instance. For example:
+        /// The name of the allocated ip range for the private ip Cloud SQL instance. For example:
         /// "google-managed-services-default". If set, the instance ip will be created in the allocated range. The range
         /// name must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035). Specifically, the name must be 1-63
         /// characters long and match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?.`
@@ -5224,10 +7156,18 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
 
         /// <summary>
         /// The list of external networks that are allowed to connect to the instance using the IP. In 'CIDR' notation,
-        /// also known as 'slash' notation (for example: **192.168.100.0/24**).
+        /// also known as 'slash' notation (for example: `157.197.200.0/24`).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("authorizedNetworks")]
         public virtual System.Collections.Generic.IList<AclEntry> AuthorizedNetworks { get; set; }
+
+        /// <summary>Optional. Custom Subject Alternative Name(SAN)s for a Cloud SQL instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customSubjectAlternativeNames")]
+        public virtual System.Collections.Generic.IList<string> CustomSubjectAlternativeNames { get; set; }
+
+        /// <summary>Controls connectivity to private IP instances from Google services, such as BigQuery.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enablePrivatePathForGoogleCloudServices")]
+        public virtual System.Nullable<bool> EnablePrivatePathForGoogleCloudServices { get; set; }
 
         /// <summary>Whether the instance is assigned a public IP address or not.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ipv4Enabled")]
@@ -5235,38 +7175,106 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
 
         /// <summary>
         /// The resource link for the VPC network from which the Cloud SQL instance is accessible for private IP. For
-        /// example, **/projects/myProject/global/networks/default**. This setting can be updated, but it cannot be
+        /// example, `/projects/myProject/global/networks/default`. This setting can be updated, but it cannot be
         /// removed after it is set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("privateNetwork")]
         public virtual string PrivateNetwork { get; set; }
 
-        /// <summary>Whether SSL connections over IP are enforced or not.</summary>
+        /// <summary>PSC settings for this instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pscConfig")]
+        public virtual PscConfig PscConfig { get; set; }
+
+        /// <summary>
+        /// Use `ssl_mode` instead. Whether SSL/TLS connections over IP are enforced. If set to false, then allow both
+        /// non-SSL/non-TLS and SSL/TLS connections. For SSL/TLS connections, the client certificate won't be verified.
+        /// If set to true, then only allow connections encrypted with SSL/TLS and with valid client certificates. If
+        /// you want to enforce SSL/TLS without enforcing the requirement for valid client certificates, then use the
+        /// `ssl_mode` flag instead of the legacy `require_ssl` flag.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requireSsl")]
         public virtual System.Nullable<bool> RequireSsl { get; set; }
+
+        /// <summary>Specify what type of CA is used for the server certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serverCaMode")]
+        public virtual string ServerCaMode { get; set; }
+
+        /// <summary>
+        /// Optional. The resource name of the server CA pool for an instance with `CUSTOMER_MANAGED_CAS_CA` as the
+        /// `server_ca_mode`. Format: projects//locations//caPools/
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serverCaPool")]
+        public virtual string ServerCaPool { get; set; }
+
+        /// <summary>
+        /// Specify how SSL/TLS is enforced in database connections. If you must use the `require_ssl` flag for backward
+        /// compatibility, then only the following value pairs are valid: For PostgreSQL and MySQL: *
+        /// `ssl_mode=ALLOW_UNENCRYPTED_AND_ENCRYPTED` and `require_ssl=false` * `ssl_mode=ENCRYPTED_ONLY` and
+        /// `require_ssl=false` * `ssl_mode=TRUSTED_CLIENT_CERTIFICATE_REQUIRED` and `require_ssl=true` For SQL Server:
+        /// * `ssl_mode=ALLOW_UNENCRYPTED_AND_ENCRYPTED` and `require_ssl=false` * `ssl_mode=ENCRYPTED_ONLY` and
+        /// `require_ssl=true` The value of `ssl_mode` has priority over the value of `require_ssl`. For example, for
+        /// the pair `ssl_mode=ENCRYPTED_ONLY` and `require_ssl=false`, `ssl_mode=ENCRYPTED_ONLY` means accept only SSL
+        /// connections, while `require_ssl=false` means accept both non-SSL and SSL connections. In this case, MySQL
+        /// and PostgreSQL databases respect `ssl_mode` and accepts only SSL connections.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sslMode")]
+        public virtual string SslMode { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Database instance IP Mapping.</summary>
+    /// <summary>Database instance IP mapping</summary>
     public class IpMapping : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The IP address assigned.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ipAddress")]
         public virtual string IpAddress { get; set; }
 
-        /// <summary>
-        /// The due time for this IP to be retired in [RFC 3339](https://tools.ietf.org/html/rfc3339) format, for
-        /// example **2012-11-15T16:19:00.094Z**. This field is only available when the IP is scheduled to be retired.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("timeToRetire")]
-        public virtual object TimeToRetire { get; set; }
+        private string _timeToRetireRaw;
+
+        private object _timeToRetire;
 
         /// <summary>
-        /// The type of this IP address. A **PRIMARY** address is a public address that can accept incoming connections.
-        /// A **PRIVATE** address is a private address that can accept incoming connections. An **OUTGOING** address is
-        /// the source address of connections originating from the instance, if supported.
+        /// The due time for this IP to be retired in [RFC 3339](https://tools.ietf.org/html/rfc3339) format, for
+        /// example `2012-11-15T16:19:00.094Z`. This field is only available when the IP is scheduled to be retired.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeToRetire")]
+        public virtual string TimeToRetireRaw
+        {
+            get => _timeToRetireRaw;
+            set
+            {
+                _timeToRetire = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timeToRetireRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimeToRetireRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeToRetireDateTimeOffset instead.")]
+        public virtual object TimeToRetire
+        {
+            get => _timeToRetire;
+            set
+            {
+                _timeToRetireRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _timeToRetire = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimeToRetireRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimeToRetireDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimeToRetireRaw);
+            set => TimeToRetireRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The type of this IP address. A `PRIMARY` address is a public address that can accept incoming connections. A
+        /// `PRIVATE` address is a private address that can accept incoming connections. An `OUTGOING` address is the
+        /// source address of connections originating from the instance, if supported.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
@@ -5283,23 +7291,27 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     public class LocationPreference : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The App Engine application to follow, it must be in the same region as the Cloud SQL instance.
+        /// The App Engine application to follow, it must be in the same region as the Cloud SQL instance. WARNING:
+        /// Changing this might restart the instance.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("followGaeApplication")]
         public virtual string FollowGaeApplication { get; set; }
 
-        /// <summary>This is always **sql#locationPreference**.</summary>
+        /// <summary>This is always `sql#locationPreference`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
         /// The preferred Compute Engine zone for the secondary/failover (for example: us-central1-a, us-central1-b,
-        /// etc.). Reserved for future use.
+        /// etc.). To disable this field, set it to 'no_secondary_zone'.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("secondaryZone")]
         public virtual string SecondaryZone { get; set; }
 
-        /// <summary>The preferred Compute Engine zone (for example: us-central1-a, us-central1-b, etc.).</summary>
+        /// <summary>
+        /// The preferred Compute Engine zone (for example: us-central1-a, us-central1-b, etc.). WARNING: Changing this
+        /// might restart the instance.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("zone")]
         public virtual string Zone { get; set; }
 
@@ -5312,21 +7324,24 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     /// </summary>
     public class MaintenanceWindow : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>day of week (1-7), starting on Monday.</summary>
+        /// <summary>
+        /// Day of week - `MONDAY`, `TUESDAY`, `WEDNESDAY`, `THURSDAY`, `FRIDAY`, `SATURDAY`, or `SUNDAY`. Specify in
+        /// the UTC time zone. Returned in output as an integer, 1 to 7, where `1` equals Monday.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("day")]
         public virtual System.Nullable<int> Day { get; set; }
 
-        /// <summary>hour of day - 0 to 23.</summary>
+        /// <summary>Hour of day - 0 to 23. Specify in the UTC time zone.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hour")]
         public virtual System.Nullable<int> Hour { get; set; }
 
-        /// <summary>This is always **sql#maintenanceWindow**.</summary>
+        /// <summary>This is always `sql#maintenanceWindow`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
-        /// Maintenance timing setting: **canary** (Earlier) or **stable** (Later). [Learn
-        /// more](https://cloud.google.com/sql/docs/mysql/instance-settings#maintenance-timing-2ndgen).
+        /// Maintenance timing settings: `canary`, `stable`, or `week5`. For more information, see [About maintenance on
+        /// Cloud SQL instances](https://cloud.google.com/sql/docs/mysql/maintenance).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTrack")]
         public virtual string UpdateTrack { get; set; }
@@ -5347,7 +7362,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string ClientCertificate { get; set; }
 
         /// <summary>
-        /// PEM representation of the replica's private key. The corresponsing public key is encoded in the client's
+        /// PEM representation of the replica's private key. The corresponding public key is encoded in the client's
         /// certificate.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("clientKey")]
@@ -5366,7 +7381,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("dumpFilePath")]
         public virtual string DumpFilePath { get; set; }
 
-        /// <summary>This is always **sql#mysqlReplicaConfiguration**.</summary>
+        /// <summary>This is always `sql#mysqlReplicaConfiguration`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5420,7 +7435,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string ClientCertificate { get; set; }
 
         /// <summary>
-        /// PEM representation of the replica's private key. The corresponsing public key is encoded in the client's
+        /// PEM representation of the replica's private key. The corresponding public key is encoded in the client's
         /// certificate.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("clientKey")]
@@ -5434,7 +7449,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("hostPort")]
         public virtual string HostPort { get; set; }
 
-        /// <summary>This is always **sql#onPremisesConfiguration**.</summary>
+        /// <summary>This is always `sql#onPremisesConfiguration`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5442,9 +7457,19 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("password")]
         public virtual string Password { get; set; }
 
+        /// <summary>
+        /// Optional. A list of objects that the user selects for replication from an external source instance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selectedObjects")]
+        public virtual System.Collections.Generic.IList<SelectedObjects> SelectedObjects { get; set; }
+
         /// <summary>The reference to Cloud SQL instance if the source is Cloud SQL.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceInstance")]
         public virtual InstanceReference SourceInstance { get; set; }
+
+        /// <summary>Optional. SslOption for replica connection to the on-premises source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sslOption")]
+        public virtual string SslOption { get; set; }
 
         /// <summary>The username for connecting to on-premises instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("username")]
@@ -5460,16 +7485,57 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     /// </summary>
     public class Operation : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The context for acquire SSRS lease operation, if applicable.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("acquireSsrsLeaseContext")]
+        public virtual AcquireSsrsLeaseContext AcquireSsrsLeaseContext { get; set; }
+
+        /// <summary>An Admin API warning message.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiWarning")]
+        public virtual ApiWarning ApiWarning { get; set; }
+
         /// <summary>The context for backup operation, if applicable.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("backupContext")]
         public virtual BackupContext BackupContext { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// The time this operation finished in UTC timezone in [RFC 3339](https://tools.ietf.org/html/rfc3339) format,
-        /// for example **2012-11-15T16:19:00.094Z**.
+        /// for example `2012-11-15T16:19:00.094Z`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>If errors occurred during processing of this operation, this field will be populated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("error")]
@@ -5483,14 +7549,47 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("importContext")]
         public virtual ImportContext ImportContext { get; set; }
 
+        private string _insertTimeRaw;
+
+        private object _insertTime;
+
         /// <summary>
         /// The time this operation was enqueued in UTC timezone in [RFC 3339](https://tools.ietf.org/html/rfc3339)
-        /// format, for example **2012-11-15T16:19:00.094Z**.
+        /// format, for example `2012-11-15T16:19:00.094Z`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("insertTime")]
-        public virtual object InsertTime { get; set; }
+        public virtual string InsertTimeRaw
+        {
+            get => _insertTimeRaw;
+            set
+            {
+                _insertTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _insertTimeRaw = value;
+            }
+        }
 
-        /// <summary>This is always **sql#operation**.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="InsertTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use InsertTimeDateTimeOffset instead.")]
+        public virtual object InsertTime
+        {
+            get => _insertTime;
+            set
+            {
+                _insertTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _insertTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="InsertTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? InsertTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(InsertTimeRaw);
+            set => InsertTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>This is always `sql#operation`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5502,9 +7601,9 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The type of the operation. Valid values are: * **CREATE** * **DELETE** * **UPDATE** * **RESTART** *
-        /// **IMPORT** * **EXPORT** * **BACKUP_VOLUME** * **RESTORE_VOLUME** * **CREATE_USER** * **DELETE_USER** *
-        /// **CREATE_DATABASE** * **DELETE_DATABASE**
+        /// The type of the operation. Valid values are: * `CREATE` * `DELETE` * `UPDATE` * `RESTART` * `IMPORT` *
+        /// `EXPORT` * `BACKUP_VOLUME` * `RESTORE_VOLUME` * `CREATE_USER` * `DELETE_USER` * `CREATE_DATABASE` *
+        /// `DELETE_DATABASE`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("operationType")]
         public virtual string OperationType { get; set; }
@@ -5513,18 +7612,54 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("selfLink")]
         public virtual string SelfLink { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>
         /// The time this operation actually started in UTC timezone in [RFC 3339](https://tools.ietf.org/html/rfc3339)
-        /// format, for example **2012-11-15T16:19:00.094Z**.
+        /// format, for example `2012-11-15T16:19:00.094Z`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The status of an operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
         public virtual string Status { get; set; }
 
-        /// <summary>Name of the database instance related to this operation.</summary>
+        /// <summary>Optional. The sub operation based on the operation type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subOperationType")]
+        public virtual SqlSubOperationType SubOperationType { get; set; }
+
         [Newtonsoft.Json.JsonPropertyAttribute("targetId")]
         public virtual string TargetId { get; set; }
 
@@ -5550,7 +7685,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("code")]
         public virtual string Code { get; set; }
 
-        /// <summary>This is always **sql#operationError**.</summary>
+        /// <summary>This is always `sql#operationError`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5569,9 +7704,114 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("errors")]
         public virtual System.Collections.Generic.IList<OperationError> Errors { get; set; }
 
-        /// <summary>This is always **sql#operationErrors**.</summary>
+        /// <summary>This is always `sql#operationErrors`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Represents the metadata of the long-running operation.</summary>
+    public class OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. API version used to start the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
+        public virtual string ApiVersion { get; set; }
+
+        /// <summary>
+        /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
+        /// been cancelled successfully have google.longrunning.Operation.error value with a google.rpc.Status.code of
+        /// `1`, corresponding to `Code.CANCELLED`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cancelRequested")]
+        public virtual System.Nullable<bool> CancelRequested { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The time the operation was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>Output only. The time the operation finished running.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. Human-readable status of the operation, if any.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("statusDetail")]
+        public virtual string StatusDetail { get; set; }
+
+        /// <summary>Output only. Server-defined resource path for the target of the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("target")]
+        public virtual string Target { get; set; }
+
+        /// <summary>Output only. Name of the verb executed by the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verb")]
+        public virtual string Verb { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5584,7 +7824,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("items")]
         public virtual System.Collections.Generic.IList<Operation> Items { get; set; }
 
-        /// <summary>This is always **sql#operationsList**.</summary>
+        /// <summary>This is always `sql#operationsList`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5606,9 +7846,44 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("locked")]
         public virtual System.Nullable<bool> Locked { get; set; }
 
+        private string _passwordExpirationTimeRaw;
+
+        private object _passwordExpirationTime;
+
         /// <summary>The expiration time of the current password.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("passwordExpirationTime")]
-        public virtual object PasswordExpirationTime { get; set; }
+        public virtual string PasswordExpirationTimeRaw
+        {
+            get => _passwordExpirationTimeRaw;
+            set
+            {
+                _passwordExpirationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _passwordExpirationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="PasswordExpirationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PasswordExpirationTimeDateTimeOffset instead.")]
+        public virtual object PasswordExpirationTime
+        {
+            get => _passwordExpirationTime;
+            set
+            {
+                _passwordExpirationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _passwordExpirationTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="PasswordExpirationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PasswordExpirationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PasswordExpirationTimeRaw);
+            set => PasswordExpirationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5621,15 +7896,25 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("complexity")]
         public virtual string Complexity { get; set; }
 
+        /// <summary>This field is deprecated and will be removed in a future version of the API.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disallowCompromisedCredentials")]
+        public virtual System.Nullable<bool> DisallowCompromisedCredentials { get; set; }
+
         /// <summary>Disallow username as a part of the password.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("disallowUsernameSubstring")]
         public virtual System.Nullable<bool> DisallowUsernameSubstring { get; set; }
+
+        /// <summary>Whether the password policy is enabled or not.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enablePasswordPolicy")]
+        public virtual System.Nullable<bool> EnablePasswordPolicy { get; set; }
 
         /// <summary>Minimum number of characters allowed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minLength")]
         public virtual System.Nullable<int> MinLength { get; set; }
 
-        /// <summary>Minimum interval after which the password can be changed.</summary>
+        /// <summary>
+        /// Minimum interval after which the password can be changed. This flag is only supported for PostgreSQL.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("passwordChangeInterval")]
         public virtual object PasswordChangeInterval { get; set; }
 
@@ -5641,11 +7926,92 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Perform disk shrink context.</summary>
+    public class PerformDiskShrinkContext : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The target disk shrink size in GigaBytes.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetSizeGb")]
+        public virtual System.Nullable<long> TargetSizeGb { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Settings for an automatically-setup Private Service Connect consumer endpoint that is used to connect to a Cloud
+    /// SQL instance.
+    /// </summary>
+    public class PscAutoConnectionConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The consumer network of this consumer endpoint. This must be a resource path that includes both the host
+        /// project and the network name. For example, `projects/project1/global/networks/network1`. The consumer host
+        /// project of this network might be different from the consumer service project.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("consumerNetwork")]
+        public virtual string ConsumerNetwork { get; set; }
+
+        /// <summary>The connection policy status of the consumer network.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("consumerNetworkStatus")]
+        public virtual string ConsumerNetworkStatus { get; set; }
+
+        /// <summary>
+        /// This is the project ID of consumer service project of this consumer endpoint. Optional. This is only
+        /// applicable if consumer_network is a shared vpc network.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("consumerProject")]
+        public virtual string ConsumerProject { get; set; }
+
+        /// <summary>The IP address of the consumer endpoint.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ipAddress")]
+        public virtual string IpAddress { get; set; }
+
+        /// <summary>The connection status of the consumer endpoint.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual string Status { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>PSC settings for a Cloud SQL instance.</summary>
+    public class PscConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The list of consumer projects that are allow-listed for PSC connections to this instance. This
+        /// instance can be connected to with PSC from any network in these projects. Each consumer project in this list
+        /// may be represented by a project number (numeric) or by a project id (alphanumeric).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowedConsumerProjects")]
+        public virtual System.Collections.Generic.IList<string> AllowedConsumerProjects { get; set; }
+
+        /// <summary>
+        /// Optional. The list of settings for requested Private Service Connect consumer endpoints that can be used to
+        /// connect to this Cloud SQL instance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pscAutoConnections")]
+        public virtual System.Collections.Generic.IList<PscAutoConnectionConfig> PscAutoConnections { get; set; }
+
+        /// <summary>Whether PSC connectivity is enabled for this instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pscEnabled")]
+        public virtual System.Nullable<bool> PscEnabled { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Read-replica configuration for connecting to the primary instance.</summary>
     public class ReplicaConfiguration : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Specifies if the replica is the failover target. If the field is set to **true** the replica will be
+        /// Optional. Specifies if a SQL Server replica is a cascadable replica. A cascadable replica is a SQL Server
+        /// cross region replica that supports replica(s) under it.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cascadableReplica")]
+        public virtual System.Nullable<bool> CascadableReplica { get; set; }
+
+        /// <summary>
+        /// Specifies if the replica is the failover target. If the field is set to `true` the replica will be
         /// designated as a failover replica. In case the primary instance fails, the replica instance will be promoted
         /// as the new primary instance. Only one replica can be specified as failover target, and the replica has to be
         /// in different zone with the primary instance.
@@ -5653,7 +8019,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("failoverTarget")]
         public virtual System.Nullable<bool> FailoverTarget { get; set; }
 
-        /// <summary>This is always **sql#replicaConfiguration**.</summary>
+        /// <summary>This is always `sql#replicaConfiguration`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5661,10 +8027,47 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         /// MySQL specific configuration when replicating from a MySQL on-premises primary instance. Replication
         /// configuration information such as the username, password, certificates, and keys are not stored in the
         /// instance metadata. The configuration information is used only to set up the replication connection and is
-        /// stored by MySQL in a file named **master.info** in the data directory.
+        /// stored by MySQL in a file named `master.info` in the data directory.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mysqlReplicaConfiguration")]
         public virtual MySqlReplicaConfiguration MysqlReplicaConfiguration { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A primary instance and disaster recovery (DR) replica pair. A DR replica is a cross-region replica that you
+    /// designate for failover in the event that the primary instance has regional failure. Applicable to MySQL and
+    /// PostgreSQL.
+    /// </summary>
+    public class ReplicationCluster : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. Read-only field that indicates whether the replica is a DR replica. This field is not set if
+        /// the instance is a primary instance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("drReplica")]
+        public virtual System.Nullable<bool> DrReplica { get; set; }
+
+        /// <summary>
+        /// Optional. If the instance is a primary instance, then this field identifies the disaster recovery (DR)
+        /// replica. A DR replica is an optional configuration for Enterprise Plus edition instances. If the instance is
+        /// a read replica, then the field is not set. Set this field to a replica name to designate a DR replica for a
+        /// primary instance. Remove the replica name to remove the DR replica designation.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("failoverDrReplicaName")]
+        public virtual string FailoverDrReplicaName { get; set; }
+
+        /// <summary>
+        /// Output only. If set, this field indicates this instance has a private service access (PSA) DNS endpoint that
+        /// is pointing to the primary instance of the cluster. If this instance is the primary, then the DNS endpoint
+        /// points to this instance. After a switchover or replica failover operation, this DNS endpoint points to the
+        /// promoted instance. This is a read-only field, returned to the user as information. This field can exist even
+        /// if a standalone instance doesn't have a DR replica yet or the DR replica is deleted.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("psaWriteEndpoint")]
+        public virtual string PsaWriteEndpoint { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5676,12 +8079,45 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("rescheduleType")]
         public virtual string RescheduleType { get; set; }
 
+        private string _scheduleTimeRaw;
+
+        private object _scheduleTime;
+
         /// <summary>
         /// Optional. Timestamp when the maintenance shall be rescheduled to if reschedule_type=SPECIFIC_TIME, in [RFC
-        /// 3339](https://tools.ietf.org/html/rfc3339) format, for example **2012-11-15T16:19:00.094Z**.
+        /// 3339](https://tools.ietf.org/html/rfc3339) format, for example `2012-11-15T16:19:00.094Z`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleTime")]
-        public virtual object ScheduleTime { get; set; }
+        public virtual string ScheduleTimeRaw
+        {
+            get => _scheduleTimeRaw;
+            set
+            {
+                _scheduleTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleTimeDateTimeOffset instead.")]
+        public virtual object ScheduleTime
+        {
+            get => _scheduleTime;
+            set
+            {
+                _scheduleTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleTimeRaw);
+            set => ScheduleTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5700,7 +8136,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("instanceId")]
         public virtual string InstanceId { get; set; }
 
-        /// <summary>This is always **sql#restoreBackupContext**.</summary>
+        /// <summary>This is always `sql#restoreBackupContext`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5715,7 +8151,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     /// <summary>Instance rotate server CA context.</summary>
     public class RotateServerCaContext : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>This is always **sql#rotateServerCaContext**.</summary>
+        /// <summary>This is always `sql#rotateServerCaContext`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5730,13 +8166,42 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Instance rotate server certificate context.</summary>
+    public class RotateServerCertificateContext : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. This is always `sql#rotateServerCertificateContext`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>
+        /// Optional. The fingerprint of the next version to be rotated to. If left unspecified, will be rotated to the
+        /// most recently added server certificate version.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextVersion")]
+        public virtual string NextVersion { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A list of objects that the user selects for replication from an external source instance.</summary>
+    public class SelectedObjects : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The name of the database to migrate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("database")]
+        public virtual string Database { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Database instance settings.</summary>
     public class Settings : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// The activation policy specifies when the instance is activated; it is applicable only when the instance
-        /// state is RUNNABLE. Valid values: * **ALWAYS**: The instance is on, and remains so even in the absence of
-        /// connection requests. * **NEVER**: The instance is off; it is not activated, even if a connection request
+        /// state is RUNNABLE. Valid values: * `ALWAYS`: The instance is on, and remains so even in the absence of
+        /// connection requests. * `NEVER`: The instance is off; it is not activated, even if a connection request
         /// arrives.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("activationPolicy")]
@@ -5746,6 +8211,10 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("activeDirectoryConfig")]
         public virtual SqlActiveDirectoryConfig ActiveDirectoryConfig { get; set; }
 
+        /// <summary>Specifies advanced machine configuration for the instances relevant only for SQL Server.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("advancedMachineFeatures")]
+        public virtual AdvancedMachineFeatures AdvancedMachineFeatures { get; set; }
+
         /// <summary>
         /// The App Engine app IDs that can access this instance. (Deprecated) Applied to First Generation instances
         /// only.
@@ -5754,9 +8223,9 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual System.Collections.Generic.IList<string> AuthorizedGaeApplications { get; set; }
 
         /// <summary>
-        /// Availability type. Potential values: * **ZONAL**: The instance serves data from only one zone. Outages in
-        /// that zone affect data accessibility. * **REGIONAL**: The instance can serve data from more than one zone in
-        /// a region (it is highly available)./ For more information, see [Overview of the High Availability
+        /// Availability type. Potential values: * `ZONAL`: The instance serves data from only one zone. Outages in that
+        /// zone affect data accessibility. * `REGIONAL`: The instance can serve data from more than one zone in a
+        /// region (it is highly available)./ For more information, see [Overview of the High Availability
         /// Configuration](https://cloud.google.com/sql/docs/mysql/high-availability).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("availabilityType")]
@@ -5771,18 +8240,32 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string Collation { get; set; }
 
         /// <summary>
+        /// Specifies if connections must use Cloud SQL connectors. Option values include the following: `NOT_REQUIRED`
+        /// (Cloud SQL instances can be connected without Cloud SQL Connectors) and `REQUIRED` (Only allow connections
+        /// that use Cloud SQL Connectors) Note that using REQUIRED disables all existing authorized networks. If this
+        /// field is not specified when creating a new instance, NOT_REQUIRED is used. If this field is not specified
+        /// when patching or updating an existing instance, it is left unchanged in the instance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connectorEnforcement")]
+        public virtual string ConnectorEnforcement { get; set; }
+
+        /// <summary>
         /// Configuration specific to read replica instances. Indicates whether database flags for crash-safe
         /// replication are enabled. This property was only applicable to First Generation instances.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("crashSafeReplicationEnabled")]
         public virtual System.Nullable<bool> CrashSafeReplicationEnabled { get; set; }
 
+        /// <summary>Configuration for data cache.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataCacheConfig")]
+        public virtual DataCacheConfig DataCacheConfig { get; set; }
+
         /// <summary>The size of data disk, in GB. The data disk size minimum is 10GB.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataDiskSizeGb")]
         public virtual System.Nullable<long> DataDiskSizeGb { get; set; }
 
         /// <summary>
-        /// The type of data disk: **PD_SSD** (default) or **PD_HDD**. Not used for First Generation instances.
+        /// The type of data disk: `PD_SSD` (default) or `PD_HDD`. Not used for First Generation instances.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataDiskType")]
         public virtual string DataDiskType { get; set; }
@@ -5792,14 +8275,38 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual System.Collections.Generic.IList<DatabaseFlags> DatabaseFlags { get; set; }
 
         /// <summary>
-        /// Configuration specific to read replica instances. Indicates whether replication is enabled or not.
+        /// Configuration specific to read replica instances. Indicates whether replication is enabled or not. WARNING:
+        /// Changing this restarts the instance.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("databaseReplicationEnabled")]
         public virtual System.Nullable<bool> DatabaseReplicationEnabled { get; set; }
 
+        /// <summary>Configuration to protect against accidental instance deletion.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deletionProtectionEnabled")]
+        public virtual System.Nullable<bool> DeletionProtectionEnabled { get; set; }
+
         /// <summary>Deny maintenance periods</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("denyMaintenancePeriods")]
         public virtual System.Collections.Generic.IList<DenyMaintenancePeriod> DenyMaintenancePeriods { get; set; }
+
+        /// <summary>Optional. The edition of the instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("edition")]
+        public virtual string Edition { get; set; }
+
+        /// <summary>
+        /// Optional. By default, Cloud SQL instances have schema extraction disabled for Dataplex. When this parameter
+        /// is set to true, schema extraction for Dataplex on Cloud SQL instances is activated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableDataplexIntegration")]
+        public virtual System.Nullable<bool> EnableDataplexIntegration { get; set; }
+
+        /// <summary>
+        /// Optional. When this parameter is set to true, Cloud SQL instances can connect to Vertex AI to pass requests
+        /// for real-time predictions and insights to the AI. The default value is false. This applies only to Cloud SQL
+        /// for PostgreSQL instances.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableGoogleMlIntegration")]
+        public virtual System.Nullable<bool> EnableGoogleMlIntegration { get; set; }
 
         /// <summary>Insights configuration, for now relevant only for Postgres.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("insightsConfig")]
@@ -5812,7 +8319,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("ipConfiguration")]
         public virtual IpConfiguration IpConfiguration { get; set; }
 
-        /// <summary>This is always **sql#settings**.</summary>
+        /// <summary>This is always `sql#settings`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5836,15 +8343,19 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual PasswordValidationPolicy PasswordValidationPolicy { get; set; }
 
         /// <summary>
-        /// The pricing plan for this instance. This can be either **PER_USE** or **PACKAGE**. Only **PER_USE** is
-        /// supported for Second Generation instances.
+        /// The pricing plan for this instance. This can be either `PER_USE` or `PACKAGE`. Only `PER_USE` is supported
+        /// for Second Generation instances.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pricingPlan")]
         public virtual string PricingPlan { get; set; }
 
+        /// <summary>Optional. Configuration value for recreation of replica after certain replication lag</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("replicationLagMaxSeconds")]
+        public virtual System.Nullable<int> ReplicationLagMaxSeconds { get; set; }
+
         /// <summary>
-        /// The type of replication this instance uses. This can be either **ASYNCHRONOUS** or **SYNCHRONOUS**.
-        /// (Deprecated) This property was only applicable to First Generation instances.
+        /// The type of replication this instance uses. This can be either `ASYNCHRONOUS` or `SYNCHRONOUS`. (Deprecated)
+        /// This property was only applicable to First Generation instances.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("replicationType")]
         public virtual string ReplicationType { get; set; }
@@ -5872,9 +8383,16 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("storageAutoResizeLimit")]
         public virtual System.Nullable<long> StorageAutoResizeLimit { get; set; }
 
-        /// <summary>The tier (or machine type) for this instance, for example **db-custom-1-3840**.</summary>
+        /// <summary>
+        /// The tier (or machine type) for this instance, for example `db-custom-1-3840`. WARNING: Changing this
+        /// restarts the instance.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tier")]
         public virtual string Tier { get; set; }
+
+        /// <summary>Server timezone, relevant only for Cloud SQL for SQL Server.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeZone")]
+        public virtual string TimeZone { get; set; }
 
         /// <summary>
         /// User-provided labels, represented as a dictionary where each label is a single key value pair.
@@ -5908,13 +8426,104 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("detail")]
         public virtual string Detail { get; set; }
 
-        /// <summary>Can be **sql#externalSyncSettingError** or **sql#externalSyncSettingWarning**.</summary>
+        /// <summary>Can be `sql#externalSyncSettingError` or `sql#externalSyncSettingWarning`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>Identifies the specific error that occurred.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Acquire SSRS lease response.</summary>
+    public class SqlInstancesAcquireSsrsLeaseResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The unique identifier for this operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("operationId")]
+        public virtual string OperationId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Instance get disk shrink config response.</summary>
+    public class SqlInstancesGetDiskShrinkConfigResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>This is always `sql#getDiskShrinkConfig`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>Additional message to customers.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("message")]
+        public virtual string Message { get; set; }
+
+        /// <summary>The minimum size to which a disk can be shrunk in GigaBytes.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minimalTargetSizeGb")]
+        public virtual System.Nullable<long> MinimalTargetSizeGb { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Instance get latest recovery time response.</summary>
+    public class SqlInstancesGetLatestRecoveryTimeResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>This is always `sql#getLatestRecoveryTime`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        private string _latestRecoveryTimeRaw;
+
+        private object _latestRecoveryTime;
+
+        /// <summary>Timestamp, identifies the latest recovery time of the source instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("latestRecoveryTime")]
+        public virtual string LatestRecoveryTimeRaw
+        {
+            get => _latestRecoveryTimeRaw;
+            set
+            {
+                _latestRecoveryTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _latestRecoveryTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LatestRecoveryTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LatestRecoveryTimeDateTimeOffset instead.")]
+        public virtual object LatestRecoveryTime
+        {
+            get => _latestRecoveryTime;
+            set
+            {
+                _latestRecoveryTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _latestRecoveryTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LatestRecoveryTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LatestRecoveryTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LatestRecoveryTimeRaw);
+            set => LatestRecoveryTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response for the release of the SSRS lease.</summary>
+    public class SqlInstancesReleaseSsrsLeaseResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The operation ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("operationId")]
+        public virtual string OperationId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5931,8 +8540,23 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Instance reset replica size request.</summary>
+    public class SqlInstancesResetReplicaSizeRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     public class SqlInstancesStartExternalSyncRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional. MigrationType configures the migration to use physical files or logical dump files. If not set,
+        /// then the logical dump file configuration is used. Valid values are `LOGICAL` or `PHYSICAL`. Only applicable
+        /// to MySQL.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("migrationType")]
+        public virtual string MigrationType { get; set; }
+
         /// <summary>MySQL-specific settings for start external sync.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mysqlSyncConfig")]
         public virtual MySqlSyncConfig MysqlSyncConfig { get; set; }
@@ -5945,19 +8569,42 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("syncMode")]
         public virtual string SyncMode { get; set; }
 
+        /// <summary>Optional. Parallel level for initial data sync. Currently only applicable for MySQL.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("syncParallelLevel")]
+        public virtual string SyncParallelLevel { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
     public class SqlInstancesVerifyExternalSyncSettingsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional. MigrationType configures the migration to use physical files or logical dump files. If not set,
+        /// then the logical dump file configuration is used. Valid values are `LOGICAL` or `PHYSICAL`. Only applicable
+        /// to MySQL.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("migrationType")]
+        public virtual string MigrationType { get; set; }
+
         /// <summary>Optional. MySQL-specific settings for start external sync.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mysqlSyncConfig")]
         public virtual MySqlSyncConfig MysqlSyncConfig { get; set; }
 
+        /// <summary>
+        /// Optional. Migrate only the specified objects from the source instance. If this field is empty, then migrate
+        /// all objects.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selectedObjects")]
+        public virtual System.Collections.Generic.IList<ExternalSyncSelectedObject> SelectedObjects { get; set; }
+
         /// <summary>External sync mode</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("syncMode")]
         public virtual string SyncMode { get; set; }
+
+        /// <summary>Optional. Parallel level for initial data sync. Only applicable for PostgreSQL.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("syncParallelLevel")]
+        public virtual string SyncParallelLevel { get; set; }
 
         /// <summary>Flag to enable verifying connection only</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("verifyConnectionOnly")]
@@ -5978,7 +8625,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("errors")]
         public virtual System.Collections.Generic.IList<SqlExternalSyncSettingError> Errors { get; set; }
 
-        /// <summary>This is always **sql#migrationSettingErrorList**.</summary>
+        /// <summary>This is always `sql#migrationSettingErrorList`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -6011,7 +8658,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Any scheduled maintenancce for this instance.</summary>
+    /// <summary>Any scheduled maintenance for this instance.</summary>
     public class SqlScheduledMaintenance : Google.Apis.Requests.IDirectResponseSchema
     {
         [Newtonsoft.Json.JsonPropertyAttribute("canDefer")]
@@ -6021,13 +8668,81 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("canReschedule")]
         public virtual System.Nullable<bool> CanReschedule { get; set; }
 
+        private string _scheduleDeadlineTimeRaw;
+
+        private object _scheduleDeadlineTime;
+
         /// <summary>Maintenance cannot be rescheduled to start beyond this deadline.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleDeadlineTime")]
-        public virtual object ScheduleDeadlineTime { get; set; }
+        public virtual string ScheduleDeadlineTimeRaw
+        {
+            get => _scheduleDeadlineTimeRaw;
+            set
+            {
+                _scheduleDeadlineTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleDeadlineTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleDeadlineTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleDeadlineTimeDateTimeOffset instead.")]
+        public virtual object ScheduleDeadlineTime
+        {
+            get => _scheduleDeadlineTime;
+            set
+            {
+                _scheduleDeadlineTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleDeadlineTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleDeadlineTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleDeadlineTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleDeadlineTimeRaw);
+            set => ScheduleDeadlineTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>The start time of any upcoming scheduled maintenance for this instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6043,6 +8758,14 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         /// <summary>This is always sql#sqlServerAuditConfig</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
+
+        /// <summary>How long to keep generated audit files.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("retentionInterval")]
+        public virtual object RetentionInterval { get; set; }
+
+        /// <summary>How often to upload generated audit files.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uploadInterval")]
+        public virtual object UploadInterval { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6078,6 +8801,17 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The sub operation type based on the operation type.</summary>
+    public class SqlSubOperationType : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The type of maintenance to be performed on the instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maintenanceType")]
+        public virtual string MaintenanceType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>SslCerts Resource</summary>
     public class SslCert : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6093,25 +8827,93 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("commonName")]
         public virtual string CommonName { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// The time when the certificate was created in [RFC 3339](https://tools.ietf.org/html/rfc3339) format, for
-        /// example **2012-11-15T16:19:00.094Z**.
+        /// example `2012-11-15T16:19:00.094Z`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _expirationTimeRaw;
+
+        private object _expirationTime;
 
         /// <summary>
         /// The time when the certificate expires in [RFC 3339](https://tools.ietf.org/html/rfc3339) format, for example
-        /// **2012-11-15T16:19:00.094Z**.
+        /// `2012-11-15T16:19:00.094Z`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expirationTime")]
-        public virtual object ExpirationTime { get; set; }
+        public virtual string ExpirationTimeRaw
+        {
+            get => _expirationTimeRaw;
+            set
+            {
+                _expirationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expirationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpirationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpirationTimeDateTimeOffset instead.")]
+        public virtual object ExpirationTime
+        {
+            get => _expirationTime;
+            set
+            {
+                _expirationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expirationTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpirationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpirationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpirationTimeRaw);
+            set => ExpirationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Name of the database instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("instance")]
         public virtual string Instance { get; set; }
 
-        /// <summary>This is always **sql#sslCert**.</summary>
+        /// <summary>This is always `sql#sslCert`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -6179,7 +8981,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("clientCert")]
         public virtual SslCertDetail ClientCert { get; set; }
 
-        /// <summary>This is always **sql#sslCertsInsert**.</summary>
+        /// <summary>This is always `sql#sslCertsInsert`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -6205,7 +9007,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("items")]
         public virtual System.Collections.Generic.IList<SslCert> Items { get; set; }
 
-        /// <summary>This is always **sql#sslCertsList**.</summary>
+        /// <summary>This is always `sql#sslCertsList`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -6241,7 +9043,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("RAM")]
         public virtual System.Nullable<long> RAM { get; set; }
 
-        /// <summary>This is always *sql#tier*.</summary>
+        /// <summary>This is always `sql#tier`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -6250,7 +9052,8 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         public virtual System.Collections.Generic.IList<string> Region { get; set; }
 
         /// <summary>
-        /// An identifier for the machine type, for example, db-custom-1-3840. For related information, see Pricing.
+        /// An identifier for the machine type, for example, `db-custom-1-3840`. For related information, see
+        /// [Pricing](/sql/pricing).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tier")]
         public virtual string TierValue { get; set; }
@@ -6266,7 +9069,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("items")]
         public virtual System.Collections.Generic.IList<Tier> Items { get; set; }
 
-        /// <summary>This is always *sql#tiersList*.</summary>
+        /// <summary>This is always `sql#tiersList`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -6277,12 +9080,12 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     /// <summary>Database Instance truncate log context.</summary>
     public class TruncateLogContext : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>This is always **sql#truncateLogContext**.</summary>
+        /// <summary>This is always `sql#truncateLogContext`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
-        /// The type of log to truncate. Valid values are **MYSQL_GENERAL_TABLE** and **MYSQL_SLOW_TABLE**.
+        /// The type of log to truncate. Valid values are `MYSQL_GENERAL_TABLE` and `MYSQL_SLOW_TABLE`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("logType")]
         public virtual string LogType { get; set; }
@@ -6294,32 +9097,36 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
     /// <summary>A Cloud SQL user resource.</summary>
     public class User : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Dual password status for the user.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dualPasswordType")]
+        public virtual string DualPasswordType { get; set; }
+
         /// <summary>This field is deprecated and will be removed from a future version of the API.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("etag")]
         public virtual string ETag { get; set; }
 
         /// <summary>
-        /// Optional. The host name from which the user can connect. For **insert** operations, host defaults to an
-        /// empty string. For **update** operations, host is specified as part of the request URL. The host name cannot
-        /// be updated after insertion. For a MySQL instance, it's required; for a PostgreSQL or SQL Server instance,
-        /// it's optional.
+        /// Optional. The host from which the user can connect. For `insert` operations, host defaults to an empty
+        /// string. For `update` operations, host is specified as part of the request URL. The host name cannot be
+        /// updated after insertion. For a MySQL instance, it's required; for a PostgreSQL or SQL Server instance, it's
+        /// optional.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("host")]
         public virtual string Host { get; set; }
 
         /// <summary>
-        /// The name of the Cloud SQL instance. This does not include the project ID. Can be omitted for *update* since
-        /// it is already specified on the URL.
+        /// The name of the Cloud SQL instance. This does not include the project ID. Can be omitted for *update*
+        /// because it is already specified on the URL.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("instance")]
         public virtual string Instance { get; set; }
 
-        /// <summary>This is always *sql#user*.</summary>
+        /// <summary>This is always `sql#user`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
-        /// The name of the user in the Cloud SQL instance. Can be omitted for **update** since it is already specified
+        /// The name of the user in the Cloud SQL instance. Can be omitted for `update` because it is already specified
         /// in the URL.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -6335,7 +9142,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
 
         /// <summary>
         /// The project ID of the project containing the Cloud SQL database. The Google apps domain is prefixed if
-        /// applicable. Can be omitted for *update* since it is already specified on the URL.
+        /// applicable. Can be omitted for *update* because it is already specified on the URL.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("project")]
         public virtual string Project { get; set; }
@@ -6362,6 +9169,13 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("enableFailedAttemptsCheck")]
         public virtual System.Nullable<bool> EnableFailedAttemptsCheck { get; set; }
 
+        /// <summary>
+        /// If true, the user must specify the current password before changing the password. This flag is supported
+        /// only for MySQL.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enablePasswordVerification")]
+        public virtual System.Nullable<bool> EnablePasswordVerification { get; set; }
+
         /// <summary>Expiration duration after password is updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("passwordExpirationDuration")]
         public virtual object PasswordExpirationDuration { get; set; }
@@ -6385,10 +9199,7 @@ namespace Google.Apis.SQLAdmin.v1beta4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
-        /// <summary>
-        /// An identifier that uniquely identifies the operation. You can use this identifier to retrieve the Operations
-        /// resource that has information about the operation.
-        /// </summary>
+        /// <summary>Unused.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
 

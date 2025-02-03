@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.Testing.v1
             ApplicationDetailService = new ApplicationDetailServiceResource(this);
             Projects = new ProjectsResource(this);
             TestEnvironmentCatalog = new TestEnvironmentCatalogResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://testing.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://testing.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.Testing.v1
         public override string Name => "testing";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://testing.googleapis.com/";
-        #else
-            "https://testing.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://testing.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Testing API.</summary>
         public class Scope
@@ -303,7 +298,7 @@ namespace Google.Apis.Testing.v1
         /// <param name="body">The body of the request.</param>
         public virtual GetApkDetailsRequest GetApkDetails(Google.Apis.Testing.v1.Data.FileReference body)
         {
-            return new GetApkDetailsRequest(service, body);
+            return new GetApkDetailsRequest(this.service, body);
         }
 
         /// <summary>Gets the details of an Android application APK.</summary>
@@ -315,6 +310,14 @@ namespace Google.Apis.Testing.v1
                 Body = body;
                 InitParameters();
             }
+
+            /// <summary>
+            /// A path to a file in Google Cloud Storage. Example:
+            /// gs://build-app-1414623860166/app%40debug-unaligned.apk These paths are expected to be url encoded
+            /// (percent encoding)
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("bundleLocation.gcsPath", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string BundleLocationGcsPath { get; set; }
 
             /// <summary>Gets or sets the body of this request.</summary>
             Google.Apis.Testing.v1.Data.FileReference Body { get; set; }
@@ -335,6 +338,14 @@ namespace Google.Apis.Testing.v1
             protected override void InitParameters()
             {
                 base.InitParameters();
+                RequestParameters.Add("bundleLocation.gcsPath", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "bundleLocation.gcsPath",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
     }
@@ -351,7 +362,369 @@ namespace Google.Apis.Testing.v1
         public ProjectsResource(Google.Apis.Services.IClientService service)
         {
             this.service = service;
+            DeviceSessions = new DeviceSessionsResource(service);
             TestMatrices = new TestMatricesResource(service);
+        }
+
+        /// <summary>Gets the DeviceSessions resource.</summary>
+        public virtual DeviceSessionsResource DeviceSessions { get; }
+
+        /// <summary>The "deviceSessions" collection of methods.</summary>
+        public class DeviceSessionsResource
+        {
+            private const string Resource = "deviceSessions";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public DeviceSessionsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// POST /v1/projects/{project_id}/deviceSessions/{device_session_id}:cancel Changes the DeviceSession to
+            /// state FINISHED and terminates all connections. Canceled sessions are not deleted and can be retrieved or
+            /// listed by the user until they expire based on the 28 day deletion policy.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. Name of the DeviceSession, e.g. "projects/{project_id}/deviceSessions/{session_id}"
+            /// </param>
+            public virtual CancelRequest Cancel(Google.Apis.Testing.v1.Data.CancelDeviceSessionRequest body, string name)
+            {
+                return new CancelRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// POST /v1/projects/{project_id}/deviceSessions/{device_session_id}:cancel Changes the DeviceSession to
+            /// state FINISHED and terminates all connections. Canceled sessions are not deleted and can be retrieved or
+            /// listed by the user until they expire based on the 28 day deletion policy.
+            /// </summary>
+            public class CancelRequest : TestingBaseServiceRequest<Google.Apis.Testing.v1.Data.Empty>
+            {
+                /// <summary>Constructs a new Cancel request.</summary>
+                public CancelRequest(Google.Apis.Services.IClientService service, Google.Apis.Testing.v1.Data.CancelDeviceSessionRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. Name of the DeviceSession, e.g. "projects/{project_id}/deviceSessions/{session_id}"
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Testing.v1.Data.CancelDeviceSessionRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "cancel";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:cancel";
+
+                /// <summary>Initializes Cancel parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/deviceSessions/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>POST /v1/projects/{project_id}/deviceSessions</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. The Compute Engine project under which this device will be allocated. "projects/{project_id}"
+            /// </param>
+            public virtual CreateRequest Create(Google.Apis.Testing.v1.Data.DeviceSession body, string parent)
+            {
+                return new CreateRequest(this.service, body, parent);
+            }
+
+            /// <summary>POST /v1/projects/{project_id}/deviceSessions</summary>
+            public class CreateRequest : TestingBaseServiceRequest<Google.Apis.Testing.v1.Data.DeviceSession>
+            {
+                /// <summary>Constructs a new Create request.</summary>
+                public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Testing.v1.Data.DeviceSession body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The Compute Engine project under which this device will be allocated.
+                /// "projects/{project_id}"
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Testing.v1.Data.DeviceSession Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "create";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/deviceSessions";
+
+                /// <summary>Initializes Create parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// GET /v1/projects/{project_id}/deviceSessions/{device_session_id} Return a DeviceSession, which documents
+            /// the allocation status and whether the device is allocated. Clients making requests from this API must
+            /// poll GetDeviceSession.
+            /// </summary>
+            /// <param name="name">
+            /// Required. Name of the DeviceSession, e.g. "projects/{project_id}/deviceSessions/{session_id}"
+            /// </param>
+            public virtual GetRequest Get(string name)
+            {
+                return new GetRequest(this.service, name);
+            }
+
+            /// <summary>
+            /// GET /v1/projects/{project_id}/deviceSessions/{device_session_id} Return a DeviceSession, which documents
+            /// the allocation status and whether the device is allocated. Clients making requests from this API must
+            /// poll GetDeviceSession.
+            /// </summary>
+            public class GetRequest : TestingBaseServiceRequest<Google.Apis.Testing.v1.Data.DeviceSession>
+            {
+                /// <summary>Constructs a new Get request.</summary>
+                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. Name of the DeviceSession, e.g. "projects/{project_id}/deviceSessions/{session_id}"
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "get";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes Get parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/deviceSessions/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// GET /v1/projects/{project_id}/deviceSessions Lists device Sessions owned by the project user.
+            /// </summary>
+            /// <param name="parent">Required. The name of the parent to request, e.g. "projects/{project_id}"</param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>
+            /// GET /v1/projects/{project_id}/deviceSessions Lists device Sessions owned by the project user.
+            /// </summary>
+            public class ListRequest : TestingBaseServiceRequest<Google.Apis.Testing.v1.Data.ListDeviceSessionsResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>Required. The name of the parent to request, e.g. "projects/{project_id}"</summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. If specified, responses will be filtered by the given filter. Allowed fields are:
+                /// session_state.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
+
+                /// <summary>Optional. The maximum number of DeviceSessions to return.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>Optional. A continuation token for paging.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/deviceSessions";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+$",
+                    });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>
+            /// PATCH /v1/projects/{projectId}/deviceSessions/deviceSessionId}:updateDeviceSession Updates the current
+            /// device session to the fields described by the update_mask.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Optional. Name of the DeviceSession, e.g. "projects/{project_id}/deviceSessions/{session_id}"
+            /// </param>
+            public virtual PatchRequest Patch(Google.Apis.Testing.v1.Data.DeviceSession body, string name)
+            {
+                return new PatchRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// PATCH /v1/projects/{projectId}/deviceSessions/deviceSessionId}:updateDeviceSession Updates the current
+            /// device session to the fields described by the update_mask.
+            /// </summary>
+            public class PatchRequest : TestingBaseServiceRequest<Google.Apis.Testing.v1.Data.DeviceSession>
+            {
+                /// <summary>Constructs a new Patch request.</summary>
+                public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Testing.v1.Data.DeviceSession body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Optional. Name of the DeviceSession, e.g. "projects/{project_id}/deviceSessions/{session_id}"
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Required. The list of fields to update.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual object UpdateMask { get; set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Testing.v1.Data.DeviceSession Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "patch";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "PATCH";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes Patch parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/deviceSessions/[^/]+$",
+                    });
+                    RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "updateMask",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
         }
 
         /// <summary>Gets the TestMatrices resource.</summary>
@@ -381,7 +754,7 @@ namespace Google.Apis.Testing.v1
             /// <param name="testMatrixId">Test matrix that will be canceled.</param>
             public virtual CancelRequest Cancel(string projectId, string testMatrixId)
             {
-                return new CancelRequest(service, projectId, testMatrixId);
+                return new CancelRequest(this.service, projectId, testMatrixId);
             }
 
             /// <summary>
@@ -443,23 +816,27 @@ namespace Google.Apis.Testing.v1
             /// <summary>
             /// Creates and runs a matrix of tests according to the given specifications. Unsupported environments will
             /// be returned in the state UNSUPPORTED. A test matrix is limited to use at most 2000 devices in parallel.
-            /// May return any of the following canonical error codes: - PERMISSION_DENIED - if the user is not
-            /// authorized to write to project - INVALID_ARGUMENT - if the request is malformed or if the matrix tries
-            /// to use too many simultaneous devices.
+            /// The returned matrix will not yet contain the executions that will be created for this matrix. Execution
+            /// creation happens later on and will require a call to GetTestMatrix. May return any of the following
+            /// canonical error codes: - PERMISSION_DENIED - if the user is not authorized to write to project -
+            /// INVALID_ARGUMENT - if the request is malformed or if the matrix tries to use too many simultaneous
+            /// devices.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="projectId">The GCE project under which this job will run.</param>
             public virtual CreateRequest Create(Google.Apis.Testing.v1.Data.TestMatrix body, string projectId)
             {
-                return new CreateRequest(service, body, projectId);
+                return new CreateRequest(this.service, body, projectId);
             }
 
             /// <summary>
             /// Creates and runs a matrix of tests according to the given specifications. Unsupported environments will
             /// be returned in the state UNSUPPORTED. A test matrix is limited to use at most 2000 devices in parallel.
-            /// May return any of the following canonical error codes: - PERMISSION_DENIED - if the user is not
-            /// authorized to write to project - INVALID_ARGUMENT - if the request is malformed or if the matrix tries
-            /// to use too many simultaneous devices.
+            /// The returned matrix will not yet contain the executions that will be created for this matrix. Execution
+            /// creation happens later on and will require a call to GetTestMatrix. May return any of the following
+            /// canonical error codes: - PERMISSION_DENIED - if the user is not authorized to write to project -
+            /// INVALID_ARGUMENT - if the request is malformed or if the matrix tries to use too many simultaneous
+            /// devices.
             /// </summary>
             public class CreateRequest : TestingBaseServiceRequest<Google.Apis.Testing.v1.Data.TestMatrix>
             {
@@ -522,21 +899,25 @@ namespace Google.Apis.Testing.v1
             }
 
             /// <summary>
-            /// Checks the status of a test matrix. May return any of the following canonical error codes: -
-            /// PERMISSION_DENIED - if the user is not authorized to read project - INVALID_ARGUMENT - if the request is
-            /// malformed - NOT_FOUND - if the Test Matrix does not exist
+            /// Checks the status of a test matrix and the executions once they are created. The test matrix will
+            /// contain the list of test executions to run if and only if the resultStorage.toolResultsExecution fields
+            /// have been populated. Note: Flaky test executions may be added to the matrix at a later stage. May return
+            /// any of the following canonical error codes: - PERMISSION_DENIED - if the user is not authorized to read
+            /// project - INVALID_ARGUMENT - if the request is malformed - NOT_FOUND - if the Test Matrix does not exist
             /// </summary>
             /// <param name="projectId">Cloud project that owns the test matrix.</param>
             /// <param name="testMatrixId">Unique test matrix id which was assigned by the service.</param>
             public virtual GetRequest Get(string projectId, string testMatrixId)
             {
-                return new GetRequest(service, projectId, testMatrixId);
+                return new GetRequest(this.service, projectId, testMatrixId);
             }
 
             /// <summary>
-            /// Checks the status of a test matrix. May return any of the following canonical error codes: -
-            /// PERMISSION_DENIED - if the user is not authorized to read project - INVALID_ARGUMENT - if the request is
-            /// malformed - NOT_FOUND - if the Test Matrix does not exist
+            /// Checks the status of a test matrix and the executions once they are created. The test matrix will
+            /// contain the list of test executions to run if and only if the resultStorage.toolResultsExecution fields
+            /// have been populated. Note: Flaky test executions may be added to the matrix at a later stage. May return
+            /// any of the following canonical error codes: - PERMISSION_DENIED - if the user is not authorized to read
+            /// project - INVALID_ARGUMENT - if the request is malformed - NOT_FOUND - if the Test Matrix does not exist
             /// </summary>
             public class GetRequest : TestingBaseServiceRequest<Google.Apis.Testing.v1.Data.TestMatrix>
             {
@@ -612,7 +993,7 @@ namespace Google.Apis.Testing.v1
         /// <param name="environmentType">Required. The type of environment that should be listed.</param>
         public virtual GetRequest Get(GetRequest.EnvironmentTypeEnum environmentType)
         {
-            return new GetRequest(service, environmentType);
+            return new GetRequest(this.service, environmentType);
         }
 
         /// <summary>
@@ -905,6 +1286,10 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
 
+        /// <summary>Output only. Lab info of this device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labInfo")]
+        public virtual LabInfo LabInfo { get; set; }
+
         /// <summary>
         /// True if and only if tests with this model are recorded by stitching together screenshots. See
         /// use_low_spec_video_recording in device config.
@@ -921,6 +1306,10 @@ namespace Google.Apis.Testing.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>Version-specific information of an Android model.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("perVersionInfo")]
+        public virtual System.Collections.Generic.IList<PerAndroidVersionInfo> PerVersionInfo { get; set; }
 
         /// <summary>Screen density in DPI. This corresponds to ro.sf.lcd_density</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("screenDensity")]
@@ -951,10 +1340,7 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("tags")]
         public virtual System.Collections.Generic.IList<string> Tags { get; set; }
 
-        /// <summary>
-        /// URL of a thumbnail image (photo) of the device. e.g.
-        /// https://lh3.googleusercontent.com/90WcauuJiCYABEl8U0lcZeuS5STUbf2yW...
-        /// </summary>
+        /// <summary>URL of a thumbnail image (photo) of the device.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("thumbnailUrl")]
         public virtual string ThumbnailUrl { get; set; }
 
@@ -1137,7 +1523,7 @@ namespace Google.Apis.Testing.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Android application details based on application manifest and apk archive contents.</summary>
+    /// <summary>Android application details based on application manifest and archive contents.</summary>
     public class ApkDetail : Google.Apis.Requests.IDirectResponseSchema
     {
         [Newtonsoft.Json.JsonPropertyAttribute("apkManifest")]
@@ -1163,6 +1549,10 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("maxSdkVersion")]
         public virtual System.Nullable<int> MaxSdkVersion { get; set; }
 
+        /// <summary>Meta-data tags defined in the manifest.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
+        public virtual System.Collections.Generic.IList<Metadata> Metadata { get; set; }
+
         /// <summary>Minimum API level required for the application to run.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minSdkVersion")]
         public virtual System.Nullable<int> MinSdkVersion { get; set; }
@@ -1171,13 +1561,32 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("packageName")]
         public virtual string PackageName { get; set; }
 
+        /// <summary>Services contained in the tag.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("services")]
+        public virtual System.Collections.Generic.IList<Service> Services { get; set; }
+
         /// <summary>Specifies the API Level on which the application is designed to run.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("targetSdkVersion")]
         public virtual System.Nullable<int> TargetSdkVersion { get; set; }
 
-        /// <summary>Permissions declared to be used by the application</summary>
+        /// <summary>Feature usage tags defined in the manifest.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("usesFeature")]
+        public virtual System.Collections.Generic.IList<UsesFeature> UsesFeature { get; set; }
+
         [Newtonsoft.Json.JsonPropertyAttribute("usesPermission")]
         public virtual System.Collections.Generic.IList<string> UsesPermission { get; set; }
+
+        /// <summary>Permissions declared to be used by the application</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("usesPermissionTags")]
+        public virtual System.Collections.Generic.IList<UsesPermissionTag> UsesPermissionTags { get; set; }
+
+        /// <summary>Version number used internally by the app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versionCode")]
+        public virtual System.Nullable<long> VersionCode { get; set; }
+
+        /// <summary>Version number shown to users.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versionName")]
+        public virtual string VersionName { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1194,6 +1603,13 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("bundleLocation")]
         public virtual FileReference BundleLocation { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request object for cancelling a Device Session.</summary>
+    public class CancelDeviceSessionRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1248,10 +1664,10 @@ namespace Google.Apis.Testing.v1.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class Date : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1319,6 +1735,194 @@ namespace Google.Apis.Testing.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Protobuf message describing the device message, used from several RPCs.</summary>
+    public class DeviceSession : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _activeStartTimeRaw;
+
+        private object _activeStartTime;
+
+        /// <summary>Output only. The timestamp that the session first became ACTIVE.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("activeStartTime")]
+        public virtual string ActiveStartTimeRaw
+        {
+            get => _activeStartTimeRaw;
+            set
+            {
+                _activeStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _activeStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ActiveStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ActiveStartTimeDateTimeOffset instead.")]
+        public virtual object ActiveStartTime
+        {
+            get => _activeStartTime;
+            set
+            {
+                _activeStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _activeStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ActiveStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ActiveStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ActiveStartTimeRaw);
+            set => ActiveStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Required. The requested device</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("androidDevice")]
+        public virtual AndroidDevice AndroidDevice { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The time that the Session was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. The title of the DeviceSession to be presented in the UI.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>
+        /// Optional. If the device is still in use at this time, any connections will be ended and the SessionState
+        /// will transition from ACTIVE to FINISHED.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. The interval of time that this device must be interacted with before it transitions from ACTIVE
+        /// to TIMEOUT_INACTIVITY.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inactivityTimeout")]
+        public virtual object InactivityTimeout { get; set; }
+
+        /// <summary>
+        /// Optional. Name of the DeviceSession, e.g. "projects/{project_id}/deviceSessions/{session_id}"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Output only. Current state of the DeviceSession.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>
+        /// Output only. The historical state transitions of the session_state message including the current session
+        /// state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stateHistories")]
+        public virtual System.Collections.Generic.IList<SessionStateEvent> StateHistories { get; set; }
+
+        /// <summary>
+        /// Optional. The amount of time that a device will be initially allocated for. This can eventually be extended
+        /// with the UpdateDeviceSession RPC. Default: 15 minutes.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ttl")]
+        public virtual object Ttl { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Denotes whether Direct Access is supported, and by which client versions. DirectAccessService is currently
+    /// available as a preview to select developers. You can register today on behalf of you and your team at
+    /// https://developer.android.com/studio/preview/android-device-streaming
+    /// </summary>
+    public class DirectAccessVersionInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Whether direct access is supported at all. Clients are expected to filter down the device list to only
+        /// android models and versions which support Direct Access when that is the user intent.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("directAccessSupported")]
+        public virtual System.Nullable<bool> DirectAccessSupported { get; set; }
+
+        /// <summary>
+        /// Output only. Indicates client-device compatibility, where a device is known to work only with certain
+        /// workarounds implemented in the Android Studio client. Expected format "major.minor.micro.patch", e.g.
+        /// "5921.22.2211.8881706".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minimumAndroidStudioVersion")]
+        public virtual string MinimumAndroidStudioVersion { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Data about the relative number of devices running a given configuration of the Android platform.
     /// </summary>
@@ -1328,10 +1932,56 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("marketShare")]
         public virtual System.Nullable<double> MarketShare { get; set; }
 
+        private string _measurementTimeRaw;
+
+        private object _measurementTime;
+
         /// <summary>Output only. The time this distribution was measured.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("measurementTime")]
-        public virtual object MeasurementTime { get; set; }
+        public virtual string MeasurementTimeRaw
+        {
+            get => _measurementTimeRaw;
+            set
+            {
+                _measurementTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _measurementTimeRaw = value;
+            }
+        }
 
+        /// <summary><seealso cref="object"/> representation of <see cref="MeasurementTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use MeasurementTimeDateTimeOffset instead.")]
+        public virtual object MeasurementTime
+        {
+            get => _measurementTime;
+            set
+            {
+                _measurementTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _measurementTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="MeasurementTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? MeasurementTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(MeasurementTimeRaw);
+            set => MeasurementTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
+    /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
+    /// </summary>
+    public class Empty : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1399,10 +2049,10 @@ namespace Google.Apis.Testing.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Response containing the details of the specified Android application APK.</summary>
+    /// <summary>Response containing the details of the specified Android application.</summary>
     public class GetApkDetailsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Details of the Android APK.</summary>
+        /// <summary>Details of the Android App.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("apkDetail")]
         public virtual ApkDetail ApkDetail { get; set; }
 
@@ -1570,6 +2220,10 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        /// <summary>Version-specific information of an iOS model.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("perVersionInfo")]
+        public virtual System.Collections.Generic.IList<PerIosVersionInfo> PerVersionInfo { get; set; }
+
         /// <summary>Screen density in DPI.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("screenDensity")]
         public virtual System.Nullable<int> ScreenDensity { get; set; }
@@ -1589,6 +2243,31 @@ namespace Google.Apis.Testing.v1.Data
         /// <summary>Tags for this dimension. Examples: "default", "preview", "deprecated".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tags")]
         public virtual System.Collections.Generic.IList<string> Tags { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A test that explores an iOS application on an iOS device.</summary>
+    public class IosRoboTest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The bundle ID for the app-under-test. This is determined by examining the application's "Info.plist" file.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appBundleId")]
+        public virtual string AppBundleId { get; set; }
+
+        /// <summary>Required. The ipa stored at this file should be used to run the test.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appIpa")]
+        public virtual FileReference AppIpa { get; set; }
+
+        /// <summary>
+        /// An optional Roboscript to customize the crawl. See
+        /// https://firebase.google.com/docs/test-lab/android/robo-scripts-reference for more information about
+        /// Roboscripts. The maximum allowed file size of the roboscript is 10MiB.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("roboScript")]
+        public virtual FileReference RoboScript { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1736,9 +2415,40 @@ namespace Google.Apis.Testing.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Lab specific information for a device.</summary>
+    public class LabInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Lab name where the device is hosted. If empty, the device is hosted in a Google owned lab.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Specifies an intent that starts the main launcher activity.</summary>
     public class LauncherActivityIntent : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A list of device sessions.</summary>
+    public class ListDeviceSessionsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The sessions matching the specified filter in the given cloud project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceSessions")]
+        public virtual System.Collections.Generic.IList<DeviceSession> DeviceSessions { get; set; }
+
+        /// <summary>
+        /// A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no
+        /// subsequent pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1776,12 +2486,51 @@ namespace Google.Apis.Testing.v1.Data
     public class ManualSharding : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. Group of packages, classes, and/or test methods to be run for each shard. When any physical
-        /// devices are selected, the number of test_targets_for_shard must be &amp;gt;= 1 and &amp;lt;= 50. When no
-        /// physical devices are selected, the number must be &amp;gt;= 1 and &amp;lt;= 500.
+        /// Required. Group of packages, classes, and/or test methods to be run for each manually-created shard. You
+        /// must specify at least one shard if this field is present. When you select one or more physical devices, the
+        /// number of repeated test_targets_for_shard must be &amp;lt;= 50. When you select one or more ARM virtual
+        /// devices, it must be &amp;lt;= 200. When you select only x86 virtual devices, it must be &amp;lt;= 500.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("testTargetsForShard")]
         public virtual System.Collections.Generic.IList<TestTargetsForShard> TestTargetsForShard { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes a single error or issue with a matrix.</summary>
+    public class MatrixErrorDetail : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. A human-readable message about how the error in the TestMatrix. Expands on the `reason` field
+        /// with additional details and possible options to fix the issue.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("message")]
+        public virtual string Message { get; set; }
+
+        /// <summary>
+        /// Output only. The reason for the error. This is a constant value in UPPER_SNAKE_CASE that identifies the
+        /// cause of the error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reason")]
+        public virtual string Reason { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A tag within a manifest. https://developer.android.com/guide/topics/manifest/meta-data-element.html
+    /// </summary>
+    public class Metadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The android:name value</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The android:value value</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("value")]
+        public virtual string Value { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1810,6 +2559,13 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("configurations")]
         public virtual System.Collections.Generic.IList<NetworkConfiguration> Configurations { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Skips the starting activity</summary>
+    public class NoActivityIntent : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1846,6 +2602,46 @@ namespace Google.Apis.Testing.v1.Data
         /// <summary>Tags for this dimension. Example: "default".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tags")]
         public virtual System.Collections.Generic.IList<string> Tags { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A version-specific information of an Android model.</summary>
+    public class PerAndroidVersionInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The number of online devices for an Android version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceCapacity")]
+        public virtual string DeviceCapacity { get; set; }
+
+        /// <summary>Output only. Identifies supported clients for DirectAccess for this Android version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("directAccessVersionInfo")]
+        public virtual DirectAccessVersionInfo DirectAccessVersionInfo { get; set; }
+
+        /// <summary>
+        /// Output only. The estimated wait time for a single interactive device session using Direct Access.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("interactiveDeviceAvailabilityEstimate")]
+        public virtual object InteractiveDeviceAvailabilityEstimate { get; set; }
+
+        /// <summary>An Android version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versionId")]
+        public virtual string VersionId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A version-specific information of an iOS model.</summary>
+    public class PerIosVersionInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The number of online devices for an iOS version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceCapacity")]
+        public virtual string DeviceCapacity { get; set; }
+
+        /// <summary>An iOS version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versionId")]
+        public virtual string VersionId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1959,6 +2755,10 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("launcherActivity")]
         public virtual LauncherActivityIntent LauncherActivity { get; set; }
 
+        /// <summary>Skips the starting activity</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("noActivity")]
+        public virtual NoActivityIntent NoActivity { get; set; }
+
         /// <summary>An intent that starts an activity with specific details.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startActivity")]
         public virtual StartActivityIntent StartActivity { get; set; }
@@ -1971,9 +2771,85 @@ namespace Google.Apis.Testing.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The section of an tag. https://developer.android.com/guide/topics/manifest/service-element</summary>
+    public class Service : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Intent filters in the service</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("intentFilter")]
+        public virtual System.Collections.Generic.IList<IntentFilter> IntentFilter { get; set; }
+
+        /// <summary>The android:name value</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A message encapsulating a series of Session states and the time that the DeviceSession first entered those
+    /// states.
+    /// </summary>
+    public class SessionStateEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _eventTimeRaw;
+
+        private object _eventTime;
+
+        /// <summary>Output only. The time that the session_state first encountered that state.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventTime")]
+        public virtual string EventTimeRaw
+        {
+            get => _eventTimeRaw;
+            set
+            {
+                _eventTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _eventTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EventTimeDateTimeOffset instead.")]
+        public virtual object EventTime
+        {
+            get => _eventTime;
+            set
+            {
+                _eventTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _eventTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EventTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EventTimeRaw);
+            set => EventTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. The session_state tracked by this event</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sessionState")]
+        public virtual string SessionState { get; set; }
+
+        /// <summary>Output only. A human-readable message to explain the state.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stateMessage")]
+        public virtual string StateMessage { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Output only. Details about the shard.</summary>
     public class Shard : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Output only. The estimated shard duration based on previous test case timing records, if available.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("estimatedShardDuration")]
+        public virtual object EstimatedShardDuration { get; set; }
+
         /// <summary>Output only. The total number of shards.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("numShards")]
         public virtual System.Nullable<int> NumShards { get; set; }
@@ -1982,7 +2858,7 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("shardIndex")]
         public virtual System.Nullable<int> ShardIndex { get; set; }
 
-        /// <summary>Output only. Test targets for each shard.</summary>
+        /// <summary>Output only. Test targets for each shard. Only set for manual sharding.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("testTargetsForShard")]
         public virtual TestTargetsForShard TestTargetsForShard { get; set; }
 
@@ -1997,9 +2873,43 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("manualSharding")]
         public virtual ManualSharding ManualSharding { get; set; }
 
+        /// <summary>Shards test based on previous test case timing records.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("smartSharding")]
+        public virtual SmartSharding SmartSharding { get; set; }
+
         /// <summary>Uniformly shards test cases given a total number of shards.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uniformSharding")]
         public virtual UniformSharding UniformSharding { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Shards test based on previous test case timing records.</summary>
+    public class SmartSharding : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The amount of time tests within a shard should take. Default: 300 seconds (5 minutes). The minimum allowed:
+        /// 120 seconds (2 minutes). The shard count is dynamically set based on time, up to the maximum shard limit
+        /// (described below). To guarantee at least one test case for each shard, the number of shards will not exceed
+        /// the number of test cases. Shard duration will be exceeded if: - The maximum shard limit is reached and there
+        /// is more calculated test time remaining to allocate into shards. - Any individual test is estimated to be
+        /// longer than the targeted shard duration. Shard duration is not guaranteed because smart sharding uses test
+        /// case history and default durations which may not be accurate. The rules for finding the test case timing
+        /// records are: - If the service has processed a test case in the last 30 days, the record of the latest
+        /// successful test case will be used. - For new test cases, the average duration of other known test cases will
+        /// be used. - If there are no previous test case timing records available, the default test case duration is 15
+        /// seconds. Because the actual shard duration can exceed the targeted shard duration, we recommend that you set
+        /// the targeted value at least 5 minutes less than the maximum allowed test timeout (45 minutes for physical
+        /// devices and 60 minutes for virtual), or that you use the custom test timeout value that you set. This
+        /// approach avoids cancelling the shard before all tests can finish. Note that there is a limit for maximum
+        /// number of shards. When you select one or more physical devices, the number of shards must be &amp;lt;= 50.
+        /// When you select one or more ARM virtual devices, it must be &amp;lt;= 200. When you select only x86 virtual
+        /// devices, it must be &amp;lt;= 500. To guarantee at least one test case for per shard, the number of shards
+        /// will not exceed the number of test cases. Each shard created counts toward daily test quota.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetedShardDuration")]
+        public virtual object TargetedShardDuration { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2118,9 +3028,42 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("testSpecification")]
         public virtual TestSpecification TestSpecification { get; set; }
 
+        private string _timestampRaw;
+
+        private object _timestamp;
+
         /// <summary>Output only. The time this test execution was initially created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timestamp")]
-        public virtual object Timestamp { get; set; }
+        public virtual string TimestampRaw
+        {
+            get => _timestampRaw;
+            set
+            {
+                _timestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimestampDateTimeOffset instead.")]
+        public virtual object Timestamp
+        {
+            get => _timestamp;
+            set
+            {
+                _timestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _timestamp = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimestampRaw);
+            set => TimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Where the results for this execution are written.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("toolResultsStep")]
@@ -2143,6 +3086,13 @@ namespace Google.Apis.Testing.v1.Data
         /// <summary>Required. The devices the tests are being executed on.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("environmentMatrix")]
         public virtual EnvironmentMatrix EnvironmentMatrix { get; set; }
+
+        /// <summary>
+        /// Output only. Details about why a matrix was deemed invalid. If multiple checks can be safely performed, they
+        /// will be reported but no assumptions should be made about the length of this list.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("extendedInvalidMatrixDetails")]
+        public virtual System.Collections.Generic.IList<MatrixErrorDetail> ExtendedInvalidMatrixDetails { get; set; }
 
         /// <summary>
         /// If true, only a single attempt at most will be made to run each execution/shard in the matrix. Flaky test
@@ -2196,9 +3146,42 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("testSpecification")]
         public virtual TestSpecification TestSpecification { get; set; }
 
+        private string _timestampRaw;
+
+        private object _timestamp;
+
         /// <summary>Output only. The time this test matrix was initially created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timestamp")]
-        public virtual object Timestamp { get; set; }
+        public virtual string TimestampRaw
+        {
+            get => _timestampRaw;
+            set
+            {
+                _timestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimestampDateTimeOffset instead.")]
+        public virtual object Timestamp
+        {
+            get => _timestamp;
+            set
+            {
+                _timestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _timestamp = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimestampRaw);
+            set => TimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2211,7 +3194,10 @@ namespace Google.Apis.Testing.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("account")]
         public virtual Account Account { get; set; }
 
-        /// <summary>APKs to install in addition to those being directly tested. Currently capped at 100.</summary>
+        /// <summary>
+        /// APKs to install in addition to those being directly tested. These will be installed after the app under
+        /// test. Currently capped at 100.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("additionalApks")]
         public virtual System.Collections.Generic.IList<Apk> AdditionalApks { get; set; }
 
@@ -2238,6 +3224,12 @@ namespace Google.Apis.Testing.v1.Data
         public virtual System.Collections.Generic.IList<DeviceFile> FilesToPush { get; set; }
 
         /// <summary>
+        /// Optional. Initial setup APKs to install before the app under test is installed. Currently capped at 100.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("initialSetupApks")]
+        public virtual System.Collections.Generic.IList<Apk> InitialSetupApks { get; set; }
+
+        /// <summary>
         /// The network traffic profile used for running the test. Available network profiles can be queried by using
         /// the NETWORK_CONFIGURATION environment type when calling
         /// TestEnvironmentDiscoveryService.GetTestEnvironmentCatalog.
@@ -2246,10 +3238,9 @@ namespace Google.Apis.Testing.v1.Data
         public virtual string NetworkProfile { get; set; }
 
         /// <summary>
-        /// Deprecated: Systrace uses Python 2 which has been sunset 2020-01-01. Support of Systrace may stop at any
-        /// time, at which point no Systrace file will be provided in the results. Systrace configuration for the run.
-        /// If set a systrace will be taken, starting on test start and lasting for the configured duration. The
-        /// systrace file thus obtained is put in the results bucket together with the other artifacts from the run.
+        /// Systrace configuration for the run. Deprecated: Systrace used Python 2 which was sunsetted on 2020-01-01.
+        /// Systrace is no longer supported in the Cloud Testing API, and no Systrace file will be provided in the
+        /// results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("systrace")]
         public virtual SystraceSetup Systrace { get; set; }
@@ -2280,6 +3271,10 @@ namespace Google.Apis.Testing.v1.Data
         /// <summary>Disables video recording. May reduce test latency.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("disableVideoRecording")]
         public virtual System.Nullable<bool> DisableVideoRecording { get; set; }
+
+        /// <summary>An iOS Robo test.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("iosRoboTest")]
+        public virtual IosRoboTest IosRoboTest { get; set; }
 
         /// <summary>An iOS application with a test loop.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("iosTestLoop")]
@@ -2314,7 +3309,7 @@ namespace Google.Apis.Testing.v1.Data
         /// <summary>
         /// Group of packages, classes, and/or test methods to be run for each shard. The targets need to be specified
         /// in AndroidJUnitRunner argument format. For example, "package com.my.packages" "class
-        /// com.my.package.MyClass". The number of shard_test_targets must be greater than 0.
+        /// com.my.package.MyClass". The number of test_targets must be greater than 0.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("testTargets")]
         public virtual System.Collections.Generic.IList<string> TestTargets { get; set; }
@@ -2408,18 +3403,55 @@ namespace Google.Apis.Testing.v1.Data
     }
 
     /// <summary>
-    /// Uniformly shards test cases given a total number of shards. For Instrumentation test, it will be translated to
-    /// "-e numShard" "-e shardIndex" AndroidJUnitRunner arguments. With uniform sharding enabled, specifying these
-    /// sharding arguments via environment_variables is invalid.
+    /// Uniformly shards test cases given a total number of shards. For instrumentation tests, it will be translated to
+    /// "-e numShard" and "-e shardIndex" AndroidJUnitRunner arguments. With uniform sharding enabled, specifying either
+    /// of these sharding arguments via `environment_variables` is invalid. Based on the sharding mechanism
+    /// AndroidJUnitRunner uses, there is no guarantee that test cases will be distributed uniformly across all shards.
     /// </summary>
     public class UniformSharding : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. Total number of shards. When any physical devices are selected, the number must be &amp;gt;= 1 and
-        /// &amp;lt;= 50. When no physical devices are selected, the number must be &amp;gt;= 1 and &amp;lt;= 500.
+        /// Required. The total number of shards to create. This must always be a positive number that is no greater
+        /// than the total number of test cases. When you select one or more physical devices, the number of shards must
+        /// be &amp;lt;= 50. When you select one or more ARM virtual devices, it must be &amp;lt;= 200. When you select
+        /// only x86 virtual devices, it must be &amp;lt;= 500.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("numShards")]
         public virtual System.Nullable<int> NumShards { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A tag within a manifest. https://developer.android.com/guide/topics/manifest/uses-feature-element.html
+    /// </summary>
+    public class UsesFeature : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The android:required value</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isRequired")]
+        public virtual System.Nullable<bool> IsRequired { get; set; }
+
+        /// <summary>The android:name value</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The tag within a manifest. https://developer.android.com/guide/topics/manifest/uses-permission-element.html
+    /// </summary>
+    public class UsesPermissionTag : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The android:name value</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxSdkVersion")]
+        public virtual System.Nullable<int> MaxSdkVersion { get; set; }
+
+        /// <summary>The android:name value</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

@@ -1,0 +1,31 @@
+{
+  "Google.Apis.WorkflowExecutions.v1.ProjectsResource+LocationsResource+WorkflowsResource+ExecutionsResource+GetRequest.ViewEnum": [
+    "EXECUTION_VIEW_UNSPECIFIED",
+    "BASIC",
+    "FULL"
+  ],
+  "Google.Apis.WorkflowExecutions.v1.ProjectsResource+LocationsResource+WorkflowsResource+ExecutionsResource+ListRequest.ViewEnum": [
+    "EXECUTION_VIEW_UNSPECIFIED",
+    "BASIC",
+    "FULL"
+  ],
+  "Google.Apis.WorkflowExecutions.v1.ProjectsResource+LocationsResource+WorkflowsResource+ExecutionsResource+StepEntriesResource+GetRequest.ViewEnum": [
+    "EXECUTION_ENTRY_VIEW_UNSPECIFIED",
+    "EXECUTION_ENTRY_VIEW_BASIC",
+    "EXECUTION_ENTRY_VIEW_DETAILED"
+  ],
+  "Google.Apis.WorkflowExecutions.v1.ProjectsResource+LocationsResource+WorkflowsResource+ExecutionsResource+StepEntriesResource+ListRequest.ViewEnum": [
+    "EXECUTION_ENTRY_VIEW_UNSPECIFIED",
+    "EXECUTION_ENTRY_VIEW_BASIC",
+    "EXECUTION_ENTRY_VIEW_DETAILED"
+  ],
+  "Google.Apis.WorkflowExecutions.v1.WorkflowExecutionsBaseServiceRequest<<TResponse>>.AltEnum": [
+    "json",
+    "media",
+    "proto"
+  ],
+  "Google.Apis.WorkflowExecutions.v1.WorkflowExecutionsBaseServiceRequest<<TResponse>>.XgafvEnum": [
+    "1",
+    "2"
+  ]
+}

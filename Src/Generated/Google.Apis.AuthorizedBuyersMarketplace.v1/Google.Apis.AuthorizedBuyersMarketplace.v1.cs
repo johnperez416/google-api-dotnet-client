@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
         {
             Bidders = new BiddersResource(this);
             Buyers = new BuyersResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://authorizedbuyersmarketplace.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://authorizedbuyersmarketplace.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
         public override string Name => "authorizedbuyersmarketplace";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://authorizedbuyersmarketplace.googleapis.com/";
-        #else
-            "https://authorizedbuyersmarketplace.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://authorizedbuyersmarketplace.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Authorized Buyers Marketplace API.</summary>
         public class Scope
@@ -277,7 +272,150 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
         public BiddersResource(Google.Apis.Services.IClientService service)
         {
             this.service = service;
+            AuctionPackages = new AuctionPackagesResource(service);
             FinalizedDeals = new FinalizedDealsResource(service);
+        }
+
+        /// <summary>Gets the AuctionPackages resource.</summary>
+        public virtual AuctionPackagesResource AuctionPackages { get; }
+
+        /// <summary>The "auctionPackages" collection of methods.</summary>
+        public class AuctionPackagesResource
+        {
+            private const string Resource = "auctionPackages";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public AuctionPackagesResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// List the auction packages. Buyers can use the URL path "/v1/buyers/{accountId}/auctionPackages" to list
+            /// auction packages for the current buyer and its clients. Bidders can use the URL path
+            /// "/v1/bidders/{accountId}/auctionPackages" to list auction packages for the bidder, its media planners,
+            /// its buyers, and all their clients.
+            /// </summary>
+            /// <param name="parent">
+            /// Required. Name of the parent buyer that can access the auction package. Format: `buyers/{accountId}`.
+            /// When used with a bidder account, the auction packages that the bidder, its media planners, its buyers
+            /// and clients are subscribed to will be listed, in the format `bidders/{accountId}`.
+            /// </param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>
+            /// List the auction packages. Buyers can use the URL path "/v1/buyers/{accountId}/auctionPackages" to list
+            /// auction packages for the current buyer and its clients. Bidders can use the URL path
+            /// "/v1/bidders/{accountId}/auctionPackages" to list auction packages for the bidder, its media planners,
+            /// its buyers, and all their clients.
+            /// </summary>
+            public class ListRequest : AuthorizedBuyersMarketplaceBaseServiceRequest<Google.Apis.AuthorizedBuyersMarketplace.v1.Data.ListAuctionPackagesResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. Name of the parent buyer that can access the auction package. Format:
+                /// `buyers/{accountId}`. When used with a bidder account, the auction packages that the bidder, its
+                /// media planners, its buyers and clients are subscribed to will be listed, in the format
+                /// `bidders/{accountId}`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. Optional query string using the [Cloud API list filtering
+                /// syntax](/authorized-buyers/apis/guides/list-filters). Only supported when parent is bidder.
+                /// Supported columns for filtering are: * displayName * createTime * updateTime * eligibleSeatIds
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
+
+                /// <summary>
+                /// Optional. An optional query string to sort auction packages using the [Cloud API sorting
+                /// syntax](https://cloud.google.com/apis/design/design_patterns#sorting_order). If no sort order is
+                /// specified, results will be returned in an arbitrary order. Only supported when parent is bidder.
+                /// Supported columns for sorting are: * displayName * createTime * updateTime
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string OrderBy { get; set; }
+
+                /// <summary>
+                /// Requested page size. The server may return fewer results than requested. Max allowed page size is
+                /// 500.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>The page token as returned. ListAuctionPackagesResponse.nextPageToken</summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/auctionPackages";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^bidders/[^/]+$",
+                    });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "orderBy",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
         }
 
         /// <summary>Gets the FinalizedDeals resource.</summary>
@@ -309,7 +447,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -336,9 +474,9 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
 
                 /// <summary>
                 /// Optional query string using the [Cloud API list filtering
-                /// syntax](https://developers.google.com/authorized-buyers/apis/guides/v2/list-filters) Supported
-                /// columns for filtering are: * deal.displayName * deal.dealType * deal.createTime * deal.updateTime *
-                /// deal.flightStartTime * deal.flightEndTime * dealServingStatus
+                /// syntax](https://developers.google.com/authorized-buyers/apis/guides/list-filters) Supported columns
+                /// for filtering are: * deal.displayName * deal.dealType * deal.createTime * deal.updateTime *
+                /// deal.flightStartTime * deal.flightEndTime * deal.eligibleSeatIds * dealServingStatus
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -350,7 +488,6 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// deal.displayName * deal.createTime * deal.updateTime * deal.flightStartTime * deal.flightEndTime *
                 /// rtbMetrics.bidRequests7Days * rtbMetrics.bids7Days * rtbMetrics.adImpressions7Days *
                 /// rtbMetrics.bidRate7Days * rtbMetrics.filteredBidRate7Days * rtbMetrics.mustBidRateCurrentMonth
-                /// Example: 'deal.displayName, deal.updateTime desc'
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string OrderBy { get; set; }
@@ -468,7 +605,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets an auction package given its name.</summary>
@@ -512,16 +649,28 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 }
             }
 
-            /// <summary>List the auction packages subscribed by a buyer and its clients.</summary>
+            /// <summary>
+            /// List the auction packages. Buyers can use the URL path "/v1/buyers/{accountId}/auctionPackages" to list
+            /// auction packages for the current buyer and its clients. Bidders can use the URL path
+            /// "/v1/bidders/{accountId}/auctionPackages" to list auction packages for the bidder, its media planners,
+            /// its buyers, and all their clients.
+            /// </summary>
             /// <param name="parent">
-            /// Required. Name of the parent buyer that can access the auction package. Format: `buyers/{accountId}`
+            /// Required. Name of the parent buyer that can access the auction package. Format: `buyers/{accountId}`.
+            /// When used with a bidder account, the auction packages that the bidder, its media planners, its buyers
+            /// and clients are subscribed to will be listed, in the format `bidders/{accountId}`.
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
-            /// <summary>List the auction packages subscribed by a buyer and its clients.</summary>
+            /// <summary>
+            /// List the auction packages. Buyers can use the URL path "/v1/buyers/{accountId}/auctionPackages" to list
+            /// auction packages for the current buyer and its clients. Bidders can use the URL path
+            /// "/v1/bidders/{accountId}/auctionPackages" to list auction packages for the bidder, its media planners,
+            /// its buyers, and all their clients.
+            /// </summary>
             public class ListRequest : AuthorizedBuyersMarketplaceBaseServiceRequest<Google.Apis.AuthorizedBuyersMarketplace.v1.Data.ListAuctionPackagesResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -532,10 +681,30 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 }
 
                 /// <summary>
-                /// Required. Name of the parent buyer that can access the auction package. Format: `buyers/{accountId}`
+                /// Required. Name of the parent buyer that can access the auction package. Format:
+                /// `buyers/{accountId}`. When used with a bidder account, the auction packages that the bidder, its
+                /// media planners, its buyers and clients are subscribed to will be listed, in the format
+                /// `bidders/{accountId}`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. Optional query string using the [Cloud API list filtering
+                /// syntax](/authorized-buyers/apis/guides/list-filters). Only supported when parent is bidder.
+                /// Supported columns for filtering are: * displayName * createTime * updateTime * eligibleSeatIds
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
+
+                /// <summary>
+                /// Optional. An optional query string to sort auction packages using the [Cloud API sorting
+                /// syntax](https://cloud.google.com/apis/design/design_patterns#sorting_order). If no sort order is
+                /// specified, results will be returned in an arbitrary order. Only supported when parent is bidder.
+                /// Supported columns for sorting are: * displayName * createTime * updateTime
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string OrderBy { get; set; }
 
                 /// <summary>
                 /// Requested page size. The server may return fewer results than requested. Max allowed page size is
@@ -569,6 +738,22 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                         DefaultValue = null,
                         Pattern = @"^buyers/[^/]+$",
                     });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "orderBy",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
                     {
                         Name = "pageSize",
@@ -599,7 +784,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// </param>
             public virtual SubscribeRequest Subscribe(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.SubscribeAuctionPackageRequest body, string name)
             {
-                return new SubscribeRequest(service, body, name);
+                return new SubscribeRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -665,7 +850,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// </param>
             public virtual SubscribeClientsRequest SubscribeClients(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.SubscribeClientsRequest body, string auctionPackage)
             {
-                return new SubscribeClientsRequest(service, body, auctionPackage);
+                return new SubscribeClientsRequest(this.service, body, auctionPackage);
             }
 
             /// <summary>
@@ -730,7 +915,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// </param>
             public virtual UnsubscribeRequest Unsubscribe(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.UnsubscribeAuctionPackageRequest body, string name)
             {
-                return new UnsubscribeRequest(service, body, name);
+                return new UnsubscribeRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -794,7 +979,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// </param>
             public virtual UnsubscribeClientsRequest UnsubscribeClients(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.UnsubscribeClientsRequest body, string auctionPackage)
             {
-                return new UnsubscribeClientsRequest(service, body, auctionPackage);
+                return new UnsubscribeClientsRequest(this.service, body, auctionPackage);
             }
 
             /// <summary>
@@ -895,7 +1080,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// </param>
                 public virtual ActivateRequest Activate(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.ActivateClientUserRequest body, string name)
                 {
-                    return new ActivateRequest(service, body, name);
+                    return new ActivateRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -959,7 +1144,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.ClientUser body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1023,7 +1208,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// </param>
                 public virtual DeactivateRequest Deactivate(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.DeactivateClientUserRequest body, string name)
                 {
-                    return new DeactivateRequest(service, body, name);
+                    return new DeactivateRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1087,7 +1272,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1140,7 +1325,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Retrieves an existing client user.</summary>
@@ -1189,7 +1374,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists all client users for a specified client.</summary>
@@ -1270,7 +1455,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// <param name="name">Required. Format: `buyers/{buyerAccountId}/clients/{clientAccountId}`</param>
             public virtual ActivateRequest Activate(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.ActivateClientRequest body, string name)
             {
-                return new ActivateRequest(service, body, name);
+                return new ActivateRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -1326,7 +1511,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// <param name="parent">Required. The name of the buyer. Format: `buyers/{accountId}`</param>
             public virtual CreateRequest Create(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.Client body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a new client.</summary>
@@ -1382,7 +1567,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// <param name="name">Required. Format: `buyers/{buyerAccountId}/clients/{clientAccountId}`</param>
             public virtual DeactivateRequest Deactivate(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.DeactivateClientRequest body, string name)
             {
-                return new DeactivateRequest(service, body, name);
+                return new DeactivateRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -1437,7 +1622,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// <param name="name">Required. Format: `buyers/{accountId}/clients/{clientAccountId}`</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a client with a given resource name.</summary>
@@ -1482,7 +1667,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// <param name="parent">Required. The name of the buyer. Format: `buyers/{accountId}`</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all the clients for the current buyer.</summary>
@@ -1501,11 +1686,11 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
 
                 /// <summary>
                 /// Query string using the [Filtering
-                /// Syntax](https://developers.google.com/authorized-buyers/apis/guides/v2/list-filters) Supported
-                /// fields for filtering are: * partnerClientId Use this field to filter the clients by the
-                /// partnerClientId. For example, if the partnerClientId of the client is "1234", the value of this
-                /// field should be `partnerClientId = "1234"`, in order to get only the client whose partnerClientId is
-                /// "1234" in the response.
+                /// Syntax](https://developers.google.com/authorized-buyers/apis/guides/list-filters) Supported fields
+                /// for filtering are: * partnerClientId Use this field to filter the clients by the partnerClientId.
+                /// For example, if the partnerClientId of the client is "1234", the value of this field should be
+                /// `partnerClientId = "1234"`, in order to get only the client whose partnerClientId is "1234" in the
+                /// response.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -1576,7 +1761,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.Client body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates an existing client.</summary>
@@ -1600,10 +1785,10 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// List of fields to be updated. If empty or unspecified, the service will update all fields populated
                 /// in the update request excluding the output only fields and primitive fields with default value. Note
                 /// that explicit field mask is required in order to reset a primitive field back to its default value,
-                /// e.g. false for boolean fields, 0 for integer fields. A special field mask consisting of a single
-                /// path "*" can be used to indicate full replacement(the equivalent of PUT method), updatable fields
-                /// unset or unspecified in the input will be cleared or set to default value. Output only fields will
-                /// be ignored regardless of the value of updateMask.
+                /// for example, false for boolean fields, 0 for integer fields. A special field mask consisting of a
+                /// single path "*" can be used to indicate full replacement(the equivalent of PUT method), updatable
+                /// fields unset or unspecified in the input will be cleared or set to default value. Output only fields
+                /// will be ignored regardless of the value of updateMask.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual object UpdateMask { get; set; }
@@ -1678,7 +1863,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// </param>
             public virtual AddCreativeRequest AddCreative(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.AddCreativeRequest body, string deal)
             {
-                return new AddCreativeRequest(service, body, deal);
+                return new AddCreativeRequest(this.service, body, deal);
             }
 
             /// <summary>
@@ -1739,7 +1924,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// <param name="name">Required. Format: `buyers/{accountId}/finalizedDeals/{dealId}`</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a finalized deal given its name.</summary>
@@ -1792,7 +1977,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -1819,9 +2004,9 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
 
                 /// <summary>
                 /// Optional query string using the [Cloud API list filtering
-                /// syntax](https://developers.google.com/authorized-buyers/apis/guides/v2/list-filters) Supported
-                /// columns for filtering are: * deal.displayName * deal.dealType * deal.createTime * deal.updateTime *
-                /// deal.flightStartTime * deal.flightEndTime * dealServingStatus
+                /// syntax](https://developers.google.com/authorized-buyers/apis/guides/list-filters) Supported columns
+                /// for filtering are: * deal.displayName * deal.dealType * deal.createTime * deal.updateTime *
+                /// deal.flightStartTime * deal.flightEndTime * deal.eligibleSeatIds * dealServingStatus
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -1833,7 +2018,6 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// deal.displayName * deal.createTime * deal.updateTime * deal.flightStartTime * deal.flightEndTime *
                 /// rtbMetrics.bidRequests7Days * rtbMetrics.bids7Days * rtbMetrics.adImpressions7Days *
                 /// rtbMetrics.bidRate7Days * rtbMetrics.filteredBidRate7Days * rtbMetrics.mustBidRateCurrentMonth
-                /// Example: 'deal.displayName, deal.updateTime desc'
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string OrderBy { get; set; }
@@ -1909,19 +2093,19 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// <summary>
             /// Pauses serving of the given finalized deal. This call only pauses the serving status, and does not
             /// affect other fields of the finalized deal. Calling this method for an already paused deal has no effect.
-            /// This method only applies to programmatic guaranteed deals.
+            /// This method only applies to programmatic guaranteed deals and preferred deals.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">Required. Format: `buyers/{accountId}/finalizedDeals/{dealId}`</param>
             public virtual PauseRequest Pause(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.PauseFinalizedDealRequest body, string name)
             {
-                return new PauseRequest(service, body, name);
+                return new PauseRequest(this.service, body, name);
             }
 
             /// <summary>
             /// Pauses serving of the given finalized deal. This call only pauses the serving status, and does not
             /// affect other fields of the finalized deal. Calling this method for an already paused deal has no effect.
-            /// This method only applies to programmatic guaranteed deals.
+            /// This method only applies to programmatic guaranteed deals and preferred deals.
             /// </summary>
             public class PauseRequest : AuthorizedBuyersMarketplaceBaseServiceRequest<Google.Apis.AuthorizedBuyersMarketplace.v1.Data.FinalizedDeal>
             {
@@ -1970,19 +2154,21 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// <summary>
             /// Resumes serving of the given finalized deal. Calling this method for an running deal has no effect. If a
             /// deal is initially paused by the seller, calling this method will not resume serving of the deal until
-            /// the seller also resumes the deal. This method only applies to programmatic guaranteed deals.
+            /// the seller also resumes the deal. This method only applies to programmatic guaranteed deals and
+            /// preferred deals.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">Required. Format: `buyers/{accountId}/finalizedDeals/{dealId}`</param>
             public virtual ResumeRequest Resume(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.ResumeFinalizedDealRequest body, string name)
             {
-                return new ResumeRequest(service, body, name);
+                return new ResumeRequest(this.service, body, name);
             }
 
             /// <summary>
             /// Resumes serving of the given finalized deal. Calling this method for an running deal has no effect. If a
             /// deal is initially paused by the seller, calling this method will not resume serving of the deal until
-            /// the seller also resumes the deal. This method only applies to programmatic guaranteed deals.
+            /// the seller also resumes the deal. This method only applies to programmatic guaranteed deals and
+            /// preferred deals.
             /// </summary>
             public class ResumeRequest : AuthorizedBuyersMarketplaceBaseServiceRequest<Google.Apis.AuthorizedBuyersMarketplace.v1.Data.FinalizedDeal>
             {
@@ -2029,25 +2215,29 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             }
 
             /// <summary>
-            /// Sets the given finalized deal as ready to serve. By default, deals are ready to serve as soon as they're
-            /// finalized. A bidder can opt out of this feature by asking to be included in an allowlist. Once opted
-            /// out, finalized deals belonging to the bidder and its child seats will not start serving until this
-            /// method is called. This method is useful to the bidders who prefer to not receive bid requests before the
-            /// creative is ready. This method only applies to programmatic guaranteed deals.
+            /// Sets the given finalized deal as ready to serve. By default, deals are set as ready to serve as soon as
+            /// they're finalized. If you want to opt out of the default behavior, and manually indicate that deals are
+            /// ready to serve, ask your Technical Account Manager to add you to the allowlist. If you choose to use
+            /// this method, finalized deals belonging to the bidder and its child seats don't start serving until after
+            /// you call `setReadyToServe`, and after the deals become active. For example, you can use this method to
+            /// delay receiving bid requests until your creative is ready. This method only applies to programmatic
+            /// guaranteed deals.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="deal">Required. Format: `buyers/{accountId}/finalizedDeals/{dealId}`</param>
             public virtual SetReadyToServeRequest SetReadyToServe(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.SetReadyToServeRequest body, string deal)
             {
-                return new SetReadyToServeRequest(service, body, deal);
+                return new SetReadyToServeRequest(this.service, body, deal);
             }
 
             /// <summary>
-            /// Sets the given finalized deal as ready to serve. By default, deals are ready to serve as soon as they're
-            /// finalized. A bidder can opt out of this feature by asking to be included in an allowlist. Once opted
-            /// out, finalized deals belonging to the bidder and its child seats will not start serving until this
-            /// method is called. This method is useful to the bidders who prefer to not receive bid requests before the
-            /// creative is ready. This method only applies to programmatic guaranteed deals.
+            /// Sets the given finalized deal as ready to serve. By default, deals are set as ready to serve as soon as
+            /// they're finalized. If you want to opt out of the default behavior, and manually indicate that deals are
+            /// ready to serve, ask your Technical Account Manager to add you to the allowlist. If you choose to use
+            /// this method, finalized deals belonging to the bidder and its child seats don't start serving until after
+            /// you call `setReadyToServe`, and after the deals become active. For example, you can use this method to
+            /// delay receiving bid requests until your creative is ready. This method only applies to programmatic
+            /// guaranteed deals.
             /// </summary>
             public class SetReadyToServeRequest : AuthorizedBuyersMarketplaceBaseServiceRequest<Google.Apis.AuthorizedBuyersMarketplace.v1.Data.FinalizedDeal>
             {
@@ -2137,7 +2327,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// </param>
                 public virtual BatchUpdateRequest BatchUpdate(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.BatchUpdateDealsRequest body, string parent)
                 {
-                    return new BatchUpdateRequest(service, body, parent);
+                    return new BatchUpdateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Batch updates multiple deals in the same proposal.</summary>
@@ -2194,7 +2384,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a deal given its name. The deal is returned at its head revision.</summary>
@@ -2245,7 +2435,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -2326,7 +2516,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// number is incremented by the server whenever the proposal or its constituent deals are updated.
                 /// Note: The revision number is kept at a proposal level. The buyer of the API is expected to keep
                 /// track of the revision number after the last update operation and send it in as part of the next
-                /// update request. This way, if there are further changes on the server (e.g., seller making new
+                /// update request. This way, if there are further changes on the server (for example, seller making new
                 /// updates), then the server can detect conflicts and reject the proposed changes.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
@@ -2336,7 +2526,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.Deal body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -2345,7 +2535,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// number is incremented by the server whenever the proposal or its constituent deals are updated.
                 /// Note: The revision number is kept at a proposal level. The buyer of the API is expected to keep
                 /// track of the revision number after the last update operation and send it in as part of the next
-                /// update request. This way, if there are further changes on the server (e.g., seller making new
+                /// update request. This way, if there are further changes on the server (for example, seller making new
                 /// updates), then the server can detect conflicts and reject the proposed changes.
                 /// </summary>
                 public class PatchRequest : AuthorizedBuyersMarketplaceBaseServiceRequest<Google.Apis.AuthorizedBuyersMarketplace.v1.Data.Deal>
@@ -2369,10 +2559,10 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                     /// List of fields to be updated. If empty or unspecified, the service will update all fields
                     /// populated in the update request excluding the output only fields and primitive fields with
                     /// default value. Note that explicit field mask is required in order to reset a primitive field
-                    /// back to its default value, e.g. false for boolean fields, 0 for integer fields. A special field
-                    /// mask consisting of a single path "*" can be used to indicate full replacement(the equivalent of
-                    /// PUT method), updatable fields unset or unspecified in the input will be cleared or set to
-                    /// default value. Output only fields will be ignored regardless of the value of updateMask.
+                    /// back to its default value, for example, false for boolean fields, 0 for integer fields. A
+                    /// special field mask consisting of a single path "*" can be used to indicate full replacement(the
+                    /// equivalent of PUT method), updatable fields unset or unspecified in the input will be cleared or
+                    /// set to default value. Output only fields will be ignored regardless of the value of updateMask.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual object UpdateMask { get; set; }
@@ -2428,7 +2618,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// <param name="name">Name of the proposal. Format: `buyers/{accountId}/proposals/{proposalId}`</param>
             public virtual AcceptRequest Accept(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.AcceptProposalRequest body, string name)
             {
-                return new AcceptRequest(service, body, name);
+                return new AcceptRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -2483,15 +2673,21 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 }
             }
 
-            /// <summary>Creates a note for this proposal and sends to the seller.</summary>
+            /// <summary>
+            /// Creates a note for this proposal and sends to the seller. This method is not supported for proposals
+            /// with DealType set to 'PRIVATE_AUCTION'.
+            /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="proposal">Name of the proposal. Format: `buyers/{accountId}/proposals/{proposalId}`</param>
             public virtual AddNoteRequest AddNote(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.AddNoteRequest body, string proposal)
             {
-                return new AddNoteRequest(service, body, proposal);
+                return new AddNoteRequest(this.service, body, proposal);
             }
 
-            /// <summary>Creates a note for this proposal and sends to the seller.</summary>
+            /// <summary>
+            /// Creates a note for this proposal and sends to the seller. This method is not supported for proposals
+            /// with DealType set to 'PRIVATE_AUCTION'.
+            /// </summary>
             public class AddNoteRequest : AuthorizedBuyersMarketplaceBaseServiceRequest<Google.Apis.AuthorizedBuyersMarketplace.v1.Data.Proposal>
             {
                 /// <summary>Constructs a new AddNote request.</summary>
@@ -2548,7 +2744,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// <param name="proposal">Name of the proposal. Format: `buyers/{accountId}/proposals/{proposalId}`</param>
             public virtual CancelNegotiationRequest CancelNegotiation(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.CancelNegotiationRequest body, string proposal)
             {
-                return new CancelNegotiationRequest(service, body, proposal);
+                return new CancelNegotiationRequest(this.service, body, proposal);
             }
 
             /// <summary>
@@ -2604,18 +2800,18 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             }
 
             /// <summary>
-            /// Gets a proposal using its name. The proposal is returned at most recent revision. revision.
+            /// Gets a proposal using its resource name. The proposal is returned at the latest revision.
             /// </summary>
             /// <param name="name">
             /// Required. Name of the proposal. Format: `buyers/{accountId}/proposals/{proposalId}`
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
-            /// Gets a proposal using its name. The proposal is returned at most recent revision. revision.
+            /// Gets a proposal using its resource name. The proposal is returned at the latest revision.
             /// </summary>
             public class GetRequest : AuthorizedBuyersMarketplaceBaseServiceRequest<Google.Apis.AuthorizedBuyersMarketplace.v1.Data.Proposal>
             {
@@ -2657,22 +2853,22 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             }
 
             /// <summary>
-            /// Lists proposals. A filter expression (list filter syntax) may be specified to filter the results. This
-            /// will not list finalized versions of proposals that are being renegotiated; to retrieve these use the
-            /// finalizedProposals resource.
+            /// Lists proposals. A filter expression using [Cloud API list filtering
+            /// syntax](https://developers.google.com/authorized-buyers/apis/guides/list-filters) may be specified to
+            /// filter the results.
             /// </summary>
             /// <param name="parent">
             /// Required. Parent that owns the collection of proposals Format: `buyers/{accountId}`
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
-            /// Lists proposals. A filter expression (list filter syntax) may be specified to filter the results. This
-            /// will not list finalized versions of proposals that are being renegotiated; to retrieve these use the
-            /// finalizedProposals resource.
+            /// Lists proposals. A filter expression using [Cloud API list filtering
+            /// syntax](https://developers.google.com/authorized-buyers/apis/guides/list-filters) may be specified to
+            /// filter the results.
             /// </summary>
             public class ListRequest : AuthorizedBuyersMarketplaceBaseServiceRequest<Google.Apis.AuthorizedBuyersMarketplace.v1.Data.ListProposalsResponse>
             {
@@ -2691,8 +2887,8 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
 
                 /// <summary>
                 /// Optional query string using the [Cloud API list filtering
-                /// syntax](https://developers.google.com/authorized-buyers/apis/guides/v2/list-filters) Supported
-                /// columns for filtering are: * displayName * dealType * updateTime * state
+                /// syntax](https://developers.google.com/authorized-buyers/apis/guides/list-filters) Supported columns
+                /// for filtering are: * displayName * dealType * updateTime * state
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -2758,10 +2954,11 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
 
             /// <summary>
             /// Updates the proposal at the given revision number. If the revision number in the request is behind the
-            /// latest from the server, an error message will be returned. See FieldMask for how to use FieldMask. Only
-            /// fields specified in the UpdateProposalRequest.update_mask will be updated; Fields noted as 'Immutable'
-            /// or 'Output only' yet specified in the UpdateProposalRequest.update_mask will be ignored and left
-            /// unchanged. Updating a private auction proposal is not allowed and will result in an error.
+            /// latest one kept in the server, an error message will be returned. See FieldMask for how to use
+            /// FieldMask. Only fields specified in the UpdateProposalRequest.update_mask will be updated; Fields noted
+            /// as 'Immutable' or 'Output only' yet specified in the UpdateProposalRequest.update_mask will be ignored
+            /// and left unchanged. Updating a private auction proposal is only allowed for buyer private data, all
+            /// other fields are immutable.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -2770,15 +2967,16 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.Proposal body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
             /// Updates the proposal at the given revision number. If the revision number in the request is behind the
-            /// latest from the server, an error message will be returned. See FieldMask for how to use FieldMask. Only
-            /// fields specified in the UpdateProposalRequest.update_mask will be updated; Fields noted as 'Immutable'
-            /// or 'Output only' yet specified in the UpdateProposalRequest.update_mask will be ignored and left
-            /// unchanged. Updating a private auction proposal is not allowed and will result in an error.
+            /// latest one kept in the server, an error message will be returned. See FieldMask for how to use
+            /// FieldMask. Only fields specified in the UpdateProposalRequest.update_mask will be updated; Fields noted
+            /// as 'Immutable' or 'Output only' yet specified in the UpdateProposalRequest.update_mask will be ignored
+            /// and left unchanged. Updating a private auction proposal is only allowed for buyer private data, all
+            /// other fields are immutable.
             /// </summary>
             public class PatchRequest : AuthorizedBuyersMarketplaceBaseServiceRequest<Google.Apis.AuthorizedBuyersMarketplace.v1.Data.Proposal>
             {
@@ -2801,10 +2999,10 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 /// List of fields to be updated. If empty or unspecified, the service will update all fields populated
                 /// in the update request excluding the output only fields and primitive fields with default value. Note
                 /// that explicit field mask is required in order to reset a primitive field back to its default value,
-                /// e.g. false for boolean fields, 0 for integer fields. A special field mask consisting of a single
-                /// path "*" can be used to indicate full replacement(the equivalent of PUT method), updatable fields
-                /// unset or unspecified in the input will be cleared or set to default value. Output only fields will
-                /// be ignored regardless of the value of updateMask.
+                /// for example, false for boolean fields, 0 for integer fields. A special field mask consisting of a
+                /// single path "*" can be used to indicate full replacement(the equivalent of PUT method), updatable
+                /// fields unset or unspecified in the input will be cleared or set to default value. Output only fields
+                /// will be ignored regardless of the value of updateMask.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual object UpdateMask { get; set; }
@@ -2860,7 +3058,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// </param>
             public virtual SendRfpRequest SendRfp(Google.Apis.AuthorizedBuyersMarketplace.v1.Data.SendRfpRequest body, string buyer)
             {
-                return new SendRfpRequest(service, body, buyer);
+                return new SendRfpRequest(this.service, body, buyer);
             }
 
             /// <summary>
@@ -2941,7 +3139,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the requested publisher profile by name.</summary>
@@ -2985,16 +3183,22 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
                 }
             }
 
-            /// <summary>Lists publisher profiles</summary>
+            /// <summary>
+            /// Lists publisher profiles. The returned publisher profiles aren't in any defined order. The order of the
+            /// results might change. A new publisher profile can appear in any place in the list of returned results.
+            /// </summary>
             /// <param name="parent">
             /// Required. Parent that owns the collection of publisher profiles Format: `buyers/{buyerId}`
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
-            /// <summary>Lists publisher profiles</summary>
+            /// <summary>
+            /// Lists publisher profiles. The returned publisher profiles aren't in any defined order. The order of the
+            /// results might change. A new publisher profile can appear in any place in the list of returned results.
+            /// </summary>
             public class ListRequest : AuthorizedBuyersMarketplaceBaseServiceRequest<Google.Apis.AuthorizedBuyersMarketplace.v1.Data.ListPublisherProfilesResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -3012,7 +3216,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1
 
                 /// <summary>
                 /// Optional query string using the [Cloud API list filtering]
-                /// (https://developers.google.com/authorized-buyers/apis/guides/v2/list-filters) syntax.
+                /// (https://developers.google.com/authorized-buyers/apis/guides/list-filters) syntax.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -3163,15 +3367,55 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
     /// </summary>
     public class AuctionPackage : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time the auction package was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The buyer that created this auction package. Format: `buyers/{buyerAccountId}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creator")]
         public virtual string Creator { get; set; }
+
+        /// <summary>
+        /// Output only. If set, this field contains the DSP specific seat id set by the media planner account that is
+        /// considered the owner of this deal. The seat ID is in the calling DSP's namespace.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dealOwnerSeatId")]
+        public virtual string DealOwnerSeatId { get; set; }
 
         /// <summary>Output only. A description of the auction package.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -3182,6 +3426,13 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         public virtual string DisplayName { get; set; }
 
         /// <summary>
+        /// Output only. If set, this field identifies a seat that the media planner selected as the owner of this
+        /// auction package. This is a seat ID in the DSP's namespace that was provided to the media planner.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eligibleSeatIds")]
+        public virtual System.Collections.Generic.IList<string> EligibleSeatIds { get; set; }
+
+        /// <summary>
         /// Immutable. The unique identifier for the auction package. Format:
         /// `buyers/{accountId}/auctionPackages/{auctionPackageId}` The auction_package_id part of name is sent in the
         /// BidRequest to all RTB bidders and is returned as deal_id by the bidder in the BidResponse.
@@ -3190,18 +3441,66 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Output only. The list of clients of the current buyer that are subscribed to the AuctionPackage. Format:
-        /// `buyers/{buyerAccountId}/clients/{clientAccountId}`
+        /// Output only. The list of buyers that are subscribed to the AuctionPackage. This field is only populated when
+        /// calling as a bidder. Format: `buyers/{buyerAccountId}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subscribedBuyers")]
+        public virtual System.Collections.Generic.IList<string> SubscribedBuyers { get; set; }
+
+        /// <summary>
+        /// Output only. When calling as a buyer, the list of clients of the current buyer that are subscribed to the
+        /// AuctionPackage. When calling as a bidder, the list of clients that are subscribed to the AuctionPackage
+        /// owned by the bidder or its buyers. Format: `buyers/{buyerAccountId}/clients/{clientAccountId}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("subscribedClients")]
         public virtual System.Collections.Generic.IList<string> SubscribedClients { get; set; }
+
+        /// <summary>
+        /// Output only. The list of media planners that are subscribed to the AuctionPackage. This field is only
+        /// populated when calling as a bidder.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subscribedMediaPlanners")]
+        public virtual System.Collections.Generic.IList<MediaPlanner> SubscribedMediaPlanners { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
 
         /// <summary>
         /// Output only. Time the auction package was last updated. This value is only increased when this auction
         /// package is updated but never when a buyer subscribed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3327,6 +3626,12 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
     /// <summary>Message captures data about the creatives in the deal.</summary>
     public class CreativeRequirements : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Output only. The format of the creative, only applicable for programmatic guaranteed and preferred deals.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("creativeFormat")]
+        public virtual string CreativeFormat { get; set; }
+
         /// <summary>Output only. Specifies the creative pre-approval policy.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creativePreApprovalPolicy")]
         public virtual string CreativePreApprovalPolicy { get; set; }
@@ -3336,11 +3641,25 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         public virtual string CreativeSafeFrameCompatibility { get; set; }
 
         /// <summary>
+        /// Output only. The max duration of the video creative in milliseconds. only applicable for deals with video
+        /// creatives.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxAdDurationMs")]
+        public virtual System.Nullable<long> MaxAdDurationMs { get; set; }
+
+        /// <summary>
         /// Output only. Specifies the creative source for programmatic deals. PUBLISHER means creative is provided by
         /// seller and ADVERTISER means creative is provided by the buyer.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("programmaticCreativeSource")]
         public virtual string ProgrammaticCreativeSource { get; set; }
+
+        /// <summary>
+        /// Output only. Skippable video ads allow viewers to skip ads after 5 seconds. Only applicable for deals with
+        /// video creatives.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("skippableAdType")]
+        public virtual string SkippableAdType { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3431,13 +3750,14 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         /// <summary>
         /// Output only. When the client field is populated, this field refers to the buyer who creates and manages the
         /// client buyer and gets billed on behalf of the client buyer; when the buyer field is populated, this field is
-        /// the same value as buyer. Format : `buyers/{buyerAccountId}`
+        /// the same value as buyer; when the deal belongs to a media planner account, this field will be empty. Format
+        /// : `buyers/{buyerAccountId}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("billedBuyer")]
         public virtual string BilledBuyer { get; set; }
 
         /// <summary>
-        /// Output only. Refers to a buyer in The Realtime-bidding API. Format: `buyers/{buyerAccountId}`
+        /// Output only. Refers to a buyer in Real-time Bidding API's Buyer resource. Format: `buyers/{buyerAccountId}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("buyer")]
         public virtual string Buyer { get; set; }
@@ -3448,9 +3768,42 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("client")]
         public virtual string Client { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time of the deal creation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Metadata about the creatives of this deal.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creativeRequirements")]
@@ -3477,26 +3830,108 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         public virtual string DisplayName { get; set; }
 
         /// <summary>
+        /// Output only. If set, this field contains the list of DSP specific seat ids set by media planners that are
+        /// eligible to transact on this deal. The seat ID is in the calling DSP's namespace.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eligibleSeatIds")]
+        public virtual System.Collections.Generic.IList<string> EligibleSeatIds { get; set; }
+
+        /// <summary>
         /// Specified by buyers in request for proposal (RFP) to notify publisher the total estimated spend for the
         /// proposal. Publishers will receive this information and send back proposed deals accordingly.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("estimatedGrossSpend")]
         public virtual Money EstimatedGrossSpend { get; set; }
 
+        private string _flightEndTimeRaw;
+
+        private object _flightEndTime;
+
         /// <summary>
         /// Proposed flight end time of the deal. This will generally be stored in a granularity of a second. A value is
         /// not necessary for Private Auction deals.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("flightEndTime")]
-        public virtual object FlightEndTime { get; set; }
+        public virtual string FlightEndTimeRaw
+        {
+            get => _flightEndTimeRaw;
+            set
+            {
+                _flightEndTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _flightEndTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FlightEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FlightEndTimeDateTimeOffset instead.")]
+        public virtual object FlightEndTime
+        {
+            get => _flightEndTime;
+            set
+            {
+                _flightEndTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _flightEndTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FlightEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FlightEndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FlightEndTimeRaw);
+            set => FlightEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _flightStartTimeRaw;
+
+        private object _flightStartTime;
 
         /// <summary>
         /// Proposed flight start time of the deal. This will generally be stored in the granularity of one second since
-        /// deal serving starts at seconds boundary. Any time specified with more granularity (e.g., in milliseconds)
-        /// will be truncated towards the start of time in seconds.
+        /// deal serving starts at seconds boundary. Any time specified with more granularity (for example, in
+        /// milliseconds) will be truncated towards the start of time in seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("flightStartTime")]
-        public virtual object FlightStartTime { get; set; }
+        public virtual string FlightStartTimeRaw
+        {
+            get => _flightStartTimeRaw;
+            set
+            {
+                _flightStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _flightStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FlightStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FlightStartTimeDateTimeOffset instead.")]
+        public virtual object FlightStartTime
+        {
+            get => _flightStartTime;
+            set
+            {
+                _flightStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _flightStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="FlightStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FlightStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FlightStartTimeRaw);
+            set => FlightStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. Refers to a buyer in Real-time Bidding API's Buyer resource. This field represents a media
+        /// planner (For example, agency or big advertiser).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mediaPlanner")]
+        public virtual MediaPlanner MediaPlanner { get; set; }
 
         /// <summary>
         /// Immutable. The unique identifier of the deal. Auto-generated by the server when a deal is created. Format:
@@ -3548,9 +3983,42 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("targeting")]
         public virtual MarketplaceTargeting Targeting { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time when the deal was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3578,7 +4046,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
     /// <summary>Message contains details about how the deal will be paced.</summary>
     public class DeliveryControl : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Output only. Specifies roadblocking in a master companion lineitem.</summary>
+        /// <summary>Output only. Specifies roadblocking in a main companion lineitem.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("companionDeliveryType")]
         public virtual string CompanionDeliveryType { get; set; }
 
@@ -3608,8 +4076,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3620,9 +4087,9 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
     /// <summary>
     /// A finalized deal is a snapshot of the deal when both buyer and seller accept the deal. The buyer or seller can
     /// update the deal after it's been finalized and renegotiate on the deal targeting, terms and other fields, while
-    /// at the same time the finalized snapshot of the deal can still be retrieved via this API. The finalized deal
+    /// at the same time the finalized snapshot of the deal can still be retrieved using this API. The finalized deal
     /// contains a copy of the deal as it existed when most recently finalized, as well as fields related to deal
-    /// serving such as pause/resume status, RTB metrics, etc.
+    /// serving such as pause/resume status, RTB metrics, and more.
     /// </summary>
     public class FinalizedDeal : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3642,7 +4109,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         public virtual string DealServingStatus { get; set; }
 
         /// <summary>
-        /// The resource name of the finalized deal. Format: `buyers/{accountId}/finalizeddeals/{finalizedDealId}`
+        /// The resource name of the finalized deal. Format: `buyers/{accountId}/finalizedDeals/{finalizedDealId}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -3715,6 +4182,17 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         /// <summary>A list of inventory sizes to be included.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("targetedInventorySizes")]
         public virtual System.Collections.Generic.IList<AdSize> TargetedInventorySizes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Targeting of the inventory types a bid request can originate from.</summary>
+    public class InventoryTypeTargeting : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of targeted inventory types for the bid request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inventoryTypes")]
+        public virtual System.Collections.Generic.IList<string> InventoryTypes { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3836,15 +4314,22 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
     }
 
     /// <summary>
-    /// Targeting represents different criteria that can be used to target inventory. For example, they can choose to
-    /// target inventory only if the user is in the US. Multiple types of targeting are always applied as a logical AND,
-    /// unless noted otherwise.
+    /// Targeting represents different criteria that can be used to target deals or auction packages. For example, they
+    /// can choose to target inventory only if the user is in the US. Multiple types of targeting are always applied as
+    /// a logical AND, unless noted otherwise.
     /// </summary>
     public class MarketplaceTargeting : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Daypart targeting information.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("daypartTargeting")]
         public virtual DayPartTargeting DaypartTargeting { get; set; }
+
+        /// <summary>
+        /// Output only. The sensitive content category label IDs excluded. Refer to this file
+        /// https://storage.googleapis.com/adx-rtb-dictionaries/content-labels.txt for category IDs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludedSensitiveCategoryIds")]
+        public virtual System.Collections.Generic.IList<System.Nullable<long>> ExcludedSensitiveCategoryIds { get; set; }
 
         /// <summary>Output only. Geo criteria IDs to be included/excluded.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("geoTargeting")]
@@ -3854,24 +4339,48 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("inventorySizeTargeting")]
         public virtual InventorySizeTargeting InventorySizeTargeting { get; set; }
 
-        /// <summary>Output only. Placement targeting information, e.g., URL, mobile applications.</summary>
+        /// <summary>Output only. Inventory type targeting information.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inventoryTypeTargeting")]
+        public virtual InventoryTypeTargeting InventoryTypeTargeting { get; set; }
+
+        /// <summary>Output only. Placement targeting information, for example, URL, mobile applications.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("placementTargeting")]
         public virtual PlacementTargeting PlacementTargeting { get; set; }
 
-        /// <summary>Output only. Technology targeting information, e.g., operating system, device category.</summary>
+        /// <summary>
+        /// Output only. Technology targeting information, for example, operating system, device category.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("technologyTargeting")]
         public virtual TechnologyTargeting TechnologyTargeting { get; set; }
 
         /// <summary>
-        /// Buyer user list targeting information. User lists can be uploaded via
+        /// Buyer user list targeting information. User lists can be uploaded using
         /// https://developers.google.com/authorized-buyers/rtb/bulk-uploader.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userListTargeting")]
         public virtual CriteriaTargeting UserListTargeting { get; set; }
 
+        /// <summary>
+        /// Output only. The verticals included or excluded as defined in
+        /// https://developers.google.com/authorized-buyers/rtb/downloads/publisher-verticals
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verticalTargeting")]
+        public virtual CriteriaTargeting VerticalTargeting { get; set; }
+
         /// <summary>Output only. Video targeting information.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("videoTargeting")]
         public virtual VideoTargeting VideoTargeting { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes a single Media Planner account.</summary>
+    public class MediaPlanner : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. Account ID of the media planner.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("accountId")]
+        public virtual string AccountId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3919,9 +4428,42 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
     /// </summary>
     public class Note : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. When this note was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The role who created the note.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creatorRole")]
@@ -3964,8 +4506,8 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
     }
 
     /// <summary>
-    /// Represents targeting about where the ads can appear, e.g., certain sites or mobile applications. Different
-    /// placement targeting types will be logically OR'ed.
+    /// Represents targeting about where the ads can appear, for example, certain sites or mobile applications.
+    /// Different placement targeting types will be logically OR'ed.
     /// </summary>
     public class PlacementTargeting : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4026,7 +4568,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Buyers are allowed to store certain types of private data in a proposal or deal.</summary>
+    /// <summary>Buyers are allowed to store certain types of private data in a proposal.</summary>
     public class PrivateData : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -4047,7 +4589,9 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("fixedPrice")]
         public virtual Price FixedPrice { get; set; }
 
-        /// <summary>Count of guaranteed looks.</summary>
+        /// <summary>
+        /// Count of guaranteed looks. For CPD deals, buyer changes to guaranteed_looks will be ignored.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("guaranteedLooks")]
         public virtual System.Nullable<long> GuaranteedLooks { get; set; }
 
@@ -4057,7 +4601,10 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("impressionCap")]
         public virtual System.Nullable<long> ImpressionCap { get; set; }
 
-        /// <summary>Daily minimum looks for CPD deal types.</summary>
+        /// <summary>
+        /// Daily minimum looks for CPD deal types. For CPD deals, buyer should negotiate on this field instead of
+        /// guaranteed_looks.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minimumDailyLooks")]
         public virtual System.Nullable<long> MinimumDailyLooks { get; set; }
 
@@ -4188,9 +4735,42 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("termsAndConditions")]
         public virtual string TermsAndConditions { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time when the proposal was last revised.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4290,7 +4870,7 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         public virtual string SamplePageUrl { get; set; }
 
         /// <summary>
-        /// Up to three key metrics and rankings. For example "#1 Mobile News Site for 20 Straight Months".
+        /// Up to three key metrics and rankings. For example, "#1 Mobile News Site for 20 Straight Months".
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("topHeadlines")]
         public virtual System.Collections.Generic.IList<string> TopHeadlines { get; set; }
@@ -4392,19 +4972,87 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("estimatedGrossSpend")]
         public virtual Money EstimatedGrossSpend { get; set; }
 
+        private string _flightEndTimeRaw;
+
+        private object _flightEndTime;
+
         /// <summary>
         /// Required. Proposed flight end time of the RFP. A timestamp in RFC3339 UTC "Zulu" format. Note that the
         /// specified value will be truncated to a granularity of one second.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("flightEndTime")]
-        public virtual object FlightEndTime { get; set; }
+        public virtual string FlightEndTimeRaw
+        {
+            get => _flightEndTimeRaw;
+            set
+            {
+                _flightEndTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _flightEndTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FlightEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FlightEndTimeDateTimeOffset instead.")]
+        public virtual object FlightEndTime
+        {
+            get => _flightEndTime;
+            set
+            {
+                _flightEndTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _flightEndTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FlightEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FlightEndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FlightEndTimeRaw);
+            set => FlightEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _flightStartTimeRaw;
+
+        private object _flightStartTime;
 
         /// <summary>
         /// Required. Proposed flight start time of the RFP. A timestamp in RFC3339 UTC "Zulu" format. Note that the
         /// specified value will be truncated to a granularity of one second.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("flightStartTime")]
-        public virtual object FlightStartTime { get; set; }
+        public virtual string FlightStartTimeRaw
+        {
+            get => _flightStartTimeRaw;
+            set
+            {
+                _flightStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _flightStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FlightStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FlightStartTimeDateTimeOffset instead.")]
+        public virtual object FlightStartTime
+        {
+            get => _flightStartTime;
+            set
+            {
+                _flightStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _flightStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="FlightStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FlightStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FlightStartTimeRaw);
+            set => FlightStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Geo criteria IDs to be targeted. Refer to Geo tables.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("geoTargeting")]
@@ -4492,23 +5140,26 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
     public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }
@@ -4520,11 +5171,11 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
     /// <summary>Represents a time zone from the [IANA Time Zone Database](https://www.iana.org/time-zones).</summary>
     public class TimeZone : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>IANA Time Zone Database time zone, e.g. "America/New_York".</summary>
+        /// <summary>IANA Time Zone Database time zone. For example "America/New_York".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
 
-        /// <summary>Optional. IANA Time Zone Database version number, e.g. "2019a".</summary>
+        /// <summary>Optional. IANA Time Zone Database version number. For example "2019a".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
         public virtual string Version { get; set; }
 
@@ -4567,10 +5218,11 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
         /// <summary>
         /// List of fields to be updated. If empty or unspecified, the service will update all fields populated in the
         /// update request excluding the output only fields and primitive fields with default value. Note that explicit
-        /// field mask is required in order to reset a primitive field back to its default value, e.g. false for boolean
-        /// fields, 0 for integer fields. A special field mask consisting of a single path "*" can be used to indicate
-        /// full replacement(the equivalent of PUT method), updatable fields unset or unspecified in the input will be
-        /// cleared or set to default value. Output only fields will be ignored regardless of the value of updateMask.
+        /// field mask is required in order to reset a primitive field back to its default value, for example, false for
+        /// boolean fields, 0 for integer fields. A special field mask consisting of a single path "*" can be used to
+        /// indicate full replacement(the equivalent of PUT method), updatable fields unset or unspecified in the input
+        /// will be cleared or set to default value. Output only fields will be ignored regardless of the value of
+        /// updateMask.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
         public virtual object UpdateMask { get; set; }
@@ -4580,8 +5232,8 @@ namespace Google.Apis.AuthorizedBuyersMarketplace.v1.Data
     }
 
     /// <summary>
-    /// Represents a list of targeted and excluded URLs (e.g., google.com). For Private Auction Deals, URLs are either
-    /// included or excluded. For Programmatic Guaranteed and Preferred Deals, this doesn't apply.
+    /// Represents a list of targeted and excluded URLs (for example, google.com). For Private Auction Deals, URLs are
+    /// either included or excluded. For Programmatic Guaranteed and Preferred Deals, this doesn't apply.
     /// </summary>
     public class UriTargeting : Google.Apis.Requests.IDirectResponseSchema
     {

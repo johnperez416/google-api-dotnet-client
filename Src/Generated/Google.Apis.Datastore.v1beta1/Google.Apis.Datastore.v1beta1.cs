@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Datastore.v1beta1
         public DatastoreService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://datastore.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://datastore.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Datastore.v1beta1
         public override string Name => "datastore";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://datastore.googleapis.com/";
-        #else
-            "https://datastore.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://datastore.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Datastore API.</summary>
         public class Scope
@@ -298,7 +293,7 @@ namespace Google.Apis.Datastore.v1beta1
         /// <param name="projectId">Project ID against which to make the request.</param>
         public virtual ExportRequest Export(Google.Apis.Datastore.v1beta1.Data.GoogleDatastoreAdminV1beta1ExportEntitiesRequest body, string projectId)
         {
-            return new ExportRequest(service, body, projectId);
+            return new ExportRequest(this.service, body, projectId);
         }
 
         /// <summary>
@@ -362,7 +357,7 @@ namespace Google.Apis.Datastore.v1beta1
         /// <param name="projectId">Project ID against which to make the request.</param>
         public virtual ImportRequest Import(Google.Apis.Datastore.v1beta1.Data.GoogleDatastoreAdminV1beta1ImportEntitiesRequest body, string projectId)
         {
-            return new ImportRequest(service, body, projectId);
+            return new ImportRequest(this.service, body, projectId);
         }
 
         /// <summary>
@@ -421,9 +416,42 @@ namespace Google.Apis.Datastore.v1beta1.Data
     /// <summary>Metadata common to all Datastore Admin operations.</summary>
     public class GoogleDatastoreAdminV1CommonMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The time the operation ended, either successfully or otherwise.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The client-assigned labels which were provided when the operation was created. May also include additional
@@ -436,9 +464,42 @@ namespace Google.Apis.Datastore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("operationType")]
         public virtual string OperationType { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time that work began on the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The current state of the Operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -451,7 +512,8 @@ namespace Google.Apis.Datastore.v1beta1.Data
     /// <summary>
     /// Metadata for Datastore to Firestore migration operations. The DatastoreFirestoreMigration operation is not
     /// started by the end-user via an explicit "creation" method. This is an intentional deviation from the LRO design
-    /// pattern. This singleton resource can be accessed at: "projects/{project_id}/datastore-firestore-migration"
+    /// pattern. This singleton resource can be accessed at:
+    /// "projects/{project_id}/operations/datastore-firestore-migration"
     /// </summary>
     public class GoogleDatastoreAdminV1DatastoreFirestoreMigrationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -588,6 +650,56 @@ namespace Google.Apis.Datastore.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// An event signifying the start of a new step in a [migration from Cloud Datastore to Cloud Firestore in Datastore
+    /// mode](https://cloud.google.com/datastore/docs/upgrade-to-firestore).
+    /// </summary>
+    public class GoogleDatastoreAdminV1MigrationProgressEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Details for the `PREPARE` step.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("prepareStepDetails")]
+        public virtual GoogleDatastoreAdminV1PrepareStepDetails PrepareStepDetails { get; set; }
+
+        /// <summary>Details for the `REDIRECT_WRITES` step.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("redirectWritesStepDetails")]
+        public virtual GoogleDatastoreAdminV1RedirectWritesStepDetails RedirectWritesStepDetails { get; set; }
+
+        /// <summary>
+        /// The step that is starting. An event with step set to `START` indicates that the migration has been reverted
+        /// back to the initial pre-migration state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("step")]
+        public virtual string Step { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An event signifying a change in state of a [migration from Cloud Datastore to Cloud Firestore in Datastore
+    /// mode](https://cloud.google.com/datastore/docs/upgrade-to-firestore).
+    /// </summary>
+    public class GoogleDatastoreAdminV1MigrationStateEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The new state of the migration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Details for the `PREPARE` step.</summary>
+    public class GoogleDatastoreAdminV1PrepareStepDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The concurrency mode this database will use when it reaches the `REDIRECT_WRITES` step.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("concurrencyMode")]
+        public virtual string ConcurrencyMode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Measures the progress of a particular metric.</summary>
     public class GoogleDatastoreAdminV1Progress : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -607,12 +719,56 @@ namespace Google.Apis.Datastore.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Details for the `REDIRECT_WRITES` step.</summary>
+    public class GoogleDatastoreAdminV1RedirectWritesStepDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Ths concurrency mode for this database.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("concurrencyMode")]
+        public virtual string ConcurrencyMode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Metadata common to all Datastore Admin operations.</summary>
     public class GoogleDatastoreAdminV1beta1CommonMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The time the operation ended, either successfully or otherwise.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The client-assigned labels which were provided when the operation was created. May also include additional
@@ -625,9 +781,42 @@ namespace Google.Apis.Datastore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("operationType")]
         public virtual string OperationType { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time that work began on the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The current state of the Operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -849,8 +1038,8 @@ namespace Google.Apis.Datastore.v1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.

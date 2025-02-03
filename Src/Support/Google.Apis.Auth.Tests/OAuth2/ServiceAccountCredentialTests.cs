@@ -19,9 +19,11 @@ using Google.Apis.Http;
 using Google.Apis.Json;
 using Google.Apis.Tests.Mocks;
 using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Cryptography;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Xunit;
@@ -31,35 +33,109 @@ namespace Google.Apis.Auth.Tests.OAuth2
 {
     public class ServiceAccountCredentialTests
     {
+        private const string FakeUniverseDomain = "fake.universe.domain.com";
+
+        private static readonly Assembly CurrentAssembly = typeof(ServiceAccountCredentialTests).Assembly;
         private static readonly TimeSpan JwtLifetime = TimeSpan.FromMinutes(60);
         private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         [Fact]
+        public void Default_RecommendedRetryPolicy()
+        {
+            var mockFactory = new MockHttpClientFactory(new FetchesTokenMessageHandler());
+            string fakeServiceAccountCredentialFileContents = GetContents(DefaultCredentialProviderTests.ServiceAccountCredentialMinimalFileName);
+            var credentialParameters = NewtonsoftJsonSerializer.Instance.Deserialize<JsonCredentialParameters>(fakeServiceAccountCredentialFileContents);
+            var credential = new ServiceAccountCredential(new ServiceAccountCredential.Initializer(credentialParameters.ClientEmail)
+            {
+                HttpClientFactory = mockFactory
+            }.FromPrivateKey(credentialParameters.PrivateKey));
+
+            var args = Assert.Single(mockFactory.AllCreateHttpClientArgs);
+
+            var retryInitializer = Assert.Single(args.Initializers);
+            Assert.Same(GoogleAuthConsts.OAuth2TokenEndpointRecommendedRetry, retryInitializer);
+        }
+
+        [Fact]
+        public void BadResponse503AndRecommended_RecommendedRetryPolicy()
+        {
+            var mockFactory = new MockHttpClientFactory(new FetchesTokenMessageHandler()); string fakeServiceAccountCredentialFileContents = GetContents(DefaultCredentialProviderTests.ServiceAccountCredentialMinimalFileName);
+            var credentialParameters = NewtonsoftJsonSerializer.Instance.Deserialize<JsonCredentialParameters>(fakeServiceAccountCredentialFileContents);
+            var credential = new ServiceAccountCredential(new ServiceAccountCredential.Initializer(credentialParameters.ClientEmail)
+            {
+                HttpClientFactory = mockFactory,
+                DefaultExponentialBackOffPolicy = ExponentialBackOffPolicy.UnsuccessfulResponse503 | ExponentialBackOffPolicy.RecommendedOrDefault
+            }.FromPrivateKey(credentialParameters.PrivateKey));
+
+            var args = Assert.Single(mockFactory.AllCreateHttpClientArgs);
+
+            var retryInitializer = Assert.Single(args.Initializers);
+            Assert.Same(GoogleAuthConsts.OAuth2TokenEndpointRecommendedRetry, retryInitializer);
+        }
+
+        [Fact]
+        public void ExceptionAndRecommended_RecommendedAndOtherRetryPolicy()
+        {
+            var mockFactory = new MockHttpClientFactory(new FetchesTokenMessageHandler());
+            string fakeServiceAccountCredentialFileContents = GetContents(DefaultCredentialProviderTests.ServiceAccountCredentialMinimalFileName);
+            var credentialParameters = NewtonsoftJsonSerializer.Instance.Deserialize<JsonCredentialParameters>(fakeServiceAccountCredentialFileContents);
+            var credential = new ServiceAccountCredential(new ServiceAccountCredential.Initializer(credentialParameters.ClientEmail)
+            {
+                HttpClientFactory = mockFactory,
+                DefaultExponentialBackOffPolicy = ExponentialBackOffPolicy.Exception | ExponentialBackOffPolicy.RecommendedOrDefault
+            }.FromPrivateKey(credentialParameters.PrivateKey));
+
+            var args = Assert.Single(mockFactory.AllCreateHttpClientArgs);
+
+            Assert.Equal(2, args.Initializers.Count);
+            Assert.Contains(GoogleAuthConsts.OAuth2TokenEndpointRecommendedRetry, args.Initializers);
+            Assert.Contains(args.Initializers, initializer => initializer != GoogleAuthConsts.OAuth2TokenEndpointRecommendedRetry);
+        }
+
+        [Fact]
+        public void NoRetryPolicy()
+        {
+            var mockFactory = new MockHttpClientFactory(new FetchesTokenMessageHandler());
+            string fakeServiceAccountCredentialFileContents = GetContents(DefaultCredentialProviderTests.ServiceAccountCredentialMinimalFileName);
+            var credentialParameters = NewtonsoftJsonSerializer.Instance.Deserialize<JsonCredentialParameters>(fakeServiceAccountCredentialFileContents);
+            var credential = new ServiceAccountCredential(new ServiceAccountCredential.Initializer(credentialParameters.ClientEmail)
+            {
+                HttpClientFactory = mockFactory,
+                DefaultExponentialBackOffPolicy = ExponentialBackOffPolicy.None
+            }.FromPrivateKey(credentialParameters.PrivateKey));
+
+            var args = Assert.Single(mockFactory.AllCreateHttpClientArgs);
+
+            Assert.Empty(args.Initializers);
+        }
+
+        [Theory]
+        [InlineData(ExponentialBackOffPolicy.Exception)]
+        [InlineData(ExponentialBackOffPolicy.UnsuccessfulResponse503)]
+        [InlineData(ExponentialBackOffPolicy.Exception | ExponentialBackOffPolicy.UnsuccessfulResponse503)]
+        public void OtherThanRecommendedRetryPolicy(ExponentialBackOffPolicy policy)
+        {
+            var mockFactory = new MockHttpClientFactory(new FetchesTokenMessageHandler());
+            string fakeServiceAccountCredentialFileContents = GetContents(DefaultCredentialProviderTests.ServiceAccountCredentialMinimalFileName);
+            var credentialParameters = NewtonsoftJsonSerializer.Instance.Deserialize<JsonCredentialParameters>(fakeServiceAccountCredentialFileContents);
+            var credential = new ServiceAccountCredential(new ServiceAccountCredential.Initializer(credentialParameters.ClientEmail)
+            {
+                HttpClientFactory = mockFactory,
+                DefaultExponentialBackOffPolicy = policy
+            }.FromPrivateKey(credentialParameters.PrivateKey));
+
+            var args = Assert.Single(mockFactory.AllCreateHttpClientArgs);
+
+            var retryInitializer = Assert.Single(args.Initializers);
+            Assert.NotSame(GoogleAuthConsts.OAuth2TokenEndpointRecommendedRetry, retryInitializer);
+        }
+
+        [Fact]
         public async Task ValidLocallySignedAccessToken_FromPrivateKey()
         {
-            const string dummyServiceAccountCredentialFileContents = @"{
-""private_key_id"": ""PRIVATE_KEY_ID"",
-""private_key"": ""-----BEGIN PRIVATE KEY-----
-MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAJJM6HT4s6btOsfe
-2x4zrzrwSUtmtR37XTTi0sPARTDF8uzmXy8UnE5RcVJzEH5T2Ssz/ylX4Sl/CI4L
-no1l8j9GiHJb49LSRjWe4Yx936q0Xj9H0R1HTxvjUPqwAsTwy2fKBTog+q1frqc9
-o8s2r6LYivUGDVbhuUzCaMJsf+x3AgMBAAECgYEAi0FTXsu/zRswAUGaViQiHjrL
-uU65BSHXNVjV/2fLNEKnGWGqpli68z1IXY+S2nwbUak7rnGsq9/0F6jtsW+hZbLk
-KXUOuuExpeC5Kd6ngWX/f2jqmhlUabiQijU9cVk7pMq8EHkRtvlosnMTUAEzempu
-QUPwn1PZHhmJkBvZ4lECQQDCErrxl+e3BwUDcS0yVEEmCNSG6xdXs2878b8rzbe7
-3Mmi6SuuOLi3PU92J+j+f/MOdtYrk13mEDdYmd5dhrt5AkEAwPvDEsDT/W4y4h5n
-gv1awGBA5aLFE1JNWM/Gwn4D1cGpEDHKFREaBtxMDCASpHJuw8r7zUywpKhmBZcf
-GS37bwJANdSAKfbafLfjuhqwUJ9yGpykZm/a36aTmerp/bpn1iHdg+RtCzwMcDb/
-TWSwibbvsflgWmHbz657y4WSWhq+8QJAWrpCNN/ZCk2zuGDo80lfUBAwkoVat8G6
-wWU1oZyS+vzIGef+hLb8kHsjeZPej9eIwZ39kcBbT54oELrCkRjwGwJAQ8V2A7lT
-ZUp8AsbVqF6rbLiiUfJMo2btGclQu4DEVyS+ymFA65tXDLUuR9EDqJYdqHNZJ5B8
-4Z5p2prkjWTLcA==
------END PRIVATE KEY-----"",
-""client_email"": ""CLIENT_EMAIL"",
-""client_id"": ""CLIENT_ID"",
-""type"": ""service_account""}";
+            string fakeServiceAccountCredentialFileContents = GetContents(DefaultCredentialProviderTests.ServiceAccountCredentialMinimalFileName);
 
-            var credentialParameters = NewtonsoftJsonSerializer.Instance.Deserialize<JsonCredentialParameters>(dummyServiceAccountCredentialFileContents);
+            var credentialParameters = NewtonsoftJsonSerializer.Instance.Deserialize<JsonCredentialParameters>(fakeServiceAccountCredentialFileContents);
             var initializer = new ServiceAccountCredential.Initializer(credentialParameters.ClientEmail)
             {
                 Clock = new MockClock(new DateTime(2016, 1, 1, 0, 0, 0, DateTimeKind.Utc))
@@ -79,49 +155,57 @@ ZUp8AsbVqF6rbLiiUfJMo2btGclQu4DEVyS+ymFA65tXDLUuR9EDqJYdqHNZJ5B8
             Assert.Equal(expectedToken, accessToken);
         }
 
+        [Fact]
+        public async Task ValidLocallySignedAccessToken_FromPrivateKey_AlsoOnRetry()
+        {
+            string fakeServiceAccountCredentialFileContents = GetContents(DefaultCredentialProviderTests.ServiceAccountCredentialMinimalFileName);
+
+            var credentialParameters = NewtonsoftJsonSerializer.Instance.Deserialize<JsonCredentialParameters>(fakeServiceAccountCredentialFileContents);
+            var messageHandler = new FetchesTokenMessageHandler();
+            var initializer = new ServiceAccountCredential.Initializer(credentialParameters.ClientEmail)
+            {
+                Clock = new MockClock(new DateTime(2016, 1, 1, 0, 0, 0, DateTimeKind.Utc)),
+                // This fetches the token "a" from server side.
+                HttpClientFactory = new MockHttpClientFactory(new FetchesTokenMessageHandler()),
+            };
+            var cred = new ServiceAccountCredential(initializer.FromPrivateKey(credentialParameters.PrivateKey));
+            
+            // We obtain an access token normally.
+            // This should be a self signed token not a server side token.
+            string accessToken = await cred.GetAccessTokenForRequestAsync("http://authurl/");
+            Assert.NotNull(accessToken);
+            Assert.NotEmpty(accessToken);
+            Assert.NotEqual("a", accessToken);
+            Assert.Equal(0, messageHandler.Calls);
+            // If the token was fetched from the service, the TokenResponse would have been set.
+            Assert.Null(cred.Token);
+
+            var fakeFailedRequest = new HttpRequestMessage();
+            fakeFailedRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            // On retries (i.e. when handling unsuccesful requests), we shouldn't need to
+            // attempt to fetch a server side token if the credential is using self signed JWTs.
+            // Instead a JWT will be regenerated, if needed, next time the request is attempted.
+            bool handled = await cred.HandleResponseAsync(new HandleUnsuccessfulResponseArgs
+            {
+                CurrentFailedTry = 1,
+                TotalTries = 3,
+                Request = fakeFailedRequest,
+                Response = new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized)
+            });
+            Assert.True(handled);
+            Assert.Equal(0, messageHandler.Calls);
+            // If the token was fetched from the service, the TokenResponse would have been set.
+            Assert.Null(cred.Token);
+        }
+
         private string ToHex(byte[] bs) => bs.Aggregate("", (acc, b) => acc + b.ToString("X2"));
 
         [Fact]
         public void Pkcs8Decoding_FromPrivateKey()
         {
-            // This is a service credential, as downloaded from the Cloud Console on 2016-12-08
-            string dummyServiceAccountCredentialFileContents = @"
-{
-""type"": ""service_account"",
-""private_key_id"": ""71bb487f3414f923196c5c433cf20a8c0f689562"",
-""private_key"": ""-----BEGIN PRIVATE KEY-----
-MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDQvitimRPWE2YM
-tOADu3jb89UQmqZz8ao6NFoAjYiYDdg/6UBUTscQwGb6rIvllMtcT6BdS4rMKUwv
-kSQFbO14gi7FiZBj4eJKveObVnt9RPxqT1txBieEPFtgJalh0GpyCo5GUmadgqe+
-89ZF+VQBFE2hMoZhBny/FDba2/qDIk1GmksdXjC67ZI0EYRCGI71eXjOpQX/wOJs
-tosMQRSTHjPKhZKvZTtjksMRWm8SlQoyORZKXsV6OGKztOieIvncKoX3lrkSupax
-J+v0yYQJIF2uTFDbbCDL86bgUJ7TyZJ9X1AvrnHGNWp+QzQBDbTCMpZCuY81ARdu
-BHeacqR3AgMBAAECggEAK7Cx+fgaO8Nhp6UwAff6KudVIB2OW1QokfglIlp9TX4Q
-VggnC75VUf9DTpJQ0aOcEN0lroFCMssuBAK37F7JMWDmEzhgvVco+wXVnsyyGh0X
-S9UCSZzFJptPcMdRNYTe0rG856EVk0AmhgQZRBoUaAls2iFuGN63u3KqrJJAU7O4
-MPofQizwNcMmiDqRV0rnU6HgmIRQ64hMMh1bnnw4I35esOXjO1O2PiwyyK0jHuVz
-eBNeD0wEXNLIP4CqDsQ0DKyBPKXZW4bmFnluq4s+VvgPMczUli7Ph0bM7G1oR0LF
-nZk8tSO9cZ4lLcZpY5mHg7lHzSE6oPAxrkPYoa+6IQKBgQD6I7KaUcmkQj+vOQ18
-sZCA28tXqjW2cGB4ThqG2uYeHK8khhjh/Pj07TFr8Xjpz1gNr1NNBJhR9Qs/dO9N
-WCXS6s0fsVz/gm8N36w7kcBe+Uo43UIt3U6xvZVG4eJYWe2B5+0sZeXzMfzGhwug
-VkinOJ0CoVpGFTByPrn17O9T8QKBgQDVoi5AO7jvL3nxLQyfXy6XhkHvmnrRU5hV
-eHrgO2+0TsjAHNRhGGrKTMDqCrMvJqxXbXAwNIKxPdzGCXjam4QzaXgp8+bJWHNe
-UNRfbWUxVo/Mzfp4owN6oCOVN2cTrnz/doFhuT1LjDj2KK5+hY6qtleH+h00XjCi
-0xrTGCpG5wKBgDy0pya+jKI5lb0Pqo9FhJ1ROkM3QrvZAACSa+uoekp6iaLijG1j
-+INwgRsCSmbr9CG2GBBL+i+Buc4Xse/iYaOTal6zq68y14LVcrYuRDKIa5PrVqFM
-4UlPikfekBEDGhn50FyDClCAJCmGIrMx3YX/vlMiF4eEovJG+NiPPPHxAoGBANQq
-qKJ0bbtmPEYQxot1HTGxTcSneDhyPEUOTYJqpQq+f9OEDkyL0msthR4rGD/Iubpu
-XtARJobeeGdZuuPpNYdVxNhteZQXuyQ9RF2tqKUyYcg1/P5YbzkW15/3EPDUByIz
-UFV8geqIzX1zc7EF9WWHiDDsbpq2vLjIzcg+JKabAoGAI7kuoGBdvIHne3Y3tucQ
-JzcnYI3bppbhyn1dmm8jsaaWrtBvFqCb1y1MjaoL4lNi+brdd6bpV5u447GBQfG8
-o3L1luXTksRPmwh5NbhXWl/ieiWc6WQL6sr8Q+vSYDKAo95zdhWJvWs+/v7NfWoF
-lK1DcBvq+IFLucBdi0/9hXE=
------END PRIVATE KEY-----"",
-""client_email"": ""CLIENT_EMAIL"",
-""client_id"": ""112326926692598796719""
-}";
+            string fakeServiceAccountCredentialFileContents = GetContents(DefaultCredentialProviderTests.ServiceAccountCredentialMinimalFileName);
 
-            var credentialParameters = NewtonsoftJsonSerializer.Instance.Deserialize<JsonCredentialParameters>(dummyServiceAccountCredentialFileContents);
+            var credentialParameters = NewtonsoftJsonSerializer.Instance.Deserialize<JsonCredentialParameters>(fakeServiceAccountCredentialFileContents);
             var initializer = new ServiceAccountCredential.Initializer(credentialParameters.ClientEmail)
             {
                 Clock = new MockClock(new DateTime(2016, 1, 1, 0, 0, 0, DateTimeKind.Utc))
@@ -129,20 +213,19 @@ lK1DcBvq+IFLucBdi0/9hXE=
             initializer.FromPrivateKey(credentialParameters.PrivateKey);
             var ps = initializer.Key.ExportParameters(true);
 
-            Assert.Equal("D0BE2B629913D613660CB4E003BB78DBF3D5109AA673F1AA3A345A008D88980DD83FE940544EC710C066FAAC8BE594CB5C4FA05D4B8ACC294C2F9124056CED78822EC5899063E1E24ABDE39B567B7D44FC6A4F5B710627843C5B6025A961D06A720A8E4652669D82A7BEF3D645F95401144DA1328661067CBF1436DADBFA83224D469A4B1D5E30BAED9234118442188EF57978CEA505FFC0E26CB68B0C4114931E33CA8592AF653B6392C3115A6F12950A3239164A5EC57A3862B3B4E89E22F9DC2A85F796B912BA96B127EBF4C98409205DAE4C50DB6C20CBF3A6E0509ED3C9927D5F502FAE71C6356A7E4334010DB4C2329642B98F3501176E04779A72A477", ToHex(ps.Modulus));
+            Assert.Equal("924CE874F8B3A6ED3AC7DEDB1E33AF3AF0494B66B51DFB5D34E2D2C3C04530C5F2ECE65F2F149C4E51715273107E53D92B33FF2957E1297F088E0B9E8D65F23F4688725BE3D2D246359EE18C7DDFAAB45E3F47D11D474F1BE350FAB002C4F0CB67CA053A20FAAD5FAEA73DA3CB36AFA2D88AF5060D56E1B94CC268C26C7FEC77", ToHex(ps.Modulus));
             Assert.Equal("010001", ToHex(ps.Exponent));
-            Assert.Equal("2BB0B1F9F81A3BC361A7A53001F7FA2AE755201D8E5B542891F825225A7D4D7E105608270BBE5551FF434E9250D1A39C10DD25AE814232CB2E0402B7EC5EC93160E6133860BD5728FB05D59ECCB21A1D174BD502499CC5269B4F70C7513584DED2B1BCE7A115934026860419441A1468096CDA216E18DEB7BB72AAAC924053B3B830FA1F422CF035C326883A91574AE753A1E0988450EB884C321D5B9E7C38237E5EB0E5E33B53B63E2C32C8AD231EE57378135E0F4C045CD2C83F80AA0EC4340CAC813CA5D95B86E616796EAB8B3E56F80F31CCD4962ECF8746CCEC6D684742C59D993CB523BD719E252DC66963998783B947CD213AA0F031AE43D8A1AFBA21", ToHex(ps.D));
-            Assert.Equal("FA23B29A51C9A4423FAF390D7CB19080DBCB57AA35B67060784E1A86DAE61E1CAF248618E1FCF8F4ED316BF178E9CF580DAF534D049851F50B3F74EF4D5825D2EACD1FB15CFF826F0DDFAC3B91C05EF94A38DD422DDD4EB1BD9546E1E25859ED81E7ED2C65E5F331FCC6870BA05648A7389D02A15A461530723EB9F5ECEF53F1", ToHex(ps.P));
-            Assert.Equal("D5A22E403BB8EF2F79F12D0C9F5F2E978641EF9A7AD1539855787AE03B6FB44EC8C01CD461186ACA4CC0EA0AB32F26AC576D70303482B13DDCC60978DA9B8433697829F3E6C958735E50D45F6D6531568FCCCDFA78A3037AA02395376713AE7CFF768161B93D4B8C38F628AE7E858EAAB65787FA1D345E30A2D31AD3182A46E7", ToHex(ps.Q));
-            Assert.Equal("3CB4A726BE8CA23995BD0FAA8F45849D513A433742BBD90000926BEBA87A4A7A89A2E28C6D63F88370811B024A66EBF421B618104BFA2F81B9CE17B1EFE261A3936A5EB3ABAF32D782D572B62E4432886B93EB56A14CE1494F8A47DE9011031A19F9D05C830A508024298622B331DD85FFBE5322178784A2F246F8D88F3CF1F1", ToHex(ps.DP));
-            Assert.Equal("D42AA8A2746DBB663C4610C68B751D31B14DC4A77838723C450E4D826AA50ABE7FD3840E4C8BD26B2D851E2B183FC8B9BA6E5ED0112686DE786759BAE3E9358755C4D86D799417BB243D445DADA8A53261C835FCFE586F3916D79FF710F0D407223350557C81EA88CD7D7373B105F565878830EC6E9AB6BCB8C8CDC83E24A69B", ToHex(ps.DQ));
-            Assert.Equal("23B92EA0605DBC81E77B7637B6E710273727608DDBA696E1CA7D5D9A6F23B1A696AED06F16A09BD72D4C8DAA0BE25362F9BADD77A6E9579BB8E3B18141F1BCA372F596E5D392C44F9B087935B8575A5FE27A259CE9640BEACAFC43EBD2603280A3DE73761589BD6B3EFEFECD7D6A0594AD43701BEAF8814BB9C05D8B4FFD8571", ToHex(ps.InverseQ));
+            Assert.Equal("8B41535ECBBFCD1B3001419A5624221E3ACBB94EB90521D73558D5FF67CB3442A71961AAA658BAF33D485D8F92DA7C1B51A93BAE71ACABDFF417A8EDB16FA165B2E429750EBAE131A5E0B929DEA78165FF7F68EA9A195469B8908A353D71593BA4CABC107911B6F968B273135001337A6A6E4143F09F53D91E1989901BD9E251", ToHex(ps.D));
+            Assert.Equal("C212BAF197E7B7070503712D3254412608D486EB1757B36F3BF1BF2BCDB7BBDCC9A2E92BAE38B8B73D4F7627E8FE7FF30E76D62B935DE610375899DE5D86BB79", ToHex(ps.P));
+            Assert.Equal("C0FBC312C0D3FD6E32E21E6782FD5AC06040E5A2C513524D58CFC6C27E03D5C1A91031CA15111A06DC4C0C2012A4726EC3CAFBCD4CB0A4A86605971F192DFB6F", ToHex(ps.Q));
+            Assert.Equal("35D48029F6DA7CB7E3BA1AB0509F721A9CA4666FDADFA69399EAE9FDBA67D621DD83E46D0B3C0C7036FF4D64B089B6EFB1F9605A61DBCFAE7BCB85925A1ABEF1", ToHex(ps.DP));
+            Assert.Equal("5ABA4234DFD90A4DB3B860E8F3495F50103092855AB7C1BAC16535A19C92FAFCC819E7FE84B6FC907B237993DE8FD788C19DFD91C05B4F9E2810BAC29118F01B", ToHex(ps.DQ));
+            Assert.Equal("43C57603B953654A7C02C6D5A85EAB6CB8A251F24CA366ED19C950BB80C45724BECA6140EB9B570CB52E47D103A8961DA8735927907CE19E69DA9AE48D64CB70", ToHex(ps.InverseQ));
         }
 
         [Fact]
         public async Task ValidLocallySignedAccessToken_FromX509Certificate()
         {
-#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETCOREAPP2_0 || NETCOREAPP2_1 || NET461
             const string sPfx = @"
 MIIGMQIBAzCCBfcGCSqGSIb3DQEHAaCCBegEggXkMIIF4DCCAt8GCSqGSIb3DQEHBqCCAtAwggLM
 AgEAMIICxQYJKoZIhvcNAQcBMBwGCiqGSIb3DQEMAQYwDgQImgNbotR3pnACAggAgIICmMHYqn7R
@@ -174,46 +257,6 @@ Sell3vQywF3jry7v/FMgPhoxJTAjBgkqhkiG9w0BCRUxFgQU+7ZMLd/K3gq6I9wxj3LcCb2tf5Uw
 MTAhMAkGBSsOAwIaBQAEFOM/amdwLHU0WBmyCw96Za0+5Z+PBAgvp7LF+Qwu+AICCAA=";
 
             var x509Cert = new X509Certificate2(Convert.FromBase64String(sPfx));
-#elif NET452 || NET46
-            const string sPrivateKey = @"
------BEGIN PRIVATE KEY-----
-MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALQoMIfUT93VMvb5
-4U5dsJLXD1D6z4o/VuVlNUaf5xH01qAv8Egpxe6f5frLB/p1eNyDjNIZ3QitD6aN
-9Vfh4ifg6txBuBJtIMfSDvRJITNZ2SjKJREbflZuBk0HINKYQk2H+3TIzUbE/pN4
-Cu6Mids5L/oVOnRWIe3bEC+PHR7ZAgMBAAECgYBI1qrwb+2ukeFeK59lcMnQRLVD
-l3RLv9ohOy80E7h38RbJgzhR5NnK5ck1AduC7vXjqihIVf6g4F+ghmq4knI94KPQ
-2fOyQGVV6jVeRVqMusx7tP9V1H26yABiK6TPklcCsWwADFmexfOxfIgbBGSmlbAd
-N2/ad1Xog1xDebrbEQJBAO+2qSIDX1ahfxUyvvcMaix6Mrh/OYKb5aH1Y/7MfAav
-lpbQavQHNvak2147aPNxy0ZvWdJ2HVA7hUMkgysYWSUCQQDAZalkZMSrve+Onh55
-U+w5xjLklhh8PhYxx8plT8ae9VG75dGvWSz/W81B3ILg2lrNU6o08NKBJdZsJYmc
-BeKlAkBtJh3zF9gEaTqlW1rqwKNjpyyLJ5r3JqczzLmAXnmmzbLi7vmULejP+5bL
-XH/YQZtOcgtTMmb8jm2Kegijyc1lAkANGt+e5v4+dIGMxVhuCzlb9hQhXdftHo2E
-dodivzxYN32Jvu25c+mMu0QP6GVBy53Dvp8pW/36rgkc9LGa3wvBAkEA7dGAl95T
-UeNFVfuzkYNtQppcSgrx1oTcpTHoNgcvk8AgBf4yDdJJyo0IUONmgJCVffc1aTWn
-nf/8cW9YC+0icQ==
------END PRIVATE KEY-----";
-            const string sCert = @"
-MIICNDCCAZ2gAwIBAgIJAKl3qU1+NsuuMA0GCSqGSIb3DQEBCwUAMDMxCzAJBgNV
-BAYTAkdCMRMwEQYDVQQIDApTb21lLVN0YXRlMQ8wDQYDVQQKDAZHb29nbGUwHhcN
-MTYwODEwMTQwOTQ2WhcNNDMxMjI3MTQwOTQ2WjAzMQswCQYDVQQGEwJHQjETMBEG
-A1UECAwKU29tZS1TdGF0ZTEPMA0GA1UECgwGR29vZ2xlMIGfMA0GCSqGSIb3DQEB
-AQUAA4GNADCBiQKBgQC0KDCH1E/d1TL2+eFOXbCS1w9Q+s+KP1blZTVGn+cR9Nag
-L/BIKcXun+X6ywf6dXjcg4zSGd0IrQ+mjfVX4eIn4OrcQbgSbSDH0g70SSEzWdko
-yiURG35WbgZNByDSmEJNh/t0yM1GxP6TeArujInbOS/6FTp0ViHt2xAvjx0e2QID
-AQABo1AwTjAdBgNVHQ4EFgQUMqzJi099PA8ML5CV1OSiHgiTGoUwHwYDVR0jBBgw
-FoAUMqzJi099PA8ML5CV1OSiHgiTGoUwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0B
-AQsFAAOBgQBQ9cMInb2rEcg8TTYq8MjDEegHWLUI9Dq/IvP/FHyKDczza4eX8m+G
-3buutN74pX2/GHRgqvqEvvUUuAQUnZ36k6KjTNxfzNLiSXDPNeYmy6PWsUZy4Rye
-/Van/ePiXdipTKMiUyl7V6dTjkE5p/e372wNVXUpcxOMmYdWmzSMvg==";
-
-            var x509Cert = new X509Certificate2(Convert.FromBase64String(sCert));
-            RSAParameters rsaParameters = Pkcs8.DecodeRsaParameters(sPrivateKey);
-            var privateKey = new System.Security.Cryptography.RSACryptoServiceProvider();
-            privateKey.ImportParameters(rsaParameters);
-            x509Cert.PrivateKey = privateKey;
-#else
-#error Unsupported target
-#endif
             Assert.True(x509Cert.HasPrivateKey);
 
             var initializer = new ServiceAccountCredential.Initializer("some-id")
@@ -408,15 +451,142 @@ ZUp8AsbVqF6rbLiiUfJMo2btGclQu4DEVyS+ymFA65tXDLUuR9EDqJYdqHNZJ5B8
             Assert.Equal("a", token);
         }
 
-        private class DummyAccessMethod : IAccessMethod
+        [Fact]
+        public async Task AccessToken_ExceptionRetry_NoDefaultRetry()
+        {
+            var clock = new MockClock(new DateTime(2016, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+            var handler = new ResponseExceptionOnFetchingTokenMessageHandler();
+            var initializer = new ServiceAccountCredential.Initializer("some-id")
+            {
+                // Let's force access token fetching
+                UseJwtAccessWithScopes = false,
+                Scopes = new[] { "scope1", "scope2" },
+                Clock = clock,
+                HttpClientFactory = new MockHttpClientFactory(handler)
+            }.FromPrivateKey(PrivateKey);
+            var cred = new ServiceAccountCredential(initializer);
+
+            await Assert.ThrowsAsync<HttpRequestException>(() => cred.GetAccessTokenForRequestAsync("uri0"));
+            Assert.Equal(1, handler.Calls);
+        }
+
+        [Fact]
+        public async Task AccessToken_ExceptionRetry_ConfiguredRetry()
+        {
+            var clock = new MockClock(new DateTime(2016, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+            var handler = new ResponseExceptionOnFetchingTokenMessageHandler();
+            var initializer = new ServiceAccountCredential.Initializer("some-id")
+            {
+                // Let's force access token fetching
+                UseJwtAccessWithScopes = false,
+                Scopes = new[] { "scope1", "scope2" },
+                Clock = clock,
+                HttpClientFactory = new MockHttpClientFactory(handler),
+                DefaultExponentialBackOffPolicy = ExponentialBackOffPolicy.Exception | ExponentialBackOffPolicy.UnsuccessfulResponse503
+            }.FromPrivateKey(PrivateKey);
+            var cred = new ServiceAccountCredential(initializer);
+
+            await Assert.ThrowsAsync<HttpRequestException>(() => cred.GetAccessTokenForRequestAsync("uri0"));
+            // Exceptions are retried 3 times by default.
+            Assert.Equal(3, handler.Calls);
+        }
+
+        private class FakeAccessMethod : IAccessMethod
         {
             public string GetAccessToken(HttpRequestMessage request) => throw new NotImplementedException();
             public void Intercept(HttpRequestMessage request, string accessToken) => throw new NotImplementedException();
         }
 
-        private class DummyHttpClientFactory : IHttpClientFactory
+        private class FakeHttpClientFactory : IHttpClientFactory
         {
             public ConfigurableHttpClient CreateHttpClient(CreateHttpClientArgs args) => null;
+        }
+
+        [Fact]
+        public async Task UniverseDomain_Default()
+        {
+            var credential = new ServiceAccountCredential(
+                new ServiceAccountCredential.Initializer("MyId", "MyTokenServerUrl")
+                .FromPrivateKey(PrivateKey)) as IGoogleCredential;
+
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, credential.GetUniverseDomain());
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, await credential.GetUniverseDomainAsync(default));
+        }
+
+        [Fact]
+        public async Task UniverseDomain_Custom()
+        {
+            var credential = new ServiceAccountCredential(
+                new ServiceAccountCredential.Initializer("MyId", "MyTokenServerUrl")
+                {
+                    UniverseDomain = FakeUniverseDomain,
+                    // So that we can set a custom universe domain as only self-signed JWTs are supported in universe domains other than googleapis.com.
+                    UseJwtAccessWithScopes = true
+                }.FromPrivateKey(PrivateKey)) as IGoogleCredential;
+
+            Assert.Equal(FakeUniverseDomain, credential.GetUniverseDomain());
+            Assert.Equal(FakeUniverseDomain, await credential.GetUniverseDomainAsync(default));
+        }
+
+        [Fact]
+        public void UniverseDomain_Custom_DomainWideDelegation() =>
+            Assert.Throws<InvalidOperationException>(() => new ServiceAccountCredential(
+                new ServiceAccountCredential.Initializer("MyId", "MyTokenServerUrl")
+                {
+                    UniverseDomain = FakeUniverseDomain,
+                    // So that we can set a custom universe domain as only self-signed JWTs are supported in universe domains other than googleapis.com.
+                    UseJwtAccessWithScopes = true,
+                    User = "usert@fake.com"
+                }.FromPrivateKey(PrivateKey)));
+
+        [Fact]
+        public void UniverseDomain_Custom_NoJwtsWithScopes_Implicit() =>
+            Assert.Throws<InvalidOperationException>(() => new ServiceAccountCredential(
+                new ServiceAccountCredential.Initializer("MyId", "MyTokenServerUrl")
+                {
+                    UniverseDomain = FakeUniverseDomain,
+                }.FromPrivateKey(PrivateKey)));
+
+        [Fact]
+        public void UniverseDomain_Custom_NoJwtsWithScopes_Explicit() =>
+            Assert.Throws<InvalidOperationException>(() => new ServiceAccountCredential(
+                new ServiceAccountCredential.Initializer("MyId", "MyTokenServerUrl")
+                {
+                    UniverseDomain = FakeUniverseDomain,
+                    UseJwtAccessWithScopes = false,
+                }.FromPrivateKey(PrivateKey)));
+
+        [Fact]
+        public async Task WithUniverseDomain_UseJwtAccessWithScopes_True()
+        {
+            var credential = new ServiceAccountCredential(
+                new ServiceAccountCredential.Initializer("MyId", "MyTokenServerUrl")
+                {
+                    // So that we can set a custom universe domain as only self-signed JWTs are supported in universe domains other than googleapis.com.
+                    UseJwtAccessWithScopes = true
+                }
+                .FromPrivateKey(PrivateKey)) as IGoogleCredential;
+
+            var newCredential = credential.WithUniverseDomain(FakeUniverseDomain);
+
+            Assert.NotSame(credential, newCredential);
+            Assert.IsType<ServiceAccountCredential>(newCredential);
+
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, credential.GetUniverseDomain());
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, await credential.GetUniverseDomainAsync(default));
+
+            Assert.Equal(FakeUniverseDomain, newCredential.GetUniverseDomain());
+            Assert.Equal(FakeUniverseDomain, await newCredential.GetUniverseDomainAsync(default));
+        }
+
+        [Fact]
+        public void WithUniverseDomain_UseJwtAccessWithScopes_Default()
+        {
+            var credential = new ServiceAccountCredential(
+                new ServiceAccountCredential.Initializer("MyId", "MyTokenServerUrl")
+                .FromPrivateKey(PrivateKey)) as IGoogleCredential;
+
+            Assert.Throws<InvalidOperationException>(() => credential.WithUniverseDomain(FakeUniverseDomain));
         }
 
         [Fact]
@@ -425,8 +595,8 @@ ZUp8AsbVqF6rbLiiUfJMo2btGclQu4DEVyS+ymFA65tXDLUuR9EDqJYdqHNZJ5B8
             var serviceAccountCred = new ServiceAccountCredential(new ServiceAccountCredential.Initializer("MyId", "MyTokenServerUrl")
             {
                 Clock = new MockClock(DateTime.UtcNow),
-                AccessMethod = new DummyAccessMethod(),
-                HttpClientFactory = new DummyHttpClientFactory(),
+                AccessMethod = new FakeAccessMethod(),
+                HttpClientFactory = new FakeHttpClientFactory(),
                 DefaultExponentialBackOffPolicy = ExponentialBackOffPolicy.Exception, // This is not the default
                 ProjectId = "a_project_id",
                 User = "a_user",
@@ -460,8 +630,8 @@ ZUp8AsbVqF6rbLiiUfJMo2btGclQu4DEVyS+ymFA65tXDLUuR9EDqJYdqHNZJ5B8
             var serviceAccountCred = new ServiceAccountCredential(new ServiceAccountCredential.Initializer("MyId", "MyTokenServerUrl")
             {
                 Clock = new MockClock(DateTime.UtcNow),
-                AccessMethod = new DummyAccessMethod(),
-                HttpClientFactory = new DummyHttpClientFactory(),
+                AccessMethod = new FakeAccessMethod(),
+                HttpClientFactory = new FakeHttpClientFactory(),
                 DefaultExponentialBackOffPolicy = ExponentialBackOffPolicy.Exception, // This is not the default
                 ProjectId = "a_project_id",
                 User = "user1",
@@ -517,12 +687,12 @@ ZUp8AsbVqF6rbLiiUfJMo2btGclQu4DEVyS+ymFA65tXDLUuR9EDqJYdqHNZJ5B8
         }
 
         [Fact]
-        public async Task FetchesOidcToken()
+        public async Task FetchesOidcToken_DefaultUniverseDomain()
         {
             // A little bit after the tokens returned from OidcTokenFakes were issued.
             var clock = new MockClock(new DateTime(2020, 5, 13, 15, 0, 0, 0, DateTimeKind.Utc));
             var messageHandler = new OidcTokenResponseSuccessMessageHandler();
-            var initializer = new ServiceAccountCredential.Initializer("MyId", "http://will.be.ignored")
+            var initializer = new ServiceAccountCredential.Initializer("sa@domain")
             {
                 Clock = clock,
                 ProjectId = "a_project_id",
@@ -536,6 +706,9 @@ ZUp8AsbVqF6rbLiiUfJMo2btGclQu4DEVyS+ymFA65tXDLUuR9EDqJYdqHNZJ5B8
 
             var signedToken = SignedToken<Header, Payload>.FromSignedToken(await oidcToken.GetAccessTokenAsync());
             Assert.Equal("https://first_call.test", signedToken.Payload.Audience);
+            Assert.Equal(GoogleAuthConsts.OidcTokenUrl, messageHandler.LatestRequest.RequestUri.AbsoluteUri);
+            Assert.Null(messageHandler.LatestRequest.Headers.Authorization);
+            Assert.Contains("assertion", messageHandler.LatestRequestContent);
             // Move the clock some but not enough that the token expires.
             clock.UtcNow = clock.UtcNow.AddMinutes(20);
             signedToken = SignedToken<Header, Payload>.FromSignedToken(await oidcToken.GetAccessTokenAsync());
@@ -545,12 +718,45 @@ ZUp8AsbVqF6rbLiiUfJMo2btGclQu4DEVyS+ymFA65tXDLUuR9EDqJYdqHNZJ5B8
         }
 
         [Fact]
-        public async Task RefreshesOidcToken()
+        public async Task FetchesOidcToken_NonDefaultUniverseDomain()
         {
             // A little bit after the tokens returned from OidcTokenFakes were issued.
             var clock = new MockClock(new DateTime(2020, 5, 13, 15, 0, 0, 0, DateTimeKind.Utc));
             var messageHandler = new OidcTokenResponseSuccessMessageHandler();
-            var initializer = new ServiceAccountCredential.Initializer("MyId", "http://will.be.ignored")
+            var initializer = new ServiceAccountCredential.Initializer("sa@domain")
+            {
+                Clock = clock,
+                ProjectId = "a_project_id",
+                HttpClientFactory = new MockHttpClientFactory(messageHandler),
+                UniverseDomain = "fake.domain",
+                UseJwtAccessWithScopes = true
+            };
+            var credential = new ServiceAccountCredential(initializer.FromPrivateKey(PrivateKey));
+
+            // The fake Oidc server returns valid tokens (expired in the real world for safety)
+            // but with a set audience that lets us know if the token was refreshed or not.
+            var oidcToken = await credential.GetOidcTokenAsync(OidcTokenOptions.FromTargetAudience("will.be.ignored"));
+
+            var signedToken = SignedToken<Header, Payload>.FromSignedToken(await oidcToken.GetAccessTokenAsync());
+            Assert.Equal("https://first_call.test", signedToken.Payload.Audience);
+            Assert.Equal("https://iamcredentials.fake.domain/v1/projects/-/serviceAccounts/sa@domain:generateIdToken", messageHandler.LatestRequest.RequestUri.AbsoluteUri);
+            Assert.NotNull(messageHandler.LatestRequest.Headers.Authorization);
+            Assert.Contains("audience", messageHandler.LatestRequestContent);
+            // Move the clock some but not enough that the token expires.
+            clock.UtcNow = clock.UtcNow.AddMinutes(20);
+            signedToken = SignedToken<Header, Payload>.FromSignedToken(await oidcToken.GetAccessTokenAsync());
+            Assert.Equal("https://first_call.test", signedToken.Payload.Audience);
+            // Only the first call should have resulted in a request. The second time the token hadn't expired.
+            Assert.Equal(1, messageHandler.Calls);
+        }
+
+        [Fact]
+        public async Task RefreshesOidcToken_DefaultUniverseDomain()
+        {
+            // A little bit after the tokens returned from OidcTokenFakes were issued.
+            var clock = new MockClock(new DateTime(2020, 5, 13, 15, 0, 0, 0, DateTimeKind.Utc));
+            var messageHandler = new OidcTokenResponseSuccessMessageHandler();
+            var initializer = new ServiceAccountCredential.Initializer("sa@domain")
             {
                 Clock = clock,
                 ProjectId = "a_project_id",
@@ -566,6 +772,40 @@ ZUp8AsbVqF6rbLiiUfJMo2btGclQu4DEVyS+ymFA65tXDLUuR9EDqJYdqHNZJ5B8
             clock.UtcNow = clock.UtcNow.AddHours(2);
             signedToken = SignedToken<Header, Payload>.FromSignedToken(await oidcToken.GetAccessTokenAsync());
             Assert.Equal("https://subsequent_calls.test", signedToken.Payload.Audience);
+            Assert.Equal(GoogleAuthConsts.OidcTokenUrl, messageHandler.LatestRequest.RequestUri.AbsoluteUri);
+            Assert.Null(messageHandler.LatestRequest.Headers.Authorization);
+            Assert.Contains("assertion", messageHandler.LatestRequestContent);
+            // Two calls, because the second time we tried to get the token, the first one had expired.
+            Assert.Equal(2, messageHandler.Calls);
+        }
+
+        [Fact]
+        public async Task RefreshesOidcToken_NonDefaultUniverseDomain()
+        {
+            // A little bit after the tokens returned from OidcTokenFakes were issued.
+            var clock = new MockClock(new DateTime(2020, 5, 13, 15, 0, 0, 0, DateTimeKind.Utc));
+            var messageHandler = new OidcTokenResponseSuccessMessageHandler();
+            var initializer = new ServiceAccountCredential.Initializer("sa@domain")
+            {
+                Clock = clock,
+                ProjectId = "a_project_id",
+                HttpClientFactory = new MockHttpClientFactory(messageHandler),
+                UniverseDomain = "fake.domain",
+                UseJwtAccessWithScopes = true
+            };
+            var credential = new ServiceAccountCredential(initializer.FromPrivateKey(PrivateKey));
+
+            var oidcToken = await credential.GetOidcTokenAsync(OidcTokenOptions.FromTargetAudience("audience"));
+
+            var signedToken = SignedToken<Header, Payload>.FromSignedToken(await oidcToken.GetAccessTokenAsync());
+            Assert.Equal("https://first_call.test", signedToken.Payload.Audience);
+            // Move the clock so that the token expires.
+            clock.UtcNow = clock.UtcNow.AddHours(2);
+            signedToken = SignedToken<Header, Payload>.FromSignedToken(await oidcToken.GetAccessTokenAsync());
+            Assert.Equal("https://subsequent_calls.test", signedToken.Payload.Audience);
+            Assert.Equal("https://iamcredentials.fake.domain/v1/projects/-/serviceAccounts/sa@domain:generateIdToken", messageHandler.LatestRequest.RequestUri.AbsoluteUri);
+            Assert.NotNull(messageHandler.LatestRequest.Headers.Authorization);
+            Assert.Contains("audience", messageHandler.LatestRequestContent);
             // Two calls, because the second time we tried to get the token, the first one had expired.
             Assert.Equal(2, messageHandler.Calls);
         }
@@ -606,6 +846,16 @@ ZUp8AsbVqF6rbLiiUfJMo2btGclQu4DEVyS+ymFA65tXDLUuR9EDqJYdqHNZJ5B8
             var encodedPayload = assertion.Split('.')[1];
 
             Assert.Contains(urlSafeEncodedExpectedPayload, encodedPayload);
+        }
+
+        private static string GetContents(string fileName)
+        {
+            var resourceName = $"Google.Apis.Auth.Tests.OAuth2.FakeCredentialFiles.{fileName}";
+
+            using var stream = CurrentAssembly.GetManifestResourceStream(resourceName) ?? throw new FileNotFoundException();
+            using var streamReader = new StreamReader(stream);
+
+            return streamReader.ReadToEnd();
         }
     }
 }

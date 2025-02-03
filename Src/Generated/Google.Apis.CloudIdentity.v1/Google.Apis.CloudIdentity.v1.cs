@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,8 +34,14 @@ namespace Google.Apis.CloudIdentity.v1
         /// <param name="initializer">The service initializer.</param>
         public CloudIdentityService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
+            Customers = new CustomersResource(this);
             Devices = new DevicesResource(this);
             Groups = new GroupsResource(this);
+            InboundSamlSsoProfiles = new InboundSamlSsoProfilesResource(this);
+            InboundSsoAssignments = new InboundSsoAssignmentsResource(this);
+            Policies = new PoliciesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudidentity.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudidentity.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,29 +51,28 @@ namespace Google.Apis.CloudIdentity.v1
         public override string Name => "cloudidentity";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudidentity.googleapis.com/";
-        #else
-            "https://cloudidentity.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudidentity.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Identity API.</summary>
         public class Scope
         {
+            /// <summary>Private Service: https://www.googleapis.com/auth/cloud-identity.devices</summary>
+            public static string CloudIdentityDevices = "https://www.googleapis.com/auth/cloud-identity.devices";
+
             /// <summary>See your device details</summary>
             public static string CloudIdentityDevicesLookup = "https://www.googleapis.com/auth/cloud-identity.devices.lookup";
+
+            /// <summary>Private Service: https://www.googleapis.com/auth/cloud-identity.devices.readonly</summary>
+            public static string CloudIdentityDevicesReadonly = "https://www.googleapis.com/auth/cloud-identity.devices.readonly";
 
             /// <summary>
             /// See, change, create, and delete any of the Cloud Identity Groups that you can access, including the
@@ -81,6 +86,24 @@ namespace Google.Apis.CloudIdentity.v1
             public static string CloudIdentityGroupsReadonly = "https://www.googleapis.com/auth/cloud-identity.groups.readonly";
 
             /// <summary>
+            /// See and edit all of the Inbound SSO profiles and their assignments to any Org Units or Google Groups in
+            /// your Cloud Identity Organization.
+            /// </summary>
+            public static string CloudIdentityInboundsso = "https://www.googleapis.com/auth/cloud-identity.inboundsso";
+
+            /// <summary>
+            /// See all of the Inbound SSO profiles and their assignments to any Org Units or Google Groups in your
+            /// Cloud Identity Organization.
+            /// </summary>
+            public static string CloudIdentityInboundssoReadonly = "https://www.googleapis.com/auth/cloud-identity.inboundsso.readonly";
+
+            /// <summary>See and edit policies in your Cloud Identity Organization.</summary>
+            public static string CloudIdentityPolicies = "https://www.googleapis.com/auth/cloud-identity.policies";
+
+            /// <summary>See policies in your Cloud Identity Organization.</summary>
+            public static string CloudIdentityPoliciesReadonly = "https://www.googleapis.com/auth/cloud-identity.policies.readonly";
+
+            /// <summary>
             /// See, edit, configure, and delete your Google Cloud data and see the email address for your Google
             /// Account.
             /// </summary>
@@ -90,8 +113,14 @@ namespace Google.Apis.CloudIdentity.v1
         /// <summary>Available OAuth 2.0 scope constants for use with the Cloud Identity API.</summary>
         public static class ScopeConstants
         {
+            /// <summary>Private Service: https://www.googleapis.com/auth/cloud-identity.devices</summary>
+            public const string CloudIdentityDevices = "https://www.googleapis.com/auth/cloud-identity.devices";
+
             /// <summary>See your device details</summary>
             public const string CloudIdentityDevicesLookup = "https://www.googleapis.com/auth/cloud-identity.devices.lookup";
+
+            /// <summary>Private Service: https://www.googleapis.com/auth/cloud-identity.devices.readonly</summary>
+            public const string CloudIdentityDevicesReadonly = "https://www.googleapis.com/auth/cloud-identity.devices.readonly";
 
             /// <summary>
             /// See, change, create, and delete any of the Cloud Identity Groups that you can access, including the
@@ -105,17 +134,47 @@ namespace Google.Apis.CloudIdentity.v1
             public const string CloudIdentityGroupsReadonly = "https://www.googleapis.com/auth/cloud-identity.groups.readonly";
 
             /// <summary>
+            /// See and edit all of the Inbound SSO profiles and their assignments to any Org Units or Google Groups in
+            /// your Cloud Identity Organization.
+            /// </summary>
+            public const string CloudIdentityInboundsso = "https://www.googleapis.com/auth/cloud-identity.inboundsso";
+
+            /// <summary>
+            /// See all of the Inbound SSO profiles and their assignments to any Org Units or Google Groups in your
+            /// Cloud Identity Organization.
+            /// </summary>
+            public const string CloudIdentityInboundssoReadonly = "https://www.googleapis.com/auth/cloud-identity.inboundsso.readonly";
+
+            /// <summary>See and edit policies in your Cloud Identity Organization.</summary>
+            public const string CloudIdentityPolicies = "https://www.googleapis.com/auth/cloud-identity.policies";
+
+            /// <summary>See policies in your Cloud Identity Organization.</summary>
+            public const string CloudIdentityPoliciesReadonly = "https://www.googleapis.com/auth/cloud-identity.policies.readonly";
+
+            /// <summary>
             /// See, edit, configure, and delete your Google Cloud data and see the email address for your Google
             /// Account.
             /// </summary>
             public const string CloudPlatform = "https://www.googleapis.com/auth/cloud-platform";
         }
 
+        /// <summary>Gets the Customers resource.</summary>
+        public virtual CustomersResource Customers { get; }
+
         /// <summary>Gets the Devices resource.</summary>
         public virtual DevicesResource Devices { get; }
 
         /// <summary>Gets the Groups resource.</summary>
         public virtual GroupsResource Groups { get; }
+
+        /// <summary>Gets the InboundSamlSsoProfiles resource.</summary>
+        public virtual InboundSamlSsoProfilesResource InboundSamlSsoProfiles { get; }
+
+        /// <summary>Gets the InboundSsoAssignments resource.</summary>
+        public virtual InboundSsoAssignmentsResource InboundSsoAssignments { get; }
+
+        /// <summary>Gets the Policies resource.</summary>
+        public virtual PoliciesResource Policies { get; }
     }
 
     /// <summary>A base abstract class for CloudIdentity requests.</summary>
@@ -299,6 +358,412 @@ namespace Google.Apis.CloudIdentity.v1
         }
     }
 
+    /// <summary>The "customers" collection of methods.</summary>
+    public class CustomersResource
+    {
+        private const string Resource = "customers";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public CustomersResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+            Userinvitations = new UserinvitationsResource(service);
+        }
+
+        /// <summary>Gets the Userinvitations resource.</summary>
+        public virtual UserinvitationsResource Userinvitations { get; }
+
+        /// <summary>The "userinvitations" collection of methods.</summary>
+        public class UserinvitationsResource
+        {
+            private const string Resource = "userinvitations";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public UserinvitationsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>Cancels a UserInvitation that was already sent.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. `UserInvitation` name in the format
+            /// `customers/{customer}/userinvitations/{user_email_address}`
+            /// </param>
+            public virtual CancelRequest Cancel(Google.Apis.CloudIdentity.v1.Data.CancelUserInvitationRequest body, string name)
+            {
+                return new CancelRequest(this.service, body, name);
+            }
+
+            /// <summary>Cancels a UserInvitation that was already sent.</summary>
+            public class CancelRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.Operation>
+            {
+                /// <summary>Constructs a new Cancel request.</summary>
+                public CancelRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudIdentity.v1.Data.CancelUserInvitationRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. `UserInvitation` name in the format
+                /// `customers/{customer}/userinvitations/{user_email_address}`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.CloudIdentity.v1.Data.CancelUserInvitationRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "cancel";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:cancel";
+
+                /// <summary>Initializes Cancel parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^customers/[^/]+/userinvitations/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Retrieves a UserInvitation resource. **Note:** New consumer accounts with the customer's verified domain
+            /// created within the previous 48 hours will not appear in the result. This delay also applies to
+            /// newly-verified domains.
+            /// </summary>
+            /// <param name="name">
+            /// Required. `UserInvitation` name in the format
+            /// `customers/{customer}/userinvitations/{user_email_address}`
+            /// </param>
+            public virtual GetRequest Get(string name)
+            {
+                return new GetRequest(this.service, name);
+            }
+
+            /// <summary>
+            /// Retrieves a UserInvitation resource. **Note:** New consumer accounts with the customer's verified domain
+            /// created within the previous 48 hours will not appear in the result. This delay also applies to
+            /// newly-verified domains.
+            /// </summary>
+            public class GetRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.UserInvitation>
+            {
+                /// <summary>Constructs a new Get request.</summary>
+                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. `UserInvitation` name in the format
+                /// `customers/{customer}/userinvitations/{user_email_address}`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "get";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes Get parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^customers/[^/]+/userinvitations/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Verifies whether a user account is eligible to receive a UserInvitation (is an unmanaged account).
+            /// Eligibility is based on the following criteria: * the email address is a consumer account and it's the
+            /// primary email address of the account, and * the domain of the email address matches an existing verified
+            /// Google Workspace or Cloud Identity domain If both conditions are met, the user is eligible. **Note:**
+            /// This method is not supported for Workspace Essentials customers.
+            /// </summary>
+            /// <param name="name">
+            /// Required. `UserInvitation` name in the format
+            /// `customers/{customer}/userinvitations/{user_email_address}`
+            /// </param>
+            public virtual IsInvitableUserRequest IsInvitableUser(string name)
+            {
+                return new IsInvitableUserRequest(this.service, name);
+            }
+
+            /// <summary>
+            /// Verifies whether a user account is eligible to receive a UserInvitation (is an unmanaged account).
+            /// Eligibility is based on the following criteria: * the email address is a consumer account and it's the
+            /// primary email address of the account, and * the domain of the email address matches an existing verified
+            /// Google Workspace or Cloud Identity domain If both conditions are met, the user is eligible. **Note:**
+            /// This method is not supported for Workspace Essentials customers.
+            /// </summary>
+            public class IsInvitableUserRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.IsInvitableUserResponse>
+            {
+                /// <summary>Constructs a new IsInvitableUser request.</summary>
+                public IsInvitableUserRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. `UserInvitation` name in the format
+                /// `customers/{customer}/userinvitations/{user_email_address}`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "isInvitableUser";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:isInvitableUser";
+
+                /// <summary>Initializes IsInvitableUser parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^customers/[^/]+/userinvitations/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Retrieves a list of UserInvitation resources. **Note:** New consumer accounts with the customer's
+            /// verified domain created within the previous 48 hours will not appear in the result. This delay also
+            /// applies to newly-verified domains.
+            /// </summary>
+            /// <param name="parent">
+            /// Required. The customer ID of the Google Workspace or Cloud Identity account the UserInvitation resources
+            /// are associated with.
+            /// </param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>
+            /// Retrieves a list of UserInvitation resources. **Note:** New consumer accounts with the customer's
+            /// verified domain created within the previous 48 hours will not appear in the result. This delay also
+            /// applies to newly-verified domains.
+            /// </summary>
+            public class ListRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.ListUserInvitationsResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The customer ID of the Google Workspace or Cloud Identity account the UserInvitation
+                /// resources are associated with.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. A query string for filtering `UserInvitation` results by their current state, in the
+                /// format: `"state=='invited'"`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
+
+                /// <summary>
+                /// Optional. The sort order of the list results. You can sort the results in descending order based on
+                /// either email or last update timestamp but not both, using `order_by="email desc"`. Currently,
+                /// sorting is supported for `update_time asc`, `update_time desc`, `email asc`, and `email desc`. If
+                /// not specified, results will be returned based on `email asc` order.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string OrderBy { get; set; }
+
+                /// <summary>
+                /// Optional. The maximum number of UserInvitation resources to return. If unspecified, at most 100
+                /// resources will be returned. The maximum value is 200; values above 200 will be set to 200.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>
+                /// Optional. A page token, received from a previous `ListUserInvitations` call. Provide this to
+                /// retrieve the subsequent page. When paginating, all other parameters provided to `ListBooks` must
+                /// match the call that provided the page token.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/userinvitations";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^customers/[^/]+$",
+                    });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "orderBy",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Sends a UserInvitation to email. If the `UserInvitation` does not exist for this request and it is a
+            /// valid request, the request creates a `UserInvitation`. **Note:** The `get` and `list` methods have a
+            /// 48-hour delay where newly-created consumer accounts will not appear in the results. You can still send a
+            /// `UserInvitation` to those accounts if you know the unmanaged email address and IsInvitableUser==True.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. `UserInvitation` name in the format
+            /// `customers/{customer}/userinvitations/{user_email_address}`
+            /// </param>
+            public virtual SendRequest Send(Google.Apis.CloudIdentity.v1.Data.SendUserInvitationRequest body, string name)
+            {
+                return new SendRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Sends a UserInvitation to email. If the `UserInvitation` does not exist for this request and it is a
+            /// valid request, the request creates a `UserInvitation`. **Note:** The `get` and `list` methods have a
+            /// 48-hour delay where newly-created consumer accounts will not appear in the results. You can still send a
+            /// `UserInvitation` to those accounts if you know the unmanaged email address and IsInvitableUser==True.
+            /// </summary>
+            public class SendRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.Operation>
+            {
+                /// <summary>Constructs a new Send request.</summary>
+                public SendRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudIdentity.v1.Data.SendUserInvitationRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. `UserInvitation` name in the format
+                /// `customers/{customer}/userinvitations/{user_email_address}`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.CloudIdentity.v1.Data.SendUserInvitationRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "send";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:send";
+
+                /// <summary>Initializes Send parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^customers/[^/]+/userinvitations/[^/]+$",
+                    });
+                }
+            }
+        }
+    }
+
     /// <summary>The "devices" collection of methods.</summary>
     public class DevicesResource
     {
@@ -364,7 +829,7 @@ namespace Google.Apis.CloudIdentity.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets the client state for the device user</summary>
@@ -441,7 +906,7 @@ namespace Google.Apis.CloudIdentity.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists the client states for the given search query.</summary>
@@ -564,7 +1029,7 @@ namespace Google.Apis.CloudIdentity.v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CloudIdentity.v1.Data.GoogleAppsCloudidentityDevicesV1ClientState body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -670,7 +1135,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual ApproveRequest Approve(Google.Apis.CloudIdentity.v1.Data.GoogleAppsCloudidentityDevicesV1ApproveDeviceUserRequest body, string name)
             {
-                return new ApproveRequest(service, body, name);
+                return new ApproveRequest(this.service, body, name);
             }
 
             /// <summary>Approves device to access user data.</summary>
@@ -731,7 +1196,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual BlockRequest Block(Google.Apis.CloudIdentity.v1.Data.GoogleAppsCloudidentityDevicesV1BlockDeviceUserRequest body, string name)
             {
-                return new BlockRequest(service, body, name);
+                return new BlockRequest(this.service, body, name);
             }
 
             /// <summary>Blocks device from accessing user data</summary>
@@ -795,7 +1260,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual CancelWipeRequest CancelWipe(Google.Apis.CloudIdentity.v1.Data.GoogleAppsCloudidentityDevicesV1CancelWipeDeviceUserRequest body, string name)
             {
-                return new CancelWipeRequest(service, body, name);
+                return new CancelWipeRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -858,7 +1323,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes the specified DeviceUser. This also revokes the user's access to device data.</summary>
@@ -928,7 +1393,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Retrieves the specified DeviceUser</summary>
@@ -997,7 +1462,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists/Searches DeviceUsers.</summary>
@@ -1133,7 +1598,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual LookupRequest Lookup(string parent)
             {
-                return new LookupRequest(service, parent);
+                return new LookupRequest(this.service, parent);
             }
 
             /// <summary>
@@ -1186,8 +1651,8 @@ namespace Google.Apis.CloudIdentity.v1
                 /// <summary>
                 /// Raw Resource Id used by Google Endpoint Verification. If the user is enrolled into Google Endpoint
                 /// Verification, this id will be saved as the 'device_resource_id' field in the following platform
-                /// dependent files. Mac: ~/.secureConnect/context_aware_config.json Windows:
-                /// C:\Users\%USERPROFILE%\.secureConnect\context_aware_config.json Linux:
+                /// dependent files. * macOS: ~/.secureConnect/context_aware_config.json * Windows:
+                /// %USERPROFILE%\AppData\Local\Google\Endpoint Verification\accounts.json * Linux:
                 /// ~/.secureConnect/context_aware_config.json
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("rawResourceId", Google.Apis.Util.RequestParameterType.Query)]
@@ -1279,7 +1744,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual WipeRequest Wipe(Google.Apis.CloudIdentity.v1.Data.GoogleAppsCloudidentityDevicesV1WipeDeviceUserRequest body, string name)
             {
-                return new WipeRequest(service, body, name);
+                return new WipeRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -1352,7 +1817,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// </param>
         public virtual CancelWipeRequest CancelWipe(Google.Apis.CloudIdentity.v1.Data.GoogleAppsCloudidentityDevicesV1CancelWipeDeviceRequest body, string name)
         {
-            return new CancelWipeRequest(service, body, name);
+            return new CancelWipeRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -1417,7 +1882,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.CloudIdentity.v1.Data.GoogleAppsCloudidentityDevicesV1Device body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -1480,7 +1945,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// </param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>Deletes the specified device.</summary>
@@ -1548,7 +2013,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// </param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Retrieves the specified device.</summary>
@@ -1613,7 +2078,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// <summary>Lists/Searches devices.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists/Searches devices.</summary>
@@ -1681,7 +2146,7 @@ namespace Google.Apis.CloudIdentity.v1
                 /// <summary>
                 /// This view contains all devices imported by the company admin. Each device in the response contains
                 /// all information specified by the company admin when importing the device (i.e. asset tags). This
-                /// includes devices that may be unaassigned or assigned to users.
+                /// includes devices that may be unassigned or assigned to users.
                 /// </summary>
                 [Google.Apis.Util.StringValueAttribute("COMPANY_INVENTORY")]
                 COMPANYINVENTORY = 1,
@@ -1767,7 +2232,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// </param>
         public virtual WipeRequest Wipe(Google.Apis.CloudIdentity.v1.Data.GoogleAppsCloudidentityDevicesV1WipeDeviceRequest body, string name)
         {
-            return new WipeRequest(service, body, name);
+            return new WipeRequest(this.service, body, name);
         }
 
         /// <summary>Wipes all data on the specified device.</summary>
@@ -1867,7 +2332,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual CheckTransitiveMembershipRequest CheckTransitiveMembership(string parent)
             {
-                return new CheckTransitiveMembershipRequest(service, parent);
+                return new CheckTransitiveMembershipRequest(this.service, parent);
             }
 
             /// <summary>
@@ -1944,7 +2409,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.CloudIdentity.v1.Data.Membership body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a `Membership`.</summary>
@@ -2002,7 +2467,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a `Membership`.</summary>
@@ -2053,7 +2518,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Retrieves a `Membership`.</summary>
@@ -2115,7 +2580,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual GetMembershipGraphRequest GetMembershipGraph(string parent)
             {
-                return new GetMembershipGraphRequest(service, parent);
+                return new GetMembershipGraphRequest(this.service, parent);
             }
 
             /// <summary>
@@ -2194,7 +2659,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists the `Membership`s within a `Group`.</summary>
@@ -2306,7 +2771,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual LookupRequest Lookup(string parent)
             {
-                return new LookupRequest(service, parent);
+                return new LookupRequest(this.service, parent);
             }
 
             /// <summary>
@@ -2331,8 +2796,10 @@ namespace Google.Apis.CloudIdentity.v1
 
                 /// <summary>
                 /// The ID of the entity. For Google-managed entities, the `id` should be the email address of an
-                /// existing group or user. For external-identity-mapped entities, the `id` must be a string conforming
-                /// to the Identity Source's requirements. Must be unique within a `namespace`.
+                /// existing group or user. Email addresses need to adhere to [name guidelines for users and
+                /// groups](https://support.google.com/a/answer/9193374). For external-identity-mapped entities, the
+                /// `id` must be a string conforming to the Identity Source's requirements. Must be unique within a
+                /// `namespace`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("memberKey.id", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string MemberKeyId { get; set; }
@@ -2394,7 +2861,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual ModifyMembershipRolesRequest ModifyMembershipRoles(Google.Apis.CloudIdentity.v1.Data.ModifyMembershipRolesRequest body, string name)
             {
-                return new ModifyMembershipRolesRequest(service, body, name);
+                return new ModifyMembershipRolesRequest(this.service, body, name);
             }
 
             /// <summary>Modifies the `MembershipRole`s of a `Membership`.</summary>
@@ -2446,6 +2913,120 @@ namespace Google.Apis.CloudIdentity.v1
                 }
             }
 
+            /// <summary>Searches direct groups of a member.</summary>
+            /// <param name="parent">
+            /// [Resource name](https://cloud.google.com/apis/design/resource_names) of the group to search transitive
+            /// memberships in. Format: groups/{group_id}, where group_id is always '-' as this API will search across
+            /// all groups for a given member.
+            /// </param>
+            public virtual SearchDirectGroupsRequest SearchDirectGroups(string parent)
+            {
+                return new SearchDirectGroupsRequest(this.service, parent);
+            }
+
+            /// <summary>Searches direct groups of a member.</summary>
+            public class SearchDirectGroupsRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.SearchDirectGroupsResponse>
+            {
+                /// <summary>Constructs a new SearchDirectGroups request.</summary>
+                public SearchDirectGroupsRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// [Resource name](https://cloud.google.com/apis/design/resource_names) of the group to search
+                /// transitive memberships in. Format: groups/{group_id}, where group_id is always '-' as this API will
+                /// search across all groups for a given member.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// The ordering of membership relation for the display name or email in the response. The syntax for
+                /// this field can be found at https://cloud.google.com/apis/design/design_patterns#sorting_order.
+                /// Example: Sort by the ascending display name: order_by="group_name" or order_by="group_name asc".
+                /// Sort by the descending display name: order_by="group_name desc". Sort by the ascending group key:
+                /// order_by="group_key" or order_by="group_key asc". Sort by the descending group key:
+                /// order_by="group_key desc".
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string OrderBy { get; set; }
+
+                /// <summary>The default page size is 200 (max 1000).</summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>The `next_page_token` value returned from a previous list request, if any</summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>
+                /// Required. A CEL expression that MUST include member specification AND label(s). Users can search on
+                /// label attributes of groups. CONTAINS match ('in') is supported on labels. Identity-mapped groups are
+                /// uniquely identified by both a `member_key_id` and a `member_key_namespace`, which requires an
+                /// additional query input: `member_key_namespace`. Example query: `member_key_id ==
+                /// 'member_key_id_value' &amp;amp;&amp;amp; 'label_value' in labels`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("query", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Query { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "searchDirectGroups";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/memberships:searchDirectGroups";
+
+                /// <summary>Initializes SearchDirectGroups parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^groups/[^/]+$",
+                    });
+                    RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "orderBy",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("query", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "query",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
             /// <summary>
             /// Search transitive groups of a member. **Note:** This feature is only available to Google Workspace
             /// Enterprise Standard, Enterprise Plus, and Enterprise for Education; and Cloud Identity Premium accounts.
@@ -2460,7 +3041,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual SearchTransitiveGroupsRequest SearchTransitiveGroups(string parent)
             {
-                return new SearchTransitiveGroupsRequest(service, parent);
+                return new SearchTransitiveGroupsRequest(this.service, parent);
             }
 
             /// <summary>
@@ -2491,7 +3072,7 @@ namespace Google.Apis.CloudIdentity.v1
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
-                /// <summary>The next_page_token value returned from a previous list request, if any.</summary>
+                /// <summary>The `next_page_token` value returned from a previous list request, if any.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
 
@@ -2500,7 +3081,12 @@ namespace Google.Apis.CloudIdentity.v1
                 /// field. Users can search on label attributes of groups. CONTAINS match ('in') is supported on labels.
                 /// Identity-mapped groups are uniquely identified by both a `member_key_id` and a
                 /// `member_key_namespace`, which requires an additional query input: `member_key_namespace`. Example
-                /// query: `member_key_id == 'member_key_id_value' &amp;amp;&amp;amp; in labels`
+                /// query: `member_key_id == 'member_key_id_value' &amp;amp;&amp;amp; in labels` Query may optionally
+                /// contain equality operators on the parent of the group restricting the search within a particular
+                /// customer, e.g. `parent == 'customers/{customer_id}'`. The `customer_id` must begin with "C" (for
+                /// example, 'C046psxkn'). This filtering is only supported for Admins with groups read permissions on
+                /// the input customer. Example query: `member_key_id == 'member_key_id_value' &amp;amp;&amp;amp; in
+                /// labels &amp;amp;&amp;amp; parent == 'customers/C046psxkn'`
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("query", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Query { get; set; }
@@ -2566,7 +3152,7 @@ namespace Google.Apis.CloudIdentity.v1
             /// </param>
             public virtual SearchTransitiveMembershipsRequest SearchTransitiveMemberships(string parent)
             {
-                return new SearchTransitiveMembershipsRequest(service, parent);
+                return new SearchTransitiveMembershipsRequest(this.service, parent);
             }
 
             /// <summary>
@@ -2597,7 +3183,7 @@ namespace Google.Apis.CloudIdentity.v1
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
-                /// <summary>The next_page_token value returned from a previous list request, if any.</summary>
+                /// <summary>The `next_page_token` value returned from a previous list request, if any.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
 
@@ -2646,7 +3232,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.CloudIdentity.v1.Data.Group body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>Creates a Group.</summary>
@@ -2720,7 +3306,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// </param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>Deletes a `Group`.</summary>
@@ -2771,7 +3357,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// </param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Retrieves a `Group`.</summary>
@@ -2821,7 +3407,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// </param>
         public virtual GetSecuritySettingsRequest GetSecuritySettings(string name)
         {
-            return new GetSecuritySettingsRequest(service, name);
+            return new GetSecuritySettingsRequest(this.service, name);
         }
 
         /// <summary>Get Security Settings</summary>
@@ -2882,7 +3468,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// <summary>Lists the `Group` resources under a customer or namespace.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists the `Group` resources under a customer or namespace.</summary>
@@ -2910,8 +3496,9 @@ namespace Google.Apis.CloudIdentity.v1
 
             /// <summary>
             /// Required. The parent resource under which to list all `Group` resources. Must be of the form
-            /// `identitysources/{identity_source}` for external- identity-mapped groups or `customers/{customer}` for
-            /// Google Groups. The `customer` must begin with "C" (for example, 'C046psxkn').
+            /// `identitysources/{identity_source}` for external- identity-mapped groups or `customers/{customer_id}`
+            /// for Google Groups. The `customer_id` must begin with "C" (for example, 'C046psxkn'). [Find your customer
+            /// ID.] (https://support.google.com/cloudidentity/answer/10070793)
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Parent { get; set; }
@@ -2990,7 +3577,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// </summary>
         public virtual LookupRequest Lookup()
         {
-            return new LookupRequest(service);
+            return new LookupRequest(this.service);
         }
 
         /// <summary>
@@ -3007,8 +3594,9 @@ namespace Google.Apis.CloudIdentity.v1
 
             /// <summary>
             /// The ID of the entity. For Google-managed entities, the `id` should be the email address of an existing
-            /// group or user. For external-identity-mapped entities, the `id` must be a string conforming to the
-            /// Identity Source's requirements. Must be unique within a `namespace`.
+            /// group or user. Email addresses need to adhere to [name guidelines for users and
+            /// groups](https://support.google.com/a/answer/9193374). For external-identity-mapped entities, the `id`
+            /// must be a string conforming to the Identity Source's requirements. Must be unique within a `namespace`.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("groupKey.id", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string GroupKeyId { get; set; }
@@ -3062,7 +3650,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.CloudIdentity.v1.Data.Group body, string name)
         {
-            return new PatchRequest(service, body, name);
+            return new PatchRequest(this.service, body, name);
         }
 
         /// <summary>Updates a `Group`.</summary>
@@ -3131,7 +3719,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// <summary>Searches for `Group` resources matching a specified query.</summary>
         public virtual SearchRequest Search()
         {
-            return new SearchRequest(service);
+            return new SearchRequest(this.service);
         }
 
         /// <summary>Searches for `Group` resources matching a specified query.</summary>
@@ -3158,11 +3746,16 @@ namespace Google.Apis.CloudIdentity.v1
             public virtual string PageToken { get; set; }
 
             /// <summary>
-            /// Required. The search query. Must be specified in [Common Expression
-            /// Language](https://opensource.google/projects/cel). May only contain equality operators on the parent and
-            /// inclusion operators on labels (e.g., `parent == 'customers/{customer}' &amp;amp;&amp;amp;
-            /// 'cloudidentity.googleapis.com/groups.discussion_forum' in labels`). The `customer` must begin with "C"
-            /// (for example, 'C046psxkn').
+            /// Required. The search query. * Must be specified in [Common Expression
+            /// Language](https://opensource.google/projects/cel). * Must contain equality operators on the parent, e.g.
+            /// `parent == 'customers/{customer_id}'`. The `customer_id` must begin with "C" (for example, 'C046psxkn').
+            /// [Find your customer ID.] (https://support.google.com/cloudidentity/answer/10070793) * Can contain
+            /// optional inclusion operators on `labels` such as `'cloudidentity.googleapis.com/groups.discussion_forum'
+            /// in labels`). * Can contain an optional equality operator on `domain_name`. e.g. `domain_name ==
+            /// 'examplepetstore.com'` * Can contain optional `startsWith/contains/equality` operators on `group_key`,
+            /// e.g. `group_key.startsWith('dev')`, `group_key.contains('dev'), group_key == 'dev@examplepetstore.com'`
+            /// * Can contain optional `startsWith/contains/equality` operators on `display_name`, such as
+            /// `display_name.startsWith('dev')` , `display_name.contains('dev')`, `display_name == 'dev'`
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("query", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Query { get; set; }
@@ -3243,7 +3836,7 @@ namespace Google.Apis.CloudIdentity.v1
         /// </param>
         public virtual UpdateSecuritySettingsRequest UpdateSecuritySettings(Google.Apis.CloudIdentity.v1.Data.SecuritySettings body, string name)
         {
-            return new UpdateSecuritySettingsRequest(service, body, name);
+            return new UpdateSecuritySettingsRequest(this.service, body, name);
         }
 
         /// <summary>Update Security Settings</summary>
@@ -3309,9 +3902,1118 @@ namespace Google.Apis.CloudIdentity.v1
             }
         }
     }
+
+    /// <summary>The "inboundSamlSsoProfiles" collection of methods.</summary>
+    public class InboundSamlSsoProfilesResource
+    {
+        private const string Resource = "inboundSamlSsoProfiles";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public InboundSamlSsoProfilesResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+            IdpCredentials = new IdpCredentialsResource(service);
+        }
+
+        /// <summary>Gets the IdpCredentials resource.</summary>
+        public virtual IdpCredentialsResource IdpCredentials { get; }
+
+        /// <summary>The "idpCredentials" collection of methods.</summary>
+        public class IdpCredentialsResource
+        {
+            private const string Resource = "idpCredentials";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public IdpCredentialsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// Adds an IdpCredential. Up to 2 credentials are allowed. When the target customer has enabled
+            /// [Multi-party approval for sensitive actions](https://support.google.com/a/answer/13790448), the
+            /// `Operation` in the response will have `"done": false`, it will not have a response, and the metadata
+            /// will have `"state": "awaiting-multi-party-approval"`.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. The InboundSamlSsoProfile that owns the IdpCredential. Format:
+            /// `inboundSamlSsoProfiles/{sso_profile_id}`
+            /// </param>
+            public virtual AddRequest Add(Google.Apis.CloudIdentity.v1.Data.AddIdpCredentialRequest body, string parent)
+            {
+                return new AddRequest(this.service, body, parent);
+            }
+
+            /// <summary>
+            /// Adds an IdpCredential. Up to 2 credentials are allowed. When the target customer has enabled
+            /// [Multi-party approval for sensitive actions](https://support.google.com/a/answer/13790448), the
+            /// `Operation` in the response will have `"done": false`, it will not have a response, and the metadata
+            /// will have `"state": "awaiting-multi-party-approval"`.
+            /// </summary>
+            public class AddRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.Operation>
+            {
+                /// <summary>Constructs a new Add request.</summary>
+                public AddRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudIdentity.v1.Data.AddIdpCredentialRequest body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The InboundSamlSsoProfile that owns the IdpCredential. Format:
+                /// `inboundSamlSsoProfiles/{sso_profile_id}`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.CloudIdentity.v1.Data.AddIdpCredentialRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "add";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/idpCredentials:add";
+
+                /// <summary>Initializes Add parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^inboundSamlSsoProfiles/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Deletes an IdpCredential.</summary>
+            /// <param name="name">
+            /// Required. The [resource name](https://cloud.google.com/apis/design/resource_names) of the IdpCredential
+            /// to delete. Format: `inboundSamlSsoProfiles/{sso_profile_id}/idpCredentials/{idp_credential_id}`
+            /// </param>
+            public virtual DeleteRequest Delete(string name)
+            {
+                return new DeleteRequest(this.service, name);
+            }
+
+            /// <summary>Deletes an IdpCredential.</summary>
+            public class DeleteRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.Operation>
+            {
+                /// <summary>Constructs a new Delete request.</summary>
+                public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The [resource name](https://cloud.google.com/apis/design/resource_names) of the
+                /// IdpCredential to delete. Format:
+                /// `inboundSamlSsoProfiles/{sso_profile_id}/idpCredentials/{idp_credential_id}`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "delete";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "DELETE";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes Delete parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^inboundSamlSsoProfiles/[^/]+/idpCredentials/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Gets an IdpCredential.</summary>
+            /// <param name="name">
+            /// Required. The [resource name](https://cloud.google.com/apis/design/resource_names) of the IdpCredential
+            /// to retrieve. Format: `inboundSamlSsoProfiles/{sso_profile_id}/idpCredentials/{idp_credential_id}`
+            /// </param>
+            public virtual GetRequest Get(string name)
+            {
+                return new GetRequest(this.service, name);
+            }
+
+            /// <summary>Gets an IdpCredential.</summary>
+            public class GetRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.IdpCredential>
+            {
+                /// <summary>Constructs a new Get request.</summary>
+                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The [resource name](https://cloud.google.com/apis/design/resource_names) of the
+                /// IdpCredential to retrieve. Format:
+                /// `inboundSamlSsoProfiles/{sso_profile_id}/idpCredentials/{idp_credential_id}`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "get";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes Get parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^inboundSamlSsoProfiles/[^/]+/idpCredentials/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Returns a list of IdpCredentials in an InboundSamlSsoProfile.</summary>
+            /// <param name="parent">
+            /// Required. The parent, which owns this collection of `IdpCredential`s. Format:
+            /// `inboundSamlSsoProfiles/{sso_profile_id}`
+            /// </param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>Returns a list of IdpCredentials in an InboundSamlSsoProfile.</summary>
+            public class ListRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.ListIdpCredentialsResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The parent, which owns this collection of `IdpCredential`s. Format:
+                /// `inboundSamlSsoProfiles/{sso_profile_id}`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// The maximum number of `IdpCredential`s to return. The service may return fewer than this value.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>
+                /// A page token, received from a previous `ListIdpCredentials` call. Provide this to retrieve the
+                /// subsequent page. When paginating, all other parameters provided to `ListIdpCredentials` must match
+                /// the call that provided the page token.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/idpCredentials";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^inboundSamlSsoProfiles/[^/]+$",
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates an InboundSamlSsoProfile for a customer. When the target customer has enabled [Multi-party approval
+        /// for sensitive actions](https://support.google.com/a/answer/13790448), the `Operation` in the response will
+        /// have `"done": false`, it will not have a response, and the metadata will have `"state":
+        /// "awaiting-multi-party-approval"`.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        public virtual CreateRequest Create(Google.Apis.CloudIdentity.v1.Data.InboundSamlSsoProfile body)
+        {
+            return new CreateRequest(this.service, body);
+        }
+
+        /// <summary>
+        /// Creates an InboundSamlSsoProfile for a customer. When the target customer has enabled [Multi-party approval
+        /// for sensitive actions](https://support.google.com/a/answer/13790448), the `Operation` in the response will
+        /// have `"done": false`, it will not have a response, and the metadata will have `"state":
+        /// "awaiting-multi-party-approval"`.
+        /// </summary>
+        public class CreateRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.Operation>
+        {
+            /// <summary>Constructs a new Create request.</summary>
+            public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudIdentity.v1.Data.InboundSamlSsoProfile body) : base(service)
+            {
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.CloudIdentity.v1.Data.InboundSamlSsoProfile Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "create";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/inboundSamlSsoProfiles";
+
+            /// <summary>Initializes Create parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+            }
+        }
+
+        /// <summary>Deletes an InboundSamlSsoProfile.</summary>
+        /// <param name="name">
+        /// Required. The [resource name](https://cloud.google.com/apis/design/resource_names) of the
+        /// InboundSamlSsoProfile to delete. Format: `inboundSamlSsoProfiles/{sso_profile_id}`
+        /// </param>
+        public virtual DeleteRequest Delete(string name)
+        {
+            return new DeleteRequest(this.service, name);
+        }
+
+        /// <summary>Deletes an InboundSamlSsoProfile.</summary>
+        public class DeleteRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.Operation>
+        {
+            /// <summary>Constructs a new Delete request.</summary>
+            public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The [resource name](https://cloud.google.com/apis/design/resource_names) of the
+            /// InboundSamlSsoProfile to delete. Format: `inboundSamlSsoProfiles/{sso_profile_id}`
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "delete";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "DELETE";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes Delete parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^inboundSamlSsoProfiles/[^/]+$",
+                });
+            }
+        }
+
+        /// <summary>Gets an InboundSamlSsoProfile.</summary>
+        /// <param name="name">
+        /// Required. The [resource name](https://cloud.google.com/apis/design/resource_names) of the
+        /// InboundSamlSsoProfile to get. Format: `inboundSamlSsoProfiles/{sso_profile_id}`
+        /// </param>
+        public virtual GetRequest Get(string name)
+        {
+            return new GetRequest(this.service, name);
+        }
+
+        /// <summary>Gets an InboundSamlSsoProfile.</summary>
+        public class GetRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.InboundSamlSsoProfile>
+        {
+            /// <summary>Constructs a new Get request.</summary>
+            public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The [resource name](https://cloud.google.com/apis/design/resource_names) of the
+            /// InboundSamlSsoProfile to get. Format: `inboundSamlSsoProfiles/{sso_profile_id}`
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "get";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes Get parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^inboundSamlSsoProfiles/[^/]+$",
+                });
+            }
+        }
+
+        /// <summary>Lists InboundSamlSsoProfiles for a customer.</summary>
+        public virtual ListRequest List()
+        {
+            return new ListRequest(this.service);
+        }
+
+        /// <summary>Lists InboundSamlSsoProfiles for a customer.</summary>
+        public class ListRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.ListInboundSamlSsoProfilesResponse>
+        {
+            /// <summary>Constructs a new List request.</summary>
+            public ListRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>
+            /// A [Common Expression Language](https://github.com/google/cel-spec) expression to filter the results. The
+            /// only supported filter is filtering by customer. For example: `customer=="customers/C0123abc"`. Omitting
+            /// the filter or specifying a filter of `customer=="customers/my_customer"` will return the profiles for
+            /// the customer that the caller (authenticated user) belongs to.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Filter { get; set; }
+
+            /// <summary>
+            /// The maximum number of InboundSamlSsoProfiles to return. The service may return fewer than this value. If
+            /// omitted (or defaulted to zero) the server will use a sensible default. This default may change over
+            /// time. The maximum allowed value is 100. Requests with page_size greater than that will be silently
+            /// interpreted as having this maximum value.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> PageSize { get; set; }
+
+            /// <summary>
+            /// A page token, received from a previous `ListInboundSamlSsoProfiles` call. Provide this to retrieve the
+            /// subsequent page. When paginating, all other parameters provided to `ListInboundSamlSsoProfiles` must
+            /// match the call that provided the page token.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PageToken { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "list";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/inboundSamlSsoProfiles";
+
+            /// <summary>Initializes List parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "filter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageSize",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageToken",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Updates an InboundSamlSsoProfile. When the target customer has enabled [Multi-party approval for sensitive
+        /// actions](https://support.google.com/a/answer/13790448), the `Operation` in the response will have `"done":
+        /// false`, it will not have a response, and the metadata will have `"state": "awaiting-multi-party-approval"`.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="name">
+        /// Output only. [Resource name](https://cloud.google.com/apis/design/resource_names) of the SAML SSO profile.
+        /// </param>
+        public virtual PatchRequest Patch(Google.Apis.CloudIdentity.v1.Data.InboundSamlSsoProfile body, string name)
+        {
+            return new PatchRequest(this.service, body, name);
+        }
+
+        /// <summary>
+        /// Updates an InboundSamlSsoProfile. When the target customer has enabled [Multi-party approval for sensitive
+        /// actions](https://support.google.com/a/answer/13790448), the `Operation` in the response will have `"done":
+        /// false`, it will not have a response, and the metadata will have `"state": "awaiting-multi-party-approval"`.
+        /// </summary>
+        public class PatchRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.Operation>
+        {
+            /// <summary>Constructs a new Patch request.</summary>
+            public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudIdentity.v1.Data.InboundSamlSsoProfile body, string name) : base(service)
+            {
+                Name = name;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Output only. [Resource name](https://cloud.google.com/apis/design/resource_names) of the SAML SSO
+            /// profile.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Required. The list of fields to be updated.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual object UpdateMask { get; set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.CloudIdentity.v1.Data.InboundSamlSsoProfile Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "patch";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "PATCH";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes Patch parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^inboundSamlSsoProfiles/[^/]+$",
+                });
+                RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "updateMask",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
+    /// <summary>The "inboundSsoAssignments" collection of methods.</summary>
+    public class InboundSsoAssignmentsResource
+    {
+        private const string Resource = "inboundSsoAssignments";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public InboundSsoAssignmentsResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>
+        /// Creates an InboundSsoAssignment for users and devices in a `Customer` under a given `Group` or `OrgUnit`.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        public virtual CreateRequest Create(Google.Apis.CloudIdentity.v1.Data.InboundSsoAssignment body)
+        {
+            return new CreateRequest(this.service, body);
+        }
+
+        /// <summary>
+        /// Creates an InboundSsoAssignment for users and devices in a `Customer` under a given `Group` or `OrgUnit`.
+        /// </summary>
+        public class CreateRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.Operation>
+        {
+            /// <summary>Constructs a new Create request.</summary>
+            public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudIdentity.v1.Data.InboundSsoAssignment body) : base(service)
+            {
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.CloudIdentity.v1.Data.InboundSsoAssignment Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "create";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/inboundSsoAssignments";
+
+            /// <summary>Initializes Create parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+            }
+        }
+
+        /// <summary>
+        /// Deletes an InboundSsoAssignment. To disable SSO, Create (or Update) an assignment that has `sso_mode` ==
+        /// `SSO_OFF`.
+        /// </summary>
+        /// <param name="name">
+        /// Required. The [resource name](https://cloud.google.com/apis/design/resource_names) of the
+        /// InboundSsoAssignment to delete. Format: `inboundSsoAssignments/{assignment}`
+        /// </param>
+        public virtual DeleteRequest Delete(string name)
+        {
+            return new DeleteRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Deletes an InboundSsoAssignment. To disable SSO, Create (or Update) an assignment that has `sso_mode` ==
+        /// `SSO_OFF`.
+        /// </summary>
+        public class DeleteRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.Operation>
+        {
+            /// <summary>Constructs a new Delete request.</summary>
+            public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The [resource name](https://cloud.google.com/apis/design/resource_names) of the
+            /// InboundSsoAssignment to delete. Format: `inboundSsoAssignments/{assignment}`
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "delete";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "DELETE";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes Delete parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^inboundSsoAssignments/[^/]+$",
+                });
+            }
+        }
+
+        /// <summary>Gets an InboundSsoAssignment.</summary>
+        /// <param name="name">
+        /// Required. The [resource name](https://cloud.google.com/apis/design/resource_names) of the
+        /// InboundSsoAssignment to fetch. Format: `inboundSsoAssignments/{assignment}`
+        /// </param>
+        public virtual GetRequest Get(string name)
+        {
+            return new GetRequest(this.service, name);
+        }
+
+        /// <summary>Gets an InboundSsoAssignment.</summary>
+        public class GetRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.InboundSsoAssignment>
+        {
+            /// <summary>Constructs a new Get request.</summary>
+            public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The [resource name](https://cloud.google.com/apis/design/resource_names) of the
+            /// InboundSsoAssignment to fetch. Format: `inboundSsoAssignments/{assignment}`
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "get";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes Get parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^inboundSsoAssignments/[^/]+$",
+                });
+            }
+        }
+
+        /// <summary>Lists the InboundSsoAssignments for a `Customer`.</summary>
+        public virtual ListRequest List()
+        {
+            return new ListRequest(this.service);
+        }
+
+        /// <summary>Lists the InboundSsoAssignments for a `Customer`.</summary>
+        public class ListRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.ListInboundSsoAssignmentsResponse>
+        {
+            /// <summary>Constructs a new List request.</summary>
+            public ListRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>
+            /// A CEL expression to filter the results. The only supported filter is filtering by customer. For example:
+            /// `customer==customers/C0123abc`. Omitting the filter or specifying a filter of
+            /// `customer==customers/my_customer` will return the assignments for the customer that the caller
+            /// (authenticated user) belongs to.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Filter { get; set; }
+
+            /// <summary>
+            /// The maximum number of assignments to return. The service may return fewer than this value. If omitted
+            /// (or defaulted to zero) the server will use a sensible default. This default may change over time. The
+            /// maximum allowed value is 100, though requests with page_size greater than that will be silently
+            /// interpreted as having this maximum value. This may increase in the futue.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> PageSize { get; set; }
+
+            /// <summary>
+            /// A page token, received from a previous `ListInboundSsoAssignments` call. Provide this to retrieve the
+            /// subsequent page. When paginating, all other parameters provided to `ListInboundSsoAssignments` must
+            /// match the call that provided the page token.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PageToken { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "list";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/inboundSsoAssignments";
+
+            /// <summary>Initializes List parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "filter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageSize",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageToken",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Updates an InboundSsoAssignment. The body of this request is the `inbound_sso_assignment` field and the
+        /// `update_mask` is relative to that. For example: a PATCH to
+        /// `/v1/inboundSsoAssignments/0abcdefg1234567&amp;amp;update_mask=rank` with a body of `{ "rank": 1 }` moves
+        /// that (presumably group-targeted) SSO assignment to the highest priority and shifts any other group-targeted
+        /// assignments down in priority.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="name">
+        /// Output only. [Resource name](https://cloud.google.com/apis/design/resource_names) of the Inbound SSO
+        /// Assignment.
+        /// </param>
+        public virtual PatchRequest Patch(Google.Apis.CloudIdentity.v1.Data.InboundSsoAssignment body, string name)
+        {
+            return new PatchRequest(this.service, body, name);
+        }
+
+        /// <summary>
+        /// Updates an InboundSsoAssignment. The body of this request is the `inbound_sso_assignment` field and the
+        /// `update_mask` is relative to that. For example: a PATCH to
+        /// `/v1/inboundSsoAssignments/0abcdefg1234567&amp;amp;update_mask=rank` with a body of `{ "rank": 1 }` moves
+        /// that (presumably group-targeted) SSO assignment to the highest priority and shifts any other group-targeted
+        /// assignments down in priority.
+        /// </summary>
+        public class PatchRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.Operation>
+        {
+            /// <summary>Constructs a new Patch request.</summary>
+            public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudIdentity.v1.Data.InboundSsoAssignment body, string name) : base(service)
+            {
+                Name = name;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Output only. [Resource name](https://cloud.google.com/apis/design/resource_names) of the Inbound SSO
+            /// Assignment.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Required. The list of fields to be updated.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual object UpdateMask { get; set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.CloudIdentity.v1.Data.InboundSsoAssignment Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "patch";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "PATCH";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes Patch parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^inboundSsoAssignments/[^/]+$",
+                });
+                RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "updateMask",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
+    /// <summary>The "policies" collection of methods.</summary>
+    public class PoliciesResource
+    {
+        private const string Resource = "policies";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public PoliciesResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>Get a Policy</summary>
+        /// <param name="name">Required. The name of the policy to retrieve. Format: "policies/{policy}".</param>
+        public virtual GetRequest Get(string name)
+        {
+            return new GetRequest(this.service, name);
+        }
+
+        /// <summary>Get a Policy</summary>
+        public class GetRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.Policy>
+        {
+            /// <summary>Constructs a new Get request.</summary>
+            public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>Required. The name of the policy to retrieve. Format: "policies/{policy}".</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "get";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes Get parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^policies/[^/]+$",
+                });
+            }
+        }
+
+        /// <summary>List Policies</summary>
+        public virtual ListRequest List()
+        {
+            return new ListRequest(this.service);
+        }
+
+        /// <summary>List Policies</summary>
+        public class ListRequest : CloudIdentityBaseServiceRequest<Google.Apis.CloudIdentity.v1.Data.ListPoliciesResponse>
+        {
+            /// <summary>Constructs a new List request.</summary>
+            public ListRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Optional. A CEL expression for filtering the results. Policies can be filtered by application with this
+            /// expression: setting.type.matches('^settings/gmail\\..*$') Policies can be filtered by setting type with
+            /// this expression: setting.type.matches('^.*\\.service_status$') A maximum of one of the above
+            /// setting.type clauses can be used. Policies can be filtered by customer with this expression: customer ==
+            /// "customers/{customer}" Where `customer` is the `id` from the [Admin SDK `Customer`
+            /// resource](https://developers.google.com/admin-sdk/directory/reference/rest/v1/customers). You may use
+            /// `customers/my_customer` to specify your own organization. When no customer is mentioned it will be
+            /// default to customers/my_customer. A maximum of one customer clause can be used. The above clauses can
+            /// only be combined together in a single filter expression with the `&amp;amp;&amp;amp;` operator.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Filter { get; set; }
+
+            /// <summary>
+            /// Optional. The maximum number of results to return. The service can return fewer than this number. If
+            /// omitted or set to 0, the default is 50 results per page. The maximum allowed value is 100. `page_size`
+            /// values greater than 100 default to 100.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> PageSize { get; set; }
+
+            /// <summary>
+            /// Optional. The pagination token received from a prior call to PoliciesService.ListPolicies to retrieve
+            /// the next page of results. When paginating, all other parameters provided to `ListPoliciesRequest` must
+            /// match the call that provided the page token.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PageToken { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "list";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/policies";
+
+            /// <summary>Initializes List parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "filter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageSize",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageToken",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
 }
 namespace Google.Apis.CloudIdentity.v1.Data
 {
+    /// <summary>LRO response metadata for InboundSamlSsoProfilesService.AddIdpCredential.</summary>
+    public class AddIdpCredentialOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// State of this Operation Will be "awaiting-multi-party-approval" when the operation is deferred due to the
+        /// target customer having enabled [Multi-party approval for sensitive
+        /// actions](https://support.google.com/a/answer/13790448).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The request for creating an IdpCredential with its associated payload. An InboundSamlSsoProfile can own up to 2
+    /// credentials.
+    /// </summary>
+    public class AddIdpCredentialRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>PEM encoded x509 certificate containing the public key for verifying IdP signatures.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pemData")]
+        public virtual string PemData { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request to cancel sent invitation for target email in UserInvitation.</summary>
+    public class CancelUserInvitationRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The response message for MembershipsService.CheckTransitiveMembership.</summary>
     public class CheckTransitiveMembershipResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3334,6 +5036,28 @@ namespace Google.Apis.CloudIdentity.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>LRO response metadata for InboundSamlSsoProfilesService.CreateInboundSamlSsoProfile.</summary>
+    public class CreateInboundSamlSsoProfileOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// State of this Operation Will be "awaiting-multi-party-approval" when the operation is deferred due to the
+        /// target customer having enabled [Multi-party approval for sensitive
+        /// actions](https://support.google.com/a/answer/13790448).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>LRO response metadata for InboundSsoAssignmentsService.CreateInboundSsoAssignment.</summary>
+    public class CreateInboundSsoAssignmentOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Metadata for CreateMembership LRO.</summary>
     public class CreateMembershipMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3348,9 +5072,41 @@ namespace Google.Apis.CloudIdentity.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>LRO response metadata for InboundSamlSsoProfilesService.DeleteIdpCredential.</summary>
+    public class DeleteIdpCredentialOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>LRO response metadata for InboundSamlSsoProfilesService.DeleteInboundSamlSsoProfile.</summary>
+    public class DeleteInboundSamlSsoProfileOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>LRO response metadata for InboundSsoAssignmentsService.DeleteInboundSsoAssignment.</summary>
+    public class DeleteInboundSsoAssignmentOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Metadata for DeleteMembership LRO.</summary>
     public class DeleteMembershipMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information of a DSA public key.</summary>
+    public class DsaPublicKeyInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Key size in bits (size of parameter P).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keySize")]
+        public virtual System.Nullable<int> KeySize { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3360,7 +5116,7 @@ namespace Google.Apis.CloudIdentity.v1.Data
     {
         /// <summary>
         /// Memberships will be the union of all queries. Only one entry with USER resource is currently supported.
-        /// Customers can create up to 100 dynamic groups.
+        /// Customers can create up to 500 dynamic groups.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("queries")]
         public virtual System.Collections.Generic.IList<DynamicGroupQuery> Queries { get; set; }
@@ -3402,13 +5158,46 @@ namespace Google.Apis.CloudIdentity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
         public virtual string Status { get; set; }
 
+        private string _statusTimeRaw;
+
+        private object _statusTime;
+
         /// <summary>
         /// The latest time at which the dynamic group is guaranteed to be in the given status. If status is
         /// `UP_TO_DATE`, the latest time at which the dynamic group was confirmed to be up-to-date. If status is
         /// `UPDATING_MEMBERSHIPS`, the time at which dynamic group was created.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("statusTime")]
-        public virtual object StatusTime { get; set; }
+        public virtual string StatusTimeRaw
+        {
+            get => _statusTimeRaw;
+            set
+            {
+                _statusTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _statusTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StatusTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StatusTimeDateTimeOffset instead.")]
+        public virtual object StatusTime
+        {
+            get => _statusTime;
+            set
+            {
+                _statusTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _statusTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StatusTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StatusTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StatusTimeRaw);
+            set => StatusTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3423,8 +5212,9 @@ namespace Google.Apis.CloudIdentity.v1.Data
     {
         /// <summary>
         /// The ID of the entity. For Google-managed entities, the `id` should be the email address of an existing group
-        /// or user. For external-identity-mapped entities, the `id` must be a string conforming to the Identity
-        /// Source's requirements. Must be unique within a `namespace`.
+        /// or user. Email addresses need to adhere to [name guidelines for users and
+        /// groups](https://support.google.com/a/answer/9193374). For external-identity-mapped entities, the `id` must
+        /// be a string conforming to the Identity Source's requirements. Must be unique within a `namespace`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
@@ -3445,9 +5235,42 @@ namespace Google.Apis.CloudIdentity.v1.Data
     /// <summary>The `MembershipRole` expiry details.</summary>
     public class ExpiryDetail : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
         /// <summary>The time at which the `MembershipRole` will expire.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3483,9 +5306,17 @@ namespace Google.Apis.CloudIdentity.v1.Data
     /// <summary>Resource representing the Android specific attributes of a Device.</summary>
     public class GoogleAppsCloudidentityDevicesV1AndroidAttributes : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Whether the device passes Android CTS compliance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ctsProfileMatch")]
+        public virtual System.Nullable<bool> CtsProfileMatch { get; set; }
+
         /// <summary>Whether applications from unknown sources can be installed on device.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("enabledUnknownSources")]
         public virtual System.Nullable<bool> EnabledUnknownSources { get; set; }
+
+        /// <summary>Whether any potentially harmful apps were detected on the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hasPotentiallyHarmfulApps")]
+        public virtual System.Nullable<bool> HasPotentiallyHarmfulApps { get; set; }
 
         /// <summary>
         /// Whether this account is on an owner/primary profile. For phones, only true for owner profiles. Android 4+
@@ -3504,6 +5335,14 @@ namespace Google.Apis.CloudIdentity.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("supportsWorkProfile")]
         public virtual System.Nullable<bool> SupportsWorkProfile { get; set; }
+
+        /// <summary>Whether Android verified boot status is GREEN.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verifiedBoot")]
+        public virtual System.Nullable<bool> VerifiedBoot { get; set; }
+
+        /// <summary>Whether Google Play Protect Verify Apps is enabled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verifyAppsEnabled")]
+        public virtual System.Nullable<bool> VerifyAppsEnabled { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3570,6 +5409,171 @@ namespace Google.Apis.CloudIdentity.v1.Data
         /// <summary>Resultant DeviceUser object for the action.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deviceUser")]
         public virtual GoogleAppsCloudidentityDevicesV1DeviceUser DeviceUser { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Contains information about browser profiles reported by the [Endpoint Verification
+    /// extension](https://chromewebstore.google.com/detail/endpoint-verification/callobklhcbilhphinckomhgkigmfocg?pli=1).
+    /// </summary>
+    public class GoogleAppsCloudidentityDevicesV1BrowserAttributes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Represents the current state of the [Chrome browser
+        /// attributes](https://cloud.google.com/access-context-manager/docs/browser-attributes) sent by the [Endpoint
+        /// Verification
+        /// extension](https://chromewebstore.google.com/detail/endpoint-verification/callobklhcbilhphinckomhgkigmfocg?pli=1).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("chromeBrowserInfo")]
+        public virtual GoogleAppsCloudidentityDevicesV1BrowserInfo ChromeBrowserInfo { get; set; }
+
+        /// <summary>Chrome profile ID that is exposed by the Chrome API. It is unique for each device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("chromeProfileId")]
+        public virtual string ChromeProfileId { get; set; }
+
+        private string _lastProfileSyncTimeRaw;
+
+        private object _lastProfileSyncTime;
+
+        /// <summary>Timestamp in milliseconds since the Unix epoch when the profile/gcm id was last synced.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastProfileSyncTime")]
+        public virtual string LastProfileSyncTimeRaw
+        {
+            get => _lastProfileSyncTimeRaw;
+            set
+            {
+                _lastProfileSyncTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastProfileSyncTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastProfileSyncTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastProfileSyncTimeDateTimeOffset instead.")]
+        public virtual object LastProfileSyncTime
+        {
+            get => _lastProfileSyncTime;
+            set
+            {
+                _lastProfileSyncTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastProfileSyncTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastProfileSyncTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastProfileSyncTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastProfileSyncTimeRaw);
+            set => LastProfileSyncTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Browser-specific fields reported by the [Endpoint Verification
+    /// extension](https://chromewebstore.google.com/detail/endpoint-verification/callobklhcbilhphinckomhgkigmfocg?pli=1).
+    /// </summary>
+    public class GoogleAppsCloudidentityDevicesV1BrowserInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. Browser's management state.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("browserManagementState")]
+        public virtual string BrowserManagementState { get; set; }
+
+        /// <summary>Version of the request initiating browser. E.g. `91.0.4442.4`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("browserVersion")]
+        public virtual string BrowserVersion { get; set; }
+
+        /// <summary>
+        /// Current state of [built-in DNS client](https://chromeenterprise.google/policies/#BuiltInDnsClientEnabled).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isBuiltInDnsClientEnabled")]
+        public virtual System.Nullable<bool> IsBuiltInDnsClientEnabled { get; set; }
+
+        /// <summary>
+        /// Current state of [bulk data
+        /// analysis](https://chromeenterprise.google/policies/#OnBulkDataEntryEnterpriseConnector). Set to true if
+        /// provider list from Chrome is non-empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isBulkDataEntryAnalysisEnabled")]
+        public virtual System.Nullable<bool> IsBulkDataEntryAnalysisEnabled { get; set; }
+
+        /// <summary>
+        /// Current state of [Chrome Cleanup](https://chromeenterprise.google/policies/#ChromeCleanupEnabled).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isChromeCleanupEnabled")]
+        public virtual System.Nullable<bool> IsChromeCleanupEnabled { get; set; }
+
+        /// <summary>
+        /// Current state of [Chrome Remote Desktop app](https://chromeenterprise.google/policies/#URLBlocklist).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isChromeRemoteDesktopAppBlocked")]
+        public virtual System.Nullable<bool> IsChromeRemoteDesktopAppBlocked { get; set; }
+
+        /// <summary>
+        /// Current state of [file download
+        /// analysis](https://chromeenterprise.google/policies/#OnFileDownloadedEnterpriseConnector). Set to true if
+        /// provider list from Chrome is non-empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isFileDownloadAnalysisEnabled")]
+        public virtual System.Nullable<bool> IsFileDownloadAnalysisEnabled { get; set; }
+
+        /// <summary>
+        /// Current state of [file upload
+        /// analysis](https://chromeenterprise.google/policies/#OnFileAttachedEnterpriseConnector). Set to true if
+        /// provider list from Chrome is non-empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isFileUploadAnalysisEnabled")]
+        public virtual System.Nullable<bool> IsFileUploadAnalysisEnabled { get; set; }
+
+        /// <summary>
+        /// Current state of [real-time URL
+        /// check](https://chromeenterprise.google/policies/#EnterpriseRealTimeUrlCheckMode). Set to true if provider
+        /// list from Chrome is non-empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isRealtimeUrlCheckEnabled")]
+        public virtual System.Nullable<bool> IsRealtimeUrlCheckEnabled { get; set; }
+
+        /// <summary>
+        /// Current state of [security event
+        /// analysis](https://chromeenterprise.google/policies/#OnSecurityEventEnterpriseConnector). Set to true if
+        /// provider list from Chrome is non-empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isSecurityEventAnalysisEnabled")]
+        public virtual System.Nullable<bool> IsSecurityEventAnalysisEnabled { get; set; }
+
+        /// <summary>
+        /// Current state of [site isolation](https://chromeenterprise.google/policies/?policy=IsolateOrigins).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isSiteIsolationEnabled")]
+        public virtual System.Nullable<bool> IsSiteIsolationEnabled { get; set; }
+
+        /// <summary>
+        /// Current state of [third-party
+        /// blocking](https://chromeenterprise.google/policies/#ThirdPartyBlockingEnabled).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isThirdPartyBlockingEnabled")]
+        public virtual System.Nullable<bool> IsThirdPartyBlockingEnabled { get; set; }
+
+        /// <summary>
+        /// Current state of [password protection
+        /// trigger](https://chromeenterprise.google/policies/#PasswordProtectionWarningTrigger).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("passwordProtectionWarningTrigger")]
+        public virtual string PasswordProtectionWarningTrigger { get; set; }
+
+        /// <summary>
+        /// Current state of [Safe Browsing protection
+        /// level](https://chromeenterprise.google/policies/#SafeBrowsingProtectionLevel).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("safeBrowsingProtectionLevel")]
+        public virtual string SafeBrowsingProtectionLevel { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3643,6 +5647,141 @@ namespace Google.Apis.CloudIdentity.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Stores information about a certificate.</summary>
+    public class GoogleAppsCloudidentityDevicesV1CertificateAttributes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The X.509 extension for CertificateTemplate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("certificateTemplate")]
+        public virtual GoogleAppsCloudidentityDevicesV1CertificateTemplate CertificateTemplate { get; set; }
+
+        /// <summary>The encoded certificate fingerprint.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fingerprint")]
+        public virtual string Fingerprint { get; set; }
+
+        /// <summary>The name of the issuer of this certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("issuer")]
+        public virtual string Issuer { get; set; }
+
+        /// <summary>Serial number of the certificate, Example: "123456789".</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serialNumber")]
+        public virtual string SerialNumber { get; set; }
+
+        /// <summary>The subject name of this certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subject")]
+        public virtual string Subject { get; set; }
+
+        /// <summary>The certificate thumbprint.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("thumbprint")]
+        public virtual string Thumbprint { get; set; }
+
+        /// <summary>Output only. Validation state of this certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validationState")]
+        public virtual string ValidationState { get; set; }
+
+        private string _validityExpirationTimeRaw;
+
+        private object _validityExpirationTime;
+
+        /// <summary>Certificate not valid at or after this timestamp.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validityExpirationTime")]
+        public virtual string ValidityExpirationTimeRaw
+        {
+            get => _validityExpirationTimeRaw;
+            set
+            {
+                _validityExpirationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _validityExpirationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ValidityExpirationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ValidityExpirationTimeDateTimeOffset instead.")]
+        public virtual object ValidityExpirationTime
+        {
+            get => _validityExpirationTime;
+            set
+            {
+                _validityExpirationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _validityExpirationTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ValidityExpirationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ValidityExpirationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ValidityExpirationTimeRaw);
+            set => ValidityExpirationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _validityStartTimeRaw;
+
+        private object _validityStartTime;
+
+        /// <summary>Certificate not valid before this timestamp.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validityStartTime")]
+        public virtual string ValidityStartTimeRaw
+        {
+            get => _validityStartTimeRaw;
+            set
+            {
+                _validityStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _validityStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ValidityStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ValidityStartTimeDateTimeOffset instead.")]
+        public virtual object ValidityStartTime
+        {
+            get => _validityStartTime;
+            set
+            {
+                _validityStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _validityStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ValidityStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ValidityStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ValidityStartTimeRaw);
+            set => ValidityStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>CertificateTemplate (v3 Extension in X.509).</summary>
+    public class GoogleAppsCloudidentityDevicesV1CertificateTemplate : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The template id of the template. Example:
+        /// "1.3.6.1.4.1.311.21.8.15608621.11768144.5720724.16068415.6889630.81.2472537.7784047".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>The Major version of the template. Example: 100.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("majorVersion")]
+        public virtual System.Nullable<int> MajorVersion { get; set; }
+
+        /// <summary>The minor version of the template. Example: 12.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minorVersion")]
+        public virtual System.Nullable<int> MinorVersion { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Represents the state associated with an API client calling the Devices API. Resource representing ClientState
     /// and supports updates from API users
@@ -3657,9 +5796,42 @@ namespace Google.Apis.CloudIdentity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("complianceState")]
         public virtual string ComplianceState { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the client state data was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// This field may be used to store a unique identifier for the API resource within which these CustomAttributes
@@ -3690,9 +5862,44 @@ namespace Google.Apis.CloudIdentity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("keyValuePairs")]
         public virtual System.Collections.Generic.IDictionary<string, GoogleAppsCloudidentityDevicesV1CustomAttributeValue> KeyValuePairs { get; set; }
 
+        private string _lastUpdateTimeRaw;
+
+        private object _lastUpdateTime;
+
         /// <summary>Output only. The time the client state data was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdateTime")]
-        public virtual object LastUpdateTime { get; set; }
+        public virtual string LastUpdateTimeRaw
+        {
+            get => _lastUpdateTimeRaw;
+            set
+            {
+                _lastUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdateTimeDateTimeOffset instead.")]
+        public virtual object LastUpdateTime
+        {
+            get => _lastUpdateTime;
+            set
+            {
+                _lastUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdateTimeRaw);
+            set => LastUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The management state of the resource as specified by the API client.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("managed")]
@@ -3796,11 +6003,48 @@ namespace Google.Apis.CloudIdentity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("compromisedState")]
         public virtual string CompromisedState { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Output only. When the Company-Owned device was imported. This field is empty for BYOD devices.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Unique identifier for the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceId")]
+        public virtual string DeviceId { get; set; }
 
         /// <summary>Output only. Type of device.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deviceType")]
@@ -3818,6 +6062,17 @@ namespace Google.Apis.CloudIdentity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("encryptionState")]
         public virtual string EncryptionState { get; set; }
 
+        /// <summary>
+        /// Output only. Attributes specific to [Endpoint
+        /// Verification](https://cloud.google.com/endpoint-verification/docs/overview) devices.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endpointVerificationSpecificAttributes")]
+        public virtual GoogleAppsCloudidentityDevicesV1EndpointVerificationSpecificAttributes EndpointVerificationSpecificAttributes { get; set; }
+
+        /// <summary>Host name of the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hostname")]
+        public virtual string Hostname { get; set; }
+
         /// <summary>Output only. IMEI number of device if GSM device; empty otherwise.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("imei")]
         public virtual string Imei { get; set; }
@@ -3826,9 +6081,42 @@ namespace Google.Apis.CloudIdentity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kernelVersion")]
         public virtual string KernelVersion { get; set; }
 
+        private string _lastSyncTimeRaw;
+
+        private object _lastSyncTime;
+
         /// <summary>Most recent time when device synced with this service.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastSyncTime")]
-        public virtual object LastSyncTime { get; set; }
+        public virtual string LastSyncTimeRaw
+        {
+            get => _lastSyncTimeRaw;
+            set
+            {
+                _lastSyncTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastSyncTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastSyncTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastSyncTimeDateTimeOffset instead.")]
+        public virtual object LastSyncTime
+        {
+            get => _lastSyncTime;
+            set
+            {
+                _lastSyncTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastSyncTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastSyncTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastSyncTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastSyncTimeRaw);
+            set => LastSyncTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Management state of the device</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("managementState")]
@@ -3848,7 +6136,9 @@ namespace Google.Apis.CloudIdentity.v1.Data
 
         /// <summary>
         /// Output only. [Resource name](https://cloud.google.com/apis/design/resource_names) of the Device in format:
-        /// `devices/{device}`, where device is the unique id assigned to the Device.
+        /// `devices/{device}`, where device is the unique id assigned to the Device. Important: Device API scopes
+        /// require that you use domain-wide delegation to access the API. For more information, see [Set up the Devices
+        /// API](https://cloud.google.com/identity/docs/how-to/setup-devices).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -3878,13 +6168,52 @@ namespace Google.Apis.CloudIdentity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("releaseVersion")]
         public virtual string ReleaseVersion { get; set; }
 
+        private string _securityPatchTimeRaw;
+
+        private object _securityPatchTime;
+
         /// <summary>Output only. OS security patch update time on device.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("securityPatchTime")]
-        public virtual object SecurityPatchTime { get; set; }
+        public virtual string SecurityPatchTimeRaw
+        {
+            get => _securityPatchTimeRaw;
+            set
+            {
+                _securityPatchTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _securityPatchTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="SecurityPatchTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SecurityPatchTimeDateTimeOffset instead.")]
+        public virtual object SecurityPatchTime
+        {
+            get => _securityPatchTime;
+            set
+            {
+                _securityPatchTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _securityPatchTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="SecurityPatchTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SecurityPatchTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(SecurityPatchTimeRaw);
+            set => SecurityPatchTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Serial Number of device. Example: HT82V1A01076.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("serialNumber")]
         public virtual string SerialNumber { get; set; }
+
+        /// <summary>Output only. Unified device id of the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unifiedDeviceId")]
+        public virtual string UnifiedDeviceId { get; set; }
 
         /// <summary>WiFi MAC addresses of device.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("wifiMacAddresses")]
@@ -3904,21 +6233,120 @@ namespace Google.Apis.CloudIdentity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("compromisedState")]
         public virtual string CompromisedState { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>When the user first signed in to the device</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _firstSyncTimeRaw;
+
+        private object _firstSyncTime;
 
         /// <summary>Output only. Most recent time when user registered with this service.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("firstSyncTime")]
-        public virtual object FirstSyncTime { get; set; }
+        public virtual string FirstSyncTimeRaw
+        {
+            get => _firstSyncTimeRaw;
+            set
+            {
+                _firstSyncTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _firstSyncTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FirstSyncTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FirstSyncTimeDateTimeOffset instead.")]
+        public virtual object FirstSyncTime
+        {
+            get => _firstSyncTime;
+            set
+            {
+                _firstSyncTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _firstSyncTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FirstSyncTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FirstSyncTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FirstSyncTimeRaw);
+            set => FirstSyncTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Default locale used on device, in IETF BCP-47 format.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("languageCode")]
         public virtual string LanguageCode { get; set; }
 
+        private string _lastSyncTimeRaw;
+
+        private object _lastSyncTime;
+
         /// <summary>Output only. Last time when user synced with policies.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastSyncTime")]
-        public virtual object LastSyncTime { get; set; }
+        public virtual string LastSyncTimeRaw
+        {
+            get => _lastSyncTimeRaw;
+            set
+            {
+                _lastSyncTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastSyncTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastSyncTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastSyncTimeDateTimeOffset instead.")]
+        public virtual object LastSyncTime
+        {
+            get => _lastSyncTime;
+            set
+            {
+                _lastSyncTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastSyncTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastSyncTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastSyncTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastSyncTimeRaw);
+            set => LastSyncTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Management state of the user on the device.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("managementState")]
@@ -3943,6 +6371,34 @@ namespace Google.Apis.CloudIdentity.v1.Data
         /// <summary>Email address of the user registered on the device.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userEmail")]
         public virtual string UserEmail { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Resource representing the [Endpoint Verification-specific
+    /// attributes](https://cloud.google.com/endpoint-verification/docs/device-information) of a device.
+    /// </summary>
+    public class GoogleAppsCloudidentityDevicesV1EndpointVerificationSpecificAttributes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// [Additional signals](https://cloud.google.com/endpoint-verification/docs/device-information) reported by
+        /// Endpoint Verification. It includes the following attributes: * Non-configurable attributes: hotfixes,
+        /// av_installed, av_enabled, windows_domain_name, is_os_native_firewall_enabled, and is_secure_boot_enabled. *
+        /// [Configurable attributes](https://cloud.google.com/endpoint-verification/docs/collect-config-attributes):
+        /// file, folder, and binary attributes; registry entries; and properties in a plist.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("additionalSignals")]
+        public virtual System.Collections.Generic.IDictionary<string, object> AdditionalSignals { get; set; }
+
+        /// <summary>Details of browser profiles reported by Endpoint Verification.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("browserAttributes")]
+        public virtual System.Collections.Generic.IList<GoogleAppsCloudidentityDevicesV1BrowserAttributes> BrowserAttributes { get; set; }
+
+        /// <summary>Details of certificates.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("certificateAttributes")]
+        public virtual System.Collections.Generic.IList<GoogleAppsCloudidentityDevicesV1CertificateAttributes> CertificateAttributes { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4006,7 +6462,7 @@ namespace Google.Apis.CloudIdentity.v1.Data
     public class GoogleAppsCloudidentityDevicesV1LookupSelfDeviceUsersResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The obfuscated customer Id that may be passed back to other Devices API methods such as List, Get, etc.
+        /// The customer resource name that may be passed back to other Devices API methods such as List, Get, etc.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customer")]
         public virtual string Customer { get; set; }
@@ -4066,6 +6522,15 @@ namespace Google.Apis.CloudIdentity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("customer")]
         public virtual string Customer { get; set; }
 
+        /// <summary>
+        /// Optional. Specifies if a user is able to factory reset a device after a Device Wipe. On iOS, this is called
+        /// "Activation Lock", while on Android, this is known as "Factory Reset Protection". If true, this protection
+        /// will be removed from the device, so that a user can successfully factory reset. If false, the setting is
+        /// untouched on the device.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("removeResetLock")]
+        public virtual System.Nullable<bool> RemoveResetLock { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -4122,9 +6587,46 @@ namespace Google.Apis.CloudIdentity.v1.Data
     /// </summary>
     public class Group : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Output only. Additional group keys associated with the Group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("additionalGroupKeys")]
+        public virtual System.Collections.Generic.IList<EntityKey> AdditionalGroupKeys { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time when the `Group` was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// An extended description to help users determine the purpose of a `Group`. Must not be longer than 4,096
@@ -4141,7 +6643,7 @@ namespace Google.Apis.CloudIdentity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("dynamicGroupMetadata")]
         public virtual DynamicGroupMetadata DynamicGroupMetadata { get; set; }
 
-        /// <summary>Required. Immutable. The `EntityKey` of the `Group`.</summary>
+        /// <summary>Required. The `EntityKey` of the `Group`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("groupKey")]
         public virtual EntityKey GroupKey { get; set; }
 
@@ -4166,16 +6668,50 @@ namespace Google.Apis.CloudIdentity.v1.Data
 
         /// <summary>
         /// Required. Immutable. The resource name of the entity under which this `Group` resides in the Cloud Identity
-        /// resource hierarchy. Must be of the form `identitysources/{identity_source}` for external- identity-mapped
-        /// groups or `customers/{customer}` for Google Groups. The `customer` must begin with "C" (for example,
-        /// 'C046psxkn').
+        /// resource hierarchy. Must be of the form `identitysources/{identity_source}` for external [identity-mapped
+        /// groups](https://support.google.com/a/answer/9039510) or `customers/{customer_id}` for Google Groups. The
+        /// `customer_id` must begin with "C" (for example, 'C046psxkn'). [Find your customer ID.]
+        /// (https://support.google.com/cloudidentity/answer/10070793)
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("parent")]
         public virtual string Parent { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time when the `Group` was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4215,6 +6751,158 @@ namespace Google.Apis.CloudIdentity.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Credential for verifying signatures produced by the Identity Provider.</summary>
+    public class IdpCredential : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. Information of a DSA public key.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dsaKeyInfo")]
+        public virtual DsaPublicKeyInfo DsaKeyInfo { get; set; }
+
+        /// <summary>
+        /// Output only. [Resource name](https://cloud.google.com/apis/design/resource_names) of the credential.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Output only. Information of a RSA public key.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rsaKeyInfo")]
+        public virtual RsaPublicKeyInfo RsaKeyInfo { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Time when the `IdpCredential` was last updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A [SAML 2.0](https://www.oasis-open.org/standards#samlv2.0) federation between a Google enterprise customer and
+    /// a SAML identity provider.
+    /// </summary>
+    public class InboundSamlSsoProfile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Immutable. The customer. For example: `customers/C0123abc`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customer")]
+        public virtual string Customer { get; set; }
+
+        /// <summary>Human-readable name of the SAML SSO profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>SAML identity provider configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("idpConfig")]
+        public virtual SamlIdpConfig IdpConfig { get; set; }
+
+        /// <summary>
+        /// Output only. [Resource name](https://cloud.google.com/apis/design/resource_names) of the SAML SSO profile.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// SAML service provider configuration for this SAML SSO profile. These are the service provider details
+        /// provided by Google that should be configured on the corresponding identity provider.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("spConfig")]
+        public virtual SamlSpConfig SpConfig { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Targets with "set" SSO assignments and their respective assignments.</summary>
+    public class InboundSsoAssignment : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Immutable. The customer. For example: `customers/C0123abc`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customer")]
+        public virtual string Customer { get; set; }
+
+        /// <summary>
+        /// Output only. [Resource name](https://cloud.google.com/apis/design/resource_names) of the Inbound SSO
+        /// Assignment.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Must be zero (which is the default value so it can be omitted) for assignments with `target_org_unit` set
+        /// and must be greater-than-or-equal-to one for assignments with `target_group` set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rank")]
+        public virtual System.Nullable<int> Rank { get; set; }
+
+        /// <summary>SAML SSO details. Must be set if and only if `sso_mode` is set to `SAML_SSO`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("samlSsoInfo")]
+        public virtual SamlSsoInfo SamlSsoInfo { get; set; }
+
+        /// <summary>
+        /// Assertions about users assigned to an IdP will always be accepted from that IdP. This controls whether/when
+        /// Google should redirect a user to the IdP. Unset (defaults) is the recommended configuration.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("signInBehavior")]
+        public virtual SignInBehavior SignInBehavior { get; set; }
+
+        /// <summary>Inbound SSO behavior.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ssoMode")]
+        public virtual string SsoMode { get; set; }
+
+        /// <summary>Immutable. Must be of the form `groups/{group}`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetGroup")]
+        public virtual string TargetGroup { get; set; }
+
+        /// <summary>Immutable. Must be of the form `orgUnits/{org_unit}`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetOrgUnit")]
+        public virtual string TargetOrgUnit { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response for IsInvitableUser RPC.</summary>
+    public class IsInvitableUserResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Returns true if the email address is invitable.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isInvitableUser")]
+        public virtual System.Nullable<bool> IsInvitableUser { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Response message for ListGroups operation.</summary>
     public class ListGroupsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4224,6 +6912,60 @@ namespace Google.Apis.CloudIdentity.v1.Data
 
         /// <summary>
         /// Token to retrieve the next page of results, or empty if there are no more results available for listing.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response of the InboundSamlSsoProfilesService.ListIdpCredentials method.</summary>
+    public class ListIdpCredentialsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The IdpCredentials from the specified InboundSamlSsoProfile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("idpCredentials")]
+        public virtual System.Collections.Generic.IList<IdpCredential> IdpCredentials { get; set; }
+
+        /// <summary>
+        /// A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no
+        /// subsequent pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response of the InboundSamlSsoProfilesService.ListInboundSamlSsoProfiles method.</summary>
+    public class ListInboundSamlSsoProfilesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of InboundSamlSsoProfiles.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inboundSamlSsoProfiles")]
+        public virtual System.Collections.Generic.IList<InboundSamlSsoProfile> InboundSamlSsoProfiles { get; set; }
+
+        /// <summary>
+        /// A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no
+        /// subsequent pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response of the InboundSsoAssignmentsService.ListInboundSsoAssignments method.</summary>
+    public class ListInboundSsoAssignmentsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The assignments.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inboundSsoAssignments")]
+        public virtual System.Collections.Generic.IList<InboundSsoAssignment> InboundSsoAssignments { get; set; }
+
+        /// <summary>
+        /// A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no
+        /// subsequent pages.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -4244,6 +6986,43 @@ namespace Google.Apis.CloudIdentity.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response message for PoliciesService.ListPolicies.</summary>
+    public class ListPoliciesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The pagination token to retrieve the next page of results. If this field is empty, there are no subsequent
+        /// pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The results</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policies")]
+        public virtual System.Collections.Generic.IList<Policy> Policies { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for UserInvitation listing request.</summary>
+    public class ListUserInvitationsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The token for the next page. If not empty, indicates that there may be more `UserInvitation` resources that
+        /// match the listing request; this value can be used in a subsequent ListUserInvitationsRequest to get
+        /// continued results with the current list call.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The list of UserInvitation resources.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userInvitations")]
+        public virtual System.Collections.Generic.IList<UserInvitation> UserInvitations { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4332,9 +7111,46 @@ namespace Google.Apis.CloudIdentity.v1.Data
     /// </summary>
     public class Membership : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time when the `Membership` was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. Delivery setting associated with the membership.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deliverySetting")]
+        public virtual string DeliverySetting { get; set; }
 
         /// <summary>
         /// Output only. The [resource name](https://cloud.google.com/apis/design/resource_names) of the `Membership`.
@@ -4358,9 +7174,42 @@ namespace Google.Apis.CloudIdentity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time when the `Membership` was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4371,8 +7220,8 @@ namespace Google.Apis.CloudIdentity.v1.Data
     {
         /// <summary>
         /// Each edge contains information about the member that belongs to this group. Note: Fields returned here will
-        /// help identify the specific Membership resource (e.g name, preferred_member_key and role), but may not be a
-        /// comprehensive list of all fields.
+        /// help identify the specific Membership resource (e.g `name`, `preferred_member_key` and `role`), but may not
+        /// be a comprehensive list of all fields.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("edges")]
         public virtual System.Collections.Generic.IList<Membership> Edges { get; set; }
@@ -4380,6 +7229,50 @@ namespace Google.Apis.CloudIdentity.v1.Data
         /// <summary>Resource name of the group that the members belong to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("group")]
         public virtual string Group { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Message containing membership relation.</summary>
+    public class MembershipRelation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>An extended description to help users determine the purpose of a `Group`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>The display name of the `Group`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// The [resource name](https://cloud.google.com/apis/design/resource_names) of the `Group`. Shall be of the
+        /// form `groups/{group_id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("group")]
+        public virtual string Group { get; set; }
+
+        /// <summary>The `EntityKey` of the `Group`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("groupKey")]
+        public virtual EntityKey GroupKey { get; set; }
+
+        /// <summary>
+        /// One or more label entries that apply to the Group. Currently supported labels contain a key with an empty
+        /// value.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
+        /// The [resource name](https://cloud.google.com/apis/design/resource_names) of the `Membership`. Shall be of
+        /// the form `groups/{group_id}/memberships/{membership_id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("membership")]
+        public virtual string Membership { get; set; }
+
+        /// <summary>The `MembershipRole`s that apply to the `Membership`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("roles")]
+        public virtual System.Collections.Generic.IList<MembershipRole> Roles { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4492,14 +7385,93 @@ namespace Google.Apis.CloudIdentity.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("response")]
         public virtual System.Collections.Generic.IDictionary<string, object> Response { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A Policy resource binds an instance of a single Setting with the scope of a PolicyQuery. The Setting instance
+    /// will be applied to all entities that satisfy the query.
+    /// </summary>
+    public class Policy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Immutable. Customer that the Policy belongs to. The value is in the format 'customers/{customerId}'. The
+        /// `customerId` must begin with "C" To find your customer ID in Admin Console see
+        /// https://support.google.com/a/answer/10070793.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customer")]
+        public virtual string Customer { get; set; }
+
+        /// <summary>
+        /// Output only. Identifier. The [resource name](https://cloud.google.com/apis/design/resource_names) of the
+        /// Policy. Format: policies/{policy}.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Required. The PolicyQuery the Setting applies to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policyQuery")]
+        public virtual PolicyQuery PolicyQuery { get; set; }
+
+        /// <summary>Required. The Setting configured by this Policy.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("setting")]
+        public virtual Setting Setting { get; set; }
+
+        /// <summary>Output only. The type of the policy.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>PolicyQuery</summary>
+    public class PolicyQuery : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Immutable. The group that the query applies to. This field is only set if there is a single value for group
+        /// that satisfies all clauses of the query. If no group applies, this will be the empty string.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("group")]
+        public virtual string Group { get; set; }
+
+        /// <summary>
+        /// Required. Immutable. Non-empty default. The OrgUnit the query applies to. This field is only set if there is
+        /// a single value for org_unit that satisfies all clauses of the query.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("orgUnit")]
+        public virtual string OrgUnit { get; set; }
+
+        /// <summary>
+        /// Immutable. The CEL query that defines which entities the Policy applies to (ex. a User entity). For details
+        /// about CEL see https://opensource.google.com/projects/cel. The OrgUnits the Policy applies to are represented
+        /// by a clause like so: entity.org_units.exists(org_unit, org_unit.org_unit_id == orgUnitId('{orgUnitId}')) The
+        /// Group the Policy applies to are represented by a clause like so: entity.groups.exists(group, group.group_id
+        /// == groupId('{groupId}')) The Licenses the Policy applies to are represented by a clause like so:
+        /// entity.licenses.exists(license, license in ['/product/{productId}/sku/{skuId}']) The above clauses can be
+        /// present in any combination, and used in conjunction with the &amp;amp;&amp;amp;, || and ! operators. The
+        /// org_unit and group fields below are helper fields that contain the corresponding value(s) as the query to
+        /// make the query easier to use.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("query")]
+        public virtual string Query { get; set; }
+
+        /// <summary>
+        /// Output only. The decimal sort order of this PolicyQuery. The value is relative to all other policies with
+        /// the same setting type for the customer. (There are no duplicates within this set).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sortOrder")]
+        public virtual System.Nullable<double> SortOrder { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4525,6 +7497,101 @@ namespace Google.Apis.CloudIdentity.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("memberRestrictionEvaluation")]
         public virtual MembershipRoleRestrictionEvaluation MemberRestrictionEvaluation { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information of a RSA public key.</summary>
+    public class RsaPublicKeyInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Key size in bits (size of the modulus).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keySize")]
+        public virtual System.Nullable<int> KeySize { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>SAML IDP (identity provider) configuration.</summary>
+    public class SamlIdpConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The **Change Password URL** of the identity provider. Users will be sent to this URL when changing their
+        /// passwords at `myaccount.google.com`. This takes precedence over the change password URL configured at
+        /// customer-level. Must use `HTTPS`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("changePasswordUri")]
+        public virtual string ChangePasswordUri { get; set; }
+
+        /// <summary>Required. The SAML **Entity ID** of the identity provider.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entityId")]
+        public virtual string EntityId { get; set; }
+
+        /// <summary>
+        /// The **Logout Redirect URL** (sign-out page URL) of the identity provider. When a user clicks the sign-out
+        /// link on a Google page, they will be redirected to this URL. This is a pure redirect with no attached SAML
+        /// `LogoutRequest` i.e. SAML single logout is not supported. Must use `HTTPS`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("logoutRedirectUri")]
+        public virtual string LogoutRedirectUri { get; set; }
+
+        /// <summary>
+        /// Required. The `SingleSignOnService` endpoint location (sign-in page URL) of the identity provider. This is
+        /// the URL where the `AuthnRequest` will be sent. Must use `HTTPS`. Assumed to accept the `HTTP-Redirect`
+        /// binding.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("singleSignOnServiceUri")]
+        public virtual string SingleSignOnServiceUri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>SAML SP (service provider) configuration.</summary>
+    public class SamlSpConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. The SAML **Assertion Consumer Service (ACS) URL** to be used for the IDP-initiated login.
+        /// Assumed to accept response messages via the `HTTP-POST` binding.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("assertionConsumerServiceUri")]
+        public virtual string AssertionConsumerServiceUri { get; set; }
+
+        /// <summary>Output only. The SAML **Entity ID** for this service provider.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entityId")]
+        public virtual string EntityId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Details that are applicable when `sso_mode` == `SAML_SSO`.</summary>
+    public class SamlSsoInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Name of the `InboundSamlSsoProfile` to use. Must be of the form
+        /// `inboundSamlSsoProfiles/{inbound_saml_sso_profile}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inboundSamlSsoProfile")]
+        public virtual string InboundSamlSsoProfile { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response message for MembershipsService.SearchDirectGroups.</summary>
+    public class SearchDirectGroupsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of direct groups satisfying the query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("memberships")]
+        public virtual System.Collections.Generic.IList<MembershipRelation> Memberships { get; set; }
+
+        /// <summary>
+        /// Token to retrieve the next page of results, or empty if there are no more results available for listing.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4597,6 +7664,39 @@ namespace Google.Apis.CloudIdentity.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A request to send email for inviting target user corresponding to the UserInvitation.</summary>
+    public class SendUserInvitationRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Setting</summary>
+    public class Setting : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Immutable. The type of the Setting. .</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>Required. The value of the Setting.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("value")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Value { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Controls sign-in behavior.</summary>
+    public class SignInBehavior : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>When to redirect sign-ins to the IdP.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("redirectCondition")]
+        public virtual string RedirectCondition { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// The `Status` type defines a logical error model that is suitable for different programming environments,
     /// including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains
@@ -4642,6 +7742,28 @@ namespace Google.Apis.CloudIdentity.v1.Data
 
     /// <summary>Metadata for UpdateGroup LRO.</summary>
     public class UpdateGroupMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>LRO response metadata for InboundSamlSsoProfilesService.UpdateInboundSamlSsoProfile.</summary>
+    public class UpdateInboundSamlSsoProfileOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// State of this Operation Will be "awaiting-multi-party-approval" when the operation is deferred due to the
+        /// target customer having enabled [Multi-party approval for sensitive
+        /// actions](https://support.google.com/a/answer/13790448).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>LRO response metadata for InboundSsoAssignmentsService.UpdateInboundSsoAssignment.</summary>
+    public class UpdateInboundSsoAssignmentOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4693,9 +7815,42 @@ namespace Google.Apis.CloudIdentity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Time when the `UserInvitation` was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Translate.v3beta1
         public TranslateService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://translation.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://translation.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Translate.v3beta1
         public override string Name => "translate";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://translation.googleapis.com/";
-        #else
-            "https://translation.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://translation.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Translation API.</summary>
         public class Scope
@@ -332,7 +327,7 @@ namespace Google.Apis.Translate.v3beta1
                 /// <param name="parent">Required. The project name.</param>
                 public virtual CreateRequest Create(Google.Apis.Translate.v3beta1.Data.Glossary body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -390,7 +385,7 @@ namespace Google.Apis.Translate.v3beta1
                 /// <param name="name">Required. The name of the glossary to delete.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -438,7 +433,7 @@ namespace Google.Apis.Translate.v3beta1
                 /// <param name="name">Required. The name of the glossary to retrieve.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a glossary. Returns NOT_FOUND, if the glossary doesn't exist.</summary>
@@ -485,7 +480,7 @@ namespace Google.Apis.Translate.v3beta1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists glossaries in a project. Returns NOT_FOUND, if the project doesn't exist.</summary>
@@ -605,13 +600,13 @@ namespace Google.Apis.Translate.v3beta1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.Translate.v3beta1.Data.CancelOperationRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -620,7 +615,7 @@ namespace Google.Apis.Translate.v3beta1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 public class CancelRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3beta1.Data.Empty>
                 {
@@ -674,7 +669,7 @@ namespace Google.Apis.Translate.v3beta1
                 /// <param name="name">The name of the operation resource to be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -726,7 +721,7 @@ namespace Google.Apis.Translate.v3beta1
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -772,27 +767,17 @@ namespace Google.Apis.Translate.v3beta1
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 public class ListRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3beta1.Data.ListOperationsResponse>
                 {
@@ -880,7 +865,7 @@ namespace Google.Apis.Translate.v3beta1
                 /// <param name="name">The name of the operation resource to wait on.</param>
                 public virtual WaitRequest Wait(Google.Apis.Translate.v3beta1.Data.WaitOperationRequest body, string name)
                 {
-                    return new WaitRequest(service, body, name);
+                    return new WaitRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -952,7 +937,7 @@ namespace Google.Apis.Translate.v3beta1
             /// </param>
             public virtual BatchTranslateDocumentRequest BatchTranslateDocument(Google.Apis.Translate.v3beta1.Data.BatchTranslateDocumentRequest body, string parent)
             {
-                return new BatchTranslateDocumentRequest(service, body, parent);
+                return new BatchTranslateDocumentRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1025,7 +1010,7 @@ namespace Google.Apis.Translate.v3beta1
             /// </param>
             public virtual BatchTranslateTextRequest BatchTranslateText(Google.Apis.Translate.v3beta1.Data.BatchTranslateTextRequest body, string parent)
             {
-                return new BatchTranslateTextRequest(service, body, parent);
+                return new BatchTranslateTextRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1094,7 +1079,7 @@ namespace Google.Apis.Translate.v3beta1
             /// </param>
             public virtual DetectLanguageRequest DetectLanguage(Google.Apis.Translate.v3beta1.Data.DetectLanguageRequest body, string parent)
             {
-                return new DetectLanguageRequest(service, body, parent);
+                return new DetectLanguageRequest(this.service, body, parent);
             }
 
             /// <summary>Detects the language of text within a request.</summary>
@@ -1152,7 +1137,7 @@ namespace Google.Apis.Translate.v3beta1
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -1204,7 +1189,7 @@ namespace Google.Apis.Translate.v3beta1
             /// </param>
             public virtual GetSupportedLanguagesRequest GetSupportedLanguages(string parent)
             {
-                return new GetSupportedLanguagesRequest(service, parent);
+                return new GetSupportedLanguagesRequest(this.service, parent);
             }
 
             /// <summary>Returns a list of supported languages for translation.</summary>
@@ -1290,7 +1275,7 @@ namespace Google.Apis.Translate.v3beta1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -1309,7 +1294,7 @@ namespace Google.Apis.Translate.v3beta1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -1386,7 +1371,7 @@ namespace Google.Apis.Translate.v3beta1
             /// </param>
             public virtual TranslateDocumentRequest TranslateDocument(Google.Apis.Translate.v3beta1.Data.TranslateDocumentRequest body, string parent)
             {
-                return new TranslateDocumentRequest(service, body, parent);
+                return new TranslateDocumentRequest(this.service, body, parent);
             }
 
             /// <summary>Translates documents in synchronous mode.</summary>
@@ -1452,7 +1437,7 @@ namespace Google.Apis.Translate.v3beta1
             /// </param>
             public virtual TranslateTextRequest TranslateText(Google.Apis.Translate.v3beta1.Data.TranslateTextRequest body, string parent)
             {
-                return new TranslateTextRequest(service, body, parent);
+                return new TranslateTextRequest(this.service, body, parent);
             }
 
             /// <summary>Translates input text and returns translated text.</summary>
@@ -1519,7 +1504,7 @@ namespace Google.Apis.Translate.v3beta1
         /// </param>
         public virtual DetectLanguageRequest DetectLanguage(Google.Apis.Translate.v3beta1.Data.DetectLanguageRequest body, string parent)
         {
-            return new DetectLanguageRequest(service, body, parent);
+            return new DetectLanguageRequest(this.service, body, parent);
         }
 
         /// <summary>Detects the language of text within a request.</summary>
@@ -1583,7 +1568,7 @@ namespace Google.Apis.Translate.v3beta1
         /// </param>
         public virtual GetSupportedLanguagesRequest GetSupportedLanguages(string parent)
         {
-            return new GetSupportedLanguagesRequest(service, parent);
+            return new GetSupportedLanguagesRequest(this.service, parent);
         }
 
         /// <summary>Returns a list of supported languages for translation.</summary>
@@ -1675,7 +1660,7 @@ namespace Google.Apis.Translate.v3beta1
         /// </param>
         public virtual TranslateTextRequest TranslateText(Google.Apis.Translate.v3beta1.Data.TranslateTextRequest body, string parent)
         {
-            return new TranslateTextRequest(service, body, parent);
+            return new TranslateTextRequest(this.service, body, parent);
         }
 
         /// <summary>Translates input text and returns translated text.</summary>
@@ -1773,13 +1758,13 @@ namespace Google.Apis.Translate.v3beta1.Data
         /// processed and ready to be consumed (that is, no partial output file is written). Since index.csv will be
         /// keeping updated during the process, please make sure there is no custom retention policy applied on the
         /// output bucket that may avoid file updating.
-        /// (https://cloud.google.com/storage/docs/bucket-lock?hl=en#retention-policy) The naming format of translation
-        /// output files follows (for target language code [trg]): `translation_output`:
-        /// gs://translation_output/a_b_c_[trg]_translation.[extension] `glossary_translation_output`:
-        /// gs://translation_test/a_b_c_[trg]_glossary_translation.[extension] The output document will maintain the
+        /// (https://cloud.google.com/storage/docs/bucket-lock#retention-policy) The naming format of translation output
+        /// files follows (for target language code [trg]): `translation_output`:
+        /// `gs://translation_output/a_b_c_[trg]_translation.[extension]` `glossary_translation_output`:
+        /// `gs://translation_test/a_b_c_[trg]_glossary_translation.[extension]`. The output document will maintain the
         /// same file format as the input document. The naming format of error output files follows (for target language
-        /// code [trg]): `error_output`: gs://translation_test/a_b_c_[trg]_errors.txt `glossary_error_output`:
-        /// gs://translation_test/a_b_c_[trg]_glossary_translation.txt The error output is a txt file containing error
+        /// code [trg]): `error_output`: `gs://translation_test/a_b_c_[trg]_errors.txt` `glossary_error_output`:
+        /// `gs://translation_test/a_b_c_[trg]_glossary_translation.txt` The error output is a txt file containing error
         /// details.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gcsDestination")]
@@ -1792,7 +1777,32 @@ namespace Google.Apis.Translate.v3beta1.Data
     /// <summary>The BatchTranslateDocument request.</summary>
     public class BatchTranslateDocumentRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Optional.</summary>
+        /// <summary>
+        /// Optional. This flag is to support user customized attribution. If not provided, the default is `Machine
+        /// Translated by Google`. Customized attribution should follow rules in
+        /// https://cloud.google.com/translate/attribution#attribution_and_logos
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customizedAttribution")]
+        public virtual string CustomizedAttribution { get; set; }
+
+        /// <summary>Optional. If true, enable auto rotation correction in DVS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableRotationCorrection")]
+        public virtual System.Nullable<bool> EnableRotationCorrection { get; set; }
+
+        /// <summary>
+        /// Optional. If true, use the text removal server to remove the shadow text on background image for native pdf
+        /// translation. Shadow removal feature can only be enabled when is_translate_native_pdf_only: false
+        /// &amp;amp;&amp;amp; pdf_native_only: false
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableShadowRemovalNativePdf")]
+        public virtual System.Nullable<bool> EnableShadowRemovalNativePdf { get; set; }
+
+        /// <summary>
+        /// Optional. File format conversion map to be applied to all input files. Map's key is the original mime_type.
+        /// Map's value is the target mime_type of translated documents. Supported file format conversion includes: -
+        /// `application/pdf` to `application/vnd.openxmlformats-officedocument.wordprocessingml.document` If nothing
+        /// specified, output files will be in the same format as the original file.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("formatConversions")]
         public virtual System.Collections.Generic.IDictionary<string, string> FormatConversions { get; set; }
 
@@ -1827,7 +1837,8 @@ namespace Google.Apis.Translate.v3beta1.Data
 
         /// <summary>
         /// Required. The BCP-47 language code of the input document if known, for example, "en-US" or "sr-Latn".
-        /// Supported language codes are listed in Language Support (https://cloud.google.com/translate/docs/languages).
+        /// Supported language codes are listed in [Language
+        /// Support](https://cloud.google.com/translate/docs/languages).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceLanguageCode")]
         public virtual string SourceLanguageCode { get; set; }
@@ -2008,15 +2019,15 @@ namespace Google.Apis.Translate.v3beta1.Data
         /// "output_[trg]_translations.[ext]", where - [trg] corresponds to the translated file's language code, - [ext]
         /// corresponds to the translated file's extension according to its mime type. For a DocumentInputConfig.gcs_uri
         /// provided document, the output file will have a name according to its URI. For example: an input file with
-        /// URI: "gs://a/b/c.[extension]" stored in a gcs_destination bucket with name "my_bucket" will have an output
-        /// URI: "gs://my_bucket/a_b_c_[trg]_translations.[ext]", where - [trg] corresponds to the translated file's
+        /// URI: `gs://a/b/c.[extension]` stored in a gcs_destination bucket with name "my_bucket" will have an output
+        /// URI: `gs://my_bucket/a_b_c_[trg]_translations.[ext]`, where - [trg] corresponds to the translated file's
         /// language code, - [ext] corresponds to the translated file's extension according to its mime type. If the
         /// document was directly provided through the request, then the output document will have the format:
-        /// "gs://my_bucket/translated_document_[trg]_translations.[ext], where - [trg] corresponds to the translated
+        /// `gs://my_bucket/translated_document_[trg]_translations.[ext]`, where - [trg] corresponds to the translated
         /// file's language code, - [ext] corresponds to the translated file's extension according to its mime type. If
         /// a glossary was provided, then the output URI for the glossary translation will be equal to the default
         /// output URI but have `glossary_translations` instead of `translations`. For the previous example, its
-        /// glossary URI would be: "gs://my_bucket/a_b_c_[trg]_glossary_translations.[ext]". Thus the max number of
+        /// glossary URI would be: `gs://my_bucket/a_b_c_[trg]_glossary_translations.[ext]`. Thus the max number of
         /// output files will be 2 (Translated document, Glossary translated document). Callers should expect no partial
         /// outputs. If there is any error during document translation, no output will be stored in the Cloud Storage
         /// bucket.
@@ -2068,8 +2079,7 @@ namespace Google.Apis.Translate.v3beta1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2105,9 +2115,42 @@ namespace Google.Apis.Translate.v3beta1.Data
     /// <summary>Represents a glossary built from user provided data.</summary>
     public class Glossary : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Output only. When the glossary creation was finished.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The number of entries defined in the glossary.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("entryCount")]
@@ -2135,9 +2178,42 @@ namespace Google.Apis.Translate.v3beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _submitTimeRaw;
+
+        private object _submitTime;
+
         /// <summary>Output only. When CreateGlossary was called.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("submitTime")]
-        public virtual object SubmitTime { get; set; }
+        public virtual string SubmitTimeRaw
+        {
+            get => _submitTimeRaw;
+            set
+            {
+                _submitTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _submitTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="SubmitTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SubmitTimeDateTimeOffset instead.")]
+        public virtual object SubmitTime
+        {
+            get => _submitTime;
+            set
+            {
+                _submitTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _submitTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="SubmitTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SubmitTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(SubmitTimeRaw);
+            set => SubmitTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2154,8 +2230,8 @@ namespace Google.Apis.Translate.v3beta1.Data
         /// second column is target text. The file must not contain headers. That is, the first row is data, not column
         /// names. - TMX (`.tmx`): TMX file with parallel data defining source/target term pairs. For equivalent term
         /// sets glossaries: - CSV (`.csv`): Multi-column CSV file defining equivalent glossary terms in multiple
-        /// languages. The format is defined for Google Translation Toolkit and documented in [Use a
-        /// glossary](https://support.google.com/translatortoolkit/answer/6306379?hl=en).
+        /// languages. See documentation for more information -
+        /// [glossaries](https://cloud.google.com/translate/docs/advanced/glossary).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gcsSource")]
         public virtual GcsSource GcsSource { get; set; }
@@ -2275,7 +2351,7 @@ namespace Google.Apis.Translate.v3beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -2337,8 +2413,8 @@ namespace Google.Apis.Translate.v3beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -2370,24 +2446,24 @@ namespace Google.Apis.Translate.v3beta1.Data
         /// input/output matching never changes. Callers should also expect all the content in input_file are processed
         /// and ready to be consumed (that is, no partial output file is written). Since index.csv will be keeping
         /// updated during the process, please make sure there is no custom retention policy applied on the output
-        /// bucket that may avoid file updating.
-        /// (https://cloud.google.com/storage/docs/bucket-lock?hl=en#retention-policy) The format of translations_file
-        /// (for target language code 'trg') is: gs://translation_test/a_b_c_'trg'_translations.[extension] If the input
-        /// file extension is tsv, the output has the following columns: Column 1: ID of the request provided in the
-        /// input, if it's not provided in the input, then the input row number is used (0-based). Column 2: source
-        /// sentence. Column 3: translation without applying a glossary. Empty string if there is an error. Column 4
-        /// (only present if a glossary is provided in the request): translation after applying the glossary. Empty
-        /// string if there is an error applying the glossary. Could be same string as column 3 if there is no glossary
-        /// applied. If input file extension is a txt or html, the translation is directly written to the output file.
-        /// If glossary is requested, a separate glossary_translations_file has format of
-        /// gs://translation_test/a_b_c_'trg'_glossary_translations.[extension] The format of errors file (for target
-        /// language code 'trg') is: gs://translation_test/a_b_c_'trg'_errors.[extension] If the input file extension is
-        /// tsv, errors_file contains the following: Column 1: ID of the request provided in the input, if it's not
+        /// bucket that may avoid file updating. (https://cloud.google.com/storage/docs/bucket-lock#retention-policy)
+        /// The format of translations_file (for target language code 'trg') is:
+        /// `gs://translation_test/a_b_c_'trg'_translations.[extension]` If the input file extension is tsv, the output
+        /// has the following columns: Column 1: ID of the request provided in the input, if it's not provided in the
+        /// input, then the input row number is used (0-based). Column 2: source sentence. Column 3: translation without
+        /// applying a glossary. Empty string if there is an error. Column 4 (only present if a glossary is provided in
+        /// the request): translation after applying the glossary. Empty string if there is an error applying the
+        /// glossary. Could be same string as column 3 if there is no glossary applied. If input file extension is a txt
+        /// or html, the translation is directly written to the output file. If glossary is requested, a separate
+        /// glossary_translations_file has format of
+        /// `gs://translation_test/a_b_c_'trg'_glossary_translations.[extension]` The format of errors file (for target
+        /// language code 'trg') is: `gs://translation_test/a_b_c_'trg'_errors.[extension]` If the input file extension
+        /// is tsv, errors_file contains the following: Column 1: ID of the request provided in the input, if it's not
         /// provided in the input, then the input row number is used (0-based). Column 2: source sentence. Column 3:
         /// Error detail for the translation. Could be empty. Column 4 (only present if a glossary is provided in the
         /// request): Error when applying the glossary. If the input file extension is txt or html, glossary_error_file
         /// will be generated that contains error details. glossary_error_file has format of
-        /// gs://translation_test/a_b_c_'trg'_glossary_errors.[extension]
+        /// `gs://translation_test/a_b_c_'trg'_glossary_errors.[extension]`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gcsDestination")]
         public virtual GcsDestination GcsDestination { get; set; }
@@ -2473,6 +2549,14 @@ namespace Google.Apis.Translate.v3beta1.Data
     /// <summary>A document translation request.</summary>
     public class TranslateDocumentRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional. This flag is to support user customized attribution. If not provided, the default is `Machine
+        /// Translated by Google`. Customized attribution should follow rules in
+        /// https://cloud.google.com/translate/attribution#attribution_and_logos
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customizedAttribution")]
+        public virtual string CustomizedAttribution { get; set; }
+
         /// <summary>Required. Input configurations.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("documentInputConfig")]
         public virtual DocumentInputConfig DocumentInputConfig { get; set; }
@@ -2485,12 +2569,31 @@ namespace Google.Apis.Translate.v3beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("documentOutputConfig")]
         public virtual DocumentOutputConfig DocumentOutputConfig { get; set; }
 
+        /// <summary>Optional. If true, enable auto rotation correction in DVS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableRotationCorrection")]
+        public virtual System.Nullable<bool> EnableRotationCorrection { get; set; }
+
+        /// <summary>
+        /// Optional. If true, use the text removal server to remove the shadow text on background image for native pdf
+        /// translation. Shadow removal feature can only be enabled when is_translate_native_pdf_only: false
+        /// &amp;amp;&amp;amp; pdf_native_only: false
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableShadowRemovalNativePdf")]
+        public virtual System.Nullable<bool> EnableShadowRemovalNativePdf { get; set; }
+
         /// <summary>
         /// Optional. Glossary to be applied. The glossary must be within the same region (have the same location-id) as
         /// the model, otherwise an INVALID_ARGUMENT (400) error is returned.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("glossaryConfig")]
         public virtual TranslateTextGlossaryConfig GlossaryConfig { get; set; }
+
+        /// <summary>
+        /// Optional. is_translate_native_pdf_only field for external customers. If true, the page limit of online
+        /// native pdf translation is 300 and only native pdf pages will be translated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isTranslateNativePdfOnly")]
+        public virtual System.Nullable<bool> IsTranslateNativePdfOnly { get; set; }
 
         /// <summary>
         /// Optional. The labels with user-defined metadata for the request. Label keys and values can be no longer than
@@ -2562,11 +2665,15 @@ namespace Google.Apis.Translate.v3beta1.Data
     }
 
     /// <summary>
-    /// Configures which glossary should be used for a specific target language, and defines options for applying that
-    /// glossary.
+    /// ----------------------------------------------------------------------------- Configures which glossary should
+    /// be used for a specific target language, and defines options for applying that glossary.
     /// </summary>
     public class TranslateTextGlossaryConfig : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Optional. If set to true, the glossary will be used for contextual translation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("contextualTranslationEnabled")]
+        public virtual System.Nullable<bool> ContextualTranslationEnabled { get; set; }
+
         /// <summary>
         /// Required. Specifies the glossary used for this translation. Use this format:
         /// projects/*/locations/*/glossaries/*

@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+using Google.Apis.Core.Util;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -64,9 +65,10 @@ namespace Google.Apis.Http
 
         internal static Func<HttpResponseMessage, StreamInterceptor> GetInterceptorProvider(HttpRequestMessage request)
         {
-            request.Properties.TryGetValue(ConfigurableMessageHandler.ResponseStreamInterceptorProviderKey, out var property);
             // If anyone adds a property of the wrong type, just ignore it.
-            return property as Func<HttpResponseMessage, StreamInterceptor>;
+            Func<HttpResponseMessage, StreamInterceptor> interceptorProvider = null;
+            request.TryGetOption(ConfigurableMessageHandler.ResponseStreamInterceptorProviderKey, out interceptorProvider);
+            return interceptorProvider;
         }
 
         private sealed class InterceptingStream : Stream

@@ -16,7 +16,6 @@ limitations under the License.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -27,14 +26,6 @@ using Google.Apis.Auth.OAuth2.Requests;
 using Google.Apis.Json;
 using Google.Apis.Util;
 using Google.Apis.Http;
-
-#if NETSTANDARD1_3 || NETSTANDARD2_0 || NET461
-using RsaKey = System.Security.Cryptography.RSA;
-#elif NET45
-using RsaKey = System.Security.Cryptography.RSACryptoServiceProvider;
-#else
-#error Unsupported target
-#endif
 
 namespace Google.Apis.Auth.OAuth2
 {
@@ -57,7 +48,6 @@ namespace Google.Apis.Auth.OAuth2
     /// </summary>
     public class ServiceAccountCredential : ServiceCredential, IOidcTokenProvider, IGoogleCredential, IBlobSigner
     {
-        private const string Sha256Oid = "2.16.840.1.101.3.4.2.1";
         private const string ScopedTokenCacheKey = "SCOPED_TOKEN";
         /// <summary>An initializer class for the service account credential. </summary>
         new public class Initializer : ServiceCredential.Initializer
@@ -76,14 +66,11 @@ namespace Google.Apis.Auth.OAuth2
             /// </summary>
             public string User { get; set; }
 
-            /// <summary>Gets the scopes which indicate API access your application is requesting.</summary>
-            public IEnumerable<string> Scopes { get; set; }
-
             /// <summary>
             /// Gets or sets the key which is used to sign the request, as specified in
             /// https://developers.google.com/accounts/docs/OAuth2ServiceAccount#computingsignature.
             /// </summary>
-            public RsaKey Key { get; set; }
+            public RSA Key { get; set; }
 
             /// <summary>
             /// Gets or sets the service account key ID.
@@ -95,33 +82,36 @@ namespace Google.Apis.Auth.OAuth2
             /// </summary>
             public bool UseJwtAccessWithScopes { get; set; }
 
+            /// <summary>
+            /// The universe domain this credential belongs to.
+            /// Won't be null.
+            /// </summary>
+            public string UniverseDomain { get; set; }
+
             /// <summary>Constructs a new initializer using the given id.</summary>
             public Initializer(string id)
-                : this(id, GoogleAuthConsts.OidcTokenUrl) { }
+                : this(id, null) { }
 
             /// <summary>Constructs a new initializer using the given id and the token server URL.</summary>
-            public Initializer(string id, string tokenServerUrl) : base(tokenServerUrl)
-            {
-                Id = id;
-                Scopes = new List<string>();
-            }
+            public Initializer(string id, string tokenServerUrl)
+                : base(tokenServerUrl ?? GoogleAuthConsts.OidcTokenUrl) => Id = id;
 
             internal Initializer(ServiceAccountCredential other) : base(other)
             {
                 Id = other.Id;
                 ProjectId = other.ProjectId;
                 User = other.User;
-                Scopes = other.Scopes;
                 Key = other.Key;
                 KeyId = other.KeyId;
                 UseJwtAccessWithScopes = other.UseJwtAccessWithScopes;
+                UniverseDomain = other.UniverseDomain;
             }
 
             /// <summary>Extracts the <see cref="Key"/> from the given PKCS8 private key.</summary>
             public Initializer FromPrivateKey(string privateKey)
             {
                 RSAParameters rsaParameters = Pkcs8.DecodeRsaParameters(privateKey);
-                Key = (RsaKey)RSA.Create();
+                Key = RSA.Create();
                 Key.ImportParameters(rsaParameters);
                 return this;
             }
@@ -129,17 +119,7 @@ namespace Google.Apis.Auth.OAuth2
             /// <summary>Extracts a <see cref="Key"/> from the given certificate.</summary>
             public Initializer FromCertificate(X509Certificate2 certificate)
             {
-#if NETSTANDARD1_3 || NETSTANDARD2_0 || NET461
                 Key = certificate.GetRSAPrivateKey();
-#elif NET45
-                // Workaround to correctly cast the private key as a RSACryptoServiceProvider type 24.
-                RSACryptoServiceProvider rsa = (RSACryptoServiceProvider)certificate.PrivateKey;
-                byte[] privateKeyBlob = rsa.ExportCspBlob(true);
-                Key = new RSACryptoServiceProvider();
-                Key.ImportCspBlob(privateKeyBlob);
-#else
-#error Unsupported target
-#endif
                 return this;
             }
         }
@@ -161,14 +141,11 @@ namespace Google.Apis.Auth.OAuth2
         /// </summary>
         public string User { get; }
 
-        /// <summary>Gets the service account scopes.</summary>
-        public IEnumerable<string> Scopes { get; }
-
         /// <summary>
         /// Gets the key which is used to sign the request, as specified in
         /// https://developers.google.com/accounts/docs/OAuth2ServiceAccount#computingsignature.
         /// </summary>
-        public RsaKey Key { get; }
+        public RSA Key { get; }
 
         /// <summary>
         /// Gets the key id of the key which is used to sign the request.
@@ -183,10 +160,9 @@ namespace Google.Apis.Auth.OAuth2
         public bool UseJwtAccessWithScopes { get; }
 
         /// <summary>
-        /// Returns true if this credential scopes have been explicitly set via this library.
-        /// Returns false otherwise.
+        /// The universe domain this credential belongs to. Won't be null.
         /// </summary>
-        internal bool HasExplicitScopes => Scopes?.Any() == true;
+        public string UniverseDomain { get; }
 
         /// <inheritdoc/>
         bool IGoogleCredential.HasExplicitScopes => HasExplicitScopes;
@@ -194,16 +170,33 @@ namespace Google.Apis.Auth.OAuth2
         /// <inheritdoc/>
         bool IGoogleCredential.SupportsExplicitScopes => true;
 
+        /// <summary>
+        /// The URL to obtain an id token from when in a universe domain other than the default universe domain.
+        /// </summary>
+        private string IamOidcTokenUrl { get; }
+
+        /// <summary>
+        /// HttpClient used to call the IAM API, authenticated as this credential.
+        /// </summary>
+        /// <remarks>Lazy to build one HtppClient only if it is needed.</remarks>
+        private readonly Lazy<ConfigurableHttpClient> _iamHttpClientCache;
+
         /// <summary>Constructs a new service account credential using the given initializer.</summary>
         public ServiceAccountCredential(Initializer initializer) : base(initializer)
         {
             Id = initializer.Id.ThrowIfNullOrEmpty("initializer.Id");
+            UniverseDomain = initializer.UniverseDomain ?? GoogleAuthConsts.DefaultUniverseDomain;
+            GoogleAuthConsts.CheckIsDefaultUniverseDomain(UniverseDomain,
+                initializer.User is not null, $"Domain-wide delegation is not supported in universes other than {GoogleAuthConsts.DefaultUniverseDomain}.");
+            GoogleAuthConsts.CheckIsDefaultUniverseDomain(UniverseDomain,
+                !initializer.UseJwtAccessWithScopes, $"Only self signed JWTs are supported in universes other than {GoogleAuthConsts.DefaultUniverseDomain}.");
             ProjectId = initializer.ProjectId;
             User = initializer.User;
-            Scopes = initializer.Scopes?.ToList().AsReadOnly() ?? Enumerable.Empty<string>();
             Key = initializer.Key.ThrowIfNull("initializer.Key");
             KeyId = initializer.KeyId;
             UseJwtAccessWithScopes = initializer.UseJwtAccessWithScopes;
+            IamOidcTokenUrl = string.Format(GoogleAuthConsts.IamIdTokenEndpointFormatString, UniverseDomain, Id);
+            _iamHttpClientCache = new Lazy<ConfigurableHttpClient>(BuildIamHttpClientUncached);
         }
 
         /// <summary>
@@ -224,6 +217,27 @@ namespace Google.Apis.Auth.OAuth2
             }
             return result;
         }
+
+        private protected override void AddHttpClientRetryConfiguration(CreateHttpClientArgs args)
+        {
+            // In case the user explicitly configured retry policy.
+            var customRetryPolicy = GoogleAuthConsts.StripOAuth2TokenEndpointRecommendedPolicy(DefaultExponentialBackOffPolicy);
+            if (customRetryPolicy != ExponentialBackOffPolicy.None)
+            {
+                args.Initializers.Add(new ExponentialBackOffInitializer(customRetryPolicy, () => new BackOffHandler(new ExponentialBackOff())));
+            }
+            // In case recommended is also configured.
+            if (DefaultExponentialBackOffPolicy.HasFlag(ExponentialBackOffPolicy.RecommendedOrDefault))
+            {
+                args.Initializers.Add(GoogleAuthConsts.OAuth2TokenEndpointRecommendedRetry);
+            }
+        }
+
+        /// <inheritdoc/>
+        Task<string> IGoogleCredential.GetUniverseDomainAsync(CancellationToken _) => Task.FromResult(UniverseDomain);
+
+        /// <inheritdoc/>
+        string IGoogleCredential.GetUniverseDomain() => UniverseDomain;
 
         /// <summary>
         /// Constructs a new instance of the <see cref="ServiceAccountCredential"/> but with the
@@ -255,6 +269,11 @@ namespace Google.Apis.Auth.OAuth2
         IGoogleCredential IGoogleCredential.WithHttpClientFactory(IHttpClientFactory httpClientFactory) =>
             new ServiceAccountCredential(new Initializer(this) { HttpClientFactory = httpClientFactory });
 
+        /// <inheritdoc/>
+        IGoogleCredential IGoogleCredential.WithUniverseDomain(string universeDomain) =>
+            new ServiceAccountCredential(new Initializer(this) { UniverseDomain = universeDomain });
+
+
         /// <summary>
         /// Requests a new token as specified in 
         /// https://developers.google.com/accounts/docs/OAuth2ServiceAccount#makingrequest.
@@ -263,6 +282,8 @@ namespace Google.Apis.Auth.OAuth2
         /// <returns><c>true</c> if a new token was received successfully.</returns>
         public override async Task<bool> RequestAccessTokenAsync(CancellationToken taskCancellationToken)
         {
+            GoogleAuthConsts.CheckIsDefaultUniverseDomain(UniverseDomain, $"Only self signed JWTs are supported in universes other than {GoogleAuthConsts.DefaultUniverseDomain}.");
+
             // Create the request.
             var request = new GoogleAssertionTokenRequest()
             {
@@ -272,7 +293,7 @@ namespace Google.Apis.Auth.OAuth2
             Logger.Debug("Request a new access token. Assertion data is: " + request.Assertion);
 
             var newToken = await request
-                .ExecuteAsync(HttpClient, TokenServerUrl, taskCancellationToken, Clock, Logger)
+                .PostFormAsync(HttpClient, TokenServerUrl, null, Clock, Logger, taskCancellationToken)
                 .ConfigureAwait(false);
             Token = newToken;
             return true;
@@ -282,16 +303,16 @@ namespace Google.Apis.Auth.OAuth2
         /// Gets an access token to authorize a request.
         /// An OAuth2 access token obtained from <see cref="ServiceCredential.TokenServerUrl"/> will be returned
         /// in the following two cases:
-        /// 1. If this credential has <see cref="Scopes"/> associated, but <see cref="UseJwtAccessWithScopes"/>
+        /// 1. If this credential has <see cref="ServiceCredential.Scopes"/> associated, but <see cref="UseJwtAccessWithScopes"/>
         /// is false; 
         /// 2. If this credential is used with domain-wide delegation, that is, the <see cref="User"/> is set;
         /// Otherwise, a locally signed JWT will be returned. 
-        /// The signed JWT will contain a "scope" claim with the scopes in <see cref="Scopes"/> if there are any,
+        /// The signed JWT will contain a "scope" claim with the scopes in <see cref="ServiceCredential.Scopes"/> if there are any,
         /// otherwise it will contain an "aud" claim with <paramref name="authUri"/>.
         /// A cached token is used if possible and the token is only refreshed once it's close to its expiry.
         /// </summary>
         /// <param name="authUri">The URI the returned token will grant access to. 
-        /// Should be specified if no <see cref="Scopes"/> have been specified for the credential.</param>
+        /// Should be specified if no <see cref="ServiceCredential.Scopes"/> have been specified for the credential.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The access token.</returns>
         public override async Task<string> GetAccessTokenForRequestAsync(string authUri = null, CancellationToken cancellationToken = default)
@@ -316,15 +337,18 @@ namespace Google.Apis.Auth.OAuth2
         public Task<OidcToken> GetOidcTokenAsync(OidcTokenOptions options, CancellationToken cancellationToken = default)
         {
             options.ThrowIfNull(nameof(options));
+            Func<TokenRefreshManager, OidcTokenOptions, CancellationToken, Task<bool>> effectiveRefresh =
+                UniverseDomain == GoogleAuthConsts.DefaultUniverseDomain ? RefreshDefaultUniverseOidcTokenAsync : RefreshIamOidcTokenAsync;
+
             // If at some point some properties are added to OidcToken that depend on the token having been fetched
             // then initialize the token here.
             TokenRefreshManager tokenRefreshManager = null;
             tokenRefreshManager = new TokenRefreshManager(
-                ct => RefreshOidcTokenAsync(tokenRefreshManager, options, ct), Clock, Logger);
+                ct => effectiveRefresh(tokenRefreshManager, options, ct), Clock, Logger);
             return Task.FromResult(new OidcToken(tokenRefreshManager));
         }
 
-        private async Task<bool> RefreshOidcTokenAsync(TokenRefreshManager caller, OidcTokenOptions options, CancellationToken cancellationToken)
+        private async Task<bool> RefreshDefaultUniverseOidcTokenAsync(TokenRefreshManager caller, OidcTokenOptions options, CancellationToken cancellationToken)
         {
             var now = Clock.UtcNow;
             var jwtExpiry = now + JwtLifetime;
@@ -335,9 +359,33 @@ namespace Google.Apis.Auth.OAuth2
                 Assertion = jwtForOidc
             };
             caller.Token = await req
-                .ExecuteAsync(HttpClient, TokenServerUrl, cancellationToken, Clock, Logger)
+                .PostFormAsync(HttpClient, TokenServerUrl, null, Clock, Logger, cancellationToken)
                 .ConfigureAwait(false);
             return true;
+        }
+
+        private async Task<bool> RefreshIamOidcTokenAsync(TokenRefreshManager caller, OidcTokenOptions options, CancellationToken cancellationToken)
+        {
+            var request = new IamOIdCTokenRequest
+            {
+                Audience = options.TargetAudience,
+                IncludeEmail = true
+            };
+
+            caller.Token = await request.PostJsonAsync(_iamHttpClientCache.Value, IamOidcTokenUrl, Clock, Logger, cancellationToken)
+                .ConfigureAwait(false);
+
+            return true;
+        }
+
+        private ConfigurableHttpClient BuildIamHttpClientUncached()
+        {
+            // We want to use the same HTTP client configuration used for the standard HTTP client used by this credential.
+            // But we need to copy them because this credential is going to be one of the initializers, as the IAM HTTP client
+            // needs to be authenticated by this credential.
+            var httpClientArgs = BuildCreateHttpClientArgs();
+            httpClientArgs.Initializers.Add(((IGoogleCredential)this).MaybeWithScopes(new string[] { GoogleAuthConsts.IamScope }));
+            return HttpClientFactory.CreateHttpClient(httpClientArgs);
         }
 
         private class JwtCacheEntry
@@ -481,13 +529,7 @@ namespace Google.Apis.Auth.OAuth2
             using (var hashAlg = SHA256.Create())
             {
                 byte[] assertionHash = hashAlg.ComputeHash(data);
-#if NETSTANDARD1_3 || NETSTANDARD2_0 || NET461
                 var sigBytes = Key.SignHash(assertionHash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-#elif NET45
-                var sigBytes = Key.SignHash(assertionHash, Sha256Oid);
-#else
-#error Unsupported target
-#endif
                 return Convert.ToBase64String(sigBytes);
             }
         }

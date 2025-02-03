@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ namespace Google.Apis.PolicySimulator.v1
             Operations = new OperationsResource(this);
             Organizations = new OrganizationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://policysimulator.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://policysimulator.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -47,23 +49,16 @@ namespace Google.Apis.PolicySimulator.v1
         public override string Name => "policysimulator";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://policysimulator.googleapis.com/";
-        #else
-            "https://policysimulator.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://policysimulator.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Policy Simulator API.</summary>
         public class Scope
@@ -309,7 +304,96 @@ namespace Google.Apis.PolicySimulator.v1
             public LocationsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                OrgPolicyViolationsPreviews = new OrgPolicyViolationsPreviewsResource(service);
                 Replays = new ReplaysResource(service);
+            }
+
+            /// <summary>Gets the OrgPolicyViolationsPreviews resource.</summary>
+            public virtual OrgPolicyViolationsPreviewsResource OrgPolicyViolationsPreviews { get; }
+
+            /// <summary>The "orgPolicyViolationsPreviews" collection of methods.</summary>
+            public class OrgPolicyViolationsPreviewsResource
+            {
+                private const string Resource = "orgPolicyViolationsPreviews";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public OrgPolicyViolationsPreviewsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    Operations = new OperationsResource(service);
+                }
+
+                /// <summary>Gets the Operations resource.</summary>
+                public virtual OperationsResource Operations { get; }
+
+                /// <summary>The "operations" collection of methods.</summary>
+                public class OperationsResource
+                {
+                    private const string Resource = "operations";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public OperationsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource.</param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    public class GetRequest : PolicySimulatorBaseServiceRequest<Google.Apis.PolicySimulator.v1.Data.GoogleLongrunningOperation>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^folders/[^/]+/locations/[^/]+/orgPolicyViolationsPreviews/[^/]+/operations/.*$",
+                            });
+                        }
+                    }
+                }
             }
 
             /// <summary>Gets the Replays resource.</summary>
@@ -327,7 +411,164 @@ namespace Google.Apis.PolicySimulator.v1
                 public ReplaysResource(Google.Apis.Services.IClientService service)
                 {
                     this.service = service;
+                    Operations = new OperationsResource(service);
                     Results = new ResultsResource(service);
+                }
+
+                /// <summary>Gets the Operations resource.</summary>
+                public virtual OperationsResource Operations { get; }
+
+                /// <summary>The "operations" collection of methods.</summary>
+                public class OperationsResource
+                {
+                    private const string Resource = "operations";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public OperationsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource.</param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    public class GetRequest : PolicySimulatorBaseServiceRequest<Google.Apis.PolicySimulator.v1.Data.GoogleLongrunningOperation>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^folders/[^/]+/locations/[^/]+/replays/[^/]+/operations/.*$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Lists operations that match the specified filter in the request. If the server doesn't support
+                    /// this method, it returns `UNIMPLEMENTED`.
+                    /// </summary>
+                    /// <param name="name">The name of the operation's parent resource.</param>
+                    public virtual ListRequest List(string name)
+                    {
+                        return new ListRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Lists operations that match the specified filter in the request. If the server doesn't support
+                    /// this method, it returns `UNIMPLEMENTED`.
+                    /// </summary>
+                    public class ListRequest : PolicySimulatorBaseServiceRequest<Google.Apis.PolicySimulator.v1.Data.GoogleLongrunningListOperationsResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation's parent resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>The standard list filter.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string Filter { get; set; }
+
+                        /// <summary>The standard list page size.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>The standard list page token.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^folders/[^/]+/locations/[^/]+/replays/[^/]+/operations$",
+                            });
+                            RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "filter",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>Gets the Results resource.</summary>
@@ -355,7 +596,7 @@ namespace Google.Apis.PolicySimulator.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists the results of running a Replay.</summary>
@@ -440,7 +681,7 @@ namespace Google.Apis.PolicySimulator.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.PolicySimulator.v1.Data.GoogleCloudPolicysimulatorV1Replay body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates and starts a Replay using the given ReplayConfig.</summary>
@@ -501,7 +742,7 @@ namespace Google.Apis.PolicySimulator.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets the specified Replay. Each `Replay` is available for at least 7 days.</summary>
@@ -572,7 +813,7 @@ namespace Google.Apis.PolicySimulator.v1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -611,47 +852,41 @@ namespace Google.Apis.PolicySimulator.v1
                     IsRequired = true,
                     ParameterType = "path",
                     DefaultValue = null,
-                    Pattern = @"^operations/[^/]+$",
+                    Pattern = @"^operations/.*$",
                 });
             }
         }
 
         /// <summary>
         /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
-        /// it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding to use
-        /// different resource name schemes, such as `users/*/operations`. To override the binding, API services can add
-        /// a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For backwards
-        /// compatibility, the default name includes the operations collection id, however overriding users must ensure
-        /// the name binding is the parent resource, without the operations collection id.
+        /// it returns `UNIMPLEMENTED`.
         /// </summary>
-        public virtual ListRequest List()
+        /// <param name="name">The name of the operation's parent resource.</param>
+        public virtual ListRequest List(string name)
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service, name);
         }
 
         /// <summary>
         /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
-        /// it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding to use
-        /// different resource name schemes, such as `users/*/operations`. To override the binding, API services can add
-        /// a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For backwards
-        /// compatibility, the default name includes the operations collection id, however overriding users must ensure
-        /// the name binding is the parent resource, without the operations collection id.
+        /// it returns `UNIMPLEMENTED`.
         /// </summary>
         public class ListRequest : PolicySimulatorBaseServiceRequest<Google.Apis.PolicySimulator.v1.Data.GoogleLongrunningListOperationsResponse>
         {
             /// <summary>Constructs a new List request.</summary>
-            public ListRequest(Google.Apis.Services.IClientService service) : base(service)
+            public ListRequest(Google.Apis.Services.IClientService service, string name) : base(service)
             {
+                Name = name;
                 InitParameters();
             }
+
+            /// <summary>The name of the operation's parent resource.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
 
             /// <summary>The standard list filter.</summary>
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; set; }
-
-            /// <summary>The name of the operation's parent resource.</summary>
-            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual string Name { get; set; }
 
             /// <summary>The standard list page size.</summary>
             [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
@@ -668,23 +903,23 @@ namespace Google.Apis.PolicySimulator.v1
             public override string HttpMethod => "GET";
 
             /// <summary>Gets the REST path.</summary>
-            public override string RestPath => "v1/operations";
+            public override string RestPath => "v1/{+name}";
 
             /// <summary>Initializes List parameter list.</summary>
             protected override void InitParameters()
             {
                 base.InitParameters();
-                RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
-                {
-                    Name = "filter",
-                    IsRequired = false,
-                    ParameterType = "query",
-                    DefaultValue = null,
-                    Pattern = null,
-                });
                 RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
                 {
                     Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^operations$",
+                });
+                RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "filter",
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = null,
@@ -740,7 +975,96 @@ namespace Google.Apis.PolicySimulator.v1
             public LocationsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                OrgPolicyViolationsPreviews = new OrgPolicyViolationsPreviewsResource(service);
                 Replays = new ReplaysResource(service);
+            }
+
+            /// <summary>Gets the OrgPolicyViolationsPreviews resource.</summary>
+            public virtual OrgPolicyViolationsPreviewsResource OrgPolicyViolationsPreviews { get; }
+
+            /// <summary>The "orgPolicyViolationsPreviews" collection of methods.</summary>
+            public class OrgPolicyViolationsPreviewsResource
+            {
+                private const string Resource = "orgPolicyViolationsPreviews";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public OrgPolicyViolationsPreviewsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    Operations = new OperationsResource(service);
+                }
+
+                /// <summary>Gets the Operations resource.</summary>
+                public virtual OperationsResource Operations { get; }
+
+                /// <summary>The "operations" collection of methods.</summary>
+                public class OperationsResource
+                {
+                    private const string Resource = "operations";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public OperationsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource.</param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    public class GetRequest : PolicySimulatorBaseServiceRequest<Google.Apis.PolicySimulator.v1.Data.GoogleLongrunningOperation>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^organizations/[^/]+/locations/[^/]+/orgPolicyViolationsPreviews/[^/]+/operations/.*$",
+                            });
+                        }
+                    }
+                }
             }
 
             /// <summary>Gets the Replays resource.</summary>
@@ -758,7 +1082,164 @@ namespace Google.Apis.PolicySimulator.v1
                 public ReplaysResource(Google.Apis.Services.IClientService service)
                 {
                     this.service = service;
+                    Operations = new OperationsResource(service);
                     Results = new ResultsResource(service);
+                }
+
+                /// <summary>Gets the Operations resource.</summary>
+                public virtual OperationsResource Operations { get; }
+
+                /// <summary>The "operations" collection of methods.</summary>
+                public class OperationsResource
+                {
+                    private const string Resource = "operations";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public OperationsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource.</param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    public class GetRequest : PolicySimulatorBaseServiceRequest<Google.Apis.PolicySimulator.v1.Data.GoogleLongrunningOperation>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^organizations/[^/]+/locations/[^/]+/replays/[^/]+/operations/.*$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Lists operations that match the specified filter in the request. If the server doesn't support
+                    /// this method, it returns `UNIMPLEMENTED`.
+                    /// </summary>
+                    /// <param name="name">The name of the operation's parent resource.</param>
+                    public virtual ListRequest List(string name)
+                    {
+                        return new ListRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Lists operations that match the specified filter in the request. If the server doesn't support
+                    /// this method, it returns `UNIMPLEMENTED`.
+                    /// </summary>
+                    public class ListRequest : PolicySimulatorBaseServiceRequest<Google.Apis.PolicySimulator.v1.Data.GoogleLongrunningListOperationsResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation's parent resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>The standard list filter.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string Filter { get; set; }
+
+                        /// <summary>The standard list page size.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>The standard list page token.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^organizations/[^/]+/locations/[^/]+/replays/[^/]+/operations$",
+                            });
+                            RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "filter",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>Gets the Results resource.</summary>
@@ -786,7 +1267,7 @@ namespace Google.Apis.PolicySimulator.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists the results of running a Replay.</summary>
@@ -871,7 +1352,7 @@ namespace Google.Apis.PolicySimulator.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.PolicySimulator.v1.Data.GoogleCloudPolicysimulatorV1Replay body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates and starts a Replay using the given ReplayConfig.</summary>
@@ -932,7 +1413,7 @@ namespace Google.Apis.PolicySimulator.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets the specified Replay. Each `Replay` is available for at least 7 days.</summary>
@@ -1012,7 +1493,96 @@ namespace Google.Apis.PolicySimulator.v1
             public LocationsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                OrgPolicyViolationsPreviews = new OrgPolicyViolationsPreviewsResource(service);
                 Replays = new ReplaysResource(service);
+            }
+
+            /// <summary>Gets the OrgPolicyViolationsPreviews resource.</summary>
+            public virtual OrgPolicyViolationsPreviewsResource OrgPolicyViolationsPreviews { get; }
+
+            /// <summary>The "orgPolicyViolationsPreviews" collection of methods.</summary>
+            public class OrgPolicyViolationsPreviewsResource
+            {
+                private const string Resource = "orgPolicyViolationsPreviews";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public OrgPolicyViolationsPreviewsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    Operations = new OperationsResource(service);
+                }
+
+                /// <summary>Gets the Operations resource.</summary>
+                public virtual OperationsResource Operations { get; }
+
+                /// <summary>The "operations" collection of methods.</summary>
+                public class OperationsResource
+                {
+                    private const string Resource = "operations";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public OperationsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource.</param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    public class GetRequest : PolicySimulatorBaseServiceRequest<Google.Apis.PolicySimulator.v1.Data.GoogleLongrunningOperation>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/orgPolicyViolationsPreviews/[^/]+/operations/.*$",
+                            });
+                        }
+                    }
+                }
             }
 
             /// <summary>Gets the Replays resource.</summary>
@@ -1030,7 +1600,164 @@ namespace Google.Apis.PolicySimulator.v1
                 public ReplaysResource(Google.Apis.Services.IClientService service)
                 {
                     this.service = service;
+                    Operations = new OperationsResource(service);
                     Results = new ResultsResource(service);
+                }
+
+                /// <summary>Gets the Operations resource.</summary>
+                public virtual OperationsResource Operations { get; }
+
+                /// <summary>The "operations" collection of methods.</summary>
+                public class OperationsResource
+                {
+                    private const string Resource = "operations";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public OperationsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource.</param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    public class GetRequest : PolicySimulatorBaseServiceRequest<Google.Apis.PolicySimulator.v1.Data.GoogleLongrunningOperation>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/replays/[^/]+/operations/.*$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Lists operations that match the specified filter in the request. If the server doesn't support
+                    /// this method, it returns `UNIMPLEMENTED`.
+                    /// </summary>
+                    /// <param name="name">The name of the operation's parent resource.</param>
+                    public virtual ListRequest List(string name)
+                    {
+                        return new ListRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Lists operations that match the specified filter in the request. If the server doesn't support
+                    /// this method, it returns `UNIMPLEMENTED`.
+                    /// </summary>
+                    public class ListRequest : PolicySimulatorBaseServiceRequest<Google.Apis.PolicySimulator.v1.Data.GoogleLongrunningListOperationsResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation's parent resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>The standard list filter.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string Filter { get; set; }
+
+                        /// <summary>The standard list page size.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>The standard list page token.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/replays/[^/]+/operations$",
+                            });
+                            RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "filter",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>Gets the Results resource.</summary>
@@ -1058,7 +1785,7 @@ namespace Google.Apis.PolicySimulator.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists the results of running a Replay.</summary>
@@ -1143,7 +1870,7 @@ namespace Google.Apis.PolicySimulator.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.PolicySimulator.v1.Data.GoogleCloudPolicysimulatorV1Replay body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates and starts a Replay using the given ReplayConfig.</summary>
@@ -1204,7 +1931,7 @@ namespace Google.Apis.PolicySimulator.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets the specified Replay. Each `Replay` is available for at least 7 days.</summary>
@@ -1256,6 +1983,326 @@ namespace Google.Apis.PolicySimulator.v1
 }
 namespace Google.Apis.PolicySimulator.v1.Data
 {
+    /// <summary>
+    /// Similar to PolicySpec but with an extra 'launch' field for launch reference. The PolicySpec here is specific for
+    /// dry-run.
+    /// </summary>
+    public class GoogleCloudOrgpolicyV2AlternatePolicySpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Reference to the launch that will be used while audit logging and to control the launch. Should be set only
+        /// in the alternate policy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("launch")]
+        public virtual string Launch { get; set; }
+
+        /// <summary>Specify constraint for configurations of Google Cloud resources.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("spec")]
+        public virtual GoogleCloudOrgpolicyV2PolicySpec Spec { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A custom constraint defined by customers which can *only* be applied to the given resource types and
+    /// organization. By creating a custom constraint, customers can apply policies of this custom constraint. *Creating
+    /// a custom constraint itself does NOT apply any policy enforcement*.
+    /// </summary>
+    public class GoogleCloudOrgpolicyV2CustomConstraint : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Allow or deny type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("actionType")]
+        public virtual string ActionType { get; set; }
+
+        /// <summary>
+        /// A Common Expression Language (CEL) condition which is used in the evaluation of the constraint. For example:
+        /// `resource.instanceName.matches("[production|test]_.*_(\d)+")` or, `resource.management.auto_upgrade == true`
+        /// The max length of the condition is 1000 characters.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("condition")]
+        public virtual string Condition { get; set; }
+
+        /// <summary>
+        /// Detailed information about this custom policy constraint. The max length of the description is 2000
+        /// characters.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>One line display name for the UI. The max length of the display_name is 200 characters.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>All the operations being applied for this constraint.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("methodTypes")]
+        public virtual System.Collections.Generic.IList<string> MethodTypes { get; set; }
+
+        /// <summary>
+        /// Immutable. Name of the constraint. This is unique within the organization. Format of the name should be *
+        /// `organizations/{organization_id}/customConstraints/{custom_constraint_id}` Example:
+        /// `organizations/123/customConstraints/custom.createOnlyE2TypeVms` The max length is 70 characters and the
+        /// minimum length is 1. Note that the prefix `organizations/{organization_id}/customConstraints/` is not
+        /// counted.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Immutable. The resource instance type on which this policy applies. Format will be of the form : `/`
+        /// Example: * `compute.googleapis.com/Instance`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceTypes")]
+        public virtual System.Collections.Generic.IList<string> ResourceTypes { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>
+        /// Output only. The last time this custom constraint was updated. This represents the last time that the
+        /// `CreateCustomConstraint` or `UpdateCustomConstraint` methods were called.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Defines an organization policy which is used to specify constraints for configurations of Google Cloud
+    /// resources.
+    /// </summary>
+    public class GoogleCloudOrgpolicyV2Policy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Deprecated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("alternate")]
+        public virtual GoogleCloudOrgpolicyV2AlternatePolicySpec Alternate { get; set; }
+
+        /// <summary>
+        /// Dry-run policy. Audit-only policy, can be used to monitor how the policy would have impacted the existing
+        /// and future resources if it's enforced.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dryRunSpec")]
+        public virtual GoogleCloudOrgpolicyV2PolicySpec DryRunSpec { get; set; }
+
+        /// <summary>
+        /// Optional. An opaque tag indicating the current state of the policy, used for concurrency control. This
+        /// 'etag' is computed by the server based on the value of other fields, and may be sent on update and delete
+        /// requests to ensure the client has an up-to-date value before proceeding.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Immutable. The resource name of the policy. Must be one of the following forms, where `constraint_name` is
+        /// the name of the constraint which this policy configures: *
+        /// `projects/{project_number}/policies/{constraint_name}` * `folders/{folder_id}/policies/{constraint_name}` *
+        /// `organizations/{organization_id}/policies/{constraint_name}` For example,
+        /// `projects/123/policies/compute.disableSerialPortAccess`. Note:
+        /// `projects/{project_id}/policies/{constraint_name}` is also an acceptable name for API requests, but
+        /// responses will return the name using the equivalent project number.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Basic information about the organization policy.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("spec")]
+        public virtual GoogleCloudOrgpolicyV2PolicySpec Spec { get; set; }
+    }
+
+    /// <summary>
+    /// Defines a Google Cloud policy specification which is used to specify constraints for configurations of Google
+    /// Cloud resources.
+    /// </summary>
+    public class GoogleCloudOrgpolicyV2PolicySpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// An opaque tag indicating the current version of the policySpec, used for concurrency control. This field is
+        /// ignored if used in a `CreatePolicy` request. When the policy is returned from either a `GetPolicy` or a
+        /// `ListPolicies` request, this `etag` indicates the version of the current policySpec to use when executing a
+        /// read-modify-write loop. When the policy is returned from a `GetEffectivePolicy` request, the `etag` will be
+        /// unset.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Determines the inheritance behavior for this policy. If `inherit_from_parent` is true, policy rules set
+        /// higher up in the hierarchy (up to the closest root) are inherited and present in the effective policy. If it
+        /// is false, then no rules are inherited, and this policy becomes the new root for evaluation. This field can
+        /// be set only for policies which configure list constraints.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inheritFromParent")]
+        public virtual System.Nullable<bool> InheritFromParent { get; set; }
+
+        /// <summary>
+        /// Ignores policies set above this resource and restores the `constraint_default` enforcement behavior of the
+        /// specific constraint at this resource. This field can be set in policies for either list or boolean
+        /// constraints. If set, `rules` must be empty and `inherit_from_parent` must be set to false.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reset")]
+        public virtual System.Nullable<bool> Reset { get; set; }
+
+        /// <summary>
+        /// In policies for boolean constraints, the following requirements apply: - There must be one and only one
+        /// policy rule where condition is unset. - Boolean policy rules with conditions must set `enforced` to the
+        /// opposite of the policy rule without a condition. - During policy evaluation, policy rules with conditions
+        /// that are true for a target resource take precedence.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rules")]
+        public virtual System.Collections.Generic.IList<GoogleCloudOrgpolicyV2PolicySpecPolicyRule> Rules { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>
+        /// Output only. The time stamp this was previously updated. This represents the last time a call to
+        /// `CreatePolicy` or `UpdatePolicy` was made for that policy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+    }
+
+    /// <summary>A rule used to express this policy.</summary>
+    public class GoogleCloudOrgpolicyV2PolicySpecPolicyRule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Setting this to true means that all values are allowed. This field can be set only in policies for list
+        /// constraints.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowAll")]
+        public virtual System.Nullable<bool> AllowAll { get; set; }
+
+        /// <summary>
+        /// A condition which determines whether this rule is used in the evaluation of the policy. When set, the
+        /// `expression` field in the `Expr' must include from 1 to 10 subexpressions, joined by the "||" or
+        /// "&amp;amp;&amp;amp;" operators. Each subexpression must be of the form
+        /// "resource.matchTag('/tag_key_short_name, 'tag_value_short_name')". or "resource.matchTagId('tagKeys/key_id',
+        /// 'tagValues/value_id')". where key_name and value_name are the resource names for Label Keys and Values.
+        /// These names are available from the Tag Manager Service. An example expression is:
+        /// "resource.matchTag('123456789/environment, 'prod')". or "resource.matchTagId('tagKeys/123',
+        /// 'tagValues/456')".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("condition")]
+        public virtual GoogleTypeExpr Condition { get; set; }
+
+        /// <summary>
+        /// Setting this to true means that all values are denied. This field can be set only in policies for list
+        /// constraints.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("denyAll")]
+        public virtual System.Nullable<bool> DenyAll { get; set; }
+
+        /// <summary>
+        /// If `true`, then the policy is enforced. If `false`, then any configuration is acceptable. This field can be
+        /// set only in policies for boolean constraints.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enforce")]
+        public virtual System.Nullable<bool> Enforce { get; set; }
+
+        /// <summary>
+        /// Optional. Required for managed constraints if parameters are defined. Passes parameter values when policy
+        /// enforcement is enabled. Ensure that parameter value types match those defined in the constraint definition.
+        /// For example: { "allowedLocations" : ["us-east1", "us-west1"], "allowAll" : true }
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parameters")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Parameters { get; set; }
+
+        /// <summary>
+        /// List of values to be used for this policy rule. This field can be set only in policies for list constraints.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("values")]
+        public virtual GoogleCloudOrgpolicyV2PolicySpecPolicyRuleStringValues Values { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A message that holds specific allowed and denied values. This message can define specific values and subtrees of
+    /// the Resource Manager resource hierarchy (`Organizations`, `Folders`, `Projects`) that are allowed or denied.
+    /// This is achieved by using the `under:` and optional `is:` prefixes. The `under:` prefix is used to denote
+    /// resource subtree values. The `is:` prefix is used to denote specific values, and is required only if the value
+    /// contains a ":". Values prefixed with "is:" are treated the same as values with no prefix. Ancestry subtrees must
+    /// be in one of the following formats: - `projects/` (for example, `projects/tokyo-rain-123`) - `folders/` (for
+    /// example, `folders/1234`) - `organizations/` (for example, `organizations/1234`) The `supports_under` field of
+    /// the associated `Constraint` defines whether ancestry prefixes can be used.
+    /// </summary>
+    public class GoogleCloudOrgpolicyV2PolicySpecPolicyRuleStringValues : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of values allowed at this resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowedValues")]
+        public virtual System.Collections.Generic.IList<string> AllowedValues { get; set; }
+
+        /// <summary>List of values denied at this resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deniedValues")]
+        public virtual System.Collections.Generic.IList<string> DeniedValues { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A summary and comparison of the principal's access under the current (baseline) policies and the proposed
     /// (simulated) policies for a single access tuple.
@@ -1563,9 +2610,42 @@ namespace Google.Apis.PolicySimulator.v1.Data
     /// <summary>Metadata about a Replay operation.</summary>
     public class GoogleCloudPolicysimulatorV1ReplayOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Time when the request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1652,27 +2732,101 @@ namespace Google.Apis.PolicySimulator.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource describing a `Replay`, or simulation.</summary>
-    public class GoogleCloudPolicysimulatorV1beta1Replay : Google.Apis.Requests.IDirectResponseSchema
+    /// <summary>
+    /// CreateOrgPolicyViolationsPreviewOperationMetadata is metadata about an OrgPolicyViolationsPreview generations
+    /// operation.
+    /// </summary>
+    public class GoogleCloudPolicysimulatorV1alphaCreateOrgPolicyViolationsPreviewOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Required. The configuration used for the `Replay`.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("config")]
-        public virtual GoogleCloudPolicysimulatorV1beta1ReplayConfig Config { get; set; }
+        private string _requestTimeRaw;
+
+        private object _requestTime;
+
+        /// <summary>Time when the request was received.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestTime")]
+        public virtual string RequestTimeRaw
+        {
+            get => _requestTimeRaw;
+            set
+            {
+                _requestTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestTimeDateTimeOffset instead.")]
+        public virtual object RequestTime
+        {
+            get => _requestTime;
+            set
+            {
+                _requestTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestTimeRaw);
+            set => RequestTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
-        /// Output only. The resource name of the `Replay`, which has the following format:
-        /// `{projects|folders|organizations}/{resource-id}/locations/global/replays/{replay-id}`, where `{resource-id}`
-        /// is the ID of the project, folder, or organization that owns the Replay. Example:
-        /// `projects/my-example-project/locations/global/replays/506a5f7f-38ce-4d7d-8e03-479ce1833c36`
+        /// Total number of resources that need scanning. Should equal resource_scanned + resources_pending
         /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("name")]
-        public virtual string Name { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcesFound")]
+        public virtual System.Nullable<int> ResourcesFound { get; set; }
 
-        /// <summary>Output only. Summary statistics about the replayed log entries.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("resultsSummary")]
-        public virtual GoogleCloudPolicysimulatorV1beta1ReplayResultsSummary ResultsSummary { get; set; }
+        /// <summary>Number of resources still to scan.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcesPending")]
+        public virtual System.Nullable<int> ResourcesPending { get; set; }
 
-        /// <summary>Output only. The current state of the `Replay`.</summary>
+        /// <summary>Number of resources already scanned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcesScanned")]
+        public virtual System.Nullable<int> ResourcesScanned { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>Time when the request started processing, i.e., when the state was set to RUNNING.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. The current state of the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
@@ -1680,70 +2834,665 @@ namespace Google.Apis.PolicySimulator.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The configuration used for a Replay.</summary>
-    public class GoogleCloudPolicysimulatorV1beta1ReplayConfig : Google.Apis.Requests.IDirectResponseSchema
+    /// <summary>
+    /// GenerateOrgPolicyViolationsPreviewOperationMetadata is metadata about an OrgPolicyViolationsPreview generations
+    /// operation.
+    /// </summary>
+    public class GoogleCloudPolicysimulatorV1alphaGenerateOrgPolicyViolationsPreviewOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The logs to use as input for the Replay.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("logSource")]
-        public virtual string LogSource { get; set; }
+        private string _requestTimeRaw;
 
-        /// <summary>
-        /// A mapping of the resources that you want to simulate policies for and the policies that you want to
-        /// simulate. Keys are the full resource names for the resources. For example,
-        /// `//cloudresourcemanager.googleapis.com/projects/my-project`. For examples of full resource names for Google
-        /// Cloud services, see https://cloud.google.com/iam/help/troubleshooter/full-resource-names. Values are Policy
-        /// objects representing the policies that you want to simulate. Replays automatically take into account any IAM
-        /// policies inherited through the resource hierarchy, and any policies set on descendant resources. You do not
-        /// need to include these policies in the policy overlay.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("policyOverlay")]
-        public virtual System.Collections.Generic.IDictionary<string, GoogleIamV1Policy> PolicyOverlay { get; set; }
+        private object _requestTime;
 
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>Metadata about a Replay operation.</summary>
-    public class GoogleCloudPolicysimulatorV1beta1ReplayOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
-    {
         /// <summary>Time when the request was received.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestTime")]
+        public virtual string RequestTimeRaw
+        {
+            get => _requestTimeRaw;
+            set
+            {
+                _requestTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestTimeDateTimeOffset instead.")]
+        public virtual object RequestTime
+        {
+            get => _requestTime;
+            set
+            {
+                _requestTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestTimeRaw);
+            set => RequestTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Total number of resources that need scanning. Should equal resource_scanned + resources_pending
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcesFound")]
+        public virtual System.Nullable<int> ResourcesFound { get; set; }
+
+        /// <summary>Number of resources still to scan.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcesPending")]
+        public virtual System.Nullable<int> ResourcesPending { get; set; }
+
+        /// <summary>Number of resources already scanned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcesScanned")]
+        public virtual System.Nullable<int> ResourcesScanned { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>Time when the request started processing, i.e. when the state was set to RUNNING.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The current state of the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Summary statistics about the replayed log entries.</summary>
-    public class GoogleCloudPolicysimulatorV1beta1ReplayResultsSummary : Google.Apis.Requests.IDirectResponseSchema
+    /// <summary>The proposed changes to OrgPolicy.</summary>
+    public class GoogleCloudPolicysimulatorV1alphaOrgPolicyOverlay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The number of replayed log entries with a difference between baseline and simulated policies.
+        /// Optional. The OrgPolicy CustomConstraint changes to preview violations for. Any existing CustomConstraints
+        /// with the same name will be overridden in the simulation. That is, violations will be determined as if all
+        /// custom constraints in the overlay were instantiated. Only a single custom_constraint is supported in the
+        /// overlay at a time. For evaluating multiple constraints, multiple `GenerateOrgPolicyViolationsPreview`
+        /// requests are made, where each request evaluates a single constraint.
         /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("differenceCount")]
-        public virtual System.Nullable<int> DifferenceCount { get; set; }
-
-        /// <summary>The number of log entries that could not be replayed.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("errorCount")]
-        public virtual System.Nullable<int> ErrorCount { get; set; }
-
-        /// <summary>The total number of log entries replayed.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("logCount")]
-        public virtual System.Nullable<int> LogCount { get; set; }
-
-        /// <summary>The date of the newest log entry replayed.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("newestDate")]
-        public virtual GoogleTypeDate NewestDate { get; set; }
-
-        /// <summary>The date of the oldest log entry replayed.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("oldestDate")]
-        public virtual GoogleTypeDate OldestDate { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("customConstraints")]
+        public virtual System.Collections.Generic.IList<GoogleCloudPolicysimulatorV1alphaOrgPolicyOverlayCustomConstraintOverlay> CustomConstraints { get; set; }
 
         /// <summary>
-        /// The number of replayed log entries with no difference between baseline and simulated policies.
+        /// Optional. The OrgPolicy changes to preview violations for. Any existing OrgPolicies with the same name will
+        /// be overridden in the simulation. That is, violations will be determined as if all policies in the overlay
+        /// were created or updated.
         /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("unchangedCount")]
-        public virtual System.Nullable<int> UnchangedCount { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("policies")]
+        public virtual System.Collections.Generic.IList<GoogleCloudPolicysimulatorV1alphaOrgPolicyOverlayPolicyOverlay> Policies { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A change to an OrgPolicy custom constraint.</summary>
+    public class GoogleCloudPolicysimulatorV1alphaOrgPolicyOverlayCustomConstraintOverlay : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. The new or updated custom constraint.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customConstraint")]
+        public virtual GoogleCloudOrgpolicyV2CustomConstraint CustomConstraint { get; set; }
+
+        /// <summary>Optional. Resource the constraint is attached to. Example: "organization/987654"</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customConstraintParent")]
+        public virtual string CustomConstraintParent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A change to an OrgPolicy.</summary>
+    public class GoogleCloudPolicysimulatorV1alphaOrgPolicyOverlayPolicyOverlay : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. The new or updated OrgPolicy.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policy")]
+        public virtual GoogleCloudOrgpolicyV2Policy Policy { get; set; }
+
+        /// <summary>Optional. The parent of the policy we are attaching to. Example: "projects/123456"</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policyParent")]
+        public virtual string PolicyParent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// OrgPolicyViolationsPreview is a resource providing a preview of the violations that will exist if an OrgPolicy
+    /// change is made. The list of violations are modeled as child resources and retrieved via a
+    /// ListOrgPolicyViolations API call. There are potentially more OrgPolicyViolations than could fit in an embedded
+    /// field. Thus, the use of a child resource instead of a field.
+    /// </summary>
+    public class GoogleCloudPolicysimulatorV1alphaOrgPolicyViolationsPreview : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Time when this `OrgPolicyViolationsPreview` was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. The names of the constraints against which all `OrgPolicyViolations` were evaluated. If
+        /// `OrgPolicyOverlay` only contains `PolicyOverlay` then it contains the name of the configured custom
+        /// constraint, applicable to the specified policies. Otherwise it contains the name of the constraint specified
+        /// in `CustomConstraintOverlay`. Format:
+        /// `organizations/{organization_id}/customConstraints/{custom_constraint_id}` Example:
+        /// `organizations/123/customConstraints/custom.createOnlyE2TypeVms`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customConstraints")]
+        public virtual System.Collections.Generic.IList<string> CustomConstraints { get; set; }
+
+        /// <summary>
+        /// Output only. The resource name of the `OrgPolicyViolationsPreview`. It has the following format:
+        /// `organizations/{organization}/locations/{location}/orgPolicyViolationsPreviews/{orgPolicyViolationsPreview}`
+        /// Example: `organizations/my-example-org/locations/global/orgPolicyViolationsPreviews/506a5f7f`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Required. The proposed changes we are previewing violations for.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("overlay")]
+        public virtual GoogleCloudPolicysimulatorV1alphaOrgPolicyOverlay Overlay { get; set; }
+
+        /// <summary>
+        /// Output only. A summary of the state of all resources scanned for compliance with the changed OrgPolicy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceCounts")]
+        public virtual GoogleCloudPolicysimulatorV1alphaOrgPolicyViolationsPreviewResourceCounts ResourceCounts { get; set; }
+
+        /// <summary>Output only. The state of the `OrgPolicyViolationsPreview`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>
+        /// Output only. The number of OrgPolicyViolations in this `OrgPolicyViolationsPreview`. This count may differ
+        /// from `resource_summary.noncompliant_count` because each OrgPolicyViolation is specific to a resource **and**
+        /// constraint. If there are multiple constraints being evaluated (i.e. multiple policies in the overlay), a
+        /// single resource may violate multiple constraints.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("violationsCount")]
+        public virtual System.Nullable<int> ViolationsCount { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A summary of the state of all resources scanned for compliance with the changed OrgPolicy.</summary>
+    public class GoogleCloudPolicysimulatorV1alphaOrgPolicyViolationsPreviewResourceCounts : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. Number of scanned resources with zero violations.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("compliant")]
+        public virtual System.Nullable<int> Compliant { get; set; }
+
+        /// <summary>Output only. Number of resources that returned an error when scanned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errors")]
+        public virtual System.Nullable<int> Errors { get; set; }
+
+        /// <summary>Output only. Number of scanned resources with at least one violation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("noncompliant")]
+        public virtual System.Nullable<int> Noncompliant { get; set; }
+
+        /// <summary>
+        /// Output only. Number of resources checked for compliance. Must equal: unenforced + noncompliant + compliant +
+        /// error
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scanned")]
+        public virtual System.Nullable<int> Scanned { get; set; }
+
+        /// <summary>
+        /// Output only. Number of resources where the constraint was not enforced, i.e. the Policy set `enforced:
+        /// false` for that resource.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unenforced")]
+        public virtual System.Nullable<int> Unenforced { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// CreateOrgPolicyViolationsPreviewOperationMetadata is metadata about an OrgPolicyViolationsPreview generations
+    /// operation.
+    /// </summary>
+    public class GoogleCloudPolicysimulatorV1betaCreateOrgPolicyViolationsPreviewOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _requestTimeRaw;
+
+        private object _requestTime;
+
+        /// <summary>Time when the request was received.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestTime")]
+        public virtual string RequestTimeRaw
+        {
+            get => _requestTimeRaw;
+            set
+            {
+                _requestTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestTimeDateTimeOffset instead.")]
+        public virtual object RequestTime
+        {
+            get => _requestTime;
+            set
+            {
+                _requestTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestTimeRaw);
+            set => RequestTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Total number of resources that need scanning. Should equal resource_scanned + resources_pending
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcesFound")]
+        public virtual System.Nullable<int> ResourcesFound { get; set; }
+
+        /// <summary>Number of resources still to scan.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcesPending")]
+        public virtual System.Nullable<int> ResourcesPending { get; set; }
+
+        /// <summary>Number of resources already scanned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcesScanned")]
+        public virtual System.Nullable<int> ResourcesScanned { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>Time when the request started processing, i.e., when the state was set to RUNNING.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. The current state of the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// GenerateOrgPolicyViolationsPreviewOperationMetadata is metadata about an OrgPolicyViolationsPreview generations
+    /// operation.
+    /// </summary>
+    public class GoogleCloudPolicysimulatorV1betaGenerateOrgPolicyViolationsPreviewOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _requestTimeRaw;
+
+        private object _requestTime;
+
+        /// <summary>Time when the request was received.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestTime")]
+        public virtual string RequestTimeRaw
+        {
+            get => _requestTimeRaw;
+            set
+            {
+                _requestTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestTimeDateTimeOffset instead.")]
+        public virtual object RequestTime
+        {
+            get => _requestTime;
+            set
+            {
+                _requestTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestTimeRaw);
+            set => RequestTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Total number of resources that need scanning. Should equal resource_scanned + resources_pending
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcesFound")]
+        public virtual System.Nullable<int> ResourcesFound { get; set; }
+
+        /// <summary>Number of resources still to scan.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcesPending")]
+        public virtual System.Nullable<int> ResourcesPending { get; set; }
+
+        /// <summary>Number of resources already scanned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcesScanned")]
+        public virtual System.Nullable<int> ResourcesScanned { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>Time when the request started processing, i.e. when the state was set to RUNNING.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The current state of the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The proposed changes to OrgPolicy.</summary>
+    public class GoogleCloudPolicysimulatorV1betaOrgPolicyOverlay : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The OrgPolicy CustomConstraint changes to preview violations for. Any existing CustomConstraints
+        /// with the same name will be overridden in the simulation. That is, violations will be determined as if all
+        /// custom constraints in the overlay were instantiated. Only a single custom_constraint is supported in the
+        /// overlay at a time. For evaluating multiple constraints, multiple `GenerateOrgPolicyViolationsPreview`
+        /// requests are made, where each request evaluates a single constraint.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customConstraints")]
+        public virtual System.Collections.Generic.IList<GoogleCloudPolicysimulatorV1betaOrgPolicyOverlayCustomConstraintOverlay> CustomConstraints { get; set; }
+
+        /// <summary>
+        /// Optional. The OrgPolicy changes to preview violations for. Any existing OrgPolicies with the same name will
+        /// be overridden in the simulation. That is, violations will be determined as if all policies in the overlay
+        /// were created or updated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policies")]
+        public virtual System.Collections.Generic.IList<GoogleCloudPolicysimulatorV1betaOrgPolicyOverlayPolicyOverlay> Policies { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A change to an OrgPolicy custom constraint.</summary>
+    public class GoogleCloudPolicysimulatorV1betaOrgPolicyOverlayCustomConstraintOverlay : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. The new or updated custom constraint.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customConstraint")]
+        public virtual GoogleCloudOrgpolicyV2CustomConstraint CustomConstraint { get; set; }
+
+        /// <summary>Optional. Resource the constraint is attached to. Example: "organization/987654"</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customConstraintParent")]
+        public virtual string CustomConstraintParent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A change to an OrgPolicy.</summary>
+    public class GoogleCloudPolicysimulatorV1betaOrgPolicyOverlayPolicyOverlay : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. The new or updated OrgPolicy.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policy")]
+        public virtual GoogleCloudOrgpolicyV2Policy Policy { get; set; }
+
+        /// <summary>Optional. The parent of the policy we are attaching to. Example: "projects/123456"</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policyParent")]
+        public virtual string PolicyParent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// OrgPolicyViolationsPreview is a resource providing a preview of the violations that will exist if an OrgPolicy
+    /// change is made. The list of violations are modeled as child resources and retrieved via a
+    /// ListOrgPolicyViolations API call. There are potentially more OrgPolicyViolations than could fit in an embedded
+    /// field. Thus, the use of a child resource instead of a field.
+    /// </summary>
+    public class GoogleCloudPolicysimulatorV1betaOrgPolicyViolationsPreview : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Time when this `OrgPolicyViolationsPreview` was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. The names of the constraints against which all `OrgPolicyViolations` were evaluated. If
+        /// `OrgPolicyOverlay` only contains `PolicyOverlay` then it contains the name of the configured custom
+        /// constraint, applicable to the specified policies. Otherwise it contains the name of the constraint specified
+        /// in `CustomConstraintOverlay`. Format:
+        /// `organizations/{organization_id}/customConstraints/{custom_constraint_id}` Example:
+        /// `organizations/123/customConstraints/custom.createOnlyE2TypeVms`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customConstraints")]
+        public virtual System.Collections.Generic.IList<string> CustomConstraints { get; set; }
+
+        /// <summary>
+        /// Output only. The resource name of the `OrgPolicyViolationsPreview`. It has the following format:
+        /// `organizations/{organization}/locations/{location}/orgPolicyViolationsPreviews/{orgPolicyViolationsPreview}`
+        /// Example: `organizations/my-example-org/locations/global/orgPolicyViolationsPreviews/506a5f7f`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Required. The proposed changes we are previewing violations for.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("overlay")]
+        public virtual GoogleCloudPolicysimulatorV1betaOrgPolicyOverlay Overlay { get; set; }
+
+        /// <summary>
+        /// Output only. A summary of the state of all resources scanned for compliance with the changed OrgPolicy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceCounts")]
+        public virtual GoogleCloudPolicysimulatorV1betaOrgPolicyViolationsPreviewResourceCounts ResourceCounts { get; set; }
+
+        /// <summary>Output only. The state of the `OrgPolicyViolationsPreview`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>
+        /// Output only. The number of OrgPolicyViolations in this `OrgPolicyViolationsPreview`. This count may differ
+        /// from `resource_summary.noncompliant_count` because each OrgPolicyViolation is specific to a resource **and**
+        /// constraint. If there are multiple constraints being evaluated (i.e. multiple policies in the overlay), a
+        /// single resource may violate multiple constraints.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("violationsCount")]
+        public virtual System.Nullable<int> ViolationsCount { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A summary of the state of all resources scanned for compliance with the changed OrgPolicy.</summary>
+    public class GoogleCloudPolicysimulatorV1betaOrgPolicyViolationsPreviewResourceCounts : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. Number of scanned resources with zero violations.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("compliant")]
+        public virtual System.Nullable<int> Compliant { get; set; }
+
+        /// <summary>Output only. Number of resources that returned an error when scanned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errors")]
+        public virtual System.Nullable<int> Errors { get; set; }
+
+        /// <summary>Output only. Number of scanned resources with at least one violation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("noncompliant")]
+        public virtual System.Nullable<int> Noncompliant { get; set; }
+
+        /// <summary>
+        /// Output only. Number of resources checked for compliance. Must equal: unenforced + noncompliant + compliant +
+        /// error
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scanned")]
+        public virtual System.Nullable<int> Scanned { get; set; }
+
+        /// <summary>
+        /// Output only. Number of resources where the constraint was not enforced, i.e. the Policy set `enforced:
+        /// false` for that resource.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unenforced")]
+        public virtual System.Nullable<int> Unenforced { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1759,7 +3508,8 @@ namespace Google.Apis.PolicySimulator.v1.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class GoogleIamV1AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1814,16 +3564,37 @@ namespace Google.Apis.PolicySimulator.v1.Data
         public virtual GoogleTypeExpr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -1831,15 +3602,19 @@ namespace Google.Apis.PolicySimulator.v1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -1857,18 +3632,26 @@ namespace Google.Apis.PolicySimulator.v1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class GoogleIamV1Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1962,8 +3745,8 @@ namespace Google.Apis.PolicySimulator.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -2007,10 +3790,10 @@ namespace Google.Apis.PolicySimulator.v1.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class GoogleTypeDate : Google.Apis.Requests.IDirectResponseSchema
     {

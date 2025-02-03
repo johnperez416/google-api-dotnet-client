@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ namespace Google.Apis.Admin.Reports.reports_v1
             CustomerUsageReports = new CustomerUsageReportsResource(this);
             EntityUsageReports = new EntityUsageReportsResource(this);
             UserUsageReport = new UserUsageReportResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://admin.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://admin.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -48,23 +50,16 @@ namespace Google.Apis.Admin.Reports.reports_v1
         public override string Name => "admin";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://admin.googleapis.com/";
-        #else
-            "https://admin.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://admin.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Admin SDK API.</summary>
         public class Scope
@@ -312,7 +307,7 @@ namespace Google.Apis.Admin.Reports.reports_v1
         /// <param name="applicationName">Application name for which the events are to be retrieved.</param>
         public virtual ListRequest List(string userKey, ListRequest.ApplicationNameEnum applicationName)
         {
-            return new ListRequest(service, userKey, applicationName);
+            return new ListRequest(this.service, userKey, applicationName);
         }
 
         /// <summary>
@@ -487,6 +482,12 @@ namespace Google.Apis.Admin.Reports.reports_v1
                 /// </summary>
                 [Google.Apis.Util.StringValueAttribute("keep")]
                 Keep = 21,
+
+                /// <summary>
+                /// The Vault activity reports return information about various types of Vault activity events.
+                /// </summary>
+                [Google.Apis.Util.StringValueAttribute("vault")]
+                Vault = 22,
             }
 
             /// <summary>
@@ -531,29 +532,31 @@ namespace Google.Apis.Admin.Reports.reports_v1
             public virtual string EventName { get; set; }
 
             /// <summary>
-            /// The `filters` query string is a comma-separated list. The list is composed of event parameters that are
-            /// manipulated by relational operators. Event parameters are in the form `parameter1 name[parameter1
-            /// value],parameter2 name[parameter2 value],...` These event parameters are associated with a specific
-            /// `eventName`. An empty report is returned if the filtered request's parameter does not belong to the
-            /// `eventName`. For more information about `eventName` parameters, see the list of event names for various
-            /// applications above in `applicationName`. In the following Admin Activity example, the &amp;lt;&amp;gt;
-            /// operator is URL-encoded in the request's query string (%3C%3E):
-            /// GET...&amp;amp;eventName=CHANGE_CALENDAR_SETTING &amp;amp;filters=NEW_VALUE%3C%3EREAD_ONLY_ACCESS In the
-            /// following Drive example, the list can be a view or edit event's `doc_id` parameter with a value that is
-            /// manipulated by an 'equal to' (==) or 'not equal to' (&amp;lt;&amp;gt;) relational operator. In the first
-            /// example, the report returns each edited document's `doc_id`. In the second example, the report returns
-            /// each viewed document's `doc_id` that equals the value 12345 and does not return any viewed document's
-            /// which have a `doc_id` value of 98765. The &amp;lt;&amp;gt; operator is URL-encoded in the request's
-            /// query string (%3C%3E): GET...&amp;amp;eventName=edit&amp;amp;filters=doc_id
-            /// GET...&amp;amp;eventName=view&amp;amp;filters=doc_id==12345,doc_id%3C%3E98765 The relational operators
-            /// include: - `==` - 'equal to'. - `&amp;lt;&amp;gt;` - 'not equal to'. It is URL-encoded (%3C%3E). -
-            /// `&amp;lt;` - 'less than'. It is URL-encoded (%3C). - `&amp;lt;=` - 'less than or equal to'. It is
-            /// URL-encoded (%3C=). - `&amp;gt;` - 'greater than'. It is URL-encoded (%3E). - `&amp;gt;=` - 'greater
-            /// than or equal to'. It is URL-encoded (%3E=). *Note:* The API doesn't accept multiple values of a
-            /// parameter. If a particular parameter is supplied more than once in the API request, the API only accepts
-            /// the last value of that request parameter. In addition, if an invalid request parameter is supplied in
-            /// the API request, the API ignores that request parameter and returns the response corresponding to the
-            /// remaining valid request parameters. If no parameters are requested, all parameters are returned.
+            /// The `filters` query string is a comma-separated list composed of event parameters manipulated by
+            /// relational operators. Event parameters are in the form `{parameter1 name}{relational
+            /// operator}{parameter1 value},{parameter2 name}{relational operator}{parameter2 value},...` These event
+            /// parameters are associated with a specific `eventName`. An empty report is returned if the request's
+            /// parameter doesn't belong to the `eventName`. For more information about the available `eventName` fields
+            /// for each application and their associated parameters, go to the [ApplicationName](#applicationname)
+            /// table, then click through to the Activity Events page in the Appendix for the application you want. In
+            /// the following Drive activity examples, the returned list consists of all `edit` events where the
+            /// `doc_id` parameter value matches the conditions defined by the relational operator. In the first
+            /// example, the request returns all edited documents with a `doc_id` value equal to `12345`. In the second
+            /// example, the report returns any edited documents where the `doc_id` value is not equal to `98765`. The
+            /// `&amp;lt;&amp;gt;` operator is URL-encoded in the request's query string (`%3C%3E`):
+            /// ```
+            /// GET...&amp;amp;eventName=edit&amp;amp;filters=doc_id==12345
+            /// GET...&amp;amp;eventName=edit&amp;amp;filters=doc_id%3C%3E98765
+            /// ```
+            /// A `filters` query supports these
+            /// relational operators: * `==`—'equal to'. * `&amp;lt;&amp;gt;`—'not equal to'. Must be URL-encoded
+            /// (%3C%3E). * `&amp;lt;`—'less than'. Must be URL-encoded (%3C). * `&amp;lt;=`—'less than or equal to'.
+            /// Must be URL-encoded (%3C=). * `&amp;gt;`—'greater than'. Must be URL-encoded (%3E). *
+            /// `&amp;gt;=`—'greater than or equal to'. Must be URL-encoded (%3E=). **Note:** The API doesn't accept
+            /// multiple values of the same parameter. If a parameter is supplied more than once in the API request, the
+            /// API only accepts the last value of that parameter. In addition, if an invalid parameter is supplied in
+            /// the API request, the API ignores that parameter and returns the response corresponding to the remaining
+            /// valid parameters. If no parameters are requested, all parameters are returned.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("filters", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filters { get; set; }
@@ -626,7 +629,7 @@ namespace Google.Apis.Admin.Reports.reports_v1
                     IsRequired = true,
                     ParameterType = "path",
                     DefaultValue = null,
-                    Pattern = @"(access_transparency)|(admin)|(calendar)|(chat)|(chrome)|(context_aware_access)|(data_studio)|(drive)|(gcp)|(gplus)|(groups)|(groups_enterprise)|(jamboard)|(keep)|(login)|(meet)|(mobile)|(rules)|(saml)|(token)|(user_accounts)",
+                    Pattern = @"(access_transparency)|(admin)|(calendar)|(chat)|(chrome)|(context_aware_access)|(data_studio)|(drive)|(gcp)|(gplus)|(groups)|(groups_enterprise)|(jamboard)|(keep)|(login)|(meet)|(mobile)|(rules)|(saml)|(token)|(user_accounts)|(vault)",
                 });
                 RequestParameters.Add("actorIpAddress", new Google.Apis.Discovery.Parameter
                 {
@@ -725,7 +728,7 @@ namespace Google.Apis.Admin.Reports.reports_v1
         /// <param name="applicationName">Application name for which the events are to be retrieved.</param>
         public virtual WatchRequest Watch(Google.Apis.Admin.Reports.reports_v1.Data.Channel body, string userKey, WatchRequest.ApplicationNameEnum applicationName)
         {
-            return new WatchRequest(service, body, userKey, applicationName);
+            return new WatchRequest(this.service, body, userKey, applicationName);
         }
 
         /// <summary>
@@ -943,29 +946,31 @@ namespace Google.Apis.Admin.Reports.reports_v1
             public virtual string EventName { get; set; }
 
             /// <summary>
-            /// The `filters` query string is a comma-separated list. The list is composed of event parameters that are
-            /// manipulated by relational operators. Event parameters are in the form `parameter1 name[parameter1
-            /// value],parameter2 name[parameter2 value],...` These event parameters are associated with a specific
-            /// `eventName`. An empty report is returned if the filtered request's parameter does not belong to the
-            /// `eventName`. For more information about `eventName` parameters, see the list of event names for various
-            /// applications above in `applicationName`. In the following Admin Activity example, the &amp;lt;&amp;gt;
-            /// operator is URL-encoded in the request's query string (%3C%3E):
-            /// GET...&amp;amp;eventName=CHANGE_CALENDAR_SETTING &amp;amp;filters=NEW_VALUE%3C%3EREAD_ONLY_ACCESS In the
-            /// following Drive example, the list can be a view or edit event's `doc_id` parameter with a value that is
-            /// manipulated by an 'equal to' (==) or 'not equal to' (&amp;lt;&amp;gt;) relational operator. In the first
-            /// example, the report returns each edited document's `doc_id`. In the second example, the report returns
-            /// each viewed document's `doc_id` that equals the value 12345 and does not return any viewed document's
-            /// which have a `doc_id` value of 98765. The &amp;lt;&amp;gt; operator is URL-encoded in the request's
-            /// query string (%3C%3E): GET...&amp;amp;eventName=edit&amp;amp;filters=doc_id
-            /// GET...&amp;amp;eventName=view&amp;amp;filters=doc_id==12345,doc_id%3C%3E98765 The relational operators
-            /// include: - `==` - 'equal to'. - `&amp;lt;&amp;gt;` - 'not equal to'. It is URL-encoded (%3C%3E). -
-            /// `&amp;lt;` - 'less than'. It is URL-encoded (%3C). - `&amp;lt;=` - 'less than or equal to'. It is
-            /// URL-encoded (%3C=). - `&amp;gt;` - 'greater than'. It is URL-encoded (%3E). - `&amp;gt;=` - 'greater
-            /// than or equal to'. It is URL-encoded (%3E=). *Note:* The API doesn't accept multiple values of a
-            /// parameter. If a particular parameter is supplied more than once in the API request, the API only accepts
-            /// the last value of that request parameter. In addition, if an invalid request parameter is supplied in
-            /// the API request, the API ignores that request parameter and returns the response corresponding to the
-            /// remaining valid request parameters. If no parameters are requested, all parameters are returned.
+            /// The `filters` query string is a comma-separated list composed of event parameters manipulated by
+            /// relational operators. Event parameters are in the form `{parameter1 name}{relational
+            /// operator}{parameter1 value},{parameter2 name}{relational operator}{parameter2 value},...` These event
+            /// parameters are associated with a specific `eventName`. An empty report is returned if the request's
+            /// parameter doesn't belong to the `eventName`. For more information about the available `eventName` fields
+            /// for each application and their associated parameters, go to the [ApplicationName](#applicationname)
+            /// table, then click through to the Activity Events page in the Appendix for the application you want. In
+            /// the following Drive activity examples, the returned list consists of all `edit` events where the
+            /// `doc_id` parameter value matches the conditions defined by the relational operator. In the first
+            /// example, the request returns all edited documents with a `doc_id` value equal to `12345`. In the second
+            /// example, the report returns any edited documents where the `doc_id` value is not equal to `98765`. The
+            /// `&amp;lt;&amp;gt;` operator is URL-encoded in the request's query string (`%3C%3E`):
+            /// ```
+            /// GET...&amp;amp;eventName=edit&amp;amp;filters=doc_id==12345
+            /// GET...&amp;amp;eventName=edit&amp;amp;filters=doc_id%3C%3E98765
+            /// ```
+            /// A `filters` query supports these
+            /// relational operators: * `==`—'equal to'. * `&amp;lt;&amp;gt;`—'not equal to'. Must be URL-encoded
+            /// (%3C%3E). * `&amp;lt;`—'less than'. Must be URL-encoded (%3C). * `&amp;lt;=`—'less than or equal to'.
+            /// Must be URL-encoded (%3C=). * `&amp;gt;`—'greater than'. Must be URL-encoded (%3E). *
+            /// `&amp;gt;=`—'greater than or equal to'. Must be URL-encoded (%3E=). **Note:** The API doesn't accept
+            /// multiple values of the same parameter. If a parameter is supplied more than once in the API request, the
+            /// API only accepts the last value of that parameter. In addition, if an invalid parameter is supplied in
+            /// the API request, the API ignores that parameter and returns the response corresponding to the remaining
+            /// valid parameters. If no parameters are requested, all parameters are returned.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("filters", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filters { get; set; }
@@ -988,8 +993,9 @@ namespace Google.Apis.Admin.Reports.reports_v1
             public virtual System.Nullable<int> MaxResults { get; set; }
 
             /// <summary>
-            /// ID of the organizational unit to report on. Activity records will be shown only for users who belong to
-            /// the specified organizational unit. Data before Dec 17, 2018 doesn't appear in the filtered results.
+            /// `Deprecated`. This field is deprecated and is no longer supported. ID of the organizational unit to
+            /// report on. Activity records will be shown only for users who belong to the specified organizational
+            /// unit. Data before Dec 17, 2018 doesn't appear in the filtered results.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("orgUnitID", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string OrgUnitID { get; set; }
@@ -1148,7 +1154,7 @@ namespace Google.Apis.Admin.Reports.reports_v1
         /// <param name="body">The body of the request.</param>
         public virtual StopRequest Stop(Google.Apis.Admin.Reports.reports_v1.Data.Channel body)
         {
-            return new StopRequest(service, body);
+            return new StopRequest(this.service, body);
         }
 
         /// <summary>Stop watching resources through this channel.</summary>
@@ -1204,12 +1210,12 @@ namespace Google.Apis.Admin.Reports.reports_v1
         /// parameters, see the Customers Usage parameters reference guides.
         /// </summary>
         /// <param name="date">
-        /// Represents the date the usage occurred. The timestamp is in the ISO 8601 format, yyyy-mm-dd. We recommend
-        /// you use your account's time zone for this.
+        /// Represents the date the usage occurred, based on UTC-8:00 (Pacific Standard Time). The timestamp is in the
+        /// [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601), `yyyy-mm-dd`.
         /// </param>
         public virtual GetRequest Get(string date)
         {
-            return new GetRequest(service, date);
+            return new GetRequest(this.service, date);
         }
 
         /// <summary>
@@ -1227,8 +1233,8 @@ namespace Google.Apis.Admin.Reports.reports_v1
             }
 
             /// <summary>
-            /// Represents the date the usage occurred. The timestamp is in the ISO 8601 format, yyyy-mm-dd. We
-            /// recommend you use your account's time zone for this.
+            /// Represents the date the usage occurred, based on UTC-8:00 (Pacific Standard Time). The timestamp is in
+            /// the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601), `yyyy-mm-dd`.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("date", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Date { get; private set; }
@@ -1304,7 +1310,7 @@ namespace Google.Apis.Admin.Reports.reports_v1
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = null,
-                    Pattern = @"(((accounts)|(app_maker)|(apps_scripts)|(classroom)|(cros)|(gmail)|(calendar)|(docs)|(gplus)|(sites)|(device_management)|(drive)|(meet)):[^,]+,)*(((accounts)|(app_maker)|(apps_scripts)|(classroom)|(cros)|(gmail)|(calendar)|(docs)|(gplus)|(sites)|(device_management)|(drive)|(meet)):[^,]+)",
+                    Pattern = @"(((accounts)|(app_maker)|(apps_scripts)|(chat)|(classroom)|(cros)|(gmail)|(calendar)|(docs)|(gplus)|(sites)|(device_management)|(drive)|(meet)):[^,]+,)*(((accounts)|(app_maker)|(apps_scripts)|(chat)|(classroom)|(cros)|(gmail)|(calendar)|(docs)|(gplus)|(sites)|(device_management)|(drive)|(meet)):[^,]+)",
                 });
             }
         }
@@ -1336,12 +1342,12 @@ namespace Google.Apis.Admin.Reports.reports_v1
         /// obtain the `entityKey` for a particular `entityType`, see the Entities Usage parameters reference guides.
         /// </param>
         /// <param name="date">
-        /// Represents the date the usage occurred. The timestamp is in the ISO 8601 format, yyyy-mm-dd. We recommend
-        /// you use your account's time zone for this.
+        /// Represents the date the usage occurred, based on UTC-8:00 (Pacific Standard Time). The timestamp is in the
+        /// [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601), `yyyy-mm-dd`.
         /// </param>
         public virtual GetRequest Get(GetRequest.EntityTypeEnum entityType, string entityKey, string date)
         {
-            return new GetRequest(service, entityType, entityKey, date);
+            return new GetRequest(this.service, entityType, entityKey, date);
         }
 
         /// <summary>
@@ -1382,8 +1388,8 @@ namespace Google.Apis.Admin.Reports.reports_v1
             public virtual string EntityKey { get; private set; }
 
             /// <summary>
-            /// Represents the date the usage occurred. The timestamp is in the ISO 8601 format, yyyy-mm-dd. We
-            /// recommend you use your account's time zone for this.
+            /// Represents the date the usage occurred, based on UTC-8:00 (Pacific Standard Time). The timestamp is in
+            /// the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601), `yyyy-mm-dd`.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("date", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Date { get; private set; }
@@ -1548,12 +1554,12 @@ namespace Google.Apis.Admin.Reports.reports_v1
         /// then use the returned `ID` as the `userKey`.
         /// </param>
         /// <param name="date">
-        /// Represents the date the usage occurred. The timestamp is in the ISO 8601 format, yyyy-mm-dd. We recommend
-        /// you use your account's time zone for this.
+        /// Represents the date the usage occurred, based on UTC-8:00 (Pacific Standard Time). The timestamp is in the
+        /// [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601), `yyyy-mm-dd`.
         /// </param>
         public virtual GetRequest Get(string userKey, string date)
         {
-            return new GetRequest(service, userKey, date);
+            return new GetRequest(this.service, userKey, date);
         }
 
         /// <summary>
@@ -1581,8 +1587,8 @@ namespace Google.Apis.Admin.Reports.reports_v1
             public virtual string UserKey { get; private set; }
 
             /// <summary>
-            /// Represents the date the usage occurred. The timestamp is in the ISO 8601 format, yyyy-mm-dd. We
-            /// recommend you use your account's time zone for this.
+            /// Represents the date the usage occurred, based on UTC-8:00 (Pacific Standard Time). The timestamp is in
+            /// the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601), `yyyy-mm-dd`.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("date", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Date { get; private set; }
@@ -1699,7 +1705,7 @@ namespace Google.Apis.Admin.Reports.reports_v1
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = null,
-                    Pattern = @"(((accounts)|(classroom)|(cros)|(gmail)|(calendar)|(docs)|(gplus)|(sites)|(device_management)|(drive)):[a-z0-9_]+[<,<=,==,>=,>,!=][^,]+,)*(((accounts)|(classroom)|(cros)|(gmail)|(calendar)|(docs)|(gplus)|(sites)|(device_management)|(drive)):[a-z0-9_]+[<,<=,==,>=,>,!=][^,]+)",
+                    Pattern = @"(((accounts)|(chat)|(classroom)|(cros)|(gmail)|(calendar)|(docs)|(gplus)|(sites)|(device_management)|(drive)):[a-z0-9_]+[<,<=,==,>=,>,!=][^,]+,)*(((accounts)|(chat)|(classroom)|(cros)|(gmail)|(calendar)|(docs)|(gplus)|(sites)|(device_management)|(drive)):[a-z0-9_]+[<,<=,==,>=,>,!=][^,]+)",
                 });
                 RequestParameters.Add("groupIdFilter", new Google.Apis.Discovery.Parameter
                 {
@@ -1739,7 +1745,7 @@ namespace Google.Apis.Admin.Reports.reports_v1
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = null,
-                    Pattern = @"(((accounts)|(classroom)|(cros)|(gmail)|(calendar)|(docs)|(gplus)|(sites)|(device_management)|(drive)):[^,]+,)*(((accounts)|(classroom)|(cros)|(gmail)|(calendar)|(docs)|(gplus)|(sites)|(device_management)|(drive)):[^,]+)",
+                    Pattern = @"(((accounts)|(chat)|(classroom)|(cros)|(gmail)|(calendar)|(docs)|(gplus)|(sites)|(device_management)|(drive)):[^,]+,)*(((accounts)|(chat)|(classroom)|(cros)|(gmail)|(calendar)|(docs)|(gplus)|(sites)|(device_management)|(drive)):[^,]+)",
                 });
             }
         }
@@ -1846,9 +1852,8 @@ namespace Google.Apis.Admin.Reports.reports_v1.Data
             /// is related to a specific Google Workspace service or feature which the API organizes into types of
             /// events. For `eventName` request parameters in general: - If no `eventName` is given, the report returns
             /// all possible instances of an `eventName`. - When you request an `eventName`, the API's response returns
-            /// all activities which contain that `eventName`. It is possible that the returned activities will have
-            /// other `eventName` properties in addition to the one requested. For more information about `eventName`
-            /// properties, see the list of event names for various applications above in `applicationName`.
+            /// all activities which contain that `eventName`. For more information about `eventName` properties, see
+            /// the list of event names for various applications above in `applicationName`.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("name")]
             public virtual string Name { get; set; }
@@ -1951,9 +1956,18 @@ namespace Google.Apis.Admin.Reports.reports_v1.Data
             [Newtonsoft.Json.JsonPropertyAttribute("time")]
             public virtual string TimeRaw { get; set; }
 
+            /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimeRaw"/>.</summary>
+            [Newtonsoft.Json.JsonIgnoreAttribute]
+            public virtual System.DateTimeOffset? TimeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeRaw);
+                set => TimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
             /// <summary><seealso cref="System.DateTime"/> representation of <see cref="TimeRaw"/>.</summary>
             [Newtonsoft.Json.JsonIgnoreAttribute]
-            public virtual System.Nullable<System.DateTime> Time
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeDateTimeOffset instead.")]
+            public virtual System.DateTime? Time
             {
                 get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeRaw);
                 set => TimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -1992,7 +2006,10 @@ namespace Google.Apis.Admin.Reports.reports_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("params")]
         public virtual System.Collections.Generic.IDictionary<string, string> Params__ { get; set; }
 
-        /// <summary>A Boolean value to indicate whether payload is wanted. Optional.</summary>
+        /// <summary>
+        /// A Boolean value to indicate whether payload is wanted. A payload is data that is sent in the body of an HTTP
+        /// POST, PUT, or PATCH message and contains important information about the request. Optional.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("payload")]
         public virtual System.Nullable<bool> Payload { get; set; }
 
@@ -2128,9 +2145,20 @@ namespace Google.Apis.Admin.Reports.reports_v1.Data
             [Newtonsoft.Json.JsonPropertyAttribute("datetimeValue")]
             public virtual string DatetimeValueRaw { get; set; }
 
+            /// <summary>
+            /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="DatetimeValueRaw"/>.
+            /// </summary>
+            [Newtonsoft.Json.JsonIgnoreAttribute]
+            public virtual System.DateTimeOffset? DatetimeValueDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(DatetimeValueRaw);
+                set => DatetimeValueRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
             /// <summary><seealso cref="System.DateTime"/> representation of <see cref="DatetimeValueRaw"/>.</summary>
             [Newtonsoft.Json.JsonIgnoreAttribute]
-            public virtual System.Nullable<System.DateTime> DatetimeValue
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DatetimeValueDateTimeOffset instead.")]
+            public virtual System.DateTime? DatetimeValue
             {
                 get => Google.Apis.Util.Utilities.GetDateTimeFromString(DatetimeValueRaw);
                 set => DatetimeValueRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);

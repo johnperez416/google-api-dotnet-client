@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.Reseller.v1
             Customers = new CustomersResource(this);
             Resellernotify = new ResellernotifyResource(this);
             Subscriptions = new SubscriptionsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://reseller.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://reseller.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.Reseller.v1
         public override string Name => "reseller";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://reseller.googleapis.com/";
-        #else
-            "https://reseller.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://reseller.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Workspace Reseller API.</summary>
         public class Scope
@@ -303,7 +298,7 @@ namespace Google.Apis.Reseller.v1
         /// </param>
         public virtual GetRequest Get(string customerId)
         {
-            return new GetRequest(service, customerId);
+            return new GetRequest(this.service, customerId);
         }
 
         /// <summary>
@@ -370,7 +365,7 @@ namespace Google.Apis.Reseller.v1
         /// <param name="body">The body of the request.</param>
         public virtual InsertRequest Insert(Google.Apis.Reseller.v1.Data.Customer body)
         {
-            return new InsertRequest(service, body);
+            return new InsertRequest(this.service, body);
         }
 
         /// <summary>
@@ -449,7 +444,7 @@ namespace Google.Apis.Reseller.v1
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Reseller.v1.Data.Customer body, string customerId)
         {
-            return new PatchRequest(service, body, customerId);
+            return new PatchRequest(this.service, body, customerId);
         }
 
         /// <summary>
@@ -521,7 +516,7 @@ namespace Google.Apis.Reseller.v1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.Reseller.v1.Data.Customer body, string customerId)
         {
-            return new UpdateRequest(service, body, customerId);
+            return new UpdateRequest(this.service, body, customerId);
         }
 
         /// <summary>
@@ -596,7 +591,7 @@ namespace Google.Apis.Reseller.v1
         /// <summary>Returns all the details of the watch corresponding to the reseller.</summary>
         public virtual GetwatchdetailsRequest Getwatchdetails()
         {
-            return new GetwatchdetailsRequest(service);
+            return new GetwatchdetailsRequest(this.service);
         }
 
         /// <summary>Returns all the details of the watch corresponding to the reseller.</summary>
@@ -627,7 +622,7 @@ namespace Google.Apis.Reseller.v1
         /// <summary>Registers a Reseller for receiving notifications.</summary>
         public virtual RegisterRequest Register()
         {
-            return new RegisterRequest(service);
+            return new RegisterRequest(this.service);
         }
 
         /// <summary>Registers a Reseller for receiving notifications.</summary>
@@ -670,7 +665,7 @@ namespace Google.Apis.Reseller.v1
         /// <summary>Unregisters a Reseller for receiving notifications.</summary>
         public virtual UnregisterRequest Unregister()
         {
-            return new UnregisterRequest(service);
+            return new UnregisterRequest(this.service);
         }
 
         /// <summary>Unregisters a Reseller for receiving notifications.</summary>
@@ -744,7 +739,7 @@ namespace Google.Apis.Reseller.v1
         /// </param>
         public virtual ActivateRequest Activate(string customerId, string subscriptionId)
         {
-            return new ActivateRequest(service, customerId, subscriptionId);
+            return new ActivateRequest(this.service, customerId, subscriptionId);
         }
 
         /// <summary>
@@ -833,7 +828,7 @@ namespace Google.Apis.Reseller.v1
         /// </param>
         public virtual ChangePlanRequest ChangePlan(Google.Apis.Reseller.v1.Data.ChangePlanRequest body, string customerId, string subscriptionId)
         {
-            return new ChangePlanRequest(service, body, customerId, subscriptionId);
+            return new ChangePlanRequest(this.service, body, customerId, subscriptionId);
         }
 
         /// <summary>
@@ -929,7 +924,7 @@ namespace Google.Apis.Reseller.v1
         /// </param>
         public virtual ChangeRenewalSettingsRequest ChangeRenewalSettings(Google.Apis.Reseller.v1.Data.RenewalSettings body, string customerId, string subscriptionId)
         {
-            return new ChangeRenewalSettingsRequest(service, body, customerId, subscriptionId);
+            return new ChangeRenewalSettingsRequest(this.service, body, customerId, subscriptionId);
         }
 
         /// <summary>
@@ -1024,7 +1019,7 @@ namespace Google.Apis.Reseller.v1
         /// </param>
         public virtual ChangeSeatsRequest ChangeSeats(Google.Apis.Reseller.v1.Data.Seats body, string customerId, string subscriptionId)
         {
-            return new ChangeSeatsRequest(service, body, customerId, subscriptionId);
+            return new ChangeSeatsRequest(this.service, body, customerId, subscriptionId);
         }
 
         /// <summary>
@@ -1117,7 +1112,7 @@ namespace Google.Apis.Reseller.v1
         /// </param>
         public virtual DeleteRequest Delete(string customerId, string subscriptionId, DeleteRequest.DeletionTypeEnum deletionType)
         {
-            return new DeleteRequest(service, customerId, subscriptionId, deletionType);
+            return new DeleteRequest(this.service, customerId, subscriptionId, deletionType);
         }
 
         /// <summary>Cancels, suspends, or transfers a subscription to direct.</summary>
@@ -1241,7 +1236,7 @@ namespace Google.Apis.Reseller.v1
         /// </param>
         public virtual GetRequest Get(string customerId, string subscriptionId)
         {
-            return new GetRequest(service, customerId, subscriptionId);
+            return new GetRequest(this.service, customerId, subscriptionId);
         }
 
         /// <summary>
@@ -1330,7 +1325,7 @@ namespace Google.Apis.Reseller.v1
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.Reseller.v1.Data.Subscription body, string customerId)
         {
-            return new InsertRequest(service, body, customerId);
+            return new InsertRequest(this.service, body, customerId);
         }
 
         /// <summary>
@@ -1364,6 +1359,39 @@ namespace Google.Apis.Reseller.v1
             public virtual string CustomerId { get; private set; }
 
             /// <summary>
+            /// The intented insert action. The usage of this field is governed by certain policies which are being
+            /// developed &amp;amp; tested currently. Hence, these might not work as intended. Once this is fully tested
+            /// &amp;amp; available to consume, we will share more information about its usage, limitations and policy
+            /// documentation.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("action", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<ActionEnum> Action { get; set; }
+
+            /// <summary>
+            /// The intented insert action. The usage of this field is governed by certain policies which are being
+            /// developed &amp;amp; tested currently. Hence, these might not work as intended. Once this is fully tested
+            /// &amp;amp; available to consume, we will share more information about its usage, limitations and policy
+            /// documentation.
+            /// </summary>
+            public enum ActionEnum
+            {
+                /// <summary>
+                /// Auto determines whether to create new subscription, upgrade or downagrade existing subscription or
+                /// transfer the existing subscription
+                /// </summary>
+                [Google.Apis.Util.StringValueAttribute("actionUnspecified")]
+                ActionUnspecified = 0,
+
+                /// <summary>Create new subscription</summary>
+                [Google.Apis.Util.StringValueAttribute("buy")]
+                Buy = 1,
+
+                /// <summary>Switch existing subscription to another sku (upgrade/downgrade)</summary>
+                [Google.Apis.Util.StringValueAttribute("switch")]
+                Switch__ = 2,
+            }
+
+            /// <summary>
             /// The `customerAuthToken` query string is required when creating a resold account that transfers a direct
             /// customer's subscription or transfers another reseller customer's subscription to your reseller
             /// management. This is a hexadecimal authentication token needed to complete the subscription transfer. For
@@ -1371,6 +1399,15 @@ namespace Google.Apis.Reseller.v1
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customerAuthToken", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string CustomerAuthToken { get; set; }
+
+            /// <summary>
+            /// The sku_id of the existing subscription to be upgraded or downgraded. This is required when action is
+            /// SWITCH. The usage of this field is governed by certain policies which are being developed &amp;amp;
+            /// tested currently. Hence, these might not work as intended. Once this is fully tested &amp;amp; available
+            /// to consume, we will share more information about its usage, limitations and policy documentation.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("sourceSkuId", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string SourceSkuId { get; set; }
 
             /// <summary>Gets or sets the body of this request.</summary>
             Google.Apis.Reseller.v1.Data.Subscription Body { get; set; }
@@ -1399,9 +1436,25 @@ namespace Google.Apis.Reseller.v1
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("action", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "action",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("customerAuthToken", new Google.Apis.Discovery.Parameter
                 {
                     Name = "customerAuthToken",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("sourceSkuId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "sourceSkuId",
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = null,
@@ -1418,7 +1471,7 @@ namespace Google.Apis.Reseller.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -1549,7 +1602,7 @@ namespace Google.Apis.Reseller.v1
         /// </param>
         public virtual StartPaidServiceRequest StartPaidService(string customerId, string subscriptionId)
         {
-            return new StartPaidServiceRequest(service, customerId, subscriptionId);
+            return new StartPaidServiceRequest(this.service, customerId, subscriptionId);
         }
 
         /// <summary>
@@ -1640,7 +1693,7 @@ namespace Google.Apis.Reseller.v1
         /// </param>
         public virtual SuspendRequest Suspend(string customerId, string subscriptionId)
         {
-            return new SuspendRequest(service, customerId, subscriptionId);
+            return new SuspendRequest(this.service, customerId, subscriptionId);
         }
 
         /// <summary>

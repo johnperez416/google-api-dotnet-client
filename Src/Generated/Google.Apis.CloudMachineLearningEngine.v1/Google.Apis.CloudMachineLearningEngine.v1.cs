@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
         public CloudMachineLearningEngineService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://ml.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://ml.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
         public override string Name => "ml";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://ml.googleapis.com/";
-        #else
-            "https://ml.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://ml.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the AI Platform Training &amp; Prediction API.</summary>
         public class Scope
@@ -319,7 +314,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// <param name="name">Required. The name of the job to cancel.</param>
             public virtual CancelRequest Cancel(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1CancelJobRequest body, string name)
             {
-                return new CancelRequest(service, body, name);
+                return new CancelRequest(this.service, body, name);
             }
 
             /// <summary>Cancels a running job.</summary>
@@ -372,7 +367,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// <param name="parent">Required. The project name.</param>
             public virtual CreateRequest Create(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1Job body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a training or a batch prediction job.</summary>
@@ -424,7 +419,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// <param name="name">Required. The name of the job to get the description of.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Describes a job.</summary>
@@ -470,12 +465,12 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// not have a policy set.
             /// </summary>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual GetIamPolicyRequest GetIamPolicy(string resource)
             {
-                return new GetIamPolicyRequest(service, resource);
+                return new GetIamPolicyRequest(this.service, resource);
             }
 
             /// <summary>
@@ -492,8 +487,9 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -550,7 +546,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// <param name="parent">Required. The name of the project for which to list jobs.</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -650,7 +646,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// <param name="name">Required. The job name.</param>
             public virtual PatchRequest Patch(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1Job body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -726,12 +722,12 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleIamV1SetIamPolicyRequest body, string resource)
             {
-                return new SetIamPolicyRequest(service, body, resource);
+                return new SetIamPolicyRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -749,8 +745,9 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -793,12 +790,12 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleIamV1TestIamPermissionsRequest body, string resource)
             {
-                return new TestIamPermissionsRequest(service, body, resource);
+                return new TestIamPermissionsRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -818,8 +815,9 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -897,12 +895,12 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(string name)
                 {
-                    return new CancelRequest(service, name);
+                    return new CancelRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -911,7 +909,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 public class CancelRequest : CloudMachineLearningEngineBaseServiceRequest<Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleProtobufEmpty>
                 {
@@ -957,7 +955,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1045,7 +1043,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                     /// <param name="name">Required. The trial name.</param>
                     public virtual AddMeasurementRequest AddMeasurement(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1AddTrialMeasurementRequest body, string name)
                     {
-                        return new AddMeasurementRequest(service, body, name);
+                        return new AddMeasurementRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1104,7 +1102,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                     /// <param name="name">Required. The trial name.</param>
                     public virtual CheckEarlyStoppingStateRequest CheckEarlyStoppingState(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1CheckTrialEarlyStoppingStateRequest body, string name)
                     {
-                        return new CheckEarlyStoppingStateRequest(service, body, name);
+                        return new CheckEarlyStoppingStateRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1160,7 +1158,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                     /// <param name="name">Required. The trial name.metat</param>
                     public virtual CompleteRequest Complete(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1CompleteTrialRequest body, string name)
                     {
-                        return new CompleteRequest(service, body, name);
+                        return new CompleteRequest(this.service, body, name);
                     }
 
                     /// <summary>Marks a trial as complete.</summary>
@@ -1213,7 +1211,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                     /// <param name="parent">Required. The name of the study that the trial belongs to.</param>
                     public virtual CreateRequest Create(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1Trial body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>Adds a user provided trial to a study.</summary>
@@ -1265,7 +1263,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                     /// <param name="name">Required. The trial name.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes a trial.</summary>
@@ -1310,7 +1308,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                     /// <param name="name">Required. The trial name.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets a trial.</summary>
@@ -1355,7 +1353,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                     /// <param name="parent">Required. The name of the study that the trial belongs to.</param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists the trials associated with a study.</summary>
@@ -1407,7 +1405,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                     /// </param>
                     public virtual ListOptimalTrialsRequest ListOptimalTrials(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1ListOptimalTrialsRequest body, string parent)
                     {
-                        return new ListOptimalTrialsRequest(service, body, parent);
+                        return new ListOptimalTrialsRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -1464,7 +1462,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                     /// <param name="name">Required. The trial name.</param>
                     public virtual StopRequest Stop(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1StopTrialRequest body, string name)
                     {
-                        return new StopRequest(service, body, name);
+                        return new StopRequest(this.service, body, name);
                     }
 
                     /// <summary>Stops a trial.</summary>
@@ -1521,7 +1519,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                     /// <param name="parent">Required. The name of the study that the trial belongs to.</param>
                     public virtual SuggestRequest Suggest(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1SuggestTrialsRequest body, string parent)
                     {
-                        return new SuggestRequest(service, body, parent);
+                        return new SuggestRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -1582,7 +1580,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1Study body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a study.</summary>
@@ -1652,7 +1650,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// <param name="name">Required. The study name.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes a study.</summary>
@@ -1697,7 +1695,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// <param name="name">Required. The study name.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a study.</summary>
@@ -1745,7 +1743,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists all the studies in a region for an associated project.</summary>
@@ -1796,7 +1794,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// <param name="name">Required. The name of the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -1846,7 +1844,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>List all locations that provides at least one type of CMLE capability.</summary>
@@ -1968,7 +1966,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// <param name="parent">Required. The name of the model.</param>
                 public virtual CreateRequest Create(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1Version body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -2033,7 +2031,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -2089,7 +2087,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// <param name="name">Required. The name of the version.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -2143,7 +2141,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// <param name="parent">Required. The name of the model for which to list the version.</param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -2240,7 +2238,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// <param name="name">Required. The name of the model.</param>
                 public virtual PatchRequest Patch(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1Version body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -2265,7 +2263,11 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                     /// Required. Specifies the path, relative to `Version`, of the field to update. Must be present and
                     /// non-empty. For example, to change the description of a version to "foo", the `update_mask`
                     /// parameter would be specified as `description`, and the `PATCH` request body would specify the
-                    /// new value, as follows: ``` { "description": "foo" } ``` Currently the only supported update mask
+                    /// new value, as follows:
+                    /// ```
+                    /// { "description": "foo" }
+                    /// ```
+                    /// Currently the only supported update mask
                     /// fields are `description`, `requestLoggingConfig`, `autoScaling.minNodes`, and
                     /// `manualScaling.nodes`. However, you can only update `manualScaling.nodes` if the version uses a
                     /// [Compute Engine (N1) machine type](/ml-engine/docs/machine-types-online-prediction).
@@ -2324,7 +2326,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 /// </param>
                 public virtual SetDefaultRequest SetDefault(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1SetDefaultVersionRequest body, string name)
                 {
-                    return new SetDefaultRequest(service, body, name);
+                    return new SetDefaultRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -2389,7 +2391,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// <param name="parent">Required. The project name.</param>
             public virtual CreateRequest Create(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1Model body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -2447,7 +2449,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// <param name="name">Required. The name of the model.</param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -2498,7 +2500,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// <param name="name">Required. The name of the model.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -2547,12 +2549,12 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// not have a policy set.
             /// </summary>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual GetIamPolicyRequest GetIamPolicy(string resource)
             {
-                return new GetIamPolicyRequest(service, resource);
+                return new GetIamPolicyRequest(this.service, resource);
             }
 
             /// <summary>
@@ -2569,8 +2571,9 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -2628,7 +2631,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// <param name="parent">Required. The name of the project whose models are to be listed.</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -2724,7 +2727,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// <param name="name">Required. The project name.</param>
             public virtual PatchRequest Patch(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1Model body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -2800,12 +2803,12 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleIamV1SetIamPolicyRequest body, string resource)
             {
-                return new SetIamPolicyRequest(service, body, resource);
+                return new SetIamPolicyRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -2823,8 +2826,9 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -2867,12 +2871,12 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleIamV1TestIamPermissionsRequest body, string resource)
             {
-                return new TestIamPermissionsRequest(service, body, resource);
+                return new TestIamPermissionsRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -2892,8 +2896,9 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -2952,12 +2957,12 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check
             /// whether the cancellation succeeded or whether the operation completed despite cancellation. On
             /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-            /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+            /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
             /// </summary>
             /// <param name="name">The name of the operation resource to be cancelled.</param>
             public virtual CancelRequest Cancel(string name)
             {
-                return new CancelRequest(service, name);
+                return new CancelRequest(this.service, name);
             }
 
             /// <summary>
@@ -2966,7 +2971,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check
             /// whether the cancellation succeeded or whether the operation completed despite cancellation. On
             /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-            /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+            /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
             /// </summary>
             public class CancelRequest : CloudMachineLearningEngineBaseServiceRequest<Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleProtobufEmpty>
             {
@@ -3012,7 +3017,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
             /// <param name="name">The name of the operation resource.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -3058,25 +3063,17 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding
-            /// to use different resource name schemes, such as `users/*/operations`. To override the binding, API
-            /// services can add a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For
-            /// backwards compatibility, the default name includes the operations collection id, however overriding
-            /// users must ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns `UNIMPLEMENTED`.
             /// </summary>
             /// <param name="name">The name of the operation's parent resource.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding
-            /// to use different resource name schemes, such as `users/*/operations`. To override the binding, API
-            /// services can add a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For
-            /// backwards compatibility, the default name includes the operations collection id, however overriding
-            /// users must ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns `UNIMPLEMENTED`.
             /// </summary>
             public class ListRequest : CloudMachineLearningEngineBaseServiceRequest<Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleLongrunningListOperationsResponse>
             {
@@ -3163,7 +3160,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
         /// </param>
         public virtual ExplainRequest Explain(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1ExplainRequest body, string name)
         {
-            return new ExplainRequest(service, body, name);
+            return new ExplainRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -3225,7 +3222,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
         /// <param name="name">Required. The project name.</param>
         public virtual GetConfigRequest GetConfig(string name)
         {
-            return new GetConfigRequest(service, name);
+            return new GetConfigRequest(this.service, name);
         }
 
         /// <summary>
@@ -3281,7 +3278,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1
         /// </param>
         public virtual PredictRequest Predict(Google.Apis.CloudMachineLearningEngine.v1.Data.GoogleCloudMlV1PredictRequest body, string name)
         {
-            return new PredictRequest(service, body, name);
+            return new PredictRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -3541,9 +3538,42 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
     /// </summary>
     public class GoogleCloudMlV1CheckTrialEarlyStoppingStateMetatdata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time at which the operation was submitted.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The name of the study that the trial belongs to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("study")]
@@ -3570,17 +3600,83 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
     /// </summary>
     public class GoogleCloudMlV1CheckTrialEarlyStoppingStateResponse : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The time at which operation processing completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>True if the Trial should stop.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("shouldStop")]
         public virtual System.Nullable<bool> ShouldStop { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time at which the operation was started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3702,8 +3798,12 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         /// Immutable. List of environment variables to set in the container. After the container starts running, code
         /// running in the container can read these environment variables. Additionally, the command and args fields can
         /// reference these variables. Later entries in this list can also reference earlier entries. For example, the
-        /// following example sets the variable `VAR_2` to have the value `foo bar`: ```json [ { "name": "VAR_1",
-        /// "value": "foo" }, { "name": "VAR_2", "value": "$(VAR_1) bar" } ] ``` If you switch the order of the
+        /// following example sets the variable `VAR_2` to have the value `foo bar`:
+        /// ```
+        /// json [ { "name": "VAR_1",
+        /// "value": "foo" }, { "name": "VAR_2", "value": "$(VAR_1) bar" } ]
+        /// ```
+        /// If you switch the order of the
         /// variables in the example, then the expansion does not occur. This field corresponds to the `env` field of
         /// the [Kubernetes Containers v1 core
         /// API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#container-v1-core).
@@ -3736,7 +3836,11 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         /// Immutable. List of ports to expose from the container. AI Platform Prediction sends any prediction requests
         /// that it receives to the first port on this list. AI Platform Prediction also sends [liveness and health
         /// checks](/ai-platform/prediction/docs/custom-container-requirements#health) to this port. If you do not
-        /// specify this field, it defaults to following value: ```json [ { "containerPort": 8080 } ] ``` AI Platform
+        /// specify this field, it defaults to following value:
+        /// ```
+        /// json [ { "containerPort": 8080 } ]
+        /// ```
+        /// AI Platform
         /// Prediction does not use ports other than the first one listed. This field corresponds to the `ports` field
         /// of the [Kubernetes Containers v1 core
         /// API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#container-v1-core).
@@ -3894,9 +3998,42 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("builtInAlgorithmOutput")]
         public virtual GoogleCloudMlV1BuiltInAlgorithmOutput BuiltInAlgorithmOutput { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Output only. End time for the trial.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The final objective metric seen for this trial.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finalMetric")]
@@ -3910,9 +4047,42 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("isTrialStoppedEarly")]
         public virtual System.Nullable<bool> IsTrialStoppedEarly { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Output only. Start time for the trial.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The detailed state of the trial.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -4042,13 +4212,79 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
     /// <summary>Represents a training or prediction job.</summary>
     public class GoogleCloudMlV1Job : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. When the job was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. When the job processing was completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The details of a failure or a cancellation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("errorMessage")]
@@ -4091,9 +4327,42 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("predictionOutput")]
         public virtual GoogleCloudMlV1PredictionOutput PredictionOutput { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Output only. When the job processing was started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The detailed state of a job.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -4321,7 +4590,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         /// <summary>
         /// Optional. One or more labels that you can add, to organize your models. Each label is a key-value pair,
         /// where both the key and the value are arbitrary strings that you supply. For more information, see the
-        /// documentation on using labels.
+        /// documentation on using labels. Note that this field is not updatable for mls1* models.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
@@ -4366,13 +4635,79 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
     /// <summary>Represents the metadata of the long-running operation.</summary>
     public class GoogleCloudMlV1OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time the operation was submitted.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>The time operation processing completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Indicates whether a request to cancel this operation has been made.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("isCancellationRequested")]
@@ -4394,9 +4729,42 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("projectNumber")]
         public virtual System.Nullable<long> ProjectNumber { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time operation processing started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Contains the version associated with the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
@@ -4737,7 +5105,9 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         /// this field to `7200s` (2 hours * 60 minutes / hour * 60 seconds / minute). If you submit your training job
         /// using the `gcloud` tool, you can [specify this field in a `config.yaml`
         /// file](/ai-platform/training/docs/training-jobs#formatting_your_configuration_parameters). For example:
-        /// ```yaml trainingInput: scheduling: maxRunningTime: 7200s ```
+        /// ```
+        /// yaml trainingInput: scheduling: maxRunningTime: 7200s
+        /// ```
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maxRunningTime")]
         public virtual object MaxRunningTime { get; set; }
@@ -4757,7 +5127,9 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         /// an hour of waiting, AI Platform Training cancels the job. If you submit your training job using the `gcloud`
         /// tool, you can [specify this field in a `config.yaml`
         /// file](/ai-platform/training/docs/training-jobs#formatting_your_configuration_parameters). For example:
-        /// ```yaml trainingInput: scheduling: maxWaitTime: 3600s ```
+        /// ```
+        /// yaml trainingInput: scheduling: maxWaitTime: 3600s
+        /// ```
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maxWaitTime")]
         public virtual object MaxWaitTime { get; set; }
@@ -4790,9 +5162,42 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
     /// <summary>A message representing a Study.</summary>
     public class GoogleCloudMlV1Study : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time at which the study was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. A human readable reason why the Study is inactive. This should be empty if a study is ACTIVE or
@@ -5007,9 +5412,42 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("clientId")]
         public virtual string ClientId { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time operation was submitted.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The name of the study that the trial belongs to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("study")]
@@ -5048,13 +5486,79 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
     /// </summary>
     public class GoogleCloudMlV1SuggestTrialsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The time at which operation processing completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>The time at which the operation was started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The state of the study.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("studyState")]
@@ -5371,9 +5875,42 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("clientId")]
         public virtual string ClientId { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Output only. Time at which the trial's status changed to COMPLETED.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The final measurement containing the objective value.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finalMeasurement")]
@@ -5401,9 +5938,42 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("parameters")]
         public virtual System.Collections.Generic.IList<GoogleCloudMlV1TrialParameter> Parameters { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Output only. Time at which the trial was started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The detailed state of a trial.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -5475,9 +6045,42 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("container")]
         public virtual GoogleCloudMlV1ContainerSpec Container { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the version was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The Cloud Storage URI of a directory containing trained model artifacts to be used to create the model
@@ -5539,7 +6142,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         /// <summary>
         /// Optional. One or more labels that you can add, to organize your model versions. Each label is a key-value
         /// pair, where both the key and the value are arbitrary strings that you supply. For more information, see the
-        /// documentation on using labels.
+        /// documentation on using labels. Note that this field is not updatable for mls1* models.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
@@ -5553,16 +6156,84 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("lastMigrationModelId")]
         public virtual string LastMigrationModelId { get; set; }
 
+        private string _lastMigrationTimeRaw;
+
+        private object _lastMigrationTime;
+
         /// <summary>
         /// Output only. The last time this version was successfully [migrated to AI Platform
         /// (Unified)](https://cloud.google.com/ai-platform-unified/docs/start/migrating-to-ai-platform-unified).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastMigrationTime")]
-        public virtual object LastMigrationTime { get; set; }
+        public virtual string LastMigrationTimeRaw
+        {
+            get => _lastMigrationTimeRaw;
+            set
+            {
+                _lastMigrationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastMigrationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastMigrationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastMigrationTimeDateTimeOffset instead.")]
+        public virtual object LastMigrationTime
+        {
+            get => _lastMigrationTime;
+            set
+            {
+                _lastMigrationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastMigrationTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastMigrationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastMigrationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastMigrationTimeRaw);
+            set => LastMigrationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _lastUseTimeRaw;
+
+        private object _lastUseTime;
 
         /// <summary>Output only. The time the version was last used for prediction.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUseTime")]
-        public virtual object LastUseTime { get; set; }
+        public virtual string LastUseTimeRaw
+        {
+            get => _lastUseTimeRaw;
+            set
+            {
+                _lastUseTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUseTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUseTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUseTimeDateTimeOffset instead.")]
+        public virtual object LastUseTime
+        {
+            get => _lastUseTime;
+            set
+            {
+                _lastUseTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUseTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUseTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUseTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUseTimeRaw);
+            set => LastUseTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. The type of machine on which to serve the model. Currently only applies to online prediction
@@ -5648,8 +6319,12 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         /// <summary>
         /// Optional. Specifies paths on a custom container's HTTP server where AI Platform Prediction sends certain
         /// requests. If you specify this field, then you must also specify the `container` field. If you specify the
-        /// `container` field and do not specify this field, it defaults to the following: ```json { "predict":
-        /// "/v1/models/MODEL/versions/VERSION:predict", "health": "/v1/models/MODEL/versions/VERSION" } ``` See
+        /// `container` field and do not specify this field, it defaults to the following:
+        /// ```
+        /// json { "predict":
+        /// "/v1/models/MODEL/versions/VERSION:predict", "health": "/v1/models/MODEL/versions/VERSION" }
+        /// ```
+        /// See
         /// RouteMap for more details about these default values.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("routes")]
@@ -5704,7 +6379,8 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class GoogleIamV1AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5759,16 +6435,37 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         public virtual GoogleTypeExpr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -5776,15 +6473,19 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -5802,18 +6503,26 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class GoogleIamV1Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5867,7 +6576,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -5888,7 +6597,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
     public class GoogleIamV1TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>
@@ -5955,8 +6664,8 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -5971,8 +6680,7 @@ namespace Google.Apis.CloudMachineLearningEngine.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class GoogleProtobufEmpty : Google.Apis.Requests.IDirectResponseSchema
     {

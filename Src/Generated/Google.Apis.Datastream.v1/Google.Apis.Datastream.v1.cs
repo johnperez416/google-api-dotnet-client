@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Datastream.v1
         public DatastreamService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://datastream.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://datastream.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Datastream.v1
         public override string Name => "datastream";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://datastream.googleapis.com/";
-        #else
-            "https://datastream.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://datastream.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Datastream API.</summary>
         public class Scope
@@ -325,7 +320,7 @@ namespace Google.Apis.Datastream.v1
                 /// <param name="parent">Required. The parent that owns the collection of ConnectionProfiles.</param>
                 public virtual CreateRequest Create(Google.Apis.Datastream.v1.Data.ConnectionProfile body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Use this method to create a connection profile in a project and location.</summary>
@@ -363,6 +358,13 @@ namespace Google.Apis.Datastream.v1
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string RequestId { get; set; }
+
+                    /// <summary>
+                    /// Optional. Only validate the connection profile, but don't create any resources. The default is
+                    /// false.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ValidateOnly { get; set; }
 
                     /// <summary>Gets or sets the body of this request.</summary>
                     Google.Apis.Datastream.v1.Data.ConnectionProfile Body { get; set; }
@@ -415,17 +417,25 @@ namespace Google.Apis.Datastream.v1
                             DefaultValue = null,
                             Pattern = null,
                         });
+                        RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "validateOnly",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
                     }
                 }
 
-                /// <summary>Use this method to delete a connection profile..</summary>
+                /// <summary>Use this method to delete a connection profile.</summary>
                 /// <param name="name">Required. The name of the connection profile resource to delete.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
-                /// <summary>Use this method to delete a connection profile..</summary>
+                /// <summary>Use this method to delete a connection profile.</summary>
                 public class DeleteRequest : DatastreamBaseServiceRequest<Google.Apis.Datastream.v1.Data.Operation>
                 {
                     /// <summary>Constructs a new Delete request.</summary>
@@ -486,7 +496,7 @@ namespace Google.Apis.Datastream.v1
 
                 /// <summary>
                 /// Use this method to discover a connection profile. The discover API call exposes the data objects and
-                /// metadata belonging to the profile. Typically, a request returns children data objects under a parent
+                /// metadata belonging to the profile. Typically, a request returns children data objects of a parent
                 /// data object that's optionally supplied in the request.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
@@ -496,12 +506,12 @@ namespace Google.Apis.Datastream.v1
                 /// </param>
                 public virtual DiscoverRequest Discover(Google.Apis.Datastream.v1.Data.DiscoverConnectionProfileRequest body, string parent)
                 {
-                    return new DiscoverRequest(service, body, parent);
+                    return new DiscoverRequest(this.service, body, parent);
                 }
 
                 /// <summary>
                 /// Use this method to discover a connection profile. The discover API call exposes the data objects and
-                /// metadata belonging to the profile. Typically, a request returns children data objects under a parent
+                /// metadata belonging to the profile. Typically, a request returns children data objects of a parent
                 /// data object that's optionally supplied in the request.
                 /// </summary>
                 public class DiscoverRequest : DatastreamBaseServiceRequest<Google.Apis.Datastream.v1.Data.DiscoverConnectionProfileResponse>
@@ -555,7 +565,7 @@ namespace Google.Apis.Datastream.v1
                 /// <param name="name">Required. The name of the connection profile resource to get.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Use this method to get details about a connection profile.</summary>
@@ -600,7 +610,7 @@ namespace Google.Apis.Datastream.v1
                 /// <param name="parent">Required. The parent that owns the collection of connection profiles.</param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Use this method to list connection profiles created in a project and location.</summary>
@@ -698,10 +708,10 @@ namespace Google.Apis.Datastream.v1
 
                 /// <summary>Use this method to update the parameters of a connection profile.</summary>
                 /// <param name="body">The body of the request.</param>
-                /// <param name="name">Output only. The resource's name.</param>
+                /// <param name="name">Output only. Identifier. The resource's name.</param>
                 public virtual PatchRequest Patch(Google.Apis.Datastream.v1.Data.ConnectionProfile body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Use this method to update the parameters of a connection profile.</summary>
@@ -715,11 +725,11 @@ namespace Google.Apis.Datastream.v1
                         InitParameters();
                     }
 
-                    /// <summary>Output only. The resource's name.</summary>
+                    /// <summary>Output only. Identifier. The resource's name.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
 
-                    /// <summary>Optional. Execute the update without validating it.</summary>
+                    /// <summary>Optional. Update the connection profile without validating it.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("force", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<bool> Force { get; set; }
 
@@ -744,6 +754,13 @@ namespace Google.Apis.Datastream.v1
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual object UpdateMask { get; set; }
+
+                    /// <summary>
+                    /// Optional. Only validate the connection profile, but don't update any resources. The default is
+                    /// false.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ValidateOnly { get; set; }
 
                     /// <summary>Gets or sets the body of this request.</summary>
                     Google.Apis.Datastream.v1.Data.ConnectionProfile Body { get; set; }
@@ -796,6 +813,14 @@ namespace Google.Apis.Datastream.v1
                             DefaultValue = null,
                             Pattern = null,
                         });
+                        RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "validateOnly",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
                     }
                 }
             }
@@ -823,13 +848,13 @@ namespace Google.Apis.Datastream.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.Datastream.v1.Data.CancelOperationRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -838,7 +863,7 @@ namespace Google.Apis.Datastream.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 public class CancelRequest : DatastreamBaseServiceRequest<Google.Apis.Datastream.v1.Data.Empty>
                 {
@@ -892,7 +917,7 @@ namespace Google.Apis.Datastream.v1
                 /// <param name="name">The name of the operation resource to be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -944,7 +969,7 @@ namespace Google.Apis.Datastream.v1
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -990,27 +1015,17 @@ namespace Google.Apis.Datastream.v1
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 public class ListRequest : DatastreamBaseServiceRequest<Google.Apis.Datastream.v1.Data.ListOperationsResponse>
                 {
@@ -1122,17 +1137,19 @@ namespace Google.Apis.Datastream.v1
                     }
 
                     /// <summary>
-                    /// Use this method to create a route for a private connectivity in a project and location.
+                    /// Use this method to create a route for a private connectivity configuration in a project and
+                    /// location.
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="parent">Required. The parent that owns the collection of Routes.</param>
                     public virtual CreateRequest Create(Google.Apis.Datastream.v1.Data.Route body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
-                    /// Use this method to create a route for a private connectivity in a project and location.
+                    /// Use this method to create a route for a private connectivity configuration in a project and
+                    /// location.
                     /// </summary>
                     public class CreateRequest : DatastreamBaseServiceRequest<Google.Apis.Datastream.v1.Data.Operation>
                     {
@@ -1216,7 +1233,7 @@ namespace Google.Apis.Datastream.v1
                     /// <param name="name">Required. The name of the Route resource to delete.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Use this method to delete a route.</summary>
@@ -1283,7 +1300,7 @@ namespace Google.Apis.Datastream.v1
                     /// <param name="name">Required. The name of the Route resource to get.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Use this method to get details about a route.</summary>
@@ -1325,16 +1342,18 @@ namespace Google.Apis.Datastream.v1
                     }
 
                     /// <summary>
-                    /// Use this method to list routes created for a private connectivity in a project and location.
+                    /// Use this method to list routes created for a private connectivity configuration in a project and
+                    /// location.
                     /// </summary>
                     /// <param name="parent">Required. The parent that owns the collection of Routess.</param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
-                    /// Use this method to list routes created for a private connectivity in a project and location.
+                    /// Use this method to list routes created for a private connectivity configuration in a project and
+                    /// location.
                     /// </summary>
                     public class ListRequest : DatastreamBaseServiceRequest<Google.Apis.Datastream.v1.Data.ListRoutesResponse>
                     {
@@ -1435,7 +1454,7 @@ namespace Google.Apis.Datastream.v1
                 /// <param name="parent">Required. The parent that owns the collection of PrivateConnections.</param>
                 public virtual CreateRequest Create(Google.Apis.Datastream.v1.Data.PrivateConnection body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Use this method to create a private connectivity configuration.</summary>
@@ -1452,6 +1471,10 @@ namespace Google.Apis.Datastream.v1
                     /// <summary>Required. The parent that owns the collection of PrivateConnections.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
+
+                    /// <summary>Optional. If set to true, will skip validations.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("force", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> Force { get; set; }
 
                     /// <summary>Required. The private connectivity identifier.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("privateConnectionId", Google.Apis.Util.RequestParameterType.Query)]
@@ -1497,6 +1520,14 @@ namespace Google.Apis.Datastream.v1
                             DefaultValue = null,
                             Pattern = @"^projects/[^/]+/locations/[^/]+$",
                         });
+                        RequestParameters.Add("force", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "force",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
                         RequestParameters.Add("privateConnectionId", new Google.Apis.Discovery.Parameter
                         {
                             Name = "privateConnectionId",
@@ -1520,7 +1551,7 @@ namespace Google.Apis.Datastream.v1
                 /// <param name="name">Required. The name of the private connectivity configuration to delete.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Use this method to delete a private connectivity configuration.</summary>
@@ -1601,7 +1632,7 @@ namespace Google.Apis.Datastream.v1
                 /// <param name="name">Required. The name of the private connectivity configuration to get.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Use this method to get details about a private connectivity configuration.</summary>
@@ -1650,7 +1681,7 @@ namespace Google.Apis.Datastream.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -1791,7 +1822,7 @@ namespace Google.Apis.Datastream.v1
                     /// <param name="name">Required. The name of the stream object resource to get.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Use this method to get details about a stream object.</summary>
@@ -1836,7 +1867,7 @@ namespace Google.Apis.Datastream.v1
                     /// <param name="parent">Required. The parent stream that owns the collection of objects.</param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Use this method to list the objects of a specific stream.</summary>
@@ -1913,7 +1944,7 @@ namespace Google.Apis.Datastream.v1
                     /// <param name="parent">Required. The parent stream that owns the collection of objects.</param>
                     public virtual LookupRequest Lookup(Google.Apis.Datastream.v1.Data.LookupStreamObjectRequest body, string parent)
                     {
-                        return new LookupRequest(service, body, parent);
+                        return new LookupRequest(this.service, body, parent);
                     }
 
                     /// <summary>Use this method to look up a stream object by its source object identifier.</summary>
@@ -1961,17 +1992,17 @@ namespace Google.Apis.Datastream.v1
                         }
                     }
 
-                    /// <summary>Starts backfill job for the specified stream object.</summary>
+                    /// <summary>Use this method to start a backfill job for the specified stream object.</summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="datastreamObject">
                     /// Required. The name of the stream object resource to start a backfill job for.
                     /// </param>
                     public virtual StartBackfillJobRequest StartBackfillJob(Google.Apis.Datastream.v1.Data.StartBackfillJobRequest body, string datastreamObject)
                     {
-                        return new StartBackfillJobRequest(service, body, datastreamObject);
+                        return new StartBackfillJobRequest(this.service, body, datastreamObject);
                     }
 
-                    /// <summary>Starts backfill job for the specified stream object.</summary>
+                    /// <summary>Use this method to start a backfill job for the specified stream object.</summary>
                     public class StartBackfillJobRequest : DatastreamBaseServiceRequest<Google.Apis.Datastream.v1.Data.StartBackfillJobResponse>
                     {
                         /// <summary>Constructs a new StartBackfillJob request.</summary>
@@ -2018,17 +2049,17 @@ namespace Google.Apis.Datastream.v1
                         }
                     }
 
-                    /// <summary>Stops the backfill job for the specified stream object.</summary>
+                    /// <summary>Use this method to stop a backfill job for the specified stream object.</summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="datastreamObject">
                     /// Required. The name of the stream object resource to stop the backfill job for.
                     /// </param>
                     public virtual StopBackfillJobRequest StopBackfillJob(Google.Apis.Datastream.v1.Data.StopBackfillJobRequest body, string datastreamObject)
                     {
-                        return new StopBackfillJobRequest(service, body, datastreamObject);
+                        return new StopBackfillJobRequest(this.service, body, datastreamObject);
                     }
 
-                    /// <summary>Stops the backfill job for the specified stream object.</summary>
+                    /// <summary>Use this method to stop a backfill job for the specified stream object.</summary>
                     public class StopBackfillJobRequest : DatastreamBaseServiceRequest<Google.Apis.Datastream.v1.Data.StopBackfillJobResponse>
                     {
                         /// <summary>Constructs a new StopBackfillJob request.</summary>
@@ -2081,7 +2112,7 @@ namespace Google.Apis.Datastream.v1
                 /// <param name="parent">Required. The parent that owns the collection of streams.</param>
                 public virtual CreateRequest Create(Google.Apis.Datastream.v1.Data.Stream body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Use this method to create a stream.</summary>
@@ -2121,7 +2152,7 @@ namespace Google.Apis.Datastream.v1
                     public virtual string StreamId { get; set; }
 
                     /// <summary>
-                    /// Optional. Only validate the stream, but do not create any resources. The default is false.
+                    /// Optional. Only validate the stream, but don't create any resources. The default is false.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<bool> ValidateOnly { get; set; }
@@ -2192,7 +2223,7 @@ namespace Google.Apis.Datastream.v1
                 /// <param name="name">Required. The name of the stream resource to delete.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Use this method to delete a stream.</summary>
@@ -2258,7 +2289,7 @@ namespace Google.Apis.Datastream.v1
                 /// <param name="name">Required. The name of the stream resource to get.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Use this method to get details about a stream.</summary>
@@ -2303,7 +2334,7 @@ namespace Google.Apis.Datastream.v1
                 /// <param name="parent">Required. The parent that owns the collection of streams.</param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Use this method to list streams in a project and location.</summary>
@@ -2401,10 +2432,10 @@ namespace Google.Apis.Datastream.v1
 
                 /// <summary>Use this method to update the configuration of a stream.</summary>
                 /// <param name="body">The body of the request.</param>
-                /// <param name="name">Output only. The stream's name.</param>
+                /// <param name="name">Output only. Identifier. The stream's name.</param>
                 public virtual PatchRequest Patch(Google.Apis.Datastream.v1.Data.Stream body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Use this method to update the configuration of a stream.</summary>
@@ -2418,11 +2449,11 @@ namespace Google.Apis.Datastream.v1
                         InitParameters();
                     }
 
-                    /// <summary>Output only. The stream's name.</summary>
+                    /// <summary>Output only. Identifier. The stream's name.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
 
-                    /// <summary>Optional. Create the stream without validating it.</summary>
+                    /// <summary>Optional. Update the stream without validating it.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("force", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<bool> Force { get; set; }
 
@@ -2516,24 +2547,82 @@ namespace Google.Apis.Datastream.v1
                         });
                     }
                 }
+
+                /// <summary>
+                /// Use this method to start, resume or recover a stream with a non default CDC strategy.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Name of the stream resource to start, in the format:
+                /// projects/{project_id}/locations/{location}/streams/{stream_name}
+                /// </param>
+                public virtual RunRequest Run(Google.Apis.Datastream.v1.Data.RunStreamRequest body, string name)
+                {
+                    return new RunRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Use this method to start, resume or recover a stream with a non default CDC strategy.
+                /// </summary>
+                public class RunRequest : DatastreamBaseServiceRequest<Google.Apis.Datastream.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Run request.</summary>
+                    public RunRequest(Google.Apis.Services.IClientService service, Google.Apis.Datastream.v1.Data.RunStreamRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the stream resource to start, in the format:
+                    /// projects/{project_id}/locations/{location}/streams/{stream_name}
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Datastream.v1.Data.RunStreamRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "run";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}:run";
+
+                    /// <summary>Initializes Run parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/streams/[^/]+$",
+                        });
+                    }
+                }
             }
 
-            /// <summary>
-            /// The FetchStaticIps API call exposes the static ips used by Datastream. Typically, a request returns
-            /// children data objects under a parent data object that's optionally supplied in the request.
-            /// </summary>
+            /// <summary>The FetchStaticIps API call exposes the static IP addresses used by Datastream.</summary>
             /// <param name="name">
-            /// Required. The name resource of the Response type. Must be in the format `projects/*/locations/*`.
+            /// Required. The resource name for the location for which static IPs should be returned. Must be in the
+            /// format `projects/*/locations/*`.
             /// </param>
             public virtual FetchStaticIpsRequest FetchStaticIps(string name)
             {
-                return new FetchStaticIpsRequest(service, name);
+                return new FetchStaticIpsRequest(this.service, name);
             }
 
-            /// <summary>
-            /// The FetchStaticIps API call exposes the static ips used by Datastream. Typically, a request returns
-            /// children data objects under a parent data object that's optionally supplied in the request.
-            /// </summary>
+            /// <summary>The FetchStaticIps API call exposes the static IP addresses used by Datastream.</summary>
             public class FetchStaticIpsRequest : DatastreamBaseServiceRequest<Google.Apis.Datastream.v1.Data.FetchStaticIpsResponse>
             {
                 /// <summary>Constructs a new FetchStaticIps request.</summary>
@@ -2544,7 +2633,8 @@ namespace Google.Apis.Datastream.v1
                 }
 
                 /// <summary>
-                /// Required. The name resource of the Response type. Must be in the format `projects/*/locations/*`.
+                /// Required. The resource name for the location for which static IPs should be returned. Must be in the
+                /// format `projects/*/locations/*`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
@@ -2603,7 +2693,7 @@ namespace Google.Apis.Datastream.v1
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -2648,7 +2738,7 @@ namespace Google.Apis.Datastream.v1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -2667,7 +2757,7 @@ namespace Google.Apis.Datastream.v1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -2737,6 +2827,13 @@ namespace Google.Apis.Datastream.v1
 }
 namespace Google.Apis.Datastream.v1.Data
 {
+    /// <summary>AppendOnly mode defines that all changes to a table will be written to the destination table.</summary>
+    public class AppendOnly : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>AVRO file format configuration.</summary>
     public class AvroFileFormat : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2757,6 +2854,14 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("oracleExcludedObjects")]
         public virtual OracleRdbms OracleExcludedObjects { get; set; }
 
+        /// <summary>PostgreSQL data source objects to avoid backfilling.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postgresqlExcludedObjects")]
+        public virtual PostgresqlRdbms PostgresqlExcludedObjects { get; set; }
+
+        /// <summary>SQLServer data source objects to avoid backfilling</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlServerExcludedObjects")]
+        public virtual SqlServerRdbms SqlServerExcludedObjects { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2768,15 +2873,81 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("errors")]
         public virtual System.Collections.Generic.IList<Error> Errors { get; set; }
 
+        private string _lastEndTimeRaw;
+
+        private object _lastEndTime;
+
         /// <summary>Output only. Backfill job's end time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastEndTime")]
-        public virtual object LastEndTime { get; set; }
+        public virtual string LastEndTimeRaw
+        {
+            get => _lastEndTimeRaw;
+            set
+            {
+                _lastEndTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastEndTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastEndTimeDateTimeOffset instead.")]
+        public virtual object LastEndTime
+        {
+            get => _lastEndTime;
+            set
+            {
+                _lastEndTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastEndTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastEndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastEndTimeRaw);
+            set => LastEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _lastStartTimeRaw;
+
+        private object _lastStartTime;
 
         /// <summary>Output only. Backfill job's start time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastStartTime")]
-        public virtual object LastStartTime { get; set; }
+        public virtual string LastStartTimeRaw
+        {
+            get => _lastStartTimeRaw;
+            set
+            {
+                _lastStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastStartTimeRaw = value;
+            }
+        }
 
-        /// <summary>Backfill job state.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="LastStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastStartTimeDateTimeOffset instead.")]
+        public virtual object LastStartTime
+        {
+            get => _lastStartTime;
+            set
+            {
+                _lastStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastStartTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastStartTimeRaw);
+            set => LastStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. Backfill job state.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
@@ -2795,9 +2966,88 @@ namespace Google.Apis.Datastream.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>BigQuery destination configuration</summary>
+    public class BigQueryDestinationConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Append only mode</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appendOnly")]
+        public virtual AppendOnly AppendOnly { get; set; }
+
+        /// <summary>
+        /// The guaranteed data freshness (in seconds) when querying tables created by the stream. Editing this field
+        /// will only affect new tables created in the future, but existing tables will not be impacted. Lower values
+        /// mean that queries will return fresher data, but may result in higher cost.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataFreshness")]
+        public virtual object DataFreshness { get; set; }
+
+        /// <summary>The standard mode</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("merge")]
+        public virtual Merge Merge { get; set; }
+
+        /// <summary>Single destination dataset.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("singleTargetDataset")]
+        public virtual SingleTargetDataset SingleTargetDataset { get; set; }
+
+        /// <summary>Source hierarchy datasets.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceHierarchyDatasets")]
+        public virtual SourceHierarchyDatasets SourceHierarchyDatasets { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>BigQuery warehouse profile.</summary>
+    public class BigQueryProfile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configuration to use Binary Log Parser CDC technique.</summary>
+    public class BinaryLogParser : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Use Oracle directories.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("logFileDirectories")]
+        public virtual LogFileDirectories LogFileDirectories { get; set; }
+
+        /// <summary>Use Oracle ASM.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oracleAsmLogFileAccess")]
+        public virtual OracleAsmLogFileAccess OracleAsmLogFileAccess { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Use Binary log position based replication.</summary>
+    public class BinaryLogPosition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The request message for Operations.CancelOperation.</summary>
     public class CancelOperationRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The strategy that the stream uses for CDC replication.</summary>
+    public class CdcStrategy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Start replicating from the most recent position in the source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mostRecentStartPosition")]
+        public virtual MostRecentStartPosition MostRecentStartPosition { get; set; }
+
+        /// <summary>Optional. Resume replication from the next available position in the source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextAvailableStartPosition")]
+        public virtual NextAvailableStartPosition NextAvailableStartPosition { get; set; }
+
+        /// <summary>Optional. Start replicating from a specific position in the source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("specificStartPosition")]
+        public virtual SpecificStartPosition SpecificStartPosition { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2807,9 +3057,46 @@ namespace Google.Apis.Datastream.v1.Data
     /// </summary>
     public class ConnectionProfile : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>BigQuery Connection Profile configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bigqueryProfile")]
+        public virtual BigQueryProfile BigqueryProfile { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The create time of the resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required. Display name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
@@ -2831,7 +3118,7 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("mysqlProfile")]
         public virtual MysqlProfile MysqlProfile { get; set; }
 
-        /// <summary>Output only. The resource's name.</summary>
+        /// <summary>Output only. Identifier. The resource's name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
@@ -2839,17 +3126,96 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("oracleProfile")]
         public virtual OracleProfile OracleProfile { get; set; }
 
+        /// <summary>PostgreSQL Connection Profile configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postgresqlProfile")]
+        public virtual PostgresqlProfile PostgresqlProfile { get; set; }
+
         /// <summary>Private connectivity.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("privateConnectivity")]
         public virtual PrivateConnectivity PrivateConnectivity { get; set; }
+
+        /// <summary>Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzi")]
+        public virtual System.Nullable<bool> SatisfiesPzi { get; set; }
+
+        /// <summary>Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzs")]
+        public virtual System.Nullable<bool> SatisfiesPzs { get; set; }
+
+        /// <summary>SQLServer Connection Profile configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlServerProfile")]
+        public virtual SqlServerProfile SqlServerProfile { get; set; }
 
         /// <summary>Static Service IP connectivity.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("staticServiceIpConnectivity")]
         public virtual StaticServiceIpConnectivity StaticServiceIpConnectivity { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The update time of the resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Dataset template used for dynamic dataset creation.</summary>
+    public class DatasetTemplate : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If supplied, every created dataset will have its name prefixed by the provided value. The prefix and name
+        /// will be separated by an underscore. i.e. _.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetIdPrefix")]
+        public virtual string DatasetIdPrefix { get; set; }
+
+        /// <summary>
+        /// Describes the Cloud KMS encryption key that will be used to protect destination BigQuery table. The BigQuery
+        /// Service Account associated with your project requires access to this encryption key. i.e.
+        /// projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{cryptoKey}. See
+        /// https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
+        public virtual string KmsKeyName { get; set; }
+
+        /// <summary>
+        /// Required. The geographic location where the dataset should reside. See
+        /// https://cloud.google.com/bigquery/docs/locations for supported locations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2858,6 +3224,10 @@ namespace Google.Apis.Datastream.v1.Data
     /// <summary>The configuration of the stream destination.</summary>
     public class DestinationConfig : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>BigQuery destination configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bigqueryDestinationConfig")]
+        public virtual BigQueryDestinationConfig BigqueryDestinationConfig { get; set; }
+
         /// <summary>
         /// Required. Destination connection profile resource. Format:
         /// `projects/{project}/locations/{location}/connectionProfiles/{name}`
@@ -2902,6 +3272,14 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("oracleRdbms")]
         public virtual OracleRdbms OracleRdbms { get; set; }
 
+        /// <summary>PostgreSQL RDBMS to enrich with child data objects and metadata.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postgresqlRdbms")]
+        public virtual PostgresqlRdbms PostgresqlRdbms { get; set; }
+
+        /// <summary>SQLServer RDBMS to enrich with child data objects and metadata.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlServerRdbms")]
+        public virtual SqlServerRdbms SqlServerRdbms { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2917,6 +3295,21 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("oracleRdbms")]
         public virtual OracleRdbms OracleRdbms { get; set; }
 
+        /// <summary>Enriched PostgreSQL RDBMS object.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postgresqlRdbms")]
+        public virtual PostgresqlRdbms PostgresqlRdbms { get; set; }
+
+        /// <summary>Enriched SQLServer RDBMS object.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlServerRdbms")]
+        public virtual SqlServerRdbms SqlServerRdbms { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configuration to drop large object values.</summary>
+    public class DropLargeObjects : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2924,8 +3317,7 @@ namespace Google.Apis.Datastream.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2940,9 +3332,42 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("details")]
         public virtual System.Collections.Generic.IDictionary<string, string> Details { get; set; }
 
+        private string _errorTimeRaw;
+
+        private object _errorTime;
+
         /// <summary>The time when the error occurred.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("errorTime")]
-        public virtual object ErrorTime { get; set; }
+        public virtual string ErrorTimeRaw
+        {
+            get => _errorTimeRaw;
+            set
+            {
+                _errorTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _errorTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ErrorTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ErrorTimeDateTimeOffset instead.")]
+        public virtual object ErrorTime
+        {
+            get => _errorTime;
+            set
+            {
+                _errorTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _errorTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ErrorTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ErrorTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ErrorTimeRaw);
+            set => ErrorTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// A unique identifier for this specific error, allowing it to be traced throughout the system in logs and API
@@ -3017,6 +3442,7 @@ namespace Google.Apis.Datastream.v1.Data
 
         /// <summary>
         /// The maximum duration for which new events are added before a file is closed and a new file is created.
+        /// Values within the range of 15-60 seconds are allowed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fileRotationInterval")]
         public virtual object FileRotationInterval { get; set; }
@@ -3048,6 +3474,13 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("rootPath")]
         public virtual string RootPath { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Use GTID based replication.</summary>
+    public class Gtid : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3200,7 +3633,7 @@ namespace Google.Apis.Datastream.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -3232,6 +3665,28 @@ namespace Google.Apis.Datastream.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Configuration to specify the Oracle directories to access the log files.</summary>
+    public class LogFileDirectories : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Oracle directory for archived logs.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("archivedLogDirectory")]
+        public virtual string ArchivedLogDirectory { get; set; }
+
+        /// <summary>Required. Oracle directory for online logs.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("onlineLogDirectory")]
+        public virtual string OnlineLogDirectory { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configuration to use LogMiner CDC method.</summary>
+    public class LogMiner : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request for looking up a specific stream object by its source object identifier.</summary>
     public class LookupStreamObjectRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3239,6 +3694,20 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sourceObjectIdentifier")]
         public virtual SourceObjectIdentifier SourceObjectIdentifier { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Merge mode defines that all changes to a table will be merged at the destination table.</summary>
+    public class Merge : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>CDC strategy to start replicating from the most recent position in the source.</summary>
+    public class MostRecentStartPosition : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3273,9 +3742,17 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("ordinalPosition")]
         public virtual System.Nullable<int> OrdinalPosition { get; set; }
 
+        /// <summary>Column precision.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("precision")]
+        public virtual System.Nullable<int> Precision { get; set; }
+
         /// <summary>Whether or not the column represents a primary key.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("primaryKey")]
         public virtual System.Nullable<bool> PrimaryKey { get; set; }
+
+        /// <summary>Column scale.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scale")]
+        public virtual System.Nullable<int> Scale { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3296,14 +3773,29 @@ namespace Google.Apis.Datastream.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>MySQL log position</summary>
+    public class MysqlLogPosition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The binary log file name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("logFile")]
+        public virtual string LogFile { get; set; }
+
+        /// <summary>Optional. The position within the binary log file. Default is head of file.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("logPosition")]
+        public virtual System.Nullable<int> LogPosition { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Mysql data source object identifier.</summary>
     public class MysqlObjectIdentifier : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The database name.</summary>
+        /// <summary>Required. The database name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("database")]
         public virtual string Database { get; set; }
 
-        /// <summary>The table name.</summary>
+        /// <summary>Required. The table name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("table")]
         public virtual string Table { get; set; }
 
@@ -3318,7 +3810,10 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("hostname")]
         public virtual string Hostname { get; set; }
 
-        /// <summary>Required. Input only. Password for the MySQL connection.</summary>
+        /// <summary>
+        /// Optional. Input only. Password for the MySQL connection. Mutually exclusive with the
+        /// `secret_manager_stored_password` field.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("password")]
         public virtual string Password { get; set; }
 
@@ -3352,13 +3847,35 @@ namespace Google.Apis.Datastream.v1.Data
     /// <summary>MySQL source configuration</summary>
     public class MysqlSourceConfig : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Use Binary log position based replication.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("binaryLogPosition")]
+        public virtual BinaryLogPosition BinaryLogPosition { get; set; }
+
         /// <summary>MySQL objects to exclude from the stream.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("excludeObjects")]
         public virtual MysqlRdbms ExcludeObjects { get; set; }
 
+        /// <summary>Use GTID based replication.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gtid")]
+        public virtual Gtid Gtid { get; set; }
+
         /// <summary>MySQL objects to retrieve from the source.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("includeObjects")]
         public virtual MysqlRdbms IncludeObjects { get; set; }
+
+        /// <summary>
+        /// Maximum number of concurrent backfill tasks. The number should be non negative. If not set (or set to 0),
+        /// the system's default value will be used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxConcurrentBackfillTasks")]
+        public virtual System.Nullable<int> MaxConcurrentBackfillTasks { get; set; }
+
+        /// <summary>
+        /// Maximum number of concurrent CDC tasks. The number should be non negative. If not set (or set to 0), the
+        /// system's default value will be used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxConcurrentCdcTasks")]
+        public virtual System.Nullable<int> MaxConcurrentCdcTasks { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3378,8 +3895,9 @@ namespace Google.Apis.Datastream.v1.Data
         public virtual System.Nullable<bool> CaCertificateSet { get; set; }
 
         /// <summary>
-        /// Input only. PEM-encoded certificate that will be used by the replica to authenticate against the source
-        /// database server. If this field is used then the 'client_key' and the 'ca_certificate' fields are mandatory.
+        /// Optional. Input only. PEM-encoded certificate that will be used by the replica to authenticate against the
+        /// source database server. If this field is used then the 'client_key' and the 'ca_certificate' fields are
+        /// mandatory.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("clientCertificate")]
         public virtual string ClientCertificate { get; set; }
@@ -3389,8 +3907,9 @@ namespace Google.Apis.Datastream.v1.Data
         public virtual System.Nullable<bool> ClientCertificateSet { get; set; }
 
         /// <summary>
-        /// Input only. PEM-encoded private key associated with the Client Certificate. If this field is used then the
-        /// 'client_certificate' and the 'ca_certificate' fields are mandatory.
+        /// Optional. Input only. PEM-encoded private key associated with the Client Certificate. If this field is used
+        /// then the 'client_certificate' and the 'ca_certificate' fields are mandatory. Mutually exclusive with the
+        /// `secret_manager_stored_client_key` field.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("clientKey")]
         public virtual string ClientKey { get; set; }
@@ -3407,7 +3926,7 @@ namespace Google.Apis.Datastream.v1.Data
     public class MysqlTable : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// MySQL columns in the database. When unspecified as part of include/exclude lists, includes/excludes
+        /// MySQL columns in the database. When unspecified as part of include/exclude objects, includes/excludes
         /// everything.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mysqlColumns")]
@@ -3417,6 +3936,13 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("table")]
         public virtual string Table { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>CDC strategy to resume replication from the next available position in the source.</summary>
+    public class NextAvailableStartPosition : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3451,8 +3977,8 @@ namespace Google.Apis.Datastream.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -3471,18 +3997,84 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
         public virtual string ApiVersion { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. The time the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
-        /// successfully been cancelled have Operation.error value with a google.rpc.Status.code of 1, corresponding to
-        /// `Code.CANCELLED`.
+        /// successfully been cancelled have google.longrunning.Operation.error value with a google.rpc.Status.code of
+        /// 1, corresponding to `Code.CANCELLED`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestedCancellation")]
         public virtual System.Nullable<bool> RequestedCancellation { get; set; }
@@ -3503,6 +4095,48 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("verb")]
         public virtual string Verb { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configuration for Oracle Automatic Storage Management (ASM) connection.</summary>
+    public class OracleAsmConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. ASM service name for the Oracle ASM connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("asmService")]
+        public virtual string AsmService { get; set; }
+
+        /// <summary>Optional. Connection string attributes</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connectionAttributes")]
+        public virtual System.Collections.Generic.IDictionary<string, string> ConnectionAttributes { get; set; }
+
+        /// <summary>Required. Hostname for the Oracle ASM connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hostname")]
+        public virtual string Hostname { get; set; }
+
+        /// <summary>Optional. SSL configuration for the Oracle connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oracleSslConfig")]
+        public virtual OracleSslConfig OracleSslConfig { get; set; }
+
+        /// <summary>Optional. Password for the Oracle ASM connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("password")]
+        public virtual string Password { get; set; }
+
+        /// <summary>Required. Port for the Oracle ASM connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("port")]
+        public virtual System.Nullable<int> Port { get; set; }
+
+        /// <summary>Required. Username for the Oracle ASM connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("username")]
+        public virtual string Username { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configuration to use Oracle ASM to access the log files.</summary>
+    public class OracleAsmLogFileAccess : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3553,11 +4187,11 @@ namespace Google.Apis.Datastream.v1.Data
     /// <summary>Oracle data source object identifier.</summary>
     public class OracleObjectIdentifier : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The schema name.</summary>
+        /// <summary>Required. The schema name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("schema")]
         public virtual string Schema { get; set; }
 
-        /// <summary>The table name.</summary>
+        /// <summary>Required. The table name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("table")]
         public virtual string Table { get; set; }
 
@@ -3580,13 +4214,31 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("hostname")]
         public virtual string Hostname { get; set; }
 
-        /// <summary>Required. Password for the Oracle connection.</summary>
+        /// <summary>Optional. Configuration for Oracle ASM connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oracleAsmConfig")]
+        public virtual OracleAsmConfig OracleAsmConfig { get; set; }
+
+        /// <summary>Optional. SSL configuration for the Oracle connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oracleSslConfig")]
+        public virtual OracleSslConfig OracleSslConfig { get; set; }
+
+        /// <summary>
+        /// Optional. Password for the Oracle connection. Mutually exclusive with the `secret_manager_stored_password`
+        /// field.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("password")]
         public virtual string Password { get; set; }
 
         /// <summary>Port for the Oracle connection, default value is 1521.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("port")]
         public virtual System.Nullable<int> Port { get; set; }
+
+        /// <summary>
+        /// Optional. A reference to a Secret Manager resource name storing the Oracle connection password. Mutually
+        /// exclusive with the `password` field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("secretManagerStoredPassword")]
+        public virtual string SecretManagerStoredPassword { get; set; }
 
         /// <summary>Required. Username for the Oracle connection.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("username")]
@@ -3622,9 +4274,28 @@ namespace Google.Apis.Datastream.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Oracle SCN position</summary>
+    public class OracleScnPosition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. SCN number from where Logs will be read</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scn")]
+        public virtual System.Nullable<long> Scn { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Oracle data source configuration</summary>
     public class OracleSourceConfig : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Use Binary Log Parser.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("binaryLogParser")]
+        public virtual BinaryLogParser BinaryLogParser { get; set; }
+
+        /// <summary>Drop large object values.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dropLargeObjects")]
+        public virtual DropLargeObjects DropLargeObjects { get; set; }
+
         /// <summary>Oracle objects to exclude from the stream.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("excludeObjects")]
         public virtual OracleRdbms ExcludeObjects { get; set; }
@@ -3632,6 +4303,47 @@ namespace Google.Apis.Datastream.v1.Data
         /// <summary>Oracle objects to include in the stream.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("includeObjects")]
         public virtual OracleRdbms IncludeObjects { get; set; }
+
+        /// <summary>Use LogMiner.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("logMiner")]
+        public virtual LogMiner LogMiner { get; set; }
+
+        /// <summary>
+        /// Maximum number of concurrent backfill tasks. The number should be non-negative. If not set (or set to 0),
+        /// the system's default value is used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxConcurrentBackfillTasks")]
+        public virtual System.Nullable<int> MaxConcurrentBackfillTasks { get; set; }
+
+        /// <summary>
+        /// Maximum number of concurrent CDC tasks. The number should be non-negative. If not set (or set to 0), the
+        /// system's default value is used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxConcurrentCdcTasks")]
+        public virtual System.Nullable<int> MaxConcurrentCdcTasks { get; set; }
+
+        /// <summary>Stream large object values.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("streamLargeObjects")]
+        public virtual StreamLargeObjects StreamLargeObjects { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Oracle SSL configuration information.</summary>
+    public class OracleSslConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Input only. PEM-encoded certificate of the CA that signed the source database server's certificate.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("caCertificate")]
+        public virtual string CaCertificate { get; set; }
+
+        /// <summary>
+        /// Output only. Indicates whether the ca_certificate field has been set for this Connection-Profile.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("caCertificateSet")]
+        public virtual System.Nullable<bool> CaCertificateSet { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3641,11 +4353,203 @@ namespace Google.Apis.Datastream.v1.Data
     public class OracleTable : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Oracle columns in the schema. When unspecified as part of inclue/exclude lists, includes/excludes
+        /// Oracle columns in the schema. When unspecified as part of include/exclude objects, includes/excludes
         /// everything.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("oracleColumns")]
         public virtual System.Collections.Generic.IList<OracleColumn> OracleColumns { get; set; }
+
+        /// <summary>Table name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("table")]
+        public virtual string Table { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>PostgreSQL Column.</summary>
+    public class PostgresqlColumn : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Column name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("column")]
+        public virtual string Column { get; set; }
+
+        /// <summary>The PostgreSQL data type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataType")]
+        public virtual string DataType { get; set; }
+
+        /// <summary>Column length.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("length")]
+        public virtual System.Nullable<int> Length { get; set; }
+
+        /// <summary>Whether or not the column can accept a null value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nullable")]
+        public virtual System.Nullable<bool> Nullable { get; set; }
+
+        /// <summary>The ordinal position of the column in the table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ordinalPosition")]
+        public virtual System.Nullable<int> OrdinalPosition { get; set; }
+
+        /// <summary>Column precision.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("precision")]
+        public virtual System.Nullable<int> Precision { get; set; }
+
+        /// <summary>Whether or not the column represents a primary key.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryKey")]
+        public virtual System.Nullable<bool> PrimaryKey { get; set; }
+
+        /// <summary>Column scale.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scale")]
+        public virtual System.Nullable<int> Scale { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>PostgreSQL data source object identifier.</summary>
+    public class PostgresqlObjectIdentifier : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The schema name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("schema")]
+        public virtual string Schema { get; set; }
+
+        /// <summary>Required. The table name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("table")]
+        public virtual string Table { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>PostgreSQL database profile.</summary>
+    public class PostgresqlProfile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Database for the PostgreSQL connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("database")]
+        public virtual string Database { get; set; }
+
+        /// <summary>Required. Hostname for the PostgreSQL connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hostname")]
+        public virtual string Hostname { get; set; }
+
+        /// <summary>
+        /// Optional. Password for the PostgreSQL connection. Mutually exclusive with the
+        /// `secret_manager_stored_password` field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("password")]
+        public virtual string Password { get; set; }
+
+        /// <summary>Port for the PostgreSQL connection, default value is 5432.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("port")]
+        public virtual System.Nullable<int> Port { get; set; }
+
+        /// <summary>
+        /// Optional. SSL configuration for the PostgreSQL connection. In case PostgresqlSslConfig is not set, the
+        /// connection will use the default SSL mode, which is `prefer` (i.e. this mode will only use encryption if
+        /// enabled from database side, otherwise will use unencrypted communication)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sslConfig")]
+        public virtual PostgresqlSslConfig SslConfig { get; set; }
+
+        /// <summary>Required. Username for the PostgreSQL connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("username")]
+        public virtual string Username { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>PostgreSQL database structure.</summary>
+    public class PostgresqlRdbms : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>PostgreSQL schemas in the database server.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postgresqlSchemas")]
+        public virtual System.Collections.Generic.IList<PostgresqlSchema> PostgresqlSchemas { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>PostgreSQL schema.</summary>
+    public class PostgresqlSchema : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Tables in the schema.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postgresqlTables")]
+        public virtual System.Collections.Generic.IList<PostgresqlTable> PostgresqlTables { get; set; }
+
+        /// <summary>Schema name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("schema")]
+        public virtual string Schema { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>PostgreSQL data source configuration</summary>
+    public class PostgresqlSourceConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>PostgreSQL objects to exclude from the stream.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludeObjects")]
+        public virtual PostgresqlRdbms ExcludeObjects { get; set; }
+
+        /// <summary>PostgreSQL objects to include in the stream.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("includeObjects")]
+        public virtual PostgresqlRdbms IncludeObjects { get; set; }
+
+        /// <summary>
+        /// Maximum number of concurrent backfill tasks. The number should be non negative. If not set (or set to 0),
+        /// the system's default value will be used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxConcurrentBackfillTasks")]
+        public virtual System.Nullable<int> MaxConcurrentBackfillTasks { get; set; }
+
+        /// <summary>
+        /// Required. The name of the publication that includes the set of all tables that are defined in the stream's
+        /// include_objects.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("publication")]
+        public virtual string Publication { get; set; }
+
+        /// <summary>
+        /// Required. Immutable. The name of the logical replication slot that's configured with the pgoutput plugin.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("replicationSlot")]
+        public virtual string ReplicationSlot { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>PostgreSQL SSL configuration information.</summary>
+    public class PostgresqlSslConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If this field is set, the communication will be encrypted with TLS encryption and both the server identity
+        /// and the client identity will be authenticated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serverAndClientVerification")]
+        public virtual ServerAndClientVerification ServerAndClientVerification { get; set; }
+
+        /// <summary>
+        ///  If this field is set, the communication will be encrypted with TLS encryption and the server identity will
+        /// be authenticated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serverVerification")]
+        public virtual ServerVerification ServerVerification { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>PostgreSQL table.</summary>
+    public class PostgresqlTable : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// PostgreSQL columns in the schema. When unspecified as part of include/exclude objects, includes/excludes
+        /// everything.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postgresqlColumns")]
+        public virtual System.Collections.Generic.IList<PostgresqlColumn> PostgresqlColumns { get; set; }
 
         /// <summary>Table name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("table")]
@@ -3661,9 +4565,42 @@ namespace Google.Apis.Datastream.v1.Data
     /// </summary>
     public class PrivateConnection : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The create time of the resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required. Display name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
@@ -3677,17 +4614,58 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
-        /// <summary>Output only. The resource's name.</summary>
+        /// <summary>Output only. Identifier. The resource's name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzi")]
+        public virtual System.Nullable<bool> SatisfiesPzi { get; set; }
+
+        /// <summary>Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzs")]
+        public virtual System.Nullable<bool> SatisfiesPzs { get; set; }
 
         /// <summary>Output only. The state of the Private Connection.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The update time of the resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>VPC Peering Config.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("vpcPeeringConfig")]
@@ -3717,9 +4695,42 @@ namespace Google.Apis.Datastream.v1.Data
     /// </summary>
     public class Route : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The create time of the resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required. Destination address for connection</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("destinationAddress")]
@@ -3737,13 +4748,123 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
-        /// <summary>Output only. The resource's name.</summary>
+        /// <summary>Output only. Identifier. The resource's name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The update time of the resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for running a stream.</summary>
+    public class RunStreamRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The CDC strategy of the stream. If not set, the system's default value will be used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cdcStrategy")]
+        public virtual CdcStrategy CdcStrategy { get; set; }
+
+        /// <summary>Optional. Update the stream without validating it.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("force")]
+        public virtual System.Nullable<bool> Force { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Message represents the option where Datastream will enforce the encryption and authenticate the server identity
+    /// as well as the client identity. ca_certificate, client_certificate and client_key must be set if user selects
+    /// this option.
+    /// </summary>
+    public class ServerAndClientVerification : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Input only. PEM-encoded server root CA certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("caCertificate")]
+        public virtual string CaCertificate { get; set; }
+
+        /// <summary>
+        /// Required. Input only. PEM-encoded certificate used by the source database to authenticate the client
+        /// identity (i.e., the Datastream's identity). This certificate is signed by either a root certificate trusted
+        /// by the server or one or more intermediate certificates (which is stored with the leaf certificate) to link
+        /// the this certificate to the trusted root certificate.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clientCertificate")]
+        public virtual string ClientCertificate { get; set; }
+
+        /// <summary>
+        /// Optional. Input only. PEM-encoded private key associated with the client certificate. This value will be
+        /// used during the SSL/TLS handshake, allowing the PostgreSQL server to authenticate the client's identity,
+        /// i.e. identity of the Datastream. Mutually exclusive with the `secret_manager_stored_client_key` field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clientKey")]
+        public virtual string ClientKey { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Message represents the option where Datastream will enforce the encryption and authenticate the server identity.
+    /// ca_certificate must be set if user selects this option.
+    /// </summary>
+    public class ServerVerification : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Input only. PEM-encoded server root CA certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("caCertificate")]
+        public virtual string CaCertificate { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A single target dataset to which all data will be streamed.</summary>
+    public class SingleTargetDataset : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The dataset ID of the target dataset. DatasetIds allowed characters:
+        /// https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets#datasetreference.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetId")]
+        public virtual string DatasetId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3752,13 +4873,17 @@ namespace Google.Apis.Datastream.v1.Data
     /// <summary>The configuration of the stream source.</summary>
     public class SourceConfig : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>MySQL data source configuration</summary>
+        /// <summary>MySQL data source configuration.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mysqlSourceConfig")]
         public virtual MysqlSourceConfig MysqlSourceConfig { get; set; }
 
-        /// <summary>Oracle data source configuration</summary>
+        /// <summary>Oracle data source configuration.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("oracleSourceConfig")]
         public virtual OracleSourceConfig OracleSourceConfig { get; set; }
+
+        /// <summary>PostgreSQL data source configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postgresqlSourceConfig")]
+        public virtual PostgresqlSourceConfig PostgresqlSourceConfig { get; set; }
 
         /// <summary>
         /// Required. Source connection profile resoource. Format:
@@ -3766,6 +4891,23 @@ namespace Google.Apis.Datastream.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceConnectionProfile")]
         public virtual string SourceConnectionProfile { get; set; }
+
+        /// <summary>SQLServer data source configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlServerSourceConfig")]
+        public virtual SqlServerSourceConfig SqlServerSourceConfig { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Destination datasets are created so that hierarchy of the destination data objects matches the source hierarchy.
+    /// </summary>
+    public class SourceHierarchyDatasets : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The dataset template to use for dynamic dataset creation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetTemplate")]
+        public virtual DatasetTemplate DatasetTemplate { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3782,6 +4924,217 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("oracleIdentifier")]
         public virtual OracleObjectIdentifier OracleIdentifier { get; set; }
 
+        /// <summary>PostgreSQL data source object identifier.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postgresqlIdentifier")]
+        public virtual PostgresqlObjectIdentifier PostgresqlIdentifier { get; set; }
+
+        /// <summary>SQLServer data source object identifier.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlServerIdentifier")]
+        public virtual SqlServerObjectIdentifier SqlServerIdentifier { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>CDC strategy to start replicating from a specific position in the source.</summary>
+    public class SpecificStartPosition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>MySQL specific log position to start replicating from.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mysqlLogPosition")]
+        public virtual MysqlLogPosition MysqlLogPosition { get; set; }
+
+        /// <summary>Oracle SCN to start replicating from.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oracleScnPosition")]
+        public virtual OracleScnPosition OracleScnPosition { get; set; }
+
+        /// <summary>SqlServer LSN to start replicating from.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlServerLsnPosition")]
+        public virtual SqlServerLsnPosition SqlServerLsnPosition { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configuration to use Change Tables CDC read method.</summary>
+    public class SqlServerChangeTables : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>SQLServer Column.</summary>
+    public class SqlServerColumn : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Column name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("column")]
+        public virtual string Column { get; set; }
+
+        /// <summary>The SQLServer data type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataType")]
+        public virtual string DataType { get; set; }
+
+        /// <summary>Column length.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("length")]
+        public virtual System.Nullable<int> Length { get; set; }
+
+        /// <summary>Whether or not the column can accept a null value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nullable")]
+        public virtual System.Nullable<bool> Nullable { get; set; }
+
+        /// <summary>The ordinal position of the column in the table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ordinalPosition")]
+        public virtual System.Nullable<int> OrdinalPosition { get; set; }
+
+        /// <summary>Column precision.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("precision")]
+        public virtual System.Nullable<int> Precision { get; set; }
+
+        /// <summary>Whether or not the column represents a primary key.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryKey")]
+        public virtual System.Nullable<bool> PrimaryKey { get; set; }
+
+        /// <summary>Column scale.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scale")]
+        public virtual System.Nullable<int> Scale { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>SQL Server LSN position</summary>
+    public class SqlServerLsnPosition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Log sequence number (LSN) from where Logs will be read</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lsn")]
+        public virtual string Lsn { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>SQLServer data source object identifier.</summary>
+    public class SqlServerObjectIdentifier : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The schema name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("schema")]
+        public virtual string Schema { get; set; }
+
+        /// <summary>Required. The table name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("table")]
+        public virtual string Table { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>SQLServer database profile.</summary>
+    public class SqlServerProfile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Database for the SQLServer connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("database")]
+        public virtual string Database { get; set; }
+
+        /// <summary>Required. Hostname for the SQLServer connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hostname")]
+        public virtual string Hostname { get; set; }
+
+        /// <summary>
+        /// Optional. Password for the SQLServer connection. Mutually exclusive with the
+        /// `secret_manager_stored_password` field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("password")]
+        public virtual string Password { get; set; }
+
+        /// <summary>Port for the SQLServer connection, default value is 1433.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("port")]
+        public virtual System.Nullable<int> Port { get; set; }
+
+        /// <summary>Required. Username for the SQLServer connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("username")]
+        public virtual string Username { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>SQLServer database structure.</summary>
+    public class SqlServerRdbms : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>SQLServer schemas in the database server.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("schemas")]
+        public virtual System.Collections.Generic.IList<SqlServerSchema> Schemas { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>SQLServer schema.</summary>
+    public class SqlServerSchema : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Schema name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("schema")]
+        public virtual string Schema { get; set; }
+
+        /// <summary>Tables in the schema.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tables")]
+        public virtual System.Collections.Generic.IList<SqlServerTable> Tables { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>SQLServer data source configuration</summary>
+    public class SqlServerSourceConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>CDC reader reads from change tables.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("changeTables")]
+        public virtual SqlServerChangeTables ChangeTables { get; set; }
+
+        /// <summary>SQLServer objects to exclude from the stream.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludeObjects")]
+        public virtual SqlServerRdbms ExcludeObjects { get; set; }
+
+        /// <summary>SQLServer objects to include in the stream.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("includeObjects")]
+        public virtual SqlServerRdbms IncludeObjects { get; set; }
+
+        /// <summary>Max concurrent backfill tasks.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxConcurrentBackfillTasks")]
+        public virtual System.Nullable<int> MaxConcurrentBackfillTasks { get; set; }
+
+        /// <summary>Max concurrent CDC tasks.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxConcurrentCdcTasks")]
+        public virtual System.Nullable<int> MaxConcurrentCdcTasks { get; set; }
+
+        /// <summary>CDC reader reads from transaction logs.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transactionLogs")]
+        public virtual SqlServerTransactionLogs TransactionLogs { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>SQLServer table.</summary>
+    public class SqlServerTable : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// SQLServer columns in the schema. When unspecified as part of include/exclude objects, includes/excludes
+        /// everything.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("columns")]
+        public virtual System.Collections.Generic.IList<SqlServerColumn> Columns { get; set; }
+
+        /// <summary>Table name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("table")]
+        public virtual string Table { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configuration to use Transaction Logs CDC read method.</summary>
+    public class SqlServerTransactionLogs : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3804,7 +5157,10 @@ namespace Google.Apis.Datastream.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Static IP address connectivity.</summary>
+    /// <summary>
+    /// Static IP address connectivity. Used when the source database is configured to allow incoming connections from
+    /// the Datastream public IP addresses for the region specified in the connection profile.
+    /// </summary>
     public class StaticServiceIpConnectivity : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The ETag of the item.</summary>
@@ -3872,9 +5228,42 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("backfillNone")]
         public virtual BackfillNoneStrategy BackfillNone { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The creation time of the stream.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Immutable. A reference to a KMS encryption key. If provided, it will be used to encrypt the data. If left
@@ -3899,9 +5288,59 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
-        /// <summary>Output only. The stream's name.</summary>
+        private string _lastRecoveryTimeRaw;
+
+        private object _lastRecoveryTime;
+
+        /// <summary>
+        /// Output only. If the stream was recovered, the time of the last recovery. Note: This field is currently
+        /// experimental.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastRecoveryTime")]
+        public virtual string LastRecoveryTimeRaw
+        {
+            get => _lastRecoveryTimeRaw;
+            set
+            {
+                _lastRecoveryTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastRecoveryTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastRecoveryTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastRecoveryTimeDateTimeOffset instead.")]
+        public virtual object LastRecoveryTime
+        {
+            get => _lastRecoveryTime;
+            set
+            {
+                _lastRecoveryTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastRecoveryTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastRecoveryTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastRecoveryTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastRecoveryTimeRaw);
+            set => LastRecoveryTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. Identifier. The stream's name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzi")]
+        public virtual System.Nullable<bool> SatisfiesPzi { get; set; }
+
+        /// <summary>Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzs")]
+        public virtual System.Nullable<bool> SatisfiesPzs { get; set; }
 
         /// <summary>Required. Source connection profile configuration.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceConfig")]
@@ -3911,10 +5350,50 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The last update time of the stream.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
 
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configuration to stream large object values.</summary>
+    public class StreamLargeObjects : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3926,9 +5405,42 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("backfillJob")]
         public virtual BackfillJob BackfillJob { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The creation time of the object.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required. Display name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
@@ -3938,7 +5450,7 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("errors")]
         public virtual System.Collections.Generic.IList<Error> Errors { get; set; }
 
-        /// <summary>Output only. The object resource's name.</summary>
+        /// <summary>Output only. Identifier. The object resource's name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
@@ -3946,9 +5458,42 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sourceObject")]
         public virtual SourceObjectIdentifier SourceObject { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The last update time of the object.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3969,7 +5514,7 @@ namespace Google.Apis.Datastream.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("message")]
         public virtual System.Collections.Generic.IList<ValidationMessage> Message { get; set; }
 
-        /// <summary>Validation execution status.</summary>
+        /// <summary>Output only. Validation execution status.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
@@ -4016,7 +5561,7 @@ namespace Google.Apis.Datastream.v1.Data
     /// </summary>
     public class VpcPeeringConfig : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Required. A free subnet for peering. (CIDR of /29) TODO(b/172995841) add validators.</summary>
+        /// <summary>Required. A free subnet for peering. (CIDR of /29)</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("subnet")]
         public virtual string Subnet { get; set; }
 

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.MyBusinessNotificationSettings.v1
         public MyBusinessNotificationSettingsService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Accounts = new AccountsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://mybusinessnotifications.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://mybusinessnotifications.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.MyBusinessNotificationSettings.v1
         public override string Name => "mybusinessnotifications";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://mybusinessnotifications.googleapis.com/";
-        #else
-            "https://mybusinessnotifications.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://mybusinessnotifications.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Gets the Accounts resource.</summary>
         public virtual AccountsResource Accounts { get; }
@@ -265,7 +260,7 @@ namespace Google.Apis.MyBusinessNotificationSettings.v1
         /// <param name="name">Required. The resource name of the notification setting we are trying to fetch.</param>
         public virtual GetNotificationSettingRequest GetNotificationSetting(string name)
         {
-            return new GetNotificationSettingRequest(service, name);
+            return new GetNotificationSettingRequest(this.service, name);
         }
 
         /// <summary>Returns the pubsub notification settings for the account.</summary>
@@ -319,7 +314,7 @@ namespace Google.Apis.MyBusinessNotificationSettings.v1
         /// </param>
         public virtual UpdateNotificationSettingRequest UpdateNotificationSetting(Google.Apis.MyBusinessNotificationSettings.v1.Data.NotificationSetting body, string name)
         {
-            return new UpdateNotificationSettingRequest(service, body, name);
+            return new UpdateNotificationSettingRequest(this.service, body, name);
         }
 
         /// <summary>

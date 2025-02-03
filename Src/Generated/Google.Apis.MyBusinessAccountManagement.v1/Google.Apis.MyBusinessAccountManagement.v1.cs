@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
         {
             Accounts = new AccountsResource(this);
             Locations = new LocationsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://mybusinessaccountmanagement.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://mybusinessaccountmanagement.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
         public override string Name => "mybusinessaccountmanagement";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://mybusinessaccountmanagement.googleapis.com/";
-        #else
-            "https://mybusinessaccountmanagement.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://mybusinessaccountmanagement.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Gets the Accounts resource.</summary>
         public virtual AccountsResource Accounts { get; }
@@ -295,7 +290,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.MyBusinessAccountManagement.v1.Data.Admin body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -356,7 +351,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Removes the specified admin from the specified account.</summary>
@@ -407,7 +402,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists the admins for the specified account.</summary>
@@ -460,7 +455,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.MyBusinessAccountManagement.v1.Data.Admin body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates the Admin for the specified Account Admin.</summary>
@@ -552,7 +547,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
             /// </param>
             public virtual AcceptRequest Accept(Google.Apis.MyBusinessAccountManagement.v1.Data.AcceptInvitationRequest body, string name)
             {
-                return new AcceptRequest(service, body, name);
+                return new AcceptRequest(this.service, body, name);
             }
 
             /// <summary>Accepts the specified invitation.</summary>
@@ -611,7 +606,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
             /// </param>
             public virtual DeclineRequest Decline(Google.Apis.MyBusinessAccountManagement.v1.Data.DeclineInvitationRequest body, string name)
             {
-                return new DeclineRequest(service, body, name);
+                return new DeclineRequest(this.service, body, name);
             }
 
             /// <summary>Declines the specified invitation.</summary>
@@ -669,7 +664,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists pending invitations for the specified account.</summary>
@@ -737,7 +732,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.MyBusinessAccountManagement.v1.Data.Account body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -784,7 +779,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
         /// <param name="name">Required. The name of the account to fetch.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -834,7 +829,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -858,10 +853,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; set; }
 
-            /// <summary>
-            /// Optional. How many accounts to fetch per page. The minimum supported page_size is 2. The default and
-            /// maximum is 20.
-            /// </summary>
+            /// <summary>Optional. How many accounts to fetch per page. The default and maximum is 20.</summary>
             [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<int> PageSize { get; set; }
 
@@ -935,7 +927,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
         /// <param name="name">Immutable. The resource name, in the format `accounts/{account_id}`.</param>
         public virtual PatchRequest Patch(Google.Apis.MyBusinessAccountManagement.v1.Data.Account body, string name)
         {
-            return new PatchRequest(service, body, name);
+            return new PatchRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -1055,7 +1047,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.MyBusinessAccountManagement.v1.Data.Admin body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1114,7 +1106,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
             /// <param name="name">Required. The resource name of the admin to remove from the location.</param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Removes the specified admin as a manager of the specified location.</summary>
@@ -1161,7 +1153,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all of the admins for the specified location.</summary>
@@ -1215,7 +1207,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.MyBusinessAccountManagement.v1.Data.Admin body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -1293,7 +1285,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1
         /// <param name="name">Required. The name of the location to transfer. `locations/{location_id}`.</param>
         public virtual TransferRequest Transfer(Google.Apis.MyBusinessAccountManagement.v1.Data.TransferLocationRequest body, string name)
         {
-            return new TransferRequest(service, body, name);
+            return new TransferRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -1389,7 +1381,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1.Data
 
         /// <summary>
         /// Required. Input only. The resource name of the account which will be the primary owner of the account being
-        /// created. It should be of the form `accounts/{account_id}/`.
+        /// created. It should be of the form `accounts/{account_id}`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("primaryOwner")]
         public virtual string PrimaryOwner { get; set; }
@@ -1426,6 +1418,15 @@ namespace Google.Apis.MyBusinessAccountManagement.v1.Data
     /// <summary>An administrator of an Account or a location.</summary>
     public class Admin : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Immutable. The name of the Account resource that this Admin refers to. Used when calling
+        /// locations.admins.create to invite a LocationGroup as an admin. If both this field and `admin` are set on
+        /// `CREATE` requests, this field takes precedence and the email address in `admin` will be ignored. Format:
+        /// `accounts/{account}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("account")]
+        public virtual string Account { get; set; }
+
         /// <summary>
         /// Optional. The name of the admin. When making the initial invitation, this is the invitee's email address. On
         /// `GET` calls, the user's email address is returned if the invitation is still pending. Otherwise, it contains
@@ -1466,8 +1467,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1582,29 +1582,29 @@ namespace Google.Apis.MyBusinessAccountManagement.v1.Data
     }
 
     /// <summary>
-    /// Represents a postal address, e.g. for postal delivery or payments addresses. Given a postal address, a postal
-    /// service can deliver items to a premise, P.O. Box or similar. It is not intended to model geographical locations
-    /// (roads, towns, mountains). In typical usage an address would be created via user input or from importing
-    /// existing data, depending on the type of process. Advice on address input / editing: - Use an i18n-ready address
-    /// widget such as https://github.com/google/libaddressinput) - Users should not be presented with UI elements for
-    /// input or editing of fields outside countries where that field is used. For more guidance on how to use this
-    /// schema, please see: https://support.google.com/business/answer/6397478
+    /// Represents a postal address. For example for postal delivery or payments addresses. Given a postal address, a
+    /// postal service can deliver items to a premise, P.O. Box or similar. It is not intended to model geographical
+    /// locations (roads, towns, mountains). In typical usage an address would be created by user input or from
+    /// importing existing data, depending on the type of process. Advice on address input / editing: - Use an
+    /// internationalization-ready address widget such as https://github.com/google/libaddressinput) - Users should not
+    /// be presented with UI elements for input or editing of fields outside countries where that field is used. For
+    /// more guidance on how to use this schema, see: https://support.google.com/business/answer/6397478
     /// </summary>
     public class PostalAddress : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// Unstructured address lines describing the lower levels of an address. Because values in address_lines do not
-        /// have type information and may sometimes contain multiple values in a single field (e.g. "Austin, TX"), it is
-        /// important that the line order is clear. The order of address lines should be "envelope order" for the
-        /// country/region of the address. In places where this can vary (e.g. Japan), address_language is used to make
-        /// it explicit (e.g. "ja" for large-to-small ordering and "ja-Latn" or "en" for small-to-large). This way, the
-        /// most specific line of an address can be selected based on the language. The minimum permitted structural
-        /// representation of an address consists of a region_code with all remaining information placed in the
-        /// address_lines. It would be possible to format such an address very approximately without geocoding, but no
-        /// semantic reasoning could be made about any of the address components until it was at least partially
-        /// resolved. Creating an address only containing a region_code and address_lines, and then geocoding is the
-        /// recommended way to handle completely unstructured addresses (as opposed to guessing which parts of the
-        /// address should be localities or administrative areas).
+        /// have type information and may sometimes contain multiple values in a single field (For example "Austin,
+        /// TX"), it is important that the line order is clear. The order of address lines should be "envelope order"
+        /// for the country/region of the address. In places where this can vary (For example Japan), address_language
+        /// is used to make it explicit (For example "ja" for large-to-small ordering and "ja-Latn" or "en" for
+        /// small-to-large). This way, the most specific line of an address can be selected based on the language. The
+        /// minimum permitted structural representation of an address consists of a region_code with all remaining
+        /// information placed in the address_lines. It would be possible to format such an address very approximately
+        /// without geocoding, but no semantic reasoning could be made about any of the address components until it was
+        /// at least partially resolved. Creating an address only containing a region_code and address_lines, and then
+        /// geocoding is the recommended way to handle completely unstructured addresses (as opposed to guessing which
+        /// parts of the address should be localities or administrative areas).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("addressLines")]
         public virtual System.Collections.Generic.IList<string> AddressLines { get; set; }
@@ -1612,8 +1612,9 @@ namespace Google.Apis.MyBusinessAccountManagement.v1.Data
         /// <summary>
         /// Optional. Highest administrative subdivision which is used for postal addresses of a country or region. For
         /// example, this can be a state, a province, an oblast, or a prefecture. Specifically, for Spain this is the
-        /// province and not the autonomous community (e.g. "Barcelona" and not "Catalonia"). Many countries don't use
-        /// an administrative area in postal addresses. E.g. in Switzerland this should be left unpopulated.
+        /// province and not the autonomous community (For example "Barcelona" and not "Catalonia"). Many countries
+        /// don't use an administrative area in postal addresses. For example in Switzerland this should be left
+        /// unpopulated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("administrativeArea")]
         public virtual string AdministrativeArea { get; set; }
@@ -1643,7 +1644,7 @@ namespace Google.Apis.MyBusinessAccountManagement.v1.Data
 
         /// <summary>
         /// Optional. Postal code of the address. Not all countries use or require postal codes to be present, but where
-        /// they are used, they may trigger additional validation with other parts of the address (e.g. state/zip
+        /// they are used, they may trigger additional validation with other parts of the address (For example state/zip
         /// validation in the U.S.A.).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("postalCode")]
@@ -1658,9 +1659,9 @@ namespace Google.Apis.MyBusinessAccountManagement.v1.Data
 
         /// <summary>
         /// Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the
-        /// user to ensure the value is correct. See http://cldr.unicode.org/ and
-        /// http://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for
-        /// Switzerland.
+        /// user to ensure the value is correct. See https://cldr.unicode.org/ and
+        /// https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH"
+        /// for Switzerland.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("regionCode")]
         public virtual string RegionCode { get; set; }
@@ -1674,9 +1675,9 @@ namespace Google.Apis.MyBusinessAccountManagement.v1.Data
 
         /// <summary>
         /// Optional. Additional, country-specific, sorting code. This is not used in most regions. Where it is used,
-        /// the value is either a string like "CEDEX", optionally followed by a number (e.g. "CEDEX 7"), or just a
-        /// number alone, representing the "sector code" (Jamaica), "delivery area indicator" (Malawi) or "post office
-        /// indicator" (e.g. Côte d'Ivoire).
+        /// the value is either a string like "CEDEX", optionally followed by a number (For example "CEDEX 7"), or just
+        /// a number alone, representing the "sector code" (Jamaica), "delivery area indicator" (Malawi) or "post office
+        /// indicator" (For example Côte d'Ivoire).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sortingCode")]
         public virtual string SortingCode { get; set; }

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.FirebaseRules.v1
         public FirebaseRulesService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://firebaserules.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://firebaserules.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.FirebaseRules.v1
         public override string Name => "firebaserules";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://firebaserules.googleapis.com/";
-        #else
-            "https://firebaserules.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://firebaserules.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Firebase Rules API.</summary>
         public class Scope
@@ -330,7 +325,7 @@ namespace Google.Apis.FirebaseRules.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.FirebaseRules.v1.Data.Release body, string name)
             {
-                return new CreateRequest(service, body, name);
+                return new CreateRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -398,7 +393,7 @@ namespace Google.Apis.FirebaseRules.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Delete a `Release` by resource name.</summary>
@@ -448,7 +443,7 @@ namespace Google.Apis.FirebaseRules.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Get a `Release` by name.</summary>
@@ -497,7 +492,7 @@ namespace Google.Apis.FirebaseRules.v1
             /// </param>
             public virtual GetExecutableRequest GetExecutable(string name)
             {
-                return new GetExecutableRequest(service, name);
+                return new GetExecutableRequest(this.service, name);
             }
 
             /// <summary>Get the `Release` executable to use when enforcing rules.</summary>
@@ -517,13 +512,13 @@ namespace Google.Apis.FirebaseRules.v1
                 public virtual string Name { get; private set; }
 
                 /// <summary>
-                /// The requested runtime executable version. Defaults to FIREBASE_RULES_EXECUTABLE_V1.
+                /// Optional. The requested runtime executable version. Defaults to FIREBASE_RULES_EXECUTABLE_V1.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("executableVersion", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<ExecutableVersionEnum> ExecutableVersion { get; set; }
 
                 /// <summary>
-                /// The requested runtime executable version. Defaults to FIREBASE_RULES_EXECUTABLE_V1.
+                /// Optional. The requested runtime executable version. Defaults to FIREBASE_RULES_EXECUTABLE_V1.
                 /// </summary>
                 public enum ExecutableVersionEnum
                 {
@@ -581,7 +576,7 @@ namespace Google.Apis.FirebaseRules.v1
             /// <param name="name">Required. Resource name for the project. Format: `projects/{project_id}`</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>
@@ -602,9 +597,9 @@ namespace Google.Apis.FirebaseRules.v1
                 public virtual string Name { get; private set; }
 
                 /// <summary>
-                /// `Release` filter. The list method supports filters with restrictions on the `Release.name`, and
-                /// `Release.ruleset_name`. Example 1: A filter of 'name=prod*' might return `Release`s with names
-                /// within 'projects/foo' prefixed with 'prod': Name -&amp;gt; Ruleset Name: *
+                /// Optional. `Release` filter. The list method supports filters with restrictions on the
+                /// `Release.name`, and `Release.ruleset_name`. Example 1: A filter of 'name=prod*' might return
+                /// `Release`s with names within 'projects/foo' prefixed with 'prod': Name -&amp;gt; Ruleset Name: *
                 /// projects/foo/releases/prod -&amp;gt; projects/foo/rulesets/uuid1234 * projects/foo/releases/prod/v1
                 /// -&amp;gt; projects/foo/rulesets/uuid1234 * projects/foo/releases/prod/v2 -&amp;gt;
                 /// projects/foo/rulesets/uuid8888 Example 2: A filter of `name=prod* ruleset_name=uuid1234` would
@@ -618,14 +613,15 @@ namespace Google.Apis.FirebaseRules.v1
                 public virtual string Filter { get; set; }
 
                 /// <summary>
-                /// Page size to load. Maximum of 100. Defaults to 10. Note: `page_size` is just a hint and the service
-                /// may choose to load fewer than `page_size` results due to the size of the output. To traverse all of
-                /// the releases, the caller should iterate until the `page_token` on the response is empty.
+                /// Optional. Page size to load. Maximum of 100. Defaults to 10. Note: `page_size` is just a hint and
+                /// the service may choose to load fewer than `page_size` results due to the size of the output. To
+                /// traverse all of the releases, the caller should iterate until the `page_token` on the response is
+                /// empty.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
-                /// <summary>Next page token for the next batch of `Release` instances.</summary>
+                /// <summary>Optional. Next page token for the next batch of `Release` instances.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
 
@@ -687,7 +683,7 @@ namespace Google.Apis.FirebaseRules.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.FirebaseRules.v1.Data.UpdateReleaseRequest body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -769,7 +765,7 @@ namespace Google.Apis.FirebaseRules.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.FirebaseRules.v1.Data.Ruleset body, string name)
             {
-                return new CreateRequest(service, body, name);
+                return new CreateRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -832,7 +828,7 @@ namespace Google.Apis.FirebaseRules.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -885,7 +881,7 @@ namespace Google.Apis.FirebaseRules.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Get a `Ruleset` by name including the full `Source` contents.</summary>
@@ -936,7 +932,7 @@ namespace Google.Apis.FirebaseRules.v1
             /// <param name="name">Required. Resource name for the project. Format: `projects/{project_id}`</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>
@@ -957,23 +953,23 @@ namespace Google.Apis.FirebaseRules.v1
                 public virtual string Name { get; private set; }
 
                 /// <summary>
-                /// `Ruleset` filter. The list method supports filters with restrictions on `Ruleset.name`. Filters on
-                /// `Ruleset.create_time` should use the `date` function which parses strings that conform to the RFC
-                /// 3339 date/time specifications. Example: `create_time &amp;gt; date("2017-01-01T00:00:00Z") AND
-                /// name=UUID-*`
+                /// Optional. `Ruleset` filter. The list method supports filters with restrictions on `Ruleset.name`.
+                /// Filters on `Ruleset.create_time` should use the `date` function which parses strings that conform to
+                /// the RFC 3339 date/time specifications. Example: `create_time &amp;gt; date("2017-01-01T00:00:00Z")
+                /// AND name=UUID-*`
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
 
                 /// <summary>
-                /// Page size to load. Maximum of 100. Defaults to 10. Note: `page_size` is just a hint and the service
-                /// may choose to load less than `page_size` due to the size of the output. To traverse all of the
-                /// releases, caller should iterate until the `page_token` is empty.
+                /// Optional. Page size to load. Maximum of 100. Defaults to 10. Note: `page_size` is just a hint and
+                /// the service may choose to load less than `page_size` due to the size of the output. To traverse all
+                /// of the releases, caller should iterate until the `page_token` is empty.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
-                /// <summary>Next page token for loading the next batch of `Ruleset` instances.</summary>
+                /// <summary>Optional. Next page token for loading the next batch of `Ruleset` instances.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
 
@@ -1045,7 +1041,7 @@ namespace Google.Apis.FirebaseRules.v1
         /// </param>
         public virtual TestRequest Test(Google.Apis.FirebaseRules.v1.Data.TestRulesetRequest body, string name)
         {
-            return new TestRequest(service, body, name);
+            return new TestRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -1129,8 +1125,7 @@ namespace Google.Apis.FirebaseRules.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1162,7 +1157,7 @@ namespace Google.Apis.FirebaseRules.v1.Data
     /// <summary>`File` containing source content.</summary>
     public class File : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Textual Content.</summary>
+        /// <summary>Required. Textual Content.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("content")]
         public virtual string Content { get; set; }
 
@@ -1170,7 +1165,7 @@ namespace Google.Apis.FirebaseRules.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("fingerprint")]
         public virtual string Fingerprint { get; set; }
 
-        /// <summary>File name.</summary>
+        /// <summary>Required. File name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
@@ -1242,16 +1237,82 @@ namespace Google.Apis.FirebaseRules.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("rulesetName")]
         public virtual string RulesetName { get; set; }
 
+        private string _syncTimeRaw;
+
+        private object _syncTime;
+
         /// <summary>
         /// Optional, indicates the freshness of the result. The response is guaranteed to be the latest within an
         /// interval up to the sync_time (inclusive).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("syncTime")]
-        public virtual object SyncTime { get; set; }
+        public virtual string SyncTimeRaw
+        {
+            get => _syncTimeRaw;
+            set
+            {
+                _syncTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _syncTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="SyncTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SyncTimeDateTimeOffset instead.")]
+        public virtual object SyncTime
+        {
+            get => _syncTime;
+            set
+            {
+                _syncTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _syncTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="SyncTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SyncTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(SyncTimeRaw);
+            set => SyncTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
 
         /// <summary>Timestamp for the most recent `Release.update_time`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1329,23 +1390,90 @@ namespace Google.Apis.FirebaseRules.v1.Data
     /// </summary>
     public class Release : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time the release was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
 
-        /// <summary>Format: `projects/{project_id}/releases/{release_id}`</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Required. Format: `projects/{project_id}/releases/{release_id}`</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Name of the `Ruleset` referred to by this `Release`. The `Ruleset` must exist the `Release` to be created.
+        /// Required. Name of the `Ruleset` referred to by this `Release`. The `Ruleset` must exist for the `Release` to
+        /// be created.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rulesetName")]
         public virtual string RulesetName { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Time the release was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1373,9 +1501,49 @@ namespace Google.Apis.FirebaseRules.v1.Data
     /// </summary>
     public class Ruleset : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Immutable. Intended resource to which this Ruleset should be released. May be left blank to signify the
+        /// resource associated with the default release. Expected format: firestore.googleapis.com/projects//databases/
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("attachmentPoint")]
+        public virtual string AttachmentPoint { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time the `Ruleset` was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The metadata for this ruleset.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
@@ -1388,7 +1556,7 @@ namespace Google.Apis.FirebaseRules.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
-        /// <summary>`Source` for the `Ruleset`.</summary>
+        /// <summary>Required. `Source` for the `Ruleset`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("source")]
         public virtual Source Source { get; set; }
 
@@ -1399,7 +1567,7 @@ namespace Google.Apis.FirebaseRules.v1.Data
     /// <summary>`Source` is one or more `File` messages comprising a logical set of rules.</summary>
     public class Source : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>`File` set constituting the `Source` bundle.</summary>
+        /// <summary>Required. `File` set constituting the `Source` bundle.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("files")]
         public virtual System.Collections.Generic.IList<File> Files { get; set; }
 
@@ -1496,7 +1664,10 @@ namespace Google.Apis.FirebaseRules.v1.Data
         /// <summary>
         /// Debug messages related to test execution issues encountered during evaluation. Debug messages may be related
         /// to too many or too few invocations of function mocks or to runtime errors that occur during evaluation. For
-        /// example: ```Unable to read variable [name: "resource"]```
+        /// example:
+        /// ```
+        /// Unable to read variable [name: "resource"]
+        /// ```
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("debugMessages")]
         public virtual System.Collections.Generic.IList<string> DebugMessages { get; set; }
@@ -1532,8 +1703,12 @@ namespace Google.Apis.FirebaseRules.v1.Data
 
         /// <summary>
         /// The set of visited permission expressions for a given test. This returns the positions and evaluation
-        /// results of all visited permission expressions which were relevant to the test case, e.g. ``` match /path {
-        /// allow read if: } ``` For a detailed report of the intermediate evaluation states, see the
+        /// results of all visited permission expressions which were relevant to the test case, e.g.
+        /// ```
+        /// match /path {
+        /// allow read if: }
+        /// ```
+        /// For a detailed report of the intermediate evaluation states, see the
         /// `expression_reports` field
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("visitedExpressions")]
@@ -1547,15 +1722,15 @@ namespace Google.Apis.FirebaseRules.v1.Data
     public class TestRulesetRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Optional `Source` to be checked for correctness. This field must not be set when the resource name refers to
-        /// a `Ruleset`.
+        /// Optional. Optional `Source` to be checked for correctness. This field must not be set when the resource name
+        /// refers to a `Ruleset`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("source")]
         public virtual Source Source { get; set; }
 
         /// <summary>
-        /// The tests to execute against the `Source`. When `Source` is provided inline, the test cases will only be run
-        /// if the `Source` is syntactically and semantically valid. Inline `TestSuite` to run.
+        /// Required. The tests to execute against the `Source`. When `Source` is provided inline, the test cases will
+        /// only be run if the `Source` is syntactically and semantically valid. Inline `TestSuite` to run.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("testSuite")]
         public virtual TestSuite TestSuite { get; set; }
@@ -1603,11 +1778,11 @@ namespace Google.Apis.FirebaseRules.v1.Data
     /// <summary>The request for FirebaseRulesService.UpdateRelease.</summary>
     public class UpdateReleaseRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>`Release` to update.</summary>
+        /// <summary>Required. `Release` to update.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("release")]
         public virtual Release Release { get; set; }
 
-        /// <summary>Specifies which fields to update.</summary>
+        /// <summary>Optional. Specifies which fields to update.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
         public virtual object UpdateMask { get; set; }
 

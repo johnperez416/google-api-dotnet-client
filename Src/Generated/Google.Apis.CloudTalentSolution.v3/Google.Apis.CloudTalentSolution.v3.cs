@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CloudTalentSolution.v3
         public CloudTalentSolutionService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://jobs.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://jobs.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CloudTalentSolution.v3
         public override string Name => "jobs";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://jobs.googleapis.com/";
-        #else
-            "https://jobs.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://jobs.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Talent Solution API.</summary>
         public class Scope
@@ -317,7 +312,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// <param name="parent">Parent project name.</param>
             public virtual CreateRequest Create(Google.Apis.CloudTalentSolution.v3.Data.CreateClientEventRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -396,7 +391,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.CloudTalentSolution.v3.Data.CreateCompanyRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a new company entity.</summary>
@@ -454,7 +449,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes specified company. Prerequisite: The company has no jobs associated with it.</summary>
@@ -506,7 +501,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Retrieves specified company.</summary>
@@ -558,7 +553,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all companies associated with the service account.</summary>
@@ -656,7 +651,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.CloudTalentSolution.v3.Data.UpdateCompanyRequest body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -737,7 +732,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual BatchDeleteRequest BatchDelete(Google.Apis.CloudTalentSolution.v3.Data.BatchDeleteJobsRequest body, string parent)
             {
-                return new BatchDeleteRequest(service, body, parent);
+                return new BatchDeleteRequest(this.service, body, parent);
             }
 
             /// <summary>Deletes a list of Jobs by filter.</summary>
@@ -799,7 +794,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.CloudTalentSolution.v3.Data.CreateJobRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -863,7 +858,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -919,7 +914,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -972,7 +967,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists jobs by filter.</summary>
@@ -1129,7 +1124,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.CloudTalentSolution.v3.Data.UpdateJobRequest body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -1196,7 +1191,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual SearchRequest Search(Google.Apis.CloudTalentSolution.v3.Data.SearchJobsRequest body, string parent)
             {
-                return new SearchRequest(service, body, parent);
+                return new SearchRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1264,7 +1259,7 @@ namespace Google.Apis.CloudTalentSolution.v3
             /// </param>
             public virtual SearchForAlertRequest SearchForAlert(Google.Apis.CloudTalentSolution.v3.Data.SearchJobsRequest body, string parent)
             {
-                return new SearchForAlertRequest(service, body, parent);
+                return new SearchForAlertRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1332,7 +1327,7 @@ namespace Google.Apis.CloudTalentSolution.v3
         /// </param>
         public virtual CompleteRequest Complete(string name)
         {
-            return new CompleteRequest(service, name);
+            return new CompleteRequest(this.service, name);
         }
 
         /// <summary>
@@ -1611,9 +1606,42 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
     /// </summary>
     public class ClientEvent : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Required. The timestamp of the event.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Required. A unique identifier, generated by the client application. This `event_id` is used to establish the
@@ -1774,10 +1802,11 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
         public virtual string ImageUri { get; set; }
 
         /// <summary>
-        /// Optional. A list of keys of filterable Job.custom_attributes, whose corresponding `string_values` are used
-        /// in keyword search. Jobs with `string_values` under these specified field keys are returned if any of the
-        /// values matches the search keyword. Custom field values with parenthesis, brackets and special symbols won't
-        /// be properly searchable, and those keyword queries need to be surrounded by quotes.
+        /// Optional. This field is deprecated. Please set the searchability of the custom attribute in the
+        /// Job.custom_attributes going forward. A list of keys of filterable Job.custom_attributes, whose corresponding
+        /// `string_values` are used in keyword search. Jobs with `string_values` under these specified field keys are
+        /// returned if any of the values matches the search keyword. Custom field values with parenthesis, brackets and
+        /// special symbols won't be properly searchable, and those keyword queries need to be surrounded by quotes.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("keywordSearchableJobCustomAttributes")]
         public virtual System.Collections.Generic.IList<string> KeywordSearchableJobCustomAttributes { get; set; }
@@ -2159,8 +2188,7 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2338,23 +2366,89 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("jobBenefits")]
         public virtual System.Collections.Generic.IList<string> JobBenefits { get; set; }
 
+        private string _jobEndTimeRaw;
+
+        private object _jobEndTime;
+
         /// <summary>
         /// Optional. The end timestamp of the job. Typically this field is used for contracting engagements. Invalid
         /// timestamps are ignored.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("jobEndTime")]
-        public virtual object JobEndTime { get; set; }
+        public virtual string JobEndTimeRaw
+        {
+            get => _jobEndTimeRaw;
+            set
+            {
+                _jobEndTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _jobEndTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="JobEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use JobEndTimeDateTimeOffset instead.")]
+        public virtual object JobEndTime
+        {
+            get => _jobEndTime;
+            set
+            {
+                _jobEndTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _jobEndTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="JobEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? JobEndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(JobEndTimeRaw);
+            set => JobEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Optional. The experience level associated with the job, such as "Entry Level".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("jobLevel")]
         public virtual string JobLevel { get; set; }
+
+        private string _jobStartTimeRaw;
+
+        private object _jobStartTime;
 
         /// <summary>
         /// Optional. The start timestamp of the job in UTC time zone. Typically this field is used for contracting
         /// engagements. Invalid timestamps are ignored.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("jobStartTime")]
-        public virtual object JobStartTime { get; set; }
+        public virtual string JobStartTimeRaw
+        {
+            get => _jobStartTimeRaw;
+            set
+            {
+                _jobStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _jobStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="JobStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use JobStartTimeDateTimeOffset instead.")]
+        public virtual object JobStartTime
+        {
+            get => _jobStartTime;
+            set
+            {
+                _jobStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _jobStartTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="JobStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? JobStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(JobStartTimeRaw);
+            set => JobStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. The language of the posting. This field is distinct from any requirements for fluency that are
@@ -2375,9 +2469,48 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _postingCreateTimeRaw;
+
+        private object _postingCreateTime;
+
         /// <summary>Output only. The timestamp when this job posting was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("postingCreateTime")]
-        public virtual object PostingCreateTime { get; set; }
+        public virtual string PostingCreateTimeRaw
+        {
+            get => _postingCreateTimeRaw;
+            set
+            {
+                _postingCreateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _postingCreateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="PostingCreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PostingCreateTimeDateTimeOffset instead.")]
+        public virtual object PostingCreateTime
+        {
+            get => _postingCreateTime;
+            set
+            {
+                _postingCreateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _postingCreateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="PostingCreateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PostingCreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PostingCreateTimeRaw);
+            set => PostingCreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _postingExpireTimeRaw;
+
+        private object _postingExpireTime;
 
         /// <summary>
         /// Optional but strongly recommended for the best service experience. The expiration timestamp of the job.
@@ -2398,14 +2531,80 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
         /// days from the job's last update time. Otherwise the expiration date isn't updated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("postingExpireTime")]
-        public virtual object PostingExpireTime { get; set; }
+        public virtual string PostingExpireTimeRaw
+        {
+            get => _postingExpireTimeRaw;
+            set
+            {
+                _postingExpireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _postingExpireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="PostingExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PostingExpireTimeDateTimeOffset instead.")]
+        public virtual object PostingExpireTime
+        {
+            get => _postingExpireTime;
+            set
+            {
+                _postingExpireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _postingExpireTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="PostingExpireTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PostingExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PostingExpireTimeRaw);
+            set => PostingExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _postingPublishTimeRaw;
+
+        private object _postingPublishTime;
 
         /// <summary>
         /// Optional. The timestamp this job posting was most recently published. The default value is the time the
         /// request arrives at the server. Invalid timestamps are ignored.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("postingPublishTime")]
-        public virtual object PostingPublishTime { get; set; }
+        public virtual string PostingPublishTimeRaw
+        {
+            get => _postingPublishTimeRaw;
+            set
+            {
+                _postingPublishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _postingPublishTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="PostingPublishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PostingPublishTimeDateTimeOffset instead.")]
+        public virtual object PostingPublishTime
+        {
+            get => _postingPublishTime;
+            set
+            {
+                _postingPublishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _postingPublishTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="PostingPublishTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PostingPublishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PostingPublishTimeRaw);
+            set => PostingPublishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. The job PostingRegion (for example, state, country) throughout which the job is available. If this
@@ -2417,9 +2616,44 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("postingRegion")]
         public virtual string PostingRegion { get; set; }
 
+        private string _postingUpdateTimeRaw;
+
+        private object _postingUpdateTime;
+
         /// <summary>Output only. The timestamp when this job posting was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("postingUpdateTime")]
-        public virtual object PostingUpdateTime { get; set; }
+        public virtual string PostingUpdateTimeRaw
+        {
+            get => _postingUpdateTimeRaw;
+            set
+            {
+                _postingUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _postingUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="PostingUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PostingUpdateTimeDateTimeOffset instead.")]
+        public virtual object PostingUpdateTime
+        {
+            get => _postingUpdateTime;
+            set
+            {
+                _postingUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _postingUpdateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="PostingUpdateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PostingUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PostingUpdateTimeRaw);
+            set => PostingUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Optional. Options for job processing.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("processingOptions")]
@@ -2529,10 +2763,15 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
         public virtual CommuteFilter CommuteFilter { get; set; }
 
         /// <summary>
-        /// Optional. This filter specifies the exact company display name of the jobs to search against. If a value
-        /// isn't specified, jobs within the search results are associated with any company. If multiple values are
-        /// specified, jobs within the search results may be associated with any of the specified companies. At most 20
-        /// company display name filters are allowed.
+        /// Optional. This filter specifies the company Company.display_name of the jobs to search against. The company
+        /// name must match the value exactly. Alternatively, the value being searched for can be wrapped in different
+        /// match operators. `SUBSTRING_MATCH([value])` The company name must contain a case insensitive substring match
+        /// of the value. Using this function may increase latency. Sample Value: `SUBSTRING_MATCH(google)`
+        /// `MULTI_WORD_TOKEN_MATCH([value])` The value will be treated as a multi word token and the company name must
+        /// contain a case insensitive match of the value. Using this function may increase latency. Sample Value:
+        /// `MULTI_WORD_TOKEN_MATCH(google)` If a value isn't specified, jobs within the search results are associated
+        /// with any company. If multiple values are specified, jobs within the search results may be associated with
+        /// any of the specified companies. At most 20 company display name filters are allowed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("companyDisplayNames")]
         public virtual System.Collections.Generic.IList<string> CompanyDisplayNames { get; set; }
@@ -2768,14 +3007,15 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
 
         /// <summary>
         /// Optional. Allows the client to return jobs without a set location, specifically, telecommuting jobs
-        /// (telecommuting is considered by the service as a special location. Job.posting_region indicates if a job
+        /// (telecommuting is considered by the service as a special location). Job.posting_region indicates if a job
         /// permits telecommuting. If this field is set to TelecommutePreference.TELECOMMUTE_ALLOWED, telecommuting jobs
         /// are searched, and address and lat_lng are ignored. If not set or set to
-        /// TelecommutePreference.TELECOMMUTE_EXCLUDED, telecommute job are not searched. This filter can be used by
-        /// itself to search exclusively for telecommuting jobs, or it can be combined with another location filter to
-        /// search for a combination of job locations, such as "Mountain View" or "telecommuting" jobs. However, when
-        /// used in combination with other location filters, telecommuting jobs can be treated as less relevant than
-        /// other jobs in the search response.
+        /// TelecommutePreference.TELECOMMUTE_EXCLUDED, the telecommute status of the jobs is ignored. Jobs that have
+        /// PostingRegion.TELECOMMUTE and have additional Job.addresses may still be matched based on other location
+        /// filters using address or latlng. This filter can be used by itself to search exclusively for telecommuting
+        /// jobs, or it can be combined with another location filter to search for a combination of job locations, such
+        /// as "Mountain View" or "telecommuting" jobs. However, when used in combination with other location filters,
+        /// telecommuting jobs can be treated as less relevant than other jobs in the search response.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("telecommutePreference")]
         public virtual string TelecommutePreference { get; set; }
@@ -2820,27 +3060,6 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>
-    /// Message representing input to a Mendel server for debug forcing. See go/mendel-debug-forcing for more details.
-    /// Next ID: 2
-    /// </summary>
-    public class MendelDebugInput : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>
-        /// When a request spans multiple servers, a MendelDebugInput may travel with the request and take effect in all
-        /// the servers. This field is a map of namespaces to NamespacedMendelDebugInput protos. In a single server, up
-        /// to two NamespacedMendelDebugInput protos are applied: 1. NamespacedMendelDebugInput with the global
-        /// namespace (key == ""). 2. NamespacedMendelDebugInput with the server's namespace. When both
-        /// NamespacedMendelDebugInput protos are present, they are merged. See go/mendel-debug-forcing for more
-        /// details.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("namespacedDebugInput")]
-        public virtual System.Collections.Generic.IDictionary<string, NamespacedDebugInput> NamespacedDebugInput { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
     /// <summary>Represents an amount of money with its currency type.</summary>
     public class Money : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2862,117 +3081,6 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("units")]
         public virtual System.Nullable<long> Units { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>Next ID: 15</summary>
-    public class NamespacedDebugInput : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>
-        /// Set of experiment names to be absolutely forced. These experiments will be forced without evaluating the
-        /// conditions.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("absolutelyForcedExpNames")]
-        public virtual System.Collections.Generic.IList<string> AbsolutelyForcedExpNames { get; set; }
-
-        /// <summary>
-        /// Set of experiment tags to be absolutely forced. The experiments with these tags will be forced without
-        /// evaluating the conditions.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("absolutelyForcedExpTags")]
-        public virtual System.Collections.Generic.IList<string> AbsolutelyForcedExpTags { get; set; }
-
-        /// <summary>
-        /// Set of experiment ids to be absolutely forced. These ids will be forced without evaluating the conditions.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("absolutelyForcedExps")]
-        public virtual System.Collections.Generic.IList<System.Nullable<int>> AbsolutelyForcedExps { get; set; }
-
-        /// <summary>
-        /// Set of experiment names to be conditionally forced. These experiments will be forced only if their
-        /// conditions and their parent domain's conditions are true.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("conditionallyForcedExpNames")]
-        public virtual System.Collections.Generic.IList<string> ConditionallyForcedExpNames { get; set; }
-
-        /// <summary>
-        /// Set of experiment tags to be conditionally forced. The experiments with these tags will be forced only if
-        /// their conditions and their parent domain's conditions are true.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("conditionallyForcedExpTags")]
-        public virtual System.Collections.Generic.IList<string> ConditionallyForcedExpTags { get; set; }
-
-        /// <summary>
-        /// Set of experiment ids to be conditionally forced. These ids will be forced only if their conditions and
-        /// their parent domain's conditions are true.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("conditionallyForcedExps")]
-        public virtual System.Collections.Generic.IList<System.Nullable<int>> ConditionallyForcedExps { get; set; }
-
-        /// <summary>
-        /// If true, disable automatic enrollment selection (at all diversion points). Automatic enrollment selection
-        /// means experiment selection process based on the experiment's automatic enrollment condition. This does not
-        /// disable selection of forced experiments.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("disableAutomaticEnrollmentSelection")]
-        public virtual System.Nullable<bool> DisableAutomaticEnrollmentSelection { get; set; }
-
-        /// <summary>
-        /// Set of experiment names to be disabled. If an experiment is disabled, it is never selected nor forced. If an
-        /// aggregate experiment is disabled, its partitions are disabled together. If an experiment with an enrollment
-        /// is disabled, the enrollment is disabled together. If a name corresponds to a domain, the domain itself and
-        /// all descendant experiments and domains are disabled together.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("disableExpNames")]
-        public virtual System.Collections.Generic.IList<string> DisableExpNames { get; set; }
-
-        /// <summary>
-        /// Set of experiment tags to be disabled. All experiments that are tagged with one or more of these tags are
-        /// disabled. If an experiment is disabled, it is never selected nor forced. If an aggregate experiment is
-        /// disabled, its partitions are disabled together. If an experiment with an enrollment is disabled, the
-        /// enrollment is disabled together.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("disableExpTags")]
-        public virtual System.Collections.Generic.IList<string> DisableExpTags { get; set; }
-
-        /// <summary>
-        /// Set of experiment ids to be disabled. If an experiment is disabled, it is never selected nor forced. If an
-        /// aggregate experiment is disabled, its partitions are disabled together. If an experiment with an enrollment
-        /// is disabled, the enrollment is disabled together. If an ID corresponds to a domain, the domain itself and
-        /// all descendant experiments and domains are disabled together.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("disableExps")]
-        public virtual System.Collections.Generic.IList<System.Nullable<int>> DisableExps { get; set; }
-
-        /// <summary>
-        /// If true, disable manual enrollment selection (at all diversion points). Manual enrollment selection means
-        /// experiment selection process based on the request's manual enrollment states (a.k.a. opt-in experiments).
-        /// This does not disable selection of forced experiments.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("disableManualEnrollmentSelection")]
-        public virtual System.Nullable<bool> DisableManualEnrollmentSelection { get; set; }
-
-        /// <summary>
-        /// If true, disable organic experiment selection (at all diversion points). Organic selection means experiment
-        /// selection process based on traffic allocation and diversion condition evaluation. This does not disable
-        /// selection of forced experiments. This is useful in cases when it is not known whether experiment selection
-        /// behavior is responsible for a error or breakage. Disabling organic selection may help to isolate the cause
-        /// of a given problem.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("disableOrganicSelection")]
-        public virtual System.Nullable<bool> DisableOrganicSelection { get; set; }
-
-        /// <summary>Flags to force in a particular experiment state. Map from flag name to flag value.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("forcedFlags")]
-        public virtual System.Collections.Generic.IDictionary<string, string> ForcedFlags { get; set; }
-
-        /// <summary>
-        /// Rollouts to force in a particular experiment state. Map from rollout name to rollout value.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("forcedRollouts")]
-        public virtual System.Collections.Generic.IDictionary<string, System.Nullable<bool>> ForcedRollouts { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3027,29 +3135,29 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
     }
 
     /// <summary>
-    /// Represents a postal address, e.g. for postal delivery or payments addresses. Given a postal address, a postal
-    /// service can deliver items to a premise, P.O. Box or similar. It is not intended to model geographical locations
-    /// (roads, towns, mountains). In typical usage an address would be created via user input or from importing
-    /// existing data, depending on the type of process. Advice on address input / editing: - Use an i18n-ready address
-    /// widget such as https://github.com/google/libaddressinput) - Users should not be presented with UI elements for
-    /// input or editing of fields outside countries where that field is used. For more guidance on how to use this
-    /// schema, please see: https://support.google.com/business/answer/6397478
+    /// Represents a postal address. For example for postal delivery or payments addresses. Given a postal address, a
+    /// postal service can deliver items to a premise, P.O. Box or similar. It is not intended to model geographical
+    /// locations (roads, towns, mountains). In typical usage an address would be created by user input or from
+    /// importing existing data, depending on the type of process. Advice on address input / editing: - Use an
+    /// internationalization-ready address widget such as https://github.com/google/libaddressinput) - Users should not
+    /// be presented with UI elements for input or editing of fields outside countries where that field is used. For
+    /// more guidance on how to use this schema, see: https://support.google.com/business/answer/6397478
     /// </summary>
     public class PostalAddress : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// Unstructured address lines describing the lower levels of an address. Because values in address_lines do not
-        /// have type information and may sometimes contain multiple values in a single field (e.g. "Austin, TX"), it is
-        /// important that the line order is clear. The order of address lines should be "envelope order" for the
-        /// country/region of the address. In places where this can vary (e.g. Japan), address_language is used to make
-        /// it explicit (e.g. "ja" for large-to-small ordering and "ja-Latn" or "en" for small-to-large). This way, the
-        /// most specific line of an address can be selected based on the language. The minimum permitted structural
-        /// representation of an address consists of a region_code with all remaining information placed in the
-        /// address_lines. It would be possible to format such an address very approximately without geocoding, but no
-        /// semantic reasoning could be made about any of the address components until it was at least partially
-        /// resolved. Creating an address only containing a region_code and address_lines, and then geocoding is the
-        /// recommended way to handle completely unstructured addresses (as opposed to guessing which parts of the
-        /// address should be localities or administrative areas).
+        /// have type information and may sometimes contain multiple values in a single field (For example "Austin,
+        /// TX"), it is important that the line order is clear. The order of address lines should be "envelope order"
+        /// for the country/region of the address. In places where this can vary (For example Japan), address_language
+        /// is used to make it explicit (For example "ja" for large-to-small ordering and "ja-Latn" or "en" for
+        /// small-to-large). This way, the most specific line of an address can be selected based on the language. The
+        /// minimum permitted structural representation of an address consists of a region_code with all remaining
+        /// information placed in the address_lines. It would be possible to format such an address very approximately
+        /// without geocoding, but no semantic reasoning could be made about any of the address components until it was
+        /// at least partially resolved. Creating an address only containing a region_code and address_lines, and then
+        /// geocoding is the recommended way to handle completely unstructured addresses (as opposed to guessing which
+        /// parts of the address should be localities or administrative areas).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("addressLines")]
         public virtual System.Collections.Generic.IList<string> AddressLines { get; set; }
@@ -3057,8 +3165,9 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
         /// <summary>
         /// Optional. Highest administrative subdivision which is used for postal addresses of a country or region. For
         /// example, this can be a state, a province, an oblast, or a prefecture. Specifically, for Spain this is the
-        /// province and not the autonomous community (e.g. "Barcelona" and not "Catalonia"). Many countries don't use
-        /// an administrative area in postal addresses. E.g. in Switzerland this should be left unpopulated.
+        /// province and not the autonomous community (For example "Barcelona" and not "Catalonia"). Many countries
+        /// don't use an administrative area in postal addresses. For example in Switzerland this should be left
+        /// unpopulated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("administrativeArea")]
         public virtual string AdministrativeArea { get; set; }
@@ -3088,7 +3197,7 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
 
         /// <summary>
         /// Optional. Postal code of the address. Not all countries use or require postal codes to be present, but where
-        /// they are used, they may trigger additional validation with other parts of the address (e.g. state/zip
+        /// they are used, they may trigger additional validation with other parts of the address (For example state/zip
         /// validation in the U.S.A.).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("postalCode")]
@@ -3103,9 +3212,9 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
 
         /// <summary>
         /// Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the
-        /// user to ensure the value is correct. See http://cldr.unicode.org/ and
-        /// http://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for
-        /// Switzerland.
+        /// user to ensure the value is correct. See https://cldr.unicode.org/ and
+        /// https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH"
+        /// for Switzerland.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("regionCode")]
         public virtual string RegionCode { get; set; }
@@ -3119,9 +3228,9 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
 
         /// <summary>
         /// Optional. Additional, country-specific, sorting code. This is not used in most regions. Where it is used,
-        /// the value is either a string like "CEDEX", optionally followed by a number (e.g. "CEDEX 7"), or just a
-        /// number alone, representing the "sector code" (Jamaica), "delivery area indicator" (Malawi) or "post office
-        /// indicator" (e.g. Côte d'Ivoire).
+        /// the value is either a string like "CEDEX", optionally followed by a number (For example "CEDEX 7"), or just
+        /// a number alone, representing the "sector code" (Jamaica), "delivery area indicator" (Malawi) or "post office
+        /// indicator" (For example Côte d'Ivoire).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sortingCode")]
         public virtual string SortingCode { get; set; }
@@ -3406,23 +3515,26 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
     public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }
@@ -3434,13 +3546,79 @@ namespace Google.Apis.CloudTalentSolution.v3.Data
     /// <summary>Message representing a period of time between two timestamps.</summary>
     public class TimestampRange : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>End of the period.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>Begin of the period.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

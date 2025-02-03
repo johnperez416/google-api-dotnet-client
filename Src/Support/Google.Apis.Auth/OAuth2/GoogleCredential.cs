@@ -18,6 +18,7 @@ using Google.Apis.Http;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,7 +33,7 @@ namespace Google.Apis.Auth.OAuth2
     /// See <see cref="GetApplicationDefaultAsync(CancellationToken)"/> for the credential retrieval logic.
     /// </para>
     /// </summary>
-    public class GoogleCredential : ICredential, ITokenAccessWithHeaders, IOidcTokenProvider, IBlobSigner
+    public class GoogleCredential : ICredential, ITokenAccessWithHeaders, IOidcTokenProvider, IBlobSigner, IHttpExecuteInterceptor
     {
         /// <summary>Provider implements the logic for creating the application default credential.</summary>
         private static readonly DefaultCredentialProvider defaultCredentialProvider = new DefaultCredentialProvider();
@@ -112,6 +113,13 @@ namespace Google.Apis.Auth.OAuth2
         /// Console or a stored user credential using the format supported by the Cloud SDK.
         /// </para>
         /// </summary>
+        /// <remarks>
+        /// Important: If you accept a credential configuration (credential JSON/File/Stream) from an external source
+        /// for authentication to Google Cloud, you must validate it before providing it to any Google API or library.
+        /// Providing an unvalidated credential configuration to Google APIs can compromise the security of your
+        /// systems and data. For more information, refer to
+        /// <see href="https://cloud.google.com/docs/authentication/external/externally-sourced-credentials">Validate credential configurations from external sources</see>.
+        /// </remarks>
         public static GoogleCredential FromStream(Stream stream) => defaultCredentialProvider.CreateDefaultCredentialFromStream(stream);
 
         /// <summary>
@@ -121,6 +129,13 @@ namespace Google.Apis.Auth.OAuth2
         /// Console or a stored user credential using the format supported by the Cloud SDK.
         /// </para>
         /// </summary>
+        /// <remarks>
+        /// Important: If you accept a credential configuration (credential JSON/File/Stream) from an external source
+        /// for authentication to Google Cloud, you must validate it before providing it to any Google API or library.
+        /// Providing an unvalidated credential configuration to Google APIs can compromise the security of your
+        /// systems and data. For more information, refer to
+        /// <see href="https://cloud.google.com/docs/authentication/external/externally-sourced-credentials">Validate credential configurations from external sources</see>.
+        /// </remarks>
         public static Task<GoogleCredential> FromStreamAsync(Stream stream, CancellationToken cancellationToken) =>
             defaultCredentialProvider.CreateDefaultCredentialFromStreamAsync(stream, cancellationToken);
 
@@ -133,6 +148,13 @@ namespace Google.Apis.Auth.OAuth2
         /// </summary>
         /// <param name="path">The path to the credential file.</param>
         /// <returns>The loaded credentials.</returns>
+        /// <remarks>
+        /// Important: If you accept a credential configuration (credential JSON/File/Stream) from an external source
+        /// for authentication to Google Cloud, you must validate it before providing it to any Google API or library.
+        /// Providing an unvalidated credential configuration to Google APIs can compromise the security of your
+        /// systems and data. For more information, refer to
+        /// <see href="https://cloud.google.com/docs/authentication/external/externally-sourced-credentials">Validate credential configurations from external sources</see>.
+        /// </remarks>
         public static GoogleCredential FromFile(string path)
         {
             using (var f = File.OpenRead(path))
@@ -151,6 +173,13 @@ namespace Google.Apis.Auth.OAuth2
         /// <param name="path">The path to the credential file.</param>
         /// <param name="cancellationToken">Cancellation token for the operation.</param>
         /// <returns>The loaded credentials.</returns>
+        /// <remarks>
+        /// Important: If you accept a credential configuration (credential JSON/File/Stream) from an external source
+        /// for authentication to Google Cloud, you must validate it before providing it to any Google API or library.
+        /// Providing an unvalidated credential configuration to Google APIs can compromise the security of your
+        /// systems and data. For more information, refer to
+        /// <see href="https://cloud.google.com/docs/authentication/external/externally-sourced-credentials">Validate credential configurations from external sources</see>.
+        /// </remarks>
         public static async Task<GoogleCredential> FromFileAsync(string path, CancellationToken cancellationToken)
         {
             using (var f = File.OpenRead(path))
@@ -166,7 +195,29 @@ namespace Google.Apis.Auth.OAuth2
         /// Console or a stored user credential using the format supported by the Cloud SDK.
         /// </para>
         /// </summary>
+        /// <remarks>
+        /// Important: If you accept a credential configuration (credential JSON/File/Stream) from an external source
+        /// for authentication to Google Cloud, you must validate it before providing it to any Google API or library.
+        /// Providing an unvalidated credential configuration to Google APIs can compromise the security of your
+        /// systems and data. For more information, refer to
+        /// <see href="https://cloud.google.com/docs/authentication/external/externally-sourced-credentials">Validate credential configurations from external sources</see>.
+        /// </remarks>
         public static GoogleCredential FromJson(string json) => defaultCredentialProvider.CreateDefaultCredentialFromJson(json);
+
+        /// <summary>
+        /// Loads a credential from JSON credential parameters. Fields are a union of credential fields
+        /// for all supported types. <see cref="JsonCredentialParameters"/> for more detailed information
+        /// about supported types and corresponding fields.
+        /// </summary>
+        /// <remarks>
+        /// Important: If you accept a credential configuration (credential JSON/File/Stream) from an external source
+        /// for authentication to Google Cloud, you must validate it before providing it to any Google API or library.
+        /// Providing an unvalidated credential configuration to Google APIs can compromise the security of your
+        /// systems and data. For more information, refer to
+        /// <see href="https://cloud.google.com/docs/authentication/external/externally-sourced-credentials">Validate credential configurations from external sources</see>.
+        /// </remarks>
+        public static GoogleCredential FromJsonParameters(JsonCredentialParameters credentialParameters) =>
+            defaultCredentialProvider.CreateDefaultCredentialFromParameters(credentialParameters);
 
         /// <summary>
         /// Create a <see cref="GoogleCredential"/> directly from the provided access token.
@@ -179,7 +230,7 @@ namespace Google.Apis.Auth.OAuth2
         public static GoogleCredential FromAccessToken(string accessToken, IAccessMethod accessMethod = null)
         {
             accessMethod ??= new BearerToken.AuthorizationHeaderAccessMethod();
-            return new GoogleCredential(new AccessTokenCredential(accessToken, accessMethod));
+            return new GoogleCredential(new AccessTokenCredential(accessToken, accessMethod, null, null));
         }
 
         /// <summary>
@@ -210,8 +261,12 @@ namespace Google.Apis.Auth.OAuth2
         /// <list type="number">
         /// <item>
         /// <description>
-        /// <see cref="ComputeCredential"/> is scoped by default. This library doesn't currently
-        /// support explicit scopes to be set on a <see cref="ComputeCredential"/>.
+        /// <see cref="ComputeCredential"/> is scoped by default but in some environments it may be scoped
+        /// explicitly, for instance when running on GKE with Workload Identity or on AppEngine Flex.
+        /// It's possible to create a <see cref="ComputeCredential"/> with explicit scopes set by calling
+        /// <see cref="CreateScoped(IEnumerable{string})"/>. If running on an environment that does not
+        /// accept explicit scoping, for instance GCE where scopes are set on the VM, explicit scopes
+        /// will be ignored.
         /// </description>
         /// </item>
         /// <item>
@@ -255,6 +310,41 @@ namespace Google.Apis.Auth.OAuth2
         public ICredential UnderlyingCredential => credential;
 
         /// <summary>
+        /// Returns the universe domain this credential belongs to.
+        /// </summary>
+        /// <remarks>
+        /// For most credential types, this operation is synchronous and will always
+        /// return a completed task.
+        /// For <see cref="ComputeCredential"/>, the universe domain is obtained from the
+        /// metadata server, which requires an HTTP call. This value is obtained only once,
+        /// the first time it is requested for any instance of <see cref="ComputeCredential"/>.
+        /// Once the universe has been fetched this method will always return a completed task.
+        /// The task's result will never be null.
+        /// Note that each <paramref name="cancellationToken"/> will only apply to the call
+        /// that provided it and not to subsequent calls. For instance, even if the first call
+        /// to <see cref="GetUniverseDomainAsync(CancellationToken)"/> is cancelled, subsequent
+        /// calls may still succeed.
+        /// </remarks>
+        public Task<string> GetUniverseDomainAsync(CancellationToken cancellationToken) =>
+            credential.GetUniverseDomainAsync(cancellationToken);
+
+        /// <summary>
+        /// Returns the universe domain this credential belongs to.
+        /// </summary>
+        /// <remarks>
+        /// Because <see cref="GetUniverseDomainAsync"/> is truly async only once, at most, in the lifetime
+        /// of an application, this method exists for convenience.
+        /// It can always be safely used for all credential types except for <see cref="ComputeCredential"/>.
+        /// For <see cref="ComputeCredential"/>, the universe domain is obtained from the
+        /// metadata server, which requires an HTTP call. This value is obtained only once,
+        /// the first time it is requested for any instance of <see cref="ComputeCredential"/>.
+        /// That first time, this method may block while waiting for the HTTP call to complete.
+        /// After that, this method will always be safe to use.
+        /// Will never return null.
+        /// </remarks>
+        public string GetUniverseDomain() => credential.GetUniverseDomain();
+
+        /// <summary>
         /// If this library supports setting explicit scopes on this credential,
         /// this method will creates a copy of the credential with the specified scopes.
         /// Otherwise, it returns the same instance.
@@ -294,12 +384,40 @@ namespace Google.Apis.Auth.OAuth2
             new GoogleCredential(credential.WithQuotaProject(quotaProject));
 
         /// <summary>
+        /// Creates a copy of this credential with the ambient quota project as set in
+        /// <see cref="GoogleAuthConsts.QuotaProjectEnvironmentVariable"/>.
+        /// If <see cref="GoogleAuthConsts.QuotaProjectEnvironmentVariable"/> is not set, or if
+        /// it is set to the empty value, this method returns this instance.
+        /// </summary>
+        /// <remarks>
+        /// The ADC quota project value will be overwritten only if the environment variable is present
+        /// and set to a non-empty value.
+        /// If the environment variable is not present or if it is present but unset, the credential
+        /// returned will maintain whatever quota project value it already had, i.e. the credential's
+        /// quota project value will not be unset.
+        /// </remarks>
+        public GoogleCredential CreateWithEnvironmentQuotaProject() =>
+            GoogleAuthConsts.EnvironmentQuotaProject is string environmentQuotaProject
+            ? CreateWithQuotaProject(environmentQuotaProject)
+            : this;
+
+        /// <summary>
         /// Creates a copy of this credential with the specified HTTP client factory.
         /// </summary>
         /// <param name="factory">The HTTP client factory to be used by the new credential.
         /// May be null, in which case the default <see cref="HttpClientFactory"/> will be used.</param>
         public virtual GoogleCredential CreateWithHttpClientFactory(IHttpClientFactory factory) =>
             new GoogleCredential(credential.WithHttpClientFactory(factory));
+
+        /// <summary>
+        /// If the credential supports custom universe domains this method will create a copy of the
+        /// credential with the specified universe domain set.
+        /// Otherwise, it throws <see cref="InvalidOperationException"/>.
+        /// </summary>
+        /// <param name="universeDomain">The universe domain to use for the credential.
+        /// May be null, in which case the default universe domain will be used.</param>
+        public GoogleCredential CreateWithUniverseDomain(string universeDomain) =>
+            new GoogleCredential(credential.WithUniverseDomain(universeDomain));
 
         void IConfigurableHttpClientInitializer.Initialize(ConfigurableHttpClient httpClient)
         {
@@ -325,7 +443,7 @@ namespace Google.Apis.Auth.OAuth2
             UnderlyingCredential is IBlobSigner ?
                 await (UnderlyingCredential as IBlobSigner).SignBlobAsync(blob, cancellationToken).ConfigureAwait(false) :
                 throw new InvalidOperationException(
-                    $"{nameof(UnderlyingCredential)} is not a blob signer. Only {nameof(ServiceAccountCredential)}, {nameof(ImpersonatedCredential)} are supported blob signers.");
+                    $"{nameof(UnderlyingCredential)} is not a blob signer. Only {nameof(ServiceAccountCredential)}, {nameof(ImpersonatedCredential)}, {nameof(ComputeCredential)} are supported blob signers.");
 
         /// <summary>
         /// Allows this credential to impersonate the <see cref="ImpersonatedCredential.Initializer.TargetPrincipal"/>.
@@ -347,6 +465,23 @@ namespace Google.Apis.Auth.OAuth2
         public static GoogleCredential FromServiceAccountCredential(ServiceAccountCredential credential)
         {
             return new GoogleCredential(credential);
+        }
+
+        // Proxy IHttpExecuteInterceptor's only method.
+        async Task IHttpExecuteInterceptor.InterceptAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (request?.TryGetOption(GoogleAuthConsts.UniverseDomainKey, out string targetUniverseDomain) == true
+                // b/377378462 Temporarily avoid automatic requests to the MDS UniverseDomain endpoint.
+                && UnderlyingCredential is not ComputeCredential)
+            {
+                string credentialUniverseDomain = await credential.GetUniverseDomainAsync(cancellationToken).ConfigureAwait(false);
+                if (targetUniverseDomain != credentialUniverseDomain)
+                {
+                    throw new InvalidOperationException(
+                        $"The service client universe domain {targetUniverseDomain} does not match the credential universe domain {credentialUniverseDomain}.");
+                }
+            }
+            await credential.InterceptAsync(request, cancellationToken).ConfigureAwait(false);
         }
     }
 }

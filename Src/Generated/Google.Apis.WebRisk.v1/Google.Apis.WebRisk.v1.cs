@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ namespace Google.Apis.WebRisk.v1
             Projects = new ProjectsResource(this);
             ThreatLists = new ThreatListsResource(this);
             Uris = new UrisResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://webrisk.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://webrisk.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -47,23 +49,16 @@ namespace Google.Apis.WebRisk.v1
         public override string Name => "webrisk";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://webrisk.googleapis.com/";
-        #else
-            "https://webrisk.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://webrisk.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Web Risk API.</summary>
         public class Scope
@@ -300,7 +295,7 @@ namespace Google.Apis.WebRisk.v1
         /// </summary>
         public virtual SearchRequest Search()
         {
-            return new SearchRequest(service);
+            return new SearchRequest(this.service);
         }
 
         /// <summary>
@@ -358,6 +353,10 @@ namespace Google.Apis.WebRisk.v1
                 /// <summary>Unwanted software targeting any platform.</summary>
                 [Google.Apis.Util.StringValueAttribute("UNWANTED_SOFTWARE")]
                 UNWANTEDSOFTWARE = 3,
+
+                /// <summary>A list of extended coverage social engineering URIs targeting any platform.</summary>
+                [Google.Apis.Util.StringValueAttribute("SOCIAL_ENGINEERING_EXTENDED_COVERAGE")]
+                SOCIALENGINEERINGEXTENDEDCOVERAGE = 5,
             }
 
             /// <summary>Gets the method name.</summary>
@@ -407,7 +406,6 @@ namespace Google.Apis.WebRisk.v1
             this.service = service;
             Operations = new OperationsResource(service);
             Submissions = new SubmissionsResource(service);
-            Uris = new UrisResource(service);
         }
 
         /// <summary>Gets the Operations resource.</summary>
@@ -433,13 +431,13 @@ namespace Google.Apis.WebRisk.v1
             /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check
             /// whether the cancellation succeeded or whether the operation completed despite cancellation. On
             /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-            /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+            /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">The name of the operation resource to be cancelled.</param>
             public virtual CancelRequest Cancel(Google.Apis.WebRisk.v1.Data.GoogleLongrunningCancelOperationRequest body, string name)
             {
-                return new CancelRequest(service, body, name);
+                return new CancelRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -448,7 +446,7 @@ namespace Google.Apis.WebRisk.v1
             /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check
             /// whether the cancellation succeeded or whether the operation completed despite cancellation. On
             /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-            /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+            /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
             /// </summary>
             public class CancelRequest : WebRiskBaseServiceRequest<Google.Apis.WebRisk.v1.Data.GoogleProtobufEmpty>
             {
@@ -502,7 +500,7 @@ namespace Google.Apis.WebRisk.v1
             /// <param name="name">The name of the operation resource to be deleted.</param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -554,7 +552,7 @@ namespace Google.Apis.WebRisk.v1
             /// <param name="name">The name of the operation resource.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -600,25 +598,17 @@ namespace Google.Apis.WebRisk.v1
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding
-            /// to use different resource name schemes, such as `users/*/operations`. To override the binding, API
-            /// services can add a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For
-            /// backwards compatibility, the default name includes the operations collection id, however overriding
-            /// users must ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns `UNIMPLEMENTED`.
             /// </summary>
             /// <param name="name">The name of the operation's parent resource.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding
-            /// to use different resource name schemes, such as `users/*/operations`. To override the binding, API
-            /// services can add a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For
-            /// backwards compatibility, the default name includes the operations collection id, however overriding
-            /// users must ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns `UNIMPLEMENTED`.
             /// </summary>
             public class ListRequest : WebRiskBaseServiceRequest<Google.Apis.WebRisk.v1.Data.GoogleLongrunningListOperationsResponse>
             {
@@ -725,7 +715,7 @@ namespace Google.Apis.WebRisk.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.WebRisk.v1.Data.GoogleCloudWebriskV1Submission body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -782,99 +772,6 @@ namespace Google.Apis.WebRisk.v1
                 }
             }
         }
-
-        /// <summary>Gets the Uris resource.</summary>
-        public virtual UrisResource Uris { get; }
-
-        /// <summary>The "uris" collection of methods.</summary>
-        public class UrisResource
-        {
-            private const string Resource = "uris";
-
-            /// <summary>The service which this resource belongs to.</summary>
-            private readonly Google.Apis.Services.IClientService service;
-
-            /// <summary>Constructs a new resource.</summary>
-            public UrisResource(Google.Apis.Services.IClientService service)
-            {
-                this.service = service;
-            }
-
-            /// <summary>
-            /// Submits a URI suspected of containing malicious content to be reviewed. Returns a
-            /// google.longrunning.Operation which, once the review is complete, is updated with its result. You can use
-            /// the [Pub/Sub API] (https://cloud.google.com/pubsub) to receive notifications for the returned Operation.
-            /// If the result verifies the existence of malicious content, the site will be added to the [Google's
-            /// Social Engineering lists] (https://support.google.com/webmasters/answer/6350487/) in order to protect
-            /// users that could get exposed to this threat in the future. Only allowlisted projects can use this method
-            /// during Early Access. Please reach out to Sales or your customer engineer to obtain access.
-            /// </summary>
-            /// <param name="body">The body of the request.</param>
-            /// <param name="parent">
-            /// Required. The name of the project that is making the submission. This string is in the format
-            /// "projects/{project_number}".
-            /// </param>
-            public virtual SubmitRequest Submit(Google.Apis.WebRisk.v1.Data.GoogleCloudWebriskV1SubmitUriRequest body, string parent)
-            {
-                return new SubmitRequest(service, body, parent);
-            }
-
-            /// <summary>
-            /// Submits a URI suspected of containing malicious content to be reviewed. Returns a
-            /// google.longrunning.Operation which, once the review is complete, is updated with its result. You can use
-            /// the [Pub/Sub API] (https://cloud.google.com/pubsub) to receive notifications for the returned Operation.
-            /// If the result verifies the existence of malicious content, the site will be added to the [Google's
-            /// Social Engineering lists] (https://support.google.com/webmasters/answer/6350487/) in order to protect
-            /// users that could get exposed to this threat in the future. Only allowlisted projects can use this method
-            /// during Early Access. Please reach out to Sales or your customer engineer to obtain access.
-            /// </summary>
-            public class SubmitRequest : WebRiskBaseServiceRequest<Google.Apis.WebRisk.v1.Data.GoogleLongrunningOperation>
-            {
-                /// <summary>Constructs a new Submit request.</summary>
-                public SubmitRequest(Google.Apis.Services.IClientService service, Google.Apis.WebRisk.v1.Data.GoogleCloudWebriskV1SubmitUriRequest body, string parent) : base(service)
-                {
-                    Parent = parent;
-                    Body = body;
-                    InitParameters();
-                }
-
-                /// <summary>
-                /// Required. The name of the project that is making the submission. This string is in the format
-                /// "projects/{project_number}".
-                /// </summary>
-                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
-                public virtual string Parent { get; private set; }
-
-                /// <summary>Gets or sets the body of this request.</summary>
-                Google.Apis.WebRisk.v1.Data.GoogleCloudWebriskV1SubmitUriRequest Body { get; set; }
-
-                /// <summary>Returns the body of the request.</summary>
-                protected override object GetBody() => Body;
-
-                /// <summary>Gets the method name.</summary>
-                public override string MethodName => "submit";
-
-                /// <summary>Gets the HTTP method.</summary>
-                public override string HttpMethod => "POST";
-
-                /// <summary>Gets the REST path.</summary>
-                public override string RestPath => "v1/{+parent}/uris:submit";
-
-                /// <summary>Initializes Submit parameter list.</summary>
-                protected override void InitParameters()
-                {
-                    base.InitParameters();
-                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "parent",
-                        IsRequired = true,
-                        ParameterType = "path",
-                        DefaultValue = null,
-                        Pattern = @"^projects/[^/]+$",
-                    });
-                }
-            }
-        }
     }
 
     /// <summary>The "threatLists" collection of methods.</summary>
@@ -899,7 +796,7 @@ namespace Google.Apis.WebRisk.v1
         /// </summary>
         public virtual ComputeDiffRequest ComputeDiff()
         {
-            return new ComputeDiffRequest(service);
+            return new ComputeDiffRequest(this.service);
         }
 
         /// <summary>
@@ -990,6 +887,10 @@ namespace Google.Apis.WebRisk.v1
                 /// <summary>Unwanted software targeting any platform.</summary>
                 [Google.Apis.Util.StringValueAttribute("UNWANTED_SOFTWARE")]
                 UNWANTEDSOFTWARE = 3,
+
+                /// <summary>A list of extended coverage social engineering URIs targeting any platform.</summary>
+                [Google.Apis.Util.StringValueAttribute("SOCIAL_ENGINEERING_EXTENDED_COVERAGE")]
+                SOCIALENGINEERINGEXTENDEDCOVERAGE = 5,
             }
 
             /// <summary>
@@ -1078,7 +979,7 @@ namespace Google.Apis.WebRisk.v1
         /// </summary>
         public virtual SearchRequest Search()
         {
-            return new SearchRequest(service);
+            return new SearchRequest(this.service);
         }
 
         /// <summary>
@@ -1128,6 +1029,10 @@ namespace Google.Apis.WebRisk.v1
                 /// <summary>Unwanted software targeting any platform.</summary>
                 [Google.Apis.Util.StringValueAttribute("UNWANTED_SOFTWARE")]
                 UNWANTEDSOFTWARE = 3,
+
+                /// <summary>A list of extended coverage social engineering URIs targeting any platform.</summary>
+                [Google.Apis.Util.StringValueAttribute("SOCIAL_ENGINEERING_EXTENDED_COVERAGE")]
+                SOCIALENGINEERINGEXTENDEDCOVERAGE = 5,
             }
 
             /// <summary>Required. The URI to be checked for matches.</summary>
@@ -1191,13 +1096,48 @@ namespace Google.Apis.WebRisk.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("newVersionToken")]
         public virtual string NewVersionToken { get; set; }
 
+        private string _recommendedNextDiffRaw;
+
+        private object _recommendedNextDiff;
+
         /// <summary>
         /// The soonest the client should wait before issuing any diff request. Querying sooner is unlikely to produce a
         /// meaningful diff. Waiting longer is acceptable considering the use case. If this field is not set clients may
         /// update as soon as they want.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("recommendedNextDiff")]
-        public virtual object RecommendedNextDiff { get; set; }
+        public virtual string RecommendedNextDiffRaw
+        {
+            get => _recommendedNextDiffRaw;
+            set
+            {
+                _recommendedNextDiff = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _recommendedNextDiffRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RecommendedNextDiffRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RecommendedNextDiffDateTimeOffset instead.")]
+        public virtual object RecommendedNextDiff
+        {
+            get => _recommendedNextDiff;
+            set
+            {
+                _recommendedNextDiffRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _recommendedNextDiff = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="RecommendedNextDiffRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RecommendedNextDiffDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RecommendedNextDiffRaw);
+            set => RecommendedNextDiffRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>A set of entries to remove from a local threat type's list. This field may be empty.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("removals")]
@@ -1300,11 +1240,46 @@ namespace Google.Apis.WebRisk.v1.Data
 
     public class GoogleCloudWebriskV1SearchHashesResponse : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _negativeExpireTimeRaw;
+
+        private object _negativeExpireTime;
+
         /// <summary>
         /// For requested entities that did not match the threat list, how long to cache the response until.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("negativeExpireTime")]
-        public virtual object NegativeExpireTime { get; set; }
+        public virtual string NegativeExpireTimeRaw
+        {
+            get => _negativeExpireTimeRaw;
+            set
+            {
+                _negativeExpireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _negativeExpireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="NegativeExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use NegativeExpireTimeDateTimeOffset instead.")]
+        public virtual object NegativeExpireTime
+        {
+            get => _negativeExpireTime;
+            set
+            {
+                _negativeExpireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _negativeExpireTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="NegativeExpireTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? NegativeExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(NegativeExpireTimeRaw);
+            set => NegativeExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The full hashes that matched the requested prefixes. The hash will be populated in the key.
@@ -1319,12 +1294,45 @@ namespace Google.Apis.WebRisk.v1.Data
     /// <summary>Contains threat information on a matching hash.</summary>
     public class GoogleCloudWebriskV1SearchHashesResponseThreatHash : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
         /// <summary>
         /// The cache lifetime for the returned match. Clients must not cache this response past this timestamp to avoid
         /// false positives.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// A 32 byte SHA256 hash. This field is in binary format. For JSON requests, hashes are base64-encoded.
@@ -1342,7 +1350,7 @@ namespace Google.Apis.WebRisk.v1.Data
 
     public class GoogleCloudWebriskV1SearchUrisResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The threat list matches. This may be empty if the URI is on no list.</summary>
+        /// <summary>The threat list matches. This might be empty if the URI is on no list.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("threat")]
         public virtual GoogleCloudWebriskV1SearchUrisResponseThreatUri Threat { get; set; }
 
@@ -1353,12 +1361,45 @@ namespace Google.Apis.WebRisk.v1.Data
     /// <summary>Contains threat information on a matching uri.</summary>
     public class GoogleCloudWebriskV1SearchUrisResponseThreatUri : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
         /// <summary>
         /// The cache lifetime for the returned match. Clients must not cache this response past this timestamp to avoid
         /// false positives.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ThreatList this threat belongs to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("threatTypes")]
@@ -1371,46 +1412,9 @@ namespace Google.Apis.WebRisk.v1.Data
     /// <summary>Wraps a URI that might be displaying malicious content.</summary>
     public class GoogleCloudWebriskV1Submission : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>
-        /// ThreatTypes found to be associated with the submitted URI after reviewing it. This may be empty if the URI
-        /// was not added to any list.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("threatTypes")]
-        public virtual System.Collections.Generic.IList<string> ThreatTypes { get; set; }
-
         /// <summary>Required. The URI that is being reported for malicious content to be analyzed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uri")]
         public virtual string Uri { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>Metadata for the Submit URI long-running operation.</summary>
-    public class GoogleCloudWebriskV1SubmitUriMetadata : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>Creation time of the operation.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
-
-        /// <summary>The state of the operation.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("state")]
-        public virtual string State { get; set; }
-
-        /// <summary>Latest update time of the operation.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>Request to send a potentially malicious URI to WebRisk.</summary>
-    public class GoogleCloudWebriskV1SubmitUriRequest : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>Required. The submission that contains the URI to be scanned.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("submission")]
-        public virtual GoogleCloudWebriskV1Submission Submission { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1494,24 +1498,17 @@ namespace Google.Apis.WebRisk.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("error")]
         public virtual GoogleRpcStatus Error { get; set; }
 
-        /// <summary>
-        /// Service-specific metadata associated with the operation. It typically contains progress information and
-        /// common metadata such as create time. Some services might not provide such metadata. Any method that returns
-        /// a long-running operation should document the metadata type, if any.
-        /// </summary>
+        /// <summary>Contains a `SubmitUriMetadata` object.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
         public virtual System.Collections.Generic.IDictionary<string, object> Metadata { get; set; }
 
-        /// <summary>
-        /// The server-assigned name, which is only unique within the same service that originally returns it. If you
-        /// use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`.
-        /// </summary>
+        /// <summary>Matches the `/v1/{project-name}/operations/{operation-id}` pattern.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -1526,8 +1523,7 @@ namespace Google.Apis.WebRisk.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class GoogleProtobufEmpty : Google.Apis.Requests.IDirectResponseSchema
     {

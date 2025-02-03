@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.Vision.v1p2beta1
             Files = new FilesResource(this);
             Images = new ImagesResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://vision.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://vision.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.Vision.v1p2beta1
         public override string Name => "vision";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://vision.googleapis.com/";
-        #else
-            "https://vision.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://vision.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Vision API.</summary>
         public class Scope
@@ -304,7 +299,7 @@ namespace Google.Apis.Vision.v1p2beta1
         /// <param name="body">The body of the request.</param>
         public virtual AnnotateRequest Annotate(Google.Apis.Vision.v1p2beta1.Data.GoogleCloudVisionV1p2beta1BatchAnnotateFilesRequest body)
         {
-            return new AnnotateRequest(service, body);
+            return new AnnotateRequest(this.service, body);
         }
 
         /// <summary>
@@ -353,7 +348,7 @@ namespace Google.Apis.Vision.v1p2beta1
         /// <param name="body">The body of the request.</param>
         public virtual AsyncBatchAnnotateRequest AsyncBatchAnnotate(Google.Apis.Vision.v1p2beta1.Data.GoogleCloudVisionV1p2beta1AsyncBatchAnnotateFilesRequest body)
         {
-            return new AsyncBatchAnnotateRequest(service, body);
+            return new AsyncBatchAnnotateRequest(this.service, body);
         }
 
         /// <summary>
@@ -412,7 +407,7 @@ namespace Google.Apis.Vision.v1p2beta1
         /// <param name="body">The body of the request.</param>
         public virtual AnnotateRequest Annotate(Google.Apis.Vision.v1p2beta1.Data.GoogleCloudVisionV1p2beta1BatchAnnotateImagesRequest body)
         {
-            return new AnnotateRequest(service, body);
+            return new AnnotateRequest(this.service, body);
         }
 
         /// <summary>Run image detection and annotation for a batch of images.</summary>
@@ -457,7 +452,7 @@ namespace Google.Apis.Vision.v1p2beta1
         /// <param name="body">The body of the request.</param>
         public virtual AsyncBatchAnnotateRequest AsyncBatchAnnotate(Google.Apis.Vision.v1p2beta1.Data.GoogleCloudVisionV1p2beta1AsyncBatchAnnotateImagesRequest body)
         {
-            return new AsyncBatchAnnotateRequest(service, body);
+            return new AsyncBatchAnnotateRequest(this.service, body);
         }
 
         /// <summary>
@@ -548,7 +543,7 @@ namespace Google.Apis.Vision.v1p2beta1
             /// </param>
             public virtual AnnotateRequest Annotate(Google.Apis.Vision.v1p2beta1.Data.GoogleCloudVisionV1p2beta1BatchAnnotateFilesRequest body, string parent)
             {
-                return new AnnotateRequest(service, body, parent);
+                return new AnnotateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -621,7 +616,7 @@ namespace Google.Apis.Vision.v1p2beta1
             /// </param>
             public virtual AsyncBatchAnnotateRequest AsyncBatchAnnotate(Google.Apis.Vision.v1p2beta1.Data.GoogleCloudVisionV1p2beta1AsyncBatchAnnotateFilesRequest body, string parent)
             {
-                return new AsyncBatchAnnotateRequest(service, body, parent);
+                return new AsyncBatchAnnotateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -707,7 +702,7 @@ namespace Google.Apis.Vision.v1p2beta1
             /// </param>
             public virtual AnnotateRequest Annotate(Google.Apis.Vision.v1p2beta1.Data.GoogleCloudVisionV1p2beta1BatchAnnotateImagesRequest body, string parent)
             {
-                return new AnnotateRequest(service, body, parent);
+                return new AnnotateRequest(this.service, body, parent);
             }
 
             /// <summary>Run image detection and annotation for a batch of images.</summary>
@@ -776,7 +771,7 @@ namespace Google.Apis.Vision.v1p2beta1
             /// </param>
             public virtual AsyncBatchAnnotateRequest AsyncBatchAnnotate(Google.Apis.Vision.v1p2beta1.Data.GoogleCloudVisionV1p2beta1AsyncBatchAnnotateImagesRequest body, string parent)
             {
-                return new AsyncBatchAnnotateRequest(service, body, parent);
+                return new AsyncBatchAnnotateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -887,7 +882,7 @@ namespace Google.Apis.Vision.v1p2beta1
                 /// </param>
                 public virtual AnnotateRequest Annotate(Google.Apis.Vision.v1p2beta1.Data.GoogleCloudVisionV1p2beta1BatchAnnotateFilesRequest body, string parent)
                 {
-                    return new AnnotateRequest(service, body, parent);
+                    return new AnnotateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -961,7 +956,7 @@ namespace Google.Apis.Vision.v1p2beta1
                 /// </param>
                 public virtual AsyncBatchAnnotateRequest AsyncBatchAnnotate(Google.Apis.Vision.v1p2beta1.Data.GoogleCloudVisionV1p2beta1AsyncBatchAnnotateFilesRequest body, string parent)
                 {
-                    return new AsyncBatchAnnotateRequest(service, body, parent);
+                    return new AsyncBatchAnnotateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1048,7 +1043,7 @@ namespace Google.Apis.Vision.v1p2beta1
                 /// </param>
                 public virtual AnnotateRequest Annotate(Google.Apis.Vision.v1p2beta1.Data.GoogleCloudVisionV1p2beta1BatchAnnotateImagesRequest body, string parent)
                 {
-                    return new AnnotateRequest(service, body, parent);
+                    return new AnnotateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Run image detection and annotation for a batch of images.</summary>
@@ -1117,7 +1112,7 @@ namespace Google.Apis.Vision.v1p2beta1
                 /// </param>
                 public virtual AsyncBatchAnnotateRequest AsyncBatchAnnotate(Google.Apis.Vision.v1p2beta1.Data.GoogleCloudVisionV1p2beta1AsyncBatchAnnotateImagesRequest body, string parent)
                 {
-                    return new AsyncBatchAnnotateRequest(service, body, parent);
+                    return new AsyncBatchAnnotateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1339,19 +1334,85 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// </summary>
     public class BatchOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// The time when the batch request is finished and google.longrunning.Operation.done is set to true.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The current state of the batch operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _submitTimeRaw;
+
+        private object _submitTime;
+
         /// <summary>The time when the batch request was submitted to the server.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("submitTime")]
-        public virtual object SubmitTime { get; set; }
+        public virtual string SubmitTimeRaw
+        {
+            get => _submitTimeRaw;
+            set
+            {
+                _submitTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _submitTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="SubmitTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SubmitTimeDateTimeOffset instead.")]
+        public virtual object SubmitTime
+        {
+            get => _submitTime;
+            set
+            {
+                _submitTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _submitTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="SubmitTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SubmitTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(SubmitTimeRaw);
+            set => SubmitTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1406,15 +1467,15 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     }
 
     /// <summary>
-    /// Represents a color in the RGBA color space. This representation is designed for simplicity of conversion to/from
-    /// color representations in various languages over compactness. For example, the fields of this representation can
-    /// be trivially provided to the constructor of `java.awt.Color` in Java; it can also be trivially provided to
+    /// Represents a color in the RGBA color space. This representation is designed for simplicity of conversion to and
+    /// from color representations in various languages over compactness. For example, the fields of this representation
+    /// can be trivially provided to the constructor of `java.awt.Color` in Java; it can also be trivially provided to
     /// UIColor's `+colorWithRed:green:blue:alpha` method in iOS; and, with just a little work, it can be easily
-    /// formatted into a CSS `rgba()` string in JavaScript. This reference page doesn't carry information about the
-    /// absolute color space that should be used to interpret the RGB value (e.g. sRGB, Adobe RGB, DCI-P3, BT.2020,
-    /// etc.). By default, applications should assume the sRGB color space. When color equality needs to be decided,
+    /// formatted into a CSS `rgba()` string in JavaScript. This reference page doesn't have information about the
+    /// absolute color space that should be used to interpret the RGB value—for example, sRGB, Adobe RGB, DCI-P3, and
+    /// BT.2020. By default, applications should assume the sRGB color space. When color equality needs to be decided,
     /// implementations, unless documented otherwise, treat two colors as equal if all their red, green, blue, and alpha
-    /// values each differ by at most 1e-5. Example (Java): import com.google.type.Color; // ... public static
+    /// values each differ by at most `1e-5`. Example (Java): import com.google.type.Color; // ... public static
     /// java.awt.Color fromProto(Color protocolor) { float alpha = protocolor.hasAlpha() ?
     /// protocolor.getAlpha().getValue() : 1.0; return new java.awt.Color( protocolor.getRed(), protocolor.getGreen(),
     /// protocolor.getBlue(), alpha); } public static Color toProto(java.awt.Color color) { float red = (float)
@@ -2142,7 +2203,11 @@ namespace Google.Apis.Vision.v1p2beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A face-specific landmark (for example, a face feature).</summary>
+    /// <summary>
+    /// A face-specific landmark (for example, a face feature). Landmark positions may fall outside the bounds of the
+    /// image if the face is near one or more edges of the image. Therefore it is NOT guaranteed that `0 &amp;lt;= x
+    /// &amp;lt; width` or `0 &amp;lt;= y &amp;lt; height`.
+    /// </summary>
     public class GoogleCloudVisionV1p1beta1FaceAnnotationLandmark : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Face landmark position.</summary>
@@ -2313,17 +2378,83 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Contains metadata for the BatchAnnotateImages operation.</summary>
     public class GoogleCloudVisionV1p1beta1OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time when the batch request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Current state of the batch operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The time when the operation result was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2497,12 +2628,45 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Results for a product search request.</summary>
     public class GoogleCloudVisionV1p1beta1ProductSearchResults : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _indexTimeRaw;
+
+        private object _indexTime;
+
         /// <summary>
         /// Timestamp of the index which provided these results. Products added to the product set and products removed
         /// from the product set after this time are not reflected in the current results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("indexTime")]
-        public virtual object IndexTime { get; set; }
+        public virtual string IndexTimeRaw
+        {
+            get => _indexTimeRaw;
+            set
+            {
+                _indexTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _indexTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="IndexTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IndexTimeDateTimeOffset instead.")]
+        public virtual object IndexTime
+        {
+            get => _indexTime;
+            set
+            {
+                _indexTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _indexTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="IndexTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? IndexTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IndexTimeRaw);
+            set => IndexTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// List of results grouped by products detected in the query image. Each entry corresponds to one bounding
@@ -2635,7 +2799,10 @@ namespace Google.Apis.Vision.v1p2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("spoof")]
         public virtual string Spoof { get; set; }
 
-        /// <summary>Likelihood that this image contains violent content.</summary>
+        /// <summary>
+        /// Likelihood that this image contains violent content. Violent content may include death, serious harm, or
+        /// injury to individuals or groups of individuals.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("violence")]
         public virtual string Violence { get; set; }
 
@@ -3100,6 +3267,15 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     public class GoogleCloudVisionV1p2beta1AsyncBatchAnnotateFilesRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Optional. The labels with user-defined metadata for the request. Label keys and values can be no longer than
+        /// 63 characters (Unicode codepoints), can only contain lowercase letters, numeric characters, underscores and
+        /// dashes. International characters are allowed. Label values are optional. Label keys must start with a
+        /// letter.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
         /// Optional. Target project and location to make a call. Format:
         /// `projects/{project-id}/locations/{location-id}`. If no parent is specified, a region will be chosen
         /// automatically. Supported location-ids: `us`: USA country only, `asia`: East asia areas, like Japan, Taiwan,
@@ -3132,6 +3308,15 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Request for async image annotation for a list of images.</summary>
     public class GoogleCloudVisionV1p2beta1AsyncBatchAnnotateImagesRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional. The labels with user-defined metadata for the request. Label keys and values can be no longer than
+        /// 63 characters (Unicode codepoints), can only contain lowercase letters, numeric characters, underscores and
+        /// dashes. International characters are allowed. Label values are optional. Label keys must start with a
+        /// letter.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
         /// <summary>Required. The desired output location and metadata (e.g. format).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("outputConfig")]
         public virtual GoogleCloudVisionV1p2beta1OutputConfig OutputConfig { get; set; }
@@ -3156,6 +3341,15 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>A list of requests to annotate files using the BatchAnnotateFiles API.</summary>
     public class GoogleCloudVisionV1p2beta1BatchAnnotateFilesRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional. The labels with user-defined metadata for the request. Label keys and values can be no longer than
+        /// 63 characters (Unicode codepoints), can only contain lowercase letters, numeric characters, underscores and
+        /// dashes. International characters are allowed. Label values are optional. Label keys must start with a
+        /// letter.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
         /// <summary>
         /// Optional. Target project and location to make a call. Format:
         /// `projects/{project-id}/locations/{location-id}`. If no parent is specified, a region will be chosen
@@ -3193,6 +3387,15 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Multiple image annotation requests are batched into a single service call.</summary>
     public class GoogleCloudVisionV1p2beta1BatchAnnotateImagesRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional. The labels with user-defined metadata for the request. Label keys and values can be no longer than
+        /// 63 characters (Unicode codepoints), can only contain lowercase letters, numeric characters, underscores and
+        /// dashes. International characters are allowed. Label values are optional. Label keys must start with a
+        /// letter.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
         /// <summary>
         /// Optional. Target project and location to make a call. Format:
         /// `projects/{project-id}/locations/{location-id}`. If no parent is specified, a region will be chosen
@@ -3499,7 +3702,11 @@ namespace Google.Apis.Vision.v1p2beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A face-specific landmark (for example, a face feature).</summary>
+    /// <summary>
+    /// A face-specific landmark (for example, a face feature). Landmark positions may fall outside the bounds of the
+    /// image if the face is near one or more edges of the image. Therefore it is NOT guaranteed that `0 &amp;lt;= x
+    /// &amp;lt; width` or `0 &amp;lt;= y &amp;lt; height`.
+    /// </summary>
     public class GoogleCloudVisionV1p2beta1FaceAnnotationLandmark : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Face landmark position.</summary>
@@ -3529,7 +3736,8 @@ namespace Google.Apis.Vision.v1p2beta1.Data
 
         /// <summary>
         /// Model to use for the feature. Supported values: "builtin/stable" (the default if unset) and
-        /// "builtin/latest".
+        /// "builtin/latest". `DOCUMENT_TEXT_DETECTION` and `TEXT_DETECTION` also support "builtin/weekly" for the
+        /// bleeding edge release updated weekly.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("model")]
         public virtual string Model { get; set; }
@@ -3801,17 +4009,83 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Contains metadata for the BatchAnnotateImages operation.</summary>
     public class GoogleCloudVisionV1p2beta1OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time when the batch request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Current state of the batch operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The time when the operation result was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4026,12 +4300,45 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Results for a product search request.</summary>
     public class GoogleCloudVisionV1p2beta1ProductSearchResults : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _indexTimeRaw;
+
+        private object _indexTime;
+
         /// <summary>
         /// Timestamp of the index which provided these results. Products added to the product set and products removed
         /// from the product set after this time are not reflected in the current results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("indexTime")]
-        public virtual object IndexTime { get; set; }
+        public virtual string IndexTimeRaw
+        {
+            get => _indexTimeRaw;
+            set
+            {
+                _indexTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _indexTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="IndexTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IndexTimeDateTimeOffset instead.")]
+        public virtual object IndexTime
+        {
+            get => _indexTime;
+            set
+            {
+                _indexTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _indexTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="IndexTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? IndexTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IndexTimeRaw);
+            set => IndexTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// List of results grouped by products detected in the query image. Each entry corresponds to one bounding
@@ -4164,7 +4471,10 @@ namespace Google.Apis.Vision.v1p2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("spoof")]
         public virtual string Spoof { get; set; }
 
-        /// <summary>Likelihood that this image contains violent content.</summary>
+        /// <summary>
+        /// Likelihood that this image contains violent content. Violent content may include death, serious harm, or
+        /// injury to individuals or groups of individuals.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("violence")]
         public virtual string Violence { get; set; }
 
@@ -4276,6 +4586,15 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     public class GoogleCloudVisionV1p2beta1TextDetectionParams : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// A list of advanced OCR options to further fine-tune OCR behavior. Current valid values are: -
+        /// `legacy_layout`: a heuristics layout detection algorithm, which serves as an alternative to the current
+        /// ML-based layout detection algorithm. Customers can choose the best suitable layout algorithm based on their
+        /// situation.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("advancedOcrOptions")]
+        public virtual System.Collections.Generic.IList<string> AdvancedOcrOptions { get; set; }
+
+        /// <summary>
         /// By default, Cloud Vision API only includes confidence score for DOCUMENT_TEXT_DETECTION result. Set the flag
         /// to true to include confidence score for TEXT_DETECTION as well.
         /// </summary>
@@ -4343,7 +4662,7 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Parameters for web detection request.</summary>
     public class GoogleCloudVisionV1p2beta1WebDetectionParams : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Whether to include results derived from the geo information in the image.</summary>
+        /// <summary>This field has no effect on results.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("includeGeoResults")]
         public virtual System.Nullable<bool> IncludeGeoResults { get; set; }
 
@@ -4597,19 +4916,85 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// </summary>
     public class GoogleCloudVisionV1p3beta1BatchOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// The time when the batch request is finished and google.longrunning.Operation.done is set to true.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The current state of the batch operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _submitTimeRaw;
+
+        private object _submitTime;
+
         /// <summary>The time when the batch request was submitted to the server.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("submitTime")]
-        public virtual object SubmitTime { get; set; }
+        public virtual string SubmitTimeRaw
+        {
+            get => _submitTimeRaw;
+            set
+            {
+                _submitTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _submitTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="SubmitTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SubmitTimeDateTimeOffset instead.")]
+        public virtual object SubmitTime
+        {
+            get => _submitTime;
+            set
+            {
+                _submitTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _submitTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="SubmitTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SubmitTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(SubmitTimeRaw);
+            set => SubmitTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4877,7 +5262,11 @@ namespace Google.Apis.Vision.v1p2beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A face-specific landmark (for example, a face feature).</summary>
+    /// <summary>
+    /// A face-specific landmark (for example, a face feature). Landmark positions may fall outside the bounds of the
+    /// image if the face is near one or more edges of the image. Therefore it is NOT guaranteed that `0 &amp;lt;= x
+    /// &amp;lt; width` or `0 &amp;lt;= y &amp;lt; height`.
+    /// </summary>
     public class GoogleCloudVisionV1p3beta1FaceAnnotationLandmark : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Face landmark position.</summary>
@@ -5070,17 +5459,83 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Contains metadata for the BatchAnnotateImages operation.</summary>
     public class GoogleCloudVisionV1p3beta1OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time when the batch request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Current state of the batch operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The time when the operation result was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5254,12 +5709,45 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Results for a product search request.</summary>
     public class GoogleCloudVisionV1p3beta1ProductSearchResults : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _indexTimeRaw;
+
+        private object _indexTime;
+
         /// <summary>
         /// Timestamp of the index which provided these results. Products added to the product set and products removed
         /// from the product set after this time are not reflected in the current results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("indexTime")]
-        public virtual object IndexTime { get; set; }
+        public virtual string IndexTimeRaw
+        {
+            get => _indexTimeRaw;
+            set
+            {
+                _indexTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _indexTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="IndexTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IndexTimeDateTimeOffset instead.")]
+        public virtual object IndexTime
+        {
+            get => _indexTime;
+            set
+            {
+                _indexTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _indexTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="IndexTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? IndexTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IndexTimeRaw);
+            set => IndexTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// List of results grouped by products detected in the query image. Each entry corresponds to one bounding
@@ -5424,7 +5912,10 @@ namespace Google.Apis.Vision.v1p2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("spoof")]
         public virtual string Spoof { get; set; }
 
-        /// <summary>Likelihood that this image contains violent content.</summary>
+        /// <summary>
+        /// Likelihood that this image contains violent content. Violent content may include death, serious harm, or
+        /// injury to individuals or groups of individuals.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("violence")]
         public virtual string Violence { get; set; }
 
@@ -5855,19 +6346,85 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// </summary>
     public class GoogleCloudVisionV1p4beta1BatchOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// The time when the batch request is finished and google.longrunning.Operation.done is set to true.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The current state of the batch operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _submitTimeRaw;
+
+        private object _submitTime;
+
         /// <summary>The time when the batch request was submitted to the server.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("submitTime")]
-        public virtual object SubmitTime { get; set; }
+        public virtual string SubmitTimeRaw
+        {
+            get => _submitTimeRaw;
+            set
+            {
+                _submitTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _submitTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="SubmitTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SubmitTimeDateTimeOffset instead.")]
+        public virtual object SubmitTime
+        {
+            get => _submitTime;
+            set
+            {
+                _submitTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _submitTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="SubmitTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SubmitTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(SubmitTimeRaw);
+            set => SubmitTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6162,7 +6719,11 @@ namespace Google.Apis.Vision.v1p2beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A face-specific landmark (for example, a face feature).</summary>
+    /// <summary>
+    /// A face-specific landmark (for example, a face feature). Landmark positions may fall outside the bounds of the
+    /// image if the face is near one or more edges of the image. Therefore it is NOT guaranteed that `0 &amp;lt;= x
+    /// &amp;lt; width` or `0 &amp;lt;= y &amp;lt; height`.
+    /// </summary>
     public class GoogleCloudVisionV1p4beta1FaceAnnotationLandmark : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Face landmark position.</summary>
@@ -6370,17 +6931,83 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Contains metadata for the BatchAnnotateImages operation.</summary>
     public class GoogleCloudVisionV1p4beta1OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time when the batch request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Current state of the batch operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The time when the operation result was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6554,12 +7181,45 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Results for a product search request.</summary>
     public class GoogleCloudVisionV1p4beta1ProductSearchResults : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _indexTimeRaw;
+
+        private object _indexTime;
+
         /// <summary>
         /// Timestamp of the index which provided these results. Products added to the product set and products removed
         /// from the product set after this time are not reflected in the current results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("indexTime")]
-        public virtual object IndexTime { get; set; }
+        public virtual string IndexTimeRaw
+        {
+            get => _indexTimeRaw;
+            set
+            {
+                _indexTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _indexTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="IndexTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IndexTimeDateTimeOffset instead.")]
+        public virtual object IndexTime
+        {
+            get => _indexTime;
+            set
+            {
+                _indexTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _indexTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="IndexTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? IndexTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IndexTimeRaw);
+            set => IndexTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// List of results grouped by products detected in the query image. Each entry corresponds to one bounding
@@ -6724,7 +7384,10 @@ namespace Google.Apis.Vision.v1p2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("spoof")]
         public virtual string Spoof { get; set; }
 
-        /// <summary>Likelihood that this image contains violent content.</summary>
+        /// <summary>
+        /// Likelihood that this image contains violent content. Violent content may include death, serious harm, or
+        /// injury to individuals or groups of individuals.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("violence")]
         public virtual string Violence { get; set; }
 
@@ -7114,7 +7777,11 @@ namespace Google.Apis.Vision.v1p2beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A face-specific landmark (for example, a face feature).</summary>
+    /// <summary>
+    /// A face-specific landmark (for example, a face feature). Landmark positions may fall outside the bounds of the
+    /// image if the face is near one or more edges of the image. Therefore it is NOT guaranteed that `0 &amp;lt;= x
+    /// &amp;lt; width` or `0 &amp;lt;= y &amp;lt; height`.
+    /// </summary>
     public class Landmark : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Face landmark position.</summary>
@@ -7263,8 +7930,8 @@ namespace Google.Apis.Vision.v1p2beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -7279,17 +7946,83 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Contains metadata for the BatchAnnotateImages operation.</summary>
     public class OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time when the batch request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Current state of the batch operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The time when the operation result was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7444,12 +8177,45 @@ namespace Google.Apis.Vision.v1p2beta1.Data
     /// <summary>Results for a product search request.</summary>
     public class ProductSearchResults : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _indexTimeRaw;
+
+        private object _indexTime;
+
         /// <summary>
         /// Timestamp of the index which provided these results. Products added to the product set and products removed
         /// from the product set after this time are not reflected in the current results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("indexTime")]
-        public virtual object IndexTime { get; set; }
+        public virtual string IndexTimeRaw
+        {
+            get => _indexTimeRaw;
+            set
+            {
+                _indexTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _indexTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="IndexTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IndexTimeDateTimeOffset instead.")]
+        public virtual object IndexTime
+        {
+            get => _indexTime;
+            set
+            {
+                _indexTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _indexTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="IndexTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? IndexTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IndexTimeRaw);
+            set => IndexTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// List of results grouped by products detected in the query image. Each entry corresponds to one bounding
@@ -7569,7 +8335,10 @@ namespace Google.Apis.Vision.v1p2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("spoof")]
         public virtual string Spoof { get; set; }
 
-        /// <summary>Likelihood that this image contains violent content.</summary>
+        /// <summary>
+        /// Likelihood that this image contains violent content. Violent content may include death, serious harm, or
+        /// injury to individuals or groups of individuals.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("violence")]
         public virtual string Violence { get; set; }
 

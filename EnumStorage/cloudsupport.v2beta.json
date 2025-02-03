@@ -1,0 +1,30 @@
+{
+  "Google.Apis.CloudSupport.v2beta.CaseClassificationsResource+SearchRequest.ProductProductLineEnum": [
+    "PRODUCT_LINE_UNSPECIFIED",
+    "GOOGLE_CLOUD",
+    "GOOGLE_MAPS"
+  ],
+  "Google.Apis.CloudSupport.v2beta.CasesResource+ListRequest.ProductLineEnum": [
+    "PRODUCT_LINE_UNSPECIFIED",
+    "GOOGLE_CLOUD",
+    "GOOGLE_MAPS"
+  ],
+  "Google.Apis.CloudSupport.v2beta.CloudSupportBaseServiceRequest<<TResponse>>.AltEnum": [
+    "json",
+    "media",
+    "proto"
+  ],
+  "Google.Apis.CloudSupport.v2beta.CloudSupportBaseServiceRequest<<TResponse>>.XgafvEnum": [
+    "1",
+    "2"
+  ],
+  "Google.Apis.CloudSupport.v2beta.MediaResource+UploadMediaUpload.AltEnum": [
+    "json",
+    "media",
+    "proto"
+  ],
+  "Google.Apis.CloudSupport.v2beta.MediaResource+UploadMediaUpload.XgafvEnum": [
+    "1",
+    "2"
+  ]
+}

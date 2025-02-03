@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,6 +47,8 @@ namespace Google.Apis.Books.v1
             Promooffer = new PromoofferResource(this);
             Series = new SeriesResource(this);
             Volumes = new VolumesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://books.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://books.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -56,23 +58,16 @@ namespace Google.Apis.Books.v1
         public override string Name => "books";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://books.googleapis.com/";
-        #else
-            "https://books.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://books.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Books API.</summary>
         public class Scope
@@ -346,7 +341,7 @@ namespace Google.Apis.Books.v1
             /// <param name="shelf">ID of bookshelf to retrieve volumes.</param>
             public virtual ListRequest List(string userId, string shelf)
             {
-                return new ListRequest(service, userId, shelf);
+                return new ListRequest(this.service, userId, shelf);
             }
 
             /// <summary>Retrieves volumes in a specific bookshelf for the specified user.</summary>
@@ -454,7 +449,7 @@ namespace Google.Apis.Books.v1
         /// <param name="shelf">ID of bookshelf to retrieve.</param>
         public virtual GetRequest Get(string userId, string shelf)
         {
-            return new GetRequest(service, userId, shelf);
+            return new GetRequest(this.service, userId, shelf);
         }
 
         /// <summary>Retrieves metadata for a specific bookshelf for the specified user.</summary>
@@ -524,7 +519,7 @@ namespace Google.Apis.Books.v1
         /// <param name="userId">ID of user for whom to retrieve bookshelves.</param>
         public virtual ListRequest List(string userId)
         {
-            return new ListRequest(service, userId);
+            return new ListRequest(this.service, userId);
         }
 
         /// <summary>Retrieves a list of public bookshelves for the specified user.</summary>
@@ -595,7 +590,7 @@ namespace Google.Apis.Books.v1
         /// <summary>Add a user-upload volume and triggers processing.</summary>
         public virtual AddBookRequest AddBook()
         {
-            return new AddBookRequest(service);
+            return new AddBookRequest(this.service);
         }
 
         /// <summary>Add a user-upload volume and triggers processing.</summary>
@@ -675,7 +670,7 @@ namespace Google.Apis.Books.v1
         /// <param name="volumeId">The id of the book to be removed.</param>
         public virtual DeleteBookRequest DeleteBook(string volumeId)
         {
-            return new DeleteBookRequest(service, volumeId);
+            return new DeleteBookRequest(this.service, volumeId);
         }
 
         /// <summary>Remove the book and its contents</summary>
@@ -720,7 +715,7 @@ namespace Google.Apis.Books.v1
         /// <param name="body">The body of the request.</param>
         public virtual UpdateBookRequest UpdateBook(Google.Apis.Books.v1.Data.BooksCloudloadingResource body)
         {
-            return new UpdateBookRequest(service, body);
+            return new UpdateBookRequest(this.service, body);
         }
 
         /// <summary>Updates a user-upload volume.</summary>
@@ -774,7 +769,7 @@ namespace Google.Apis.Books.v1
         /// <param name="cpksver">The device/version ID from which to request the data.</param>
         public virtual ListOfflineMetadataRequest ListOfflineMetadata(string cpksver)
         {
-            return new ListOfflineMetadataRequest(service, cpksver);
+            return new ListOfflineMetadataRequest(this.service, cpksver);
         }
 
         /// <summary>Returns a list of offline dictionary metadata available</summary>
@@ -833,7 +828,7 @@ namespace Google.Apis.Books.v1
         /// <summary>Gets information regarding the family that the user is part of.</summary>
         public virtual GetFamilyInfoRequest GetFamilyInfo()
         {
-            return new GetFamilyInfoRequest(service);
+            return new GetFamilyInfoRequest(this.service);
         }
 
         /// <summary>Gets information regarding the family that the user is part of.</summary>
@@ -878,7 +873,7 @@ namespace Google.Apis.Books.v1
         /// </summary>
         public virtual ShareRequest Share()
         {
-            return new ShareRequest(service);
+            return new ShareRequest(this.service);
         }
 
         /// <summary>
@@ -950,7 +945,7 @@ namespace Google.Apis.Books.v1
         /// </summary>
         public virtual UnshareRequest Unshare()
         {
-            return new UnshareRequest(service);
+            return new UnshareRequest(this.service);
         }
 
         /// <summary>
@@ -1058,7 +1053,7 @@ namespace Google.Apis.Books.v1
             /// <param name="contentVersion">The content version for the volume you are trying to retrieve.</param>
             public virtual GetRequest Get(string volumeId, string layerId, string annotationDataId, string contentVersion)
             {
-                return new GetRequest(service, volumeId, layerId, annotationDataId, contentVersion);
+                return new GetRequest(this.service, volumeId, layerId, annotationDataId, contentVersion);
             }
 
             /// <summary>Gets the annotation data.</summary>
@@ -1222,7 +1217,7 @@ namespace Google.Apis.Books.v1
             /// <param name="contentVersion">The content version for the requested volume.</param>
             public virtual ListRequest List(string volumeId, string layerId, string contentVersion)
             {
-                return new ListRequest(service, volumeId, layerId, contentVersion);
+                return new ListRequest(this.service, volumeId, layerId, contentVersion);
             }
 
             /// <summary>Gets the annotation data for a volume and layer.</summary>
@@ -1443,7 +1438,7 @@ namespace Google.Apis.Books.v1
             /// <param name="annotationId">The ID of the volume annotation to retrieve.</param>
             public virtual GetRequest Get(string volumeId, string layerId, string annotationId)
             {
-                return new GetRequest(service, volumeId, layerId, annotationId);
+                return new GetRequest(this.service, volumeId, layerId, annotationId);
             }
 
             /// <summary>Gets the volume annotation.</summary>
@@ -1542,7 +1537,7 @@ namespace Google.Apis.Books.v1
             /// <param name="contentVersion">The content version for the requested volume.</param>
             public virtual ListRequest List(string volumeId, string layerId, string contentVersion)
             {
-                return new ListRequest(service, volumeId, layerId, contentVersion);
+                return new ListRequest(this.service, volumeId, layerId, contentVersion);
             }
 
             /// <summary>Gets the volume annotations for a volume and layer.</summary>
@@ -1766,7 +1761,7 @@ namespace Google.Apis.Books.v1
         /// <param name="summaryId">The ID for the layer to get the summary for.</param>
         public virtual GetRequest Get(string volumeId, string summaryId)
         {
-            return new GetRequest(service, volumeId, summaryId);
+            return new GetRequest(this.service, volumeId, summaryId);
         }
 
         /// <summary>Gets the layer summary for a volume.</summary>
@@ -1848,7 +1843,7 @@ namespace Google.Apis.Books.v1
         /// <param name="volumeId">The volume to retrieve layers for.</param>
         public virtual ListRequest List(string volumeId)
         {
-            return new ListRequest(service, volumeId);
+            return new ListRequest(this.service, volumeId);
         }
 
         /// <summary>List the layer summaries for a volume.</summary>
@@ -1955,7 +1950,7 @@ namespace Google.Apis.Books.v1
         /// <summary>Gets the current settings for the user.</summary>
         public virtual GetUserSettingsRequest GetUserSettings()
         {
-            return new GetUserSettingsRequest(service);
+            return new GetUserSettingsRequest(this.service);
         }
 
         /// <summary>Gets the current settings for the user.</summary>
@@ -2000,7 +1995,7 @@ namespace Google.Apis.Books.v1
         /// <param name="volumeIds">The volume(s) to release restrictions for.</param>
         public virtual ReleaseDownloadAccessRequest ReleaseDownloadAccess(string cpksver, Google.Apis.Util.Repeatable<string> volumeIds)
         {
-            return new ReleaseDownloadAccessRequest(service, cpksver, volumeIds);
+            return new ReleaseDownloadAccessRequest(this.service, cpksver, volumeIds);
         }
 
         /// <summary>Release downloaded content access restriction.</summary>
@@ -2085,7 +2080,7 @@ namespace Google.Apis.Books.v1
         /// <param name="volumeId">The volume to request concurrent/download restrictions for.</param>
         public virtual RequestAccessRequest RequestAccess(string cpksver, string nonce, string source, string volumeId)
         {
-            return new RequestAccessRequest(service, cpksver, nonce, source, volumeId);
+            return new RequestAccessRequest(this.service, cpksver, nonce, source, volumeId);
         }
 
         /// <summary>Request concurrent and download access restrictions.</summary>
@@ -2215,7 +2210,7 @@ namespace Google.Apis.Books.v1
         /// <param name="source">String to identify the originator of this request.</param>
         public virtual SyncVolumeLicensesRequest SyncVolumeLicenses(string cpksver, string nonce, string source)
         {
-            return new SyncVolumeLicensesRequest(service, cpksver, nonce, source);
+            return new SyncVolumeLicensesRequest(this.service, cpksver, nonce, source);
         }
 
         /// <summary>Request downloaded content access for specified volumes on the My eBooks shelf.</summary>
@@ -2373,7 +2368,7 @@ namespace Google.Apis.Books.v1
         /// <param name="body">The body of the request.</param>
         public virtual UpdateUserSettingsRequest UpdateUserSettings(Google.Apis.Books.v1.Data.Usersettings body)
         {
-            return new UpdateUserSettingsRequest(service, body);
+            return new UpdateUserSettingsRequest(this.service, body);
         }
 
         /// <summary>
@@ -2450,7 +2445,7 @@ namespace Google.Apis.Books.v1
             /// <param name="annotationId">The ID for the annotation to delete.</param>
             public virtual DeleteRequest Delete(string annotationId)
             {
-                return new DeleteRequest(service, annotationId);
+                return new DeleteRequest(this.service, annotationId);
             }
 
             /// <summary>Deletes an annotation.</summary>
@@ -2507,7 +2502,7 @@ namespace Google.Apis.Books.v1
             /// <param name="body">The body of the request.</param>
             public virtual InsertRequest Insert(Google.Apis.Books.v1.Data.Annotation body)
             {
-                return new InsertRequest(service, body);
+                return new InsertRequest(this.service, body);
             }
 
             /// <summary>Inserts a new annotation.</summary>
@@ -2595,7 +2590,7 @@ namespace Google.Apis.Books.v1
             /// <summary>Retrieves a list of annotations, possibly filtered.</summary>
             public virtual ListRequest List()
             {
-                return new ListRequest(service);
+                return new ListRequest(this.service);
             }
 
             /// <summary>Retrieves a list of annotations, possibly filtered.</summary>
@@ -2753,7 +2748,7 @@ namespace Google.Apis.Books.v1
             /// <param name="volumeId">Volume id to get the summary for.</param>
             public virtual SummaryRequest Summary(Google.Apis.Util.Repeatable<string> layerIds, string volumeId)
             {
-                return new SummaryRequest(service, layerIds, volumeId);
+                return new SummaryRequest(this.service, layerIds, volumeId);
             }
 
             /// <summary>Gets the summary of specified layers.</summary>
@@ -2774,6 +2769,10 @@ namespace Google.Apis.Books.v1
                 /// <summary>Volume id to get the summary for.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("volumeId", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string VolumeId { get; private set; }
+
+                /// <summary>Optional. String to identify the originator of this request.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("source", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Source { get; set; }
 
                 /// <summary>Gets the method name.</summary>
                 public override string MethodName => "summary";
@@ -2804,6 +2803,14 @@ namespace Google.Apis.Books.v1
                         DefaultValue = null,
                         Pattern = null,
                     });
+                    RequestParameters.Add("source", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "source",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                 }
             }
 
@@ -2812,7 +2819,7 @@ namespace Google.Apis.Books.v1
             /// <param name="annotationId">The ID for the annotation to update.</param>
             public virtual UpdateRequest Update(Google.Apis.Books.v1.Data.Annotation body, string annotationId)
             {
-                return new UpdateRequest(service, body, annotationId);
+                return new UpdateRequest(this.service, body, annotationId);
             }
 
             /// <summary>Updates an existing annotation.</summary>
@@ -2912,7 +2919,7 @@ namespace Google.Apis.Books.v1
                 /// <param name="shelf">The bookshelf ID or name retrieve volumes for.</param>
                 public virtual ListRequest List(string shelf)
                 {
-                    return new ListRequest(service, shelf);
+                    return new ListRequest(this.service, shelf);
                 }
 
                 /// <summary>Gets volume information for volumes on a bookshelf.</summary>
@@ -3059,7 +3066,7 @@ namespace Google.Apis.Books.v1
             /// <param name="volumeId">ID of volume to add.</param>
             public virtual AddVolumeRequest AddVolume(string shelf, string volumeId)
             {
-                return new AddVolumeRequest(service, shelf, volumeId);
+                return new AddVolumeRequest(this.service, shelf, volumeId);
             }
 
             /// <summary>Adds a volume to a bookshelf.</summary>
@@ -3161,7 +3168,7 @@ namespace Google.Apis.Books.v1
             /// <param name="shelf">ID of bookshelf from which to remove a volume.</param>
             public virtual ClearVolumesRequest ClearVolumes(string shelf)
             {
-                return new ClearVolumesRequest(service, shelf);
+                return new ClearVolumesRequest(this.service, shelf);
             }
 
             /// <summary>Clears all volumes from a bookshelf.</summary>
@@ -3218,7 +3225,7 @@ namespace Google.Apis.Books.v1
             /// <param name="shelf">ID of bookshelf to retrieve.</param>
             public virtual GetRequest Get(string shelf)
             {
-                return new GetRequest(service, shelf);
+                return new GetRequest(this.service, shelf);
             }
 
             /// <summary>Retrieves metadata for a specific bookshelf belonging to the authenticated user.</summary>
@@ -3274,7 +3281,7 @@ namespace Google.Apis.Books.v1
             /// <summary>Retrieves a list of bookshelves belonging to the authenticated user.</summary>
             public virtual ListRequest List()
             {
-                return new ListRequest(service);
+                return new ListRequest(this.service);
             }
 
             /// <summary>Retrieves a list of bookshelves belonging to the authenticated user.</summary>
@@ -3323,7 +3330,7 @@ namespace Google.Apis.Books.v1
             /// </param>
             public virtual MoveVolumeRequest MoveVolume(string shelf, string volumeId, int volumePosition)
             {
-                return new MoveVolumeRequest(service, shelf, volumeId, volumePosition);
+                return new MoveVolumeRequest(this.service, shelf, volumeId, volumePosition);
             }
 
             /// <summary>Moves a volume within a bookshelf.</summary>
@@ -3410,7 +3417,7 @@ namespace Google.Apis.Books.v1
             /// <param name="volumeId">ID of volume to remove.</param>
             public virtual RemoveVolumeRequest RemoveVolume(string shelf, string volumeId)
             {
-                return new RemoveVolumeRequest(service, shelf, volumeId);
+                return new RemoveVolumeRequest(this.service, shelf, volumeId);
             }
 
             /// <summary>Removes a volume from a bookshelf.</summary>
@@ -3522,7 +3529,7 @@ namespace Google.Apis.Books.v1
             /// <param name="volumeId">ID of volume for which to retrieve a reading position.</param>
             public virtual GetRequest Get(string volumeId)
             {
-                return new GetRequest(service, volumeId);
+                return new GetRequest(this.service, volumeId);
             }
 
             /// <summary>Retrieves my reading position information for a volume.</summary>
@@ -3593,7 +3600,7 @@ namespace Google.Apis.Books.v1
             /// <param name="timestamp">RFC 3339 UTC format timestamp associated with this reading position.</param>
             public virtual SetPositionRequest SetPosition(string volumeId, string position, string timestamp)
             {
-                return new SetPositionRequest(service, volumeId, position, timestamp);
+                return new SetPositionRequest(this.service, volumeId, position, timestamp);
             }
 
             /// <summary>Sets my reading position information for a volume.</summary>
@@ -3760,7 +3767,7 @@ namespace Google.Apis.Books.v1
         /// <param name="notificationId">String to identify the notification.</param>
         public virtual GetRequest Get(string notificationId)
         {
-            return new GetRequest(service, notificationId);
+            return new GetRequest(this.service, notificationId);
         }
 
         /// <summary>Returns notification details for a given notification id.</summary>
@@ -3846,7 +3853,7 @@ namespace Google.Apis.Books.v1
         /// <summary>List categories for onboarding experience.</summary>
         public virtual ListCategoriesRequest ListCategories()
         {
-            return new ListCategoriesRequest(service);
+            return new ListCategoriesRequest(this.service);
         }
 
         /// <summary>List categories for onboarding experience.</summary>
@@ -3889,7 +3896,7 @@ namespace Google.Apis.Books.v1
         /// <summary>List available volumes under categories for onboarding experience.</summary>
         public virtual ListCategoryVolumesRequest ListCategoryVolumes()
         {
-            return new ListCategoryVolumesRequest(service);
+            return new ListCategoryVolumesRequest(this.service);
         }
 
         /// <summary>List available volumes under categories for onboarding experience.</summary>
@@ -4017,7 +4024,7 @@ namespace Google.Apis.Books.v1
         /// <summary>Returns a stream of personalized book clusters</summary>
         public virtual GetRequest Get()
         {
-            return new GetRequest(service);
+            return new GetRequest(this.service);
         }
 
         /// <summary>Returns a stream of personalized book clusters</summary>
@@ -4123,7 +4130,7 @@ namespace Google.Apis.Books.v1
         /// <summary>Accepts the promo offer.</summary>
         public virtual AcceptRequest Accept()
         {
-            return new AcceptRequest(service);
+            return new AcceptRequest(this.service);
         }
 
         /// <summary>Accepts the promo offer.</summary>
@@ -4249,7 +4256,7 @@ namespace Google.Apis.Books.v1
         /// <summary>Marks the promo offer as dismissed.</summary>
         public virtual DismissRequest Dismiss()
         {
-            return new DismissRequest(service);
+            return new DismissRequest(this.service);
         }
 
         /// <summary>Marks the promo offer as dismissed.</summary>
@@ -4364,7 +4371,7 @@ namespace Google.Apis.Books.v1
         /// <summary>Returns a list of promo offers available to the user</summary>
         public virtual GetRequest Get()
         {
-            return new GetRequest(service);
+            return new GetRequest(this.service);
         }
 
         /// <summary>Returns a list of promo offers available to the user</summary>
@@ -4501,7 +4508,7 @@ namespace Google.Apis.Books.v1
             /// <param name="seriesId">String that identifies the series</param>
             public virtual GetRequest Get(string seriesId)
             {
-                return new GetRequest(service, seriesId);
+                return new GetRequest(this.service, seriesId);
             }
 
             /// <summary>Returns Series membership data given the series id.</summary>
@@ -4571,7 +4578,7 @@ namespace Google.Apis.Books.v1
         /// <param name="seriesId">String that identifies the series</param>
         public virtual GetRequest Get(Google.Apis.Util.Repeatable<string> seriesId)
         {
-            return new GetRequest(service, seriesId);
+            return new GetRequest(this.service, seriesId);
         }
 
         /// <summary>Returns Series metadata for the given series ids.</summary>
@@ -4652,7 +4659,7 @@ namespace Google.Apis.Books.v1
             /// <param name="volumeId">ID of the source volume.</param>
             public virtual ListRequest List(string volumeId)
             {
-                return new ListRequest(service, volumeId);
+                return new ListRequest(this.service, volumeId);
             }
 
             /// <summary>Return a list of associated books.</summary>
@@ -4806,7 +4813,7 @@ namespace Google.Apis.Books.v1
             /// <summary>Return a list of books in My Library.</summary>
             public virtual ListRequest List()
             {
-                return new ListRequest(service);
+                return new ListRequest(this.service);
             }
 
             /// <summary>Return a list of books in My Library.</summary>
@@ -5034,7 +5041,7 @@ namespace Google.Apis.Books.v1
             /// <summary>Return a list of recommended books for the current user.</summary>
             public virtual ListRequest List()
             {
-                return new ListRequest(service);
+                return new ListRequest(this.service);
             }
 
             /// <summary>Return a list of recommended books for the current user.</summary>
@@ -5127,7 +5134,7 @@ namespace Google.Apis.Books.v1
             /// <param name="volumeId">ID of the source volume.</param>
             public virtual RateRequest Rate(RateRequest.RatingEnum rating, string volumeId)
             {
-                return new RateRequest(service, rating, volumeId);
+                return new RateRequest(this.service, rating, volumeId);
             }
 
             /// <summary>Rate a recommended book for the current user.</summary>
@@ -5244,7 +5251,7 @@ namespace Google.Apis.Books.v1
             /// <summary>Return a list of books uploaded by the current user.</summary>
             public virtual ListRequest List()
             {
-                return new ListRequest(service);
+                return new ListRequest(this.service);
             }
 
             /// <summary>Return a list of books uploaded by the current user.</summary>
@@ -5386,7 +5393,7 @@ namespace Google.Apis.Books.v1
         /// <param name="volumeId">ID of volume to retrieve.</param>
         public virtual GetRequest Get(string volumeId)
         {
-            return new GetRequest(service, volumeId);
+            return new GetRequest(this.service, volumeId);
         }
 
         /// <summary>Gets volume information for a single volume.</summary>
@@ -5518,7 +5525,7 @@ namespace Google.Apis.Books.v1
         /// <param name="q">Full-text search query string.</param>
         public virtual ListRequest List(string q)
         {
-            return new ListRequest(service, q);
+            return new ListRequest(this.service, q);
         }
 
         /// <summary>Performs a book search.</summary>
@@ -6644,8 +6651,7 @@ namespace Google.Apis.Books.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.ResourceSettings.v1
             Folders = new FoldersResource(this);
             Organizations = new OrganizationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://resourcesettings.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://resourcesettings.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.ResourceSettings.v1
         public override string Name => "resourcesettings";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://resourcesettings.googleapis.com/";
-        #else
-            "https://resourcesettings.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://resourcesettings.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Resource Settings API.</summary>
         public class Scope
@@ -316,7 +311,7 @@ namespace Google.Apis.ResourceSettings.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -405,7 +400,7 @@ namespace Google.Apis.ResourceSettings.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all the settings that are available on the Cloud resource `parent`.</summary>
@@ -529,7 +524,7 @@ namespace Google.Apis.ResourceSettings.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.ResourceSettings.v1.Data.GoogleCloudResourcesettingsV1Setting body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -633,7 +628,7 @@ namespace Google.Apis.ResourceSettings.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -722,7 +717,7 @@ namespace Google.Apis.ResourceSettings.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all the settings that are available on the Cloud resource `parent`.</summary>
@@ -846,7 +841,7 @@ namespace Google.Apis.ResourceSettings.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.ResourceSettings.v1.Data.GoogleCloudResourcesettingsV1Setting body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -950,7 +945,7 @@ namespace Google.Apis.ResourceSettings.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -1039,7 +1034,7 @@ namespace Google.Apis.ResourceSettings.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all the settings that are available on the Cloud resource `parent`.</summary>
@@ -1163,7 +1158,7 @@ namespace Google.Apis.ResourceSettings.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.ResourceSettings.v1.Data.GoogleCloudResourcesettingsV1Setting body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>

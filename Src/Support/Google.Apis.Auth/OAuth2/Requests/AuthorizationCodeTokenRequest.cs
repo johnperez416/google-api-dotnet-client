@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-using System;
+using Google.Apis.Util;
 
 namespace Google.Apis.Auth.OAuth2.Requests
 {
@@ -25,14 +25,23 @@ namespace Google.Apis.Auth.OAuth2.Requests
     public class AuthorizationCodeTokenRequest : TokenRequest
     {
         /// <summary>Gets or sets the authorization code received from the authorization server.</summary>
-        [Google.Apis.Util.RequestParameterAttribute("code")]
+        [RequestParameter("code")]
         public string Code { get; set; }
 
         /// <summary>
         /// Gets or sets the redirect URI parameter matching the redirect URI parameter in the authorization request.
         /// </summary>
-        [Google.Apis.Util.RequestParameterAttribute("redirect_uri")]
+        [RequestParameter("redirect_uri")]
         public string RedirectUri { get; set; }
+
+
+        /// <summary>
+        /// Gets or sets the code verifier matching the code challenge in the authorization request.
+        /// See https://developers.google.com/identity/protocols/oauth2/native-app#exchange-authorization-code
+        /// for more information.
+        /// </summary>
+        [RequestParameter("code_verifier")]
+        public string CodeVerifier { get; set; }
 
         /// <summary>
         /// Constructs a new authorization code token request and sets grant_type to <c>authorization_code</c>.

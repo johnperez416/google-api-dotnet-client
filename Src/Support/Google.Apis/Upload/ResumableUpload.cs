@@ -14,24 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+using Google.Apis.Http;
+using Google.Apis.Json;
+using Google.Apis.Logging;
+using Google.Apis.Requests;
+using Google.Apis.Responses;
+using Google.Apis.Services;
+using Google.Apis.Testing;
+using Google.Apis.Util;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Reflection;
-
-using Google.Apis.Http;
-using Google.Apis.Logging;
-using Google.Apis.Media;
-using Google.Apis.Requests;
-using Google.Apis.Services;
-using Google.Apis.Testing;
-using Google.Apis.Util;
-using System.Collections.Generic;
 
 namespace Google.Apis.Upload
 {
@@ -231,9 +231,8 @@ namespace Google.Apis.Upload
 
             public void AddToRequest(HttpRequestMessage request)
             {
-                // This assumes the property hasn't been set elsewhere - but that's reasonable as we're creating the messages ourselves in this class.
-                request.Properties[ConfigurableMessageHandler.ExceptionHandlerKey] = new List<IHttpExceptionHandler> { this };
-                request.Properties[ConfigurableMessageHandler.UnsuccessfulResponseHandlerKey] = new List<IHttpUnsuccessfulResponseHandler> { this };
+                request.SetOption(ConfigurableMessageHandler.ExceptionHandlerKey,new List<IHttpExceptionHandler> { this });
+                request.SetOption(ConfigurableMessageHandler.UnsuccessfulResponseHandlerKey, new List<IHttpUnsuccessfulResponseHandler> { this });
             }
 
             public Task<bool> HandleResponseAsync(HandleUnsuccessfulResponseArgs args)
@@ -283,7 +282,7 @@ namespace Google.Apis.Upload
         #region Progress Monitoring
 
         /// <summary>Class that communicates the progress of resumable uploads to a container.</summary>
-        private class ResumableUploadProgress : IUploadProgress
+        internal class ResumableUploadProgress : IUploadProgress
         {
             /// <summary>
             /// Create a ResumableUploadProgress instance.
@@ -306,11 +305,18 @@ namespace Google.Apis.Upload
                 Status = UploadStatus.Failed;
                 BytesSent = bytesSent;
                 Exception = exception;
+                ExceptionDispatchInfo = ExceptionDispatchInfo.Capture(exception);
             }
 
-            public UploadStatus Status { get; private set; }
-            public long BytesSent { get; private set; }
-            public Exception Exception { get; private set; }
+            public UploadStatus Status { get; }
+            public long BytesSent { get; }
+            public Exception Exception { get; }
+
+            /// <summary>
+            /// The original dispatch information for <see cref="Exception"/>. This is null
+            /// if and only if <see cref="Exception"/> is null.
+            /// </summary>
+            public ExceptionDispatchInfo ExceptionDispatchInfo { get; }
         }
 
         /// <summary>
@@ -685,9 +691,17 @@ namespace Google.Apis.Upload
         /// </summary>
         /// <param name="response">The error response.</param>
         /// <returns>An exception which can be thrown by the caller.</returns>
-        protected Task<GoogleApiException> ExceptionForResponseAsync(HttpResponseMessage response)
+        protected async Task<GoogleApiException> ExceptionForResponseAsync(HttpResponseMessage response)
         {
-            return MediaApiErrorHandling.ExceptionForResponseAsync(Options?.Serializer, Options?.ServiceName, response);
+            string effectiveServiceName = Options?.ServiceName ?? "";
+            RequestError error = await response
+                .DeserializeErrorAsync(effectiveServiceName, Options?.Serializer ?? NewtonsoftJsonSerializer.Instance)
+                .ConfigureAwait(false);
+            return new GoogleApiException(effectiveServiceName)
+            {
+                Error = error,
+                HttpStatusCode = response.StatusCode
+            };
         }
 
         /// <summary>A callback when the media was uploaded successfully.</summary>
@@ -1175,7 +1189,7 @@ namespace Google.Apis.Upload
 
                 if (attribute != null)
                 {
-                    string name = attribute.Name ?? property.Name.ToLower();
+                    string name = attribute.Name ?? property.Name.ToLowerInvariant();
                     object value = property.GetValue(this, null);
                     if (value != null)
                     {

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.FirebaseCloudMessaging.v1
         public FirebaseCloudMessagingService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://fcm.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://fcm.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.FirebaseCloudMessaging.v1
         public override string Name => "fcm";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://fcm.googleapis.com/";
-        #else
-            "https://fcm.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://fcm.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Firebase Cloud Messaging API.</summary>
         public class Scope
@@ -314,7 +309,7 @@ namespace Google.Apis.FirebaseCloudMessaging.v1
             /// </param>
             public virtual SendRequest Send(Google.Apis.FirebaseCloudMessaging.v1.Data.SendMessageRequest body, string parent)
             {
-                return new SendRequest(service, body, parent);
+                return new SendRequest(this.service, body, parent);
             }
 
             /// <summary>Send a message to specified target (a registration token, topic or condition).</summary>
@@ -468,6 +463,12 @@ namespace Google.Apis.FirebaseCloudMessaging.v1.Data
         public virtual string BodyLocKey { get; set; }
 
         /// <summary>
+        /// If set, display notifications delivered to the device will be handled by the app instead of the proxy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bypassProxyNotification")]
+        public virtual System.Nullable<bool> BypassProxyNotification { get; set; }
+
+        /// <summary>
         /// The [notification's channel
         /// id](https://developer.android.com/guide/topics/ui/notifiers/notifications#ManageChannels) (new in Android
         /// O). The app must create a channel with this channel ID before any notification with this channel ID is
@@ -516,13 +517,46 @@ namespace Google.Apis.FirebaseCloudMessaging.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("defaultVibrateTimings")]
         public virtual System.Nullable<bool> DefaultVibrateTimings { get; set; }
 
+        private string _eventTimeRaw;
+
+        private object _eventTime;
+
         /// <summary>
         /// Set the time that the event in the notification occurred. Notifications in the panel are sorted by this
         /// time. A point in time is represented using
         /// [protobuf.Timestamp](https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/Timestamp).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("eventTime")]
-        public virtual object EventTime { get; set; }
+        public virtual string EventTimeRaw
+        {
+            get => _eventTimeRaw;
+            set
+            {
+                _eventTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _eventTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EventTimeDateTimeOffset instead.")]
+        public virtual object EventTime
+        {
+            get => _eventTime;
+            set
+            {
+                _eventTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _eventTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EventTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EventTimeRaw);
+            set => EventTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The notification's icon. Sets the notification icon to myicon for drawable resource myicon. If you don't
@@ -577,6 +611,10 @@ namespace Google.Apis.FirebaseCloudMessaging.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("notificationPriority")]
         public virtual string NotificationPriority { get; set; }
+
+        /// <summary>Setting to control when a notification may be proxied.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("proxy")]
+        public virtual string Proxy { get; set; }
 
         /// <summary>
         /// The sound to play when the device receives the notification. Supports "default" or the filename of a sound
@@ -662,17 +700,30 @@ namespace Google.Apis.FirebaseCloudMessaging.v1.Data
         /// <summary>
         /// HTTP request headers defined in Apple Push Notification Service. Refer to [APNs request
         /// headers](https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/sending_notification_requests_to_apns)
-        /// for supported headers such as `apns-expiration` and `apns-priority`.
+        /// for supported headers such as `apns-expiration` and `apns-priority`. The backend sets a default value for
+        /// `apns-expiration` of 30 days and a default value for `apns-priority` of 10 if not explicitly set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("headers")]
         public virtual System.Collections.Generic.IDictionary<string, string> Headers { get; set; }
 
         /// <summary>
+        /// Optional. [Apple Live
+        /// Activity](https://developer.apple.com/design/human-interface-guidelines/live-activities) token to send
+        /// updates to. This token can either be a push token or
+        /// [push-to-start](https://developer.apple.com/documentation/activitykit/activity/pushtostarttoken) token from
+        /// Apple. To start, update, or end a live activity remotely using FCM, construct an [`aps
+        /// payload`](https://developer.apple.com/documentation/activitykit/starting-and-updating-live-activities-with-activitykit-push-notifications#Construct-the-payload-that-starts-a-Live-Activity)
+        /// and put it in the
+        /// [`apns.payload`](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages#ApnsConfig) field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("liveActivityToken")]
+        public virtual string LiveActivityToken { get; set; }
+
+        /// <summary>
         /// APNs payload as a JSON object, including both `aps` dictionary and custom payload. See [Payload Key
         /// Reference](https://developer.apple.com/documentation/usernotifications/setting_up_a_remote_notification_server/generating_a_remote_notification).
         /// If present, it overrides google.firebase.fcm.v1.Notification.title and
-        /// google.firebase.fcm.v1.Notification.body. The backend sets a default value for `apns-expiration` of 30 days
-        /// and a default value for `apns-priority` of 10 if not explicitly set.
+        /// google.firebase.fcm.v1.Notification.body.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("payload")]
         public virtual System.Collections.Generic.IDictionary<string, object> Payload { get; set; }
@@ -700,15 +751,15 @@ namespace Google.Apis.FirebaseCloudMessaging.v1.Data
     }
 
     /// <summary>
-    /// Represents a color in the RGBA color space. This representation is designed for simplicity of conversion to/from
-    /// color representations in various languages over compactness. For example, the fields of this representation can
-    /// be trivially provided to the constructor of `java.awt.Color` in Java; it can also be trivially provided to
+    /// Represents a color in the RGBA color space. This representation is designed for simplicity of conversion to and
+    /// from color representations in various languages over compactness. For example, the fields of this representation
+    /// can be trivially provided to the constructor of `java.awt.Color` in Java; it can also be trivially provided to
     /// UIColor's `+colorWithRed:green:blue:alpha` method in iOS; and, with just a little work, it can be easily
-    /// formatted into a CSS `rgba()` string in JavaScript. This reference page doesn't carry information about the
-    /// absolute color space that should be used to interpret the RGB value (e.g. sRGB, Adobe RGB, DCI-P3, BT.2020,
-    /// etc.). By default, applications should assume the sRGB color space. When color equality needs to be decided,
+    /// formatted into a CSS `rgba()` string in JavaScript. This reference page doesn't have information about the
+    /// absolute color space that should be used to interpret the RGB value—for example, sRGB, Adobe RGB, DCI-P3, and
+    /// BT.2020. By default, applications should assume the sRGB color space. When color equality needs to be decided,
     /// implementations, unless documented otherwise, treat two colors as equal if all their red, green, blue, and alpha
-    /// values each differ by at most 1e-5. Example (Java): import com.google.type.Color; // ... public static
+    /// values each differ by at most `1e-5`. Example (Java): import com.google.type.Color; // ... public static
     /// java.awt.Color fromProto(Color protocolor) { float alpha = protocolor.hasAlpha() ?
     /// protocolor.getAlpha().getValue() : 1.0; return new java.awt.Color( protocolor.getRed(), protocolor.getGreen(),
     /// protocolor.getBlue(), alpha); } public static Color toProto(java.awt.Color color) { float red = (float)
@@ -822,8 +873,8 @@ namespace Google.Apis.FirebaseCloudMessaging.v1.Data
 
         /// <summary>
         /// Input only. Arbitrary key/value payload, which must be UTF-8 encoded. The key should not be a reserved word
-        /// ("from", "message_type", or any word starting with "google" or "gcm"). When sending payloads containing only
-        /// data fields to iOS devices, only normal priority (`"apns-priority": "5"`) is allowed in
+        /// ("from", "message_type", or any word starting with "google." or "gcm.notification."). When sending payloads
+        /// containing only data fields to iOS devices, only normal priority (`"apns-priority": "5"`) is allowed in
         /// [`ApnsConfig`](/docs/reference/fcm/rest/v1/projects.messages#apnsconfig).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("data")]

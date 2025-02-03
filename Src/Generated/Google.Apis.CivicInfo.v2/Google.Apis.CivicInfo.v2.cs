@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.CivicInfo.v2
             Divisions = new DivisionsResource(this);
             Elections = new ElectionsResource(this);
             Representatives = new RepresentativesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://civicinfo.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://civicinfo.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.CivicInfo.v2
         public override string Name => "civicinfo";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://civicinfo.googleapis.com/";
-        #else
-            "https://civicinfo.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://civicinfo.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Gets the Divisions resource.</summary>
         public virtual DivisionsResource Divisions { get; }
@@ -269,10 +264,52 @@ namespace Google.Apis.CivicInfo.v2
             this.service = service;
         }
 
+        /// <summary>Lookup OCDIDs and names for divisions related to an address.</summary>
+        public virtual QueryDivisionByAddressRequest QueryDivisionByAddress()
+        {
+            return new QueryDivisionByAddressRequest(this.service);
+        }
+
+        /// <summary>Lookup OCDIDs and names for divisions related to an address.</summary>
+        public class QueryDivisionByAddressRequest : CivicInfoBaseServiceRequest<Google.Apis.CivicInfo.v2.Data.DivisionByAddressResponse>
+        {
+            /// <summary>Constructs a new QueryDivisionByAddress request.</summary>
+            public QueryDivisionByAddressRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            [Google.Apis.Util.RequestParameterAttribute("address", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Address { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "queryDivisionByAddress";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "civicinfo/v2/divisionsByAddress";
+
+            /// <summary>Initializes QueryDivisionByAddress parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("address", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "address",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
         /// <summary>Searches for political divisions by their natural name or OCD ID.</summary>
         public virtual SearchRequest Search()
         {
-            return new SearchRequest(service);
+            return new SearchRequest(this.service);
         }
 
         /// <summary>Searches for political divisions by their natural name or OCD ID.</summary>
@@ -334,7 +371,7 @@ namespace Google.Apis.CivicInfo.v2
         /// <summary>List of available elections to query.</summary>
         public virtual ElectionQueryRequest ElectionQuery()
         {
-            return new ElectionQueryRequest(service);
+            return new ElectionQueryRequest(this.service);
         }
 
         /// <summary>List of available elections to query.</summary>
@@ -345,6 +382,10 @@ namespace Google.Apis.CivicInfo.v2
             {
                 InitParameters();
             }
+
+            /// <summary>Whether to include data that has not been allowlisted yet</summary>
+            [Google.Apis.Util.RequestParameterAttribute("productionDataOnly", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> ProductionDataOnly { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "electionQuery";
@@ -359,29 +400,35 @@ namespace Google.Apis.CivicInfo.v2
             protected override void InitParameters()
             {
                 base.InitParameters();
+                RequestParameters.Add("productionDataOnly", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "productionDataOnly",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = "true",
+                    Pattern = null,
+                });
             }
         }
 
         /// <summary>Looks up information relevant to a voter based on the voter's registered address.</summary>
-        /// <param name="address">The registered address of the voter to look up.</param>
-        public virtual VoterInfoQueryRequest VoterInfoQuery(string address)
+        public virtual VoterInfoQueryRequest VoterInfoQuery()
         {
-            return new VoterInfoQueryRequest(service, address);
+            return new VoterInfoQueryRequest(this.service);
         }
 
         /// <summary>Looks up information relevant to a voter based on the voter's registered address.</summary>
         public class VoterInfoQueryRequest : CivicInfoBaseServiceRequest<Google.Apis.CivicInfo.v2.Data.VoterInfoResponse>
         {
             /// <summary>Constructs a new VoterInfoQuery request.</summary>
-            public VoterInfoQueryRequest(Google.Apis.Services.IClientService service, string address) : base(service)
+            public VoterInfoQueryRequest(Google.Apis.Services.IClientService service) : base(service)
             {
-                Address = address;
                 InitParameters();
             }
 
             /// <summary>The registered address of the voter to look up.</summary>
             [Google.Apis.Util.RequestParameterAttribute("address", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual string Address { get; private set; }
+            public virtual string Address { get; set; }
 
             /// <summary>
             /// The unique ID of the election to look up. A list of election IDs can be obtained at
@@ -395,6 +442,13 @@ namespace Google.Apis.CivicInfo.v2
             /// <summary>If set to true, only data from official state sources will be returned.</summary>
             [Google.Apis.Util.RequestParameterAttribute("officialOnly", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> OfficialOnly { get; set; }
+
+            /// <summary>
+            /// Whether to include data that has not been vetted yet. Should only be made available to internal IPs or
+            /// trusted partners. This is a non-discoverable parameter in the One Platform API config.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("productionDataOnly", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> ProductionDataOnly { get; set; }
 
             /// <summary>
             /// If set to true, the query will return the success code and include any partial information when it is
@@ -419,7 +473,7 @@ namespace Google.Apis.CivicInfo.v2
                 RequestParameters.Add("address", new Google.Apis.Discovery.Parameter
                 {
                     Name = "address",
-                    IsRequired = true,
+                    IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = null,
                     Pattern = null,
@@ -438,6 +492,14 @@ namespace Google.Apis.CivicInfo.v2
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = "false",
+                    Pattern = null,
+                });
+                RequestParameters.Add("productionDataOnly", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "productionDataOnly",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = "true",
                     Pattern = null,
                 });
                 RequestParameters.Add("returnAllAvailableData", new Google.Apis.Discovery.Parameter
@@ -469,7 +531,7 @@ namespace Google.Apis.CivicInfo.v2
         /// <summary>Looks up political geography and representative information for a single address.</summary>
         public virtual RepresentativeInfoByAddressRequest RepresentativeInfoByAddress()
         {
-            return new RepresentativeInfoByAddressRequest(service);
+            return new RepresentativeInfoByAddressRequest(this.service);
         }
 
         /// <summary>Looks up political geography and representative information for a single address.</summary>
@@ -688,7 +750,7 @@ namespace Google.Apis.CivicInfo.v2
         /// <param name="ocdId">The Open Civic Data division identifier of the division to look up.</param>
         public virtual RepresentativeInfoByDivisionRequest RepresentativeInfoByDivision(string ocdId)
         {
-            return new RepresentativeInfoByDivisionRequest(service, ocdId);
+            return new RepresentativeInfoByDivisionRequest(this.service, ocdId);
         }
 
         /// <summary>Looks up representative information for a single geographic division.</summary>
@@ -1117,13 +1179,6 @@ namespace Google.Apis.CivicInfo.v2.Data
         public virtual System.Collections.Generic.IList<string> PrimaryParties { get; set; }
 
         /// <summary>
-        /// [DEPRECATED] If this is a partisan election, the name of the party it is for. This field as deprecated in
-        /// favor of the array "primaryParties", as contests may contain more than one party.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("primaryParty")]
-        public virtual string PrimaryParty { get; set; }
-
-        /// <summary>
         /// The set of ballot responses for the referendum. A ballot response represents a line on the ballot. Common
         /// examples might include "yes" or "no" for referenda. This field is only populated for contests of type
         /// 'Referendum'.
@@ -1217,6 +1272,19 @@ namespace Google.Apis.CivicInfo.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    public class DivisionByAddressResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("divisions")]
+        public virtual System.Collections.Generic.IDictionary<string, GeographicDivision> Divisions { get; set; }
+
+        /// <summary>The normalized version of the requested address.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("normalizedInput")]
+        public virtual SimpleAddressType NormalizedInput { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The result of a division search query.</summary>
     public class DivisionSearchResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1280,6 +1348,9 @@ namespace Google.Apis.CivicInfo.v2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ocdDivisionId")]
         public virtual string OcdDivisionId { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("shapeLookupBehavior")]
+        public virtual string ShapeLookupBehavior { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1536,6 +1607,76 @@ namespace Google.Apis.CivicInfo.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    public class Precinct : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// ID of the AdministrationRegion message for this precinct. Corresponds to LocalityId xml tag.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("administrationRegionId")]
+        public virtual string AdministrationRegionId { get; set; }
+
+        /// <summary>ID(s) of the Contest message(s) for this precinct.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("contestId")]
+        public virtual System.Collections.Generic.IList<string> ContestId { get; set; }
+
+        /// <summary>Required. Dataset ID. What datasets our Precincts come from.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetId")]
+        public virtual System.Nullable<long> DatasetId { get; set; }
+
+        /// <summary>ID(s) of the PollingLocation message(s) for this precinct.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("earlyVoteSiteId")]
+        public virtual System.Collections.Generic.IList<string> EarlyVoteSiteId { get; set; }
+
+        /// <summary>ID(s) of the ElectoralDistrict message(s) for this precinct.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("electoralDistrictId")]
+        public virtual System.Collections.Generic.IList<string> ElectoralDistrictId { get; set; }
+
+        /// <summary>Required. A unique identifier for this precinct.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>Specifies if the precinct runs mail-only elections.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mailOnly")]
+        public virtual System.Nullable<bool> MailOnly { get; set; }
+
+        /// <summary>Required. The name of the precinct.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The number of the precinct.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("number")]
+        public virtual string Number { get; set; }
+
+        /// <summary>Encouraged. The OCD ID of the precinct</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ocdId")]
+        public virtual System.Collections.Generic.IList<string> OcdId { get; set; }
+
+        /// <summary>ID(s) of the PollingLocation message(s) for this precinct.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pollingLocationId")]
+        public virtual System.Collections.Generic.IList<string> PollingLocationId { get; set; }
+
+        /// <summary>
+        /// ID(s) of the SpatialBoundary message(s) for this precinct. Used to specify a geometrical boundary of the
+        /// precinct.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("spatialBoundaryId")]
+        public virtual System.Collections.Generic.IList<string> SpatialBoundaryId { get; set; }
+
+        /// <summary>
+        /// If present, this proto corresponds to one portion of split precinct. Other portions of this precinct are
+        /// guaranteed to have the same `name`. If not present, this proto represents a full precicnt.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("splitName")]
+        public virtual string SplitName { get; set; }
+
+        /// <summary>Specifies the ward the precinct is contained within.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ward")]
+        public virtual string Ward { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     public class RepresentativeInfoData : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -1707,6 +1848,13 @@ namespace Google.Apis.CivicInfo.v2.Data
 
         [Newtonsoft.Json.JsonPropertyAttribute("precinctId")]
         public virtual string PrecinctId { get; set; }
+
+        /// <summary>
+        /// The precincts that match this voter's address. Will only be returned for project IDs which have been
+        /// allowlisted as "partner projects".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("precincts")]
+        public virtual System.Collections.Generic.IList<Precinct> Precincts { get; set; }
 
         /// <summary>
         /// Local Election Information for the state that the voter votes in. For the US, there will only be one element

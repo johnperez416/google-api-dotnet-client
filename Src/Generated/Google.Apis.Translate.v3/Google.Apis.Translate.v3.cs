@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Translate.v3
         public TranslateService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://translation.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://translation.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Translate.v3
         public override string Name => "translate";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://translation.googleapis.com/";
-        #else
-            "https://translation.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://translation.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Translation API.</summary>
         public class Scope
@@ -303,8 +298,1234 @@ namespace Google.Apis.Translate.v3
             public LocationsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                AdaptiveMtDatasets = new AdaptiveMtDatasetsResource(service);
+                Datasets = new DatasetsResource(service);
                 Glossaries = new GlossariesResource(service);
+                Models = new ModelsResource(service);
                 Operations = new OperationsResource(service);
+            }
+
+            /// <summary>Gets the AdaptiveMtDatasets resource.</summary>
+            public virtual AdaptiveMtDatasetsResource AdaptiveMtDatasets { get; }
+
+            /// <summary>The "adaptiveMtDatasets" collection of methods.</summary>
+            public class AdaptiveMtDatasetsResource
+            {
+                private const string Resource = "adaptiveMtDatasets";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public AdaptiveMtDatasetsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    AdaptiveMtFiles = new AdaptiveMtFilesResource(service);
+                    AdaptiveMtSentences = new AdaptiveMtSentencesResource(service);
+                }
+
+                /// <summary>Gets the AdaptiveMtFiles resource.</summary>
+                public virtual AdaptiveMtFilesResource AdaptiveMtFiles { get; }
+
+                /// <summary>The "adaptiveMtFiles" collection of methods.</summary>
+                public class AdaptiveMtFilesResource
+                {
+                    private const string Resource = "adaptiveMtFiles";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public AdaptiveMtFilesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                        AdaptiveMtSentences = new AdaptiveMtSentencesResource(service);
+                    }
+
+                    /// <summary>Gets the AdaptiveMtSentences resource.</summary>
+                    public virtual AdaptiveMtSentencesResource AdaptiveMtSentences { get; }
+
+                    /// <summary>The "adaptiveMtSentences" collection of methods.</summary>
+                    public class AdaptiveMtSentencesResource
+                    {
+                        private const string Resource = "adaptiveMtSentences";
+
+                        /// <summary>The service which this resource belongs to.</summary>
+                        private readonly Google.Apis.Services.IClientService service;
+
+                        /// <summary>Constructs a new resource.</summary>
+                        public AdaptiveMtSentencesResource(Google.Apis.Services.IClientService service)
+                        {
+                            this.service = service;
+                        }
+
+                        /// <summary>Lists all AdaptiveMtSentences under a given file/dataset.</summary>
+                        /// <param name="parent">
+                        /// Required. The resource name of the project from which to list the Adaptive MT files. The
+                        /// following format lists all sentences under a file.
+                        /// `projects/{project}/locations/{location}/adaptiveMtDatasets/{dataset}/adaptiveMtFiles/{file}`
+                        /// The following format lists all sentences within a dataset.
+                        /// `projects/{project}/locations/{location}/adaptiveMtDatasets/{dataset}`
+                        /// </param>
+                        public virtual ListRequest List(string parent)
+                        {
+                            return new ListRequest(this.service, parent);
+                        }
+
+                        /// <summary>Lists all AdaptiveMtSentences under a given file/dataset.</summary>
+                        public class ListRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.ListAdaptiveMtSentencesResponse>
+                        {
+                            /// <summary>Constructs a new List request.</summary>
+                            public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                            {
+                                Parent = parent;
+                                InitParameters();
+                            }
+
+                            /// <summary>
+                            /// Required. The resource name of the project from which to list the Adaptive MT files. The
+                            /// following format lists all sentences under a file.
+                            /// `projects/{project}/locations/{location}/adaptiveMtDatasets/{dataset}/adaptiveMtFiles/{file}`
+                            /// The following format lists all sentences within a dataset.
+                            /// `projects/{project}/locations/{location}/adaptiveMtDatasets/{dataset}`
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                            public virtual string Parent { get; private set; }
+
+                            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual System.Nullable<int> PageSize { get; set; }
+
+                            /// <summary>
+                            /// A token identifying a page of results the server should return. Typically, this is the
+                            /// value of ListAdaptiveMtSentencesRequest.next_page_token returned from the previous call
+                            /// to `ListTranslationMemories` method. The first page is returned if `page_token` is empty
+                            /// or missing.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual string PageToken { get; set; }
+
+                            /// <summary>Gets the method name.</summary>
+                            public override string MethodName => "list";
+
+                            /// <summary>Gets the HTTP method.</summary>
+                            public override string HttpMethod => "GET";
+
+                            /// <summary>Gets the REST path.</summary>
+                            public override string RestPath => "v3/{+parent}/adaptiveMtSentences";
+
+                            /// <summary>Initializes List parameter list.</summary>
+                            protected override void InitParameters()
+                            {
+                                base.InitParameters();
+                                RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "parent",
+                                    IsRequired = true,
+                                    ParameterType = "path",
+                                    DefaultValue = null,
+                                    Pattern = @"^projects/[^/]+/locations/[^/]+/adaptiveMtDatasets/[^/]+/adaptiveMtFiles/[^/]+$",
+                                });
+                                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "pageSize",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "pageToken",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                            }
+                        }
+                    }
+
+                    /// <summary>Deletes an AdaptiveMtFile along with its sentences.</summary>
+                    /// <param name="name">
+                    /// Required. The resource name of the file to delete, in form of
+                    /// `projects/{project-number-or-id}/locations/{location_id}/adaptiveMtDatasets/{dataset}/adaptiveMtFiles/{file}`
+                    /// </param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>Deletes an AdaptiveMtFile along with its sentences.</summary>
+                    public class DeleteRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Empty>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The resource name of the file to delete, in form of
+                        /// `projects/{project-number-or-id}/locations/{location_id}/adaptiveMtDatasets/{dataset}/adaptiveMtFiles/{file}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v3/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/adaptiveMtDatasets/[^/]+/adaptiveMtFiles/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Gets and AdaptiveMtFile</summary>
+                    /// <param name="name">
+                    /// Required. The resource name of the file, in form of
+                    /// `projects/{project-number-or-id}/locations/{location_id}/adaptiveMtDatasets/{dataset}/adaptiveMtFiles/{file}`
+                    /// </param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>Gets and AdaptiveMtFile</summary>
+                    public class GetRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.AdaptiveMtFile>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The resource name of the file, in form of
+                        /// `projects/{project-number-or-id}/locations/{location_id}/adaptiveMtDatasets/{dataset}/adaptiveMtFiles/{file}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v3/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/adaptiveMtDatasets/[^/]+/adaptiveMtFiles/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Lists all AdaptiveMtFiles associated to an AdaptiveMtDataset.</summary>
+                    /// <param name="parent">
+                    /// Required. The resource name of the project from which to list the Adaptive MT files.
+                    /// `projects/{project}/locations/{location}/adaptiveMtDatasets/{dataset}`
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists all AdaptiveMtFiles associated to an AdaptiveMtDataset.</summary>
+                    public class ListRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.ListAdaptiveMtFilesResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The resource name of the project from which to list the Adaptive MT files.
+                        /// `projects/{project}/locations/{location}/adaptiveMtDatasets/{dataset}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>Optional. </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// Optional. A token identifying a page of results the server should return. Typically, this is
+                        /// the value of ListAdaptiveMtFilesResponse.next_page_token returned from the previous call to
+                        /// `ListAdaptiveMtFiles` method. The first page is returned if `page_token`is empty or missing.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v3/{+parent}/adaptiveMtFiles";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/adaptiveMtDatasets/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>Gets the AdaptiveMtSentences resource.</summary>
+                public virtual AdaptiveMtSentencesResource AdaptiveMtSentences { get; }
+
+                /// <summary>The "adaptiveMtSentences" collection of methods.</summary>
+                public class AdaptiveMtSentencesResource
+                {
+                    private const string Resource = "adaptiveMtSentences";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public AdaptiveMtSentencesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>Lists all AdaptiveMtSentences under a given file/dataset.</summary>
+                    /// <param name="parent">
+                    /// Required. The resource name of the project from which to list the Adaptive MT files. The
+                    /// following format lists all sentences under a file.
+                    /// `projects/{project}/locations/{location}/adaptiveMtDatasets/{dataset}/adaptiveMtFiles/{file}`
+                    /// The following format lists all sentences within a dataset.
+                    /// `projects/{project}/locations/{location}/adaptiveMtDatasets/{dataset}`
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists all AdaptiveMtSentences under a given file/dataset.</summary>
+                    public class ListRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.ListAdaptiveMtSentencesResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The resource name of the project from which to list the Adaptive MT files. The
+                        /// following format lists all sentences under a file.
+                        /// `projects/{project}/locations/{location}/adaptiveMtDatasets/{dataset}/adaptiveMtFiles/{file}`
+                        /// The following format lists all sentences within a dataset.
+                        /// `projects/{project}/locations/{location}/adaptiveMtDatasets/{dataset}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// A token identifying a page of results the server should return. Typically, this is the value
+                        /// of ListAdaptiveMtSentencesRequest.next_page_token returned from the previous call to
+                        /// `ListTranslationMemories` method. The first page is returned if `page_token` is empty or
+                        /// missing.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v3/{+parent}/adaptiveMtSentences";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/adaptiveMtDatasets/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>Creates an Adaptive MT dataset.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. Name of the parent project. In form of
+                /// `projects/{project-number-or-id}/locations/{location-id}`
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Translate.v3.Data.AdaptiveMtDataset body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates an Adaptive MT dataset.</summary>
+                public class CreateRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.AdaptiveMtDataset>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Translate.v3.Data.AdaptiveMtDataset body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the parent project. In form of
+                    /// `projects/{project-number-or-id}/locations/{location-id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Translate.v3.Data.AdaptiveMtDataset Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+parent}/adaptiveMtDatasets";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Deletes an Adaptive MT dataset, including all its entries and associated metadata.
+                /// </summary>
+                /// <param name="name">
+                /// Required. Name of the dataset. In the form of
+                /// `projects/{project-number-or-id}/locations/{location-id}/adaptiveMtDatasets/{adaptive-mt-dataset-id}`
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Deletes an Adaptive MT dataset, including all its entries and associated metadata.
+                /// </summary>
+                public class DeleteRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the dataset. In the form of
+                    /// `projects/{project-number-or-id}/locations/{location-id}/adaptiveMtDatasets/{adaptive-mt-dataset-id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/adaptiveMtDatasets/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets the Adaptive MT dataset.</summary>
+                /// <param name="name">
+                /// Required. Name of the dataset. In the form of
+                /// `projects/{project-number-or-id}/locations/{location-id}/adaptiveMtDatasets/{adaptive-mt-dataset-id}`
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets the Adaptive MT dataset.</summary>
+                public class GetRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.AdaptiveMtDataset>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the dataset. In the form of
+                    /// `projects/{project-number-or-id}/locations/{location-id}/adaptiveMtDatasets/{adaptive-mt-dataset-id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/adaptiveMtDatasets/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Imports an AdaptiveMtFile and adds all of its sentences into the AdaptiveMtDataset.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The resource name of the file, in form of
+                /// `projects/{project-number-or-id}/locations/{location_id}/adaptiveMtDatasets/{dataset}`
+                /// </param>
+                public virtual ImportAdaptiveMtFileRequest ImportAdaptiveMtFile(Google.Apis.Translate.v3.Data.ImportAdaptiveMtFileRequest body, string parent)
+                {
+                    return new ImportAdaptiveMtFileRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Imports an AdaptiveMtFile and adds all of its sentences into the AdaptiveMtDataset.
+                /// </summary>
+                public class ImportAdaptiveMtFileRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.ImportAdaptiveMtFileResponse>
+                {
+                    /// <summary>Constructs a new ImportAdaptiveMtFile request.</summary>
+                    public ImportAdaptiveMtFileRequest(Google.Apis.Services.IClientService service, Google.Apis.Translate.v3.Data.ImportAdaptiveMtFileRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the file, in form of
+                    /// `projects/{project-number-or-id}/locations/{location_id}/adaptiveMtDatasets/{dataset}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Translate.v3.Data.ImportAdaptiveMtFileRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "importAdaptiveMtFile";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+parent}:importAdaptiveMtFile";
+
+                    /// <summary>Initializes ImportAdaptiveMtFile parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/adaptiveMtDatasets/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists all Adaptive MT datasets for which the caller has read permission.</summary>
+                /// <param name="parent">
+                /// Required. The resource name of the project from which to list the Adaptive MT datasets.
+                /// `projects/{project-number-or-id}/locations/{location-id}`
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists all Adaptive MT datasets for which the caller has read permission.</summary>
+                public class ListRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.ListAdaptiveMtDatasetsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the project from which to list the Adaptive MT datasets.
+                    /// `projects/{project-number-or-id}/locations/{location-id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An expression for filtering the results of the request. Filter is not supported yet.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. Requested page size. The server may return fewer results than requested. If
+                    /// unspecified, the server picks an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. A token identifying a page of results the server should return. Typically, this is the
+                    /// value of ListAdaptiveMtDatasetsResponse.next_page_token returned from the previous call to
+                    /// `ListAdaptiveMtDatasets` method. The first page is returned if `page_token`is empty or missing.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+parent}/adaptiveMtDatasets";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the Datasets resource.</summary>
+            public virtual DatasetsResource Datasets { get; }
+
+            /// <summary>The "datasets" collection of methods.</summary>
+            public class DatasetsResource
+            {
+                private const string Resource = "datasets";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public DatasetsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    Examples = new ExamplesResource(service);
+                }
+
+                /// <summary>Gets the Examples resource.</summary>
+                public virtual ExamplesResource Examples { get; }
+
+                /// <summary>The "examples" collection of methods.</summary>
+                public class ExamplesResource
+                {
+                    private const string Resource = "examples";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public ExamplesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>Lists sentence pairs in the dataset.</summary>
+                    /// <param name="parent">
+                    /// Required. Name of the parent dataset. In form of
+                    /// `projects/{project-number-or-id}/locations/{location-id}/datasets/{dataset-id}`
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists sentence pairs in the dataset.</summary>
+                    public class ListRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.ListExamplesResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. Name of the parent dataset. In form of
+                        /// `projects/{project-number-or-id}/locations/{location-id}/datasets/{dataset-id}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Optional. An expression for filtering the examples that will be returned. Example filter: *
+                        /// `usage=TRAIN`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string Filter { get; set; }
+
+                        /// <summary>
+                        /// Optional. Requested page size. The server can return fewer results than requested.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// Optional. A token identifying a page of results for the server to return. Typically obtained
+                        /// from next_page_token field in the response of a ListExamples call.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v3/{+parent}/examples";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/datasets/[^/]+$",
+                            });
+                            RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "filter",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>Creates a Dataset.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">Required. The project name.</param>
+                public virtual CreateRequest Create(Google.Apis.Translate.v3.Data.Dataset body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a Dataset.</summary>
+                public class CreateRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Translate.v3.Data.Dataset body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The project name.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Translate.v3.Data.Dataset Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+parent}/datasets";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a dataset and all of its contents.</summary>
+                /// <param name="name">Required. The name of the dataset to delete.</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a dataset and all of its contents.</summary>
+                public class DeleteRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The name of the dataset to delete.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/datasets/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Exports dataset's data to the provided output location.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="dataset">
+                /// Required. Name of the dataset. In form of
+                /// `projects/{project-number-or-id}/locations/{location-id}/datasets/{dataset-id}`
+                /// </param>
+                public virtual ExportDataRequest ExportData(Google.Apis.Translate.v3.Data.ExportDataRequest body, string dataset)
+                {
+                    return new ExportDataRequest(this.service, body, dataset);
+                }
+
+                /// <summary>Exports dataset's data to the provided output location.</summary>
+                public class ExportDataRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Operation>
+                {
+                    /// <summary>Constructs a new ExportData request.</summary>
+                    public ExportDataRequest(Google.Apis.Services.IClientService service, Google.Apis.Translate.v3.Data.ExportDataRequest body, string dataset) : base(service)
+                    {
+                        Dataset = dataset;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the dataset. In form of
+                    /// `projects/{project-number-or-id}/locations/{location-id}/datasets/{dataset-id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("dataset", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Dataset { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Translate.v3.Data.ExportDataRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "exportData";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+dataset}:exportData";
+
+                    /// <summary>Initializes ExportData parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("dataset", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "dataset",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/datasets/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a Dataset.</summary>
+                /// <param name="name">Required. The resource name of the dataset to retrieve.</param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a Dataset.</summary>
+                public class GetRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Dataset>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The resource name of the dataset to retrieve.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/datasets/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Import sentence pairs into translation Dataset.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="dataset">
+                /// Required. Name of the dataset. In form of
+                /// `projects/{project-number-or-id}/locations/{location-id}/datasets/{dataset-id}`
+                /// </param>
+                public virtual ImportDataRequest ImportData(Google.Apis.Translate.v3.Data.ImportDataRequest body, string dataset)
+                {
+                    return new ImportDataRequest(this.service, body, dataset);
+                }
+
+                /// <summary>Import sentence pairs into translation Dataset.</summary>
+                public class ImportDataRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Operation>
+                {
+                    /// <summary>Constructs a new ImportData request.</summary>
+                    public ImportDataRequest(Google.Apis.Services.IClientService service, Google.Apis.Translate.v3.Data.ImportDataRequest body, string dataset) : base(service)
+                    {
+                        Dataset = dataset;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the dataset. In form of
+                    /// `projects/{project-number-or-id}/locations/{location-id}/datasets/{dataset-id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("dataset", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Dataset { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Translate.v3.Data.ImportDataRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "importData";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+dataset}:importData";
+
+                    /// <summary>Initializes ImportData parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("dataset", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "dataset",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/datasets/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists datasets.</summary>
+                /// <param name="parent">
+                /// Required. Name of the parent project. In form of
+                /// `projects/{project-number-or-id}/locations/{location-id}`
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists datasets.</summary>
+                public class ListRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.ListDatasetsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the parent project. In form of
+                    /// `projects/{project-number-or-id}/locations/{location-id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Requested page size. The server can return fewer results than requested.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. A token identifying a page of results for the server to return. Typically obtained
+                    /// from next_page_token field in the response of a ListDatasets call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+parent}/datasets";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Glossaries resource.</summary>
@@ -322,6 +1543,309 @@ namespace Google.Apis.Translate.v3
                 public GlossariesResource(Google.Apis.Services.IClientService service)
                 {
                     this.service = service;
+                    GlossaryEntries = new GlossaryEntriesResource(service);
+                }
+
+                /// <summary>Gets the GlossaryEntries resource.</summary>
+                public virtual GlossaryEntriesResource GlossaryEntries { get; }
+
+                /// <summary>The "glossaryEntries" collection of methods.</summary>
+                public class GlossaryEntriesResource
+                {
+                    private const string Resource = "glossaryEntries";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public GlossaryEntriesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>Creates a glossary entry.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// Required. The resource name of the glossary to create the entry under.
+                    /// </param>
+                    public virtual CreateRequest Create(Google.Apis.Translate.v3.Data.GlossaryEntry body, string parent)
+                    {
+                        return new CreateRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>Creates a glossary entry.</summary>
+                    public class CreateRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.GlossaryEntry>
+                    {
+                        /// <summary>Constructs a new Create request.</summary>
+                        public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Translate.v3.Data.GlossaryEntry body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. The resource name of the glossary to create the entry under.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Translate.v3.Data.GlossaryEntry Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "create";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v3/{+parent}/glossaryEntries";
+
+                        /// <summary>Initializes Create parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/glossaries/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Deletes a single entry from the glossary</summary>
+                    /// <param name="name">Required. The resource name of the glossary entry to delete</param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>Deletes a single entry from the glossary</summary>
+                    public class DeleteRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Empty>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. The resource name of the glossary entry to delete</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v3/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/glossaries/[^/]+/glossaryEntries/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Gets a single glossary entry by the given id.</summary>
+                    /// <param name="name">Required. The resource name of the glossary entry to get</param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>Gets a single glossary entry by the given id.</summary>
+                    public class GetRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.GlossaryEntry>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. The resource name of the glossary entry to get</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v3/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/glossaries/[^/]+/glossaryEntries/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>List the entries for the glossary.</summary>
+                    /// <param name="parent">
+                    /// Required. The parent glossary resource name for listing the glossary's entries.
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>List the entries for the glossary.</summary>
+                    public class ListRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.ListGlossaryEntriesResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The parent glossary resource name for listing the glossary's entries.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Optional. Requested page size. The server may return fewer glossary entries than requested.
+                        /// If unspecified, the server picks an appropriate default.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// Optional. A token identifying a page of results the server should return. Typically, this is
+                        /// the value of [ListGlossaryEntriesResponse.next_page_token] returned from the previous call.
+                        /// The first page is returned if `page_token`is empty or missing.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v3/{+parent}/glossaryEntries";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/glossaries/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Updates a glossary entry.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">
+                    /// Identifier. The resource name of the entry. Format:
+                    /// `projects/*/locations/*/glossaries/*/glossaryEntries/*`
+                    /// </param>
+                    public virtual PatchRequest Patch(Google.Apis.Translate.v3.Data.GlossaryEntry body, string name)
+                    {
+                        return new PatchRequest(this.service, body, name);
+                    }
+
+                    /// <summary>Updates a glossary entry.</summary>
+                    public class PatchRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.GlossaryEntry>
+                    {
+                        /// <summary>Constructs a new Patch request.</summary>
+                        public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Translate.v3.Data.GlossaryEntry body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Identifier. The resource name of the entry. Format:
+                        /// `projects/*/locations/*/glossaries/*/glossaryEntries/*`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Translate.v3.Data.GlossaryEntry Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "patch";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "PATCH";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v3/{+name}";
+
+                        /// <summary>Initializes Patch parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/glossaries/[^/]+/glossaryEntries/[^/]+$",
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>
@@ -332,7 +1856,7 @@ namespace Google.Apis.Translate.v3
                 /// <param name="parent">Required. The project name.</param>
                 public virtual CreateRequest Create(Google.Apis.Translate.v3.Data.Glossary body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -390,7 +1914,7 @@ namespace Google.Apis.Translate.v3
                 /// <param name="name">Required. The name of the glossary to delete.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -438,7 +1962,7 @@ namespace Google.Apis.Translate.v3
                 /// <param name="name">Required. The name of the glossary to retrieve.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a glossary. Returns NOT_FOUND, if the glossary doesn't exist.</summary>
@@ -485,7 +2009,7 @@ namespace Google.Apis.Translate.v3
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists glossaries in a project. Returns NOT_FOUND, if the project doesn't exist.</summary>
@@ -580,6 +2104,345 @@ namespace Google.Apis.Translate.v3
                         });
                     }
                 }
+
+                /// <summary>
+                /// Updates a glossary. A LRO is used since the update can be async if the glossary's entry file is
+                /// updated.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. The resource name of the glossary. Glossary names have the form
+                /// `projects/{project-number-or-id}/locations/{location-id}/glossaries/{glossary-id}`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.Translate.v3.Data.Glossary body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Updates a glossary. A LRO is used since the update can be async if the glossary's entry file is
+                /// updated.
+                /// </summary>
+                public class PatchRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Translate.v3.Data.Glossary body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the glossary. Glossary names have the form
+                    /// `projects/{project-number-or-id}/locations/{location-id}/glossaries/{glossary-id}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// The list of fields to be updated. Currently only `display_name` and 'input_config'
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Translate.v3.Data.Glossary Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/glossaries/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the Models resource.</summary>
+            public virtual ModelsResource Models { get; }
+
+            /// <summary>The "models" collection of methods.</summary>
+            public class ModelsResource
+            {
+                private const string Resource = "models";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public ModelsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a Model.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The project name, in form of `projects/{project}/locations/{location}`
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Translate.v3.Data.Model body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a Model.</summary>
+                public class CreateRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Translate.v3.Data.Model body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The project name, in form of `projects/{project}/locations/{location}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Translate.v3.Data.Model Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+parent}/models";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a model.</summary>
+                /// <param name="name">Required. The name of the model to delete.</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a model.</summary>
+                public class DeleteRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The name of the model to delete.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/models/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a model.</summary>
+                /// <param name="name">Required. The resource name of the model to retrieve.</param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a model.</summary>
+                public class GetRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Model>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The resource name of the model to retrieve.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/models/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists models.</summary>
+                /// <param name="parent">
+                /// Required. Name of the parent project. In form of
+                /// `projects/{project-number-or-id}/locations/{location-id}`
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists models.</summary>
+                public class ListRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.ListModelsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the parent project. In form of
+                    /// `projects/{project-number-or-id}/locations/{location-id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An expression for filtering the models that will be returned. Supported filter:
+                    /// `dataset_id=${dataset_id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. Requested page size. The server can return fewer results than requested.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. A token identifying a page of results for the server to return. Typically obtained
+                    /// from next_page_token field in the response of a ListModels call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v3/{+parent}/models";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Operations resource.</summary>
@@ -605,13 +2468,13 @@ namespace Google.Apis.Translate.v3
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.Translate.v3.Data.CancelOperationRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -620,7 +2483,7 @@ namespace Google.Apis.Translate.v3
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 public class CancelRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.Empty>
                 {
@@ -674,7 +2537,7 @@ namespace Google.Apis.Translate.v3
                 /// <param name="name">The name of the operation resource to be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -726,7 +2589,7 @@ namespace Google.Apis.Translate.v3
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -772,27 +2635,17 @@ namespace Google.Apis.Translate.v3
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 public class ListRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.ListOperationsResponse>
                 {
@@ -880,7 +2733,7 @@ namespace Google.Apis.Translate.v3
                 /// <param name="name">The name of the operation resource to wait on.</param>
                 public virtual WaitRequest Wait(Google.Apis.Translate.v3.Data.WaitOperationRequest body, string name)
                 {
-                    return new WaitRequest(service, body, name);
+                    return new WaitRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -937,6 +2790,65 @@ namespace Google.Apis.Translate.v3
                 }
             }
 
+            /// <summary>Translate text using Adaptive MT.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. Location to make a regional call. Format:
+            /// `projects/{project-number-or-id}/locations/{location-id}`.
+            /// </param>
+            public virtual AdaptiveMtTranslateRequest AdaptiveMtTranslate(Google.Apis.Translate.v3.Data.AdaptiveMtTranslateRequest body, string parent)
+            {
+                return new AdaptiveMtTranslateRequest(this.service, body, parent);
+            }
+
+            /// <summary>Translate text using Adaptive MT.</summary>
+            public class AdaptiveMtTranslateRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.AdaptiveMtTranslateResponse>
+            {
+                /// <summary>Constructs a new AdaptiveMtTranslate request.</summary>
+                public AdaptiveMtTranslateRequest(Google.Apis.Services.IClientService service, Google.Apis.Translate.v3.Data.AdaptiveMtTranslateRequest body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. Location to make a regional call. Format:
+                /// `projects/{project-number-or-id}/locations/{location-id}`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Translate.v3.Data.AdaptiveMtTranslateRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "adaptiveMtTranslate";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v3/{+parent}:adaptiveMtTranslate";
+
+                /// <summary>Initializes AdaptiveMtTranslate parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                    });
+                }
+            }
+
             /// <summary>
             /// Translates a large volume of document in asynchronous batch mode. This function provides real-time
             /// output as the inputs are being processed. If caller cancels a request, the partial results (for an input
@@ -952,7 +2864,7 @@ namespace Google.Apis.Translate.v3
             /// </param>
             public virtual BatchTranslateDocumentRequest BatchTranslateDocument(Google.Apis.Translate.v3.Data.BatchTranslateDocumentRequest body, string parent)
             {
-                return new BatchTranslateDocumentRequest(service, body, parent);
+                return new BatchTranslateDocumentRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1025,7 +2937,7 @@ namespace Google.Apis.Translate.v3
             /// </param>
             public virtual BatchTranslateTextRequest BatchTranslateText(Google.Apis.Translate.v3.Data.BatchTranslateTextRequest body, string parent)
             {
-                return new BatchTranslateTextRequest(service, body, parent);
+                return new BatchTranslateTextRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1094,7 +3006,7 @@ namespace Google.Apis.Translate.v3
             /// </param>
             public virtual DetectLanguageRequest DetectLanguage(Google.Apis.Translate.v3.Data.DetectLanguageRequest body, string parent)
             {
-                return new DetectLanguageRequest(service, body, parent);
+                return new DetectLanguageRequest(this.service, body, parent);
             }
 
             /// <summary>Detects the language of text within a request.</summary>
@@ -1152,7 +3064,7 @@ namespace Google.Apis.Translate.v3
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -1204,7 +3116,7 @@ namespace Google.Apis.Translate.v3
             /// </param>
             public virtual GetSupportedLanguagesRequest GetSupportedLanguages(string parent)
             {
-                return new GetSupportedLanguagesRequest(service, parent);
+                return new GetSupportedLanguagesRequest(this.service, parent);
             }
 
             /// <summary>Returns a list of supported languages for translation.</summary>
@@ -1290,7 +3202,7 @@ namespace Google.Apis.Translate.v3
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -1309,7 +3221,7 @@ namespace Google.Apis.Translate.v3
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -1375,6 +3287,69 @@ namespace Google.Apis.Translate.v3
                 }
             }
 
+            /// <summary>Romanize input text written in non-Latin scripts to Latin text.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. Project or location to make a call. Must refer to a caller's project. Format:
+            /// `projects/{project-number-or-id}/locations/{location-id}` or `projects/{project-number-or-id}`. For
+            /// global calls, use `projects/{project-number-or-id}/locations/global` or
+            /// `projects/{project-number-or-id}`.
+            /// </param>
+            public virtual RomanizeTextRequest RomanizeText(Google.Apis.Translate.v3.Data.RomanizeTextRequest body, string parent)
+            {
+                return new RomanizeTextRequest(this.service, body, parent);
+            }
+
+            /// <summary>Romanize input text written in non-Latin scripts to Latin text.</summary>
+            public class RomanizeTextRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.RomanizeTextResponse>
+            {
+                /// <summary>Constructs a new RomanizeText request.</summary>
+                public RomanizeTextRequest(Google.Apis.Services.IClientService service, Google.Apis.Translate.v3.Data.RomanizeTextRequest body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. Project or location to make a call. Must refer to a caller's project. Format:
+                /// `projects/{project-number-or-id}/locations/{location-id}` or `projects/{project-number-or-id}`. For
+                /// global calls, use `projects/{project-number-or-id}/locations/global` or
+                /// `projects/{project-number-or-id}`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Translate.v3.Data.RomanizeTextRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "romanizeText";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v3/{+parent}:romanizeText";
+
+                /// <summary>Initializes RomanizeText parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                    });
+                }
+            }
+
             /// <summary>Translates documents in synchronous mode.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
@@ -1387,7 +3362,7 @@ namespace Google.Apis.Translate.v3
             /// </param>
             public virtual TranslateDocumentRequest TranslateDocument(Google.Apis.Translate.v3.Data.TranslateDocumentRequest body, string parent)
             {
-                return new TranslateDocumentRequest(service, body, parent);
+                return new TranslateDocumentRequest(this.service, body, parent);
             }
 
             /// <summary>Translates documents in synchronous mode.</summary>
@@ -1454,7 +3429,7 @@ namespace Google.Apis.Translate.v3
             /// </param>
             public virtual TranslateTextRequest TranslateText(Google.Apis.Translate.v3.Data.TranslateTextRequest body, string parent)
             {
-                return new TranslateTextRequest(service, body, parent);
+                return new TranslateTextRequest(this.service, body, parent);
             }
 
             /// <summary>Translates input text and returns translated text.</summary>
@@ -1521,7 +3496,7 @@ namespace Google.Apis.Translate.v3
         /// </param>
         public virtual DetectLanguageRequest DetectLanguage(Google.Apis.Translate.v3.Data.DetectLanguageRequest body, string parent)
         {
-            return new DetectLanguageRequest(service, body, parent);
+            return new DetectLanguageRequest(this.service, body, parent);
         }
 
         /// <summary>Detects the language of text within a request.</summary>
@@ -1585,7 +3560,7 @@ namespace Google.Apis.Translate.v3
         /// </param>
         public virtual GetSupportedLanguagesRequest GetSupportedLanguages(string parent)
         {
-            return new GetSupportedLanguagesRequest(service, parent);
+            return new GetSupportedLanguagesRequest(this.service, parent);
         }
 
         /// <summary>Returns a list of supported languages for translation.</summary>
@@ -1665,6 +3640,68 @@ namespace Google.Apis.Translate.v3
             }
         }
 
+        /// <summary>Romanize input text written in non-Latin scripts to Latin text.</summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="parent">
+        /// Required. Project or location to make a call. Must refer to a caller's project. Format:
+        /// `projects/{project-number-or-id}/locations/{location-id}` or `projects/{project-number-or-id}`. For global
+        /// calls, use `projects/{project-number-or-id}/locations/global` or `projects/{project-number-or-id}`.
+        /// </param>
+        public virtual RomanizeTextRequest RomanizeText(Google.Apis.Translate.v3.Data.RomanizeTextRequest body, string parent)
+        {
+            return new RomanizeTextRequest(this.service, body, parent);
+        }
+
+        /// <summary>Romanize input text written in non-Latin scripts to Latin text.</summary>
+        public class RomanizeTextRequest : TranslateBaseServiceRequest<Google.Apis.Translate.v3.Data.RomanizeTextResponse>
+        {
+            /// <summary>Constructs a new RomanizeText request.</summary>
+            public RomanizeTextRequest(Google.Apis.Services.IClientService service, Google.Apis.Translate.v3.Data.RomanizeTextRequest body, string parent) : base(service)
+            {
+                Parent = parent;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. Project or location to make a call. Must refer to a caller's project. Format:
+            /// `projects/{project-number-or-id}/locations/{location-id}` or `projects/{project-number-or-id}`. For
+            /// global calls, use `projects/{project-number-or-id}/locations/global` or
+            /// `projects/{project-number-or-id}`.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Parent { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Translate.v3.Data.RomanizeTextRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "romanizeText";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v3/{+parent}:romanizeText";
+
+            /// <summary>Initializes RomanizeText parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "parent",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^projects/[^/]+$",
+                });
+            }
+        }
+
         /// <summary>Translates input text and returns translated text.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="parent">
@@ -1677,7 +3714,7 @@ namespace Google.Apis.Translate.v3
         /// </param>
         public virtual TranslateTextRequest TranslateText(Google.Apis.Translate.v3.Data.TranslateTextRequest body, string parent)
         {
-            return new TranslateTextRequest(service, body, parent);
+            return new TranslateTextRequest(this.service, body, parent);
         }
 
         /// <summary>Translates input text and returns translated text.</summary>
@@ -1735,6 +3772,367 @@ namespace Google.Apis.Translate.v3
 }
 namespace Google.Apis.Translate.v3.Data
 {
+    /// <summary>An Adaptive MT Dataset.</summary>
+    public class AdaptiveMtDataset : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Timestamp when this dataset was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The name of the dataset to show in the interface. The name can be up to 32 characters long and can consist
+        /// only of ASCII Latin letters A-Z and a-z, underscores (_), and ASCII digits 0-9.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>The number of examples in the dataset.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exampleCount")]
+        public virtual System.Nullable<int> ExampleCount { get; set; }
+
+        /// <summary>
+        /// Required. The resource name of the dataset, in form of
+        /// `projects/{project-number-or-id}/locations/{location_id}/adaptiveMtDatasets/{dataset_id}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The BCP-47 language code of the source language.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceLanguageCode")]
+        public virtual string SourceLanguageCode { get; set; }
+
+        /// <summary>The BCP-47 language code of the target language.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetLanguageCode")]
+        public virtual string TargetLanguageCode { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Timestamp when this dataset was last updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An AdaptiveMtFile.</summary>
+    public class AdaptiveMtFile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Timestamp when this file was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The file's display name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>The number of entries that the file contains.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entryCount")]
+        public virtual System.Nullable<int> EntryCount { get; set; }
+
+        /// <summary>
+        /// Required. The resource name of the file, in form of
+        /// `projects/{project-number-or-id}/locations/{location_id}/adaptiveMtDatasets/{dataset}/adaptiveMtFiles/{file}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Timestamp when this file was last updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An AdaptiveMt sentence entry.</summary>
+    public class AdaptiveMtSentence : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Timestamp when this sentence was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Required. The resource name of the file, in form of
+        /// `projects/{project-number-or-id}/locations/{location_id}/adaptiveMtDatasets/{dataset}/adaptiveMtFiles/{file}/adaptiveMtSentences/{sentence}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Required. The source sentence.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceSentence")]
+        public virtual string SourceSentence { get; set; }
+
+        /// <summary>Required. The target sentence.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetSentence")]
+        public virtual string TargetSentence { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Timestamp when this sentence was last updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for sending an AdaptiveMt translation query.</summary>
+    public class AdaptiveMtTranslateRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The content of the input in string format.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("content")]
+        public virtual System.Collections.Generic.IList<string> Content { get; set; }
+
+        /// <summary>
+        /// Required. The resource name for the dataset to use for adaptive MT.
+        /// `projects/{project}/locations/{location-id}/adaptiveMtDatasets/{dataset}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
+        public virtual string Dataset { get; set; }
+
+        /// <summary>
+        /// Optional. Glossary to be applied. The glossary must be within the same region (have the same location-id) as
+        /// the model, otherwise an INVALID_ARGUMENT (400) error is returned.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("glossaryConfig")]
+        public virtual GlossaryConfig GlossaryConfig { get; set; }
+
+        /// <summary>Configuration for caller provided reference sentences.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("referenceSentenceConfig")]
+        public virtual ReferenceSentenceConfig ReferenceSentenceConfig { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An AdaptiveMtTranslate response.</summary>
+    public class AdaptiveMtTranslateResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Text translation response if a glossary is provided in the request. This could be the same as 'translation'
+        /// above if no terms apply.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("glossaryTranslations")]
+        public virtual System.Collections.Generic.IList<AdaptiveMtTranslation> GlossaryTranslations { get; set; }
+
+        /// <summary>Output only. The translation's language code.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("languageCode")]
+        public virtual string LanguageCode { get; set; }
+
+        /// <summary>Output only. The translation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("translations")]
+        public virtual System.Collections.Generic.IList<AdaptiveMtTranslation> Translations { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An AdaptiveMt translation.</summary>
+    public class AdaptiveMtTranslation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. The translated text.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("translatedText")]
+        public virtual string TranslatedText { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Input configuration for BatchTranslateDocument request.</summary>
     public class BatchDocumentInputConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1775,14 +4173,14 @@ namespace Google.Apis.Translate.v3.Data
         /// processed and ready to be consumed (that is, no partial output file is written). Since index.csv will be
         /// keeping updated during the process, please make sure there is no custom retention policy applied on the
         /// output bucket that may avoid file updating.
-        /// (https://cloud.google.com/storage/docs/bucket-lock?hl=en#retention-policy) The naming format of translation
-        /// output files follows (for target language code [trg]): `translation_output`:
-        /// gs://translation_output/a_b_c_[trg]_translation.[extension] `glossary_translation_output`:
-        /// gs://translation_test/a_b_c_[trg]_glossary_translation.[extension] The output document will maintain the
+        /// (https://cloud.google.com/storage/docs/bucket-lock#retention-policy) The naming format of translation output
+        /// files follows (for target language code [trg]): `translation_output`:
+        /// `gs://translation_output/a_b_c_[trg]_translation.[extension]` `glossary_translation_output`:
+        /// `gs://translation_test/a_b_c_[trg]_glossary_translation.[extension]`. The output document will maintain the
         /// same file format as the input document. The naming format of error output files follows (for target language
-        /// code [trg]): `error_output`: gs://translation_test/a_b_c_[trg]_errors.txt `glossary_error_output`:
-        /// gs://translation_test/a_b_c_[trg]_glossary_translation.txt The error output is a txt file containing error
-        /// details.
+        /// code [trg]): `error_output`: `gs://translation_test/a_b_c_[trg]_errors.txt` `glossary_error_output`:
+        /// `gs://translation_test/a_b_c_[trg]_glossary_translation.txt`. The error output is a txt file containing
+        /// error details.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gcsDestination")]
         public virtual GcsDestination GcsDestination { get; set; }
@@ -1794,7 +4192,32 @@ namespace Google.Apis.Translate.v3.Data
     /// <summary>The BatchTranslateDocument request.</summary>
     public class BatchTranslateDocumentRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Optional.</summary>
+        /// <summary>
+        /// Optional. This flag is to support user customized attribution. If not provided, the default is `Machine
+        /// Translated by Google`. Customized attribution should follow rules in
+        /// https://cloud.google.com/translate/attribution#attribution_and_logos
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customizedAttribution")]
+        public virtual string CustomizedAttribution { get; set; }
+
+        /// <summary>Optional. If true, enable auto rotation correction in DVS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableRotationCorrection")]
+        public virtual System.Nullable<bool> EnableRotationCorrection { get; set; }
+
+        /// <summary>
+        /// Optional. If true, use the text removal server to remove the shadow text on background image for native pdf
+        /// translation. Shadow removal feature can only be enabled when is_translate_native_pdf_only: false
+        /// &amp;amp;&amp;amp; pdf_native_only: false
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableShadowRemovalNativePdf")]
+        public virtual System.Nullable<bool> EnableShadowRemovalNativePdf { get; set; }
+
+        /// <summary>
+        /// Optional. The file format conversion map that is applied to all input files. The map key is the original
+        /// mime_type. The map value is the target mime_type of translated documents. Supported file format conversion
+        /// includes: - `application/pdf` to `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
+        /// If nothing specified, output files will be in the same format as the original file.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("formatConversions")]
         public virtual System.Collections.Generic.IDictionary<string, string> FormatConversions { get; set; }
 
@@ -1828,14 +4251,15 @@ namespace Google.Apis.Translate.v3.Data
         public virtual BatchDocumentOutputConfig OutputConfig { get; set; }
 
         /// <summary>
-        /// Required. The BCP-47 language code of the input document if known, for example, "en-US" or "sr-Latn".
-        /// Supported language codes are listed in Language Support (https://cloud.google.com/translate/docs/languages).
+        /// Required. The ISO-639 language code of the input document if known, for example, "en-US" or "sr-Latn".
+        /// Supported language codes are listed in [Language
+        /// Support](https://cloud.google.com/translate/docs/languages).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceLanguageCode")]
         public virtual string SourceLanguageCode { get; set; }
 
         /// <summary>
-        /// Required. The BCP-47 language code to use for translation of the input document. Specify up to 10 language
+        /// Required. The ISO-639 language code to use for translation of the input document. Specify up to 10 language
         /// codes here.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("targetLanguageCodes")]
@@ -1905,6 +4329,147 @@ namespace Google.Apis.Translate.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A dataset that hosts the examples (sentence pairs) used for translation models.</summary>
+    public class Dataset : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Timestamp when this dataset was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The name of the dataset to show in the interface. The name can be up to 32 characters long and can consist
+        /// only of ASCII Latin letters A-Z and a-z, underscores (_), and ASCII digits 0-9.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Output only. The number of examples in the dataset.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exampleCount")]
+        public virtual System.Nullable<int> ExampleCount { get; set; }
+
+        /// <summary>
+        /// The resource name of the dataset, in form of
+        /// `projects/{project-number-or-id}/locations/{location_id}/datasets/{dataset_id}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The BCP-47 language code of the source language.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceLanguageCode")]
+        public virtual string SourceLanguageCode { get; set; }
+
+        /// <summary>The BCP-47 language code of the target language.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetLanguageCode")]
+        public virtual string TargetLanguageCode { get; set; }
+
+        /// <summary>Output only. Number of test examples (sentence pairs).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("testExampleCount")]
+        public virtual System.Nullable<int> TestExampleCount { get; set; }
+
+        /// <summary>Output only. Number of training examples (sentence pairs).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("trainExampleCount")]
+        public virtual System.Nullable<int> TrainExampleCount { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Timestamp when this dataset was last updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. Number of validation examples (sentence pairs).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateExampleCount")]
+        public virtual System.Nullable<int> ValidateExampleCount { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Input configuration for datasets.</summary>
+    public class DatasetInputConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Files containing the sentence pairs to be imported to the dataset.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inputFiles")]
+        public virtual System.Collections.Generic.IList<InputFile> InputFiles { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Output configuration for datasets.</summary>
+    public class DatasetOutputConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Google Cloud Storage destination to write the output.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gcsDestination")]
+        public virtual GcsOutputDestination GcsDestination { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The request message for language detection.</summary>
     public class DetectLanguageRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1963,7 +4528,7 @@ namespace Google.Apis.Translate.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("confidence")]
         public virtual System.Nullable<float> Confidence { get; set; }
 
-        /// <summary>The BCP-47 language code of source content in the request, detected automatically.</summary>
+        /// <summary>The ISO-639 language code of the source content in the request, detected automatically.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("languageCode")]
         public virtual string LanguageCode { get; set; }
 
@@ -2010,15 +4575,15 @@ namespace Google.Apis.Translate.v3.Data
         /// "output_[trg]_translations.[ext]", where - [trg] corresponds to the translated file's language code, - [ext]
         /// corresponds to the translated file's extension according to its mime type. For a DocumentInputConfig.gcs_uri
         /// provided document, the output file will have a name according to its URI. For example: an input file with
-        /// URI: "gs://a/b/c.[extension]" stored in a gcs_destination bucket with name "my_bucket" will have an output
-        /// URI: "gs://my_bucket/a_b_c_[trg]_translations.[ext]", where - [trg] corresponds to the translated file's
+        /// URI: `gs://a/b/c.[extension]` stored in a gcs_destination bucket with name "my_bucket" will have an output
+        /// URI: `gs://my_bucket/a_b_c_[trg]_translations.[ext]`, where - [trg] corresponds to the translated file's
         /// language code, - [ext] corresponds to the translated file's extension according to its mime type. If the
         /// document was directly provided through the request, then the output document will have the format:
-        /// "gs://my_bucket/translated_document_[trg]_translations.[ext], where - [trg] corresponds to the translated
+        /// `gs://my_bucket/translated_document_[trg]_translations.[ext]`, where - [trg] corresponds to the translated
         /// file's language code, - [ext] corresponds to the translated file's extension according to its mime type. If
         /// a glossary was provided, then the output URI for the glossary translation will be equal to the default
         /// output URI but have `glossary_translations` instead of `translations`. For the previous example, its
-        /// glossary URI would be: "gs://my_bucket/a_b_c_[trg]_glossary_translations.[ext]". Thus the max number of
+        /// glossary URI would be: `gs://my_bucket/a_b_c_[trg]_glossary_translations.[ext]`. Thus the max number of
         /// output files will be 2 (Translated document, Glossary translated document). Callers should expect no partial
         /// outputs. If there is any error during document translation, no output will be stored in the Cloud Storage
         /// bucket.
@@ -2070,11 +4635,66 @@ namespace Google.Apis.Translate.v3.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A sentence pair.</summary>
+    public class Example : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. The resource name of the example, in form of
+        /// `projects/{project-number-or-id}/locations/{location_id}/datasets/{dataset_id}/examples/{example_id}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Sentence in source language.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceText")]
+        public virtual string SourceText { get; set; }
+
+        /// <summary>Sentence in target language.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetText")]
+        public virtual string TargetText { get; set; }
+
+        /// <summary>Output only. Usage of the sentence pair. Options are TRAIN|VALIDATION|TEST.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("usage")]
+        public virtual string Usage { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for ExportData.</summary>
+    public class ExportDataRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The config for the output content.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("outputConfig")]
+        public virtual DatasetOutputConfig OutputConfig { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An inlined file.</summary>
+    public class FileInputSource : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The file's byte contents.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("content")]
+        public virtual string Content { get; set; }
+
+        /// <summary>Required. The file's display name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Required. The file's mime type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mimeType")]
+        public virtual string MimeType { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2096,6 +4716,31 @@ namespace Google.Apis.Translate.v3.Data
     }
 
     /// <summary>The Google Cloud Storage location for the input content.</summary>
+    public class GcsInputSource : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Source data URI. For example, `gs://my_bucket/my_object`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inputUri")]
+        public virtual string InputUri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The Google Cloud Storage location for the output content.</summary>
+    public class GcsOutputDestination : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Google Cloud Storage URI to output directory. For example, `gs://bucket/directory`. The requesting
+        /// user must have write permission to the bucket. The directory will be created if it doesn't exist.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("outputUriPrefix")]
+        public virtual string OutputUriPrefix { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The Google Cloud Storage location for the input content.</summary>
     public class GcsSource : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Required. Source data URI. For example, `gs://my_bucket/my_object`.</summary>
@@ -2106,12 +4751,49 @@ namespace Google.Apis.Translate.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Represents a glossary built from user provided data.</summary>
+    /// <summary>Represents a glossary built from user-provided data.</summary>
     public class Glossary : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Optional. The display name of the glossary.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Output only. When the glossary creation was finished.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The number of entries defined in the glossary.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("entryCount")]
@@ -2139,9 +4821,92 @@ namespace Google.Apis.Translate.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _submitTimeRaw;
+
+        private object _submitTime;
+
         /// <summary>Output only. When CreateGlossary was called.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("submitTime")]
-        public virtual object SubmitTime { get; set; }
+        public virtual string SubmitTimeRaw
+        {
+            get => _submitTimeRaw;
+            set
+            {
+                _submitTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _submitTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="SubmitTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SubmitTimeDateTimeOffset instead.")]
+        public virtual object SubmitTime
+        {
+            get => _submitTime;
+            set
+            {
+                _submitTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _submitTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="SubmitTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SubmitTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(SubmitTimeRaw);
+            set => SubmitTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Configures which glossary is used for a specific target language and defines options for applying that glossary.
+    /// </summary>
+    public class GlossaryConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. If set to true, the glossary will be used for contextual translation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("contextualTranslationEnabled")]
+        public virtual System.Nullable<bool> ContextualTranslationEnabled { get; set; }
+
+        /// <summary>
+        /// Required. The `glossary` to be applied for this translation. The format depends on the glossary: -
+        /// User-provided custom glossary:
+        /// `projects/{project-number-or-id}/locations/{location-id}/glossaries/{glossary-id}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("glossary")]
+        public virtual string Glossary { get; set; }
+
+        /// <summary>Optional. Indicates match is case insensitive. The default value is `false` if missing.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ignoreCase")]
+        public virtual System.Nullable<bool> IgnoreCase { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Represents a single entry in a glossary.</summary>
+    public class GlossaryEntry : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Describes the glossary entry.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>
+        /// Identifier. The resource name of the entry. Format: `projects/*/locations/*/glossaries/*/glossaryEntries/*`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Used for an unidirectional glossary.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("termsPair")]
+        public virtual GlossaryTermsPair TermsPair { get; set; }
+
+        /// <summary>Used for an equivalent term sets glossary.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("termsSet")]
+        public virtual GlossaryTermsSet TermsSet { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2154,15 +4919,96 @@ namespace Google.Apis.Translate.v3.Data
         /// Required. Google Cloud Storage location of glossary data. File format is determined based on the filename
         /// extension. API returns [google.rpc.Code.INVALID_ARGUMENT] for unsupported URI-s and file formats. Wildcards
         /// are not allowed. This must be a single file in one of the following formats: For unidirectional glossaries:
-        /// - TSV/CSV (`.tsv`/`.csv`): 2 column file, tab- or comma-separated. The first column is source text. The
-        /// second column is target text. The file must not contain headers. That is, the first row is data, not column
-        /// names. - TMX (`.tmx`): TMX file with parallel data defining source/target term pairs. For equivalent term
-        /// sets glossaries: - CSV (`.csv`): Multi-column CSV file defining equivalent glossary terms in multiple
-        /// languages. See documentation for more information -
+        /// - TSV/CSV (`.tsv`/`.csv`): Two column file, tab- or comma-separated. The first column is source text. The
+        /// second column is target text. No headers in this file. The first row contains data and not column names. -
+        /// TMX (`.tmx`): TMX file with parallel data defining source/target term pairs. For equivalent term sets
+        /// glossaries: - CSV (`.csv`): Multi-column CSV file defining equivalent glossary terms in multiple languages.
+        /// See documentation for more information -
         /// [glossaries](https://cloud.google.com/translate/docs/advanced/glossary).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gcsSource")]
         public virtual GcsSource GcsSource { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Represents a single glossary term</summary>
+    public class GlossaryTerm : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The language for this glossary term.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("languageCode")]
+        public virtual string LanguageCode { get; set; }
+
+        /// <summary>The text for the glossary term.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("text")]
+        public virtual string Text { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Represents a single entry for an unidirectional glossary.</summary>
+    public class GlossaryTermsPair : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The source term is the term that will get match in the text,</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceTerm")]
+        public virtual GlossaryTerm SourceTerm { get; set; }
+
+        /// <summary>The term that will replace the match source term.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetTerm")]
+        public virtual GlossaryTerm TargetTerm { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a single entry for an equivalent term set glossary. This is used for equivalent term sets where each
+    /// term can be replaced by the other terms in the set.
+    /// </summary>
+    public class GlossaryTermsSet : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Each term in the set represents a term that can be replaced by the other terms.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("terms")]
+        public virtual System.Collections.Generic.IList<GlossaryTerm> Terms { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for importing an AdaptiveMt file along with its sentences.</summary>
+    public class ImportAdaptiveMtFileRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Inline file source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileInputSource")]
+        public virtual FileInputSource FileInputSource { get; set; }
+
+        /// <summary>Google Cloud Storage file source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gcsInputSource")]
+        public virtual GcsInputSource GcsInputSource { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response for importing an AdaptiveMtFile</summary>
+    public class ImportAdaptiveMtFileResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. The Adaptive MT file that was imported.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("adaptiveMtFile")]
+        public virtual AdaptiveMtFile AdaptiveMtFile { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for ImportData.</summary>
+    public class ImportDataRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The config for the input content.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inputConfig")]
+        public virtual DatasetInputConfig InputConfig { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2196,18 +5042,36 @@ namespace Google.Apis.Translate.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>An input file.</summary>
+    public class InputFile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Google Cloud Storage file source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gcsSource")]
+        public virtual GcsInputSource GcsSource { get; set; }
+
+        /// <summary>
+        /// Optional. Usage of the file contents. Options are TRAIN|VALIDATION|TEST, or UNASSIGNED (by default) for auto
+        /// split.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("usage")]
+        public virtual string Usage { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Used with unidirectional glossaries.</summary>
     public class LanguageCodePair : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. The BCP-47 language code of the input text, for example, "en-US". Expected to be an exact match
+        /// Required. The ISO-639 language code of the input text, for example, "en-US". Expected to be an exact match
         /// for GlossaryTerm.language_code.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceLanguageCode")]
         public virtual string SourceLanguageCode { get; set; }
 
         /// <summary>
-        /// Required. The BCP-47 language code for translation output, for example, "zh-CN". Expected to be an exact
+        /// Required. The ISO-639 language code for translation output, for example, "zh-CN". Expected to be an exact
         /// match for GlossaryTerm.language_code.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("targetLanguageCode")]
@@ -2221,11 +5085,100 @@ namespace Google.Apis.Translate.v3.Data
     public class LanguageCodesSet : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The BCP-47 language code(s) for terms defined in the glossary. All entries are unique. The list contains at
+        /// The ISO-639 language code(s) for terms defined in the glossary. All entries are unique. The list contains at
         /// least two entries. Expected to be an exact match for GlossaryTerm.language_code.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("languageCodes")]
         public virtual System.Collections.Generic.IList<string> LanguageCodes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A list of AdaptiveMtDatasets.</summary>
+    public class ListAdaptiveMtDatasetsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. A list of Adaptive MT datasets.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("adaptiveMtDatasets")]
+        public virtual System.Collections.Generic.IList<AdaptiveMtDataset> AdaptiveMtDatasets { get; set; }
+
+        /// <summary>
+        /// Optional. A token to retrieve a page of results. Pass this value in the
+        /// [ListAdaptiveMtDatasetsRequest.page_token] field in the subsequent call to `ListAdaptiveMtDatasets` method
+        /// to retrieve the next page of results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response for listing all AdaptiveMt files under a given dataset.</summary>
+    public class ListAdaptiveMtFilesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. The Adaptive MT files.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("adaptiveMtFiles")]
+        public virtual System.Collections.Generic.IList<AdaptiveMtFile> AdaptiveMtFiles { get; set; }
+
+        /// <summary>
+        /// Optional. A token to retrieve a page of results. Pass this value in the
+        /// ListAdaptiveMtFilesRequest.page_token field in the subsequent call to `ListAdaptiveMtFiles` method to
+        /// retrieve the next page of results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>List AdaptiveMt sentences response.</summary>
+    public class ListAdaptiveMtSentencesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. The list of AdaptiveMtSentences.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("adaptiveMtSentences")]
+        public virtual System.Collections.Generic.IList<AdaptiveMtSentence> AdaptiveMtSentences { get; set; }
+
+        /// <summary>Optional. </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for ListDatasets.</summary>
+    public class ListDatasetsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The datasets read.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasets")]
+        public virtual System.Collections.Generic.IList<Dataset> Datasets { get; set; }
+
+        /// <summary>
+        /// A token to retrieve next page of results. Pass this token to the page_token field in the ListDatasetsRequest
+        /// to obtain the corresponding page.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for ListExamples.</summary>
+    public class ListExamplesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The sentence pairs.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("examples")]
+        public virtual System.Collections.Generic.IList<Example> Examples { get; set; }
+
+        /// <summary>
+        /// A token to retrieve next page of results. Pass this token to the page_token field in the ListExamplesRequest
+        /// to obtain the corresponding page.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2249,6 +5202,24 @@ namespace Google.Apis.Translate.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Response message for ListGlossaryEntries</summary>
+    public class ListGlossaryEntriesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. The Glossary Entries</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("glossaryEntries")]
+        public virtual System.Collections.Generic.IList<GlossaryEntry> GlossaryEntries { get; set; }
+
+        /// <summary>
+        /// Optional. A token to retrieve a page of results. Pass this value in the
+        /// [ListGLossaryEntriesRequest.page_token] field in the subsequent calls.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The response message for Locations.ListLocations.</summary>
     public class ListLocationsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2257,6 +5228,24 @@ namespace Google.Apis.Translate.v3.Data
         public virtual System.Collections.Generic.IList<Location> Locations { get; set; }
 
         /// <summary>The standard List next-page token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for ListModels.</summary>
+    public class ListModelsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The models read.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("models")]
+        public virtual System.Collections.Generic.IList<Model> Models { get; set; }
+
+        /// <summary>
+        /// A token to retrieve next page of results. Pass this token to the page_token field in the ListModelsRequest
+        /// to obtain the corresponding page.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
 
@@ -2279,7 +5268,7 @@ namespace Google.Apis.Translate.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -2306,6 +5295,130 @@ namespace Google.Apis.Translate.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A trained translation model.</summary>
+    public class Model : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>
+        /// Output only. Timestamp when the model resource was created, which is also when the training started.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The dataset from which the model is trained, in form of
+        /// `projects/{project-number-or-id}/locations/{location_id}/datasets/{dataset_id}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
+        public virtual string Dataset { get; set; }
+
+        /// <summary>
+        /// The name of the model to show in the interface. The name can be up to 32 characters long and can consist
+        /// only of ASCII Latin letters A-Z and a-z, underscores (_), and ASCII digits 0-9.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// The resource name of the model, in form of
+        /// `projects/{project-number-or-id}/locations/{location_id}/models/{model_id}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Output only. The BCP-47 language code of the source language.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceLanguageCode")]
+        public virtual string SourceLanguageCode { get; set; }
+
+        /// <summary>Output only. The BCP-47 language code of the target language.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetLanguageCode")]
+        public virtual string TargetLanguageCode { get; set; }
+
+        /// <summary>Output only. Number of examples (sentence pairs) used to test the model.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("testExampleCount")]
+        public virtual System.Nullable<int> TestExampleCount { get; set; }
+
+        /// <summary>Output only. Number of examples (sentence pairs) used to train the model.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("trainExampleCount")]
+        public virtual System.Nullable<int> TrainExampleCount { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Timestamp when this model was last updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. Number of examples (sentence pairs) used to validate the model.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateExampleCount")]
+        public virtual System.Nullable<int> ValidateExampleCount { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2341,8 +5454,8 @@ namespace Google.Apis.Translate.v3.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -2374,27 +5487,127 @@ namespace Google.Apis.Translate.v3.Data
         /// input/output matching never changes. Callers should also expect all the content in input_file are processed
         /// and ready to be consumed (that is, no partial output file is written). Since index.csv will be keeping
         /// updated during the process, please make sure there is no custom retention policy applied on the output
-        /// bucket that may avoid file updating.
-        /// (https://cloud.google.com/storage/docs/bucket-lock?hl=en#retention-policy) The format of translations_file
-        /// (for target language code 'trg') is: gs://translation_test/a_b_c_'trg'_translations.[extension] If the input
-        /// file extension is tsv, the output has the following columns: Column 1: ID of the request provided in the
-        /// input, if it's not provided in the input, then the input row number is used (0-based). Column 2: source
-        /// sentence. Column 3: translation without applying a glossary. Empty string if there is an error. Column 4
-        /// (only present if a glossary is provided in the request): translation after applying the glossary. Empty
-        /// string if there is an error applying the glossary. Could be same string as column 3 if there is no glossary
-        /// applied. If input file extension is a txt or html, the translation is directly written to the output file.
-        /// If glossary is requested, a separate glossary_translations_file has format of
-        /// gs://translation_test/a_b_c_'trg'_glossary_translations.[extension] The format of errors file (for target
-        /// language code 'trg') is: gs://translation_test/a_b_c_'trg'_errors.[extension] If the input file extension is
-        /// tsv, errors_file contains the following: Column 1: ID of the request provided in the input, if it's not
+        /// bucket that may avoid file updating. (https://cloud.google.com/storage/docs/bucket-lock#retention-policy)
+        /// The format of translations_file (for target language code 'trg') is:
+        /// `gs://translation_test/a_b_c_'trg'_translations.[extension]` If the input file extension is tsv, the output
+        /// has the following columns: Column 1: ID of the request provided in the input, if it's not provided in the
+        /// input, then the input row number is used (0-based). Column 2: source sentence. Column 3: translation without
+        /// applying a glossary. Empty string if there is an error. Column 4 (only present if a glossary is provided in
+        /// the request): translation after applying the glossary. Empty string if there is an error applying the
+        /// glossary. Could be same string as column 3 if there is no glossary applied. If input file extension is a txt
+        /// or html, the translation is directly written to the output file. If glossary is requested, a separate
+        /// glossary_translations_file has format of
+        /// `gs://translation_test/a_b_c_'trg'_glossary_translations.[extension]` The format of errors file (for target
+        /// language code 'trg') is: `gs://translation_test/a_b_c_'trg'_errors.[extension]` If the input file extension
+        /// is tsv, errors_file contains the following: Column 1: ID of the request provided in the input, if it's not
         /// provided in the input, then the input row number is used (0-based). Column 2: source sentence. Column 3:
         /// Error detail for the translation. Could be empty. Column 4 (only present if a glossary is provided in the
         /// request): Error when applying the glossary. If the input file extension is txt or html, glossary_error_file
         /// will be generated that contains error details. glossary_error_file has format of
-        /// gs://translation_test/a_b_c_'trg'_glossary_errors.[extension]
+        /// `gs://translation_test/a_b_c_'trg'_glossary_errors.[extension]`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gcsDestination")]
         public virtual GcsDestination GcsDestination { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Message of caller-provided reference configuration.</summary>
+    public class ReferenceSentenceConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Reference sentences pair lists. Each list will be used as the references to translate the sentence under
+        /// "content" field at the corresponding index. Length of the list is required to be equal to the length of
+        /// "content" field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("referenceSentencePairLists")]
+        public virtual System.Collections.Generic.IList<ReferenceSentencePairList> ReferenceSentencePairLists { get; set; }
+
+        /// <summary>Source language code.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceLanguageCode")]
+        public virtual string SourceLanguageCode { get; set; }
+
+        /// <summary>Target language code.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetLanguageCode")]
+        public virtual string TargetLanguageCode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A pair of sentences used as reference in source and target languages.</summary>
+    public class ReferenceSentencePair : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Source sentence in the sentence pair.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceSentence")]
+        public virtual string SourceSentence { get; set; }
+
+        /// <summary>Target sentence in the sentence pair.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetSentence")]
+        public virtual string TargetSentence { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A list of reference sentence pairs.</summary>
+    public class ReferenceSentencePairList : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Reference sentence pairs.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("referenceSentencePairs")]
+        public virtual System.Collections.Generic.IList<ReferenceSentencePair> ReferenceSentencePairs { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A single romanization response.</summary>
+    public class Romanization : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The ISO-639 language code of source text in the initial request, detected automatically, if no source
+        /// language was passed within the initial request. If the source language was passed, auto-detection of the
+        /// language does not occur and this field is empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("detectedLanguageCode")]
+        public virtual string DetectedLanguageCode { get; set; }
+
+        /// <summary>
+        /// Romanized text. If an error occurs during romanization, this field might be excluded from the response.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("romanizedText")]
+        public virtual string RomanizedText { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request message for synchronous romanization.</summary>
+    public class RomanizeTextRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The content of the input in string format.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("contents")]
+        public virtual System.Collections.Generic.IList<string> Contents { get; set; }
+
+        /// <summary>
+        /// Optional. The ISO-639 language code of the input text if known, for example, "hi" or "zh". If the source
+        /// language isn't specified, the API attempts to identify the source language automatically and returns the
+        /// source language for each content in the response.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceLanguageCode")]
+        public virtual string SourceLanguageCode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response message for synchronous romanization.</summary>
+    public class RomanizeTextResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Text romanization responses. This field has the same length as `contents`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("romanizations")]
+        public virtual System.Collections.Generic.IList<Romanization> Romanizations { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2435,24 +5648,24 @@ namespace Google.Apis.Translate.v3.Data
     public class SupportedLanguage : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Human readable name of the language localized in the display language specified in the request.
+        /// Human-readable name of the language localized in the display language specified in the request.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
         /// <summary>
         /// Supported language code, generally consisting of its ISO 639-1 identifier, for example, 'en', 'ja'. In
-        /// certain cases, BCP-47 codes including language and region identifiers are returned (for example, 'zh-TW' and
-        /// 'zh-CN')
+        /// certain cases, ISO-639 codes including language and region identifiers are returned (for example, 'zh-TW'
+        /// and 'zh-CN').
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("languageCode")]
         public virtual string LanguageCode { get; set; }
 
-        /// <summary>Can be used as source language.</summary>
+        /// <summary>Can be used as a source language.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("supportSource")]
         public virtual System.Nullable<bool> SupportSource { get; set; }
 
-        /// <summary>Can be used as target language.</summary>
+        /// <summary>Can be used as a target language.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("supportTarget")]
         public virtual System.Nullable<bool> SupportTarget { get; set; }
 
@@ -2477,6 +5690,14 @@ namespace Google.Apis.Translate.v3.Data
     /// <summary>A document translation request.</summary>
     public class TranslateDocumentRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional. This flag is to support user customized attribution. If not provided, the default is `Machine
+        /// Translated by Google`. Customized attribution should follow rules in
+        /// https://cloud.google.com/translate/attribution#attribution_and_logos
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customizedAttribution")]
+        public virtual string CustomizedAttribution { get; set; }
+
         /// <summary>Required. Input configurations.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("documentInputConfig")]
         public virtual DocumentInputConfig DocumentInputConfig { get; set; }
@@ -2489,12 +5710,31 @@ namespace Google.Apis.Translate.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("documentOutputConfig")]
         public virtual DocumentOutputConfig DocumentOutputConfig { get; set; }
 
+        /// <summary>Optional. If true, enable auto rotation correction in DVS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableRotationCorrection")]
+        public virtual System.Nullable<bool> EnableRotationCorrection { get; set; }
+
+        /// <summary>
+        /// Optional. If true, use the text removal server to remove the shadow text on background image for native pdf
+        /// translation. Shadow removal feature can only be enabled when is_translate_native_pdf_only: false
+        /// &amp;amp;&amp;amp; pdf_native_only: false
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableShadowRemovalNativePdf")]
+        public virtual System.Nullable<bool> EnableShadowRemovalNativePdf { get; set; }
+
         /// <summary>
         /// Optional. Glossary to be applied. The glossary must be within the same region (have the same location-id) as
         /// the model, otherwise an INVALID_ARGUMENT (400) error is returned.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("glossaryConfig")]
         public virtual TranslateTextGlossaryConfig GlossaryConfig { get; set; }
+
+        /// <summary>
+        /// Optional. is_translate_native_pdf_only field for external customers. If true, the page limit of online
+        /// native pdf translation is 300 and only native pdf pages will be translated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isTranslateNativePdfOnly")]
+        public virtual System.Nullable<bool> IsTranslateNativePdfOnly { get; set; }
 
         /// <summary>
         /// Optional. The labels with user-defined metadata for the request. Label keys and values can be no longer than
@@ -2515,7 +5755,7 @@ namespace Google.Apis.Translate.v3.Data
         public virtual string Model { get; set; }
 
         /// <summary>
-        /// Optional. The BCP-47 language code of the input document if known, for example, "en-US" or "sr-Latn".
+        /// Optional. The ISO-639 language code of the input document if known, for example, "en-US" or "sr-Latn".
         /// Supported language codes are listed in Language Support. If the source language isn't specified, the API
         /// attempts to identify the source language automatically and returns the source language within the response.
         /// Source language must be specified if the request contains a glossary or a custom model.
@@ -2524,7 +5764,7 @@ namespace Google.Apis.Translate.v3.Data
         public virtual string SourceLanguageCode { get; set; }
 
         /// <summary>
-        /// Required. The BCP-47 language code to use for translation of the input document, set to one of the language
+        /// Required. The ISO-639 language code to use for translation of the input document, set to one of the language
         /// codes listed in Language Support.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("targetLanguageCode")]
@@ -2566,19 +5806,23 @@ namespace Google.Apis.Translate.v3.Data
     }
 
     /// <summary>
-    /// Configures which glossary should be used for a specific target language, and defines options for applying that
-    /// glossary.
+    /// Configures which glossary is used for a specific target language and defines options for applying that glossary.
     /// </summary>
     public class TranslateTextGlossaryConfig : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Optional. If set to true, the glossary will be used for contextual translation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("contextualTranslationEnabled")]
+        public virtual System.Nullable<bool> ContextualTranslationEnabled { get; set; }
+
         /// <summary>
-        /// Required. The `glossary` to be applied for this translation. The format depends on glossary: - User provided
-        /// custom glossary: `projects/{project-number-or-id}/locations/{location-id}/glossaries/{glossary-id}`
+        /// Required. The `glossary` to be applied for this translation. The format depends on the glossary: -
+        /// User-provided custom glossary:
+        /// `projects/{project-number-or-id}/locations/{location-id}/glossaries/{glossary-id}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("glossary")]
         public virtual string Glossary { get; set; }
 
-        /// <summary>Optional. Indicates match is case-insensitive. Default value is false if missing.</summary>
+        /// <summary>Optional. Indicates match is case insensitive. The default value is `false` if missing.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ignoreCase")]
         public virtual System.Nullable<bool> IgnoreCase { get; set; }
 
@@ -2590,7 +5834,7 @@ namespace Google.Apis.Translate.v3.Data
     public class TranslateTextRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. The content of the input in string format. We recommend the total content be less than 30k
+        /// Required. The content of the input in string format. We recommend the total content be less than 30,000
         /// codepoints. The max length of this field is 1024. Use BatchTranslateText for larger text.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("contents")]
@@ -2622,7 +5866,9 @@ namespace Google.Apis.Translate.v3.Data
         /// <summary>
         /// Optional. The `model` type requested for this translation. The format depends on model type: - AutoML
         /// Translation models: `projects/{project-number-or-id}/locations/{location-id}/models/{model-id}` - General
-        /// (built-in) models: `projects/{project-number-or-id}/locations/{location-id}/models/general/nmt`, For global
+        /// (built-in) models: `projects/{project-number-or-id}/locations/{location-id}/models/general/nmt`, -
+        /// Translation LLM models:
+        /// `projects/{project-number-or-id}/locations/{location-id}/models/general/translation-llm`, For global
         /// (non-regionalized) requests, use `location-id` `global`. For example,
         /// `projects/{project-number-or-id}/locations/global/models/general/nmt`. If not provided, the default Google
         /// model (NMT) will be used
@@ -2631,7 +5877,7 @@ namespace Google.Apis.Translate.v3.Data
         public virtual string Model { get; set; }
 
         /// <summary>
-        /// Optional. The BCP-47 language code of the input text if known, for example, "en-US" or "sr-Latn". Supported
+        /// Optional. The ISO-639 language code of the input text if known, for example, "en-US" or "sr-Latn". Supported
         /// language codes are listed in Language Support. If the source language isn't specified, the API attempts to
         /// identify the source language automatically and returns the source language within the response.
         /// </summary>
@@ -2639,11 +5885,15 @@ namespace Google.Apis.Translate.v3.Data
         public virtual string SourceLanguageCode { get; set; }
 
         /// <summary>
-        /// Required. The BCP-47 language code to use for translation of the input text, set to one of the language
+        /// Required. The ISO-639 language code to use for translation of the input text, set to one of the language
         /// codes listed in Language Support.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("targetLanguageCode")]
         public virtual string TargetLanguageCode { get; set; }
+
+        /// <summary>Optional. Transliteration to be applied.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transliterationConfig")]
+        public virtual TransliterationConfig TransliterationConfig { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2672,7 +5922,7 @@ namespace Google.Apis.Translate.v3.Data
     public class Translation : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The BCP-47 language code of source text in the initial request, detected automatically, if no source
+        /// The ISO-639 language code of source text in the initial request, detected automatically, if no source
         /// language was passed within the initial request. If the source language was passed, auto-detection of the
         /// language does not occur and this field is empty.
         /// </summary>
@@ -2698,6 +5948,17 @@ namespace Google.Apis.Translate.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("translatedText")]
         public virtual string TranslatedText { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configures transliteration feature on top of translation.</summary>
+    public class TransliterationConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>If true, source text in romanized form can be translated to the target language.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableTransliteration")]
+        public virtual System.Nullable<bool> EnableTransliteration { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

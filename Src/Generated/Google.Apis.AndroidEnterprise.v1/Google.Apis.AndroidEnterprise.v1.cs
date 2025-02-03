@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         public AndroidEnterpriseService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Devices = new DevicesResource(this);
+            EnrollmentTokens = new EnrollmentTokensResource(this);
             Enterprises = new EnterprisesResource(this);
             Entitlements = new EntitlementsResource(this);
             Grouplicenses = new GrouplicensesResource(this);
@@ -50,6 +51,8 @@ namespace Google.Apis.AndroidEnterprise.v1
             Storelayoutpages = new StorelayoutpagesResource(this);
             Users = new UsersResource(this);
             Webapps = new WebappsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://androidenterprise.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://androidenterprise.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -59,23 +62,16 @@ namespace Google.Apis.AndroidEnterprise.v1
         public override string Name => "androidenterprise";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://androidenterprise.googleapis.com/";
-        #else
-            "https://androidenterprise.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://androidenterprise.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Play EMM API.</summary>
         public class Scope
@@ -93,6 +89,9 @@ namespace Google.Apis.AndroidEnterprise.v1
 
         /// <summary>Gets the Devices resource.</summary>
         public virtual DevicesResource Devices { get; }
+
+        /// <summary>Gets the EnrollmentTokens resource.</summary>
+        public virtual EnrollmentTokensResource EnrollmentTokens { get; }
 
         /// <summary>Gets the Enterprises resource.</summary>
         public virtual EnterprisesResource Enterprises { get; }
@@ -345,7 +344,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="deviceId">The ID of the device.</param>
         public virtual ForceReportUploadRequest ForceReportUpload(string enterpriseId, string userId, string deviceId)
         {
-            return new ForceReportUploadRequest(service, enterpriseId, userId, deviceId);
+            return new ForceReportUploadRequest(this.service, enterpriseId, userId, deviceId);
         }
 
         /// <summary>
@@ -422,7 +421,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="deviceId">The ID of the device.</param>
         public virtual GetRequest Get(string enterpriseId, string userId, string deviceId)
         {
-            return new GetRequest(service, enterpriseId, userId, deviceId);
+            return new GetRequest(this.service, enterpriseId, userId, deviceId);
         }
 
         /// <summary>Retrieves the details of a device.</summary>
@@ -500,7 +499,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="deviceId">The ID of the device.</param>
         public virtual GetStateRequest GetState(string enterpriseId, string userId, string deviceId)
         {
-            return new GetStateRequest(service, enterpriseId, userId, deviceId);
+            return new GetStateRequest(this.service, enterpriseId, userId, deviceId);
         }
 
         /// <summary>
@@ -577,7 +576,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="userId">The ID of the user.</param>
         public virtual ListRequest List(string enterpriseId, string userId)
         {
-            return new ListRequest(service, enterpriseId, userId);
+            return new ListRequest(this.service, enterpriseId, userId);
         }
 
         /// <summary>Retrieves the IDs of all of a user's devices.</summary>
@@ -643,7 +642,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="deviceId">The ID of the device.</param>
         public virtual SetStateRequest SetState(Google.Apis.AndroidEnterprise.v1.Data.DeviceState body, string enterpriseId, string userId, string deviceId)
         {
-            return new SetStateRequest(service, body, enterpriseId, userId, deviceId);
+            return new SetStateRequest(this.service, body, enterpriseId, userId, deviceId);
         }
 
         /// <summary>
@@ -735,7 +734,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="deviceId">The ID of the device.</param>
         public virtual UpdateRequest Update(Google.Apis.AndroidEnterprise.v1.Data.Device body, string enterpriseId, string userId, string deviceId)
         {
-            return new UpdateRequest(service, body, enterpriseId, userId, deviceId);
+            return new UpdateRequest(this.service, body, enterpriseId, userId, deviceId);
         }
 
         /// <summary>
@@ -832,6 +831,82 @@ namespace Google.Apis.AndroidEnterprise.v1
         }
     }
 
+    /// <summary>The "enrollmentTokens" collection of methods.</summary>
+    public class EnrollmentTokensResource
+    {
+        private const string Resource = "enrollmentTokens";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public EnrollmentTokensResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>
+        /// Returns a token for device enrollment. The DPC can encode this token within the QR/NFC/zero-touch enrollment
+        /// payload or fetch it before calling the on-device API to authenticate the user. The token can be generated
+        /// for each device or reused across multiple devices.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="enterpriseId">Required. The ID of the enterprise.</param>
+        public virtual CreateRequest Create(Google.Apis.AndroidEnterprise.v1.Data.EnrollmentToken body, string enterpriseId)
+        {
+            return new CreateRequest(this.service, body, enterpriseId);
+        }
+
+        /// <summary>
+        /// Returns a token for device enrollment. The DPC can encode this token within the QR/NFC/zero-touch enrollment
+        /// payload or fetch it before calling the on-device API to authenticate the user. The token can be generated
+        /// for each device or reused across multiple devices.
+        /// </summary>
+        public class CreateRequest : AndroidEnterpriseBaseServiceRequest<Google.Apis.AndroidEnterprise.v1.Data.EnrollmentToken>
+        {
+            /// <summary>Constructs a new Create request.</summary>
+            public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.AndroidEnterprise.v1.Data.EnrollmentToken body, string enterpriseId) : base(service)
+            {
+                EnterpriseId = enterpriseId;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Required. The ID of the enterprise.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("enterpriseId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string EnterpriseId { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.AndroidEnterprise.v1.Data.EnrollmentToken Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "create";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "androidenterprise/v1/enterprises/{enterpriseId}/enrollmentTokens";
+
+            /// <summary>Initializes Create parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("enterpriseId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "enterpriseId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
     /// <summary>The "enterprises" collection of methods.</summary>
     public class EnterprisesResource
     {
@@ -852,7 +927,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </summary>
         public virtual AcknowledgeNotificationSetRequest AcknowledgeNotificationSet()
         {
-            return new AcknowledgeNotificationSetRequest(service);
+            return new AcknowledgeNotificationSetRequest(this.service);
         }
 
         /// <summary>
@@ -903,7 +978,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </summary>
         public virtual CompleteSignupRequest CompleteSignup()
         {
-            return new CompleteSignupRequest(service);
+            return new CompleteSignupRequest(this.service);
         }
 
         /// <summary>
@@ -960,19 +1035,19 @@ namespace Google.Apis.AndroidEnterprise.v1
 
         /// <summary>
         /// Returns a unique token to access an embeddable UI. To generate a web UI, pass the generated token into the
-        /// managed Google Play javascript API. Each token may only be used to start one UI session. See the javascript
+        /// managed Google Play javascript API. Each token may only be used to start one UI session. See the JavaScript
         /// API documentation for further information.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual CreateWebTokenRequest CreateWebToken(Google.Apis.AndroidEnterprise.v1.Data.AdministratorWebTokenSpec body, string enterpriseId)
         {
-            return new CreateWebTokenRequest(service, body, enterpriseId);
+            return new CreateWebTokenRequest(this.service, body, enterpriseId);
         }
 
         /// <summary>
         /// Returns a unique token to access an embeddable UI. To generate a web UI, pass the generated token into the
-        /// managed Google Play javascript API. Each token may only be used to start one UI session. See the javascript
+        /// managed Google Play javascript API. Each token may only be used to start one UI session. See the JavaScript
         /// API documentation for further information.
         /// </summary>
         public class CreateWebTokenRequest : AndroidEnterpriseBaseServiceRequest<Google.Apis.AndroidEnterprise.v1.Data.AdministratorWebToken>
@@ -1024,7 +1099,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="token">Required. The token provided by the enterprise to register the EMM.</param>
         public virtual EnrollRequest Enroll(Google.Apis.AndroidEnterprise.v1.Data.Enterprise body, string token)
         {
-            return new EnrollRequest(service, body, token);
+            return new EnrollRequest(this.service, body, token);
         }
 
         /// <summary>Enrolls an enterprise with the calling EMM.</summary>
@@ -1075,7 +1150,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <summary>Generates a sign-up URL.</summary>
         public virtual GenerateSignupUrlRequest GenerateSignupUrl()
         {
-            return new GenerateSignupUrlRequest(service);
+            return new GenerateSignupUrlRequest(this.service);
         }
 
         /// <summary>Generates a sign-up URL.</summary>
@@ -1086,6 +1161,25 @@ namespace Google.Apis.AndroidEnterprise.v1
             {
                 InitParameters();
             }
+
+            /// <summary>
+            /// Optional. Email address used to prefill the admin field of the enterprise signup form. This value is a
+            /// hint only and can be altered by the user. If `allowedDomains` is non-empty then this must belong to one
+            /// of the `allowedDomains`.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("adminEmail", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string AdminEmail { get; set; }
+
+            /// <summary>
+            /// Optional. A list of domains that are permitted for the admin email. The IT admin cannot enter an email
+            /// address with a domain name that is not in this list. Subdomains of domains in this list are not allowed
+            /// but can be allowed by adding a second entry which has `*.` prefixed to the domain name (e.g.
+            /// *.example.com). If the field is not present or is an empty list then the IT admin is free to use any
+            /// valid domain name. Personal email domains are always allowed, but will result in the creation of a
+            /// managed Google Play Accounts enterprise.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("allowedDomains", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<string> AllowedDomains { get; set; }
 
             /// <summary>
             /// The callback URL to which the Admin will be redirected after successfully creating an enterprise. Before
@@ -1110,6 +1204,22 @@ namespace Google.Apis.AndroidEnterprise.v1
             protected override void InitParameters()
             {
                 base.InitParameters();
+                RequestParameters.Add("adminEmail", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "adminEmail",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("allowedDomains", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "allowedDomains",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("callbackUrl", new Google.Apis.Discovery.Parameter
                 {
                     Name = "callbackUrl",
@@ -1125,7 +1235,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual GetRequest Get(string enterpriseId)
         {
-            return new GetRequest(service, enterpriseId);
+            return new GetRequest(this.service, enterpriseId);
         }
 
         /// <summary>Retrieves the name and domain of an enterprise.</summary>
@@ -1178,7 +1288,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual GetServiceAccountRequest GetServiceAccount(string enterpriseId)
         {
-            return new GetServiceAccountRequest(service, enterpriseId);
+            return new GetServiceAccountRequest(this.service, enterpriseId);
         }
 
         /// <summary>
@@ -1262,7 +1372,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual GetStoreLayoutRequest GetStoreLayout(string enterpriseId)
         {
-            return new GetStoreLayoutRequest(service, enterpriseId);
+            return new GetStoreLayoutRequest(this.service, enterpriseId);
         }
 
         /// <summary>
@@ -1315,7 +1425,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="domain">Required. The exact primary domain name of the enterprise to look up.</param>
         public virtual ListRequest List(string domain)
         {
-            return new ListRequest(service, domain);
+            return new ListRequest(this.service, domain);
         }
 
         /// <summary>
@@ -1375,7 +1485,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </summary>
         public virtual PullNotificationSetRequest PullNotificationSet()
         {
-            return new PullNotificationSetRequest(service);
+            return new PullNotificationSetRequest(this.service);
         }
 
         /// <summary>
@@ -1401,7 +1511,7 @@ namespace Google.Apis.AndroidEnterprise.v1
             /// <summary>
             /// The request mode for pulling notifications. Specifying waitForNotifications will cause the request to
             /// block and wait until one or more notifications are present, or return an empty notification list if no
-            /// notifications are present after some time. Speciying returnImmediately will cause the request to
+            /// notifications are present after some time. Specifying returnImmediately will cause the request to
             /// immediately return the pending notifications, or an empty list if no notifications are present. If
             /// omitted, defaults to waitForNotifications.
             /// </summary>
@@ -1411,7 +1521,7 @@ namespace Google.Apis.AndroidEnterprise.v1
             /// <summary>
             /// The request mode for pulling notifications. Specifying waitForNotifications will cause the request to
             /// block and wait until one or more notifications are present, or return an empty notification list if no
-            /// notifications are present after some time. Speciying returnImmediately will cause the request to
+            /// notifications are present after some time. Specifying returnImmediately will cause the request to
             /// immediately return the pending notifications, or an empty list if no notifications are present. If
             /// omitted, defaults to waitForNotifications.
             /// </summary>
@@ -1457,7 +1567,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual SendTestPushNotificationRequest SendTestPushNotification(string enterpriseId)
         {
-            return new SendTestPushNotificationRequest(service, enterpriseId);
+            return new SendTestPushNotificationRequest(this.service, enterpriseId);
         }
 
         /// <summary>
@@ -1506,7 +1616,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual SetAccountRequest SetAccount(Google.Apis.AndroidEnterprise.v1.Data.EnterpriseAccount body, string enterpriseId)
         {
-            return new SetAccountRequest(service, body, enterpriseId);
+            return new SetAccountRequest(this.service, body, enterpriseId);
         }
 
         /// <summary>Sets the account that will be used to authenticate to the API as the enterprise.</summary>
@@ -1565,7 +1675,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual SetStoreLayoutRequest SetStoreLayout(Google.Apis.AndroidEnterprise.v1.Data.StoreLayout body, string enterpriseId)
         {
-            return new SetStoreLayoutRequest(service, body, enterpriseId);
+            return new SetStoreLayoutRequest(this.service, body, enterpriseId);
         }
 
         /// <summary>
@@ -1623,7 +1733,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual UnenrollRequest Unenroll(string enterpriseId)
         {
-            return new UnenrollRequest(service, enterpriseId);
+            return new UnenrollRequest(this.service, enterpriseId);
         }
 
         /// <summary>Unenrolls an enterprise from the calling EMM.</summary>
@@ -1679,7 +1789,10 @@ namespace Google.Apis.AndroidEnterprise.v1
             this.service = service;
         }
 
-        /// <summary>Removes an entitlement to an app for a user.</summary>
+        /// <summary>
+        /// Removes an entitlement to an app for a user. **Note:** This item has been deprecated. New integrations
+        /// cannot use this method and can refer to our new recommendations.
+        /// </summary>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         /// <param name="userId">The ID of the user.</param>
         /// <param name="entitlementId">
@@ -1687,10 +1800,13 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual DeleteRequest Delete(string enterpriseId, string userId, string entitlementId)
         {
-            return new DeleteRequest(service, enterpriseId, userId, entitlementId);
+            return new DeleteRequest(this.service, enterpriseId, userId, entitlementId);
         }
 
-        /// <summary>Removes an entitlement to an app for a user.</summary>
+        /// <summary>
+        /// Removes an entitlement to an app for a user. **Note:** This item has been deprecated. New integrations
+        /// cannot use this method and can refer to our new recommendations.
+        /// </summary>
         public class DeleteRequest : AndroidEnterpriseBaseServiceRequest<string>
         {
             /// <summary>Constructs a new Delete request.</summary>
@@ -1754,7 +1870,10 @@ namespace Google.Apis.AndroidEnterprise.v1
             }
         }
 
-        /// <summary>Retrieves details of an entitlement.</summary>
+        /// <summary>
+        /// Retrieves details of an entitlement. **Note:** This item has been deprecated. New integrations cannot use
+        /// this method and can refer to our new recommendations.
+        /// </summary>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         /// <param name="userId">The ID of the user.</param>
         /// <param name="entitlementId">
@@ -1762,10 +1881,13 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual GetRequest Get(string enterpriseId, string userId, string entitlementId)
         {
-            return new GetRequest(service, enterpriseId, userId, entitlementId);
+            return new GetRequest(this.service, enterpriseId, userId, entitlementId);
         }
 
-        /// <summary>Retrieves details of an entitlement.</summary>
+        /// <summary>
+        /// Retrieves details of an entitlement. **Note:** This item has been deprecated. New integrations cannot use
+        /// this method and can refer to our new recommendations.
+        /// </summary>
         public class GetRequest : AndroidEnterpriseBaseServiceRequest<Google.Apis.AndroidEnterprise.v1.Data.Entitlement>
         {
             /// <summary>Constructs a new Get request.</summary>
@@ -1829,15 +1951,21 @@ namespace Google.Apis.AndroidEnterprise.v1
             }
         }
 
-        /// <summary>Lists all entitlements for the specified user. Only the ID is set.</summary>
+        /// <summary>
+        /// Lists all entitlements for the specified user. Only the ID is set. **Note:** This item has been deprecated.
+        /// New integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         /// <param name="userId">The ID of the user.</param>
         public virtual ListRequest List(string enterpriseId, string userId)
         {
-            return new ListRequest(service, enterpriseId, userId);
+            return new ListRequest(this.service, enterpriseId, userId);
         }
 
-        /// <summary>Lists all entitlements for the specified user. Only the ID is set.</summary>
+        /// <summary>
+        /// Lists all entitlements for the specified user. Only the ID is set. **Note:** This item has been deprecated.
+        /// New integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         public class ListRequest : AndroidEnterpriseBaseServiceRequest<Google.Apis.AndroidEnterprise.v1.Data.EntitlementsListResponse>
         {
             /// <summary>Constructs a new List request.</summary>
@@ -1888,7 +2016,10 @@ namespace Google.Apis.AndroidEnterprise.v1
             }
         }
 
-        /// <summary>Adds or updates an entitlement to an app for a user.</summary>
+        /// <summary>
+        /// Adds or updates an entitlement to an app for a user. **Note:** This item has been deprecated. New
+        /// integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         /// <param name="userId">The ID of the user.</param>
@@ -1897,10 +2028,13 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.AndroidEnterprise.v1.Data.Entitlement body, string enterpriseId, string userId, string entitlementId)
         {
-            return new UpdateRequest(service, body, enterpriseId, userId, entitlementId);
+            return new UpdateRequest(this.service, body, enterpriseId, userId, entitlementId);
         }
 
-        /// <summary>Adds or updates an entitlement to an app for a user.</summary>
+        /// <summary>
+        /// Adds or updates an entitlement to an app for a user. **Note:** This item has been deprecated. New
+        /// integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         public class UpdateRequest : AndroidEnterpriseBaseServiceRequest<Google.Apis.AndroidEnterprise.v1.Data.Entitlement>
         {
             /// <summary>Constructs a new Update request.</summary>
@@ -2002,17 +2136,23 @@ namespace Google.Apis.AndroidEnterprise.v1
             this.service = service;
         }
 
-        /// <summary>Retrieves details of an enterprise's group license for a product.</summary>
+        /// <summary>
+        /// Retrieves details of an enterprise's group license for a product. **Note:** This item has been deprecated.
+        /// New integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         /// <param name="groupLicenseId">
         /// The ID of the product the group license is for, e.g. "app:com.google.android.gm".
         /// </param>
         public virtual GetRequest Get(string enterpriseId, string groupLicenseId)
         {
-            return new GetRequest(service, enterpriseId, groupLicenseId);
+            return new GetRequest(this.service, enterpriseId, groupLicenseId);
         }
 
-        /// <summary>Retrieves details of an enterprise's group license for a product.</summary>
+        /// <summary>
+        /// Retrieves details of an enterprise's group license for a product. **Note:** This item has been deprecated.
+        /// New integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         public class GetRequest : AndroidEnterpriseBaseServiceRequest<Google.Apis.AndroidEnterprise.v1.Data.GroupLicense>
         {
             /// <summary>Constructs a new Get request.</summary>
@@ -2063,14 +2203,20 @@ namespace Google.Apis.AndroidEnterprise.v1
             }
         }
 
-        /// <summary>Retrieves IDs of all products for which the enterprise has a group license.</summary>
+        /// <summary>
+        /// Retrieves IDs of all products for which the enterprise has a group license. **Note:** This item has been
+        /// deprecated. New integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual ListRequest List(string enterpriseId)
         {
-            return new ListRequest(service, enterpriseId);
+            return new ListRequest(this.service, enterpriseId);
         }
 
-        /// <summary>Retrieves IDs of all products for which the enterprise has a group license.</summary>
+        /// <summary>
+        /// Retrieves IDs of all products for which the enterprise has a group license. **Note:** This item has been
+        /// deprecated. New integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         public class ListRequest : AndroidEnterpriseBaseServiceRequest<Google.Apis.AndroidEnterprise.v1.Data.GroupLicensesListResponse>
         {
             /// <summary>Constructs a new List request.</summary>
@@ -2123,17 +2269,23 @@ namespace Google.Apis.AndroidEnterprise.v1
             this.service = service;
         }
 
-        /// <summary>Retrieves the IDs of the users who have been granted entitlements under the license.</summary>
+        /// <summary>
+        /// Retrieves the IDs of the users who have been granted entitlements under the license. **Note:** This item has
+        /// been deprecated. New integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         /// <param name="groupLicenseId">
         /// The ID of the product the group license is for, e.g. "app:com.google.android.gm".
         /// </param>
         public virtual ListRequest List(string enterpriseId, string groupLicenseId)
         {
-            return new ListRequest(service, enterpriseId, groupLicenseId);
+            return new ListRequest(this.service, enterpriseId, groupLicenseId);
         }
 
-        /// <summary>Retrieves the IDs of the users who have been granted entitlements under the license.</summary>
+        /// <summary>
+        /// Retrieves the IDs of the users who have been granted entitlements under the license. **Note:** This item has
+        /// been deprecated. New integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         public class ListRequest : AndroidEnterpriseBaseServiceRequest<Google.Apis.AndroidEnterprise.v1.Data.GroupLicenseUsersListResponse>
         {
             /// <summary>Constructs a new List request.</summary>
@@ -2201,7 +2353,9 @@ namespace Google.Apis.AndroidEnterprise.v1
 
         /// <summary>
         /// Requests to remove an app from a device. A call to get or list will still show the app as installed on the
-        /// device until it is actually removed.
+        /// device until it is actually removed. A successful response indicates that a removal request has been sent to
+        /// the device. The call will be considered successful even if the app is not present on the device (e.g. it was
+        /// never installed, or was removed by the user).
         /// </summary>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         /// <param name="userId">The ID of the user.</param>
@@ -2211,12 +2365,14 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual DeleteRequest Delete(string enterpriseId, string userId, string deviceId, string installId)
         {
-            return new DeleteRequest(service, enterpriseId, userId, deviceId, installId);
+            return new DeleteRequest(this.service, enterpriseId, userId, deviceId, installId);
         }
 
         /// <summary>
         /// Requests to remove an app from a device. A call to get or list will still show the app as installed on the
-        /// device until it is actually removed.
+        /// device until it is actually removed. A successful response indicates that a removal request has been sent to
+        /// the device. The call will be considered successful even if the app is not present on the device (e.g. it was
+        /// never installed, or was removed by the user).
         /// </summary>
         public class DeleteRequest : AndroidEnterpriseBaseServiceRequest<string>
         {
@@ -2303,7 +2459,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual GetRequest Get(string enterpriseId, string userId, string deviceId, string installId)
         {
-            return new GetRequest(service, enterpriseId, userId, deviceId, installId);
+            return new GetRequest(this.service, enterpriseId, userId, deviceId, installId);
         }
 
         /// <summary>Retrieves details of an installation of an app on a device.</summary>
@@ -2389,7 +2545,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="deviceId">The Android ID of the device.</param>
         public virtual ListRequest List(string enterpriseId, string userId, string deviceId)
         {
-            return new ListRequest(service, enterpriseId, userId, deviceId);
+            return new ListRequest(this.service, enterpriseId, userId, deviceId);
         }
 
         /// <summary>Retrieves the details of all apps installed on the specified device.</summary>
@@ -2469,7 +2625,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.AndroidEnterprise.v1.Data.Install body, string enterpriseId, string userId, string deviceId, string installId)
         {
-            return new UpdateRequest(service, body, enterpriseId, userId, deviceId, installId);
+            return new UpdateRequest(this.service, body, enterpriseId, userId, deviceId, installId);
         }
 
         /// <summary>
@@ -2583,7 +2739,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual DeleteRequest Delete(string enterpriseId, string userId, string deviceId, string managedConfigurationForDeviceId)
         {
-            return new DeleteRequest(service, enterpriseId, userId, deviceId, managedConfigurationForDeviceId);
+            return new DeleteRequest(this.service, enterpriseId, userId, deviceId, managedConfigurationForDeviceId);
         }
 
         /// <summary>Removes a per-device managed configuration for an app for the specified device.</summary>
@@ -2672,7 +2828,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual GetRequest Get(string enterpriseId, string userId, string deviceId, string managedConfigurationForDeviceId)
         {
-            return new GetRequest(service, enterpriseId, userId, deviceId, managedConfigurationForDeviceId);
+            return new GetRequest(this.service, enterpriseId, userId, deviceId, managedConfigurationForDeviceId);
         }
 
         /// <summary>Retrieves details of a per-device managed configuration.</summary>
@@ -2760,7 +2916,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="deviceId">The Android ID of the device.</param>
         public virtual ListRequest List(string enterpriseId, string userId, string deviceId)
         {
-            return new ListRequest(service, enterpriseId, userId, deviceId);
+            return new ListRequest(this.service, enterpriseId, userId, deviceId);
         }
 
         /// <summary>
@@ -2839,7 +2995,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.AndroidEnterprise.v1.Data.ManagedConfiguration body, string enterpriseId, string userId, string deviceId, string managedConfigurationForDeviceId)
         {
-            return new UpdateRequest(service, body, enterpriseId, userId, deviceId, managedConfigurationForDeviceId);
+            return new UpdateRequest(this.service, body, enterpriseId, userId, deviceId, managedConfigurationForDeviceId);
         }
 
         /// <summary>Adds or updates a per-device managed configuration for an app for the specified device.</summary>
@@ -2949,7 +3105,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual DeleteRequest Delete(string enterpriseId, string userId, string managedConfigurationForUserId)
         {
-            return new DeleteRequest(service, enterpriseId, userId, managedConfigurationForUserId);
+            return new DeleteRequest(this.service, enterpriseId, userId, managedConfigurationForUserId);
         }
 
         /// <summary>Removes a per-user managed configuration for an app for the specified user.</summary>
@@ -3024,7 +3180,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual GetRequest Get(string enterpriseId, string userId, string managedConfigurationForUserId)
         {
-            return new GetRequest(service, enterpriseId, userId, managedConfigurationForUserId);
+            return new GetRequest(this.service, enterpriseId, userId, managedConfigurationForUserId);
         }
 
         /// <summary>Retrieves details of a per-user managed configuration for an app for the specified user.</summary>
@@ -3096,7 +3252,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="userId">The ID of the user.</param>
         public virtual ListRequest List(string enterpriseId, string userId)
         {
-            return new ListRequest(service, enterpriseId, userId);
+            return new ListRequest(this.service, enterpriseId, userId);
         }
 
         /// <summary>Lists all the per-user managed configurations for the specified user. Only the ID is set.</summary>
@@ -3164,7 +3320,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.AndroidEnterprise.v1.Data.ManagedConfiguration body, string enterpriseId, string userId, string managedConfigurationForUserId)
         {
-            return new UpdateRequest(service, body, enterpriseId, userId, managedConfigurationForUserId);
+            return new UpdateRequest(this.service, body, enterpriseId, userId, managedConfigurationForUserId);
         }
 
         /// <summary>
@@ -3265,7 +3421,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// </param>
         public virtual ListRequest List(string enterpriseId, string productId)
         {
-            return new ListRequest(service, enterpriseId, productId);
+            return new ListRequest(this.service, enterpriseId, productId);
         }
 
         /// <summary>Lists all the managed configurations settings for the specified app.</summary>
@@ -3338,7 +3494,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="permissionId">The ID of the permission.</param>
         public virtual GetRequest Get(string permissionId)
         {
-            return new GetRequest(service, permissionId);
+            return new GetRequest(this.service, permissionId);
         }
 
         /// <summary>Retrieves details of an Android app permission for display to an enterprise admin.</summary>
@@ -3409,20 +3565,22 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <summary>
         ///  Approves the specified product and the relevant app permissions, if any. The maximum number of products
         /// that you can approve per enterprise customer is 1,000. To learn how to use managed Google Play to design and
-        /// create a store layout to display approved products to your users, see Store Layout Design.
+        /// create a store layout to display approved products to your users, see Store Layout Design. **Note:** This
+        /// item has been deprecated. New integrations cannot use this method and can refer to our new recommendations.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         /// <param name="productId">The ID of the product.</param>
         public virtual ApproveRequest Approve(Google.Apis.AndroidEnterprise.v1.Data.ProductsApproveRequest body, string enterpriseId, string productId)
         {
-            return new ApproveRequest(service, body, enterpriseId, productId);
+            return new ApproveRequest(this.service, body, enterpriseId, productId);
         }
 
         /// <summary>
         ///  Approves the specified product and the relevant app permissions, if any. The maximum number of products
         /// that you can approve per enterprise customer is 1,000. To learn how to use managed Google Play to design and
-        /// create a store layout to display approved products to your users, see Store Layout Design.
+        /// create a store layout to display approved products to your users, see Store Layout Design. **Note:** This
+        /// item has been deprecated. New integrations cannot use this method and can refer to our new recommendations.
         /// </summary>
         public class ApproveRequest : AndroidEnterpriseBaseServiceRequest<string>
         {
@@ -3487,13 +3645,14 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// approve that product. Admins should accept the displayed permissions by interacting with a separate UI
         /// element in the EMM console, which in turn should trigger the use of this URL as the
         /// approvalUrlInfo.approvalUrl property in a Products.approve call to approve the product. This URL can only be
-        /// used to display permissions for up to 1 day.
+        /// used to display permissions for up to 1 day. **Note:** This item has been deprecated. New integrations
+        /// cannot use this method and can refer to our new recommendations.
         /// </summary>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         /// <param name="productId">The ID of the product.</param>
         public virtual GenerateApprovalUrlRequest GenerateApprovalUrl(string enterpriseId, string productId)
         {
-            return new GenerateApprovalUrlRequest(service, enterpriseId, productId);
+            return new GenerateApprovalUrlRequest(this.service, enterpriseId, productId);
         }
 
         /// <summary>
@@ -3502,7 +3661,8 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// approve that product. Admins should accept the displayed permissions by interacting with a separate UI
         /// element in the EMM console, which in turn should trigger the use of this URL as the
         /// approvalUrlInfo.approvalUrl property in a Products.approve call to approve the product. This URL can only be
-        /// used to display permissions for up to 1 day.
+        /// used to display permissions for up to 1 day. **Note:** This item has been deprecated. New integrations
+        /// cannot use this method and can refer to our new recommendations.
         /// </summary>
         public class GenerateApprovalUrlRequest : AndroidEnterpriseBaseServiceRequest<Google.Apis.AndroidEnterprise.v1.Data.ProductsGenerateApprovalUrlResponse>
         {
@@ -3574,7 +3734,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="productId">The ID of the product, e.g. "app:com.google.android.gm".</param>
         public virtual GetRequest Get(string enterpriseId, string productId)
         {
-            return new GetRequest(service, enterpriseId, productId);
+            return new GetRequest(this.service, enterpriseId, productId);
         }
 
         /// <summary>Retrieves details of a product for display to an enterprise admin.</summary>
@@ -3650,7 +3810,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="productId">The ID of the product.</param>
         public virtual GetAppRestrictionsSchemaRequest GetAppRestrictionsSchema(string enterpriseId, string productId)
         {
-            return new GetAppRestrictionsSchemaRequest(service, enterpriseId, productId);
+            return new GetAppRestrictionsSchemaRequest(this.service, enterpriseId, productId);
         }
 
         /// <summary>
@@ -3726,7 +3886,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="productId">The ID of the product.</param>
         public virtual GetPermissionsRequest GetPermissions(string enterpriseId, string productId)
         {
-            return new GetPermissionsRequest(service, enterpriseId, productId);
+            return new GetPermissionsRequest(this.service, enterpriseId, productId);
         }
 
         /// <summary>Retrieves the Android app permissions required by this app.</summary>
@@ -3781,16 +3941,18 @@ namespace Google.Apis.AndroidEnterprise.v1
         }
 
         /// <summary>
-        /// Finds approved products that match a query, or all approved products if there is no query.
+        /// Finds approved products that match a query, or all approved products if there is no query. **Note:** This
+        /// item has been deprecated. New integrations cannot use this method and can refer to our new recommendations.
         /// </summary>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual ListRequest List(string enterpriseId)
         {
-            return new ListRequest(service, enterpriseId);
+            return new ListRequest(this.service, enterpriseId);
         }
 
         /// <summary>
-        /// Finds approved products that match a query, or all approved products if there is no query.
+        /// Finds approved products that match a query, or all approved products if there is no query. **Note:** This
+        /// item has been deprecated. New integrations cannot use this method and can refer to our new recommendations.
         /// </summary>
         public class ListRequest : AndroidEnterpriseBaseServiceRequest<Google.Apis.AndroidEnterprise.v1.Data.ProductsListResponse>
         {
@@ -3905,15 +4067,21 @@ namespace Google.Apis.AndroidEnterprise.v1
             }
         }
 
-        /// <summary>Unapproves the specified product (and the relevant app permissions, if any)</summary>
+        /// <summary>
+        /// Unapproves the specified product (and the relevant app permissions, if any) **Note:** This item has been
+        /// deprecated. New integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         /// <param name="productId">The ID of the product.</param>
         public virtual UnapproveRequest Unapprove(string enterpriseId, string productId)
         {
-            return new UnapproveRequest(service, enterpriseId, productId);
+            return new UnapproveRequest(this.service, enterpriseId, productId);
         }
 
-        /// <summary>Unapproves the specified product (and the relevant app permissions, if any)</summary>
+        /// <summary>
+        /// Unapproves the specified product (and the relevant app permissions, if any) **Note:** This item has been
+        /// deprecated. New integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         public class UnapproveRequest : AndroidEnterpriseBaseServiceRequest<string>
         {
             /// <summary>Constructs a new Unapprove request.</summary>
@@ -3988,7 +4156,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="keyId">The ID of the key.</param>
         public virtual DeleteRequest Delete(string enterpriseId, string keyId)
         {
-            return new DeleteRequest(service, enterpriseId, keyId);
+            return new DeleteRequest(this.service, enterpriseId, keyId);
         }
 
         /// <summary>
@@ -4056,7 +4224,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual InsertRequest Insert(Google.Apis.AndroidEnterprise.v1.Data.ServiceAccountKey body, string enterpriseId)
         {
-            return new InsertRequest(service, body, enterpriseId);
+            return new InsertRequest(this.service, body, enterpriseId);
         }
 
         /// <summary>
@@ -4118,7 +4286,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual ListRequest List(string enterpriseId)
         {
-            return new ListRequest(service, enterpriseId);
+            return new ListRequest(this.service, enterpriseId);
         }
 
         /// <summary>
@@ -4185,7 +4353,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="clusterId">The ID of the cluster.</param>
         public virtual DeleteRequest Delete(string enterpriseId, string pageId, string clusterId)
         {
-            return new DeleteRequest(service, enterpriseId, pageId, clusterId);
+            return new DeleteRequest(this.service, enterpriseId, pageId, clusterId);
         }
 
         /// <summary>Deletes a cluster.</summary>
@@ -4258,7 +4426,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="clusterId">The ID of the cluster.</param>
         public virtual GetRequest Get(string enterpriseId, string pageId, string clusterId)
         {
-            return new GetRequest(service, enterpriseId, pageId, clusterId);
+            return new GetRequest(this.service, enterpriseId, pageId, clusterId);
         }
 
         /// <summary>Retrieves details of a cluster.</summary>
@@ -4331,7 +4499,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="pageId">The ID of the page.</param>
         public virtual InsertRequest Insert(Google.Apis.AndroidEnterprise.v1.Data.StoreCluster body, string enterpriseId, string pageId)
         {
-            return new InsertRequest(service, body, enterpriseId, pageId);
+            return new InsertRequest(this.service, body, enterpriseId, pageId);
         }
 
         /// <summary>Inserts a new cluster in a page.</summary>
@@ -4397,7 +4565,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="pageId">The ID of the page.</param>
         public virtual ListRequest List(string enterpriseId, string pageId)
         {
-            return new ListRequest(service, enterpriseId, pageId);
+            return new ListRequest(this.service, enterpriseId, pageId);
         }
 
         /// <summary>Retrieves the details of all clusters on the specified page.</summary>
@@ -4458,7 +4626,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="clusterId">The ID of the cluster.</param>
         public virtual UpdateRequest Update(Google.Apis.AndroidEnterprise.v1.Data.StoreCluster body, string enterpriseId, string pageId, string clusterId)
         {
-            return new UpdateRequest(service, body, enterpriseId, pageId, clusterId);
+            return new UpdateRequest(this.service, body, enterpriseId, pageId, clusterId);
         }
 
         /// <summary>Updates a cluster.</summary>
@@ -4552,7 +4720,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="pageId">The ID of the page.</param>
         public virtual DeleteRequest Delete(string enterpriseId, string pageId)
         {
-            return new DeleteRequest(service, enterpriseId, pageId);
+            return new DeleteRequest(this.service, enterpriseId, pageId);
         }
 
         /// <summary>Deletes a store page.</summary>
@@ -4611,7 +4779,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="pageId">The ID of the page.</param>
         public virtual GetRequest Get(string enterpriseId, string pageId)
         {
-            return new GetRequest(service, enterpriseId, pageId);
+            return new GetRequest(this.service, enterpriseId, pageId);
         }
 
         /// <summary>Retrieves details of a store page.</summary>
@@ -4670,7 +4838,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual InsertRequest Insert(Google.Apis.AndroidEnterprise.v1.Data.StorePage body, string enterpriseId)
         {
-            return new InsertRequest(service, body, enterpriseId);
+            return new InsertRequest(this.service, body, enterpriseId);
         }
 
         /// <summary>Inserts a new store page.</summary>
@@ -4722,7 +4890,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual ListRequest List(string enterpriseId)
         {
-            return new ListRequest(service, enterpriseId);
+            return new ListRequest(this.service, enterpriseId);
         }
 
         /// <summary>Retrieves the details of all pages in the store.</summary>
@@ -4769,7 +4937,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="pageId">The ID of the page.</param>
         public virtual UpdateRequest Update(Google.Apis.AndroidEnterprise.v1.Data.StorePage body, string enterpriseId, string pageId)
         {
-            return new UpdateRequest(service, body, enterpriseId, pageId);
+            return new UpdateRequest(this.service, body, enterpriseId, pageId);
         }
 
         /// <summary>Updates the content of a store page.</summary>
@@ -4850,7 +5018,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="userId">The ID of the user.</param>
         public virtual DeleteRequest Delete(string enterpriseId, string userId)
         {
-            return new DeleteRequest(service, enterpriseId, userId);
+            return new DeleteRequest(this.service, enterpriseId, userId);
         }
 
         /// <summary>Deleted an EMM-managed user.</summary>
@@ -4913,7 +5081,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="userId">The ID of the user.</param>
         public virtual GenerateAuthenticationTokenRequest GenerateAuthenticationToken(string enterpriseId, string userId)
         {
-            return new GenerateAuthenticationTokenRequest(service, enterpriseId, userId);
+            return new GenerateAuthenticationTokenRequest(this.service, enterpriseId, userId);
         }
 
         /// <summary>
@@ -4976,7 +5144,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="userId">The ID of the user.</param>
         public virtual GetRequest Get(string enterpriseId, string userId)
         {
-            return new GetRequest(service, enterpriseId, userId);
+            return new GetRequest(this.service, enterpriseId, userId);
         }
 
         /// <summary>Retrieves a user's details.</summary>
@@ -5030,15 +5198,21 @@ namespace Google.Apis.AndroidEnterprise.v1
             }
         }
 
-        /// <summary>Retrieves the set of products a user is entitled to access.</summary>
+        /// <summary>
+        /// Retrieves the set of products a user is entitled to access. **Note:** This item has been deprecated. New
+        /// integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         /// <param name="userId">The ID of the user.</param>
         public virtual GetAvailableProductSetRequest GetAvailableProductSet(string enterpriseId, string userId)
         {
-            return new GetAvailableProductSetRequest(service, enterpriseId, userId);
+            return new GetAvailableProductSetRequest(this.service, enterpriseId, userId);
         }
 
-        /// <summary>Retrieves the set of products a user is entitled to access.</summary>
+        /// <summary>
+        /// Retrieves the set of products a user is entitled to access. **Note:** This item has been deprecated. New
+        /// integrations cannot use this method and can refer to our new recommendations.
+        /// </summary>
         public class GetAvailableProductSetRequest : AndroidEnterpriseBaseServiceRequest<Google.Apis.AndroidEnterprise.v1.Data.ProductSet>
         {
             /// <summary>Constructs a new GetAvailableProductSet request.</summary>
@@ -5099,7 +5273,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual InsertRequest Insert(Google.Apis.AndroidEnterprise.v1.Data.User body, string enterpriseId)
         {
-            return new InsertRequest(service, body, enterpriseId);
+            return new InsertRequest(this.service, body, enterpriseId);
         }
 
         /// <summary>
@@ -5161,7 +5335,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="email">Required. The exact primary email address of the user to look up.</param>
         public virtual ListRequest List(string enterpriseId, string email)
         {
-            return new ListRequest(service, enterpriseId, email);
+            return new ListRequest(this.service, enterpriseId, email);
         }
 
         /// <summary>
@@ -5227,7 +5401,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="userId">The ID of the user.</param>
         public virtual RevokeDeviceAccessRequest RevokeDeviceAccess(string enterpriseId, string userId)
         {
-            return new RevokeDeviceAccessRequest(service, enterpriseId, userId);
+            return new RevokeDeviceAccessRequest(this.service, enterpriseId, userId);
         }
 
         /// <summary>
@@ -5287,20 +5461,22 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <summary>
         /// Modifies the set of products that a user is entitled to access (referred to as *whitelisted* products). Only
         /// products that are approved or products that were previously approved (products with revoked approval) can be
-        /// whitelisted.
+        /// whitelisted. **Note:** This item has been deprecated. New integrations cannot use this method and can refer
+        /// to our new recommendations.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         /// <param name="userId">The ID of the user.</param>
         public virtual SetAvailableProductSetRequest SetAvailableProductSet(Google.Apis.AndroidEnterprise.v1.Data.ProductSet body, string enterpriseId, string userId)
         {
-            return new SetAvailableProductSetRequest(service, body, enterpriseId, userId);
+            return new SetAvailableProductSetRequest(this.service, body, enterpriseId, userId);
         }
 
         /// <summary>
         /// Modifies the set of products that a user is entitled to access (referred to as *whitelisted* products). Only
         /// products that are approved or products that were previously approved (products with revoked approval) can be
-        /// whitelisted.
+        /// whitelisted. **Note:** This item has been deprecated. New integrations cannot use this method and can refer
+        /// to our new recommendations.
         /// </summary>
         public class SetAvailableProductSetRequest : AndroidEnterpriseBaseServiceRequest<Google.Apis.AndroidEnterprise.v1.Data.ProductSet>
         {
@@ -5369,7 +5545,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="userId">The ID of the user.</param>
         public virtual UpdateRequest Update(Google.Apis.AndroidEnterprise.v1.Data.User body, string enterpriseId, string userId)
         {
-            return new UpdateRequest(service, body, enterpriseId, userId);
+            return new UpdateRequest(this.service, body, enterpriseId, userId);
         }
 
         /// <summary>
@@ -5454,7 +5630,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="webAppId">The ID of the web app.</param>
         public virtual DeleteRequest Delete(string enterpriseId, string webAppId)
         {
-            return new DeleteRequest(service, enterpriseId, webAppId);
+            return new DeleteRequest(this.service, enterpriseId, webAppId);
         }
 
         /// <summary>Deletes an existing web app.</summary>
@@ -5513,7 +5689,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="webAppId">The ID of the web app.</param>
         public virtual GetRequest Get(string enterpriseId, string webAppId)
         {
-            return new GetRequest(service, enterpriseId, webAppId);
+            return new GetRequest(this.service, enterpriseId, webAppId);
         }
 
         /// <summary>Gets an existing web app.</summary>
@@ -5572,7 +5748,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual InsertRequest Insert(Google.Apis.AndroidEnterprise.v1.Data.WebApp body, string enterpriseId)
         {
-            return new InsertRequest(service, body, enterpriseId);
+            return new InsertRequest(this.service, body, enterpriseId);
         }
 
         /// <summary>Creates a new web app for the enterprise.</summary>
@@ -5624,7 +5800,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="enterpriseId">The ID of the enterprise.</param>
         public virtual ListRequest List(string enterpriseId)
         {
-            return new ListRequest(service, enterpriseId);
+            return new ListRequest(this.service, enterpriseId);
         }
 
         /// <summary>Retrieves the details of all web apps for a given enterprise.</summary>
@@ -5671,7 +5847,7 @@ namespace Google.Apis.AndroidEnterprise.v1
         /// <param name="webAppId">The ID of the web app.</param>
         public virtual UpdateRequest Update(Google.Apis.AndroidEnterprise.v1.Data.WebApp body, string enterpriseId, string webAppId)
         {
-            return new UpdateRequest(service, body, enterpriseId, webAppId);
+            return new UpdateRequest(this.service, body, enterpriseId, webAppId);
         }
 
         /// <summary>Updates an existing web app.</summary>
@@ -6024,6 +6200,13 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("isProduction")]
         public virtual System.Nullable<bool> IsProduction { get; set; }
 
+        /// <summary>
+        /// The SDK version this app targets, as specified in the manifest of the APK. See
+        /// http://developer.android.com/guide/topics/manifest/uses-sdk-element.html
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetSdkVersion")]
+        public virtual System.Nullable<int> TargetSdkVersion { get; set; }
+
         /// <summary>Deprecated, use trackId instead.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("track")]
         public virtual string Track { get; set; }
@@ -6109,7 +6292,10 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("autoInstallConstraint")]
         public virtual System.Collections.Generic.IList<AutoInstallConstraint> AutoInstallConstraint { get; set; }
 
-        /// <summary>The auto-install mode. If unset defaults to "doNotAutoInstall".</summary>
+        /// <summary>
+        /// The auto-install mode. If unset, defaults to "doNotAutoInstall". An app is automatically installed
+        /// regardless of a set maintenance window.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("autoInstallMode")]
         public virtual string AutoInstallMode { get; set; }
 
@@ -6163,6 +6349,21 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
         public virtual string AndroidId { get; set; }
 
         /// <summary>
+        /// The internal hardware codename of the device. This comes from android.os.Build.DEVICE. (field named "device"
+        /// per logs/wireless/android/android_checkin.proto)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("device")]
+        public virtual string DeviceValue { get; set; }
+
+        /// <summary>The build fingerprint of the device if known.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("latestBuildFingerprint")]
+        public virtual string LatestBuildFingerprint { get; set; }
+
+        /// <summary>The manufacturer of the device. This comes from android.os.Build.MANUFACTURER.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maker")]
+        public virtual string Maker { get; set; }
+
+        /// <summary>
         /// Identifies the extent to which the device is controlled by a managed Google Play EMM in various deployment
         /// configurations. Possible values include: - "managedDevice", a device that has the EMM's device policy
         /// controller (DPC) as the device owner. - "managedProfile", a device that has a profile managed by the DPC
@@ -6174,13 +6375,29 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("managementType")]
         public virtual string ManagementType { get; set; }
 
+        /// <summary>The model name of the device. This comes from android.os.Build.MODEL.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("model")]
+        public virtual string Model { get; set; }
+
         /// <summary>The policy enforced on the device.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
         public virtual Policy Policy { get; set; }
 
+        /// <summary>The product name of the device. This comes from android.os.Build.PRODUCT.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("product")]
+        public virtual string Product { get; set; }
+
         /// <summary>The device report updated with the latest app states.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("report")]
         public virtual DeviceReport Report { get; set; }
+
+        /// <summary>Retail brand for the device, if set. See android.os.Build.BRAND</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("retailBrand")]
+        public virtual string RetailBrand { get; set; }
+
+        /// <summary>API compatibility version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sdkVersion")]
+        public virtual System.Nullable<int> SdkVersion { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6252,6 +6469,32 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A token used to enroll a device.</summary>
+    public class EnrollmentToken : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// [Optional] The length of time the enrollment token is valid, ranging from 1 minute to
+        /// [`Durations.MAX_VALUE`](https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/util/Durations.html#MAX_VALUE),
+        /// approximately 10,000 years. If not specified, the default duration is 1 hour.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("duration")]
+        public virtual object Duration { get; set; }
+
+        /// <summary>[Required] The type of the enrollment token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enrollmentTokenType")]
+        public virtual string EnrollmentTokenType { get; set; }
+
+        /// <summary>
+        /// The token value that's passed to the device and authorizes the device to enroll. This is a read-only field
+        /// generated by the server.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("token")]
+        public virtual string Token { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// An Enterprises resource represents the binding between an EMM and a specific organization. That binding can be
     /// instantiated in one of two different ways using this API as follows: - For Google managed domain customers, the
@@ -6269,6 +6512,10 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("administrator")]
         public virtual System.Collections.Generic.IList<Administrator> Administrator { get; set; }
+
+        /// <summary>Output only. Settings for Google-provided user authentication.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleAuthenticationSettings")]
+        public virtual GoogleAuthenticationSettings GoogleAuthenticationSettings { get; set; }
 
         /// <summary>The unique ID for the enterprise.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
@@ -6295,6 +6542,17 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
         /// <summary>The email address of the service account.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("accountEmail")]
         public virtual string AccountEmail { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An authentication URL configuration for the authenticator app of an identity provider.</summary>
+    public class EnterpriseAuthenticationAppLinkConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>An authentication url.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6328,19 +6586,7 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
     }
 
     /// <summary>
-    /// The presence of an Entitlements resource indicates that a user has the right to use a particular app.
-    /// Entitlements are user specific, not device specific. This allows a user with an entitlement to an app to install
-    /// the app on all their devices. It's also possible for a user to hold an entitlement to an app without installing
-    /// the app on any device. The API can be used to create an entitlement. As an option, you can also use the API to
-    /// trigger the installation of an app on all a user's managed devices at the same time the entitlement is created.
-    /// If the app is free, creating the entitlement also creates a group license for that app. For paid apps, creating
-    /// the entitlement consumes one license, and that license remains consumed until the entitlement is removed. If the
-    /// enterprise hasn't purchased enough licenses, then no entitlement is created and the installation fails. An
-    /// entitlement is also not created for an app if the app requires permissions that the enterprise hasn't accepted.
-    /// If an entitlement is deleted, the app may be uninstalled from a user's device. As a best practice, uninstall the
-    /// app by calling Installs.delete() before deleting the entitlement. Entitlements for apps that a user pays for on
-    /// an unmanaged profile have "userPurchase" as the entitlement reason. These entitlements cannot be removed via the
-    /// API.
+    ///  *Deprecated:* New integrations cannot use this method and can refer to our new recommendations.
     /// </summary>
     public class Entitlement : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6374,16 +6620,23 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Contains settings for Google-provided user authentication.</summary>
+    public class GoogleAuthenticationSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Whether dedicated devices are allowed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dedicatedDevicesAllowed")]
+        public virtual string DedicatedDevicesAllowed { get; set; }
+
+        /// <summary>Whether Google authentication is required.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleAuthenticationRequired")]
+        public virtual string GoogleAuthenticationRequired { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
-    /// Group license objects allow you to keep track of licenses (called entitlements) for both free and paid apps. For
-    /// a free app, a group license is created when an enterprise admin first approves the product in Google Play or
-    /// when the first entitlement for the product is created for a user via the API. For a paid app, a group license
-    /// object is only created when an enterprise admin purchases the product in Google Play for the first time. Use the
-    /// API to query group licenses. A Grouplicenses resource includes the total number of licenses purchased (paid apps
-    /// only) and the total number of licenses currently in use. In other words, the total number of Entitlements that
-    /// exist for the product. Only one group license object is created per product and group license objects are never
-    /// deleted. If a product is unapproved, its group license remains. This allows enterprise admins to keep track of
-    /// any remaining entitlements for the product.
+    ///  *Deprecated:* New integrations cannot use this method and can refer to our new recommendations
     /// </summary>
     public class GroupLicense : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6621,8 +6874,7 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
     }
 
     /// <summary>
-    /// A managed configuration resource contains the set of managed properties defined by the app developer in the
-    /// app's managed configurations schema, as well as any configuration variables defined for the user.
+    ///  *Deprecated:* New integrations cannot use this method and can refer to our new recommendations
     /// </summary>
     public class ManagedConfiguration : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6951,10 +7203,13 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Deprecated. Use autoUpdateMode instead. When autoUpdateMode is set to AUTO_UPDATE_POSTPONED or
-        /// AUTO_UPDATE_HIGH_PRIORITY, this field has no effect. "choiceToTheUser" allows the device's user to configure
-        /// the app update policy. "always" enables auto updates. "never" disables auto updates. "wifiOnly" enables auto
-        /// updates only when the device is connected to wifi.
+        /// Controls when automatic app updates on the device can be applied. Recommended alternative: autoUpdateMode
+        /// which is set per app, provides greater flexibility around update frequency. When autoUpdateMode is set to
+        /// AUTO_UPDATE_POSTPONED or AUTO_UPDATE_HIGH_PRIORITY, autoUpdatePolicy has no effect. - choiceToTheUser allows
+        /// the device's user to configure the app update policy. - always enables auto updates. - never disables auto
+        /// updates. - wifiOnly enables auto updates only when the device is connected to wifi. *Important:* Changes to
+        /// app update policies don't affect updates that are in progress. Any policy changes will apply to subsequent
+        /// app updates.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("autoUpdatePolicy")]
         public virtual string AutoUpdatePolicy { get; set; }
@@ -6968,6 +7223,12 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
         /// <summary>The maintenance window defining when apps running in the foreground should be updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maintenanceWindow")]
         public virtual MaintenanceWindow MaintenanceWindow { get; set; }
+
+        /// <summary>
+        /// An identifier for the policy that will be passed with the app install feedback sent from the Play Store.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policyId")]
+        public virtual string PolicyId { get; set; }
 
         /// <summary>
         /// The availability granted to the device for the specified products. "all" gives the device access to all
@@ -6999,6 +7260,10 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
     /// </summary>
     public class Product : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The app restriction schema</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appRestrictionsSchema")]
+        public virtual AppRestrictionsSchema AppRestrictionsSchema { get; set; }
+
         /// <summary>The tracks visible to the enterprise.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("appTracks")]
         public virtual System.Collections.Generic.IList<TrackInfo> AppTracks { get; set; }
@@ -7048,6 +7313,10 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
         /// <summary>Noteworthy features (if any) of this product.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("features")]
         public virtual System.Collections.Generic.IList<string> Features { get; set; }
+
+        /// <summary>The localized full app store description, if available.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fullDescription")]
+        public virtual string FullDescription { get; set; }
 
         /// <summary>
         /// A link to an image that can be used as an icon for the product. This image is suitable for use at up to
@@ -7201,9 +7470,20 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("autoInstallPolicy")]
         public virtual AutoInstallPolicy AutoInstallPolicy { get; set; }
 
-        /// <summary>The auto-update mode for the product.</summary>
+        /// <summary>
+        /// The auto-update mode for the product. When autoUpdateMode is used, it always takes precedence over the
+        /// user's choice. So when a user makes changes to the device settings manually, these changes are ignored.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("autoUpdateMode")]
         public virtual string AutoUpdateMode { get; set; }
+
+        /// <summary>
+        /// An authentication URL configuration for the authenticator app of an identity provider. This helps to launch
+        /// the identity provider's authenticator app during the authentication happening in a private app using Android
+        /// WebView. Authenticator app should already be the default handler for the authentication url on the device.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enterpriseAuthenticationAppLinkConfigs")]
+        public virtual System.Collections.Generic.IList<EnterpriseAuthenticationAppLinkConfig> EnterpriseAuthenticationAppLinkConfigs { get; set; }
 
         /// <summary>The managed configuration for the product.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("managedConfiguration")]
@@ -7380,7 +7660,9 @@ namespace Google.Apis.AndroidEnterprise.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Credentials that can be used to authenticate as a service account.</summary>
+    /// <summary>
+    ///  *Deprecated:* New integrations cannot use this method and can refer to our new recommendations
+    /// </summary>
     public class ServiceAccountKey : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>

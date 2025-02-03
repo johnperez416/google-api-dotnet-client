@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,10 @@ namespace Google.Apis.NetworkSecurity.v1
         /// <param name="initializer">The service initializer.</param>
         public NetworkSecurityService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
+            Organizations = new OrganizationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://networksecurity.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://networksecurity.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +47,16 @@ namespace Google.Apis.NetworkSecurity.v1
         public override string Name => "networksecurity";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://networksecurity.googleapis.com/";
-        #else
-            "https://networksecurity.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://networksecurity.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Network Security API.</summary>
         public class Scope
@@ -81,6 +77,9 @@ namespace Google.Apis.NetworkSecurity.v1
             /// </summary>
             public const string CloudPlatform = "https://www.googleapis.com/auth/cloud-platform";
         }
+
+        /// <summary>Gets the Organizations resource.</summary>
+        public virtual OrganizationsResource Organizations { get; }
 
         /// <summary>Gets the Projects resource.</summary>
         public virtual ProjectsResource Projects { get; }
@@ -267,6 +266,2120 @@ namespace Google.Apis.NetworkSecurity.v1
         }
     }
 
+    /// <summary>The "organizations" collection of methods.</summary>
+    public class OrganizationsResource
+    {
+        private const string Resource = "organizations";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public OrganizationsResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+            Locations = new LocationsResource(service);
+        }
+
+        /// <summary>Gets the Locations resource.</summary>
+        public virtual LocationsResource Locations { get; }
+
+        /// <summary>The "locations" collection of methods.</summary>
+        public class LocationsResource
+        {
+            private const string Resource = "locations";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public LocationsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+                AddressGroups = new AddressGroupsResource(service);
+                FirewallEndpoints = new FirewallEndpointsResource(service);
+                Operations = new OperationsResource(service);
+                SecurityProfileGroups = new SecurityProfileGroupsResource(service);
+                SecurityProfiles = new SecurityProfilesResource(service);
+            }
+
+            /// <summary>Gets the AddressGroups resource.</summary>
+            public virtual AddressGroupsResource AddressGroups { get; }
+
+            /// <summary>The "addressGroups" collection of methods.</summary>
+            public class AddressGroupsResource
+            {
+                private const string Resource = "addressGroups";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public AddressGroupsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Adds items to an address group.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="addressGroup">
+                /// Required. A name of the AddressGroup to add items to. Must be in the format
+                /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                /// </param>
+                public virtual AddItemsRequest AddItems(Google.Apis.NetworkSecurity.v1.Data.AddAddressGroupItemsRequest body, string addressGroup)
+                {
+                    return new AddItemsRequest(this.service, body, addressGroup);
+                }
+
+                /// <summary>Adds items to an address group.</summary>
+                public class AddItemsRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new AddItems request.</summary>
+                    public AddItemsRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.AddAddressGroupItemsRequest body, string addressGroup) : base(service)
+                    {
+                        AddressGroup = addressGroup;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the AddressGroup to add items to. Must be in the format
+                    /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addressGroup", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AddressGroup { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.AddAddressGroupItemsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "addItems";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+addressGroup}:addItems";
+
+                    /// <summary>Initializes AddItems parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("addressGroup", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addressGroup",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Clones items from one address group to another.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="addressGroup">
+                /// Required. A name of the AddressGroup to clone items to. Must be in the format
+                /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                /// </param>
+                public virtual CloneItemsRequest CloneItems(Google.Apis.NetworkSecurity.v1.Data.CloneAddressGroupItemsRequest body, string addressGroup)
+                {
+                    return new CloneItemsRequest(this.service, body, addressGroup);
+                }
+
+                /// <summary>Clones items from one address group to another.</summary>
+                public class CloneItemsRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new CloneItems request.</summary>
+                    public CloneItemsRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.CloneAddressGroupItemsRequest body, string addressGroup) : base(service)
+                    {
+                        AddressGroup = addressGroup;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the AddressGroup to clone items to. Must be in the format
+                    /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addressGroup", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AddressGroup { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.CloneAddressGroupItemsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "cloneItems";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+addressGroup}:cloneItems";
+
+                    /// <summary>Initializes CloneItems parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("addressGroup", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addressGroup",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Creates a new address group in a given project and location.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource of the AddressGroup. Must be in the format
+                /// `projects/*/locations/{location}`.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.AddressGroup body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new address group in a given project and location.</summary>
+                public class CreateRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.AddressGroup body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource of the AddressGroup. Must be in the format
+                    /// `projects/*/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. Short name of the AddressGroup resource to be created. This value should be 1-63
+                    /// characters long, containing only letters, numbers, hyphens, and underscores, and should not
+                    /// start with a number. E.g. "authz_policy".
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addressGroupId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string AddressGroupId { get; set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server will know to ignore the request if it has already been
+                    /// completed. The server will guarantee that for at least 60 minutes since the first request. For
+                    /// example, consider a situation where you make an initial request and the request times out. If
+                    /// you make the request again with the same request ID, the server can check if original operation
+                    /// with the same request ID was received, and if so, will ignore the second request. This prevents
+                    /// clients from accidentally creating duplicate commitments. The request ID must be a valid UUID
+                    /// with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.AddressGroup Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/addressGroups";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("addressGroupId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addressGroupId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes an address group.</summary>
+                /// <param name="name">
+                /// Required. A name of the AddressGroup to delete. Must be in the format
+                /// `projects/*/locations/{location}/addressGroups/*`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes an address group.</summary>
+                public class DeleteRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the AddressGroup to delete. Must be in the format
+                    /// `projects/*/locations/{location}/addressGroups/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server will know to ignore the request if it has already been
+                    /// completed. The server will guarantee that for at least 60 minutes since the first request. For
+                    /// example, consider a situation where you make an initial request and the request times out. If
+                    /// you make the request again with the same request ID, the server can check if original operation
+                    /// with the same request ID was received, and if so, will ignore the second request. This prevents
+                    /// clients from accidentally creating duplicate commitments. The request ID must be a valid UUID
+                    /// with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Gets details of a single address group.</summary>
+                /// <param name="name">
+                /// Required. A name of the AddressGroup to get. Must be in the format
+                /// `projects/*/locations/{location}/addressGroups/*`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets details of a single address group.</summary>
+                public class GetRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.AddressGroup>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the AddressGroup to get. Must be in the format
+                    /// `projects/*/locations/{location}/addressGroups/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists address groups in a given project and location.</summary>
+                /// <param name="parent">
+                /// Required. The project and location from which the AddressGroups should be listed, specified in the
+                /// format `projects/*/locations/{location}`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists address groups in a given project and location.</summary>
+                public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListAddressGroupsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The project and location from which the AddressGroups should be listed, specified in
+                    /// the format `projects/*/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Maximum number of AddressGroups to return per call.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// The value returned by the last `ListAddressGroupsResponse` Indicates that this is a continuation
+                    /// of a prior `ListAddressGroups` call, and that the system should return the next page of data.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/addressGroups";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Lists references of an address group.</summary>
+                /// <param name="addressGroup">
+                /// Required. A name of the AddressGroup to clone items to. Must be in the format
+                /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                /// </param>
+                public virtual ListReferencesRequest ListReferences(string addressGroup)
+                {
+                    return new ListReferencesRequest(this.service, addressGroup);
+                }
+
+                /// <summary>Lists references of an address group.</summary>
+                public class ListReferencesRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListAddressGroupReferencesResponse>
+                {
+                    /// <summary>Constructs a new ListReferences request.</summary>
+                    public ListReferencesRequest(Google.Apis.Services.IClientService service, string addressGroup) : base(service)
+                    {
+                        AddressGroup = addressGroup;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the AddressGroup to clone items to. Must be in the format
+                    /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addressGroup", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AddressGroup { get; private set; }
+
+                    /// <summary>
+                    /// The maximum number of references to return. If unspecified, server will pick an appropriate
+                    /// default. Server may return fewer items than requested. A caller should only rely on response's
+                    /// next_page_token to determine if there are more AddressGroupUsers left to be queried.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>The next_page_token value returned from a previous List request, if any.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "listReferences";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+addressGroup}:listReferences";
+
+                    /// <summary>Initializes ListReferences parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("addressGroup", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addressGroup",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates parameters of an address group.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Name of the AddressGroup resource. It matches pattern
+                /// `projects/*/locations/{location}/addressGroups/`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.AddressGroup body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates parameters of an address group.</summary>
+                public class PatchRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.AddressGroup body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the AddressGroup resource. It matches pattern
+                    /// `projects/*/locations/{location}/addressGroups/`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server will know to ignore the request if it has already been
+                    /// completed. The server will guarantee that for at least 60 minutes since the first request. For
+                    /// example, consider a situation where you make an initial request and the request times out. If
+                    /// you make the request again with the same request ID, the server can check if original operation
+                    /// with the same request ID was received, and if so, will ignore the second request. This prevents
+                    /// clients from accidentally creating duplicate commitments. The request ID must be a valid UUID
+                    /// with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>
+                    /// Optional. Field mask is used to specify the fields to be overwritten in the AddressGroup
+                    /// resource by the update. The fields specified in the update_mask are relative to the resource,
+                    /// not the full request. A field will be overwritten if it is in the mask. If the user does not
+                    /// provide a mask then all fields will be overwritten.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.AddressGroup Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Removes items from an address group.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="addressGroup">
+                /// Required. A name of the AddressGroup to remove items from. Must be in the format
+                /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                /// </param>
+                public virtual RemoveItemsRequest RemoveItems(Google.Apis.NetworkSecurity.v1.Data.RemoveAddressGroupItemsRequest body, string addressGroup)
+                {
+                    return new RemoveItemsRequest(this.service, body, addressGroup);
+                }
+
+                /// <summary>Removes items from an address group.</summary>
+                public class RemoveItemsRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new RemoveItems request.</summary>
+                    public RemoveItemsRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.RemoveAddressGroupItemsRequest body, string addressGroup) : base(service)
+                    {
+                        AddressGroup = addressGroup;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the AddressGroup to remove items from. Must be in the format
+                    /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addressGroup", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AddressGroup { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.RemoveAddressGroupItemsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "removeItems";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+addressGroup}:removeItems";
+
+                    /// <summary>Initializes RemoveItems parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("addressGroup", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addressGroup",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the FirewallEndpoints resource.</summary>
+            public virtual FirewallEndpointsResource FirewallEndpoints { get; }
+
+            /// <summary>The "firewallEndpoints" collection of methods.</summary>
+            public class FirewallEndpointsResource
+            {
+                private const string Resource = "firewallEndpoints";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public FirewallEndpointsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a new FirewallEndpoint in a given project and location.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">Required. Value for parent.</param>
+                public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.FirewallEndpoint body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new FirewallEndpoint in a given project and location.</summary>
+                public class CreateRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.FirewallEndpoint body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Value for parent.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. Id of the requesting object. If auto-generating Id server-side, remove this field and
+                    /// firewall_endpoint_id from the method_signature of Create RPC.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("firewallEndpointId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string FirewallEndpointId { get; set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server will know to ignore the request if it has already been
+                    /// completed. The server will guarantee that for at least 60 minutes since the first request. For
+                    /// example, consider a situation where you make an initial request and the request times out. If
+                    /// you make the request again with the same request ID, the server can check if original operation
+                    /// with the same request ID was received, and if so, will ignore the second request. This prevents
+                    /// clients from accidentally creating duplicate commitments. The request ID must be a valid UUID
+                    /// with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.FirewallEndpoint Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/firewallEndpoints";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("firewallEndpointId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "firewallEndpointId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a single Endpoint.</summary>
+                /// <param name="name">Required. Name of the resource</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a single Endpoint.</summary>
+                public class DeleteRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Name of the resource</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server will know to ignore the request if it has already been
+                    /// completed. The server will guarantee that for at least 60 minutes after the first request. For
+                    /// example, consider a situation where you make an initial request and the request times out. If
+                    /// you make the request again with the same request ID, the server can check if original operation
+                    /// with the same request ID was received, and if so, will ignore the second request. This prevents
+                    /// clients from accidentally creating duplicate commitments. The request ID must be a valid UUID
+                    /// with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/firewallEndpoints/[^/]+$",
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Gets details of a single Endpoint.</summary>
+                /// <param name="name">Required. Name of the resource</param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets details of a single Endpoint.</summary>
+                public class GetRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.FirewallEndpoint>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Name of the resource</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/firewallEndpoints/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists FirewallEndpoints in a given project and location.</summary>
+                /// <param name="parent">Required. Parent value for ListEndpointsRequest</param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists FirewallEndpoints in a given project and location.</summary>
+                public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListFirewallEndpointsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Parent value for ListEndpointsRequest</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Optional. Filtering results</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>Hint for how to order the results</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// Optional. Requested page size. Server may return fewer items than requested. If unspecified,
+                    /// server will pick an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>A token identifying a page of results the server should return.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/firewallEndpoints";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Update a single Endpoint.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">Immutable. Identifier. name of resource</param>
+                public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.FirewallEndpoint body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Update a single Endpoint.</summary>
+                public class PatchRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.FirewallEndpoint body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Immutable. Identifier. name of resource</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server will know to ignore the request if it has already been
+                    /// completed. The server will guarantee that for at least 60 minutes since the first request. For
+                    /// example, consider a situation where you make an initial request and the request times out. If
+                    /// you make the request again with the same request ID, the server can check if original operation
+                    /// with the same request ID was received, and if so, will ignore the second request. This prevents
+                    /// clients from accidentally creating duplicate commitments. The request ID must be a valid UUID
+                    /// with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>
+                    /// Required. Field mask is used to specify the fields to be overwritten in the Endpoint resource by
+                    /// the update. The fields specified in the update_mask are relative to the resource, not the full
+                    /// request. A field will be overwritten if it is in the mask. If the user does not provide a mask
+                    /// then all fields will be overwritten.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.FirewallEndpoint Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/firewallEndpoints/[^/]+$",
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the Operations resource.</summary>
+            public virtual OperationsResource Operations { get; }
+
+            /// <summary>The "operations" collection of methods.</summary>
+            public class OperationsResource
+            {
+                private const string Resource = "operations";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public OperationsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to
+                /// cancel the operation, but success is not guaranteed. If the server doesn't support this method, it
+                /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
+                /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
+                /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">The name of the operation resource to be cancelled.</param>
+                public virtual CancelRequest Cancel(Google.Apis.NetworkSecurity.v1.Data.CancelOperationRequest body, string name)
+                {
+                    return new CancelRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to
+                /// cancel the operation, but success is not guaranteed. If the server doesn't support this method, it
+                /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
+                /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
+                /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
+                /// </summary>
+                public class CancelRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Cancel request.</summary>
+                    public CancelRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.CancelOperationRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation resource to be cancelled.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.CancelOperationRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "cancel";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}:cancel";
+
+                    /// <summary>Initializes Cancel parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/operations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Deletes a long-running operation. This method indicates that the client is no longer interested in
+                /// the operation result. It does not cancel the operation. If the server doesn't support this method,
+                /// it returns `google.rpc.Code.UNIMPLEMENTED`.
+                /// </summary>
+                /// <param name="name">The name of the operation resource to be deleted.</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Deletes a long-running operation. This method indicates that the client is no longer interested in
+                /// the operation result. It does not cancel the operation. If the server doesn't support this method,
+                /// it returns `google.rpc.Code.UNIMPLEMENTED`.
+                /// </summary>
+                public class DeleteRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation resource to be deleted.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/operations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
+                /// result at intervals as recommended by the API service.
+                /// </summary>
+                /// <param name="name">The name of the operation resource.</param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
+                /// result at intervals as recommended by the API service.
+                /// </summary>
+                public class GetRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation resource.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/operations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Lists operations that match the specified filter in the request. If the server doesn't support this
+                /// method, it returns `UNIMPLEMENTED`.
+                /// </summary>
+                /// <param name="name">The name of the operation's parent resource.</param>
+                public virtual ListRequest List(string name)
+                {
+                    return new ListRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Lists operations that match the specified filter in the request. If the server doesn't support this
+                /// method, it returns `UNIMPLEMENTED`.
+                /// </summary>
+                public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListOperationsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation's parent resource.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>The standard list filter.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>The standard list page size.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>The standard list page token.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}/operations";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the SecurityProfileGroups resource.</summary>
+            public virtual SecurityProfileGroupsResource SecurityProfileGroups { get; }
+
+            /// <summary>The "securityProfileGroups" collection of methods.</summary>
+            public class SecurityProfileGroupsResource
+            {
+                private const string Resource = "securityProfileGroups";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public SecurityProfileGroupsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a new SecurityProfileGroup in a given organization and location.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource of the SecurityProfileGroup. Must be in the format
+                /// `projects|organizations/*/locations/{location}`.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.SecurityProfileGroup body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new SecurityProfileGroup in a given organization and location.</summary>
+                public class CreateRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.SecurityProfileGroup body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource of the SecurityProfileGroup. Must be in the format
+                    /// `projects|organizations/*/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. Short name of the SecurityProfileGroup resource to be created. This value should be
+                    /// 1-63 characters long, containing only letters, numbers, hyphens, and underscores, and should not
+                    /// start with a number. E.g. "security_profile_group1".
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("securityProfileGroupId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string SecurityProfileGroupId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.SecurityProfileGroup Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/securityProfileGroups";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("securityProfileGroupId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "securityProfileGroupId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a single SecurityProfileGroup.</summary>
+                /// <param name="name">
+                /// Required. A name of the SecurityProfileGroup to delete. Must be in the format
+                /// `projects|organizations/*/locations/{location}/securityProfileGroups/{security_profile_group}`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a single SecurityProfileGroup.</summary>
+                public class DeleteRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the SecurityProfileGroup to delete. Must be in the format
+                    /// `projects|organizations/*/locations/{location}/securityProfileGroups/{security_profile_group}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. If client provided etag is out of date, delete will return FAILED_PRECONDITION error.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("etag", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Etag { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/securityProfileGroups/[^/]+$",
+                        });
+                        RequestParameters.Add("etag", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "etag",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Gets details of a single SecurityProfileGroup.</summary>
+                /// <param name="name">
+                /// Required. A name of the SecurityProfileGroup to get. Must be in the format
+                /// `projects|organizations/*/locations/{location}/securityProfileGroups/{security_profile_group}`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets details of a single SecurityProfileGroup.</summary>
+                public class GetRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.SecurityProfileGroup>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the SecurityProfileGroup to get. Must be in the format
+                    /// `projects|organizations/*/locations/{location}/securityProfileGroups/{security_profile_group}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/securityProfileGroups/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists SecurityProfileGroups in a given organization and location.</summary>
+                /// <param name="parent">
+                /// Required. The project or organization and location from which the SecurityProfileGroups should be
+                /// listed, specified in the format `projects|organizations/*/locations/{location}`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists SecurityProfileGroups in a given organization and location.</summary>
+                public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListSecurityProfileGroupsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The project or organization and location from which the SecurityProfileGroups should
+                    /// be listed, specified in the format `projects|organizations/*/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Maximum number of SecurityProfileGroups to return per call.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// The value returned by the last `ListSecurityProfileGroupsResponse` Indicates that this is a
+                    /// continuation of a prior `ListSecurityProfileGroups` call, and that the system should return the
+                    /// next page of data.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/securityProfileGroups";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates the parameters of a single SecurityProfileGroup.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Immutable. Identifier. Name of the SecurityProfileGroup resource. It matches pattern
+                /// `projects|organizations/*/locations/{location}/securityProfileGroups/{security_profile_group}`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.SecurityProfileGroup body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates the parameters of a single SecurityProfileGroup.</summary>
+                public class PatchRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.SecurityProfileGroup body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Immutable. Identifier. Name of the SecurityProfileGroup resource. It matches pattern
+                    /// `projects|organizations/*/locations/{location}/securityProfileGroups/{security_profile_group}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. Field mask is used to specify the fields to be overwritten in the SecurityProfileGroup
+                    /// resource by the update. The fields specified in the update_mask are relative to the resource,
+                    /// not the full request. A field will be overwritten if it is in the mask.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.SecurityProfileGroup Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/securityProfileGroups/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the SecurityProfiles resource.</summary>
+            public virtual SecurityProfilesResource SecurityProfiles { get; }
+
+            /// <summary>The "securityProfiles" collection of methods.</summary>
+            public class SecurityProfilesResource
+            {
+                private const string Resource = "securityProfiles";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public SecurityProfilesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a new SecurityProfile in a given organization and location.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource of the SecurityProfile. Must be in the format
+                /// `projects|organizations/*/locations/{location}`.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.SecurityProfile body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new SecurityProfile in a given organization and location.</summary>
+                public class CreateRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.SecurityProfile body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource of the SecurityProfile. Must be in the format
+                    /// `projects|organizations/*/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. Short name of the SecurityProfile resource to be created. This value should be 1-63
+                    /// characters long, containing only letters, numbers, hyphens, and underscores, and should not
+                    /// start with a number. E.g. "security_profile1".
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("securityProfileId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string SecurityProfileId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.SecurityProfile Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/securityProfiles";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("securityProfileId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "securityProfileId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a single SecurityProfile.</summary>
+                /// <param name="name">
+                /// Required. A name of the SecurityProfile to delete. Must be in the format
+                /// `projects|organizations/*/locations/{location}/securityProfiles/{security_profile_id}`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a single SecurityProfile.</summary>
+                public class DeleteRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the SecurityProfile to delete. Must be in the format
+                    /// `projects|organizations/*/locations/{location}/securityProfiles/{security_profile_id}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. If client provided etag is out of date, delete will return FAILED_PRECONDITION error.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("etag", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Etag { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/securityProfiles/[^/]+$",
+                        });
+                        RequestParameters.Add("etag", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "etag",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Gets details of a single SecurityProfile.</summary>
+                /// <param name="name">
+                /// Required. A name of the SecurityProfile to get. Must be in the format
+                /// `projects|organizations/*/locations/{location}/securityProfiles/{security_profile_id}`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets details of a single SecurityProfile.</summary>
+                public class GetRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.SecurityProfile>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the SecurityProfile to get. Must be in the format
+                    /// `projects|organizations/*/locations/{location}/securityProfiles/{security_profile_id}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/securityProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists SecurityProfiles in a given organization and location.</summary>
+                /// <param name="parent">
+                /// Required. The project or organization and location from which the SecurityProfiles should be listed,
+                /// specified in the format `projects|organizations/*/locations/{location}`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists SecurityProfiles in a given organization and location.</summary>
+                public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListSecurityProfilesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The project or organization and location from which the SecurityProfiles should be
+                    /// listed, specified in the format `projects|organizations/*/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Maximum number of SecurityProfiles to return per call.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// The value returned by the last `ListSecurityProfilesResponse` Indicates that this is a
+                    /// continuation of a prior `ListSecurityProfiles` call, and that the system should return the next
+                    /// page of data.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/securityProfiles";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates the parameters of a single SecurityProfile.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Immutable. Identifier. Name of the SecurityProfile resource. It matches pattern
+                /// `projects|organizations/*/locations/{location}/securityProfiles/{security_profile}`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.SecurityProfile body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates the parameters of a single SecurityProfile.</summary>
+                public class PatchRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.SecurityProfile body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Immutable. Identifier. Name of the SecurityProfile resource. It matches pattern
+                    /// `projects|organizations/*/locations/{location}/securityProfiles/{security_profile}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. Field mask is used to specify the fields to be overwritten in the SecurityProfile
+                    /// resource by the update. The fields specified in the update_mask are relative to the resource,
+                    /// not the full request. A field will be overwritten if it is in the mask.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.SecurityProfile Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/securityProfiles/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+        }
+    }
+
     /// <summary>The "projects" collection of methods.</summary>
     public class ProjectsResource
     {
@@ -297,10 +2410,902 @@ namespace Google.Apis.NetworkSecurity.v1
             public LocationsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                AddressGroups = new AddressGroupsResource(service);
                 AuthorizationPolicies = new AuthorizationPoliciesResource(service);
+                AuthzPolicies = new AuthzPoliciesResource(service);
                 ClientTlsPolicies = new ClientTlsPoliciesResource(service);
+                FirewallEndpointAssociations = new FirewallEndpointAssociationsResource(service);
+                GatewaySecurityPolicies = new GatewaySecurityPoliciesResource(service);
                 Operations = new OperationsResource(service);
                 ServerTlsPolicies = new ServerTlsPoliciesResource(service);
+                TlsInspectionPolicies = new TlsInspectionPoliciesResource(service);
+                UrlLists = new UrlListsResource(service);
+            }
+
+            /// <summary>Gets the AddressGroups resource.</summary>
+            public virtual AddressGroupsResource AddressGroups { get; }
+
+            /// <summary>The "addressGroups" collection of methods.</summary>
+            public class AddressGroupsResource
+            {
+                private const string Resource = "addressGroups";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public AddressGroupsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Adds items to an address group.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="addressGroup">
+                /// Required. A name of the AddressGroup to add items to. Must be in the format
+                /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                /// </param>
+                public virtual AddItemsRequest AddItems(Google.Apis.NetworkSecurity.v1.Data.AddAddressGroupItemsRequest body, string addressGroup)
+                {
+                    return new AddItemsRequest(this.service, body, addressGroup);
+                }
+
+                /// <summary>Adds items to an address group.</summary>
+                public class AddItemsRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new AddItems request.</summary>
+                    public AddItemsRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.AddAddressGroupItemsRequest body, string addressGroup) : base(service)
+                    {
+                        AddressGroup = addressGroup;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the AddressGroup to add items to. Must be in the format
+                    /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addressGroup", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AddressGroup { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.AddAddressGroupItemsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "addItems";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+addressGroup}:addItems";
+
+                    /// <summary>Initializes AddItems parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("addressGroup", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addressGroup",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Clones items from one address group to another.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="addressGroup">
+                /// Required. A name of the AddressGroup to clone items to. Must be in the format
+                /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                /// </param>
+                public virtual CloneItemsRequest CloneItems(Google.Apis.NetworkSecurity.v1.Data.CloneAddressGroupItemsRequest body, string addressGroup)
+                {
+                    return new CloneItemsRequest(this.service, body, addressGroup);
+                }
+
+                /// <summary>Clones items from one address group to another.</summary>
+                public class CloneItemsRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new CloneItems request.</summary>
+                    public CloneItemsRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.CloneAddressGroupItemsRequest body, string addressGroup) : base(service)
+                    {
+                        AddressGroup = addressGroup;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the AddressGroup to clone items to. Must be in the format
+                    /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addressGroup", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AddressGroup { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.CloneAddressGroupItemsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "cloneItems";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+addressGroup}:cloneItems";
+
+                    /// <summary>Initializes CloneItems parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("addressGroup", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addressGroup",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Creates a new address group in a given project and location.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource of the AddressGroup. Must be in the format
+                /// `projects/*/locations/{location}`.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.AddressGroup body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new address group in a given project and location.</summary>
+                public class CreateRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.AddressGroup body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource of the AddressGroup. Must be in the format
+                    /// `projects/*/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. Short name of the AddressGroup resource to be created. This value should be 1-63
+                    /// characters long, containing only letters, numbers, hyphens, and underscores, and should not
+                    /// start with a number. E.g. "authz_policy".
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addressGroupId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string AddressGroupId { get; set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server will know to ignore the request if it has already been
+                    /// completed. The server will guarantee that for at least 60 minutes since the first request. For
+                    /// example, consider a situation where you make an initial request and the request times out. If
+                    /// you make the request again with the same request ID, the server can check if original operation
+                    /// with the same request ID was received, and if so, will ignore the second request. This prevents
+                    /// clients from accidentally creating duplicate commitments. The request ID must be a valid UUID
+                    /// with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.AddressGroup Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/addressGroups";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("addressGroupId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addressGroupId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a single address group.</summary>
+                /// <param name="name">
+                /// Required. A name of the AddressGroup to delete. Must be in the format
+                /// `projects/*/locations/{location}/addressGroups/*`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a single address group.</summary>
+                public class DeleteRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the AddressGroup to delete. Must be in the format
+                    /// `projects/*/locations/{location}/addressGroups/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server will know to ignore the request if it has already been
+                    /// completed. The server will guarantee that for at least 60 minutes since the first request. For
+                    /// example, consider a situation where you make an initial request and the request times out. If
+                    /// you make the request again with the same request ID, the server can check if original operation
+                    /// with the same request ID was received, and if so, will ignore the second request. This prevents
+                    /// clients from accidentally creating duplicate commitments. The request ID must be a valid UUID
+                    /// with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Gets details of a single address group.</summary>
+                /// <param name="name">
+                /// Required. A name of the AddressGroup to get. Must be in the format
+                /// `projects/*/locations/{location}/addressGroups/*`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets details of a single address group.</summary>
+                public class GetRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.AddressGroup>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the AddressGroup to get. Must be in the format
+                    /// `projects/*/locations/{location}/addressGroups/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Gets the access control policy for a resource. Returns an empty policy if the resource exists and
+                /// does not have a policy set.
+                /// </summary>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual GetIamPolicyRequest GetIamPolicy(string resource)
+                {
+                    return new GetIamPolicyRequest(this.service, resource);
+                }
+
+                /// <summary>
+                /// Gets the access control policy for a resource. Returns an empty policy if the resource exists and
+                /// does not have a policy set.
+                /// </summary>
+                public class GetIamPolicyRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1Policy>
+                {
+                    /// <summary>Constructs a new GetIamPolicy request.</summary>
+                    public GetIamPolicyRequest(Google.Apis.Services.IClientService service, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The maximum policy version that will be used to format the policy. Valid values are 0,
+                    /// 1, and 3. Requests specifying an invalid value will be rejected. Requests for policies with any
+                    /// conditional role bindings must specify version 3. Policies with no conditional role bindings may
+                    /// specify any valid value or leave the field unset. The policy in the response might use the
+                    /// policy version that you specified, or it might use a lower policy version. For example, if you
+                    /// specify version 3, but the policy has no conditional role bindings, the response uses version 1.
+                    /// To learn which resources support conditions in their IAM policies, see the [IAM
+                    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("options.requestedPolicyVersion", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> OptionsRequestedPolicyVersion { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getIamPolicy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+resource}:getIamPolicy";
+
+                    /// <summary>Initializes GetIamPolicy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                        RequestParameters.Add("options.requestedPolicyVersion", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "options.requestedPolicyVersion",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Lists address groups in a given project and location.</summary>
+                /// <param name="parent">
+                /// Required. The project and location from which the AddressGroups should be listed, specified in the
+                /// format `projects/*/locations/{location}`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists address groups in a given project and location.</summary>
+                public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListAddressGroupsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The project and location from which the AddressGroups should be listed, specified in
+                    /// the format `projects/*/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Maximum number of AddressGroups to return per call.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// The value returned by the last `ListAddressGroupsResponse` Indicates that this is a continuation
+                    /// of a prior `ListAddressGroups` call, and that the system should return the next page of data.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/addressGroups";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Lists references of an address group.</summary>
+                /// <param name="addressGroup">
+                /// Required. A name of the AddressGroup to clone items to. Must be in the format
+                /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                /// </param>
+                public virtual ListReferencesRequest ListReferences(string addressGroup)
+                {
+                    return new ListReferencesRequest(this.service, addressGroup);
+                }
+
+                /// <summary>Lists references of an address group.</summary>
+                public class ListReferencesRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListAddressGroupReferencesResponse>
+                {
+                    /// <summary>Constructs a new ListReferences request.</summary>
+                    public ListReferencesRequest(Google.Apis.Services.IClientService service, string addressGroup) : base(service)
+                    {
+                        AddressGroup = addressGroup;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the AddressGroup to clone items to. Must be in the format
+                    /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addressGroup", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AddressGroup { get; private set; }
+
+                    /// <summary>
+                    /// The maximum number of references to return. If unspecified, server will pick an appropriate
+                    /// default. Server may return fewer items than requested. A caller should only rely on response's
+                    /// next_page_token to determine if there are more AddressGroupUsers left to be queried.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>The next_page_token value returned from a previous List request, if any.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "listReferences";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+addressGroup}:listReferences";
+
+                    /// <summary>Initializes ListReferences parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("addressGroup", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addressGroup",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates the parameters of a single address group.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Name of the AddressGroup resource. It matches pattern
+                /// `projects/*/locations/{location}/addressGroups/`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.AddressGroup body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates the parameters of a single address group.</summary>
+                public class PatchRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.AddressGroup body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the AddressGroup resource. It matches pattern
+                    /// `projects/*/locations/{location}/addressGroups/`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server will know to ignore the request if it has already been
+                    /// completed. The server will guarantee that for at least 60 minutes since the first request. For
+                    /// example, consider a situation where you make an initial request and the request times out. If
+                    /// you make the request again with the same request ID, the server can check if original operation
+                    /// with the same request ID was received, and if so, will ignore the second request. This prevents
+                    /// clients from accidentally creating duplicate commitments. The request ID must be a valid UUID
+                    /// with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>
+                    /// Optional. Field mask is used to specify the fields to be overwritten in the AddressGroup
+                    /// resource by the update. The fields specified in the update_mask are relative to the resource,
+                    /// not the full request. A field will be overwritten if it is in the mask. If the user does not
+                    /// provide a mask then all fields will be overwritten.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.AddressGroup Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Removes items from an address group.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="addressGroup">
+                /// Required. A name of the AddressGroup to remove items from. Must be in the format
+                /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                /// </param>
+                public virtual RemoveItemsRequest RemoveItems(Google.Apis.NetworkSecurity.v1.Data.RemoveAddressGroupItemsRequest body, string addressGroup)
+                {
+                    return new RemoveItemsRequest(this.service, body, addressGroup);
+                }
+
+                /// <summary>Removes items from an address group.</summary>
+                public class RemoveItemsRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new RemoveItems request.</summary>
+                    public RemoveItemsRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.RemoveAddressGroupItemsRequest body, string addressGroup) : base(service)
+                    {
+                        AddressGroup = addressGroup;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the AddressGroup to remove items from. Must be in the format
+                    /// `projects|organization/*/locations/{location}/addressGroups/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addressGroup", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AddressGroup { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.RemoveAddressGroupItemsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "removeItems";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+addressGroup}:removeItems";
+
+                    /// <summary>Initializes RemoveItems parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("addressGroup", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addressGroup",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Sets the access control policy on the specified resource. Replaces any existing policy. Can return
+                /// `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1SetIamPolicyRequest body, string resource)
+                {
+                    return new SetIamPolicyRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Sets the access control policy on the specified resource. Replaces any existing policy. Can return
+                /// `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors.
+                /// </summary>
+                public class SetIamPolicyRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1Policy>
+                {
+                    /// <summary>Constructs a new SetIamPolicy request.</summary>
+                    public SetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1SetIamPolicyRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1SetIamPolicyRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "setIamPolicy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+resource}:setIamPolicy";
+
+                    /// <summary>Initializes SetIamPolicy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                /// this will return an empty set of permissions, not a `NOT_FOUND` error. Note: This operation is
+                /// designed to be used for building permission-aware UIs and command-line tools, not for authorization
+                /// checking. This operation may "fail open" without warning.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1TestIamPermissionsRequest body, string resource)
+                {
+                    return new TestIamPermissionsRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                /// this will return an empty set of permissions, not a `NOT_FOUND` error. Note: This operation is
+                /// designed to be used for building permission-aware UIs and command-line tools, not for authorization
+                /// checking. This operation may "fail open" without warning.
+                /// </summary>
+                public class TestIamPermissionsRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1TestIamPermissionsResponse>
+                {
+                    /// <summary>Constructs a new TestIamPermissions request.</summary>
+                    public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1TestIamPermissionsRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1TestIamPermissionsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "testIamPermissions";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+resource}:testIamPermissions";
+
+                    /// <summary>Initializes TestIamPermissions parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/addressGroups/[^/]+$",
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the AuthorizationPolicies resource.</summary>
@@ -328,7 +3333,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.AuthorizationPolicy body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a new AuthorizationPolicy in a given project and location.</summary>
@@ -402,7 +3407,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes a single AuthorizationPolicy.</summary>
@@ -453,7 +3458,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets details of a single AuthorizationPolicy.</summary>
@@ -502,12 +3507,13 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// does not have a policy set.
                 /// </summary>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                 {
-                    return new GetIamPolicyRequest(service, resource);
+                    return new GetIamPolicyRequest(this.service, resource);
                 }
 
                 /// <summary>
@@ -524,18 +3530,21 @@ namespace Google.Apis.NetworkSecurity.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
 
                     /// <summary>
-                    /// Optional. The policy format version to be returned. Valid values are 0, 1, and 3. Requests
-                    /// specifying an invalid value will be rejected. Requests for policies with any conditional
-                    /// bindings must specify version 3. Policies without any conditional bindings may specify any valid
-                    /// value or leave the field unset. To learn which resources support conditions in their IAM
-                    /// policies, see the [IAM
+                    /// Optional. The maximum policy version that will be used to format the policy. Valid values are 0,
+                    /// 1, and 3. Requests specifying an invalid value will be rejected. Requests for policies with any
+                    /// conditional role bindings must specify version 3. Policies with no conditional role bindings may
+                    /// specify any valid value or leave the field unset. The policy in the response might use the
+                    /// policy version that you specified, or it might use a lower policy version. For example, if you
+                    /// specify version 3, but the policy has no conditional role bindings, the response uses version 1.
+                    /// To learn which resources support conditions in their IAM policies, see the [IAM
                     /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies).
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("options.requestedPolicyVersion", Google.Apis.Util.RequestParameterType.Query)]
@@ -580,7 +3589,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists AuthorizationPolicies in a given project and location.</summary>
@@ -660,7 +3669,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.AuthorizationPolicy body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates the parameters of a single AuthorizationPolicy.</summary>
@@ -734,12 +3743,13 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -757,8 +3767,9 @@ namespace Google.Apis.NetworkSecurity.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -801,12 +3812,13 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -826,8 +3838,9 @@ namespace Google.Apis.NetworkSecurity.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -863,6 +3876,656 @@ namespace Google.Apis.NetworkSecurity.v1
                 }
             }
 
+            /// <summary>Gets the AuthzPolicies resource.</summary>
+            public virtual AuthzPoliciesResource AuthzPolicies { get; }
+
+            /// <summary>The "authzPolicies" collection of methods.</summary>
+            public class AuthzPoliciesResource
+            {
+                private const string Resource = "authzPolicies";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public AuthzPoliciesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a new AuthzPolicy in a given project and location.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource of the `AuthzPolicy` resource. Must be in the format
+                /// `projects/{project}/locations/{location}`.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.AuthzPolicy body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new AuthzPolicy in a given project and location.</summary>
+                public class CreateRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.AuthzPolicy body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource of the `AuthzPolicy` resource. Must be in the format
+                    /// `projects/{project}/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Required. User-provided ID of the `AuthzPolicy` resource to be created.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("authzPolicyId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string AuthzPolicyId { get; set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server can ignore the request if it has already been completed.
+                    /// The server guarantees that for at least 60 minutes since the first request. For example,
+                    /// consider a situation where you make an initial request and the request times out. If you make
+                    /// the request again with the same request ID, the server can check if original operation with the
+                    /// same request ID was received, and if so, ignores the second request. This prevents clients from
+                    /// accidentally creating duplicate commitments. The request ID must be a valid UUID with the
+                    /// exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.AuthzPolicy Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/authzPolicies";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("authzPolicyId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "authzPolicyId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a single AuthzPolicy.</summary>
+                /// <param name="name">
+                /// Required. The name of the `AuthzPolicy` resource to delete. Must be in the format
+                /// `projects/{project}/locations/{location}/authzPolicies/{authz_policy}`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a single AuthzPolicy.</summary>
+                public class DeleteRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the `AuthzPolicy` resource to delete. Must be in the format
+                    /// `projects/{project}/locations/{location}/authzPolicies/{authz_policy}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server can ignore the request if it has already been completed.
+                    /// The server guarantees that for at least 60 minutes after the first request. For example,
+                    /// consider a situation where you make an initial request and the request times out. If you make
+                    /// the request again with the same request ID, the server can check if original operation with the
+                    /// same request ID was received, and if so, ignores the second request. This prevents clients from
+                    /// accidentally creating duplicate commitments. The request ID must be a valid UUID with the
+                    /// exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/authzPolicies/[^/]+$",
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Gets details of a single AuthzPolicy.</summary>
+                /// <param name="name">
+                /// Required. A name of the `AuthzPolicy` resource to get. Must be in the format
+                /// `projects/{project}/locations/{location}/authzPolicies/{authz_policy}`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets details of a single AuthzPolicy.</summary>
+                public class GetRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.AuthzPolicy>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the `AuthzPolicy` resource to get. Must be in the format
+                    /// `projects/{project}/locations/{location}/authzPolicies/{authz_policy}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/authzPolicies/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Gets the access control policy for a resource. Returns an empty policy if the resource exists and
+                /// does not have a policy set.
+                /// </summary>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual GetIamPolicyRequest GetIamPolicy(string resource)
+                {
+                    return new GetIamPolicyRequest(this.service, resource);
+                }
+
+                /// <summary>
+                /// Gets the access control policy for a resource. Returns an empty policy if the resource exists and
+                /// does not have a policy set.
+                /// </summary>
+                public class GetIamPolicyRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1Policy>
+                {
+                    /// <summary>Constructs a new GetIamPolicy request.</summary>
+                    public GetIamPolicyRequest(Google.Apis.Services.IClientService service, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The maximum policy version that will be used to format the policy. Valid values are 0,
+                    /// 1, and 3. Requests specifying an invalid value will be rejected. Requests for policies with any
+                    /// conditional role bindings must specify version 3. Policies with no conditional role bindings may
+                    /// specify any valid value or leave the field unset. The policy in the response might use the
+                    /// policy version that you specified, or it might use a lower policy version. For example, if you
+                    /// specify version 3, but the policy has no conditional role bindings, the response uses version 1.
+                    /// To learn which resources support conditions in their IAM policies, see the [IAM
+                    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("options.requestedPolicyVersion", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> OptionsRequestedPolicyVersion { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getIamPolicy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+resource}:getIamPolicy";
+
+                    /// <summary>Initializes GetIamPolicy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/authzPolicies/[^/]+$",
+                        });
+                        RequestParameters.Add("options.requestedPolicyVersion", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "options.requestedPolicyVersion",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Lists AuthzPolicies in a given project and location.</summary>
+                /// <param name="parent">
+                /// Required. The project and location from which the `AuthzPolicy` resources are listed, specified in
+                /// the following format: `projects/{project}/locations/{location}`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists AuthzPolicies in a given project and location.</summary>
+                public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListAuthzPoliciesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The project and location from which the `AuthzPolicy` resources are listed, specified
+                    /// in the following format: `projects/{project}/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Optional. Filtering results.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>Optional. Hint for how to order the results.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// Optional. Requested page size. The server might return fewer items than requested. If
+                    /// unspecified, the server picks an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>Optional. A token identifying a page of results that the server returns.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/authzPolicies";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates the parameters of a single AuthzPolicy.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Identifier. Name of the `AuthzPolicy` resource in the following format:
+                /// `projects/{project}/locations/{location}/authzPolicies/{authz_policy}`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.AuthzPolicy body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates the parameters of a single AuthzPolicy.</summary>
+                public class PatchRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.AuthzPolicy body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Identifier. Name of the `AuthzPolicy` resource in the following format:
+                    /// `projects/{project}/locations/{location}/authzPolicies/{authz_policy}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server can ignore the request if it has already been completed.
+                    /// The server guarantees that for at least 60 minutes since the first request. For example,
+                    /// consider a situation where you make an initial request and the request times out. If you make
+                    /// the request again with the same request ID, the server can check if original operation with the
+                    /// same request ID was received, and if so, ignores the second request. This prevents clients from
+                    /// accidentally creating duplicate commitments. The request ID must be a valid UUID with the
+                    /// exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>
+                    /// Required. Used to specify the fields to be overwritten in the `AuthzPolicy` resource by the
+                    /// update. The fields specified in the `update_mask` are relative to the resource, not the full
+                    /// request. A field is overwritten if it is in the mask. If the user does not specify a mask, then
+                    /// all fields are overwritten.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.AuthzPolicy Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/authzPolicies/[^/]+$",
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Sets the access control policy on the specified resource. Replaces any existing policy. Can return
+                /// `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1SetIamPolicyRequest body, string resource)
+                {
+                    return new SetIamPolicyRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Sets the access control policy on the specified resource. Replaces any existing policy. Can return
+                /// `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors.
+                /// </summary>
+                public class SetIamPolicyRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1Policy>
+                {
+                    /// <summary>Constructs a new SetIamPolicy request.</summary>
+                    public SetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1SetIamPolicyRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1SetIamPolicyRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "setIamPolicy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+resource}:setIamPolicy";
+
+                    /// <summary>Initializes SetIamPolicy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/authzPolicies/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                /// this will return an empty set of permissions, not a `NOT_FOUND` error. Note: This operation is
+                /// designed to be used for building permission-aware UIs and command-line tools, not for authorization
+                /// checking. This operation may "fail open" without warning.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1TestIamPermissionsRequest body, string resource)
+                {
+                    return new TestIamPermissionsRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                /// this will return an empty set of permissions, not a `NOT_FOUND` error. Note: This operation is
+                /// designed to be used for building permission-aware UIs and command-line tools, not for authorization
+                /// checking. This operation may "fail open" without warning.
+                /// </summary>
+                public class TestIamPermissionsRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1TestIamPermissionsResponse>
+                {
+                    /// <summary>Constructs a new TestIamPermissions request.</summary>
+                    public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1TestIamPermissionsRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1TestIamPermissionsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "testIamPermissions";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+resource}:testIamPermissions";
+
+                    /// <summary>Initializes TestIamPermissions parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/authzPolicies/[^/]+$",
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets the ClientTlsPolicies resource.</summary>
             public virtual ClientTlsPoliciesResource ClientTlsPolicies { get; }
 
@@ -888,7 +4551,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.ClientTlsPolicy body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a new ClientTlsPolicy in a given project and location.</summary>
@@ -962,7 +4625,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes a single ClientTlsPolicy.</summary>
@@ -1013,7 +4676,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets details of a single ClientTlsPolicy.</summary>
@@ -1062,12 +4725,13 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// does not have a policy set.
                 /// </summary>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                 {
-                    return new GetIamPolicyRequest(service, resource);
+                    return new GetIamPolicyRequest(this.service, resource);
                 }
 
                 /// <summary>
@@ -1084,18 +4748,21 @@ namespace Google.Apis.NetworkSecurity.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
 
                     /// <summary>
-                    /// Optional. The policy format version to be returned. Valid values are 0, 1, and 3. Requests
-                    /// specifying an invalid value will be rejected. Requests for policies with any conditional
-                    /// bindings must specify version 3. Policies without any conditional bindings may specify any valid
-                    /// value or leave the field unset. To learn which resources support conditions in their IAM
-                    /// policies, see the [IAM
+                    /// Optional. The maximum policy version that will be used to format the policy. Valid values are 0,
+                    /// 1, and 3. Requests specifying an invalid value will be rejected. Requests for policies with any
+                    /// conditional role bindings must specify version 3. Policies with no conditional role bindings may
+                    /// specify any valid value or leave the field unset. The policy in the response might use the
+                    /// policy version that you specified, or it might use a lower policy version. For example, if you
+                    /// specify version 3, but the policy has no conditional role bindings, the response uses version 1.
+                    /// To learn which resources support conditions in their IAM policies, see the [IAM
                     /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies).
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("options.requestedPolicyVersion", Google.Apis.Util.RequestParameterType.Query)]
@@ -1140,7 +4807,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists ClientTlsPolicies in a given project and location.</summary>
@@ -1220,7 +4887,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.ClientTlsPolicy body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates the parameters of a single ClientTlsPolicy.</summary>
@@ -1294,12 +4961,13 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -1317,8 +4985,9 @@ namespace Google.Apis.NetworkSecurity.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -1361,12 +5030,13 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -1386,8 +5056,9 @@ namespace Google.Apis.NetworkSecurity.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -1423,6 +5094,1117 @@ namespace Google.Apis.NetworkSecurity.v1
                 }
             }
 
+            /// <summary>Gets the FirewallEndpointAssociations resource.</summary>
+            public virtual FirewallEndpointAssociationsResource FirewallEndpointAssociations { get; }
+
+            /// <summary>The "firewallEndpointAssociations" collection of methods.</summary>
+            public class FirewallEndpointAssociationsResource
+            {
+                private const string Resource = "firewallEndpointAssociations";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public FirewallEndpointAssociationsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a new FirewallEndpointAssociation in a given project and location.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">Required. Value for parent.</param>
+                public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.FirewallEndpointAssociation body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new FirewallEndpointAssociation in a given project and location.</summary>
+                public class CreateRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.FirewallEndpointAssociation body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Value for parent.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Id of the requesting object. If auto-generating Id server-side, remove this field and
+                    /// firewall_endpoint_association_id from the method_signature of Create RPC.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("firewallEndpointAssociationId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string FirewallEndpointAssociationId { get; set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server will know to ignore the request if it has already been
+                    /// completed. The server will guarantee that for at least 60 minutes since the first request. For
+                    /// example, consider a situation where you make an initial request and the request times out. If
+                    /// you make the request again with the same request ID, the server can check if original operation
+                    /// with the same request ID was received, and if so, will ignore the second request. This prevents
+                    /// clients from accidentally creating duplicate commitments. The request ID must be a valid UUID
+                    /// with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.FirewallEndpointAssociation Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/firewallEndpointAssociations";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("firewallEndpointAssociationId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "firewallEndpointAssociationId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a single FirewallEndpointAssociation.</summary>
+                /// <param name="name">Required. Name of the resource</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a single FirewallEndpointAssociation.</summary>
+                public class DeleteRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Name of the resource</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server will know to ignore the request if it has already been
+                    /// completed. The server will guarantee that for at least 60 minutes after the first request. For
+                    /// example, consider a situation where you make an initial request and the request times out. If
+                    /// you make the request again with the same request ID, the server can check if original operation
+                    /// with the same request ID was received, and if so, will ignore the second request. This prevents
+                    /// clients from accidentally creating duplicate commitments. The request ID must be a valid UUID
+                    /// with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/firewallEndpointAssociations/[^/]+$",
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Gets details of a single FirewallEndpointAssociation.</summary>
+                /// <param name="name">Required. Name of the resource</param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets details of a single FirewallEndpointAssociation.</summary>
+                public class GetRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.FirewallEndpointAssociation>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Name of the resource</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/firewallEndpointAssociations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists Associations in a given project and location.</summary>
+                /// <param name="parent">Required. Parent value for ListAssociationsRequest</param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists Associations in a given project and location.</summary>
+                public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListFirewallEndpointAssociationsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Parent value for ListAssociationsRequest</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Optional. Filtering results</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>Hint for how to order the results</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// Optional. Requested page size. Server may return fewer items than requested. If unspecified,
+                    /// server will pick an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>A token identifying a page of results the server should return.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/firewallEndpointAssociations";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Update a single FirewallEndpointAssociation.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">Immutable. Identifier. name of resource</param>
+                public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.FirewallEndpointAssociation body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Update a single FirewallEndpointAssociation.</summary>
+                public class PatchRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.FirewallEndpointAssociation body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Immutable. Identifier. name of resource</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if
+                    /// you must retry your request, the server will know to ignore the request if it has already been
+                    /// completed. The server will guarantee that for at least 60 minutes since the first request. For
+                    /// example, consider a situation where you make an initial request and the request times out. If
+                    /// you make the request again with the same request ID, the server can check if original operation
+                    /// with the same request ID was received, and if so, will ignore the second request. This prevents
+                    /// clients from accidentally creating duplicate commitments. The request ID must be a valid UUID
+                    /// with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RequestId { get; set; }
+
+                    /// <summary>
+                    /// Required. Field mask is used to specify the fields to be overwritten in the Association resource
+                    /// by the update. The fields specified in the update_mask are relative to the resource, not the
+                    /// full request. A field will be overwritten if it is in the mask. If the user does not provide a
+                    /// mask then all fields will be overwritten.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.FirewallEndpointAssociation Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/firewallEndpointAssociations/[^/]+$",
+                        });
+                        RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "requestId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the GatewaySecurityPolicies resource.</summary>
+            public virtual GatewaySecurityPoliciesResource GatewaySecurityPolicies { get; }
+
+            /// <summary>The "gatewaySecurityPolicies" collection of methods.</summary>
+            public class GatewaySecurityPoliciesResource
+            {
+                private const string Resource = "gatewaySecurityPolicies";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public GatewaySecurityPoliciesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    Rules = new RulesResource(service);
+                }
+
+                /// <summary>Gets the Rules resource.</summary>
+                public virtual RulesResource Rules { get; }
+
+                /// <summary>The "rules" collection of methods.</summary>
+                public class RulesResource
+                {
+                    private const string Resource = "rules";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public RulesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>Creates a new GatewaySecurityPolicy in a given project and location.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// Required. The parent where this rule will be created. Format :
+                    /// projects/{project}/location/{location}/gatewaySecurityPolicies/*
+                    /// </param>
+                    public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicyRule body, string parent)
+                    {
+                        return new CreateRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>Creates a new GatewaySecurityPolicy in a given project and location.</summary>
+                    public class CreateRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Create request.</summary>
+                        public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicyRule body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The parent where this rule will be created. Format :
+                        /// projects/{project}/location/{location}/gatewaySecurityPolicies/*
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// The ID to use for the rule, which will become the final component of the rule's resource
+                        /// name. This value should be 4-63 characters, and valid characters are /a-z-/.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("gatewaySecurityPolicyRuleId", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string GatewaySecurityPolicyRuleId { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicyRule Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "create";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+parent}/rules";
+
+                        /// <summary>Initializes Create parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/gatewaySecurityPolicies/[^/]+$",
+                            });
+                            RequestParameters.Add("gatewaySecurityPolicyRuleId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "gatewaySecurityPolicyRuleId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Deletes a single GatewaySecurityPolicyRule.</summary>
+                    /// <param name="name">
+                    /// Required. A name of the GatewaySecurityPolicyRule to delete. Must be in the format
+                    /// `projects/{project}/locations/{location}/gatewaySecurityPolicies/{gatewaySecurityPolicy}/rules/*`.
+                    /// </param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>Deletes a single GatewaySecurityPolicyRule.</summary>
+                    public class DeleteRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. A name of the GatewaySecurityPolicyRule to delete. Must be in the format
+                        /// `projects/{project}/locations/{location}/gatewaySecurityPolicies/{gatewaySecurityPolicy}/rules/*`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/gatewaySecurityPolicies/[^/]+/rules/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Gets details of a single GatewaySecurityPolicyRule.</summary>
+                    /// <param name="name">
+                    /// Required. The name of the GatewaySecurityPolicyRule to retrieve. Format:
+                    /// projects/{project}/location/{location}/gatewaySecurityPolicies/*/rules/*
+                    /// </param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>Gets details of a single GatewaySecurityPolicyRule.</summary>
+                    public class GetRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicyRule>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The name of the GatewaySecurityPolicyRule to retrieve. Format:
+                        /// projects/{project}/location/{location}/gatewaySecurityPolicies/*/rules/*
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/gatewaySecurityPolicies/[^/]+/rules/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Lists GatewaySecurityPolicyRules in a given project and location.</summary>
+                    /// <param name="parent">
+                    /// Required. The project, location and GatewaySecurityPolicy from which the
+                    /// GatewaySecurityPolicyRules should be listed, specified in the format
+                    /// `projects/{project}/locations/{location}/gatewaySecurityPolicies/{gatewaySecurityPolicy}`.
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists GatewaySecurityPolicyRules in a given project and location.</summary>
+                    public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListGatewaySecurityPolicyRulesResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The project, location and GatewaySecurityPolicy from which the
+                        /// GatewaySecurityPolicyRules should be listed, specified in the format
+                        /// `projects/{project}/locations/{location}/gatewaySecurityPolicies/{gatewaySecurityPolicy}`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>Maximum number of GatewaySecurityPolicyRules to return per call.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// The value returned by the last 'ListGatewaySecurityPolicyRulesResponse' Indicates that this
+                        /// is a continuation of a prior 'ListGatewaySecurityPolicyRules' call, and that the system
+                        /// should return the next page of data.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+parent}/rules";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/gatewaySecurityPolicies/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Updates the parameters of a single GatewaySecurityPolicyRule.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">
+                    /// Required. Immutable. Name of the resource. ame is the full resource name so
+                    /// projects/{project}/locations/{location}/gatewaySecurityPolicies/{gateway_security_policy}/rules/{rule}
+                    /// rule should match the pattern: (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$).
+                    /// </param>
+                    public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicyRule body, string name)
+                    {
+                        return new PatchRequest(this.service, body, name);
+                    }
+
+                    /// <summary>Updates the parameters of a single GatewaySecurityPolicyRule.</summary>
+                    public class PatchRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Patch request.</summary>
+                        public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicyRule body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. Immutable. Name of the resource. ame is the full resource name so
+                        /// projects/{project}/locations/{location}/gatewaySecurityPolicies/{gateway_security_policy}/rules/{rule}
+                        /// rule should match the pattern: (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$).
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>
+                        /// Optional. Field mask is used to specify the fields to be overwritten in the
+                        /// GatewaySecurityPolicy resource by the update. The fields specified in the update_mask are
+                        /// relative to the resource, not the full request. A field will be overwritten if it is in the
+                        /// mask. If the user does not provide a mask then all fields will be overwritten.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual object UpdateMask { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicyRule Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "patch";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "PATCH";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Patch parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/gatewaySecurityPolicies/[^/]+/rules/[^/]+$",
+                            });
+                            RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "updateMask",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>Creates a new GatewaySecurityPolicy in a given project and location.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource of the GatewaySecurityPolicy. Must be in the format
+                /// `projects/{project}/locations/{location}`.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicy body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new GatewaySecurityPolicy in a given project and location.</summary>
+                public class CreateRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicy body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource of the GatewaySecurityPolicy. Must be in the format
+                    /// `projects/{project}/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. Short name of the GatewaySecurityPolicy resource to be created. This value should be
+                    /// 1-63 characters long, containing only letters, numbers, hyphens, and underscores, and should not
+                    /// start with a number. E.g. "gateway_security_policy1".
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("gatewaySecurityPolicyId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string GatewaySecurityPolicyId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicy Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/gatewaySecurityPolicies";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("gatewaySecurityPolicyId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "gatewaySecurityPolicyId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a single GatewaySecurityPolicy.</summary>
+                /// <param name="name">
+                /// Required. A name of the GatewaySecurityPolicy to delete. Must be in the format
+                /// `projects/{project}/locations/{location}/gatewaySecurityPolicies/*`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a single GatewaySecurityPolicy.</summary>
+                public class DeleteRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the GatewaySecurityPolicy to delete. Must be in the format
+                    /// `projects/{project}/locations/{location}/gatewaySecurityPolicies/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/gatewaySecurityPolicies/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets details of a single GatewaySecurityPolicy.</summary>
+                /// <param name="name">
+                /// Required. A name of the GatewaySecurityPolicy to get. Must be in the format
+                /// `projects/{project}/locations/{location}/gatewaySecurityPolicies/*`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets details of a single GatewaySecurityPolicy.</summary>
+                public class GetRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicy>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the GatewaySecurityPolicy to get. Must be in the format
+                    /// `projects/{project}/locations/{location}/gatewaySecurityPolicies/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/gatewaySecurityPolicies/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists GatewaySecurityPolicies in a given project and location.</summary>
+                /// <param name="parent">
+                /// Required. The project and location from which the GatewaySecurityPolicies should be listed,
+                /// specified in the format `projects/{project}/locations/{location}`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists GatewaySecurityPolicies in a given project and location.</summary>
+                public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListGatewaySecurityPoliciesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The project and location from which the GatewaySecurityPolicies should be listed,
+                    /// specified in the format `projects/{project}/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Maximum number of GatewaySecurityPolicies to return per call.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// The value returned by the last 'ListGatewaySecurityPoliciesResponse' Indicates that this is a
+                    /// continuation of a prior 'ListGatewaySecurityPolicies' call, and that the system should return
+                    /// the next page of data.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/gatewaySecurityPolicies";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates the parameters of a single GatewaySecurityPolicy.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Name of the resource. Name is of the form
+                /// projects/{project}/locations/{location}/gatewaySecurityPolicies/{gateway_security_policy}
+                /// gateway_security_policy should match the pattern:(^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$).
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicy body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates the parameters of a single GatewaySecurityPolicy.</summary>
+                public class PatchRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicy body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the resource. Name is of the form
+                    /// projects/{project}/locations/{location}/gatewaySecurityPolicies/{gateway_security_policy}
+                    /// gateway_security_policy should match the pattern:(^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Field mask is used to specify the fields to be overwritten in the
+                    /// GatewaySecurityPolicy resource by the update. The fields specified in the update_mask are
+                    /// relative to the resource, not the full request. A field will be overwritten if it is in the
+                    /// mask. If the user does not provide a mask then all fields will be overwritten.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.GatewaySecurityPolicy Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/gatewaySecurityPolicies/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets the Operations resource.</summary>
             public virtual OperationsResource Operations { get; }
 
@@ -1446,13 +6228,13 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.NetworkSecurity.v1.Data.CancelOperationRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1461,7 +6243,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 public class CancelRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Empty>
                 {
@@ -1515,7 +6297,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// <param name="name">The name of the operation resource to be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1567,7 +6349,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1613,27 +6395,17 @@ namespace Google.Apis.NetworkSecurity.v1
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListOperationsResponse>
                 {
@@ -1734,7 +6506,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.ServerTlsPolicy body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a new ServerTlsPolicy in a given project and location.</summary>
@@ -1808,7 +6580,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes a single ServerTlsPolicy.</summary>
@@ -1859,7 +6631,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets details of a single ServerTlsPolicy.</summary>
@@ -1908,12 +6680,13 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// does not have a policy set.
                 /// </summary>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                 {
-                    return new GetIamPolicyRequest(service, resource);
+                    return new GetIamPolicyRequest(this.service, resource);
                 }
 
                 /// <summary>
@@ -1930,18 +6703,21 @@ namespace Google.Apis.NetworkSecurity.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
 
                     /// <summary>
-                    /// Optional. The policy format version to be returned. Valid values are 0, 1, and 3. Requests
-                    /// specifying an invalid value will be rejected. Requests for policies with any conditional
-                    /// bindings must specify version 3. Policies without any conditional bindings may specify any valid
-                    /// value or leave the field unset. To learn which resources support conditions in their IAM
-                    /// policies, see the [IAM
+                    /// Optional. The maximum policy version that will be used to format the policy. Valid values are 0,
+                    /// 1, and 3. Requests specifying an invalid value will be rejected. Requests for policies with any
+                    /// conditional role bindings must specify version 3. Policies with no conditional role bindings may
+                    /// specify any valid value or leave the field unset. The policy in the response might use the
+                    /// policy version that you specified, or it might use a lower policy version. For example, if you
+                    /// specify version 3, but the policy has no conditional role bindings, the response uses version 1.
+                    /// To learn which resources support conditions in their IAM policies, see the [IAM
                     /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies).
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("options.requestedPolicyVersion", Google.Apis.Util.RequestParameterType.Query)]
@@ -1986,7 +6762,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists ServerTlsPolicies in a given project and location.</summary>
@@ -2066,7 +6842,7 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.ServerTlsPolicy body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates the parameters of a single ServerTlsPolicy.</summary>
@@ -2140,12 +6916,13 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -2163,8 +6940,9 @@ namespace Google.Apis.NetworkSecurity.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -2207,12 +6985,13 @@ namespace Google.Apis.NetworkSecurity.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.NetworkSecurity.v1.Data.GoogleIamV1TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -2232,8 +7011,9 @@ namespace Google.Apis.NetworkSecurity.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -2269,11 +7049,729 @@ namespace Google.Apis.NetworkSecurity.v1
                 }
             }
 
+            /// <summary>Gets the TlsInspectionPolicies resource.</summary>
+            public virtual TlsInspectionPoliciesResource TlsInspectionPolicies { get; }
+
+            /// <summary>The "tlsInspectionPolicies" collection of methods.</summary>
+            public class TlsInspectionPoliciesResource
+            {
+                private const string Resource = "tlsInspectionPolicies";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public TlsInspectionPoliciesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a new TlsInspectionPolicy in a given project and location.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource of the TlsInspectionPolicy. Must be in the format
+                /// `projects/{project}/locations/{location}`.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.TlsInspectionPolicy body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new TlsInspectionPolicy in a given project and location.</summary>
+                public class CreateRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.TlsInspectionPolicy body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource of the TlsInspectionPolicy. Must be in the format
+                    /// `projects/{project}/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. Short name of the TlsInspectionPolicy resource to be created. This value should be
+                    /// 1-63 characters long, containing only letters, numbers, hyphens, and underscores, and should not
+                    /// start with a number. E.g. "tls_inspection_policy1".
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("tlsInspectionPolicyId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string TlsInspectionPolicyId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.TlsInspectionPolicy Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/tlsInspectionPolicies";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("tlsInspectionPolicyId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "tlsInspectionPolicyId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a single TlsInspectionPolicy.</summary>
+                /// <param name="name">
+                /// Required. A name of the TlsInspectionPolicy to delete. Must be in the format
+                /// `projects/{project}/locations/{location}/tlsInspectionPolicies/{tls_inspection_policy}`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a single TlsInspectionPolicy.</summary>
+                public class DeleteRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the TlsInspectionPolicy to delete. Must be in the format
+                    /// `projects/{project}/locations/{location}/tlsInspectionPolicies/{tls_inspection_policy}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// If set to true, any rules for this TlsInspectionPolicy will also be deleted. (Otherwise, the
+                    /// request will only work if the TlsInspectionPolicy has no rules.)
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("force", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> Force { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/tlsInspectionPolicies/[^/]+$",
+                        });
+                        RequestParameters.Add("force", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "force",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Gets details of a single TlsInspectionPolicy.</summary>
+                /// <param name="name">
+                /// Required. A name of the TlsInspectionPolicy to get. Must be in the format
+                /// `projects/{project}/locations/{location}/tlsInspectionPolicies/{tls_inspection_policy}`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets details of a single TlsInspectionPolicy.</summary>
+                public class GetRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.TlsInspectionPolicy>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the TlsInspectionPolicy to get. Must be in the format
+                    /// `projects/{project}/locations/{location}/tlsInspectionPolicies/{tls_inspection_policy}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/tlsInspectionPolicies/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists TlsInspectionPolicies in a given project and location.</summary>
+                /// <param name="parent">
+                /// Required. The project and location from which the TlsInspectionPolicies should be listed, specified
+                /// in the format `projects/{project}/locations/{location}`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists TlsInspectionPolicies in a given project and location.</summary>
+                public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListTlsInspectionPoliciesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The project and location from which the TlsInspectionPolicies should be listed,
+                    /// specified in the format `projects/{project}/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Maximum number of TlsInspectionPolicies to return per call.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// The value returned by the last 'ListTlsInspectionPoliciesResponse' Indicates that this is a
+                    /// continuation of a prior 'ListTlsInspectionPolicies' call, and that the system should return the
+                    /// next page of data.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/tlsInspectionPolicies";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates the parameters of a single TlsInspectionPolicy.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Name of the resource. Name is of the form
+                /// projects/{project}/locations/{location}/tlsInspectionPolicies/{tls_inspection_policy}
+                /// tls_inspection_policy should match the pattern:(^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$).
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.TlsInspectionPolicy body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates the parameters of a single TlsInspectionPolicy.</summary>
+                public class PatchRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.TlsInspectionPolicy body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the resource. Name is of the form
+                    /// projects/{project}/locations/{location}/tlsInspectionPolicies/{tls_inspection_policy}
+                    /// tls_inspection_policy should match the pattern:(^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Field mask is used to specify the fields to be overwritten in the TlsInspectionPolicy
+                    /// resource by the update. The fields specified in the update_mask are relative to the resource,
+                    /// not the full request. A field will be overwritten if it is in the mask. If the user does not
+                    /// provide a mask then all fields will be overwritten.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.TlsInspectionPolicy Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/tlsInspectionPolicies/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the UrlLists resource.</summary>
+            public virtual UrlListsResource UrlLists { get; }
+
+            /// <summary>The "urlLists" collection of methods.</summary>
+            public class UrlListsResource
+            {
+                private const string Resource = "urlLists";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public UrlListsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a new UrlList in a given project and location.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource of the UrlList. Must be in the format
+                /// `projects/*/locations/{location}`.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.NetworkSecurity.v1.Data.UrlList body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new UrlList in a given project and location.</summary>
+                public class CreateRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.UrlList body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource of the UrlList. Must be in the format
+                    /// `projects/*/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. Short name of the UrlList resource to be created. This value should be 1-63 characters
+                    /// long, containing only letters, numbers, hyphens, and underscores, and should not start with a
+                    /// number. E.g. "url_list".
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("urlListId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string UrlListId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.UrlList Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/urlLists";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("urlListId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "urlListId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a single UrlList.</summary>
+                /// <param name="name">
+                /// Required. A name of the UrlList to delete. Must be in the format
+                /// `projects/*/locations/{location}/urlLists/*`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a single UrlList.</summary>
+                public class DeleteRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the UrlList to delete. Must be in the format
+                    /// `projects/*/locations/{location}/urlLists/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/urlLists/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets details of a single UrlList.</summary>
+                /// <param name="name">
+                /// Required. A name of the UrlList to get. Must be in the format
+                /// `projects/*/locations/{location}/urlLists/*`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets details of a single UrlList.</summary>
+                public class GetRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.UrlList>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A name of the UrlList to get. Must be in the format
+                    /// `projects/*/locations/{location}/urlLists/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/urlLists/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists UrlLists in a given project and location.</summary>
+                /// <param name="parent">
+                /// Required. The project and location from which the UrlLists should be listed, specified in the format
+                /// `projects/{project}/locations/{location}`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists UrlLists in a given project and location.</summary>
+                public class ListRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.ListUrlListsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The project and location from which the UrlLists should be listed, specified in the
+                    /// format `projects/{project}/locations/{location}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Maximum number of UrlLists to return per call.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// The value returned by the last `ListUrlListsResponse` Indicates that this is a continuation of a
+                    /// prior `ListUrlLists` call, and that the system should return the next page of data.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/urlLists";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates the parameters of a single UrlList.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Name of the resource provided by the user. Name is of the form
+                /// projects/{project}/locations/{location}/urlLists/{url_list} url_list should match the
+                /// pattern:(^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$).
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.NetworkSecurity.v1.Data.UrlList body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates the parameters of a single UrlList.</summary>
+                public class PatchRequest : NetworkSecurityBaseServiceRequest<Google.Apis.NetworkSecurity.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkSecurity.v1.Data.UrlList body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the resource provided by the user. Name is of the form
+                    /// projects/{project}/locations/{location}/urlLists/{url_list} url_list should match the
+                    /// pattern:(^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Field mask is used to specify the fields to be overwritten in the UrlList resource by
+                    /// the update. The fields specified in the update_mask are relative to the resource, not the full
+                    /// request. A field will be overwritten if it is in the mask. If the user does not provide a mask
+                    /// then all fields will be overwritten.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkSecurity.v1.Data.UrlList Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/urlLists/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets information about a location.</summary>
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -2318,7 +7816,7 @@ namespace Google.Apis.NetworkSecurity.v1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -2337,7 +7835,7 @@ namespace Google.Apis.NetworkSecurity.v1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -2407,6 +7905,145 @@ namespace Google.Apis.NetworkSecurity.v1
 }
 namespace Google.Apis.NetworkSecurity.v1.Data
 {
+    /// <summary>Request used by the AddAddressGroupItems method.</summary>
+    public class AddAddressGroupItemsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. List of items to add.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("items")]
+        public virtual System.Collections.Generic.IList<string> Items { get; set; }
+
+        /// <summary>
+        /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry
+        /// your request, the server will know to ignore the request if it has already been completed. The server will
+        /// guarantee that for at least 60 minutes since the first request. For example, consider a situation where you
+        /// make an initial request and the request times out. If you make the request again with the same request ID,
+        /// the server can check if original operation with the same request ID was received, and if so, will ignore the
+        /// second request. This prevents clients from accidentally creating duplicate commitments. The request ID must
+        /// be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestId")]
+        public virtual string RequestId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>AddressGroup is a resource that specifies how a collection of IP/DNS used in Firewall Policy.</summary>
+    public class AddressGroup : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Capacity of the Address Group</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("capacity")]
+        public virtual System.Nullable<int> Capacity { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The timestamp when the resource was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. Free-text description of the resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Optional. List of items.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("items")]
+        public virtual System.Collections.Generic.IList<string> Items { get; set; }
+
+        /// <summary>Optional. Set of label tags associated with the AddressGroup resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
+        /// Required. Name of the AddressGroup resource. It matches pattern
+        /// `projects/*/locations/{location}/addressGroups/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Optional. List of supported purposes of the Address Group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("purpose")]
+        public virtual System.Collections.Generic.IList<string> Purpose { get; set; }
+
+        /// <summary>Output only. Server-defined fully-qualified URL for this resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selfLink")]
+        public virtual string SelfLink { get; set; }
+
+        /// <summary>Required. The type of the Address Group. Possible values are "IPv4" or "IPV6".</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The timestamp when the resource was updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// AuthorizationPolicy is a resource that specifies how a server should authorize incoming connections. This
     /// resource in itself does not change the configuration unless it's attached to a target https proxy or endpoint
@@ -2420,9 +8057,42 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("action")]
         public virtual string Action { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The timestamp when the resource was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Optional. Free-text description of the resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -2447,9 +8117,490 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("rules")]
         public virtual System.Collections.Generic.IList<Rule> Rules { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The timestamp when the resource was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// `AuthzPolicy` is a resource that allows to forward traffic to a callout backend designed to scan the traffic for
+    /// security purposes.
+    /// </summary>
+    public class AuthzPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Can be one of `ALLOW`, `DENY`, `CUSTOM`. When the action is `CUSTOM`, `customProvider` must be
+        /// specified. When the action is `ALLOW`, only requests matching the policy will be allowed. When the action is
+        /// `DENY`, only requests matching the policy will be denied. When a request arrives, the policies are evaluated
+        /// in the following order: 1. If there is a `CUSTOM` policy that matches the request, the `CUSTOM` policy is
+        /// evaluated using the custom authorization providers and the request is denied if the provider rejects the
+        /// request. 2. If there are any `DENY` policies that match the request, the request is denied. 3. If there are
+        /// no `ALLOW` policies for the resource or if any of the `ALLOW` policies match the request, the request is
+        /// allowed. 4. Else the request is denied by default if none of the configured AuthzPolicies with `ALLOW`
+        /// action match the request.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("action")]
+        public virtual string Action { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The timestamp when the resource was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. Required if the action is `CUSTOM`. Allows delegating authorization decisions to Cloud IAP or to
+        /// Service Extensions. One of `cloudIap` or `authzExtension` must be specified.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customProvider")]
+        public virtual AuthzPolicyCustomProvider CustomProvider { get; set; }
+
+        /// <summary>Optional. A human-readable description of the resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>
+        /// Optional. A list of authorization HTTP rules to match against the incoming request. A policy match occurs
+        /// when at least one HTTP rule matches the request or when no HTTP rules are specified in the policy. At least
+        /// one HTTP Rule is required for Allow or Deny Action. Limited to 5 rules.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("httpRules")]
+        public virtual System.Collections.Generic.IList<AuthzPolicyAuthzRule> HttpRules { get; set; }
+
+        /// <summary>
+        /// Optional. Set of labels associated with the `AuthzPolicy` resource. The format must comply with [the
+        /// following requirements](/compute/docs/labeling-resources#requirements).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
+        /// Required. Identifier. Name of the `AuthzPolicy` resource in the following format:
+        /// `projects/{project}/locations/{location}/authzPolicies/{authz_policy}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Required. Specifies the set of resources to which this policy should be applied to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("target")]
+        public virtual AuthzPolicyTarget Target { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The timestamp when the resource was updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Conditions to match against the incoming request.</summary>
+    public class AuthzPolicyAuthzRule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Describes properties of a source of a request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("from")]
+        public virtual AuthzPolicyAuthzRuleFrom From { get; set; }
+
+        /// <summary>Optional. Describes properties of a target of a request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("to")]
+        public virtual AuthzPolicyAuthzRuleTo To { get; set; }
+
+        /// <summary>
+        /// Optional. CEL expression that describes the conditions to be satisfied for the action. The result of the CEL
+        /// expression is ANDed with the from and to. Refer to the CEL language reference for a list of available
+        /// attributes.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("when")]
+        public virtual string When { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes properties of one or more sources of a request.</summary>
+    public class AuthzPolicyAuthzRuleFrom : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Describes the negated properties of request sources. Matches requests from sources that do not
+        /// match the criteria specified in this field. At least one of sources or notSources must be specified.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("notSources")]
+        public virtual System.Collections.Generic.IList<AuthzPolicyAuthzRuleFromRequestSource> NotSources { get; set; }
+
+        /// <summary>
+        /// Optional. Describes the properties of a request's sources. At least one of sources or notSources must be
+        /// specified. Limited to 1 source. A match occurs when ANY source (in sources or notSources) matches the
+        /// request. Within a single source, the match follows AND semantics across fields and OR semantics within a
+        /// single field, i.e. a match occurs when ANY principal matches AND ANY ipBlocks match.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sources")]
+        public virtual System.Collections.Generic.IList<AuthzPolicyAuthzRuleFromRequestSource> Sources { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes the properties of a single source.</summary>
+    public class AuthzPolicyAuthzRuleFromRequestSource : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. A list of identities derived from the client's certificate. This field will not match on a request
+        /// unless mutual TLS is enabled for the Forwarding rule or Gateway. Each identity is a string whose value is
+        /// matched against the URI SAN, or DNS SAN or the subject field in the client's certificate. The match can be
+        /// exact, prefix, suffix or a substring match. One of exact, prefix, suffix or contains must be specified.
+        /// Limited to 5 principals.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("principals")]
+        public virtual System.Collections.Generic.IList<AuthzPolicyAuthzRuleStringMatch> Principals { get; set; }
+
+        /// <summary>
+        /// Optional. A list of resources to match against the resource of the source VM of a request. Limited to 5
+        /// resources.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resources")]
+        public virtual System.Collections.Generic.IList<AuthzPolicyAuthzRuleRequestResource> Resources { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Determines how a HTTP header should be matched.</summary>
+    public class AuthzPolicyAuthzRuleHeaderMatch : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Specifies the name of the header in the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Optional. Specifies how the header match will be performed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("value")]
+        public virtual AuthzPolicyAuthzRuleStringMatch Value { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Describes the properties of a client VM resource accessing the internal application load balancers.
+    /// </summary>
+    public class AuthzPolicyAuthzRuleRequestResource : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. An IAM service account to match against the source service account of the VM sending the request.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("iamServiceAccount")]
+        public virtual AuthzPolicyAuthzRuleStringMatch IamServiceAccount { get; set; }
+
+        /// <summary>
+        /// Optional. A list of resource tag value permanent IDs to match against the resource manager tags value
+        /// associated with the source VM of a request.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagValueIdSet")]
+        public virtual AuthzPolicyAuthzRuleRequestResourceTagValueIdSet TagValueIdSet { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Describes a set of resource tag value permanent IDs to match against the resource manager tags value associated
+    /// with the source VM of a request.
+    /// </summary>
+    public class AuthzPolicyAuthzRuleRequestResourceTagValueIdSet : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. A list of resource tag value permanent IDs to match against the resource manager tags value
+        /// associated with the source VM of a request. The match follows AND semantics which means all the ids must
+        /// match. Limited to 5 matches.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ids")]
+        public virtual System.Collections.Generic.IList<System.Nullable<long>> Ids { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Determines how a string value should be matched.</summary>
+    public class AuthzPolicyAuthzRuleStringMatch : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The input string must have the substring specified here. Note: empty contains match is not allowed, please
+        /// use regex instead. Examples: * ``abc`` matches the value ``xyz.abc.def``
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("contains")]
+        public virtual string Contains { get; set; }
+
+        /// <summary>
+        /// The input string must match exactly the string specified here. Examples: * ``abc`` only matches the value
+        /// ``abc``.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exact")]
+        public virtual string Exact { get; set; }
+
+        /// <summary>
+        /// If true, indicates the exact/prefix/suffix/contains matching should be case insensitive. For example, the
+        /// matcher ``data`` will match both input string ``Data`` and ``data`` if set to true.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ignoreCase")]
+        public virtual System.Nullable<bool> IgnoreCase { get; set; }
+
+        /// <summary>
+        /// The input string must have the prefix specified here. Note: empty prefix is not allowed, please use regex
+        /// instead. Examples: * ``abc`` matches the value ``abc.xyz``
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("prefix")]
+        public virtual string Prefix { get; set; }
+
+        /// <summary>
+        /// The input string must have the suffix specified here. Note: empty prefix is not allowed, please use regex
+        /// instead. Examples: * ``abc`` matches the value ``xyz.abc``
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("suffix")]
+        public virtual string Suffix { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes properties of one or more targets of a request.</summary>
+    public class AuthzPolicyAuthzRuleTo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Describes the negated properties of the targets of a request. Matches requests for operations that
+        /// do not match the criteria specified in this field. At least one of operations or notOperations must be
+        /// specified.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("notOperations")]
+        public virtual System.Collections.Generic.IList<AuthzPolicyAuthzRuleToRequestOperation> NotOperations { get; set; }
+
+        /// <summary>
+        /// Optional. Describes properties of one or more targets of a request. At least one of operations or
+        /// notOperations must be specified. Limited to 1 operation. A match occurs when ANY operation (in operations or
+        /// notOperations) matches. Within an operation, the match follows AND semantics across fields and OR semantics
+        /// within a field, i.e. a match occurs when ANY path matches AND ANY header matches and ANY method matches.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("operations")]
+        public virtual System.Collections.Generic.IList<AuthzPolicyAuthzRuleToRequestOperation> Operations { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes properties of one or more targets of a request.</summary>
+    public class AuthzPolicyAuthzRuleToRequestOperation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. A list of headers to match against in http header.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("headerSet")]
+        public virtual AuthzPolicyAuthzRuleToRequestOperationHeaderSet HeaderSet { get; set; }
+
+        /// <summary>
+        /// Optional. A list of HTTP Hosts to match against. The match can be one of exact, prefix, suffix, or contains
+        /// (substring match). Matches are always case sensitive unless the ignoreCase is set. Limited to 5 matches.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hosts")]
+        public virtual System.Collections.Generic.IList<AuthzPolicyAuthzRuleStringMatch> Hosts { get; set; }
+
+        /// <summary>
+        /// Optional. A list of HTTP methods to match against. Each entry must be a valid HTTP method name (GET, PUT,
+        /// POST, HEAD, PATCH, DELETE, OPTIONS). It only allows exact match and is always case sensitive.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("methods")]
+        public virtual System.Collections.Generic.IList<string> Methods { get; set; }
+
+        /// <summary>
+        /// Optional. A list of paths to match against. The match can be one of exact, prefix, suffix, or contains
+        /// (substring match). Matches are always case sensitive unless the ignoreCase is set. Limited to 5 matches.
+        /// Note that this path match includes the query parameters. For gRPC services, this should be a fully-qualified
+        /// name of the form /package.service/method.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("paths")]
+        public virtual System.Collections.Generic.IList<AuthzPolicyAuthzRuleStringMatch> Paths { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes a set of HTTP headers to match against.</summary>
+    public class AuthzPolicyAuthzRuleToRequestOperationHeaderSet : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. A list of headers to match against in http header. The match can be one of exact, prefix, suffix,
+        /// or contains (substring match). The match follows AND semantics which means all the headers must match.
+        /// Matches are always case sensitive unless the ignoreCase is set. Limited to 5 matches.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("headers")]
+        public virtual System.Collections.Generic.IList<AuthzPolicyAuthzRuleHeaderMatch> Headers { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Allows delegating authorization decisions to Cloud IAP or to Service Extensions.</summary>
+    public class AuthzPolicyCustomProvider : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Delegate authorization decision to user authored Service Extension. Only one of cloudIap or
+        /// authzExtension can be specified.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("authzExtension")]
+        public virtual AuthzPolicyCustomProviderAuthzExtension AuthzExtension { get; set; }
+
+        /// <summary>
+        /// Optional. Delegates authorization decisions to Cloud IAP. Applicable only for managed load balancers.
+        /// Enabling Cloud IAP at the AuthzPolicy level is not compatible with Cloud IAP settings in the BackendService.
+        /// Enabling IAP in both places will result in request failure. Ensure that IAP is enabled in either the
+        /// AuthzPolicy or the BackendService but not in both places.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudIap")]
+        public virtual AuthzPolicyCustomProviderCloudIap CloudIap { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Optional. Delegate authorization decision to user authored extension. Only one of cloudIap or authzExtension can
+    /// be specified.
+    /// </summary>
+    public class AuthzPolicyCustomProviderAuthzExtension : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. A list of references to authorization extensions that will be invoked for requests matching this
+        /// policy. Limited to 1 custom provider.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resources")]
+        public virtual System.Collections.Generic.IList<string> Resources { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Optional. Delegates authorization decisions to Cloud IAP. Applicable only for managed load balancers. Enabling
+    /// Cloud IAP at the AuthzPolicy level is not compatible with Cloud IAP settings in the BackendService. Enabling IAP
+    /// in both places will result in request failure. Ensure that IAP is enabled in either the AuthzPolicy or the
+    /// BackendService but not in both places.
+    /// </summary>
+    public class AuthzPolicyCustomProviderCloudIap : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Specifies the set of targets to which this policy should be applied to.</summary>
+    public class AuthzPolicyTarget : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. All gateways and forwarding rules referenced by this policy and extensions must share the same
+        /// load balancing scheme. Supported values: `INTERNAL_MANAGED` and `EXTERNAL_MANAGED`. For more information,
+        /// refer to [Backend services overview](https://cloud.google.com/load-balancing/docs/backend-service).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loadBalancingScheme")]
+        public virtual string LoadBalancingScheme { get; set; }
+
+        /// <summary>
+        /// Required. A list of references to the Forwarding Rules on which this policy will be applied.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resources")]
+        public virtual System.Collections.Generic.IList<string> Resources { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2493,9 +8644,42 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("clientCertificate")]
         public virtual GoogleCloudNetworksecurityV1CertificateProvider ClientCertificate { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The timestamp when the resource was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Optional. Free-text description of the resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -2526,9 +8710,94 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sni")]
         public virtual string Sni { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The timestamp when the resource was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request used by the CloneAddressGroupItems method.</summary>
+    public class CloneAddressGroupItemsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry
+        /// your request, the server will know to ignore the request if it has already been completed. The server will
+        /// guarantee that for at least 60 minutes since the first request. For example, consider a situation where you
+        /// make an initial request and the request times out. If you make the request again with the same request ID,
+        /// the server can check if original operation with the same request ID was received, and if so, will ignore the
+        /// second request. This prevents clients from accidentally creating duplicate commitments. The request ID must
+        /// be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestId")]
+        public virtual string RequestId { get; set; }
+
+        /// <summary>Required. Source address group to clone items from.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceAddressGroup")]
+        public virtual string SourceAddressGroup { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// CustomInterceptProfile defines the Packet Intercept Endpoint Group used to intercept traffic to a third-party
+    /// firewall in a Firewall rule.
+    /// </summary>
+    public class CustomInterceptProfile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The InterceptEndpointGroup to which traffic associated with the SP should be mirrored.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("interceptEndpointGroup")]
+        public virtual string InterceptEndpointGroup { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>CustomMirroringProfile defines an action for mirroring traffic to a collector's EndpointGroup</summary>
+    public class CustomMirroringProfile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The MirroringEndpointGroup to which traffic associated with the SP should be mirrored.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mirroringEndpointGroup")]
+        public virtual string MirroringEndpointGroup { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2538,16 +8807,18 @@ namespace Google.Apis.NetworkSecurity.v1.Data
     public class Destination : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. List of host names to match. Matched against HOST header in http requests. At least one host
-        /// should match. Each host can be an exact match, or a prefix match (example "mydomain.*") or a suffix match
-        /// (example // *.myorg.com") or a presence(any) match "*".
+        /// Required. List of host names to match. Matched against the ":authority" header in http requests. At least
+        /// one host should match. Each host can be an exact match, or a prefix match (example "mydomain.*") or a suffix
+        /// match (example "*.myorg.com") or a presence (any) match "*".
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hosts")]
         public virtual System.Collections.Generic.IList<string> Hosts { get; set; }
 
         /// <summary>
         /// Optional. Match against key:value pair in http header. Provides a flexible match based on HTTP headers, for
-        /// potentially advanced use cases. At least one header should match.
+        /// potentially advanced use cases. At least one header should match. Avoid using header matches to make
+        /// authorization decisions unless there is a strong guarantee that requests arrive through a trusted client or
+        /// proxy.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("httpHeaderMatch")]
         public virtual HttpHeaderMatch HttpHeaderMatch { get; set; }
@@ -2570,8 +8841,7 @@ namespace Google.Apis.NetworkSecurity.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2623,6 +8893,492 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Message describing Endpoint object</summary>
+    public class FirewallEndpoint : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. List of networks that are associated with this endpoint in the local zone. This is a projection
+        /// of the FirewallEndpointAssociations pointing at this endpoint. A network will only appear in this list after
+        /// traffic routing is fully configured. Format: projects/{project}/global/networks/{name}.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("associatedNetworks")]
+        public virtual System.Collections.Generic.IList<string> AssociatedNetworks { get; set; }
+
+        /// <summary>
+        /// Output only. List of FirewallEndpointAssociations that are associated to this endpoint. An association will
+        /// only appear in this list after traffic routing is fully configured.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("associations")]
+        public virtual System.Collections.Generic.IList<FirewallEndpointAssociationReference> Associations { get; set; }
+
+        /// <summary>Required. Project to bill on endpoint uptime usage.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("billingProjectId")]
+        public virtual string BillingProjectId { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Create time stamp</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. Description of the firewall endpoint. Max length 2048 characters.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Optional. Labels as key value pairs</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>Immutable. Identifier. name of resource</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Output only. Whether reconciling is in progress, recommended per https://google.aip.dev/128.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reconciling")]
+        public virtual System.Nullable<bool> Reconciling { get; set; }
+
+        /// <summary>Output only. Current state of the endpoint.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Update time stamp</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Message describing Association object</summary>
+    public class FirewallEndpointAssociation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Create time stamp</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. Whether the association is disabled. True indicates that traffic won't be intercepted
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disabled")]
+        public virtual System.Nullable<bool> Disabled { get; set; }
+
+        /// <summary>Required. The URL of the FirewallEndpoint that is being associated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("firewallEndpoint")]
+        public virtual string FirewallEndpoint { get; set; }
+
+        /// <summary>Optional. Labels as key value pairs</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>Immutable. Identifier. name of resource</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Required. The URL of the network that is being associated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("network")]
+        public virtual string Network { get; set; }
+
+        /// <summary>
+        /// Output only. Whether reconciling is in progress, recommended per https://google.aip.dev/128.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reconciling")]
+        public virtual System.Nullable<bool> Reconciling { get; set; }
+
+        /// <summary>Output only. Current state of the association.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>Optional. The URL of the TlsInspectionPolicy that is being associated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tlsInspectionPolicy")]
+        public virtual string TlsInspectionPolicy { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Update time stamp</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// This is a subset of the FirewallEndpointAssociation message, containing fields to be used by the consumer.
+    /// </summary>
+    public class FirewallEndpointAssociationReference : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. The resource name of the FirewallEndpointAssociation. Format:
+        /// projects/{project}/locations/{location}/firewallEndpointAssociations/{id}
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Output only. The VPC network associated. Format: projects/{project}/global/networks/{name}.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("network")]
+        public virtual string Network { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The GatewaySecurityPolicy resource contains a collection of GatewaySecurityPolicyRules and associated metadata.
+    /// </summary>
+    public class GatewaySecurityPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The timestamp when the resource was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. Free-text description of the resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>
+        /// Required. Name of the resource. Name is of the form
+        /// projects/{project}/locations/{location}/gatewaySecurityPolicies/{gateway_security_policy}
+        /// gateway_security_policy should match the pattern:(^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Optional. Name of a TLS Inspection Policy resource that defines how TLS inspection will be performed for any
+        /// rule(s) which enables it.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tlsInspectionPolicy")]
+        public virtual string TlsInspectionPolicy { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The timestamp when the resource was updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The GatewaySecurityPolicyRule resource is in a nested collection within a GatewaySecurityPolicy and represents a
+    /// traffic matching condition and associated action to perform.
+    /// </summary>
+    public class GatewaySecurityPolicyRule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. CEL expression for matching on L7/application level criteria.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("applicationMatcher")]
+        public virtual string ApplicationMatcher { get; set; }
+
+        /// <summary>Required. Profile which tells what the primitive action should be.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("basicProfile")]
+        public virtual string BasicProfile { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Time when the rule was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. Free-text description of the resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Required. Whether the rule is enforced.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enabled")]
+        public virtual System.Nullable<bool> Enabled { get; set; }
+
+        /// <summary>
+        /// Required. Immutable. Name of the resource. ame is the full resource name so
+        /// projects/{project}/locations/{location}/gatewaySecurityPolicies/{gateway_security_policy}/rules/{rule} rule
+        /// should match the pattern: (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Required. Priority of the rule. Lower number corresponds to higher precedence.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("priority")]
+        public virtual System.Nullable<int> Priority { get; set; }
+
+        /// <summary>Required. CEL expression for matching on session criteria.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sessionMatcher")]
+        public virtual string SessionMatcher { get; set; }
+
+        /// <summary>
+        /// Optional. Flag to enable TLS inspection of traffic matching on , can only be true if the parent
+        /// GatewaySecurityPolicy references a TLSInspectionConfig.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tlsInspectionEnabled")]
+        public virtual System.Nullable<bool> TlsInspectionEnabled { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Time when the rule was updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Specification of certificate provider. Defines the mechanism to obtain the certificate and private key for peer
     /// to peer authentication.
@@ -2648,7 +9404,7 @@ namespace Google.Apis.NetworkSecurity.v1.Data
     public class GoogleCloudNetworksecurityV1GrpcEndpoint : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. The target URI of the gRPC endpoint. Only UDS path is supported, and should start with “unix:”.
+        /// Required. The target URI of the gRPC endpoint. Only UDS path is supported, and should start with "unix:".
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("targetUri")]
         public virtual string TargetUri { get; set; }
@@ -2667,7 +9423,8 @@ namespace Google.Apis.NetworkSecurity.v1.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class GoogleIamV1AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2708,30 +9465,51 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Associates `members` with a `role`.</summary>
+    /// <summary>Associates `members`, or principals, with a `role`.</summary>
     public class GoogleIamV1Binding : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// The condition that is associated with this binding. If the condition evaluates to `true`, then this binding
         /// applies to the current request. If the condition evaluates to `false`, then this binding does not apply to
         /// the current request. However, a different role binding might grant the same role to one or more of the
-        /// members in this binding. To learn which resources support conditions in their IAM policies, see the [IAM
+        /// principals in this binding. To learn which resources support conditions in their IAM policies, see the [IAM
         /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("condition")]
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the identities requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -2739,14 +9517,19 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
-        /// Role that is assigned to `members`. For example, `roles/viewer`, `roles/editor`, or `roles/owner`.
+        /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -2757,24 +9540,33 @@ namespace Google.Apis.NetworkSecurity.v1.Data
 
     /// <summary>
     /// An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A
-    /// `Policy` is a collection of `bindings`. A `binding` binds one or more `members` to a single `role`. Members can
-    /// be user accounts, service accounts, Google groups, and domains (such as G Suite). A `role` is a named list of
-    /// permissions; each `role` can be an IAM predefined role or a user-created custom role. For some types of Google
-    /// Cloud resources, a `binding` can also specify a `condition`, which is a logical expression that allows access to
-    /// a resource only if the expression evaluates to `true`. A condition can add constraints based on attributes of
-    /// the request, the resource, or both. To learn which resources support conditions in their IAM policies, see the
-    /// [IAM documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** {
+    /// `Policy` is a collection of `bindings`. A `binding` binds one or more `members`, or principals, to a single
+    /// `role`. Principals can be user accounts, service accounts, Google groups, and domains (such as G Suite). A
+    /// `role` is a named list of permissions; each `role` can be an IAM predefined role or a user-created custom role.
+    /// For some types of Google Cloud resources, a `binding` can also specify a `condition`, which is a logical
+    /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
+    /// constraints based on attributes of the request, the resource, or both. To learn which resources support
+    /// conditions in their IAM policies, see the [IAM
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
     /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class GoogleIamV1Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2783,8 +9575,12 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         public virtual System.Collections.Generic.IList<GoogleIamV1AuditConfig> AuditConfigs { get; set; }
 
         /// <summary>
-        /// Associates a list of `members` to a `role`. Optionally, may specify a `condition` that determines how and
-        /// when the `bindings` are applied. Each of the `bindings` must contain at least one member.
+        /// Associates a list of `members`, or principals, with a `role`. Optionally, may specify a `condition` that
+        /// determines how and when the `bindings` are applied. Each of the `bindings` must contain at least one
+        /// principal. The `bindings` in a `Policy` can refer to up to 1,500 principals; up to 250 of these principals
+        /// can be Google groups. Each occurrence of a principal counts towards these limits. For example, if the
+        /// `bindings` grant 50 different roles to `user:alice@example.com`, and not to any other principal, then you
+        /// can add another 1,450 principals to the `bindings` in the `Policy`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bindings")]
         public virtual System.Collections.Generic.IList<GoogleIamV1Binding> Bindings { get; set; }
@@ -2824,7 +9620,7 @@ namespace Google.Apis.NetworkSecurity.v1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -2845,7 +9641,7 @@ namespace Google.Apis.NetworkSecurity.v1.Data
     public class GoogleIamV1TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>
@@ -2867,7 +9663,7 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Specification of HTTP header match atrributes.</summary>
+    /// <summary>Specification of HTTP header match attributes.</summary>
     public class HttpHeaderMatch : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -2891,6 +9687,61 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Response of the ListAddressGroupReferences method.</summary>
+    public class ListAddressGroupReferencesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A list of references that matches the specified filter in the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("addressGroupReferences")]
+        public virtual System.Collections.Generic.IList<ListAddressGroupReferencesResponseAddressGroupReference> AddressGroupReferences { get; set; }
+
+        /// <summary>
+        /// If there might be more results than those appearing in this response, then `next_page_token` is included. To
+        /// get the next set of results, call this method again using the value of `next_page_token` as `page_token`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The Reference of AddressGroup.</summary>
+    public class ListAddressGroupReferencesResponseAddressGroupReference : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>FirewallPolicy that is using the Address Group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("firewallPolicy")]
+        public virtual string FirewallPolicy { get; set; }
+
+        /// <summary>Rule priority of the FirewallPolicy that is using the Address Group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rulePriority")]
+        public virtual System.Nullable<int> RulePriority { get; set; }
+
+        /// <summary>Cloud Armor SecurityPolicy that is using the Address Group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("securityPolicy")]
+        public virtual string SecurityPolicy { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response returned by the ListAddressGroups method.</summary>
+    public class ListAddressGroupsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of AddressGroups resources.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("addressGroups")]
+        public virtual System.Collections.Generic.IList<AddressGroup> AddressGroups { get; set; }
+
+        /// <summary>
+        /// If there might be more results than those appearing in this response, then `next_page_token` is included. To
+        /// get the next set of results, call this method again using the value of `next_page_token` as `page_token`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Response returned by the ListAuthorizationPolicies method.</summary>
     public class ListAuthorizationPoliciesResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2909,6 +9760,25 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Message for response to listing `AuthzPolicy` resources.</summary>
+    public class ListAuthzPoliciesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of `AuthzPolicy` resources.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("authzPolicies")]
+        public virtual System.Collections.Generic.IList<AuthzPolicy> AuthzPolicies { get; set; }
+
+        /// <summary>A token identifying a page of results that the server returns.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>Locations that could not be reached.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Response returned by the ListClientTlsPolicies method.</summary>
     public class ListClientTlsPoliciesResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2922,6 +9792,88 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Message for response to listing Associations</summary>
+    public class ListFirewallEndpointAssociationsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of Association</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("firewallEndpointAssociations")]
+        public virtual System.Collections.Generic.IList<FirewallEndpointAssociation> FirewallEndpointAssociations { get; set; }
+
+        /// <summary>A token identifying a page of results the server should return.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>Locations that could not be reached.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Message for response to listing Endpoints</summary>
+    public class ListFirewallEndpointsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of Endpoint</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("firewallEndpoints")]
+        public virtual System.Collections.Generic.IList<FirewallEndpoint> FirewallEndpoints { get; set; }
+
+        /// <summary>A token identifying a page of results the server should return.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>Locations that could not be reached.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response returned by the ListGatewaySecurityPolicies method.</summary>
+    public class ListGatewaySecurityPoliciesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of GatewaySecurityPolicies resources.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gatewaySecurityPolicies")]
+        public virtual System.Collections.Generic.IList<GatewaySecurityPolicy> GatewaySecurityPolicies { get; set; }
+
+        /// <summary>
+        /// If there might be more results than those appearing in this response, then 'next_page_token' is included. To
+        /// get the next set of results, call this method again using the value of 'next_page_token' as 'page_token'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>Locations that could not be reached.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response returned by the ListGatewaySecurityPolicyRules method.</summary>
+    public class ListGatewaySecurityPolicyRulesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of GatewaySecurityPolicyRule resources.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gatewaySecurityPolicyRules")]
+        public virtual System.Collections.Generic.IList<GatewaySecurityPolicyRule> GatewaySecurityPolicyRules { get; set; }
+
+        /// <summary>
+        /// If there might be more results than those appearing in this response, then 'next_page_token' is included. To
+        /// get the next set of results, call this method again using the value of 'next_page_token' as 'page_token'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>Locations that could not be reached.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2957,6 +9909,42 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Response returned by the ListSecurityProfileGroups method.</summary>
+    public class ListSecurityProfileGroupsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If there might be more results than those appearing in this response, then `next_page_token` is included. To
+        /// get the next set of results, call this method again using the value of `next_page_token` as `page_token`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>List of SecurityProfileGroups resources.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("securityProfileGroups")]
+        public virtual System.Collections.Generic.IList<SecurityProfileGroup> SecurityProfileGroups { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response returned by the ListSecurityProfiles method.</summary>
+    public class ListSecurityProfilesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If there might be more results than those appearing in this response, then `next_page_token` is included. To
+        /// get the next set of results, call this method again using the value of `next_page_token` as `page_token`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>List of SecurityProfile resources.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("securityProfiles")]
+        public virtual System.Collections.Generic.IList<SecurityProfile> SecurityProfiles { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Response returned by the ListServerTlsPolicies method.</summary>
     public class ListServerTlsPoliciesResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2975,7 +9963,51 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>Response returned by the ListTlsInspectionPolicies method.</summary>
+    public class ListTlsInspectionPoliciesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If there might be more results than those appearing in this response, then 'next_page_token' is included. To
+        /// get the next set of results, call this method again using the value of 'next_page_token' as 'page_token'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>List of TlsInspectionPolicies resources.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tlsInspectionPolicies")]
+        public virtual System.Collections.Generic.IList<TlsInspectionPolicy> TlsInspectionPolicies { get; set; }
+
+        /// <summary>Locations that could not be reached.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response returned by the ListUrlLists method.</summary>
+    public class ListUrlListsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If there might be more results than those appearing in this response, then `next_page_token` is included. To
+        /// get the next set of results, call this method again using the value of `next_page_token` as `page_token`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>Locations that could not be reached.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
+
+        /// <summary>List of UrlList resources.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("urlLists")]
+        public virtual System.Collections.Generic.IList<UrlList> UrlLists { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -3011,10 +10043,27 @@ namespace Google.Apis.NetworkSecurity.v1.Data
     public class MTLSPolicy : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        ///  Defines the mechanism to obtain the Certificate Authority certificate to validate the client certificate.
+        /// Required if the policy is to be used with Traffic Director. For Application Load Balancers it must be empty.
+        /// Defines the mechanism to obtain the Certificate Authority certificate to validate the client certificate.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("clientValidationCa")]
         public virtual System.Collections.Generic.IList<ValidationCA> ClientValidationCa { get; set; }
+
+        /// <summary>
+        /// When the client presents an invalid certificate or no certificate to the load balancer, the
+        /// `client_validation_mode` specifies how the client connection is handled. Required if the policy is to be
+        /// used with the Application Load Balancers. For Traffic Director it must be empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clientValidationMode")]
+        public virtual string ClientValidationMode { get; set; }
+
+        /// <summary>
+        /// Reference to the TrustConfig from certificatemanager.googleapis.com namespace. If specified, the chain
+        /// validation will be performed against certificates configured in the given TrustConfig. Allowed only if the
+        /// policy is to be used with Application Load Balancers.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clientValidationTrustConfig")]
+        public virtual string ClientValidationTrustConfig { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3050,8 +10099,8 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -3070,13 +10119,79 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
         public virtual string ApiVersion { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. The time the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
@@ -3097,6 +10212,29 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         /// <summary>Output only. Name of the verb executed by the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("verb")]
         public virtual string Verb { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request used by the RemoveAddressGroupItems method.</summary>
+    public class RemoveAddressGroupItemsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. List of items to remove.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("items")]
+        public virtual System.Collections.Generic.IList<string> Items { get; set; }
+
+        /// <summary>
+        /// Optional. An optional request ID to identify requests. Specify a unique request ID so that if you must retry
+        /// your request, the server will know to ignore the request if it has already been completed. The server will
+        /// guarantee that for at least 60 minutes since the first request. For example, consider a situation where you
+        /// make an initial request and the request times out. If you make the request again with the same request ID,
+        /// the server can check if original operation with the same request ID was received, and if so, will ignore the
+        /// second request. This prevents clients from accidentally creating duplicate commitments. The request ID must
+        /// be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestId")]
+        public virtual string RequestId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3125,25 +10263,291 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>SecurityProfile is a resource that defines the behavior for one of many ProfileTypes.</summary>
+    public class SecurityProfile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Resource creation timestamp.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The custom TPPI configuration for the SecurityProfile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customInterceptProfile")]
+        public virtual CustomInterceptProfile CustomInterceptProfile { get; set; }
+
+        /// <summary>The custom Packet Mirroring v2 configuration for the SecurityProfile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customMirroringProfile")]
+        public virtual CustomMirroringProfile CustomMirroringProfile { get; set; }
+
+        /// <summary>Optional. An optional description of the profile. Max length 512 characters.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>
+        /// Output only. This checksum is computed by the server based on the value of other fields, and may be sent on
+        /// update and delete requests to ensure the client has an up-to-date value before proceeding.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>Optional. Labels as key value pairs.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
+        /// Immutable. Identifier. Name of the SecurityProfile resource. It matches pattern
+        /// `projects|organizations/*/locations/{location}/securityProfiles/{security_profile}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The threat prevention configuration for the SecurityProfile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("threatPreventionProfile")]
+        public virtual ThreatPreventionProfile ThreatPreventionProfile { get; set; }
+
+        /// <summary>Immutable. The single ProfileType that the SecurityProfile resource configures.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Last resource update timestamp.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+    }
+
+    /// <summary>SecurityProfileGroup is a resource that defines the behavior for various ProfileTypes.</summary>
+    public class SecurityProfileGroup : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Resource creation timestamp.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. Reference to a SecurityProfile with the CustomIntercept configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customInterceptProfile")]
+        public virtual string CustomInterceptProfile { get; set; }
+
+        /// <summary>Optional. Reference to a SecurityProfile with the CustomMirroring configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customMirroringProfile")]
+        public virtual string CustomMirroringProfile { get; set; }
+
+        /// <summary>Optional. An optional description of the profile group. Max length 2048 characters.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>
+        /// Output only. This checksum is computed by the server based on the value of other fields, and may be sent on
+        /// update and delete requests to ensure the client has an up-to-date value before proceeding.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>Optional. Labels as key value pairs.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
+        /// Immutable. Identifier. Name of the SecurityProfileGroup resource. It matches pattern
+        /// `projects|organizations/*/locations/{location}/securityProfileGroups/{security_profile_group}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Optional. Reference to a SecurityProfile with the ThreatPrevention configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("threatPreventionProfile")]
+        public virtual string ThreatPreventionProfile { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Last resource update timestamp.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+    }
+
     /// <summary>
     /// ServerTlsPolicy is a resource that specifies how a server should authenticate incoming requests. This resource
-    /// itself does not affect configuration unless it is attached to a target https proxy or endpoint config selector
-    /// resource.
+    /// itself does not affect configuration unless it is attached to a target HTTPS proxy or endpoint config selector
+    /// resource. ServerTlsPolicy in the form accepted by Application Load Balancers can be attached only to
+    /// TargetHttpsProxy with an `EXTERNAL`, `EXTERNAL_MANAGED` or `INTERNAL_MANAGED` load balancing scheme. Traffic
+    /// Director compatible ServerTlsPolicies can be attached to EndpointPolicy and TargetHttpsProxy with Traffic
+    /// Director `INTERNAL_SELF_MANAGED` load balancing scheme.
     /// </summary>
     public class ServerTlsPolicy : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        ///  Determines if server allows plaintext connections. If set to true, server allows plain text connections. By
-        /// default, it is set to false. This setting is not exclusive of other encryption modes. For example, if
-        /// `allow_open` and `mtls_policy` are set, server allows both plain text and mTLS connections. See
-        /// documentation of other encryption modes to confirm compatibility.
+        /// This field applies only for Traffic Director policies. It is must be set to false for Application Load
+        /// Balancer policies. Determines if server allows plaintext connections. If set to true, server allows plain
+        /// text connections. By default, it is set to false. This setting is not exclusive of other encryption modes.
+        /// For example, if `allow_open` and `mtls_policy` are set, server allows both plain text and mTLS connections.
+        /// See documentation of other encryption modes to confirm compatibility. Consider using it if you wish to
+        /// upgrade in place your deployment to TLS while having mixed TLS and non-TLS traffic reaching port :80.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("allowOpen")]
         public virtual System.Nullable<bool> AllowOpen { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The timestamp when the resource was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Free-text description of the resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -3154,9 +10558,11 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
         /// <summary>
-        ///  Defines a mechanism to provision peer validation certificates for peer to peer authentication (Mutual TLS -
-        /// mTLS). If not specified, client certificate will not be requested. The connection is treated as TLS and not
-        /// mTLS. If `allow_open` and `mtls_policy` are set, server allows both plain text and mTLS connections.
+        /// This field is required if the policy is used with Application Load Balancers. This field can be empty for
+        /// Traffic Director. Defines a mechanism to provision peer validation certificates for peer to peer
+        /// authentication (Mutual TLS - mTLS). If not specified, client certificate will not be requested. The
+        /// connection is treated as TLS and not mTLS. If `allow_open` and `mtls_policy` are set, server allows both
+        /// plain text and mTLS connections.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mtlsPolicy")]
         public virtual MTLSPolicy MtlsPolicy { get; set; }
@@ -3169,15 +10575,64 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        ///  Defines a mechanism to provision server identity (public and private keys). Cannot be combined with
+        /// Optional if policy is to be used with Traffic Director. For Application Load Balancers must be empty.
+        /// Defines a mechanism to provision server identity (public and private keys). Cannot be combined with
         /// `allow_open` as a permissive mode that allows both plain text and TLS is not supported.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("serverCertificate")]
         public virtual GoogleCloudNetworksecurityV1CertificateProvider ServerCertificate { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The timestamp when the resource was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Defines what action to take for a specific severity match.</summary>
+    public class SeverityOverride : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Threat action override.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("action")]
+        public virtual string Action { get; set; }
+
+        /// <summary>Required. Severity level to match.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("severity")]
+        public virtual string Severity { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3188,15 +10643,17 @@ namespace Google.Apis.NetworkSecurity.v1.Data
     {
         /// <summary>
         /// Optional. List of CIDR ranges to match based on source IP address. At least one IP block should match.
-        /// Single IP (e.g., "1.2.3.4") and CIDR (e.g., "1.2.3.0/24") are supported.
+        /// Single IP (e.g., "1.2.3.4") and CIDR (e.g., "1.2.3.0/24") are supported. Authorization based on source IP
+        /// alone should be avoided. The IP addresses of any load balancers or proxies should be considered untrusted.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ipBlocks")]
         public virtual System.Collections.Generic.IList<string> IpBlocks { get; set; }
 
         /// <summary>
         /// Optional. List of peer identities to match for authorization. At least one principal should match. Each peer
-        /// can be an exact match, or a prefix match (example, "namespace/*") or a suffix match (example, //
-        /// */service-account") or a presence match "*".
+        /// can be an exact match, or a prefix match (example, "namespace/*") or a suffix match (example,
+        /// "*/service-account") or a presence match "*". Authorization based on the principal name without certificate
+        /// validation (configured by ServerTlsPolicy resource) is considered insecure.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("principals")]
         public virtual System.Collections.Generic.IList<string> Principals { get; set; }
@@ -3229,6 +10686,296 @@ namespace Google.Apis.NetworkSecurity.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("message")]
         public virtual string Message { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Defines what action to take for a specific threat_id match.</summary>
+    public class ThreatOverride : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Threat action override. For some threat types, only a subset of actions applies.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("action")]
+        public virtual string Action { get; set; }
+
+        /// <summary>Required. Vendor-specific ID of a threat to override.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("threatId")]
+        public virtual string ThreatId { get; set; }
+
+        /// <summary>Output only. Type of the threat (read only).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>ThreatPreventionProfile defines an action for specific threat signatures or severity levels.</summary>
+    public class ThreatPreventionProfile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Configuration for overriding threats actions by severity match.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("severityOverrides")]
+        public virtual System.Collections.Generic.IList<SeverityOverride> SeverityOverrides { get; set; }
+
+        /// <summary>
+        /// Optional. Configuration for overriding threats actions by threat_id match. If a threat is matched both by
+        /// configuration provided in severity_overrides and threat_overrides, the threat_overrides action is applied.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("threatOverrides")]
+        public virtual System.Collections.Generic.IList<ThreatOverride> ThreatOverrides { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The TlsInspectionPolicy resource contains references to CA pools in Certificate Authority Service and associated
+    /// metadata.
+    /// </summary>
+    public class TlsInspectionPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. A CA pool resource used to issue interception certificates. The CA pool string has a relative
+        /// resource path following the form "projects/{project}/locations/{location}/caPools/{ca_pool}".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("caPool")]
+        public virtual string CaPool { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The timestamp when the resource was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. List of custom TLS cipher suites selected. This field is valid only if the selected
+        /// tls_feature_profile is CUSTOM. The compute.SslPoliciesService.ListAvailableFeatures method returns the set
+        /// of features that can be specified in this list. Note that Secure Web Proxy does not yet honor this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customTlsFeatures")]
+        public virtual System.Collections.Generic.IList<string> CustomTlsFeatures { get; set; }
+
+        /// <summary>Optional. Free-text description of the resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>
+        /// Optional. If FALSE (the default), use our default set of public CAs in addition to any CAs specified in
+        /// trust_config. These public CAs are currently based on the Mozilla Root Program and are subject to change
+        /// over time. If TRUE, do not accept our default set of public CAs. Only CAs specified in trust_config will be
+        /// accepted. This defaults to FALSE (use public CAs in addition to trust_config) for backwards compatibility,
+        /// but trusting public root CAs is *not recommended* unless the traffic in question is outbound to public web
+        /// servers. When possible, prefer setting this to "false" and explicitly specifying trusted CAs and
+        /// certificates in a TrustConfig. Note that Secure Web Proxy does not yet honor this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludePublicCaSet")]
+        public virtual System.Nullable<bool> ExcludePublicCaSet { get; set; }
+
+        /// <summary>
+        /// Optional. Minimum TLS version that the firewall should use when negotiating connections with both clients
+        /// and servers. If this is not set, then the default value is to allow the broadest set of clients and servers
+        /// (TLS 1.0 or higher). Setting this to more restrictive values may improve security, but may also prevent the
+        /// firewall from connecting to some clients or servers. Note that Secure Web Proxy does not yet honor this
+        /// field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minTlsVersion")]
+        public virtual string MinTlsVersion { get; set; }
+
+        /// <summary>
+        /// Required. Name of the resource. Name is of the form
+        /// projects/{project}/locations/{location}/tlsInspectionPolicies/{tls_inspection_policy} tls_inspection_policy
+        /// should match the pattern:(^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Optional. The selected Profile. If this is not set, then the default value is to allow the broadest set of
+        /// clients and servers ("PROFILE_COMPATIBLE"). Setting this to more restrictive values may improve security,
+        /// but may also prevent the TLS inspection proxy from connecting to some clients or servers. Note that Secure
+        /// Web Proxy does not yet honor this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tlsFeatureProfile")]
+        public virtual string TlsFeatureProfile { get; set; }
+
+        /// <summary>
+        /// Optional. A TrustConfig resource used when making a connection to the TLS server. This is a relative
+        /// resource path following the form "projects/{project}/locations/{location}/trustConfigs/{trust_config}". This
+        /// is necessary to intercept TLS connections to servers with certificates signed by a private CA or self-signed
+        /// certificates. Note that Secure Web Proxy does not yet honor this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("trustConfig")]
+        public virtual string TrustConfig { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The timestamp when the resource was updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// UrlList proto helps users to set reusable, independently manageable lists of hosts, host patterns, URLs, URL
+    /// patterns.
+    /// </summary>
+    public class UrlList : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Time when the security policy was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. Free-text description of the resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>
+        /// Required. Name of the resource provided by the user. Name is of the form
+        /// projects/{project}/locations/{location}/urlLists/{url_list} url_list should match the
+        /// pattern:(^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Time when the security policy was updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Required. FQDNs and URLs.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("values")]
+        public virtual System.Collections.Generic.IList<string> Values { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

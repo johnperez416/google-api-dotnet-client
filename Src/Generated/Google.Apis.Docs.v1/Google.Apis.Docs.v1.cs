@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Docs.v1
         public DocsService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Documents = new DocumentsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://docs.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://docs.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Docs.v1
         public override string Name => "docs";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://docs.googleapis.com/";
-        #else
-            "https://docs.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://docs.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Docs API.</summary>
         public class Scope
@@ -318,7 +313,7 @@ namespace Google.Apis.Docs.v1
         /// <param name="documentId">The ID of the document to update.</param>
         public virtual BatchUpdateRequest BatchUpdate(Google.Apis.Docs.v1.Data.BatchUpdateDocumentRequest body, string documentId)
         {
-            return new BatchUpdateRequest(service, body, documentId);
+            return new BatchUpdateRequest(this.service, body, documentId);
         }
 
         /// <summary>
@@ -383,7 +378,7 @@ namespace Google.Apis.Docs.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.Docs.v1.Data.Document body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -425,7 +420,7 @@ namespace Google.Apis.Docs.v1
         /// <param name="documentId">The ID of the document to retrieve.</param>
         public virtual GetRequest Get(string documentId)
         {
-            return new GetRequest(service, documentId);
+            return new GetRequest(this.service, documentId);
         }
 
         /// <summary>Gets the latest version of the specified document.</summary>
@@ -441,6 +436,16 @@ namespace Google.Apis.Docs.v1
             /// <summary>The ID of the document to retrieve.</summary>
             [Google.Apis.Util.RequestParameterAttribute("documentId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string DocumentId { get; private set; }
+
+            /// <summary>
+            /// Whether to populate the Document.tabs field instead of the text content fields like `body` and
+            /// `documentStyle` on Document. - When `True`: Document content populates in the Document.tabs field
+            /// instead of the text content fields in Document. - When `False`: The content of the document's first tab
+            /// populates the content fields in Document excluding Document.tabs. If a document has only one tab, then
+            /// that tab is used to populate the document content. Document.tabs will be empty.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("includeTabsContent", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> IncludeTabsContent { get; set; }
 
             /// <summary>
             /// The suggestions view mode to apply to the document. This allows viewing the document with all
@@ -508,6 +513,14 @@ namespace Google.Apis.Docs.v1
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("includeTabsContent", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "includeTabsContent",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("suggestionsViewMode", new Google.Apis.Discovery.Parameter
                 {
                     Name = "suggestionsViewMode",
@@ -523,8 +536,8 @@ namespace Google.Apis.Docs.v1
 namespace Google.Apis.Docs.v1.Data
 {
     /// <summary>
-    /// A ParagraphElement representing a spot in the text that is dynamically replaced with content that can change
-    /// over time, like a page number.
+    /// A ParagraphElement representing a spot in the text that's dynamically replaced with content that can change over
+    /// time, like a page number.
     /// </summary>
     public class AutoText : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -535,7 +548,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IList<string> SuggestedDeletionIds { get; set; }
 
         /// <summary>
-        /// The suggested insertion IDs. An AutoText may have multiple insertion IDs if it is a nested suggested change.
+        /// The suggested insertion IDs. An AutoText may have multiple insertion IDs if it's a nested suggested change.
         /// If empty, then this is not a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
@@ -619,7 +632,7 @@ namespace Google.Apis.Docs.v1.Data
     }
 
     /// <summary>
-    /// The document body. The body typically contains the full document contents except for headers, footers and
+    /// The document body. The body typically contains the full document contents except for headers, footers, and
     /// footnotes.
     /// </summary>
     public class Body : Google.Apis.Requests.IDirectResponseSchema
@@ -627,6 +640,21 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>The contents of the body. The indexes for the body's content begin at zero.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("content")]
         public virtual System.Collections.Generic.IList<StructuralElement> Content { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A reference to a bookmark in this document.</summary>
+    public class BookmarkLink : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ID of a bookmark in this document.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>The ID of the tab containing this bookmark.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabId")]
+        public virtual string TabId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -643,7 +671,7 @@ namespace Google.Apis.Docs.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("nestingLevel")]
         public virtual System.Nullable<int> NestingLevel { get; set; }
 
-        /// <summary>The paragraph specific text style applied to this bullet.</summary>
+        /// <summary>The paragraph-specific text style applied to this bullet.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("textStyle")]
         public virtual TextStyle TextStyle { get; set; }
 
@@ -653,7 +681,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base Bullet have been changed in this suggestion. For any field
-    /// set to true, there is a new suggested value.
+    /// set to true, there's a new suggested value.
     /// </summary>
     public class BulletSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -699,7 +727,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IList<string> SuggestedDeletionIds { get; set; }
 
         /// <summary>
-        /// The suggested insertion IDs. A ColumnBreak may have multiple insertion IDs if it is a nested suggested
+        /// The suggested insertion IDs. A ColumnBreak may have multiple insertion IDs if it's a nested suggested
         /// change. If empty, then this is not a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
@@ -711,8 +739,7 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// The text style of this ColumnBreak. Similar to text content, like text runs and footnote references, the
-        /// text style of a column break can affect content layout as well as the styling of text inserted adjacent to
-        /// it.
+        /// text style of a column break can affect content layout as well as the styling of text inserted next to it.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("textStyle")]
         public virtual TextStyle TextStyle { get; set; }
@@ -723,8 +750,8 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// Creates a Footer. The new footer is applied to the SectionStyle at the location of the SectionBreak if
-    /// specificed, otherwise it is applied to the DocumentStyle. If a footer of the specified type already exists, a
-    /// 400 bad request error is returned.
+    /// specified, otherwise it is applied to the DocumentStyle. If a footer of the specified type already exists, a 400
+    /// bad request error is returned.
     /// </summary>
     public class CreateFooterRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -796,8 +823,8 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// Creates a Header. The new header is applied to the SectionStyle at the location of the SectionBreak if
-    /// specificed, otherwise it is applied to the DocumentStyle. If a header of the specified type already exists, a
-    /// 400 bad request error is returned.
+    /// specified, otherwise it is applied to the DocumentStyle. If a header of the specified type already exists, a 400
+    /// bad request error is returned.
     /// </summary>
     public class CreateHeaderRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -880,7 +907,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// The crop properties of an image. The crop rectangle is represented using fractional offsets from the original
-    /// content's four edges. - If the offset is in the interval (0, 1), the corresponding edge of crop rectangle is
+    /// content's 4 edges. - If the offset is in the interval (0, 1), the corresponding edge of crop rectangle is
     /// positioned inside of the image's original bounding rectangle. - If the offset is negative or greater than 1, the
     /// corresponding edge of crop rectangle is positioned outside of the image's original bounding rectangle. - If all
     /// offsets and rotation angle are 0, the image is not cropped.
@@ -928,7 +955,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base CropProperties have been changed in this suggestion. For
-    /// any field set to true, there is a new suggested value.
+    /// any field set to true, there's a new suggested value.
     /// </summary>
     public class CropPropertiesSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -988,6 +1015,15 @@ namespace Google.Apis.Docs.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("footerId")]
         public virtual string FooterId { get; set; }
 
+        /// <summary>
+        /// The tab that contains the footer to delete. When omitted, the request is applied to the first tab. In a
+        /// document containing a single tab: - If provided, must match the singular tab's ID. - If omitted, the request
+        /// applies to the singular tab. In a document containing multiple tabs: - If provided, the request applies to
+        /// the specified tab. - If omitted, the request applies to the first tab in the document.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabId")]
+        public virtual string TabId { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1004,6 +1040,15 @@ namespace Google.Apis.Docs.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("headerId")]
         public virtual string HeaderId { get; set; }
 
+        /// <summary>
+        /// The tab containing the header to delete. When omitted, the request is applied to the first tab. In a
+        /// document containing a single tab: - If provided, must match the singular tab's ID. - If omitted, the request
+        /// applies to the singular tab. In a document containing multiple tabs: - If provided, the request applies to
+        /// the specified tab. - If omitted, the request applies to the first tab in the document.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabId")]
+        public virtual string TabId { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1018,6 +1063,16 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>The ID of the named range to delete.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("namedRangeId")]
         public virtual string NamedRangeId { get; set; }
+
+        /// <summary>
+        /// Optional. The criteria used to specify which tab(s) the range deletion should occur in. When omitted, the
+        /// range deletion is applied to all tabs. In a document containing a single tab: - If provided, must match the
+        /// singular tab's ID. - If omitted, the range deletion applies to the singular tab. In a document containing
+        /// multiple tabs: - If provided, the range deletion applies to the specified tabs. - If not provided, the range
+        /// deletion applies to all tabs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabsCriteria")]
+        public virtual TabsCriteria TabsCriteria { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1043,6 +1098,15 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>The ID of the positioned object to delete.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("objectId")]
         public virtual string ObjectId { get; set; }
+
+        /// <summary>
+        /// The tab that the positioned object to delete is in. When omitted, the request is applied to the first tab.
+        /// In a document containing a single tab: - If provided, must match the singular tab's ID. - If omitted, the
+        /// request applies to the singular tab. In a document containing multiple tabs: - If provided, the request
+        /// applies to the specified tab. - If omitted, the request applies to the first tab in the document.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabId")]
+        public virtual string TabId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1096,7 +1160,11 @@ namespace Google.Apis.Docs.v1.Data
     /// <summary>A Google Docs document.</summary>
     public class Document : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Output only. The main body of the document.</summary>
+        /// <summary>
+        /// Output only. The main body of the document. Legacy field: Instead, use Document.tabs.documentTab.body, which
+        /// exposes the actual document content from all tabs when the includeTabsContent parameter is set to `true`. If
+        /// `false` or unset, this field contains information about the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("body")]
         public virtual Body Body { get; set; }
 
@@ -1104,61 +1172,113 @@ namespace Google.Apis.Docs.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("documentId")]
         public virtual string DocumentId { get; set; }
 
-        /// <summary>Output only. The style of the document.</summary>
+        /// <summary>
+        /// Output only. The style of the document. Legacy field: Instead, use Document.tabs.documentTab.documentStyle,
+        /// which exposes the actual document content from all tabs when the includeTabsContent parameter is set to
+        /// `true`. If `false` or unset, this field contains information about the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("documentStyle")]
         public virtual DocumentStyle DocumentStyle { get; set; }
 
-        /// <summary>Output only. The footers in the document, keyed by footer ID.</summary>
+        /// <summary>
+        /// Output only. The footers in the document, keyed by footer ID. Legacy field: Instead, use
+        /// Document.tabs.documentTab.footers, which exposes the actual document content from all tabs when the
+        /// includeTabsContent parameter is set to `true`. If `false` or unset, this field contains information about
+        /// the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("footers")]
         public virtual System.Collections.Generic.IDictionary<string, Footer> Footers { get; set; }
 
-        /// <summary>Output only. The footnotes in the document, keyed by footnote ID.</summary>
+        /// <summary>
+        /// Output only. The footnotes in the document, keyed by footnote ID. Legacy field: Instead, use
+        /// Document.tabs.documentTab.footnotes, which exposes the actual document content from all tabs when the
+        /// includeTabsContent parameter is set to `true`. If `false` or unset, this field contains information about
+        /// the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("footnotes")]
         public virtual System.Collections.Generic.IDictionary<string, Footnote> Footnotes { get; set; }
 
-        /// <summary>Output only. The headers in the document, keyed by header ID.</summary>
+        /// <summary>
+        /// Output only. The headers in the document, keyed by header ID. Legacy field: Instead, use
+        /// Document.tabs.documentTab.headers, which exposes the actual document content from all tabs when the
+        /// includeTabsContent parameter is set to `true`. If `false` or unset, this field contains information about
+        /// the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("headers")]
         public virtual System.Collections.Generic.IDictionary<string, Header> Headers { get; set; }
 
-        /// <summary>Output only. The inline objects in the document, keyed by object ID.</summary>
+        /// <summary>
+        /// Output only. The inline objects in the document, keyed by object ID. Legacy field: Instead, use
+        /// Document.tabs.documentTab.inlineObjects, which exposes the actual document content from all tabs when the
+        /// includeTabsContent parameter is set to `true`. If `false` or unset, this field contains information about
+        /// the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("inlineObjects")]
         public virtual System.Collections.Generic.IDictionary<string, InlineObject> InlineObjects { get; set; }
 
-        /// <summary>Output only. The lists in the document, keyed by list ID.</summary>
+        /// <summary>
+        /// Output only. The lists in the document, keyed by list ID. Legacy field: Instead, use
+        /// Document.tabs.documentTab.lists, which exposes the actual document content from all tabs when the
+        /// includeTabsContent parameter is set to `true`. If `false` or unset, this field contains information about
+        /// the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lists")]
         public virtual System.Collections.Generic.IDictionary<string, List> Lists { get; set; }
 
-        /// <summary>Output only. The named ranges in the document, keyed by name.</summary>
+        /// <summary>
+        /// Output only. The named ranges in the document, keyed by name. Legacy field: Instead, use
+        /// Document.tabs.documentTab.namedRanges, which exposes the actual document content from all tabs when the
+        /// includeTabsContent parameter is set to `true`. If `false` or unset, this field contains information about
+        /// the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("namedRanges")]
         public virtual System.Collections.Generic.IDictionary<string, NamedRanges> NamedRanges { get; set; }
 
-        /// <summary>Output only. The named styles of the document.</summary>
+        /// <summary>
+        /// Output only. The named styles of the document. Legacy field: Instead, use
+        /// Document.tabs.documentTab.namedStyles, which exposes the actual document content from all tabs when the
+        /// includeTabsContent parameter is set to `true`. If `false` or unset, this field contains information about
+        /// the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("namedStyles")]
         public virtual NamedStyles NamedStyles { get; set; }
 
-        /// <summary>Output only. The positioned objects in the document, keyed by object ID.</summary>
+        /// <summary>
+        /// Output only. The positioned objects in the document, keyed by object ID. Legacy field: Instead, use
+        /// Document.tabs.documentTab.positionedObjects, which exposes the actual document content from all tabs when
+        /// the includeTabsContent parameter is set to `true`. If `false` or unset, this field contains information
+        /// about the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("positionedObjects")]
         public virtual System.Collections.Generic.IDictionary<string, PositionedObject> PositionedObjects { get; set; }
 
         /// <summary>
         /// Output only. The revision ID of the document. Can be used in update requests to specify which revision of a
         /// document to apply updates to and how the request should behave if the document has been edited since that
-        /// revision. Only populated if the user has edit access to the document. The format of the revision ID may
-        /// change over time, so it should be treated opaquely. A returned revision ID is only guaranteed to be valid
-        /// for 24 hours after it has been returned and cannot be shared across users. If the revision ID is unchanged
-        /// between calls, then the document has not changed. Conversely, a changed ID (for the same document and user)
-        /// usually means the document has been updated; however, a changed ID can also be due to internal factors such
-        /// as ID format changes.
+        /// revision. Only populated if the user has edit access to the document. The revision ID is not a sequential
+        /// number but an opaque string. The format of the revision ID might change over time. A returned revision ID is
+        /// only guaranteed to be valid for 24 hours after it has been returned and cannot be shared across users. If
+        /// the revision ID is unchanged between calls, then the document has not changed. Conversely, a changed ID (for
+        /// the same document and user) usually means the document has been updated. However, a changed ID can also be
+        /// due to internal factors such as ID format changes.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("revisionId")]
         public virtual string RevisionId { get; set; }
 
-        /// <summary>Output only. The suggested changes to the style of the document, keyed by suggestion ID.</summary>
+        /// <summary>
+        /// Output only. The suggested changes to the style of the document, keyed by suggestion ID. Legacy field:
+        /// Instead, use Document.tabs.documentTab.suggestedDocumentStyleChanges, which exposes the actual document
+        /// content from all tabs when the includeTabsContent parameter is set to `true`. If `false` or unset, this
+        /// field contains information about the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedDocumentStyleChanges")]
         public virtual System.Collections.Generic.IDictionary<string, SuggestedDocumentStyle> SuggestedDocumentStyleChanges { get; set; }
 
         /// <summary>
-        /// Output only. The suggested changes to the named styles of the document, keyed by suggestion ID.
+        /// Output only. The suggested changes to the named styles of the document, keyed by suggestion ID. Legacy
+        /// field: Instead, use Document.tabs.documentTab.suggestedNamedStylesChanges, which exposes the actual document
+        /// content from all tabs when the includeTabsContent parameter is set to `true`. If `false` or unset, this
+        /// field contains information about the first tab in the document.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedNamedStylesChanges")]
         public virtual System.Collections.Generic.IDictionary<string, SuggestedNamedStyles> SuggestedNamedStylesChanges { get; set; }
@@ -1169,6 +1289,13 @@ namespace Google.Apis.Docs.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestionsViewMode")]
         public virtual string SuggestionsViewMode { get; set; }
+
+        /// <summary>
+        /// Tabs that are part of a document. Tabs can contain child tabs, a tab nested within another tab. Child tabs
+        /// are represented by the Tab.childTabs field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabs")]
+        public virtual System.Collections.Generic.IList<Tab> Tabs { get; set; }
 
         /// <summary>The title of the document.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("title")]
@@ -1186,20 +1313,20 @@ namespace Google.Apis.Docs.v1.Data
         public virtual Background Background { get; set; }
 
         /// <summary>
-        /// The ID of the default footer. If not set, there is no default footer. This property is read-only.
+        /// The ID of the default footer. If not set, there's no default footer. This property is read-only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("defaultFooterId")]
         public virtual string DefaultFooterId { get; set; }
 
         /// <summary>
-        /// The ID of the default header. If not set, there is no default header. This property is read-only.
+        /// The ID of the default header. If not set, there's no default header. This property is read-only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("defaultHeaderId")]
         public virtual string DefaultHeaderId { get; set; }
 
         /// <summary>
         /// The ID of the footer used only for even pages. The value of use_even_page_header_footer determines whether
-        /// to use the default_footer_id or this value for the footer on even pages. If not set, there is no even page
+        /// to use the default_footer_id or this value for the footer on even pages. If not set, there's no even page
         /// footer. This property is read-only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("evenPageFooterId")]
@@ -1207,7 +1334,7 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// The ID of the header used only for even pages. The value of use_even_page_header_footer determines whether
-        /// to use the default_header_id or this value for the header on even pages. If not set, there is no even page
+        /// to use the default_header_id or this value for the header on even pages. If not set, there's no even page
         /// header. This property is read-only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("evenPageHeaderId")]
@@ -1216,7 +1343,7 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>
         /// The ID of the footer used only for the first page. If not set then a unique footer for the first page does
         /// not exist. The value of use_first_page_header_footer determines whether to use the default_footer_id or this
-        /// value for the footer on the first page. If not set, there is no first page footer. This property is
+        /// value for the footer on the first page. If not set, there's no first page footer. This property is
         /// read-only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("firstPageFooterId")]
@@ -1225,11 +1352,18 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>
         /// The ID of the header used only for the first page. If not set then a unique header for the first page does
         /// not exist. The value of use_first_page_header_footer determines whether to use the default_header_id or this
-        /// value for the header on the first page. If not set, there is no first page header. This property is
+        /// value for the header on the first page. If not set, there's no first page header. This property is
         /// read-only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("firstPageHeaderId")]
         public virtual string FirstPageHeaderId { get; set; }
+
+        /// <summary>
+        /// Optional. Indicates whether to flip the dimensions of the page_size, which allows changing the page
+        /// orientation between portrait and landscape.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("flipPageOrientation")]
+        public virtual System.Nullable<bool> FlipPageOrientation { get; set; }
 
         /// <summary>
         /// The bottom page margin. Updating the bottom page margin on the document style clears the bottom page margin
@@ -1297,7 +1431,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base DocumentStyle have been changed in this suggestion. For
-    /// any field set to true, there is a new suggested value.
+    /// any field set to true, there's a new suggested value.
     /// </summary>
     public class DocumentStyleSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1330,6 +1464,10 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>Indicates if there was a suggested change to first_page_header_id.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("firstPageHeaderIdSuggested")]
         public virtual System.Nullable<bool> FirstPageHeaderIdSuggested { get; set; }
+
+        /// <summary>Optional. Indicates if there was a suggested change to flip_page_orientation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("flipPageOrientationSuggested")]
+        public virtual System.Nullable<bool> FlipPageOrientationSuggested { get; set; }
 
         /// <summary>Indicates if there was a suggested change to margin_bottom.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("marginBottomSuggested")]
@@ -1379,7 +1517,65 @@ namespace Google.Apis.Docs.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The properties of an embedded drawing.</summary>
+    /// <summary>A tab with document contents.</summary>
+    public class DocumentTab : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The main body of the document tab.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("body")]
+        public virtual Body Body { get; set; }
+
+        /// <summary>The style of the document tab.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("documentStyle")]
+        public virtual DocumentStyle DocumentStyle { get; set; }
+
+        /// <summary>The footers in the document tab, keyed by footer ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("footers")]
+        public virtual System.Collections.Generic.IDictionary<string, Footer> Footers { get; set; }
+
+        /// <summary>The footnotes in the document tab, keyed by footnote ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("footnotes")]
+        public virtual System.Collections.Generic.IDictionary<string, Footnote> Footnotes { get; set; }
+
+        /// <summary>The headers in the document tab, keyed by header ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("headers")]
+        public virtual System.Collections.Generic.IDictionary<string, Header> Headers { get; set; }
+
+        /// <summary>The inline objects in the document tab, keyed by object ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inlineObjects")]
+        public virtual System.Collections.Generic.IDictionary<string, InlineObject> InlineObjects { get; set; }
+
+        /// <summary>The lists in the document tab, keyed by list ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lists")]
+        public virtual System.Collections.Generic.IDictionary<string, List> Lists { get; set; }
+
+        /// <summary>The named ranges in the document tab, keyed by name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("namedRanges")]
+        public virtual System.Collections.Generic.IDictionary<string, NamedRanges> NamedRanges { get; set; }
+
+        /// <summary>The named styles of the document tab.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("namedStyles")]
+        public virtual NamedStyles NamedStyles { get; set; }
+
+        /// <summary>The positioned objects in the document tab, keyed by object ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("positionedObjects")]
+        public virtual System.Collections.Generic.IDictionary<string, PositionedObject> PositionedObjects { get; set; }
+
+        /// <summary>The suggested changes to the style of the document tab, keyed by suggestion ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("suggestedDocumentStyleChanges")]
+        public virtual System.Collections.Generic.IDictionary<string, SuggestedDocumentStyle> SuggestedDocumentStyleChanges { get; set; }
+
+        /// <summary>The suggested changes to the named styles of the document tab, keyed by suggestion ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("suggestedNamedStylesChanges")]
+        public virtual System.Collections.Generic.IDictionary<string, SuggestedNamedStyles> SuggestedNamedStylesChanges { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The properties of an embedded drawing and used to differentiate the object type. An embedded drawing is one
+    /// that's created and edited within a document. Note that extensive details are not supported.
+    /// </summary>
     public class EmbeddedDrawingProperties : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The ETag of the item.</summary>
@@ -1388,7 +1584,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base EmbeddedDrawingProperties have been changed in this
-    /// suggestion. For any field set to true, there is a new suggested value.
+    /// suggestion. For any field set to true, there's a new suggested value.
     /// </summary>
     public class EmbeddedDrawingPropertiesSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1418,8 +1614,8 @@ namespace Google.Apis.Docs.v1.Data
         public virtual ImageProperties ImageProperties { get; set; }
 
         /// <summary>
-        /// A reference to the external linked source content. For example, it contains a reference to the source Sheets
-        /// chart when the embedded object is a linked chart. If unset, then the embedded object is not linked.
+        /// A reference to the external linked source content. For example, it contains a reference to the source Google
+        /// Sheets chart when the embedded object is a linked chart. If unset, then the embedded object is not linked.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("linkedContentReference")]
         public virtual LinkedContentReference LinkedContentReference { get; set; }
@@ -1479,7 +1675,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base EmbeddedObjectBorder have been changed in this suggestion.
-    /// For any field set to true, there is a new suggested value.
+    /// For any field set to true, there's a new suggested value.
     /// </summary>
     public class EmbeddedObjectBorderSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1505,7 +1701,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base EmbeddedObject have been changed in this suggestion. For
-    /// any field set to true, there is a new suggested value.
+    /// any field set to true, there's a new suggested value.
     /// </summary>
     public class EmbeddedObjectSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1579,6 +1775,15 @@ namespace Google.Apis.Docs.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("segmentId")]
         public virtual string SegmentId { get; set; }
 
+        /// <summary>
+        /// The tab that the location is in. When omitted, the request is applied to the first tab. In a document
+        /// containing a single tab: - If provided, must match the singular tab's ID. - If omitted, the request applies
+        /// to the singular tab. In a document containing multiple tabs: - If provided, the request applies to the
+        /// specified tab. - If omitted, the request applies to the first tab in the document.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabId")]
+        public virtual string TabId { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1593,7 +1798,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IList<string> SuggestedDeletionIds { get; set; }
 
         /// <summary>
-        /// The suggested insertion IDs. A Equation may have multiple insertion IDs if it is a nested suggested change.
+        /// The suggested insertion IDs. An Equation may have multiple insertion IDs if it's a nested suggested change.
         /// If empty, then this is not a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
@@ -1654,7 +1859,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IList<string> SuggestedDeletionIds { get; set; }
 
         /// <summary>
-        /// The suggested insertion IDs. A FootnoteReference may have multiple insertion IDs if it is a nested suggested
+        /// The suggested insertion IDs. A FootnoteReference may have multiple insertion IDs if it's a nested suggested
         /// change. If empty, then this is not a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
@@ -1687,6 +1892,21 @@ namespace Google.Apis.Docs.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A reference to a heading in this document.</summary>
+    public class HeadingLink : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ID of a heading in this document.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>The ID of the tab containing this heading.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabId")]
+        public virtual string TabId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A ParagraphElement representing a horizontal line.</summary>
     public class HorizontalRule : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1709,8 +1929,8 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// The text style of this HorizontalRule. Similar to text content, like text runs and footnote references, the
-        /// text style of a horizontal rule can affect content layout as well as the styling of text inserted adjacent
-        /// to it.
+        /// text style of a horizontal rule can affect content layout as well as the styling of text inserted next to
+        /// it.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("textStyle")]
         public virtual TextStyle TextStyle { get; set; }
@@ -1757,7 +1977,7 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// The transparency effect of the image. The value should be in the interval [0.0, 1.0], where 0 means no
-        /// effect and 1 means completely transparent.
+        /// effect and 1 means transparent.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("transparency")]
         public virtual System.Nullable<float> Transparency { get; set; }
@@ -1768,7 +1988,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base ImageProperties have been changed in this suggestion. For
-    /// any field set to true, there is a new suggested value.
+    /// any field set to true, there's a new suggested value.
     /// </summary>
     public class ImagePropertiesSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1815,7 +2035,7 @@ namespace Google.Apis.Docs.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("inlineObjectProperties")]
         public virtual InlineObjectProperties InlineObjectProperties { get; set; }
 
-        /// <summary>The ID of this inline object.</summary>
+        /// <summary>The ID of this inline object. Can be used to update an object’s properties.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("objectId")]
         public virtual string ObjectId { get; set; }
 
@@ -1851,7 +2071,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IList<string> SuggestedDeletionIds { get; set; }
 
         /// <summary>
-        /// The suggested insertion IDs. An InlineObjectElement may have multiple insertion IDs if it is a nested
+        /// The suggested insertion IDs. An InlineObjectElement may have multiple insertion IDs if it's a nested
         /// suggested change. If empty, then this is not a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
@@ -1864,7 +2084,7 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>
         /// The text style of this InlineObjectElement. Similar to text content, like text runs and footnote references,
         /// the text style of an inline object element can affect content layout as well as the styling of text inserted
-        /// adjacent to it.
+        /// next to it.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("textStyle")]
         public virtual TextStyle TextStyle { get; set; }
@@ -1886,7 +2106,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base InlineObjectProperties have been changed in this
-    /// suggestion. For any field set to true, there is a new suggested value.
+    /// suggestion. For any field set to true, there's a new suggested value.
     /// </summary>
     public class InlineObjectPropertiesSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1931,8 +2151,8 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>
         /// The image URI. The image is fetched once at insertion time and a copy is stored for display inside the
         /// document. Images must be less than 50MB in size, cannot exceed 25 megapixels, and must be in one of PNG,
-        /// JPEG, or GIF format. The provided URI can be at most 2 kB in length. The URI itself is saved with the image,
-        /// and exposed via the ImageProperties.content_uri field.
+        /// JPEG, or GIF format. The provided URI must be publicly accessible and at most 2 kB in length. The URI itself
+        /// is saved with the image, and exposed via the ImageProperties.content_uri field.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uri")]
         public virtual string Uri { get; set; }
@@ -2131,13 +2351,47 @@ namespace Google.Apis.Docs.v1.Data
     /// <summary>A reference to another portion of a document or an external URL resource.</summary>
     public class Link : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The ID of a bookmark in this document.</summary>
+        /// <summary>
+        /// A bookmark in this document. In documents containing a single tab, links to bookmarks within the singular
+        /// tab continue to return Link.bookmarkId when the includeTabsContent parameter is set to `false` or unset.
+        /// Otherwise, this field is returned.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bookmark")]
+        public virtual BookmarkLink Bookmark { get; set; }
+
+        /// <summary>
+        /// The ID of a bookmark in this document. Legacy field: Instead, set includeTabsContent to `true` and use
+        /// Link.bookmark for read and write operations. This field is only returned when includeTabsContent is set to
+        /// `false` in documents containing a single tab and links to a bookmark within the singular tab. Otherwise,
+        /// Link.bookmark is returned. If this field is used in a write request, the bookmark is considered to be from
+        /// the tab ID specified in the request. If a tab ID is not specified in the request, it is considered to be
+        /// from the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bookmarkId")]
         public virtual string BookmarkId { get; set; }
 
-        /// <summary>The ID of a heading in this document.</summary>
+        /// <summary>
+        /// A heading in this document. In documents containing a single tab, links to headings within the singular tab
+        /// continue to return Link.headingId when the includeTabsContent parameter is set to `false` or unset.
+        /// Otherwise, this field is returned.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("heading")]
+        public virtual HeadingLink Heading { get; set; }
+
+        /// <summary>
+        /// The ID of a heading in this document. Legacy field: Instead, set includeTabsContent to `true` and use
+        /// Link.heading for read and write operations. This field is only returned when includeTabsContent is set to
+        /// `false` in documents containing a single tab and links to a heading within the singular tab. Otherwise,
+        /// Link.heading is returned. If this field is used in a write request, the heading is considered to be from the
+        /// tab ID specified in the request. If a tab ID is not specified in the request, it is considered to be from
+        /// the first tab in the document.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("headingId")]
         public virtual string HeadingId { get; set; }
+
+        /// <summary>The ID of a tab in this document.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabId")]
+        public virtual string TabId { get; set; }
 
         /// <summary>An external URL.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("url")]
@@ -2160,7 +2414,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base LinkedContentReference have been changed in this
-    /// suggestion. For any field set to true, there is a new suggested value.
+    /// suggestion. For any field set to true, there's a new suggested value.
     /// </summary>
     public class LinkedContentReferenceSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2176,7 +2430,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A List represents the list attributes for a group of paragraphs that all belong to the same list. A paragraph
-    /// that is part of a list has a reference to the list's ID in its bullet.
+    /// that's part of a list has a reference to the list's ID in its bullet.
     /// </summary>
     public class List : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2201,15 +2455,15 @@ namespace Google.Apis.Docs.v1.Data
     }
 
     /// <summary>
-    /// The properties of a list which describe the look and feel of bullets belonging to paragraphs associated with a
+    /// The properties of a list that describe the look and feel of bullets belonging to paragraphs associated with a
     /// list.
     /// </summary>
     public class ListProperties : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Describes the properties of the bullets at the associated level. A list has at most nine levels of nesting
-        /// with nesting level 0 corresponding to the top-most level and nesting level 8 corresponding to the most
-        /// nested level. The nesting levels are returned in ascending order with the least nested returned first.
+        /// Describes the properties of the bullets at the associated level. A list has at most 9 levels of nesting with
+        /// nesting level 0 corresponding to the top-most level and nesting level 8 corresponding to the most nested
+        /// level. The nesting levels are returned in ascending order with the least nested returned first.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nestingLevels")]
         public virtual System.Collections.Generic.IList<NestingLevel> NestingLevels { get; set; }
@@ -2220,7 +2474,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base ListProperties have been changed in this suggestion. For
-    /// any field set to true, there is a new suggested value.
+    /// any field set to true, there's a new suggested value.
     /// </summary>
     public class ListPropertiesSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2253,6 +2507,15 @@ namespace Google.Apis.Docs.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("segmentId")]
         public virtual string SegmentId { get; set; }
 
+        /// <summary>
+        /// The tab that the location is in. When omitted, the request is applied to the first tab. In a document
+        /// containing a single tab: - If provided, must match the singular tab's ID. - If omitted, the request applies
+        /// to the singular tab. In a document containing multiple tabs: - If provided, the request applies to the
+        /// specified tab. - If omitted, the request applies to the first tab in the document.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabId")]
+        public virtual string TabId { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2276,11 +2539,11 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A collection of Ranges with the same named range ID. Named ranges allow developers to associate parts of a
-    /// document with an arbitrary user-defined label so their contents can be programmatically read or edited at a
-    /// later time. A document can contain multiple named ranges with the same name, but every named range has a unique
-    /// ID. A named range is created with a single Range, and content inserted inside a named range generally expands
-    /// that range. However, certain document changes can cause the range to be split into multiple ranges. Named ranges
-    /// are not private. All applications and collaborators that have access to the document can see its named ranges.
+    /// document with an arbitrary user-defined label so their contents can be programmatically read or edited later. A
+    /// document can contain multiple named ranges with the same name, but every named range has a unique ID. A named
+    /// range is created with a single Range, and content inserted inside a named range generally expands that range.
+    /// However, certain document changes can cause the range to be split into multiple ranges. Named ranges are not
+    /// private. All applications and collaborators that have access to the document can see its named ranges.
     /// </summary>
     public class NamedRange : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2369,7 +2632,7 @@ namespace Google.Apis.Docs.v1.Data
     /// </summary>
     public class NamedStyles : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The named styles. There is an entry for each of the possible named style types.</summary>
+        /// <summary>The named styles. There's an entry for each of the possible named style types.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("styles")]
         public virtual System.Collections.Generic.IList<NamedStyle> Styles { get; set; }
 
@@ -2382,8 +2645,8 @@ namespace Google.Apis.Docs.v1.Data
     {
         /// <summary>
         /// A mask that indicates which of the fields on the corresponding NamedStyle in styles have been changed in
-        /// this suggestion. The order of these named style suggestion states match the order of the corresponding named
-        /// style within the named styles suggestion.
+        /// this suggestion. The order of these named style suggestion states matches the order of the corresponding
+        /// named style within the named styles suggestion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("stylesSuggestionStates")]
         public virtual System.Collections.Generic.IList<NamedStyleSuggestionState> StylesSuggestionStates { get; set; }
@@ -2403,7 +2666,7 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// The format string used by bullets at this level of nesting. The glyph format contains one or more
-        /// placeholders, and these placeholder are replaced with the appropriate values depending on the glyph_type or
+        /// placeholders, and these placeholders are replaced with the appropriate values depending on the glyph_type or
         /// glyph_symbol. The placeholders follow the pattern `%[nesting_level]`. Furthermore, placeholders can have
         /// prefixes and suffixes. Thus, the glyph format follows the pattern `%[nesting_level]`. Note that the prefix
         /// and suffix are optional and can be arbitrary strings. For example, the glyph format `%0.` indicates that the
@@ -2451,9 +2714,8 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// The number of the first list item at this nesting level. A value of 0 is treated as a value of 1 for
-        /// lettered lists and roman numeraled lists, i.e. for values of both 0 and 1, lettered and roman numeraled
-        /// lists will begin at `a` and `i` respectively. This value is ignored for nesting levels with unordered
-        /// glyphs.
+        /// lettered lists and Roman numeral lists. For values of both 0 and 1, lettered and Roman numeral lists will
+        /// begin at `a` and `i` respectively. This value is ignored for nesting levels with unordered glyphs.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startNumber")]
         public virtual System.Nullable<int> StartNumber { get; set; }
@@ -2468,7 +2730,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base NestingLevel have been changed in this suggestion. For any
-    /// field set to true, there is a new suggested value.
+    /// field set to true, there's a new suggested value.
     /// </summary>
     public class NestingLevelSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2547,7 +2809,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IList<string> SuggestedDeletionIds { get; set; }
 
         /// <summary>
-        /// The suggested insertion IDs. A PageBreak may have multiple insertion IDs if it is a nested suggested change.
+        /// The suggested insertion IDs. A PageBreak may have multiple insertion IDs if it's a nested suggested change.
         /// If empty, then this is not a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
@@ -2559,7 +2821,7 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// The text style of this PageBreak. Similar to text content, like text runs and footnote references, the text
-        /// style of a page break can affect content layout as well as the styling of text inserted adjacent to it.
+        /// style of a page break can affect content layout as well as the styling of text inserted next to it.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("textStyle")]
         public virtual TextStyle TextStyle { get; set; }
@@ -2569,8 +2831,8 @@ namespace Google.Apis.Docs.v1.Data
     }
 
     /// <summary>
-    /// A StructuralElement representing a paragraph. A paragraph is a range of content that is terminated with a
-    /// newline character.
+    /// A StructuralElement representing a paragraph. A paragraph is a range of content that's terminated with a newline
+    /// character.
     /// </summary>
     public class Paragraph : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2578,7 +2840,7 @@ namespace Google.Apis.Docs.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("bullet")]
         public virtual Bullet Bullet { get; set; }
 
-        /// <summary>The content of the paragraph broken down into its component parts.</summary>
+        /// <summary>The content of the paragraph, broken down into its component parts.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("elements")]
         public virtual System.Collections.Generic.IList<ParagraphElement> Elements { get; set; }
 
@@ -2599,8 +2861,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IDictionary<string, SuggestedParagraphStyle> SuggestedParagraphStyleChanges { get; set; }
 
         /// <summary>
-        /// The IDs of the positioned objects that are suggested to be attached to this paragraph, keyed by suggestion
-        /// ID.
+        /// The IDs of the positioned objects suggested to be attached to this paragraph, keyed by suggestion ID.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedPositionedObjectIds")]
         public virtual System.Collections.Generic.IDictionary<string, ObjectReferences> SuggestedPositionedObjectIds { get; set; }
@@ -2672,8 +2933,8 @@ namespace Google.Apis.Docs.v1.Data
         public virtual Person Person { get; set; }
 
         /// <summary>
-        /// A paragraph element that links to a Google resource (such as a file in Drive, a Youtube video, a Calendar
-        /// event, etc.)
+        /// A paragraph element that links to a Google resource (such as a file in Google Drive, a YouTube video, or a
+        /// Calendar event.)
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("richLink")]
         public virtual RichLink RichLink { get; set; }
@@ -2695,7 +2956,7 @@ namespace Google.Apis.Docs.v1.Data
     /// message. A paragraph style's parent depends on where the paragraph style is defined: * The ParagraphStyle on a
     /// Paragraph inherits from the paragraph's corresponding named style type. * The ParagraphStyle on a named style
     /// inherits from the normal text named style. * The ParagraphStyle of the normal text named style inherits from the
-    /// default paragraph style in the Docs editor. * The ParagraphStyle on a Paragraph element that is contained in a
+    /// default paragraph style in the Docs editor. * The ParagraphStyle on a Paragraph element that's contained in a
     /// table may inherit its paragraph style from the table style. If the paragraph style does not inherit from a
     /// parent, unsetting fields will revert the style to a value matching the defaults in the Docs editor.
     /// </summary>
@@ -2714,8 +2975,8 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>
         /// The border between this paragraph and the next and previous paragraphs. If unset, the value is inherited
         /// from the parent. The between border is rendered when the adjacent paragraph has the same border and indent
-        /// properties. Paragraph borders cannot be partially updated. When making changes to a paragraph border the new
-        /// border must be specified in its entirety.
+        /// properties. Paragraph borders cannot be partially updated. When changing a paragraph border, the new border
+        /// must be specified in its entirety.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("borderBetween")]
         public virtual ParagraphBorder BorderBetween { get; set; }
@@ -2723,24 +2984,24 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>
         /// The border at the bottom of this paragraph. If unset, the value is inherited from the parent. The bottom
         /// border is rendered when the paragraph below has different border and indent properties. Paragraph borders
-        /// cannot be partially updated. When making changes to a paragraph border the new border must be specified in
-        /// its entirety.
+        /// cannot be partially updated. When changing a paragraph border, the new border must be specified in its
+        /// entirety.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("borderBottom")]
         public virtual ParagraphBorder BorderBottom { get; set; }
 
         /// <summary>
         /// The border to the left of this paragraph. If unset, the value is inherited from the parent. Paragraph
-        /// borders cannot be partially updated. When making changes to a paragraph border the new border must be
-        /// specified in its entirety.
+        /// borders cannot be partially updated. When changing a paragraph border, the new border must be specified in
+        /// its entirety.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("borderLeft")]
         public virtual ParagraphBorder BorderLeft { get; set; }
 
         /// <summary>
         /// The border to the right of this paragraph. If unset, the value is inherited from the parent. Paragraph
-        /// borders cannot be partially updated. When making changes to a paragraph border the new border must be
-        /// specified in its entirety.
+        /// borders cannot be partially updated. When changing a paragraph border, the new border must be specified in
+        /// its entirety.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("borderRight")]
         public virtual ParagraphBorder BorderRight { get; set; }
@@ -2748,8 +3009,7 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>
         /// The border at the top of this paragraph. If unset, the value is inherited from the parent. The top border is
         /// rendered when the paragraph above has different border and indent properties. Paragraph borders cannot be
-        /// partially updated. When making changes to a paragraph border the new border must be specified in its
-        /// entirety.
+        /// partially updated. When changing a paragraph border, the new border must be specified in its entirety.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("borderTop")]
         public virtual ParagraphBorder BorderTop { get; set; }
@@ -2816,6 +3076,15 @@ namespace Google.Apis.Docs.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("namedStyleType")]
         public virtual string NamedStyleType { get; set; }
 
+        /// <summary>
+        /// Whether the current paragraph should always start at the beginning of a page. If unset, the value is
+        /// inherited from the parent. Attempting to update page_break_before for paragraphs in unsupported regions,
+        /// including Table, Header, Footer and Footnote, can result in an invalid document state that returns a 400 bad
+        /// request error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pageBreakBefore")]
+        public virtual System.Nullable<bool> PageBreakBefore { get; set; }
+
         /// <summary>The shading of the paragraph. If unset, the value is inherited from the parent.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("shading")]
         public virtual Shading Shading { get; set; }
@@ -2849,7 +3118,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base ParagraphStyle have been changed in this suggestion. For
-    /// any field set to true, there is a new suggested value.
+    /// any field set to true, there's a new suggested value.
     /// </summary>
     public class ParagraphStyleSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2917,6 +3186,10 @@ namespace Google.Apis.Docs.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("namedStyleTypeSuggested")]
         public virtual System.Nullable<bool> NamedStyleTypeSuggested { get; set; }
 
+        /// <summary>Indicates if there was a suggested change to page_break_before.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pageBreakBeforeSuggested")]
+        public virtual System.Nullable<bool> PageBreakBeforeSuggested { get; set; }
+
         /// <summary>
         /// A mask that indicates which of the fields in shading have been changed in this suggestion.
         /// </summary>
@@ -2955,15 +3228,15 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// IDs for suggestions that remove this person link from the document. A Person might have multiple deletion
-        /// IDs if, for example, multiple users suggest to delete it. If empty, then this person link isn't suggested
-        /// for deletion.
+        /// IDs if, for example, multiple users suggest deleting it. If empty, then this person link isn't suggested for
+        /// deletion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedDeletionIds")]
         public virtual System.Collections.Generic.IList<string> SuggestedDeletionIds { get; set; }
 
         /// <summary>
         /// IDs for suggestions that insert this person link into the document. A Person might have multiple insertion
-        /// IDs if it is a nested suggested change (a suggestion within a suggestion made by a different user, for
+        /// IDs if it's a nested suggested change (a suggestion within a suggestion made by a different user, for
         /// example). If empty, then this person link isn't a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
@@ -2989,7 +3262,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual string Email { get; set; }
 
         /// <summary>
-        /// Output only. The name of the person if it is displayed in the link text instead of the person's email
+        /// Output only. The name of the person if it's displayed in the link text instead of the person's email
         /// address.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -2999,8 +3272,23 @@ namespace Google.Apis.Docs.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Updates the number of pinned table header rows in a table.</summary>
+    public class PinTableHeaderRowsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The number of table rows to pin, where 0 implies that all rows are unpinned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pinnedHeaderRowsCount")]
+        public virtual System.Nullable<int> PinnedHeaderRowsCount { get; set; }
+
+        /// <summary>The location where the table starts in the document.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableStartLocation")]
+        public virtual Location TableStartLocation { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
-    /// An object that is tethered to a Paragraph and positioned relative to the beginning of the paragraph. A
+    /// An object that's tethered to a Paragraph and positioned relative to the beginning of the paragraph. A
     /// PositionedObject contains an EmbeddedObject such as an image.
     /// </summary>
     public class PositionedObject : Google.Apis.Requests.IDirectResponseSchema
@@ -3033,7 +3321,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// The positioning of a PositionedObject. The positioned object is positioned relative to the beginning of the
-    /// Paragraph it is tethered to.
+    /// Paragraph it's tethered to.
     /// </summary>
     public class PositionedObjectPositioning : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3042,7 +3330,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual string Layout { get; set; }
 
         /// <summary>
-        /// The offset of the left edge of the positioned object relative to the beginning of the Paragraph it is
+        /// The offset of the left edge of the positioned object relative to the beginning of the Paragraph it's
         /// tethered to. The exact positioning of the object can depend on other content in the document and the
         /// document's styling.
         /// </summary>
@@ -3050,9 +3338,9 @@ namespace Google.Apis.Docs.v1.Data
         public virtual Dimension LeftOffset { get; set; }
 
         /// <summary>
-        /// The offset of the top edge of the positioned object relative to the beginning of the Paragraph it is
-        /// tethered to. The exact positioning of the object can depend on other content in the document and the
-        /// document's styling.
+        /// The offset of the top edge of the positioned object relative to the beginning of the Paragraph it's tethered
+        /// to. The exact positioning of the object can depend on other content in the document and the document's
+        /// styling.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("topOffset")]
         public virtual Dimension TopOffset { get; set; }
@@ -3063,7 +3351,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base PositionedObjectPositioning have been changed in this
-    /// suggestion. For any field set to true, there is a new suggested value.
+    /// suggestion. For any field set to true, there's a new suggested value.
     /// </summary>
     public class PositionedObjectPositioningSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3103,7 +3391,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base PositionedObjectProperties have been changed in this
-    /// suggestion. For any field set to true, there is a new suggested value.
+    /// suggestion. For any field set to true, there's a new suggested value.
     /// </summary>
     public class PositionedObjectPropertiesSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3135,7 +3423,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Nullable<int> EndIndex { get; set; }
 
         /// <summary>
-        /// The ID of the header, footer or footnote that this range is contained in. An empty segment ID signifies the
+        /// The ID of the header, footer, or footnote that this range is contained in. An empty segment ID signifies the
         /// document's body.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("segmentId")]
@@ -3147,6 +3435,15 @@ namespace Google.Apis.Docs.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startIndex")]
         public virtual System.Nullable<int> StartIndex { get; set; }
+
+        /// <summary>
+        /// The tab that contains this range. When omitted, the request applies to the first tab. In a document
+        /// containing a single tab: - If provided, must match the singular tab's ID. - If omitted, the request applies
+        /// to the singular tab. In a document containing multiple tabs: - If provided, the request applies to the
+        /// specified tab. - If omitted, the request applies to the first tab in the document.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabId")]
+        public virtual string TabId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3162,6 +3459,15 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>The text that will replace the matched text.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("replaceText")]
         public virtual string ReplaceText { get; set; }
+
+        /// <summary>
+        /// Optional. The criteria used to specify in which tabs the replacement occurs. When omitted, the replacement
+        /// applies to all tabs. In a document containing a single tab: - If provided, must match the singular tab's ID.
+        /// - If omitted, the replacement applies to the singular tab. In a document containing multiple tabs: - If
+        /// provided, the replacement applies to the specified tabs. - If omitted, the replacement applies to all tabs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabsCriteria")]
+        public virtual TabsCriteria TabsCriteria { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3184,7 +3490,10 @@ namespace Google.Apis.Docs.v1.Data
     /// </summary>
     public class ReplaceImageRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The ID of the existing image that will be replaced.</summary>
+        /// <summary>
+        /// The ID of the existing image that will be replaced. The ID can be retrieved from the response of a get
+        /// request.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("imageObjectId")]
         public virtual string ImageObjectId { get; set; }
 
@@ -3193,10 +3502,19 @@ namespace Google.Apis.Docs.v1.Data
         public virtual string ImageReplaceMethod { get; set; }
 
         /// <summary>
+        /// The tab that the image to be replaced is in. When omitted, the request is applied to the first tab. In a
+        /// document containing a single tab: - If provided, must match the singular tab's ID. - If omitted, the request
+        /// applies to the singular tab. In a document containing multiple tabs: - If provided, the request applies to
+        /// the specified tab. - If omitted, the request applies to the first tab in the document.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabId")]
+        public virtual string TabId { get; set; }
+
+        /// <summary>
         /// The URI of the new image. The image is fetched once at insertion time and a copy is stored for display
-        /// inside the document. Images must be less than 50MB in size, cannot exceed 25 megapixels, and must be in one
-        /// of PNG, JPEG, or GIF format. The provided URI can be at most 2 kB in length. The URI itself is saved with
-        /// the image, and exposed via the ImageProperties.source_uri field.
+        /// inside the document. Images must be less than 50MB, cannot exceed 25 megapixels, and must be in PNG, JPEG,
+        /// or GIF format. The provided URI can't surpass 2 KB in length. The URI is saved with the image, and exposed
+        /// through the ImageProperties.source_uri field.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uri")]
         public virtual string Uri { get; set; }
@@ -3227,6 +3545,15 @@ namespace Google.Apis.Docs.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("namedRangeName")]
         public virtual string NamedRangeName { get; set; }
+
+        /// <summary>
+        /// Optional. The criteria used to specify in which tabs the replacement occurs. When omitted, the replacement
+        /// applies to all tabs. In a document containing a single tab: - If provided, must match the singular tab's ID.
+        /// - If omitted, the replacement applies to the singular tab. In a document containing multiple tabs: - If
+        /// provided, the replacement applies to the specified tabs. - If omitted, the replacement applies to all tabs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabsCriteria")]
+        public virtual TabsCriteria TabsCriteria { get; set; }
 
         /// <summary>Replaces the content of the specified named range(s) with the given text.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("text")]
@@ -3322,6 +3649,10 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>Merges cells in a table.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mergeTableCells")]
         public virtual MergeTableCellsRequest MergeTableCells { get; set; }
+
+        /// <summary>Updates the number of pinned header rows in a table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pinTableHeaderRows")]
+        public virtual PinTableHeaderRowsRequest PinTableHeaderRows { get; set; }
 
         /// <summary>Replaces all instances of the specified text.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("replaceAllText")]
@@ -3425,7 +3756,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A link to a Google resource (e.g., a file in Drive, a YouTube video, a Calendar event, etc.).</summary>
+    /// <summary>A link to a Google resource (such as a file in Drive, a YouTube video, or a Calendar event).</summary>
     public class RichLink : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Output only. The ID of this link.</summary>
@@ -3438,7 +3769,7 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// IDs for suggestions that remove this link from the document. A RichLink might have multiple deletion IDs if,
-        /// for example, multiple users suggest to delete it. If empty, then this person link isn't suggested for
+        /// for example, multiple users suggest deleting it. If empty, then this person link isn't suggested for
         /// deletion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedDeletionIds")]
@@ -3446,7 +3777,7 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// IDs for suggestions that insert this link into the document. A RichLink might have multiple insertion IDs if
-        /// it is a nested suggested change (a suggestion within a suggestion made by a different user, for example). If
+        /// it's a nested suggested change (a suggestion within a suggestion made by a different user, for example). If
         /// empty, then this person link isn't a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
@@ -3469,7 +3800,7 @@ namespace Google.Apis.Docs.v1.Data
     {
         /// <summary>
         /// Output only. The [MIME type](https://developers.google.com/drive/api/v3/mime-types) of the RichLink, if
-        /// there is one (i.e., when it is a file in Drive).
+        /// there's one (for example, when it's a file in Drive).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mimeType")]
         public virtual string MimeType { get; set; }
@@ -3490,7 +3821,7 @@ namespace Google.Apis.Docs.v1.Data
     }
 
     /// <summary>
-    /// A StructuralElement representing a section break. A section is a range of content which has the same
+    /// A StructuralElement representing a section break. A section is a range of content that has the same
     /// SectionStyle. A section break represents the start of a new section, and the section style applies to the
     /// section after the section break. The document body always begins with a section break.
     /// </summary>
@@ -3507,7 +3838,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IList<string> SuggestedDeletionIds { get; set; }
 
         /// <summary>
-        /// The suggested insertion IDs. A SectionBreak may have multiple insertion IDs if it is a nested suggested
+        /// The suggested insertion IDs. A SectionBreak may have multiple insertion IDs if it's a nested suggested
         /// change. If empty, then this is not a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
@@ -3537,14 +3868,14 @@ namespace Google.Apis.Docs.v1.Data
     {
         /// <summary>
         /// The section's columns properties. If empty, the section contains one column with the default properties in
-        /// the Docs editor. A section can be updated to have no more than three columns. When updating this property,
+        /// the Docs editor. A section can be updated to have no more than 3 columns. When updating this property,
         /// setting a concrete value is required. Unsetting this property will result in a 400 bad request error.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("columnProperties")]
         public virtual System.Collections.Generic.IList<SectionColumnProperties> ColumnProperties { get; set; }
 
         /// <summary>
-        /// The style of column separators. This style can be set even when there is one column in the section. When
+        /// The style of column separators. This style can be set even when there's one column in the section. When
         /// updating this property, setting a concrete value is required. Unsetting this property results in a 400 bad
         /// request error.
         /// </summary>
@@ -3577,7 +3908,7 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>
         /// The ID of the footer used only for even pages. If the value of DocumentStyle's use_even_page_header_footer
         /// is true, this value is used for the footers on even pages in the section. If it is false, the footers on
-        /// even pages uses the default_footer_id. If unset, the value inherits from the previous SectionBreak's
+        /// even pages use the default_footer_id. If unset, the value inherits from the previous SectionBreak's
         /// SectionStyle. If the value is unset in the first SectionBreak, it inherits from DocumentStyle's
         /// even_page_footer_id. This property is read-only.
         /// </summary>
@@ -3587,7 +3918,7 @@ namespace Google.Apis.Docs.v1.Data
         /// <summary>
         /// The ID of the header used only for even pages. If the value of DocumentStyle's use_even_page_header_footer
         /// is true, this value is used for the headers on even pages in the section. If it is false, the headers on
-        /// even pages uses the default_header_id. If unset, the value inherits from the previous SectionBreak's
+        /// even pages use the default_header_id. If unset, the value inherits from the previous SectionBreak's
         /// SectionStyle. If the value is unset in the first SectionBreak, it inherits from DocumentStyle's
         /// even_page_header_id. This property is read-only.
         /// </summary>
@@ -3596,7 +3927,7 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// The ID of the footer used only for the first page of the section. If use_first_page_header_footer is true,
-        /// this value is used for the footer on the first page of the section. If it is false, the footer on the first
+        /// this value is used for the footer on the first page of the section. If it's false, the footer on the first
         /// page of the section uses the default_footer_id. If unset, the value inherits from the previous
         /// SectionBreak's SectionStyle. If the value is unset in the first SectionBreak, it inherits from
         /// DocumentStyle's first_page_footer_id. This property is read-only.
@@ -3606,7 +3937,7 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// The ID of the header used only for the first page of the section. If use_first_page_header_footer is true,
-        /// this value is used for the header on the first page of the section. If it is false, the header on the first
+        /// this value is used for the header on the first page of the section. If it's false, the header on the first
         /// page of the section uses the default_header_id. If unset, the value inherits from the previous
         /// SectionBreak's SectionStyle. If the value is unset in the first SectionBreak, it inherits from
         /// DocumentStyle's first_page_header_id. This property is read-only.
@@ -3615,15 +3946,25 @@ namespace Google.Apis.Docs.v1.Data
         public virtual string FirstPageHeaderId { get; set; }
 
         /// <summary>
-        /// The bottom page margin of the section. If unset, uses margin_bottom from DocumentStyle. When updating this
-        /// property, setting a concrete value is required. Unsetting this property results in a 400 bad request error.
+        /// Optional. Indicates whether to flip the dimensions of DocumentStyle's page_size for this section, which
+        /// allows changing the page orientation between portrait and landscape. If unset, the value inherits from
+        /// DocumentStyle's flip_page_orientation. When updating this property, setting a concrete value is required.
+        /// Unsetting this property results in a 400 bad request error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("flipPageOrientation")]
+        public virtual System.Nullable<bool> FlipPageOrientation { get; set; }
+
+        /// <summary>
+        /// The bottom page margin of the section. If unset, the value defaults to margin_bottom from DocumentStyle.
+        /// When updating this property, setting a concrete value is required. Unsetting this property results in a 400
+        /// bad request error.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("marginBottom")]
         public virtual Dimension MarginBottom { get; set; }
 
         /// <summary>
-        /// The footer margin of the section. If unset, uses margin_footer from DocumentStyle. If updated,
-        /// use_custom_header_footer_margins is set to true on DocumentStyle. The value of
+        /// The footer margin of the section. If unset, the value defaults to margin_footer from DocumentStyle. If
+        /// updated, use_custom_header_footer_margins is set to true on DocumentStyle. The value of
         /// use_custom_header_footer_margins on DocumentStyle indicates if a footer margin is being respected for this
         /// section When updating this property, setting a concrete value is required. Unsetting this property results
         /// in a 400 bad request error.
@@ -3632,8 +3973,8 @@ namespace Google.Apis.Docs.v1.Data
         public virtual Dimension MarginFooter { get; set; }
 
         /// <summary>
-        /// The header margin of the section. If unset, uses margin_header from DocumentStyle. If updated,
-        /// use_custom_header_footer_margins is set to true on DocumentStyle. The value of
+        /// The header margin of the section. If unset, the value defaults to margin_header from DocumentStyle. If
+        /// updated, use_custom_header_footer_margins is set to true on DocumentStyle. The value of
         /// use_custom_header_footer_margins on DocumentStyle indicates if a header margin is being respected for this
         /// section. When updating this property, setting a concrete value is required. Unsetting this property results
         /// in a 400 bad request error.
@@ -3642,26 +3983,27 @@ namespace Google.Apis.Docs.v1.Data
         public virtual Dimension MarginHeader { get; set; }
 
         /// <summary>
-        /// The left page margin of the section. If unset, uses margin_left from DocumentStyle. Updating left margin
-        /// causes columns in this section to resize. Since the margin affects column width, it is applied before column
-        /// properties. When updating this property, setting a concrete value is required. Unsetting this property
-        /// results in a 400 bad request error.
+        /// The left page margin of the section. If unset, the value defaults to margin_left from DocumentStyle.
+        /// Updating the left margin causes columns in this section to resize. Since the margin affects column width,
+        /// it's applied before column properties. When updating this property, setting a concrete value is required.
+        /// Unsetting this property results in a 400 bad request error.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("marginLeft")]
         public virtual Dimension MarginLeft { get; set; }
 
         /// <summary>
-        /// The right page margin of the section. If unset, uses margin_right from DocumentStyle. Updating right margin
-        /// causes columns in this section to resize. Since the margin affects column width, it is applied before column
-        /// properties. When updating this property, setting a concrete value is required. Unsetting this property
-        /// results in a 400 bad request error.
+        /// The right page margin of the section. If unset, the value defaults to margin_right from DocumentStyle.
+        /// Updating the right margin causes columns in this section to resize. Since the margin affects column width,
+        /// it's applied before column properties. When updating this property, setting a concrete value is required.
+        /// Unsetting this property results in a 400 bad request error.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("marginRight")]
         public virtual Dimension MarginRight { get; set; }
 
         /// <summary>
-        /// The top page margin of the section. If unset, uses margin_top from DocumentStyle. When updating this
-        /// property, setting a concrete value is required. Unsetting this property results in a 400 bad request error.
+        /// The top page margin of the section. If unset, the value defaults to margin_top from DocumentStyle. When
+        /// updating this property, setting a concrete value is required. Unsetting this property results in a 400 bad
+        /// request error.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("marginTop")]
         public virtual Dimension MarginTop { get; set; }
@@ -3705,7 +4047,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base Shading have been changed in this suggested change. For
-    /// any field set to true, there is a new suggested value.
+    /// any field set to true, there's a new suggested value.
     /// </summary>
     public class ShadingSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3720,7 +4062,7 @@ namespace Google.Apis.Docs.v1.Data
     /// <summary>A reference to a linked chart embedded from Google Sheets.</summary>
     public class SheetsChartReference : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The ID of the specific chart in the Google Sheets spreadsheet that is embedded.</summary>
+        /// <summary>The ID of the specific chart in the Google Sheets spreadsheet that's embedded.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("chartId")]
         public virtual System.Nullable<int> ChartId { get; set; }
 
@@ -3734,7 +4076,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base SheetsChartReference have been changed in this suggestion.
-    /// For any field set to true, there is a new suggested value.
+    /// For any field set to true, there's a new suggested value.
     /// </summary>
     public class SheetsChartReferenceSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3938,7 +4280,7 @@ namespace Google.Apis.Docs.v1.Data
     {
         /// <summary>
         /// A ParagraphStyle that only includes the changes made in this suggestion. This can be used along with the
-        /// paragraph_suggestion_state to see which fields have changed and their new values.
+        /// paragraph_style_suggestion_state to see which fields have changed and their new values.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("paragraphStyle")]
         public virtual ParagraphStyle ParagraphStyle { get; set; }
@@ -4035,6 +4377,55 @@ namespace Google.Apis.Docs.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A tab in a document.</summary>
+    public class Tab : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The child tabs nested within this tab.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("childTabs")]
+        public virtual System.Collections.Generic.IList<Tab> ChildTabs { get; set; }
+
+        /// <summary>A tab with document contents, like text and images.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("documentTab")]
+        public virtual DocumentTab DocumentTab { get; set; }
+
+        /// <summary>The properties of the tab, like ID and title.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabProperties")]
+        public virtual TabProperties TabProperties { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Properties of a tab.</summary>
+    public class TabProperties : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The zero-based index of the tab within the parent.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("index")]
+        public virtual System.Nullable<int> Index { get; set; }
+
+        /// <summary>Output only. The depth of the tab within the document. Root-level tabs start at 0.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nestingLevel")]
+        public virtual System.Nullable<int> NestingLevel { get; set; }
+
+        /// <summary>
+        /// Optional. The ID of the parent tab. Empty when the current tab is a root-level tab, which means it doesn't
+        /// have any parents.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parentTabId")]
+        public virtual string ParentTabId { get; set; }
+
+        /// <summary>Output only. The ID of the tab. This field can't be changed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabId")]
+        public virtual string TabId { get; set; }
+
+        /// <summary>The user-visible name of the tab.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A tab stop within a paragraph.</summary>
     public class TabStop : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4054,7 +4445,7 @@ namespace Google.Apis.Docs.v1.Data
     public class Table : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Number of columns in the table. It is possible for a table to be non-rectangular, so some rows may have a
+        /// Number of columns in the table. It's possible for a table to be non-rectangular, so some rows may have a
         /// different number of cells.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("columns")]
@@ -4071,7 +4462,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IList<string> SuggestedDeletionIds { get; set; }
 
         /// <summary>
-        /// The suggested insertion IDs. A Table may have multiple insertion IDs if it is a nested suggested change. If
+        /// The suggested insertion IDs. A Table may have multiple insertion IDs if it's a nested suggested change. If
         /// empty, then this is not a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
@@ -4111,7 +4502,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IList<string> SuggestedDeletionIds { get; set; }
 
         /// <summary>
-        /// The suggested insertion IDs. A TableCell may have multiple insertion IDs if it is a nested suggested change.
+        /// The suggested insertion IDs. A TableCell may have multiple insertion IDs if it's a nested suggested change.
         /// If empty, then this is not a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
@@ -4235,7 +4626,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base TableCellStyle have been changed in this suggestion. For
-    /// any field set to true, there is a new suggested value.
+    /// any field set to true, there's a new suggested value.
     /// </summary>
     public class TableCellStyleSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4373,7 +4764,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IList<string> SuggestedDeletionIds { get; set; }
 
         /// <summary>
-        /// The suggested insertion IDs. A TableRow may have multiple insertion IDs if it is a nested suggested change.
+        /// The suggested insertion IDs. A TableRow may have multiple insertion IDs if it's a nested suggested change.
         /// If empty, then this is not a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
@@ -4384,7 +4775,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IDictionary<string, SuggestedTableRowStyle> SuggestedTableRowStyleChanges { get; set; }
 
         /// <summary>
-        /// The contents and style of each cell in this row. It is possible for a table to be non-rectangular, so some
+        /// The contents and style of each cell in this row. It's possible for a table to be non-rectangular, so some
         /// rows may have a different number of cells than other rows in the same table.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tableCells")]
@@ -4408,13 +4799,21 @@ namespace Google.Apis.Docs.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("minRowHeight")]
         public virtual Dimension MinRowHeight { get; set; }
 
+        /// <summary>Whether the row cannot overflow across page or column boundaries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("preventOverflow")]
+        public virtual System.Nullable<bool> PreventOverflow { get; set; }
+
+        /// <summary>Whether the row is a table header.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableHeader")]
+        public virtual System.Nullable<bool> TableHeader { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
     /// <summary>
     /// A mask that indicates which of the fields on the base TableRowStyle have been changed in this suggestion. For
-    /// any field set to true, there is a new suggested value.
+    /// any field set to true, there's a new suggested value.
     /// </summary>
     public class TableRowStyleSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4440,6 +4839,17 @@ namespace Google.Apis.Docs.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A criteria that specifies in which tabs a request executes.</summary>
+    public class TabsCriteria : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of tab IDs in which the request executes.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabIds")]
+        public virtual System.Collections.Generic.IList<string> TabIds { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A ParagraphElement that represents a run of text that all has the same styling.</summary>
     public class TextRun : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4456,8 +4866,8 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Collections.Generic.IList<string> SuggestedDeletionIds { get; set; }
 
         /// <summary>
-        /// The suggested insertion IDs. A TextRun may have multiple insertion IDs if it is a nested suggested change.
-        /// If empty, then this is not a suggested insertion.
+        /// The suggested insertion IDs. A TextRun may have multiple insertion IDs if it's a nested suggested change. If
+        /// empty, then this is not a suggested insertion.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedInsertionIds")]
         public virtual System.Collections.Generic.IList<string> SuggestedInsertionIds { get; set; }
@@ -4479,7 +4889,7 @@ namespace Google.Apis.Docs.v1.Data
     /// this message. A text style's parent depends on where the text style is defined: * The TextStyle of text in a
     /// Paragraph inherits from the paragraph's corresponding named style type. * The TextStyle on a named style
     /// inherits from the normal text named style. * The TextStyle of the normal text named style inherits from the
-    /// default text style in the Docs editor. * The TextStyle on a Paragraph element that is contained in a table may
+    /// default text style in the Docs editor. * The TextStyle on a Paragraph element that's contained in a table may
     /// inherit its text style from the table style. If the text style does not inherit from a parent, unsetting fields
     /// will revert the style to a value matching the defaults in the Docs editor.
     /// </summary>
@@ -4494,8 +4904,8 @@ namespace Google.Apis.Docs.v1.Data
 
         /// <summary>
         /// The text's vertical offset from its normal position. Text with `SUPERSCRIPT` or `SUBSCRIPT` baseline offsets
-        /// is automatically rendered in a smaller font size, computed based on the `font_size` field. The `font_size`
-        /// itself is not affected by changes in this field.
+        /// is automatically rendered in a smaller font size, computed based on the `font_size` field. Changes in this
+        /// field don't affect the `font_size`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("baselineOffset")]
         public virtual string BaselineOffset { get; set; }
@@ -4520,7 +4930,7 @@ namespace Google.Apis.Docs.v1.Data
         public virtual System.Nullable<bool> Italic { get; set; }
 
         /// <summary>
-        /// The hyperlink destination of the text. If unset, there is no link. Links are not inherited from parent text.
+        /// The hyperlink destination of the text. If unset, there's no link. Links are not inherited from parent text.
         /// Changing the link in an update request causes some other changes to the text style of the range: * When
         /// setting a link, the text foreground color will be updated to the default link color and the text will be
         /// underlined. If these fields are modified in the same request, those values will be used instead of the link
@@ -4563,7 +4973,7 @@ namespace Google.Apis.Docs.v1.Data
 
     /// <summary>
     /// A mask that indicates which of the fields on the base TextStyle have been changed in this suggestion. For any
-    /// field set to true, there is a new suggested value.
+    /// field set to true, there's a new suggested value.
     /// </summary>
     public class TextStyleSuggestionState : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4650,6 +5060,15 @@ namespace Google.Apis.Docs.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("fields")]
         public virtual object Fields { get; set; }
 
+        /// <summary>
+        /// The tab that contains the style to update. When omitted, the request applies to the first tab. In a document
+        /// containing a single tab: - If provided, must match the singular tab's ID. - If omitted, the request applies
+        /// to the singular tab. In a document containing multiple tabs: - If provided, the request applies to the
+        /// specified tab. - If not provided, the request applies to the first tab in the document.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tabId")]
+        public virtual string TabId { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -4659,9 +5078,9 @@ namespace Google.Apis.Docs.v1.Data
     {
         /// <summary>
         /// The fields that should be updated. At least one field must be specified. The root `paragraph_style` is
-        /// implied and should not be specified. For example, to update the paragraph style's alignment property, set
-        /// `fields` to `"alignment"`. To reset a property to its default value, include its field name in the field
-        /// mask but leave the field itself unset.
+        /// implied and should not be specified. A single `"*"` can be used as short-hand for listing every field. For
+        /// example, to update the paragraph style's alignment property, set `fields` to `"alignment"`. To reset a
+        /// property to its default value, include its field name in the field mask but leave the field itself unset.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fields")]
         public virtual object Fields { get; set; }
@@ -4853,15 +5272,15 @@ namespace Google.Apis.Docs.v1.Data
         public virtual string FontFamily { get; set; }
 
         /// <summary>
-        /// The weight of the font. This field can have any value that is a multiple of `100` between `100` and `900`,
+        /// The weight of the font. This field can have any value that's a multiple of `100` between `100` and `900`,
         /// inclusive. This range corresponds to the numerical values described in the CSS 2.1 Specification, [section
         /// 15.6](https://www.w3.org/TR/CSS21/fonts.html#font-boldness), with non-numerical values disallowed. The
         /// default value is `400` ("normal"). The font weight makes up just one component of the rendered font weight.
-        /// The rendered weight is determined by a combination of the `weight` and the text style's resolved `bold`
-        /// value, after accounting for inheritance: * If the text is bold and the weight is less than `400`, the
-        /// rendered weight is 400. * If the text is bold and the weight is greater than or equal to `400` but is less
-        /// than `700`, the rendered weight is `700`. * If the weight is greater than or equal to `700`, the rendered
-        /// weight is equal to the weight. * If the text is not bold, the rendered weight is equal to the weight.
+        /// A combination of the `weight` and the text style's resolved `bold` value determine the rendered weight,
+        /// after accounting for inheritance: * If the text is bold and the weight is less than `400`, the rendered
+        /// weight is 400. * If the text is bold and the weight is greater than or equal to `400` but is less than
+        /// `700`, the rendered weight is `700`. * If the weight is greater than or equal to `700`, the rendered weight
+        /// is equal to the weight. * If the text is not bold, the rendered weight is equal to the weight.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("weight")]
         public virtual System.Nullable<int> Weight { get; set; }
@@ -4874,25 +5293,24 @@ namespace Google.Apis.Docs.v1.Data
     public class WriteControl : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The revision ID of the document that the write request will be applied to. If this is not the latest
-        /// revision of the document, the request will not be processed and will return a 400 bad request error. When a
-        /// required revision ID is returned in a response, it indicates the revision ID of the document after the
-        /// request was applied.
+        /// The optional revision ID of the document the write request is applied to. If this is not the latest revision
+        /// of the document, the request is not processed and returns a 400 bad request error. When a required revision
+        /// ID is returned in a response, it indicates the revision ID of the document after the request was applied.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requiredRevisionId")]
         public virtual string RequiredRevisionId { get; set; }
 
         /// <summary>
-        /// The target revision ID of the document that the write request will be applied to. If collaborator changes
-        /// have occurred after the document was read using the API, the changes produced by this write request will be
-        /// transformed against the collaborator changes. This results in a new revision of the document which
-        /// incorporates both the changes in the request and the collaborator changes, and the Docs server will resolve
-        /// conflicting changes. When using `target_revision_id`, the API client can be thought of as another
-        /// collaborator of the document. The target revision ID may only be used to write to recent versions of a
-        /// document. If the target revision is too far behind the latest revision, the request will not be processed
-        /// and will return a 400 bad request error and the request should be retried after reading the latest version
-        /// of the document. In most cases a `revision_id` will remain valid for use as a target revision for several
-        /// minutes after it is read, but for frequently-edited documents this window may be shorter.
+        /// The optional target revision ID of the document the write request is applied to. If collaborator changes
+        /// have occurred after the document was read using the API, the changes produced by this write request are
+        /// applied against the collaborator changes. This results in a new revision of the document that incorporates
+        /// both the collaborator changes and the changes in the request, with the Docs server resolving conflicting
+        /// changes. When using target revision ID, the API client can be thought of as another collaborator of the
+        /// document. The target revision ID can only be used to write to recent versions of a document. If the target
+        /// revision is too far behind the latest revision, the request is not processed and returns a 400 bad request
+        /// error. The request should be tried again after retrieving the latest version of the document. Usually a
+        /// revision ID remains valid for use as a target revision for several minutes after it's read, but for
+        /// frequently edited documents this window might be shorter.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("targetRevisionId")]
         public virtual string TargetRevisionId { get; set; }

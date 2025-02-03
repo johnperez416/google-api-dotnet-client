@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.ApiKeysService.v2
             Keys = new KeysResource(this);
             Operations = new OperationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://apikeys.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://apikeys.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.ApiKeysService.v2
         public override string Name => "apikeys";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://apikeys.googleapis.com/";
-        #else
-            "https://apikeys.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://apikeys.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the API Keys API.</summary>
         public class Scope
@@ -306,7 +301,7 @@ namespace Google.Apis.ApiKeysService.v2
         /// </summary>
         public virtual LookupKeyRequest LookupKey()
         {
-            return new LookupKeyRequest(service);
+            return new LookupKeyRequest(this.service);
         }
 
         /// <summary>
@@ -372,7 +367,7 @@ namespace Google.Apis.ApiKeysService.v2
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -468,69 +463,6 @@ namespace Google.Apis.ApiKeysService.v2
                 }
 
                 /// <summary>
-                /// Clones the existing key's restriction and display name to a new API key. The service account must
-                /// have the `apikeys.keys.get` and `apikeys.keys.create` permissions in the project. NOTE: Key is a
-                /// global resource; hence the only supported value for location is `global`.
-                /// </summary>
-                /// <param name="body">The body of the request.</param>
-                /// <param name="name">
-                /// Required. The resource name of the API key to be cloned in the same project.
-                /// </param>
-                public virtual CloneRequest Clone(Google.Apis.ApiKeysService.v2.Data.V2CloneKeyRequest body, string name)
-                {
-                    return new CloneRequest(service, body, name);
-                }
-
-                /// <summary>
-                /// Clones the existing key's restriction and display name to a new API key. The service account must
-                /// have the `apikeys.keys.get` and `apikeys.keys.create` permissions in the project. NOTE: Key is a
-                /// global resource; hence the only supported value for location is `global`.
-                /// </summary>
-                public class CloneRequest : ApiKeysServiceBaseServiceRequest<Google.Apis.ApiKeysService.v2.Data.Operation>
-                {
-                    /// <summary>Constructs a new Clone request.</summary>
-                    public CloneRequest(Google.Apis.Services.IClientService service, Google.Apis.ApiKeysService.v2.Data.V2CloneKeyRequest body, string name) : base(service)
-                    {
-                        Name = name;
-                        Body = body;
-                        InitParameters();
-                    }
-
-                    /// <summary>Required. The resource name of the API key to be cloned in the same project.</summary>
-                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
-                    public virtual string Name { get; private set; }
-
-                    /// <summary>Gets or sets the body of this request.</summary>
-                    Google.Apis.ApiKeysService.v2.Data.V2CloneKeyRequest Body { get; set; }
-
-                    /// <summary>Returns the body of the request.</summary>
-                    protected override object GetBody() => Body;
-
-                    /// <summary>Gets the method name.</summary>
-                    public override string MethodName => "clone";
-
-                    /// <summary>Gets the HTTP method.</summary>
-                    public override string HttpMethod => "POST";
-
-                    /// <summary>Gets the REST path.</summary>
-                    public override string RestPath => "v2/{+name}:clone";
-
-                    /// <summary>Initializes Clone parameter list.</summary>
-                    protected override void InitParameters()
-                    {
-                        base.InitParameters();
-                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
-                        {
-                            Name = "name",
-                            IsRequired = true,
-                            ParameterType = "path",
-                            DefaultValue = null,
-                            Pattern = @"^projects/[^/]+/locations/[^/]+/keys/[^/]+$",
-                        });
-                    }
-                }
-
-                /// <summary>
                 /// Creates a new API key. NOTE: Key is a global resource; hence the only supported value for location
                 /// is `global`.
                 /// </summary>
@@ -538,7 +470,7 @@ namespace Google.Apis.ApiKeysService.v2
                 /// <param name="parent">Required. The project in which the API key is created.</param>
                 public virtual CreateRequest Create(Google.Apis.ApiKeysService.v2.Data.V2Key body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -615,7 +547,7 @@ namespace Google.Apis.ApiKeysService.v2
                 /// <param name="name">Required. The resource name of the API key to be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -682,7 +614,7 @@ namespace Google.Apis.ApiKeysService.v2
                 /// <param name="name">Required. The resource name of the API key to get.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -733,7 +665,7 @@ namespace Google.Apis.ApiKeysService.v2
                 /// <param name="name">Required. The resource name of the API key to be retrieved.</param>
                 public virtual GetKeyStringRequest GetKeyString(string name)
                 {
-                    return new GetKeyStringRequest(service, name);
+                    return new GetKeyStringRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -784,7 +716,7 @@ namespace Google.Apis.ApiKeysService.v2
                 /// <param name="parent">Required. Lists all API keys associated with this project.</param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -804,13 +736,6 @@ namespace Google.Apis.ApiKeysService.v2
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
 
-                    /// <summary>
-                    /// Optional. Only list keys that conform to the specified filter. The allowed filter strings are
-                    /// `state:ACTIVE` and `state:DELETED`. By default, ListKeys returns only active keys.
-                    /// </summary>
-                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
-                    public virtual string Filter { get; set; }
-
                     /// <summary>Optional. Specifies the maximum number of results to be returned at a time.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<int> PageSize { get; set; }
@@ -818,6 +743,12 @@ namespace Google.Apis.ApiKeysService.v2
                     /// <summary>Optional. Requests a specific page of results.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string PageToken { get; set; }
+
+                    /// <summary>
+                    /// Optional. Indicate that keys deleted in the past 30 days should also be returned.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("showDeleted", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ShowDeleted { get; set; }
 
                     /// <summary>Gets the method name.</summary>
                     public override string MethodName => "list";
@@ -840,14 +771,6 @@ namespace Google.Apis.ApiKeysService.v2
                             DefaultValue = null,
                             Pattern = @"^projects/[^/]+/locations/[^/]+$",
                         });
-                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
-                        {
-                            Name = "filter",
-                            IsRequired = false,
-                            ParameterType = "query",
-                            DefaultValue = null,
-                            Pattern = null,
-                        });
                         RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
                         {
                             Name = "pageSize",
@@ -859,6 +782,14 @@ namespace Google.Apis.ApiKeysService.v2
                         RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
                         {
                             Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("showDeleted", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "showDeleted",
                             IsRequired = false,
                             ParameterType = "query",
                             DefaultValue = null,
@@ -880,7 +811,7 @@ namespace Google.Apis.ApiKeysService.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.ApiKeysService.v2.Data.V2Key body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -908,10 +839,10 @@ namespace Google.Apis.ApiKeysService.v2
 
                     /// <summary>
                     /// The field mask specifies which fields to be updated as part of this request. All other fields
-                    /// are ignored. Mutable fields are: `display_name` and `restrictions`. If an update mask is not
-                    /// provided, the service treats it as an implied mask equivalent to all allowed fields that are set
-                    /// on the wire. If the field mask has a special value "*", the service treats it equivalent to
-                    /// replace all allowed mutable fields.
+                    /// are ignored. Mutable fields are: `display_name`, `restrictions`, and `annotations`. If an update
+                    /// mask is not provided, the service treats it as an implied mask equivalent to all allowed fields
+                    /// that are set on the wire. If the field mask has a special value "*", the service treats it
+                    /// equivalent to replace all allowed mutable fields.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual object UpdateMask { get; set; }
@@ -962,7 +893,7 @@ namespace Google.Apis.ApiKeysService.v2
                 /// <param name="name">Required. The resource name of the API key to be undeleted.</param>
                 public virtual UndeleteRequest Undelete(Google.Apis.ApiKeysService.v2.Data.V2UndeleteKeyRequest body, string name)
                 {
-                    return new UndeleteRequest(service, body, name);
+                    return new UndeleteRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1048,8 +979,8 @@ namespace Google.Apis.ApiKeysService.v2.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -1137,8 +1068,9 @@ namespace Google.Apis.ApiKeysService.v2.Data
 
         /// <summary>
         /// The service for this restriction. It should be the canonical service name, for example:
-        /// `translate.googleapis.com`. You can use [`gcloud services list`](/sdk/gcloud/reference/services/list) to get
-        /// a list of services that are enabled in the project.
+        /// `translate.googleapis.com`. You can use [`gcloud services
+        /// list`](https://cloud.google.com/sdk/gcloud/reference/services/list) to get a list of services that are
+        /// enabled in the project.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("service")]
         public virtual string Service { get; set; }
@@ -1155,22 +1087,6 @@ namespace Google.Apis.ApiKeysService.v2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("allowedReferrers")]
         public virtual System.Collections.Generic.IList<string> AllowedReferrers { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>Request message for `CloneKey` method.</summary>
-    public class V2CloneKeyRequest : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>
-        /// User specified key id (optional). If specified, it will become the final component of the key resource name.
-        /// The id must be unique within the project, must conform with RFC-1034, is restricted to lower-cased letters,
-        /// and has a maximum length of 63 characters. In another word, the id must match the regular expression:
-        /// `[a-z]([a-z0-9-]{0,61}[a-z0-9])?`. The id must NOT be a UUID-like string.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("keyId")]
-        public virtual string KeyId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1201,15 +1117,88 @@ namespace Google.Apis.ApiKeysService.v2.Data
     /// <summary>The representation of a key managed by the API Keys API.</summary>
     public class V2Key : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Annotations is an unstructured key-value map stored with a policy that may be set by external tools to store
+        /// and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("annotations")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Annotations { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. A timestamp identifying the time this key was originally created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _deleteTimeRaw;
+
+        private object _deleteTime;
 
         /// <summary>
         /// Output only. A timestamp when this key was deleted. If the resource is not deleted, this must be empty.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deleteTime")]
-        public virtual object DeleteTime { get; set; }
+        public virtual string DeleteTimeRaw
+        {
+            get => _deleteTimeRaw;
+            set
+            {
+                _deleteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deleteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeleteTimeDateTimeOffset instead.")]
+        public virtual object DeleteTime
+        {
+            get => _deleteTime;
+            set
+            {
+                _deleteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deleteTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeleteTimeRaw);
+            set => DeleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Human-readable display name of this key that you can modify. The maximum length is 63 characters.
@@ -1219,7 +1208,8 @@ namespace Google.Apis.ApiKeysService.v2.Data
 
         /// <summary>
         /// Output only. A checksum computed by the server based on the current value of the Key resource. This may be
-        /// sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
+        /// sent on update and delete requests to ensure the client has an up-to-date value before proceeding. See
+        /// https://google.aip.dev/154.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("etag")]
         public virtual string ETag { get; set; }
@@ -1243,13 +1233,53 @@ namespace Google.Apis.ApiKeysService.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("restrictions")]
         public virtual V2Restrictions Restrictions { get; set; }
 
+        /// <summary>
+        /// Optional. The email address of [the service account](https://cloud.google.com/iam/docs/service-accounts) the
+        /// key is bound to.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceAccountEmail")]
+        public virtual string ServiceAccountEmail { get; set; }
+
         /// <summary>Output only. Unique id in UUID4 format.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uid")]
         public virtual string Uid { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. A timestamp identifying the time this key was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
     }
 
     /// <summary>Response message for `ListKeys` method.</summary>

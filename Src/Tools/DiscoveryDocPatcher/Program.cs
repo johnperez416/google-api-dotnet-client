@@ -28,9 +28,6 @@ namespace DiscoveryDocPatcher
             {
                 string discoveryDocPath = args[0];
 
-                // No longer required as on 2020-07-09. The offending resource is no longer present at all.
-                // PatchGames(discoveryDocPath);
-
                 PatchDirectory(discoveryDocPath);
 
                 return 0;
@@ -42,39 +39,23 @@ namespace DiscoveryDocPatcher
             }
         }
 
-        static void PatchGames(string rootPath)
-        {
-            var patcher = IfFileExists(() => Patcher.Load(Path.Combine(rootPath, "games_v1.json")));
-            if (patcher is null)
-            {
-                return;
-            }
-            // Remove deprecated enum value that causes duplicate C# enum value.
-            patcher.Remove("resources.players.methods.list.parameters.collection.enum[2]", "'playedWith'", "'played_with'");
-            // There are now two descriptions that look the same. We just want to remove the first of them.
-            patcher.Remove("resources.players.methods.list.parameters.collection.enumDescriptions[2]",
-                "'(DEPRECATED) Retrieve a list of players you have played a multiplayer game (realtime or turn-based) with recently.'",
-                "'(DEPRECATED) Retrieve a list of players you have played a multiplayer game (realtime or turn-based) with recently.'");
-            patcher.SaveWithBackup();
-        }
-
         static void PatchDirectory(string rootPath)
         {
-            var patcher = IfFileExists(() => Patcher.Load(Path.Combine(rootPath, "admin_directory_v1.json")));
+            var patcher = IfFileExists(() => Patcher.Load(Path.Combine(rootPath, "admin.directory_v1.json")));
             if (patcher is null)
             {
                 return;
             }
             // Strongly-type properties that are defined without typing.
-            patcher.Replace("schemas.User.properties.addresses", "{ 'type': 'any', 'description': 'A list of the user&s addresses. The maximum allowed data size for this field is 10Kb.'}", "{ 'type': 'array', 'items': { '$ref': 'UserAddress' }, 'description': 'A list of the user&s addresses. The maximum allowed data size for this field is 10Kb.' }");
-            patcher.Replace("schemas.User.properties.emails", "{ 'type': 'any', 'description': 'A list of the user&s email addresses. The maximum allowed data size for this field is 10Kb.' }", "{ 'type': 'array', 'items': { '$ref': 'UserEmail' }, 'description': 'A list of the user&s email addresses. The maximum allowed data size for this field is 10Kb.' }");
-            patcher.Replace("schemas.User.properties.externalIds", "{ 'type': 'any', 'description': 'A list of external IDs for the user, such as an employee or network ID. The maximum allowed data size for this field is 2Kb.' }", "{ 'type': 'array', 'items': { '$ref': 'UserExternalId' }, 'description': 'A list of external IDs for the user, such as an employee or network ID. The maximum allowed data size for this field is 2Kb.' }");
-            patcher.Replace("schemas.User.properties.ims", "{ 'type': 'any', 'description': 'The user&s Instant Messenger (IM) accounts. A user account can have multiple ims properties. But, only one of these ims properties can be the primary IM contact. The maximum allowed data size for this field is 2Kb.' }", "{ 'type': 'array', 'items': { '$ref': 'UserIm' }, 'description': 'The user&s Instant Messenger (IM) accounts. A user account can have multiple ims properties. But, only one of these ims properties can be the primary IM contact. The maximum allowed data size for this field is 2Kb.' }");
-            patcher.Replace("schemas.User.properties.organizations", "{ 'type': 'any', 'description': 'A list of organizations the user belongs to. The maximum allowed data size for this field is 10Kb.' }", "{ 'type': 'array', 'items': { '$ref': 'UserOrganization' }, 'description': 'A list of organizations the user belongs to. The maximum allowed data size for this field is 10Kb.' }");
-            patcher.Replace("schemas.User.properties.phones", "{ 'type': 'any', 'description': 'A list of the user&s phone numbers. The maximum allowed data size for this field is 1Kb.' }", "{ 'type': 'array', 'items': { '$ref': 'UserPhone' }, 'description': 'A list of the user&s phone numbers. The maximum allowed data size for this field is 1Kb.' }");
-            patcher.Replace("schemas.User.properties.relations", "{ 'type': 'any', 'description': 'A list of the user&s relationships to other users. The maximum allowed data size for this field is 2Kb.' }", "{ 'type': 'array', 'items': { '$ref': 'UserRelation' }, 'description': 'A list of the user&s relationships to other users. The maximum allowed data size for this field is 2Kb.' }");
-            patcher.Replace("schemas.User.properties.websites", "{ 'type': 'any', 'description': 'The user&s websites. The maximum allowed data size for this field is 2Kb.' }", "{ 'type': 'array', 'items': { '$ref': 'UserWebsite' }, 'description': 'The user&s websites. The maximum allowed data size for this field is 2Kb.' }");
-            patcher.Replace("schemas.Aliases.properties.aliases.items", "{ 'type': 'any' }", "{ '$ref': 'Alias' }");
+            patcher.FromAnyToTypedArray("schemas.User.properties.addresses", "UserAddress");
+            patcher.FromAnyToTypedArray("schemas.User.properties.emails", "UserEmail");
+            patcher.FromAnyToTypedArray("schemas.User.properties.externalIds", "UserExternalId");
+            patcher.FromAnyToTypedArray("schemas.User.properties.ims", "UserIm");
+            patcher.FromAnyToTypedArray("schemas.User.properties.organizations", "UserOrganization");
+            patcher.FromAnyToTypedArray("schemas.User.properties.phones", "UserPhone");
+            patcher.FromAnyToTypedArray("schemas.User.properties.relations", "UserRelation");
+            patcher.FromAnyToTypedArray("schemas.User.properties.websites", "UserWebsite");
+            patcher.FromAnyToTyped("schemas.Aliases.properties.aliases.items", "Alias");
             patcher.SaveWithBackup();
 
         }

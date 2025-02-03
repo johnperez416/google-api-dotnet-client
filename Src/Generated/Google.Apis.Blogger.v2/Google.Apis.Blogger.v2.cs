@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ namespace Google.Apis.Blogger.v2
             Pages = new PagesResource(this);
             Posts = new PostsResource(this);
             Users = new UsersResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://blogger.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://blogger.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -48,32 +50,25 @@ namespace Google.Apis.Blogger.v2
         public override string Name => "blogger";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://blogger.googleapis.com/";
-        #else
-            "https://blogger.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://blogger.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
-        /// <summary>Available OAuth 2.0 scopes for use with the Blogger API v3.</summary>
+        /// <summary>Available OAuth 2.0 scopes for use with the Blogger API.</summary>
         public class Scope
         {
             /// <summary>Manage your Blogger account</summary>
             public static string Blogger = "https://www.googleapis.com/auth/blogger";
         }
 
-        /// <summary>Available OAuth 2.0 scope constants for use with the Blogger API v3.</summary>
+        /// <summary>Available OAuth 2.0 scope constants for use with the Blogger API.</summary>
         public static class ScopeConstants
         {
             /// <summary>Manage your Blogger account</summary>
@@ -295,7 +290,7 @@ namespace Google.Apis.Blogger.v2
         /// <param name="blogId"><c>null</c></param>
         public virtual GetRequest Get(string blogId)
         {
-            return new GetRequest(service, blogId);
+            return new GetRequest(this.service, blogId);
         }
 
         /// <summary>Gets a blog by id.</summary>
@@ -339,7 +334,7 @@ namespace Google.Apis.Blogger.v2
         /// <param name="userId"><c>null</c></param>
         public virtual ListRequest List(string userId)
         {
-            return new ListRequest(service, userId);
+            return new ListRequest(this.service, userId);
         }
 
         /// <summary>Lists blogs by user id, possibly filtered.</summary>
@@ -400,7 +395,7 @@ namespace Google.Apis.Blogger.v2
         /// <param name="commentId"><c>null</c></param>
         public virtual GetRequest Get(string blogId, string postId, string commentId)
         {
-            return new GetRequest(service, blogId, postId, commentId);
+            return new GetRequest(this.service, blogId, postId, commentId);
         }
 
         /// <summary>Gets a comment by blog id, post id and comment id.</summary>
@@ -469,7 +464,7 @@ namespace Google.Apis.Blogger.v2
         /// <param name="postId"><c>null</c></param>
         public virtual ListRequest List(string blogId, string postId)
         {
-            return new ListRequest(service, blogId, postId);
+            return new ListRequest(this.service, blogId, postId);
         }
 
         /// <summary>Lists comments.</summary>
@@ -585,7 +580,7 @@ namespace Google.Apis.Blogger.v2
         /// <param name="pageId"><c>null</c></param>
         public virtual GetRequest Get(string blogId, string pageId)
         {
-            return new GetRequest(service, blogId, pageId);
+            return new GetRequest(this.service, blogId, pageId);
         }
 
         /// <summary>Gets a page by blog id and page id.</summary>
@@ -641,7 +636,7 @@ namespace Google.Apis.Blogger.v2
         /// <param name="blogId"><c>null</c></param>
         public virtual ListRequest List(string blogId)
         {
-            return new ListRequest(service, blogId);
+            return new ListRequest(this.service, blogId);
         }
 
         /// <summary>Lists pages.</summary>
@@ -712,7 +707,7 @@ namespace Google.Apis.Blogger.v2
         /// <param name="postId"><c>null</c></param>
         public virtual GetRequest Get(string blogId, string postId)
         {
-            return new GetRequest(service, blogId, postId);
+            return new GetRequest(this.service, blogId, postId);
         }
 
         /// <summary>Gets a post by blog id and post id</summary>
@@ -768,7 +763,7 @@ namespace Google.Apis.Blogger.v2
         /// <param name="blogId"><c>null</c></param>
         public virtual ListRequest List(string blogId)
         {
-            return new ListRequest(service, blogId);
+            return new ListRequest(this.service, blogId);
         }
 
         /// <summary>Lists posts.</summary>
@@ -871,7 +866,7 @@ namespace Google.Apis.Blogger.v2
         /// <param name="userId"><c>null</c></param>
         public virtual GetRequest Get(string userId)
         {
-            return new GetRequest(service, userId);
+            return new GetRequest(this.service, userId);
         }
 
         /// <summary>Gets a user by user id.</summary>
@@ -1249,6 +1244,10 @@ namespace Google.Apis.Blogger.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("title")]
         public virtual string Title { get; set; }
 
+        /// <summary>RFC 3339 date-time when this Page was trashed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("trashed")]
+        public virtual string Trashed { get; set; }
+
         /// <summary>RFC 3339 date-time when this Page was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updated")]
         public virtual string Updated { get; set; }
@@ -1382,6 +1381,10 @@ namespace Google.Apis.Blogger.v2.Data
         /// <summary>The title link URL, similar to atom's related link.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("titleLink")]
         public virtual string TitleLink { get; set; }
+
+        /// <summary>RFC 3339 date-time when this Post was last trashed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("trashed")]
+        public virtual string Trashed { get; set; }
 
         /// <summary>RFC 3339 date-time when this Post was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updated")]

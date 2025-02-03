@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CloudBillingBudget.v1beta1
         public CloudBillingBudgetService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             BillingAccounts = new BillingAccountsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://billingbudgets.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://billingbudgets.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CloudBillingBudget.v1beta1
         public override string Name => "billingbudgets";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://billingbudgets.googleapis.com/";
-        #else
-            "https://billingbudgets.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://billingbudgets.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Billing Budget API.</summary>
         public class Scope
@@ -306,8 +301,8 @@ namespace Google.Apis.CloudBillingBudget.v1beta1
             }
 
             /// <summary>
-            /// Creates a new budget. See Quotas and limits for more information on the limits of the number of budgets
-            /// you can create.
+            /// Creates a new budget. See [Quotas and limits](https://cloud.google.com/billing/quotas) for more
+            /// information on the limits of the number of budgets you can create.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
@@ -316,12 +311,12 @@ namespace Google.Apis.CloudBillingBudget.v1beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.CloudBillingBudget.v1beta1.Data.GoogleCloudBillingBudgetsV1beta1CreateBudgetRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
-            /// Creates a new budget. See Quotas and limits for more information on the limits of the number of budgets
-            /// you can create.
+            /// Creates a new budget. See [Quotas and limits](https://cloud.google.com/billing/quotas) for more
+            /// information on the limits of the number of budgets you can create.
             /// </summary>
             public class CreateRequest : CloudBillingBudgetBaseServiceRequest<Google.Apis.CloudBillingBudget.v1beta1.Data.GoogleCloudBillingBudgetsV1beta1Budget>
             {
@@ -377,7 +372,7 @@ namespace Google.Apis.CloudBillingBudget.v1beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a budget. Returns successfully if already deleted.</summary>
@@ -432,7 +427,7 @@ namespace Google.Apis.CloudBillingBudget.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -491,7 +486,7 @@ namespace Google.Apis.CloudBillingBudget.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -527,6 +522,16 @@ namespace Google.Apis.CloudBillingBudget.v1beta1
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
+
+                /// <summary>
+                /// Optional. Set the scope of the budgets to be returned, in the format of the resource name. The scope
+                /// of a budget is the cost that it tracks, such as costs for a single project, or the costs for all
+                /// projects in a folder. Only project scope (in the format of "projects/project-id" or "projects/123")
+                /// is supported in this field. When this field is set to a project's resource name, the budgets
+                /// returned are tracking the costs for that project.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("scope", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Scope { get; set; }
 
                 /// <summary>Gets the method name.</summary>
                 public override string MethodName => "list";
@@ -565,6 +570,14 @@ namespace Google.Apis.CloudBillingBudget.v1beta1
                         DefaultValue = null,
                         Pattern = null,
                     });
+                    RequestParameters.Add("scope", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "scope",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                 }
             }
 
@@ -580,7 +593,7 @@ namespace Google.Apis.CloudBillingBudget.v1beta1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.CloudBillingBudget.v1beta1.Data.GoogleCloudBillingBudgetsV1beta1UpdateBudgetRequest body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -649,6 +662,14 @@ namespace Google.Apis.CloudBillingBudget.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("disableDefaultIamRecipients")]
         public virtual System.Nullable<bool> DisableDefaultIamRecipients { get; set; }
+
+        /// <summary>
+        /// Optional. When set to true, and when the budget has a single project configured, notifications will be sent
+        /// to project level recipients of that project. This field will be ignored if the budget has multiple or no
+        /// project configured. Currently, project level recipients are the users with `Owner` role on a cloud project.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableProjectLevelRecipients")]
+        public virtual System.Nullable<bool> EnableProjectLevelRecipients { get; set; }
 
         /// <summary>
         /// Optional. Targets to send notifications to when a threshold is exceeded. This is in addition to default
@@ -724,6 +745,9 @@ namespace Google.Apis.CloudBillingBudget.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("ownershipScope")]
+        public virtual string OwnershipScope { get; set; }
 
         /// <summary>
         /// Optional. Rules that trigger alerts (notifications of thresholds being crossed) when spend exceeds the
@@ -830,11 +854,20 @@ namespace Google.Apis.CloudBillingBudget.v1beta1.Data
         /// <summary>
         /// Optional. A set of projects of the form `projects/{project}`, specifying that usage from only this set of
         /// projects should be included in the budget. If omitted, the report will include all usage for the billing
-        /// account, regardless of which project the usage occurred on. Only zero or one project can be specified
-        /// currently.
+        /// account, regardless of which project the usage occurred on.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projects")]
         public virtual System.Collections.Generic.IList<string> Projects { get; set; }
+
+        /// <summary>
+        /// Optional. A set of folder and organization names of the form `folders/{folderId}` or
+        /// `organizations/{organizationId}`, specifying that usage from only this set of folders and organizations
+        /// should be included in the budget. If omitted, the budget includes all usage that the billing account pays
+        /// for. If the folder or organization contains projects that are paid for by a different Cloud Billing account,
+        /// the budget *doesn't* apply to those projects.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceAncestors")]
+        public virtual System.Collections.Generic.IList<string> ResourceAncestors { get; set; }
 
         /// <summary>
         /// Optional. A set of services of the form `services/{service_id}`, specifying that usage from only this set of
@@ -944,8 +977,7 @@ namespace Google.Apis.CloudBillingBudget.v1beta1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class GoogleProtobufEmpty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -956,10 +988,10 @@ namespace Google.Apis.CloudBillingBudget.v1beta1.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class GoogleTypeDate : Google.Apis.Requests.IDirectResponseSchema
     {

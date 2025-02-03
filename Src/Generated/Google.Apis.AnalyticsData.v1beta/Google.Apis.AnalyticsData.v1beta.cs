@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.AnalyticsData.v1beta
         public AnalyticsDataService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Properties = new PropertiesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://analyticsdata.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://analyticsdata.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.AnalyticsData.v1beta
         public override string Name => "analyticsdata";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://analyticsdata.googleapis.com/";
-        #else
-            "https://analyticsdata.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://analyticsdata.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Analytics Data API.</summary>
         public class Scope
@@ -279,23 +274,388 @@ namespace Google.Apis.AnalyticsData.v1beta
         public PropertiesResource(Google.Apis.Services.IClientService service)
         {
             this.service = service;
+            AudienceExports = new AudienceExportsResource(service);
         }
 
-        /// <summary>Returns multiple pivot reports in a batch. All reports must be for the same GA4 Property.</summary>
+        /// <summary>Gets the AudienceExports resource.</summary>
+        public virtual AudienceExportsResource AudienceExports { get; }
+
+        /// <summary>The "audienceExports" collection of methods.</summary>
+        public class AudienceExportsResource
+        {
+            private const string Resource = "audienceExports";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public AudienceExportsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// Creates an audience export for later retrieval. This method quickly returns the audience export's
+            /// resource name and initiates a long running asynchronous request to form an audience export. To export
+            /// the users in an audience export, first create the audience export through this method and then send the
+            /// audience resource name to the `QueryAudienceExport` method. See [Creating an Audience
+            /// Export](https://developers.google.com/analytics/devguides/reporting/data/v1/audience-list-basics) for an
+            /// introduction to Audience Exports with examples. An audience export is a snapshot of the users currently
+            /// in the audience at the time of audience export creation. Creating audience exports for one audience on
+            /// different days will return different results as users enter and exit the audience. Audiences in Google
+            /// Analytics 4 allow you to segment your users in the ways that are important to your business. To learn
+            /// more, see https://support.google.com/analytics/answer/9267572. Audience exports contain the users in
+            /// each audience. Audience Export APIs have some methods at alpha and other methods at beta stability. The
+            /// intention is to advance methods to beta stability after some feedback and adoption. To give your
+            /// feedback on this API, complete the [Google Analytics Audience Export API
+            /// Feedback](https://forms.gle/EeA5u5LW6PEggtCEA) form.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. The parent resource where this audience export will be created. Format:
+            /// `properties/{property}`
+            /// </param>
+            public virtual CreateRequest Create(Google.Apis.AnalyticsData.v1beta.Data.AudienceExport body, string parent)
+            {
+                return new CreateRequest(this.service, body, parent);
+            }
+
+            /// <summary>
+            /// Creates an audience export for later retrieval. This method quickly returns the audience export's
+            /// resource name and initiates a long running asynchronous request to form an audience export. To export
+            /// the users in an audience export, first create the audience export through this method and then send the
+            /// audience resource name to the `QueryAudienceExport` method. See [Creating an Audience
+            /// Export](https://developers.google.com/analytics/devguides/reporting/data/v1/audience-list-basics) for an
+            /// introduction to Audience Exports with examples. An audience export is a snapshot of the users currently
+            /// in the audience at the time of audience export creation. Creating audience exports for one audience on
+            /// different days will return different results as users enter and exit the audience. Audiences in Google
+            /// Analytics 4 allow you to segment your users in the ways that are important to your business. To learn
+            /// more, see https://support.google.com/analytics/answer/9267572. Audience exports contain the users in
+            /// each audience. Audience Export APIs have some methods at alpha and other methods at beta stability. The
+            /// intention is to advance methods to beta stability after some feedback and adoption. To give your
+            /// feedback on this API, complete the [Google Analytics Audience Export API
+            /// Feedback](https://forms.gle/EeA5u5LW6PEggtCEA) form.
+            /// </summary>
+            public class CreateRequest : AnalyticsDataBaseServiceRequest<Google.Apis.AnalyticsData.v1beta.Data.Operation>
+            {
+                /// <summary>Constructs a new Create request.</summary>
+                public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.AnalyticsData.v1beta.Data.AudienceExport body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The parent resource where this audience export will be created. Format:
+                /// `properties/{property}`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.AnalyticsData.v1beta.Data.AudienceExport Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "create";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta/{+parent}/audienceExports";
+
+                /// <summary>Initializes Create parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^properties/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Gets configuration metadata about a specific audience export. This method can be used to understand an
+            /// audience export after it has been created. See [Creating an Audience
+            /// Export](https://developers.google.com/analytics/devguides/reporting/data/v1/audience-list-basics) for an
+            /// introduction to Audience Exports with examples. Audience Export APIs have some methods at alpha and
+            /// other methods at beta stability. The intention is to advance methods to beta stability after some
+            /// feedback and adoption. To give your feedback on this API, complete the [Google Analytics Audience Export
+            /// API Feedback](https://forms.gle/EeA5u5LW6PEggtCEA) form.
+            /// </summary>
+            /// <param name="name">
+            /// Required. The audience export resource name. Format:
+            /// `properties/{property}/audienceExports/{audience_export}`
+            /// </param>
+            public virtual GetRequest Get(string name)
+            {
+                return new GetRequest(this.service, name);
+            }
+
+            /// <summary>
+            /// Gets configuration metadata about a specific audience export. This method can be used to understand an
+            /// audience export after it has been created. See [Creating an Audience
+            /// Export](https://developers.google.com/analytics/devguides/reporting/data/v1/audience-list-basics) for an
+            /// introduction to Audience Exports with examples. Audience Export APIs have some methods at alpha and
+            /// other methods at beta stability. The intention is to advance methods to beta stability after some
+            /// feedback and adoption. To give your feedback on this API, complete the [Google Analytics Audience Export
+            /// API Feedback](https://forms.gle/EeA5u5LW6PEggtCEA) form.
+            /// </summary>
+            public class GetRequest : AnalyticsDataBaseServiceRequest<Google.Apis.AnalyticsData.v1beta.Data.AudienceExport>
+            {
+                /// <summary>Constructs a new Get request.</summary>
+                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The audience export resource name. Format:
+                /// `properties/{property}/audienceExports/{audience_export}`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "get";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta/{+name}";
+
+                /// <summary>Initializes Get parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^properties/[^/]+/audienceExports/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Lists all audience exports for a property. This method can be used for you to find and reuse existing
+            /// audience exports rather than creating unnecessary new audience exports. The same audience can have
+            /// multiple audience exports that represent the export of users that were in an audience on different days.
+            /// See [Creating an Audience
+            /// Export](https://developers.google.com/analytics/devguides/reporting/data/v1/audience-list-basics) for an
+            /// introduction to Audience Exports with examples. Audience Export APIs have some methods at alpha and
+            /// other methods at beta stability. The intention is to advance methods to beta stability after some
+            /// feedback and adoption. To give your feedback on this API, complete the [Google Analytics Audience Export
+            /// API Feedback](https://forms.gle/EeA5u5LW6PEggtCEA) form.
+            /// </summary>
+            /// <param name="parent">
+            /// Required. All audience exports for this property will be listed in the response. Format:
+            /// `properties/{property}`
+            /// </param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>
+            /// Lists all audience exports for a property. This method can be used for you to find and reuse existing
+            /// audience exports rather than creating unnecessary new audience exports. The same audience can have
+            /// multiple audience exports that represent the export of users that were in an audience on different days.
+            /// See [Creating an Audience
+            /// Export](https://developers.google.com/analytics/devguides/reporting/data/v1/audience-list-basics) for an
+            /// introduction to Audience Exports with examples. Audience Export APIs have some methods at alpha and
+            /// other methods at beta stability. The intention is to advance methods to beta stability after some
+            /// feedback and adoption. To give your feedback on this API, complete the [Google Analytics Audience Export
+            /// API Feedback](https://forms.gle/EeA5u5LW6PEggtCEA) form.
+            /// </summary>
+            public class ListRequest : AnalyticsDataBaseServiceRequest<Google.Apis.AnalyticsData.v1beta.Data.ListAudienceExportsResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. All audience exports for this property will be listed in the response. Format:
+                /// `properties/{property}`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. The maximum number of audience exports to return. The service may return fewer than this
+                /// value. If unspecified, at most 200 audience exports will be returned. The maximum value is 1000
+                /// (higher values will be coerced to the maximum).
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>
+                /// Optional. A page token, received from a previous `ListAudienceExports` call. Provide this to
+                /// retrieve the subsequent page. When paginating, all other parameters provided to
+                /// `ListAudienceExports` must match the call that provided the page token.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta/{+parent}/audienceExports";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^properties/[^/]+$",
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Retrieves an audience export of users. After creating an audience, the users are not immediately
+            /// available for exporting. First, a request to `CreateAudienceExport` is necessary to create an audience
+            /// export of users, and then second, this method is used to retrieve the users in the audience export. See
+            /// [Creating an Audience
+            /// Export](https://developers.google.com/analytics/devguides/reporting/data/v1/audience-list-basics) for an
+            /// introduction to Audience Exports with examples. Audiences in Google Analytics 4 allow you to segment
+            /// your users in the ways that are important to your business. To learn more, see
+            /// https://support.google.com/analytics/answer/9267572. Audience Export APIs have some methods at alpha and
+            /// other methods at beta stability. The intention is to advance methods to beta stability after some
+            /// feedback and adoption. To give your feedback on this API, complete the [Google Analytics Audience Export
+            /// API Feedback](https://forms.gle/EeA5u5LW6PEggtCEA) form.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The name of the audience export to retrieve users from. Format:
+            /// `properties/{property}/audienceExports/{audience_export}`
+            /// </param>
+            public virtual QueryRequest Query(Google.Apis.AnalyticsData.v1beta.Data.QueryAudienceExportRequest body, string name)
+            {
+                return new QueryRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Retrieves an audience export of users. After creating an audience, the users are not immediately
+            /// available for exporting. First, a request to `CreateAudienceExport` is necessary to create an audience
+            /// export of users, and then second, this method is used to retrieve the users in the audience export. See
+            /// [Creating an Audience
+            /// Export](https://developers.google.com/analytics/devguides/reporting/data/v1/audience-list-basics) for an
+            /// introduction to Audience Exports with examples. Audiences in Google Analytics 4 allow you to segment
+            /// your users in the ways that are important to your business. To learn more, see
+            /// https://support.google.com/analytics/answer/9267572. Audience Export APIs have some methods at alpha and
+            /// other methods at beta stability. The intention is to advance methods to beta stability after some
+            /// feedback and adoption. To give your feedback on this API, complete the [Google Analytics Audience Export
+            /// API Feedback](https://forms.gle/EeA5u5LW6PEggtCEA) form.
+            /// </summary>
+            public class QueryRequest : AnalyticsDataBaseServiceRequest<Google.Apis.AnalyticsData.v1beta.Data.QueryAudienceExportResponse>
+            {
+                /// <summary>Constructs a new Query request.</summary>
+                public QueryRequest(Google.Apis.Services.IClientService service, Google.Apis.AnalyticsData.v1beta.Data.QueryAudienceExportRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The name of the audience export to retrieve users from. Format:
+                /// `properties/{property}/audienceExports/{audience_export}`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.AnalyticsData.v1beta.Data.QueryAudienceExportRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "query";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta/{+name}:query";
+
+                /// <summary>Initializes Query parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^properties/[^/]+/audienceExports/[^/]+$",
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns multiple pivot reports in a batch. All reports must be for the same Google Analytics property.
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="property">
-        /// A Google Analytics GA4 property identifier whose events are tracked. Specified in the URL path and not the
-        /// body. To learn more, see [where to find your Property
+        /// A Google Analytics property identifier whose events are tracked. Specified in the URL path and not the body.
+        /// To learn more, see [where to find your Property
         /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). This property must be
         /// specified for the batch. The property within RunPivotReportRequest may either be unspecified or consistent
         /// with this property. Example: properties/1234
         /// </param>
         public virtual BatchRunPivotReportsRequest BatchRunPivotReports(Google.Apis.AnalyticsData.v1beta.Data.BatchRunPivotReportsRequest body, string property)
         {
-            return new BatchRunPivotReportsRequest(service, body, property);
+            return new BatchRunPivotReportsRequest(this.service, body, property);
         }
 
-        /// <summary>Returns multiple pivot reports in a batch. All reports must be for the same GA4 Property.</summary>
+        /// <summary>
+        /// Returns multiple pivot reports in a batch. All reports must be for the same Google Analytics property.
+        /// </summary>
         public class BatchRunPivotReportsRequest : AnalyticsDataBaseServiceRequest<Google.Apis.AnalyticsData.v1beta.Data.BatchRunPivotReportsResponse>
         {
             /// <summary>Constructs a new BatchRunPivotReports request.</summary>
@@ -307,8 +667,8 @@ namespace Google.Apis.AnalyticsData.v1beta
             }
 
             /// <summary>
-            /// A Google Analytics GA4 property identifier whose events are tracked. Specified in the URL path and not
-            /// the body. To learn more, see [where to find your Property
+            /// A Google Analytics property identifier whose events are tracked. Specified in the URL path and not the
+            /// body. To learn more, see [where to find your Property
             /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). This property must
             /// be specified for the batch. The property within RunPivotReportRequest may either be unspecified or
             /// consistent with this property. Example: properties/1234
@@ -346,21 +706,25 @@ namespace Google.Apis.AnalyticsData.v1beta
             }
         }
 
-        /// <summary>Returns multiple reports in a batch. All reports must be for the same GA4 Property.</summary>
+        /// <summary>
+        /// Returns multiple reports in a batch. All reports must be for the same Google Analytics property.
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="property">
-        /// A Google Analytics GA4 property identifier whose events are tracked. Specified in the URL path and not the
-        /// body. To learn more, see [where to find your Property
+        /// A Google Analytics property identifier whose events are tracked. Specified in the URL path and not the body.
+        /// To learn more, see [where to find your Property
         /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). This property must be
         /// specified for the batch. The property within RunReportRequest may either be unspecified or consistent with
         /// this property. Example: properties/1234
         /// </param>
         public virtual BatchRunReportsRequest BatchRunReports(Google.Apis.AnalyticsData.v1beta.Data.BatchRunReportsRequest body, string property)
         {
-            return new BatchRunReportsRequest(service, body, property);
+            return new BatchRunReportsRequest(this.service, body, property);
         }
 
-        /// <summary>Returns multiple reports in a batch. All reports must be for the same GA4 Property.</summary>
+        /// <summary>
+        /// Returns multiple reports in a batch. All reports must be for the same Google Analytics property.
+        /// </summary>
         public class BatchRunReportsRequest : AnalyticsDataBaseServiceRequest<Google.Apis.AnalyticsData.v1beta.Data.BatchRunReportsResponse>
         {
             /// <summary>Constructs a new BatchRunReports request.</summary>
@@ -372,8 +736,8 @@ namespace Google.Apis.AnalyticsData.v1beta
             }
 
             /// <summary>
-            /// A Google Analytics GA4 property identifier whose events are tracked. Specified in the URL path and not
-            /// the body. To learn more, see [where to find your Property
+            /// A Google Analytics property identifier whose events are tracked. Specified in the URL path and not the
+            /// body. To learn more, see [where to find your Property
             /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). This property must
             /// be specified for the batch. The property within RunReportRequest may either be unspecified or consistent
             /// with this property. Example: properties/1234
@@ -421,15 +785,13 @@ namespace Google.Apis.AnalyticsData.v1beta
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="property">
-        /// A Google Analytics GA4 property identifier whose events are tracked. To learn more, see [where to find your
+        /// A Google Analytics property identifier whose events are tracked. To learn more, see [where to find your
         /// Property ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). `property`
-        /// should be the same value as in your `runReport` request. Example: properties/1234 Set the Property ID to 0
-        /// for compatibility checking on dimensions and metrics common to all properties. In this special mode, this
-        /// method will not return custom dimensions and metrics.
+        /// should be the same value as in your `runReport` request. Example: properties/1234
         /// </param>
         public virtual CheckCompatibilityRequest CheckCompatibility(Google.Apis.AnalyticsData.v1beta.Data.CheckCompatibilityRequest body, string property)
         {
-            return new CheckCompatibilityRequest(service, body, property);
+            return new CheckCompatibilityRequest(this.service, body, property);
         }
 
         /// <summary>
@@ -451,11 +813,9 @@ namespace Google.Apis.AnalyticsData.v1beta
             }
 
             /// <summary>
-            /// A Google Analytics GA4 property identifier whose events are tracked. To learn more, see [where to find
-            /// your Property ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id).
-            /// `property` should be the same value as in your `runReport` request. Example: properties/1234 Set the
-            /// Property ID to 0 for compatibility checking on dimensions and metrics common to all properties. In this
-            /// special mode, this method will not return custom dimensions and metrics.
+            /// A Google Analytics property identifier whose events are tracked. To learn more, see [where to find your
+            /// Property ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id).
+            /// `property` should be the same value as in your `runReport` request. Example: properties/1234
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("property", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Property { get; private set; }
@@ -492,7 +852,7 @@ namespace Google.Apis.AnalyticsData.v1beta
 
         /// <summary>
         /// Returns metadata for dimensions and metrics available in reporting methods. Used to explore the dimensions
-        /// and metrics. In this method, a Google Analytics GA4 Property Identifier is specified in the request, and the
+        /// and metrics. In this method, a Google Analytics property identifier is specified in the request, and the
         /// metadata response includes Custom dimensions and metrics as well as Universal metadata. For example if a
         /// custom metric with parameter name `levels_unlocked` is registered to a property, the Metadata response will
         /// contain `customEvent:levels_unlocked`. Universal metadata are dimensions and metrics applicable to any
@@ -500,20 +860,19 @@ namespace Google.Apis.AnalyticsData.v1beta
         /// </summary>
         /// <param name="name">
         /// Required. The resource name of the metadata to retrieve. This name field is specified in the URL path and
-        /// not URL parameters. Property is a numeric Google Analytics GA4 Property identifier. To learn more, see
-        /// [where to find your Property
-        /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). Example:
-        /// properties/1234/metadata Set the Property ID to 0 for dimensions and metrics common to all properties. In
-        /// this special mode, this method will not return custom dimensions and metrics.
+        /// not URL parameters. Property is a numeric Google Analytics property identifier. To learn more, see [where to
+        /// find your Property ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id).
+        /// Example: properties/1234/metadata Set the Property ID to 0 for dimensions and metrics common to all
+        /// properties. In this special mode, this method will not return custom dimensions and metrics.
         /// </param>
         public virtual GetMetadataRequest GetMetadata(string name)
         {
-            return new GetMetadataRequest(service, name);
+            return new GetMetadataRequest(this.service, name);
         }
 
         /// <summary>
         /// Returns metadata for dimensions and metrics available in reporting methods. Used to explore the dimensions
-        /// and metrics. In this method, a Google Analytics GA4 Property Identifier is specified in the request, and the
+        /// and metrics. In this method, a Google Analytics property identifier is specified in the request, and the
         /// metadata response includes Custom dimensions and metrics as well as Universal metadata. For example if a
         /// custom metric with parameter name `levels_unlocked` is registered to a property, the Metadata response will
         /// contain `customEvent:levels_unlocked`. Universal metadata are dimensions and metrics applicable to any
@@ -530,8 +889,8 @@ namespace Google.Apis.AnalyticsData.v1beta
 
             /// <summary>
             /// Required. The resource name of the metadata to retrieve. This name field is specified in the URL path
-            /// and not URL parameters. Property is a numeric Google Analytics GA4 Property identifier. To learn more,
-            /// see [where to find your Property
+            /// and not URL parameters. Property is a numeric Google Analytics property identifier. To learn more, see
+            /// [where to find your Property
             /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). Example:
             /// properties/1234/metadata Set the Property ID to 0 for dimensions and metrics common to all properties.
             /// In this special mode, this method will not return custom dimensions and metrics.
@@ -570,15 +929,15 @@ namespace Google.Apis.AnalyticsData.v1beta
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="property">
-        /// A Google Analytics GA4 property identifier whose events are tracked. Specified in the URL path and not the
-        /// body. To learn more, see [where to find your Property
+        /// A Google Analytics property identifier whose events are tracked. Specified in the URL path and not the body.
+        /// To learn more, see [where to find your Property
         /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). Within a batch
         /// request, this property should either be unspecified or consistent with the batch-level property. Example:
         /// properties/1234
         /// </param>
         public virtual RunPivotReportRequest RunPivotReport(Google.Apis.AnalyticsData.v1beta.Data.RunPivotReportRequest body, string property)
         {
-            return new RunPivotReportRequest(service, body, property);
+            return new RunPivotReportRequest(this.service, body, property);
         }
 
         /// <summary>
@@ -597,8 +956,8 @@ namespace Google.Apis.AnalyticsData.v1beta
             }
 
             /// <summary>
-            /// A Google Analytics GA4 property identifier whose events are tracked. Specified in the URL path and not
-            /// the body. To learn more, see [where to find your Property
+            /// A Google Analytics property identifier whose events are tracked. Specified in the URL path and not the
+            /// body. To learn more, see [where to find your Property
             /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). Within a batch
             /// request, this property should either be unspecified or consistent with the batch-level property.
             /// Example: properties/1234
@@ -637,24 +996,32 @@ namespace Google.Apis.AnalyticsData.v1beta
         }
 
         /// <summary>
-        /// The Google Analytics Realtime API returns a customized report of realtime event data for your property.
-        /// These reports show events and usage from the last 30 minutes.
+        /// Returns a customized report of realtime event data for your property. Events appear in realtime reports
+        /// seconds after they have been sent to the Google Analytics. Realtime reports show events and usage data for
+        /// the periods of time ranging from the present moment to 30 minutes ago (up to 60 minutes for Google Analytics
+        /// 360 properties). For a guide to constructing realtime requests &amp;amp; understanding responses, see
+        /// [Creating a Realtime
+        /// Report](https://developers.google.com/analytics/devguides/reporting/data/v1/realtime-basics).
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="property">
-        /// A Google Analytics GA4 property identifier whose events are tracked. Specified in the URL path and not the
-        /// body. To learn more, see [where to find your Property
+        /// A Google Analytics property identifier whose events are tracked. Specified in the URL path and not the body.
+        /// To learn more, see [where to find your Property
         /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). Example:
         /// properties/1234
         /// </param>
         public virtual RunRealtimeReportRequest RunRealtimeReport(Google.Apis.AnalyticsData.v1beta.Data.RunRealtimeReportRequest body, string property)
         {
-            return new RunRealtimeReportRequest(service, body, property);
+            return new RunRealtimeReportRequest(this.service, body, property);
         }
 
         /// <summary>
-        /// The Google Analytics Realtime API returns a customized report of realtime event data for your property.
-        /// These reports show events and usage from the last 30 minutes.
+        /// Returns a customized report of realtime event data for your property. Events appear in realtime reports
+        /// seconds after they have been sent to the Google Analytics. Realtime reports show events and usage data for
+        /// the periods of time ranging from the present moment to 30 minutes ago (up to 60 minutes for Google Analytics
+        /// 360 properties). For a guide to constructing realtime requests &amp;amp; understanding responses, see
+        /// [Creating a Realtime
+        /// Report](https://developers.google.com/analytics/devguides/reporting/data/v1/realtime-basics).
         /// </summary>
         public class RunRealtimeReportRequest : AnalyticsDataBaseServiceRequest<Google.Apis.AnalyticsData.v1beta.Data.RunRealtimeReportResponse>
         {
@@ -667,8 +1034,8 @@ namespace Google.Apis.AnalyticsData.v1beta
             }
 
             /// <summary>
-            /// A Google Analytics GA4 property identifier whose events are tracked. Specified in the URL path and not
-            /// the body. To learn more, see [where to find your Property
+            /// A Google Analytics property identifier whose events are tracked. Specified in the URL path and not the
+            /// body. To learn more, see [where to find your Property
             /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). Example:
             /// properties/1234
             /// </summary>
@@ -710,19 +1077,21 @@ namespace Google.Apis.AnalyticsData.v1beta
         /// data collected by the Google Analytics tracking code. The data returned from the API is as a table with
         /// columns for the requested dimensions and metrics. Metrics are individual measurements of user activity on
         /// your property, such as active users or event count. Dimensions break down metrics across some common
-        /// criteria, such as country or event name.
+        /// criteria, such as country or event name. For a guide to constructing requests &amp;amp; understanding
+        /// responses, see [Creating a
+        /// Report](https://developers.google.com/analytics/devguides/reporting/data/v1/basics).
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="property">
-        /// A Google Analytics GA4 property identifier whose events are tracked. Specified in the URL path and not the
-        /// body. To learn more, see [where to find your Property
+        /// A Google Analytics property identifier whose events are tracked. Specified in the URL path and not the body.
+        /// To learn more, see [where to find your Property
         /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). Within a batch
         /// request, this property should either be unspecified or consistent with the batch-level property. Example:
         /// properties/1234
         /// </param>
         public virtual RunReportRequest RunReport(Google.Apis.AnalyticsData.v1beta.Data.RunReportRequest body, string property)
         {
-            return new RunReportRequest(service, body, property);
+            return new RunReportRequest(this.service, body, property);
         }
 
         /// <summary>
@@ -730,7 +1099,9 @@ namespace Google.Apis.AnalyticsData.v1beta
         /// data collected by the Google Analytics tracking code. The data returned from the API is as a table with
         /// columns for the requested dimensions and metrics. Metrics are individual measurements of user activity on
         /// your property, such as active users or event count. Dimensions break down metrics across some common
-        /// criteria, such as country or event name.
+        /// criteria, such as country or event name. For a guide to constructing requests &amp;amp; understanding
+        /// responses, see [Creating a
+        /// Report](https://developers.google.com/analytics/devguides/reporting/data/v1/basics).
         /// </summary>
         public class RunReportRequest : AnalyticsDataBaseServiceRequest<Google.Apis.AnalyticsData.v1beta.Data.RunReportResponse>
         {
@@ -743,8 +1114,8 @@ namespace Google.Apis.AnalyticsData.v1beta
             }
 
             /// <summary>
-            /// A Google Analytics GA4 property identifier whose events are tracked. Specified in the URL path and not
-            /// the body. To learn more, see [where to find your Property
+            /// A Google Analytics property identifier whose events are tracked. Specified in the URL path and not the
+            /// body. To learn more, see [where to find your Property
             /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). Within a batch
             /// request, this property should either be unspecified or consistent with the batch-level property.
             /// Example: properties/1234
@@ -796,6 +1167,114 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("restrictedMetricTypes")]
         public virtual System.Collections.Generic.IList<string> RestrictedMetricTypes { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An audience export is a list of users in an audience at the time of the list's creation. One audience may have
+    /// multiple audience exports created for different days.
+    /// </summary>
+    public class AudienceExport : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The audience resource name. This resource name identifies the audience being listed and is shared
+        /// between the Analytics Data &amp;amp; Admin APIs. Format: `properties/{property}/audiences/{audience}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("audience")]
+        public virtual string Audience { get; set; }
+
+        /// <summary>Output only. The descriptive display name for this audience. For example, "Purchasers".</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("audienceDisplayName")]
+        public virtual string AudienceDisplayName { get; set; }
+
+        private string _beginCreatingTimeRaw;
+
+        private object _beginCreatingTime;
+
+        /// <summary>
+        /// Output only. The time when CreateAudienceExport was called and the AudienceExport began the `CREATING`
+        /// state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("beginCreatingTime")]
+        public virtual string BeginCreatingTimeRaw
+        {
+            get => _beginCreatingTimeRaw;
+            set
+            {
+                _beginCreatingTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _beginCreatingTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="BeginCreatingTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use BeginCreatingTimeDateTimeOffset instead.")]
+        public virtual object BeginCreatingTime
+        {
+            get => _beginCreatingTime;
+            set
+            {
+                _beginCreatingTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _beginCreatingTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="BeginCreatingTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? BeginCreatingTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(BeginCreatingTimeRaw);
+            set => BeginCreatingTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. The total quota tokens charged during creation of the AudienceExport. Because this token count
+        /// is based on activity from the `CREATING` state, this tokens charged will be fixed once an AudienceExport
+        /// enters the `ACTIVE` or `FAILED` states.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("creationQuotaTokensCharged")]
+        public virtual System.Nullable<int> CreationQuotaTokensCharged { get; set; }
+
+        /// <summary>Required. The dimensions requested and displayed in the query response.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dimensions")]
+        public virtual System.Collections.Generic.IList<V1betaAudienceDimension> Dimensions { get; set; }
+
+        /// <summary>
+        /// Output only. Error message is populated when an audience export fails during creation. A common reason for
+        /// such a failure is quota exhaustion.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errorMessage")]
+        public virtual string ErrorMessage { get; set; }
+
+        /// <summary>
+        /// Output only. Identifier. The audience export resource name assigned during creation. This resource name
+        /// identifies this `AudienceExport`. Format: `properties/{property}/audienceExports/{audience_export}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Output only. The percentage completed for this audience export ranging between 0 to 100.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("percentageCompleted")]
+        public virtual System.Nullable<double> PercentageCompleted { get; set; }
+
+        /// <summary>Output only. The total number of rows in the AudienceExport result.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rowCount")]
+        public virtual System.Nullable<int> RowCount { get; set; }
+
+        /// <summary>Output only. The current state for this AudienceExport.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>This metadata is currently blank.</summary>
+    public class AudienceListMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1074,6 +1553,55 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Defines an individual comparison. Most requests will include multiple comparisons so that the report compares
+    /// between the comparisons.
+    /// </summary>
+    public class Comparison : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A saved comparison identified by the comparison's resource name. For example, 'comparisons/1234'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("comparison")]
+        public virtual string ComparisonValue { get; set; }
+
+        /// <summary>A basic comparison.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dimensionFilter")]
+        public virtual FilterExpression DimensionFilter { get; set; }
+
+        /// <summary>
+        /// Each comparison produces separate rows in the response. In the response, this comparison is identified by
+        /// this name. If name is unspecified, we will use the saved comparisons display name.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The metadata for a single comparison.</summary>
+    public class ComparisonMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// This comparison's resource name. Useable in [Comparison](#Comparison)'s `comparison` field. For example,
+        /// 'comparisons/1234'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiName")]
+        public virtual string ApiName { get; set; }
+
+        /// <summary>This comparison's description.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>This comparison's name within the Google Analytics user interface.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uiName")]
+        public virtual string UiName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Used to combine dimension values to a single dimension.</summary>
     public class ConcatenateExpression : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1097,7 +1625,8 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
     }
 
     /// <summary>
-    /// A contiguous set of days: startDate, startDate + 1, ..., endDate. Requests are allowed up to 4 date ranges.
+    /// A contiguous set of days: `startDate`, `startDate + 1`, ..., `endDate`. Requests are allowed up to 4 date
+    /// ranges.
     /// </summary>
     public class DateRange : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1131,8 +1660,8 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
 
     /// <summary>
     /// Dimensions are attributes of your data. For example, the dimension city indicates the city from which an event
-    /// originates. Dimension values in report responses are strings; for example, city could be "Paris" or "New York".
-    /// Requests are allowed up to 9 dimensions.
+    /// originates. Dimension values in report responses are strings; for example, the city could be "Paris" or "New
+    /// York". Requests are allowed up to 9 dimensions.
     /// </summary>
     public class Dimension : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1146,11 +1675,16 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         /// <summary>
         /// The name of the dimension. See the [API
         /// Dimensions](https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema#dimensions) for
-        /// the list of dimension names. If `dimensionExpression` is specified, `name` can be any string that you would
-        /// like within the allowed character set. For example if a `dimensionExpression` concatenates `country` and
-        /// `city`, you could call that dimension `countryAndCity`. Dimension names that you choose must match the
-        /// regular expression `^[a-zA-Z0-9_]$`. Dimensions are referenced by `name` in `dimensionFilter`, `orderBys`,
-        /// `dimensionExpression`, and `pivots`.
+        /// the list of dimension names supported by core reporting methods such as `runReport` and `batchRunReports`.
+        /// See [Realtime
+        /// Dimensions](https://developers.google.com/analytics/devguides/reporting/data/v1/realtime-api-schema#dimensions)
+        /// for the list of dimension names supported by the `runRealtimeReport` method. See [Funnel
+        /// Dimensions](https://developers.google.com/analytics/devguides/reporting/data/v1/exploration-api-schema#dimensions)
+        /// for the list of dimension names supported by the `runFunnelReport` method. If `dimensionExpression` is
+        /// specified, `name` can be any string that you would like within the allowed character set. For example if a
+        /// `dimensionExpression` concatenates `country` and `city`, you could call that dimension `countryAndCity`.
+        /// Dimension names that you choose must match the regular expression `^[a-zA-Z0-9_]$`. Dimensions are
+        /// referenced by `name` in `dimensionFilter`, `orderBys`, `dimensionExpression`, and `pivots`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -1236,7 +1770,12 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("category")]
         public virtual string Category { get; set; }
 
-        /// <summary>True if the dimension is a custom dimension for this property.</summary>
+        /// <summary>
+        /// True if the dimension is custom to this property. This includes user, event, &amp;amp; item scoped custom
+        /// dimensions; to learn more about custom dimensions, see https://support.google.com/analytics/answer/14240153.
+        /// This also include custom channel groups; to learn more about custom channel groups, see
+        /// https://support.google.com/analytics/answer/13051316.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customDefinition")]
         public virtual System.Nullable<bool> CustomDefinition { get; set; }
 
@@ -1288,6 +1827,13 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Filter for empty values.</summary>
+    public class EmptyFilter : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>An expression to filter dimension or metric values.</summary>
     public class Filter : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1295,7 +1841,15 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("betweenFilter")]
         public virtual BetweenFilter BetweenFilter { get; set; }
 
-        /// <summary>The dimension name or metric name. Must be a name defined in dimensions or metrics.</summary>
+        /// <summary>A filter for empty values such as "(not set)" and "" values.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("emptyFilter")]
+        public virtual EmptyFilter EmptyFilter { get; set; }
+
+        /// <summary>
+        /// The dimension name or metric name. In most methods, dimensions &amp;amp; metrics can be used for the first
+        /// time in this field. However in a RunPivotReportRequest, this field must be additionally specified by name in
+        /// the RunPivotReportRequest's dimensions or metrics.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fieldName")]
         public virtual string FieldName { get; set; }
 
@@ -1326,8 +1880,8 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual FilterExpressionList AndGroup { get; set; }
 
         /// <summary>
-        /// A primitive filter. All fields in filter in same FilterExpression needs to be either all dimensions or
-        /// metrics.
+        /// A primitive filter. In the same FilterExpression, all of the filter's field names need to be either all
+        /// dimensions or all metrics.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("filter")]
         public virtual Filter Filter { get; set; }
@@ -1370,9 +1924,31 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The dimensions and metrics currently accepted in reporting methods.</summary>
+    /// <summary>A list of all audience exports for a property.</summary>
+    public class ListAudienceExportsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Each audience export for a property.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("audienceExports")]
+        public virtual System.Collections.Generic.IList<AudienceExport> AudienceExports { get; set; }
+
+        /// <summary>
+        /// A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no
+        /// subsequent pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The dimensions, metrics and comparisons currently accepted in reporting methods.</summary>
     public class Metadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The comparison descriptions.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("comparisons")]
+        public virtual System.Collections.Generic.IList<ComparisonMetadata> Comparisons { get; set; }
+
         /// <summary>The dimension descriptions.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dimensions")]
         public virtual System.Collections.Generic.IList<DimensionMetadata> Dimensions { get; set; }
@@ -1412,10 +1988,16 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         /// <summary>
         /// The name of the metric. See the [API
         /// Metrics](https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema#metrics) for the
-        /// list of metric names. If `expression` is specified, `name` can be any string that you would like within the
-        /// allowed character set. For example if `expression` is `screenPageViews/sessions`, you could call that
-        /// metric's name = `viewsPerSession`. Metric names that you choose must match the regular expression
-        /// `^[a-zA-Z0-9_]$`. Metrics are referenced by `name` in `metricFilter`, `orderBys`, and metric `expression`.
+        /// list of metric names supported by core reporting methods such as `runReport` and `batchRunReports`. See
+        /// [Realtime
+        /// Metrics](https://developers.google.com/analytics/devguides/reporting/data/v1/realtime-api-schema#metrics)
+        /// for the list of metric names supported by the `runRealtimeReport` method. See [Funnel
+        /// Metrics](https://developers.google.com/analytics/devguides/reporting/data/v1/exploration-api-schema#metrics)
+        /// for the list of metric names supported by the `runFunnelReport` method. If `expression` is specified, `name`
+        /// can be any string that you would like within the allowed character set. For example if `expression` is
+        /// `screenPageViews/sessions`, you could call that metric's name = `viewsPerSession`. Metric names that you
+        /// choose must match the regular expression `^[a-zA-Z0-9_]$`. Metrics are referenced by `name` in
+        /// `metricFilter`, `orderBys`, and metric `expression`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -1548,8 +2130,8 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
     }
 
     /// <summary>
-    /// A contiguous set of minutes: startMinutesAgo, startMinutesAgo + 1, ..., endMinutesAgo. Requests are allowed up
-    /// to 2 minute ranges.
+    /// A contiguous set of minutes: `startMinutesAgo`, `startMinutesAgo + 1`, ..., `endMinutesAgo`. Requests are
+    /// allowed up to 2 minute ranges.
     /// </summary>
     public class MinuteRange : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1616,7 +2198,53 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The sort options.</summary>
+    /// <summary>This resource represents a long-running operation that is the result of a network API call.</summary>
+    public class Operation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed,
+        /// and either `error` or `response` is available.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("done")]
+        public virtual System.Nullable<bool> Done { get; set; }
+
+        /// <summary>The error result of the operation in case of failure or cancellation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("error")]
+        public virtual Status Error { get; set; }
+
+        /// <summary>
+        /// Service-specific metadata associated with the operation. It typically contains progress information and
+        /// common metadata such as create time. Some services might not provide such metadata. Any method that returns
+        /// a long-running operation should document the metadata type, if any.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Metadata { get; set; }
+
+        /// <summary>
+        /// The server-assigned name, which is only unique within the same service that originally returns it. If you
+        /// use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
+        /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
+        /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("response")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Response { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Order bys define how rows will be sorted in the response. For example, ordering rows by descending event count
+    /// is one ordering, and ordering rows by the event name string is a different ordering.
+    /// </summary>
     public class OrderBy : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>If true, sorts by descending order.</summary>
@@ -1653,7 +2281,7 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         /// <summary>
         /// The number of unique combinations of dimension values to return in this pivot. The `limit` parameter is
         /// required. A `limit` of 10,000 is common for single pivot requests. The product of the `limit` for each
-        /// `pivot` in a `RunPivotReportRequest` must not exceed 100,000. For example, a two pivot request with `limit:
+        /// `pivot` in a `RunPivotReportRequest` must not exceed 250,000. For example, a two pivot request with `limit:
         /// 1000` in each pivot will fail because the product is `1,000,000`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("limit")]
@@ -1782,19 +2410,86 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual QuotaStatus ServerErrorsPerProjectPerHour { get; set; }
 
         /// <summary>
-        /// Standard Analytics Properties can use up to 25,000 tokens per day; Analytics 360 Properties can use 250,000
-        /// tokens per day. Most requests consume fewer than 10 tokens.
+        /// Standard Analytics Properties can use up to 200,000 tokens per day; Analytics 360 Properties can use
+        /// 2,000,000 tokens per day. Most requests consume fewer than 10 tokens.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tokensPerDay")]
         public virtual QuotaStatus TokensPerDay { get; set; }
 
         /// <summary>
-        /// Standard Analytics Properties can use up to 5,000 tokens per hour; Analytics 360 Properties can use 50,000
-        /// tokens per hour. An API request consumes a single number of tokens, and that number is deducted from both
-        /// the hourly and daily quotas.
+        /// Standard Analytics Properties can use up to 40,000 tokens per hour; Analytics 360 Properties can use 400,000
+        /// tokens per hour. An API request consumes a single number of tokens, and that number is deducted from all of
+        /// the hourly, daily, and per project hourly quotas.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tokensPerHour")]
         public virtual QuotaStatus TokensPerHour { get; set; }
+
+        /// <summary>
+        /// Analytics Properties can use up to 35% of their tokens per project per hour. This amounts to standard
+        /// Analytics Properties can use up to 14,000 tokens per project per hour, and Analytics 360 Properties can use
+        /// 140,000 tokens per project per hour. An API request consumes a single number of tokens, and that number is
+        /// deducted from all of the hourly, daily, and per project hourly quotas.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tokensPerProjectPerHour")]
+        public virtual QuotaStatus TokensPerProjectPerHour { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A request to list users in an audience export.</summary>
+    public class QueryAudienceExportRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The number of rows to return. If unspecified, 10,000 rows are returned. The API returns a maximum
+        /// of 250,000 rows per request, no matter how many you ask for. `limit` must be positive. The API can also
+        /// return fewer rows than the requested `limit`, if there aren't as many dimension values as the `limit`. To
+        /// learn more about this pagination parameter, see
+        /// [Pagination](https://developers.google.com/analytics/devguides/reporting/data/v1/basics#pagination).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("limit")]
+        public virtual System.Nullable<long> Limit { get; set; }
+
+        /// <summary>
+        /// Optional. The row count of the start row. The first row is counted as row 0. When paging, the first request
+        /// does not specify offset; or equivalently, sets offset to 0; the first request returns the first `limit` of
+        /// rows. The second request sets offset to the `limit` of the first request; the second request returns the
+        /// second `limit` of rows. To learn more about this pagination parameter, see
+        /// [Pagination](https://developers.google.com/analytics/devguides/reporting/data/v1/basics#pagination).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("offset")]
+        public virtual System.Nullable<long> Offset { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A list of users in an audience export.</summary>
+    public class QueryAudienceExportResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Configuration data about AudienceExport being queried. Returned to help interpret the audience rows in this
+        /// response. For example, the dimensions in this AudienceExport correspond to the columns in the AudienceRows.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("audienceExport")]
+        public virtual AudienceExport AudienceExport { get; set; }
+
+        /// <summary>
+        /// Rows for each user in an audience export. The number of rows in this response will be less than or equal to
+        /// request's page size.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("audienceRows")]
+        public virtual System.Collections.Generic.IList<V1betaAudienceRow> AudienceRows { get; set; }
+
+        /// <summary>
+        /// The total number of rows in the AudienceExport result. `rowCount` is independent of the number of rows
+        /// returned in the response, the `limit` request parameter, and the `offset` request parameter. For example if
+        /// a query returns 175 rows and includes `limit` of 50 in the API request, the response will contain `rowCount`
+        /// of 175 but only 50 rows. To learn more about this pagination parameter, see
+        /// [Pagination](https://developers.google.com/analytics/devguides/reporting/data/v1/basics#pagination).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rowCount")]
+        public virtual System.Nullable<int> RowCount { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1831,7 +2526,12 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
 
         /// <summary>
         /// If true, indicates some buckets of dimension combinations are rolled into "(other)" row. This can happen for
-        /// high cardinality reports.
+        /// high cardinality reports. The metadata parameter dataLossFromOtherRow is populated based on the aggregated
+        /// data table used in the report. The parameter will be accurately populated regardless of the filters and
+        /// limits in the report. For example, the (other) row could be dropped from the report because the request
+        /// contains a filter on sessionSource = google. This parameter will still be populated if data loss from other
+        /// row was present in the input aggregate data used to generate this report. To learn more, see [About the
+        /// (other) row and data sampling](https://support.google.com/analytics/answer/13208658#reports).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataLossFromOtherRow")]
         public virtual System.Nullable<bool> DataLossFromOtherRow { get; set; }
@@ -1841,6 +2541,15 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual string EmptyReason { get; set; }
 
         /// <summary>
+        /// If this report results is [sampled](https://support.google.com/analytics/answer/13331292), this describes
+        /// the percentage of events used in this report. One `samplingMetadatas` is populated for each date range. Each
+        /// `samplingMetadatas` corresponds to a date range in order that date ranges were specified in the request.
+        /// However if the results are not sampled, this field will not be defined.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("samplingMetadatas")]
+        public virtual System.Collections.Generic.IList<SamplingMetadata> SamplingMetadatas { get; set; }
+
+        /// <summary>
         /// Describes the schema restrictions actively enforced in creating this report. To learn more, see [Access and
         /// data-restriction management](https://support.google.com/analytics/answer/10851388).
         /// </summary>
@@ -1848,14 +2557,13 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual SchemaRestrictionResponse SchemaRestrictionResponse { get; set; }
 
         /// <summary>
-        /// If `thresholdingApplied` is true, this report has thresholding applied and only returns data that meets the
-        /// minimum aggregation thresholds. This boolean only indicates if thresholding was applied. It is possible for
-        /// thresholding to be applied and no data is absent from the report, and this happens when all data is above
-        /// the thresholds. To learn more, see [Data thresholds](https://support.google.com/analytics/answer/9383630)
-        /// and [About Demographics and Interests](https://support.google.com/analytics/answer/2799357).
+        /// If `subjectToThresholding` is true, this report is subject to thresholding and only returns data that meets
+        /// the minimum aggregation thresholds. It is possible for a request to be subject to thresholding thresholding
+        /// and no data is absent from the report, and this happens when all data is above the thresholds. To learn
+        /// more, see [Data thresholds](https://support.google.com/analytics/answer/9383630).
         /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("thresholdingApplied")]
-        public virtual System.Nullable<bool> ThresholdingApplied { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("subjectToThresholding")]
+        public virtual System.Nullable<bool> SubjectToThresholding { get; set; }
 
         /// <summary>
         /// The property's current timezone. Intended to be used to interpret time-based dimensions like `hour` and
@@ -1870,9 +2578,15 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
     }
 
     /// <summary>
-    /// Report data for each row. For example if RunReportRequest contains: ```none "dimensions": [ { "name":
-    /// "eventName" }, { "name": "countryId" } ], "metrics": [ { "name": "eventCount" } ] ``` One row with
-    /// 'in_app_purchase' as the eventName, 'JP' as the countryId, and 15 as the eventCount, would be: ```none
+    /// Report data for each row. For example if RunReportRequest contains:
+    /// ```
+    /// none "dimensions": [ { "name":
+    /// "eventName" }, { "name": "countryId" } ], "metrics": [ { "name": "eventCount" } ]
+    /// ```
+    /// One row with
+    /// 'in_app_purchase' as the eventName, 'JP' as the countryId, and 15 as the eventCount, would be:
+    /// ```
+    /// none
     /// "dimensionValues": [ { "value": "in_app_purchase" }, { "value": "JP" } ], "metricValues": [ { "value": "15" } ]
     /// ```
     /// </summary>
@@ -1902,6 +2616,13 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cohortSpec")]
         public virtual CohortSpec CohortSpec { get; set; }
+
+        /// <summary>
+        /// Optional. The configuration of comparisons requested and displayed. The request requires both a comparisons
+        /// field and a comparisons dimension to receive a comparison column in the response.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("comparisons")]
+        public virtual System.Collections.Generic.IList<Comparison> Comparisons { get; set; }
 
         /// <summary>
         /// A currency code in ISO4217 format, such as "AED", "USD", "JPY". If the field is empty, the report uses the
@@ -1935,7 +2656,10 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
 
         /// <summary>
         /// If false or unspecified, each row with all metrics equal to 0 will not be returned. If true, these rows will
-        /// be returned if they are not separately removed by a filter.
+        /// be returned if they are not separately removed by a filter. Regardless of this `keep_empty_rows` setting,
+        /// only data recorded by the Google Analytics property can be displayed in a report. For example if a property
+        /// never logs a `purchase` event, then a query for the `eventName` dimension and `eventCount` metric will not
+        /// have a row eventName: "purchase" and eventCount: 0.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("keepEmptyRows")]
         public virtual System.Nullable<bool> KeepEmptyRows { get; set; }
@@ -1963,8 +2687,8 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual System.Collections.Generic.IList<Pivot> Pivots { get; set; }
 
         /// <summary>
-        /// A Google Analytics GA4 property identifier whose events are tracked. Specified in the URL path and not the
-        /// body. To learn more, see [where to find your Property
+        /// A Google Analytics property identifier whose events are tracked. Specified in the URL path and not the body.
+        /// To learn more, see [where to find your Property
         /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). Within a batch
         /// request, this property should either be unspecified or consistent with the batch-level property. Example:
         /// properties/1234
@@ -1973,7 +2697,7 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual string Property { get; set; }
 
         /// <summary>
-        /// Toggles whether to return the current state of this Analytics Property's quota. Quota is returned in
+        /// Toggles whether to return the current state of this Google Analytics property's quota. Quota is returned in
         /// [PropertyQuota](#PropertyQuota).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("returnPropertyQuota")]
@@ -2030,7 +2754,7 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("pivotHeaders")]
         public virtual System.Collections.Generic.IList<PivotHeader> PivotHeaders { get; set; }
 
-        /// <summary>This Analytics Property's quota state including this request.</summary>
+        /// <summary>This Google Analytics property's quota state including this request.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("propertyQuota")]
         public virtual PropertyQuota PropertyQuota { get; set; }
 
@@ -2045,10 +2769,7 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
     /// <summary>The request to generate a realtime report.</summary>
     public class RunRealtimeReportRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>
-        /// The filter clause of dimensions. Dimensions must be requested to be used in this filter. Metrics cannot be
-        /// used in this filter.
-        /// </summary>
+        /// <summary>The filter clause of dimensions. Metrics cannot be used in this filter.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dimensionFilter")]
         public virtual FilterExpression DimensionFilter { get; set; }
 
@@ -2057,7 +2778,7 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual System.Collections.Generic.IList<Dimension> Dimensions { get; set; }
 
         /// <summary>
-        /// The number of rows to return. If unspecified, 10,000 rows are returned. The API returns a maximum of 100,000
+        /// The number of rows to return. If unspecified, 10,000 rows are returned. The API returns a maximum of 250,000
         /// rows per request, no matter how many you ask for. `limit` must be positive. The API can also return fewer
         /// rows than the requested `limit`, if there aren't as many dimension values as the `limit`. For instance,
         /// there are fewer than 300 possible values for the dimension `country`, so when reporting on only `country`,
@@ -2074,8 +2795,8 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual System.Collections.Generic.IList<string> MetricAggregations { get; set; }
 
         /// <summary>
-        /// The filter clause of metrics. Applied at post aggregation phase, similar to SQL having-clause. Metrics must
-        /// be requested to be used in this filter. Dimensions cannot be used in this filter.
+        /// The filter clause of metrics. Applied at post aggregation phase, similar to SQL having-clause. Dimensions
+        /// cannot be used in this filter.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("metricFilter")]
         public virtual FilterExpression MetricFilter { get; set; }
@@ -2098,8 +2819,8 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual System.Collections.Generic.IList<OrderBy> OrderBys { get; set; }
 
         /// <summary>
-        /// Toggles whether to return the current state of this Analytics Property's Realtime quota. Quota is returned
-        /// in [PropertyQuota](#PropertyQuota).
+        /// Toggles whether to return the current state of this Google Analytics property's Realtime quota. Quota is
+        /// returned in [PropertyQuota](#PropertyQuota).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("returnPropertyQuota")]
         public virtual System.Nullable<bool> ReturnPropertyQuota { get; set; }
@@ -2140,7 +2861,7 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("minimums")]
         public virtual System.Collections.Generic.IList<Row> Minimums { get; set; }
 
-        /// <summary>This Analytics Property's Realtime quota state including this request.</summary>
+        /// <summary>This Google Analytics property's Realtime quota state including this request.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("propertyQuota")]
         public virtual PropertyQuota PropertyQuota { get; set; }
 
@@ -2175,6 +2896,13 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual CohortSpec CohortSpec { get; set; }
 
         /// <summary>
+        /// Optional. The configuration of comparisons requested and displayed. The request only requires a comparisons
+        /// field in order to receive a comparison column in the response.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("comparisons")]
+        public virtual System.Collections.Generic.IList<Comparison> Comparisons { get; set; }
+
+        /// <summary>
         /// A currency code in ISO4217 format, such as "AED", "USD", "JPY". If the field is empty, the report uses the
         /// property's default currency.
         /// </summary>
@@ -2190,7 +2918,7 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual System.Collections.Generic.IList<DateRange> DateRanges { get; set; }
 
         /// <summary>
-        /// Dimension filters allow you to ask for only specific dimension values in the report. To learn more, see
+        /// Dimension filters let you ask for only specific dimension values in the report. To learn more, see
         /// [Fundamentals of Dimension
         /// Filters](https://developers.google.com/analytics/devguides/reporting/data/v1/basics#dimension_filters) for
         /// examples. Metrics cannot be used in this filter.
@@ -2204,13 +2932,16 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
 
         /// <summary>
         /// If false or unspecified, each row with all metrics equal to 0 will not be returned. If true, these rows will
-        /// be returned if they are not separately removed by a filter.
+        /// be returned if they are not separately removed by a filter. Regardless of this `keep_empty_rows` setting,
+        /// only data recorded by the Google Analytics property can be displayed in a report. For example if a property
+        /// never logs a `purchase` event, then a query for the `eventName` dimension and `eventCount` metric will not
+        /// have a row eventName: "purchase" and eventCount: 0.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("keepEmptyRows")]
         public virtual System.Nullable<bool> KeepEmptyRows { get; set; }
 
         /// <summary>
-        /// The number of rows to return. If unspecified, 10,000 rows are returned. The API returns a maximum of 100,000
+        /// The number of rows to return. If unspecified, 10,000 rows are returned. The API returns a maximum of 250,000
         /// rows per request, no matter how many you ask for. `limit` must be positive. The API can also return fewer
         /// rows than the requested `limit`, if there aren't as many dimension values as the `limit`. For instance,
         /// there are fewer than 300 possible values for the dimension `country`, so when reporting on only `country`,
@@ -2223,14 +2954,15 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
 
         /// <summary>
         /// Aggregation of metrics. Aggregated metric values will be shown in rows where the dimension_values are set to
-        /// "RESERVED_(MetricAggregation)".
+        /// "RESERVED_(MetricAggregation)". Aggregates including both comparisons and multiple date ranges will be
+        /// aggregated based on the date ranges.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("metricAggregations")]
         public virtual System.Collections.Generic.IList<string> MetricAggregations { get; set; }
 
         /// <summary>
-        /// The filter clause of metrics. Applied at post aggregation phase, similar to SQL having-clause. Dimensions
-        /// cannot be used in this filter.
+        /// The filter clause of metrics. Applied after aggregating the report's rows, similar to SQL having-clause.
+        /// Dimensions cannot be used in this filter.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("metricFilter")]
         public virtual FilterExpression MetricFilter { get; set; }
@@ -2249,13 +2981,16 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("offset")]
         public virtual System.Nullable<long> Offset { get; set; }
 
-        /// <summary>Specifies how rows are ordered in the response.</summary>
+        /// <summary>
+        /// Specifies how rows are ordered in the response. Requests including both comparisons and multiple date ranges
+        /// will have order bys applied on the comparisons.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("orderBys")]
         public virtual System.Collections.Generic.IList<OrderBy> OrderBys { get; set; }
 
         /// <summary>
-        /// A Google Analytics GA4 property identifier whose events are tracked. Specified in the URL path and not the
-        /// body. To learn more, see [where to find your Property
+        /// A Google Analytics property identifier whose events are tracked. Specified in the URL path and not the body.
+        /// To learn more, see [where to find your Property
         /// ID](https://developers.google.com/analytics/devguides/reporting/data/v1/property-id). Within a batch
         /// request, this property should either be unspecified or consistent with the batch-level property. Example:
         /// properties/1234
@@ -2264,7 +2999,7 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         public virtual string Property { get; set; }
 
         /// <summary>
-        /// Toggles whether to return the current state of this Analytics Property's quota. Quota is returned in
+        /// Toggles whether to return the current state of this Google Analytics property's quota. Quota is returned in
         /// [PropertyQuota](#PropertyQuota).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("returnPropertyQuota")]
@@ -2310,7 +3045,7 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("minimums")]
         public virtual System.Collections.Generic.IList<Row> Minimums { get; set; }
 
-        /// <summary>This Analytics Property's quota state including this request.</summary>
+        /// <summary>This Google Analytics property's quota state including this request.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("propertyQuota")]
         public virtual PropertyQuota PropertyQuota { get; set; }
 
@@ -2337,6 +3072,33 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
     }
 
     /// <summary>
+    /// If this report results is [sampled](https://support.google.com/analytics/answer/13331292), this describes the
+    /// percentage of events used in this report. Sampling is the practice of analyzing a subset of all data in order to
+    /// uncover the meaningful information in the larger data set.
+    /// </summary>
+    public class SamplingMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The total number of events read in this sampled report for a date range. This is the size of the subset this
+        /// property's data that was analyzed in this report.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("samplesReadCount")]
+        public virtual System.Nullable<long> SamplesReadCount { get; set; }
+
+        /// <summary>
+        /// The total number of events present in this property's data that could have been analyzed in this report for
+        /// a date range. Sampling uncovers the meaningful information about the larger data set, and this is the size
+        /// of the larger data set. To calculate the percentage of available data that was used in this report, compute
+        /// `samplesReadCount/samplingSpaceSize`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("samplingSpaceSize")]
+        public virtual System.Nullable<long> SamplingSpaceSize { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// The schema restrictions actively enforced in creating this report. To learn more, see [Access and
     /// data-restriction management](https://support.google.com/analytics/answer/10851388).
     /// </summary>
@@ -2349,6 +3111,35 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("activeMetricRestrictions")]
         public virtual System.Collections.Generic.IList<ActiveMetricRestriction> ActiveMetricRestrictions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The `Status` type defines a logical error model that is suitable for different programming environments,
+    /// including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains
+    /// three pieces of data: error code, error message, and error details. You can find out more about this error model
+    /// and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).
+    /// </summary>
+    public class Status : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The status code, which should be an enum value of google.rpc.Code.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("code")]
+        public virtual System.Nullable<int> Code { get; set; }
+
+        /// <summary>
+        /// A list of messages that carry the error details. There is a common set of message types for APIs to use.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual System.Collections.Generic.IList<System.Collections.Generic.IDictionary<string, object>> Details { get; set; }
+
+        /// <summary>
+        /// A developer-facing error message, which should be in English. Any user-facing error message should be
+        /// localized and sent in the google.rpc.Status.details field, or localized by the client.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("message")]
+        public virtual string Message { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2368,6 +3159,49 @@ namespace Google.Apis.AnalyticsData.v1beta.Data
         /// <summary>The string value used for the matching.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("value")]
         public virtual string Value { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An audience dimension is a user attribute. Specific user attributed are requested and then later returned in the
+    /// `QueryAudienceExportResponse`.
+    /// </summary>
+    public class V1betaAudienceDimension : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The API name of the dimension. See the [API
+        /// Dimensions](https://developers.google.com/analytics/devguides/reporting/data/v1/audience-list-api-schema#dimensions)
+        /// for the list of dimension names.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dimensionName")]
+        public virtual string DimensionName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The value of a dimension.</summary>
+    public class V1betaAudienceDimensionValue : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Value as a string if the dimension type is a string.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("value")]
+        public virtual string Value { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Dimension value attributes for the audience user row.</summary>
+    public class V1betaAudienceRow : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Each dimension value attribute for an audience user. One dimension value will be added for each dimension
+        /// column requested.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dimensionValues")]
+        public virtual System.Collections.Generic.IList<V1betaAudienceDimensionValue> DimensionValues { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

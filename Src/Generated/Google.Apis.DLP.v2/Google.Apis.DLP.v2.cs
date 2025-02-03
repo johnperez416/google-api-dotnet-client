@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ namespace Google.Apis.DLP.v2
             Locations = new LocationsResource(this);
             Organizations = new OrganizationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://dlp.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://dlp.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -47,25 +49,18 @@ namespace Google.Apis.DLP.v2
         public override string Name => "dlp";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://dlp.googleapis.com/";
-        #else
-            "https://dlp.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://dlp.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
-        /// <summary>Available OAuth 2.0 scopes for use with the Cloud Data Loss Prevention (DLP) API.</summary>
+        /// <summary>Available OAuth 2.0 scopes for use with the Sensitive Data Protection (DLP).</summary>
         public class Scope
         {
             /// <summary>
@@ -75,9 +70,7 @@ namespace Google.Apis.DLP.v2
             public static string CloudPlatform = "https://www.googleapis.com/auth/cloud-platform";
         }
 
-        /// <summary>
-        /// Available OAuth 2.0 scope constants for use with the Cloud Data Loss Prevention (DLP) API.
-        /// </summary>
+        /// <summary>Available OAuth 2.0 scope constants for use with the Sensitive Data Protection (DLP).</summary>
         public static class ScopeConstants
         {
             /// <summary>
@@ -297,16 +290,16 @@ namespace Google.Apis.DLP.v2
 
         /// <summary>
         /// Returns a list of the sensitive information types that the DLP API supports. See
-        /// https://cloud.google.com/dlp/docs/infotypes-reference to learn more.
+        /// https://cloud.google.com/sensitive-data-protection/docs/infotypes-reference to learn more.
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
         /// Returns a list of the sensitive information types that the DLP API supports. See
-        /// https://cloud.google.com/dlp/docs/infotypes-reference to learn more.
+        /// https://cloud.google.com/sensitive-data-protection/docs/infotypes-reference to learn more.
         /// </summary>
         public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListInfoTypesResponse>
         {
@@ -334,7 +327,7 @@ namespace Google.Apis.DLP.v2
             public virtual string LocationId { get; set; }
 
             /// <summary>
-            /// The parent resource name. The format of this value is as follows: locations/ LOCATION_ID
+            /// The parent resource name. The format of this value is as follows: `locations/{location_id}`
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Parent { get; set; }
@@ -422,19 +415,19 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// Returns a list of the sensitive information types that the DLP API supports. See
-            /// https://cloud.google.com/dlp/docs/infotypes-reference to learn more.
+            /// https://cloud.google.com/sensitive-data-protection/docs/infotypes-reference to learn more.
             /// </summary>
             /// <param name="parent">
-            /// The parent resource name. The format of this value is as follows: locations/ LOCATION_ID
+            /// The parent resource name. The format of this value is as follows: `locations/{location_id}`
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
             /// Returns a list of the sensitive information types that the DLP API supports. See
-            /// https://cloud.google.com/dlp/docs/infotypes-reference to learn more.
+            /// https://cloud.google.com/sensitive-data-protection/docs/infotypes-reference to learn more.
             /// </summary>
             public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListInfoTypesResponse>
             {
@@ -446,7 +439,7 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// The parent resource name. The format of this value is as follows: locations/ LOCATION_ID
+                /// The parent resource name. The format of this value is as follows: `locations/{location_id}`
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -555,29 +548,31 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Creates a DeidentifyTemplate for re-using frequently used configuration for de-identifying content,
-            /// images, and storage. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+            /// Creates a DeidentifyTemplate for reusing frequently used configuration for de-identifying content,
+            /// images, and storage. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid
+            /// to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on the scope of the request
             /// (project or organization) and whether you have [specified a processing
-            /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location specified:
-            /// `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified (defaults to
-            /// global): `projects/`PROJECT_ID + Organizations scope, location specified:
-            /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified (defaults to
-            /// global): `organizations/`ORG_ID The following example `parent` string specifies a parent project with
-            /// the identifier `example-project`, and specifies the `europe-west3` location for processing data:
+            /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+            /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no location
+            /// specified (defaults to global): `projects/{project_id}` + Organizations scope, location specified:
+            /// `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location specified (defaults
+            /// to global): `organizations/{org_id}` The following example `parent` string specifies a parent project
+            /// with the identifier `example-project`, and specifies the `europe-west3` location for processing data:
             /// parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateDeidentifyTemplateRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
-            /// Creates a DeidentifyTemplate for re-using frequently used configuration for de-identifying content,
-            /// images, and storage. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+            /// Creates a DeidentifyTemplate for reusing frequently used configuration for de-identifying content,
+            /// images, and storage. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid
+            /// to learn more.
             /// </summary>
             public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyTemplate>
             {
@@ -592,13 +587,13 @@ namespace Google.Apis.DLP.v2
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -634,8 +629,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Deletes a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-            /// more.
+            /// Deletes a DeidentifyTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the organization and deidentify template to be deleted, for example
@@ -644,12 +639,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
-            /// Deletes a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-            /// more.
+            /// Deletes a DeidentifyTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
             {
@@ -693,7 +688,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Gets a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+            /// Gets a DeidentifyTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the organization and deidentify template to be read, for example
@@ -702,11 +698,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
-            /// Gets a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+            /// Gets a DeidentifyTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyTemplate>
             {
@@ -750,26 +747,28 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Lists DeidentifyTemplates. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+            /// Lists DeidentifyTemplates. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on the scope of the request
             /// (project or organization) and whether you have [specified a processing
-            /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location specified:
-            /// `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified (defaults to
-            /// global): `projects/`PROJECT_ID + Organizations scope, location specified:
-            /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified (defaults to
-            /// global): `organizations/`ORG_ID The following example `parent` string specifies a parent project with
-            /// the identifier `example-project`, and specifies the `europe-west3` location for processing data:
+            /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+            /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no location
+            /// specified (defaults to global): `projects/{project_id}` + Organizations scope, location specified:
+            /// `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location specified (defaults
+            /// to global): `organizations/{org_id}` The following example `parent` string specifies a parent project
+            /// with the identifier `example-project`, and specifies the `europe-west3` location for processing data:
             /// parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
-            /// Lists DeidentifyTemplates. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+            /// Lists DeidentifyTemplates. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListDeidentifyTemplatesResponse>
             {
@@ -783,13 +782,13 @@ namespace Google.Apis.DLP.v2
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -799,24 +798,25 @@ namespace Google.Apis.DLP.v2
                 public virtual string LocationId { get; set; }
 
                 /// <summary>
-                /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                /// case-insensitive, default sorting order is ascending, redundant space characters are insignificant.
+                /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is case
+                /// insensitive. The default sorting order is ascending. Redundant space characters are insignificant.
                 /// Example: `name asc,update_time, create_time desc` Supported fields are: - `create_time`: corresponds
-                /// to time the template was created. - `update_time`: corresponds to time the template was last
-                /// updated. - `name`: corresponds to template's name. - `display_name`: corresponds to template's
-                /// display name.
+                /// to the time the template was created. - `update_time`: corresponds to the time the template was last
+                /// updated. - `name`: corresponds to the template's name. - `display_name`: corresponds to the
+                /// template's display name.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string OrderBy { get; set; }
 
                 /// <summary>
-                /// Size of the page, can be limited by server. If zero server returns a page of max size 100.
+                /// Size of the page. This value can be limited by the server. If zero server returns a page of max size
+                /// 100.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
                 /// <summary>
-                /// Page token to continue retrieval. Comes from previous call to `ListDeidentifyTemplates`.
+                /// Page token to continue retrieval. Comes from the previous call to `ListDeidentifyTemplates`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
@@ -878,8 +878,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Updates the DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-            /// more.
+            /// Updates the DeidentifyTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -889,12 +889,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateDeidentifyTemplateRequest body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Updates the DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-            /// more.
+            /// Updates the DeidentifyTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyTemplate>
             {
@@ -963,29 +963,29 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Creates an InspectTemplate for re-using frequently used configuration for inspecting content, images,
-            /// and storage. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Creates an InspectTemplate for reusing frequently used configuration for inspecting content, images, and
+            /// storage. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on the scope of the request
             /// (project or organization) and whether you have [specified a processing
-            /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location specified:
-            /// `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified (defaults to
-            /// global): `projects/`PROJECT_ID + Organizations scope, location specified:
-            /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified (defaults to
-            /// global): `organizations/`ORG_ID The following example `parent` string specifies a parent project with
-            /// the identifier `example-project`, and specifies the `europe-west3` location for processing data:
+            /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+            /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no location
+            /// specified (defaults to global): `projects/{project_id}` + Organizations scope, location specified:
+            /// `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location specified (defaults
+            /// to global): `organizations/{org_id}` The following example `parent` string specifies a parent project
+            /// with the identifier `example-project`, and specifies the `europe-west3` location for processing data:
             /// parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateInspectTemplateRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
-            /// Creates an InspectTemplate for re-using frequently used configuration for inspecting content, images,
-            /// and storage. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Creates an InspectTemplate for reusing frequently used configuration for inspecting content, images, and
+            /// storage. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
             /// </summary>
             public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectTemplate>
             {
@@ -1000,13 +1000,13 @@ namespace Google.Apis.DLP.v2
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -1042,7 +1042,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Deletes an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Deletes an InspectTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the organization and inspectTemplate to be deleted, for example
@@ -1050,11 +1051,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
-            /// Deletes an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Deletes an InspectTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
             /// </summary>
             public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
             {
@@ -1098,7 +1100,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Gets an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Gets an InspectTemplate. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates
+            /// to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the organization and inspectTemplate to be read, for example
@@ -1106,11 +1109,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
-            /// Gets an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Gets an InspectTemplate. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates
+            /// to learn more.
             /// </summary>
             public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectTemplate>
             {
@@ -1154,26 +1158,28 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Lists InspectTemplates. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Lists InspectTemplates. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates
+            /// to learn more.
             /// </summary>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on the scope of the request
             /// (project or organization) and whether you have [specified a processing
-            /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location specified:
-            /// `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified (defaults to
-            /// global): `projects/`PROJECT_ID + Organizations scope, location specified:
-            /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified (defaults to
-            /// global): `organizations/`ORG_ID The following example `parent` string specifies a parent project with
-            /// the identifier `example-project`, and specifies the `europe-west3` location for processing data:
+            /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+            /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no location
+            /// specified (defaults to global): `projects/{project_id}` + Organizations scope, location specified:
+            /// `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location specified (defaults
+            /// to global): `organizations/{org_id}` The following example `parent` string specifies a parent project
+            /// with the identifier `example-project`, and specifies the `europe-west3` location for processing data:
             /// parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
-            /// Lists InspectTemplates. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Lists InspectTemplates. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates
+            /// to learn more.
             /// </summary>
             public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListInspectTemplatesResponse>
             {
@@ -1187,13 +1193,13 @@ namespace Google.Apis.DLP.v2
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -1203,24 +1209,25 @@ namespace Google.Apis.DLP.v2
                 public virtual string LocationId { get; set; }
 
                 /// <summary>
-                /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                /// case-insensitive, default sorting order is ascending, redundant space characters are insignificant.
+                /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is case
+                /// insensitive. The default sorting order is ascending. Redundant space characters are insignificant.
                 /// Example: `name asc,update_time, create_time desc` Supported fields are: - `create_time`: corresponds
-                /// to time the template was created. - `update_time`: corresponds to time the template was last
-                /// updated. - `name`: corresponds to template's name. - `display_name`: corresponds to template's
-                /// display name.
+                /// to the time the template was created. - `update_time`: corresponds to the time the template was last
+                /// updated. - `name`: corresponds to the template's name. - `display_name`: corresponds to the
+                /// template's display name.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string OrderBy { get; set; }
 
                 /// <summary>
-                /// Size of the page, can be limited by server. If zero server returns a page of max size 100.
+                /// Size of the page. This value can be limited by the server. If zero server returns a page of max size
+                /// 100.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
                 /// <summary>
-                /// Page token to continue retrieval. Comes from previous call to `ListInspectTemplates`.
+                /// Page token to continue retrieval. Comes from the previous call to `ListInspectTemplates`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
@@ -1282,7 +1289,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Updates the InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Updates the InspectTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -1291,11 +1299,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateInspectTemplateRequest body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Updates the InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Updates the InspectTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
             /// </summary>
             public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectTemplate>
             {
@@ -1361,11 +1370,636 @@ namespace Google.Apis.DLP.v2
             public LocationsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                ColumnDataProfiles = new ColumnDataProfilesResource(service);
+                Connections = new ConnectionsResource(service);
                 DeidentifyTemplates = new DeidentifyTemplatesResource(service);
+                DiscoveryConfigs = new DiscoveryConfigsResource(service);
                 DlpJobs = new DlpJobsResource(service);
+                FileStoreDataProfiles = new FileStoreDataProfilesResource(service);
                 InspectTemplates = new InspectTemplatesResource(service);
                 JobTriggers = new JobTriggersResource(service);
+                ProjectDataProfiles = new ProjectDataProfilesResource(service);
                 StoredInfoTypes = new StoredInfoTypesResource(service);
+                TableDataProfiles = new TableDataProfilesResource(service);
+            }
+
+            /// <summary>Gets the ColumnDataProfiles resource.</summary>
+            public virtual ColumnDataProfilesResource ColumnDataProfiles { get; }
+
+            /// <summary>The "columnDataProfiles" collection of methods.</summary>
+            public class ColumnDataProfilesResource
+            {
+                private const string Resource = "columnDataProfiles";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public ColumnDataProfilesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Gets a column data profile.</summary>
+                /// <param name="name">
+                /// Required. Resource name, for example `organizations/12345/locations/us/columnDataProfiles/53234423`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a column data profile.</summary>
+                public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ColumnDataProfile>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name, for example
+                    /// `organizations/12345/locations/us/columnDataProfiles/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/columnDataProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists column data profiles for an organization.</summary>
+                /// <param name="parent">
+                /// Required. Resource name of the organization or project, for example
+                /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists column data profiles for an organization.</summary>
+                public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListColumnDataProfilesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the organization or project, for example
+                    /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Allows filtering. Supported syntax: * Filter expressions are made up of one or more
+                    /// restrictions. * Restrictions can be combined by `AND` or `OR` logical operators. A sequence of
+                    /// restrictions implicitly uses `AND`. * A restriction has the form of `{field} {operator}
+                    /// {value}`. * Supported fields/values: - `table_data_profile_name` - The name of the related table
+                    /// data profile. - `project_id` - The Google Cloud project ID. (REQUIRED) - `dataset_id` - The
+                    /// BigQuery dataset ID. (REQUIRED) - `table_id` - The BigQuery table ID. (REQUIRED) - `field_id` -
+                    /// The ID of the BigQuery field. - `info_type` - The infotype detected in the resource. -
+                    /// `sensitivity_level` - HIGH|MEDIUM|LOW - `data_risk_level`: How much risk is associated with this
+                    /// data. - `status_code` - an RPC status code as defined in
+                    /// https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto * The operator must
+                    /// be `=` for project_id, dataset_id, and table_id. Other filters also support `!=`. Examples: *
+                    /// project_id = 12345 AND status_code = 1 * project_id = 12345 AND sensitivity_level = HIGH *
+                    /// project_id = 12345 AND info_type = STREET_ADDRESS The length of this field should be no more
+                    /// than 500 characters.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
+                    /// insignificant. Only one order field at a time is allowed. Examples: * `project_id asc` *
+                    /// `table_id` * `sensitivity_level desc` Supported fields are: - `project_id`: The Google Cloud
+                    /// project ID. - `dataset_id`: The ID of a BigQuery dataset. - `table_id`: The ID of a BigQuery
+                    /// table. - `sensitivity_level`: How sensitive the data in a column is, at most. -
+                    /// `data_risk_level`: How much risk is associated with this data. - `profile_last_generated`: When
+                    /// the profile was last updated in epoch seconds.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// Size of the page. This value can be limited by the server. If zero, server returns a page of max
+                    /// size 100.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>Page token to continue retrieval.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/columnDataProfiles";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the Connections resource.</summary>
+            public virtual ConnectionsResource Connections { get; }
+
+            /// <summary>The "connections" collection of methods.</summary>
+            public class ConnectionsResource
+            {
+                private const string Resource = "connections";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public ConnectionsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Create a Connection to an external data source.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. Parent resource name. The format of this value varies depending on the scope of the
+                /// request (project or organization): + Projects scope: `projects/{project_id}/locations/{location_id}`
+                /// + Organizations scope: `organizations/{org_id}/locations/{location_id}`
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateConnectionRequest body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Create a Connection to an external data source.</summary>
+                public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2Connection>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateConnectionRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Parent resource name. The format of this value varies depending on the scope of the
+                    /// request (project or organization): + Projects scope:
+                    /// `projects/{project_id}/locations/{location_id}` + Organizations scope:
+                    /// `organizations/{org_id}/locations/{location_id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateConnectionRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/connections";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Delete a Connection.</summary>
+                /// <param name="name">
+                /// Required. Resource name of the Connection to be deleted, in the format:
+                /// `projects/{project}/locations/{location}/connections/{connection}`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Delete a Connection.</summary>
+                public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the Connection to be deleted, in the format:
+                    /// `projects/{project}/locations/{location}/connections/{connection}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/connections/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Get a Connection by name.</summary>
+                /// <param name="name">
+                /// Required. Resource name in the format:
+                /// `projects/{project}/locations/{location}/connections/{connection}`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Get a Connection by name.</summary>
+                public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2Connection>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name in the format:
+                    /// `projects/{project}/locations/{location}/connections/{connection}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/connections/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Lists Connections in a parent. Use SearchConnections to see all connections within an organization.
+                /// </summary>
+                /// <param name="parent">
+                /// Required. Resource name of the organization or project, for example,
+                /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>
+                /// Lists Connections in a parent. Use SearchConnections to see all connections within an organization.
+                /// </summary>
+                public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListConnectionsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the organization or project, for example,
+                    /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Optional. Supported field/value: `state` - MISSING|AVAILABLE|ERROR</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>Optional. Number of results per page, max 1000.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. Page token from a previous page to return the next set of results. If set, all other
+                    /// request fields must match the original request.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/connections";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Update a Connection.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Resource name in the format:
+                /// `projects/{project}/locations/{location}/connections/{connection}`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateConnectionRequest body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Update a Connection.</summary>
+                public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2Connection>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateConnectionRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name in the format:
+                    /// `projects/{project}/locations/{location}/connections/{connection}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateConnectionRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/connections/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Searches for Connections in a parent.</summary>
+                /// <param name="parent">
+                /// Required. Resource name of the organization or project with a wildcard location, for example,
+                /// `organizations/433245324/locations/-` or `projects/project-id/locations/-`.
+                /// </param>
+                public virtual SearchRequest Search(string parent)
+                {
+                    return new SearchRequest(this.service, parent);
+                }
+
+                /// <summary>Searches for Connections in a parent.</summary>
+                public class SearchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2SearchConnectionsResponse>
+                {
+                    /// <summary>Constructs a new Search request.</summary>
+                    public SearchRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the organization or project with a wildcard location, for example,
+                    /// `organizations/433245324/locations/-` or `projects/project-id/locations/-`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Optional. Supported field/value: - `state` - MISSING|AVAILABLE|ERROR</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>Optional. Number of results per page, max 1000.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. Page token from a previous page to return the next set of results. If set, all other
+                    /// request fields must match the original request.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "search";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/connections:search";
+
+                    /// <summary>Initializes Search parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the DeidentifyTemplates resource.</summary>
@@ -1386,29 +2020,31 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Creates a DeidentifyTemplate for re-using frequently used configuration for de-identifying content,
-                /// images, and storage. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+                /// Creates a DeidentifyTemplate for reusing frequently used configuration for de-identifying content,
+                /// images, and storage. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateDeidentifyTemplateRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
-                /// Creates a DeidentifyTemplate for re-using frequently used configuration for de-identifying content,
-                /// images, and storage. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+                /// Creates a DeidentifyTemplate for reusing frequently used configuration for de-identifying content,
+                /// images, and storage. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyTemplate>
                 {
@@ -1423,13 +2059,14 @@ namespace Google.Apis.DLP.v2
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on the scope of the
                     /// request (project or organization) and whether you have [specified a processing
-                    /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                    /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                    /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                    /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                    /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                    /// parent project with the identifier `example-project`, and specifies the `europe-west3` location
-                    /// for processing data: parent=projects/example-project/locations/europe-west3
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` + Organizations
+                    /// scope, location specified: `organizations/{org_id}/locations/{location_id}` + Organizations
+                    /// scope, no location specified (defaults to global): `organizations/{org_id}` The following
+                    /// example `parent` string specifies a parent project with the identifier `example-project`, and
+                    /// specifies the `europe-west3` location for processing data:
+                    /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -1465,8 +2102,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Deletes a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-                /// more.
+                /// Deletes a DeidentifyTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the organization and deidentify template to be deleted, for example
@@ -1475,12 +2112,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Deletes a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-                /// more.
+                /// Deletes a DeidentifyTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
                 {
@@ -1524,8 +2161,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Gets a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-                /// more.
+                /// Gets a DeidentifyTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the organization and deidentify template to be read, for example
@@ -1534,12 +2171,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Gets a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-                /// more.
+                /// Gets a DeidentifyTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyTemplate>
                 {
@@ -1583,28 +2220,28 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Lists DeidentifyTemplates. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-                /// more.
+                /// Lists DeidentifyTemplates. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
-                /// Lists DeidentifyTemplates. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-                /// more.
+                /// Lists DeidentifyTemplates. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListDeidentifyTemplatesResponse>
                 {
@@ -1618,13 +2255,14 @@ namespace Google.Apis.DLP.v2
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on the scope of the
                     /// request (project or organization) and whether you have [specified a processing
-                    /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                    /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                    /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                    /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                    /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                    /// parent project with the identifier `example-project`, and specifies the `europe-west3` location
-                    /// for processing data: parent=projects/example-project/locations/europe-west3
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` + Organizations
+                    /// scope, location specified: `organizations/{org_id}/locations/{location_id}` + Organizations
+                    /// scope, no location specified (defaults to global): `organizations/{org_id}` The following
+                    /// example `parent` string specifies a parent project with the identifier `example-project`, and
+                    /// specifies the `europe-west3` location for processing data:
+                    /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -1634,24 +2272,25 @@ namespace Google.Apis.DLP.v2
                     public virtual string LocationId { get; set; }
 
                     /// <summary>
-                    /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                    /// case-insensitive, default sorting order is ascending, redundant space characters are
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
                     /// insignificant. Example: `name asc,update_time, create_time desc` Supported fields are: -
-                    /// `create_time`: corresponds to time the template was created. - `update_time`: corresponds to
-                    /// time the template was last updated. - `name`: corresponds to template's name. - `display_name`:
-                    /// corresponds to template's display name.
+                    /// `create_time`: corresponds to the time the template was created. - `update_time`: corresponds to
+                    /// the time the template was last updated. - `name`: corresponds to the template's name. -
+                    /// `display_name`: corresponds to the template's display name.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string OrderBy { get; set; }
 
                     /// <summary>
-                    /// Size of the page, can be limited by server. If zero server returns a page of max size 100.
+                    /// Size of the page. This value can be limited by the server. If zero server returns a page of max
+                    /// size 100.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<int> PageSize { get; set; }
 
                     /// <summary>
-                    /// Page token to continue retrieval. Comes from previous call to `ListDeidentifyTemplates`.
+                    /// Page token to continue retrieval. Comes from the previous call to `ListDeidentifyTemplates`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string PageToken { get; set; }
@@ -1713,8 +2352,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Updates the DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to
-                /// learn more.
+                /// Updates the DeidentifyTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -1724,12 +2363,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateDeidentifyTemplateRequest body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates the DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to
-                /// learn more.
+                /// Updates the DeidentifyTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyTemplate>
                 {
@@ -1780,6 +2419,351 @@ namespace Google.Apis.DLP.v2
                 }
             }
 
+            /// <summary>Gets the DiscoveryConfigs resource.</summary>
+            public virtual DiscoveryConfigsResource DiscoveryConfigs { get; }
+
+            /// <summary>The "discoveryConfigs" collection of methods.</summary>
+            public class DiscoveryConfigsResource
+            {
+                private const string Resource = "discoveryConfigs";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public DiscoveryConfigsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a config for discovery to scan and profile storage.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. Parent resource name. The format of this value varies depending on the scope of the
+                /// request (project or organization): + Projects scope: `projects/{project_id}/locations/{location_id}`
+                /// + Organizations scope: `organizations/{org_id}/locations/{location_id}` The following example
+                /// `parent` string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateDiscoveryConfigRequest body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a config for discovery to scan and profile storage.</summary>
+                public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DiscoveryConfig>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateDiscoveryConfigRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Parent resource name. The format of this value varies depending on the scope of the
+                    /// request (project or organization): + Projects scope:
+                    /// `projects/{project_id}/locations/{location_id}` + Organizations scope:
+                    /// `organizations/{org_id}/locations/{location_id}` The following example `parent` string specifies
+                    /// a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                    /// location for processing data: parent=projects/example-project/locations/europe-west3
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateDiscoveryConfigRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/discoveryConfigs";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a discovery configuration.</summary>
+                /// <param name="name">
+                /// Required. Resource name of the project and the config, for example
+                /// `projects/dlp-test-project/discoveryConfigs/53234423`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a discovery configuration.</summary>
+                public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the project and the config, for example
+                    /// `projects/dlp-test-project/discoveryConfigs/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/discoveryConfigs/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a discovery configuration.</summary>
+                /// <param name="name">
+                /// Required. Resource name of the project and the configuration, for example
+                /// `projects/dlp-test-project/discoveryConfigs/53234423`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a discovery configuration.</summary>
+                public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DiscoveryConfig>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the project and the configuration, for example
+                    /// `projects/dlp-test-project/discoveryConfigs/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/discoveryConfigs/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists discovery configurations.</summary>
+                /// <param name="parent">
+                /// Required. Parent resource name. The format of this value is as follows:
+                /// `projects/{project_id}/locations/{location_id}` The following example `parent` string specifies a
+                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
+                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists discovery configurations.</summary>
+                public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListDiscoveryConfigsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Parent resource name. The format of this value is as follows:
+                    /// `projects/{project_id}/locations/{location_id}` The following example `parent` string specifies
+                    /// a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                    /// location for processing data: parent=projects/example-project/locations/europe-west3
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Comma-separated list of config fields to order by, followed by `asc` or `desc` postfix. This
+                    /// list is case insensitive. The default sorting order is ascending. Redundant space characters are
+                    /// insignificant. Example: `name asc,update_time, create_time desc` Supported fields are: -
+                    /// `last_run_time`: corresponds to the last time the DiscoveryConfig ran. - `name`: corresponds to
+                    /// the DiscoveryConfig's name. - `status`: corresponds to DiscoveryConfig's status.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>Size of the page. This value can be limited by a server.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Page token to continue retrieval. Comes from the previous call to ListDiscoveryConfigs.
+                    /// `order_by` field must not change for subsequent calls.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/discoveryConfigs";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates a discovery configuration.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Resource name of the project and the configuration, for example
+                /// `projects/dlp-test-project/discoveryConfigs/53234423`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateDiscoveryConfigRequest body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates a discovery configuration.</summary>
+                public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DiscoveryConfig>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateDiscoveryConfigRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the project and the configuration, for example
+                    /// `projects/dlp-test-project/discoveryConfigs/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateDiscoveryConfigRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/discoveryConfigs/[^/]+$",
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets the DlpJobs resource.</summary>
             public virtual DlpJobsResource DlpJobs { get; }
 
@@ -1799,26 +2783,27 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Lists DlpJobs that match the specified filter in the request. See
-                /// https://cloud.google.com/dlp/docs/inspecting-storage and
-                /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+                /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
                 /// </summary>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
                 /// Lists DlpJobs that match the specified filter in the request. See
-                /// https://cloud.google.com/dlp/docs/inspecting-storage and
-                /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+                /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
                 /// </summary>
                 public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListDlpJobsResponse>
                 {
@@ -1831,9 +2816,10 @@ namespace Google.Apis.DLP.v2
 
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on whether you have
-                    /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): +
-                    /// Projects scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects
-                    /// scope, no location specified (defaults to global): `projects/`PROJECT_ID The following example
+                    /// [specified a processing
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
                     /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
                     /// the `europe-west3` location for processing data:
                     /// parent=projects/example-project/locations/europe-west3
@@ -1847,11 +2833,11 @@ namespace Google.Apis.DLP.v2
                     /// restrictions implicitly uses `AND`. * A restriction has the form of `{field} {operator}
                     /// {value}`. * Supported fields/values for inspect jobs: - `state` -
                     /// PENDING|RUNNING|CANCELED|FINISHED|FAILED - `inspected_storage` -
-                    /// DATASTORE|CLOUD_STORAGE|BIGQUERY - `trigger_name` - The resource name of the trigger that
-                    /// created job. - 'end_time` - Corresponds to time the job finished. - 'start_time` - Corresponds
-                    /// to time the job finished. * Supported fields for risk analysis jobs: - `state` -
-                    /// RUNNING|CANCELED|FINISHED|FAILED - 'end_time` - Corresponds to time the job finished. -
-                    /// 'start_time` - Corresponds to time the job finished. * The operator must be `=` or `!=`.
+                    /// DATASTORE|CLOUD_STORAGE|BIGQUERY - `trigger_name` - The name of the trigger that created the
+                    /// job. - 'end_time` - Corresponds to the time the job finished. - 'start_time` - Corresponds to
+                    /// the time the job finished. * Supported fields for risk analysis jobs: - `state` -
+                    /// RUNNING|CANCELED|FINISHED|FAILED - 'end_time` - Corresponds to the time the job finished. -
+                    /// 'start_time` - Corresponds to the time the job finished. * The operator must be `=` or `!=`.
                     /// Examples: * inspected_storage = cloud_storage AND state = done * inspected_storage =
                     /// cloud_storage OR inspected_storage = bigquery * inspected_storage = cloud_storage AND (state =
                     /// done OR state = canceled) * end_time &amp;gt; \"2017-12-12T00:00:00+00:00\" The length of this
@@ -1865,11 +2851,11 @@ namespace Google.Apis.DLP.v2
                     public virtual string LocationId { get; set; }
 
                     /// <summary>
-                    /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                    /// case-insensitive, default sorting order is ascending, redundant space characters are
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
                     /// insignificant. Example: `name asc, end_time asc, create_time desc` Supported fields are: -
-                    /// `create_time`: corresponds to time the job was created. - `end_time`: corresponds to time the
-                    /// job ended. - `name`: corresponds to job's name. - `state`: corresponds to `state`
+                    /// `create_time`: corresponds to the time the job was created. - `end_time`: corresponds to the
+                    /// time the job ended. - `name`: corresponds to the job's name. - `state`: corresponds to `state`
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string OrderBy { get; set; }
@@ -1975,6 +2961,253 @@ namespace Google.Apis.DLP.v2
                 }
             }
 
+            /// <summary>Gets the FileStoreDataProfiles resource.</summary>
+            public virtual FileStoreDataProfilesResource FileStoreDataProfiles { get; }
+
+            /// <summary>The "fileStoreDataProfiles" collection of methods.</summary>
+            public class FileStoreDataProfilesResource
+            {
+                private const string Resource = "fileStoreDataProfiles";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public FileStoreDataProfilesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Delete a FileStoreDataProfile. Will not prevent the profile from being regenerated if the resource
+                /// is still included in a discovery configuration.
+                /// </summary>
+                /// <param name="name">Required. Resource name of the file store data profile.</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Delete a FileStoreDataProfile. Will not prevent the profile from being regenerated if the resource
+                /// is still included in a discovery configuration.
+                /// </summary>
+                public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Resource name of the file store data profile.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/fileStoreDataProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a file store data profile.</summary>
+                /// <param name="name">
+                /// Required. Resource name, for example
+                /// `organizations/12345/locations/us/fileStoreDataProfiles/53234423`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a file store data profile.</summary>
+                public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2FileStoreDataProfile>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name, for example
+                    /// `organizations/12345/locations/us/fileStoreDataProfiles/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/fileStoreDataProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists file store data profiles for an organization.</summary>
+                /// <param name="parent">
+                /// Required. Resource name of the organization or project, for example
+                /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists file store data profiles for an organization.</summary>
+                public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListFileStoreDataProfilesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the organization or project, for example
+                    /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Allows filtering. Supported syntax: * Filter expressions are made up of one or more
+                    /// restrictions. * Restrictions can be combined by `AND` or `OR` logical operators. A sequence of
+                    /// restrictions implicitly uses `AND`. * A restriction has the form of `{field} {operator}
+                    /// {value}`. * Supported fields/values: - `project_id` - The Google Cloud project ID. -
+                    /// `account_id` - The AWS account ID. - `file_store_path` - The path like "gs://bucket". -
+                    /// `data_source_type` - The profile's data source type, like "google/storage/bucket". -
+                    /// `data_storage_location` - The location where the file store's data is stored, like
+                    /// "us-central1". - `sensitivity_level` - HIGH|MODERATE|LOW - `data_risk_level` - HIGH|MODERATE|LOW
+                    /// - `resource_visibility`: PUBLIC|RESTRICTED - `status_code` - an RPC status code as defined in
+                    /// https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto * The operator must
+                    /// be `=` or `!=`. Examples: * `project_id = 12345 AND status_code = 1` * `project_id = 12345 AND
+                    /// sensitivity_level = HIGH` * `project_id = 12345 AND resource_visibility = PUBLIC` *
+                    /// `file_store_path = "gs://mybucket"` The length of this field should be no more than 500
+                    /// characters.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This
+                    /// list is case insensitive. The default sorting order is ascending. Redundant space characters are
+                    /// insignificant. Only one order field at a time is allowed. Examples: * `project_id asc` * `name`
+                    /// * `sensitivity_level desc` Supported fields are: - `project_id`: The Google Cloud project ID. -
+                    /// `sensitivity_level`: How sensitive the data in a table is, at most. - `data_risk_level`: How
+                    /// much risk is associated with this data. - `profile_last_generated`: When the profile was last
+                    /// updated in epoch seconds. - `last_modified`: The last time the resource was modified. -
+                    /// `resource_visibility`: Visibility restriction for this resource. - `name`: The name of the
+                    /// profile. - `create_time`: The time the file store was first created.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// Optional. Size of the page. This value can be limited by the server. If zero, server returns a
+                    /// page of max size 100.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>Optional. Page token to continue retrieval.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/fileStoreDataProfiles";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets the InspectTemplates resource.</summary>
             public virtual InspectTemplatesResource InspectTemplates { get; }
 
@@ -1993,29 +3226,31 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Creates an InspectTemplate for re-using frequently used configuration for inspecting content,
-                /// images, and storage. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Creates an InspectTemplate for reusing frequently used configuration for inspecting content, images,
+                /// and storage. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn
+                /// more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateInspectTemplateRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
-                /// Creates an InspectTemplate for re-using frequently used configuration for inspecting content,
-                /// images, and storage. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Creates an InspectTemplate for reusing frequently used configuration for inspecting content, images,
+                /// and storage. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn
+                /// more.
                 /// </summary>
                 public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectTemplate>
                 {
@@ -2030,13 +3265,14 @@ namespace Google.Apis.DLP.v2
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on the scope of the
                     /// request (project or organization) and whether you have [specified a processing
-                    /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                    /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                    /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                    /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                    /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                    /// parent project with the identifier `example-project`, and specifies the `europe-west3` location
-                    /// for processing data: parent=projects/example-project/locations/europe-west3
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` + Organizations
+                    /// scope, location specified: `organizations/{org_id}/locations/{location_id}` + Organizations
+                    /// scope, no location specified (defaults to global): `organizations/{org_id}` The following
+                    /// example `parent` string specifies a parent project with the identifier `example-project`, and
+                    /// specifies the `europe-west3` location for processing data:
+                    /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -2072,7 +3308,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Deletes an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Deletes an InspectTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the organization and inspectTemplate to be deleted, for example
@@ -2081,11 +3318,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Deletes an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Deletes an InspectTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
                 {
@@ -2129,7 +3367,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Gets an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Gets an InspectTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the organization and inspectTemplate to be read, for example
@@ -2138,11 +3377,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Gets an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Gets an InspectTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectTemplate>
                 {
@@ -2186,26 +3426,28 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Lists InspectTemplates. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Lists InspectTemplates. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
-                /// Lists InspectTemplates. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Lists InspectTemplates. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListInspectTemplatesResponse>
                 {
@@ -2219,13 +3461,14 @@ namespace Google.Apis.DLP.v2
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on the scope of the
                     /// request (project or organization) and whether you have [specified a processing
-                    /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                    /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                    /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                    /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                    /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                    /// parent project with the identifier `example-project`, and specifies the `europe-west3` location
-                    /// for processing data: parent=projects/example-project/locations/europe-west3
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` + Organizations
+                    /// scope, location specified: `organizations/{org_id}/locations/{location_id}` + Organizations
+                    /// scope, no location specified (defaults to global): `organizations/{org_id}` The following
+                    /// example `parent` string specifies a parent project with the identifier `example-project`, and
+                    /// specifies the `europe-west3` location for processing data:
+                    /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -2235,24 +3478,25 @@ namespace Google.Apis.DLP.v2
                     public virtual string LocationId { get; set; }
 
                     /// <summary>
-                    /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                    /// case-insensitive, default sorting order is ascending, redundant space characters are
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
                     /// insignificant. Example: `name asc,update_time, create_time desc` Supported fields are: -
-                    /// `create_time`: corresponds to time the template was created. - `update_time`: corresponds to
-                    /// time the template was last updated. - `name`: corresponds to template's name. - `display_name`:
-                    /// corresponds to template's display name.
+                    /// `create_time`: corresponds to the time the template was created. - `update_time`: corresponds to
+                    /// the time the template was last updated. - `name`: corresponds to the template's name. -
+                    /// `display_name`: corresponds to the template's display name.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string OrderBy { get; set; }
 
                     /// <summary>
-                    /// Size of the page, can be limited by server. If zero server returns a page of max size 100.
+                    /// Size of the page. This value can be limited by the server. If zero server returns a page of max
+                    /// size 100.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<int> PageSize { get; set; }
 
                     /// <summary>
-                    /// Page token to continue retrieval. Comes from previous call to `ListInspectTemplates`.
+                    /// Page token to continue retrieval. Comes from the previous call to `ListInspectTemplates`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string PageToken { get; set; }
@@ -2314,7 +3558,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Updates the InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Updates the InspectTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -2324,11 +3569,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateInspectTemplateRequest body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates the InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Updates the InspectTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectTemplate>
                 {
@@ -2398,25 +3644,28 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Creates a job trigger to run DLP actions such as scanning storage for sensitive information on a set
-                /// schedule. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// schedule. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn
+                /// more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateJobTriggerRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
                 /// Creates a job trigger to run DLP actions such as scanning storage for sensitive information on a set
-                /// schedule. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// schedule. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn
+                /// more.
                 /// </summary>
                 public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2JobTrigger>
                 {
@@ -2430,9 +3679,10 @@ namespace Google.Apis.DLP.v2
 
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on whether you have
-                    /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): +
-                    /// Projects scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects
-                    /// scope, no location specified (defaults to global): `projects/`PROJECT_ID The following example
+                    /// [specified a processing
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
                     /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
                     /// the `europe-west3` location for processing data:
                     /// parent=projects/example-project/locations/europe-west3
@@ -2471,7 +3721,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Deletes a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Deletes a job trigger. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the project and the triggeredJob, for example
@@ -2479,11 +3730,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Deletes a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Deletes a job trigger. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
                 {
@@ -2526,7 +3778,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Gets a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Gets a job trigger. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the project and the triggeredJob, for example
@@ -2534,11 +3787,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Gets a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Gets a job trigger. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2JobTrigger>
                 {
@@ -2581,23 +3835,26 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Lists job triggers. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Lists job triggers. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
-                /// Lists job triggers. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Lists job triggers. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListJobTriggersResponse>
                 {
@@ -2610,9 +3867,10 @@ namespace Google.Apis.DLP.v2
 
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on whether you have
-                    /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): +
-                    /// Projects scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects
-                    /// scope, no location specified (defaults to global): `projects/`PROJECT_ID The following example
+                    /// [specified a processing
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
                     /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
                     /// the `europe-west3` location for processing data:
                     /// parent=projects/example-project/locations/europe-west3
@@ -2641,24 +3899,24 @@ namespace Google.Apis.DLP.v2
                     public virtual string LocationId { get; set; }
 
                     /// <summary>
-                    /// Comma separated list of triggeredJob fields to order by, followed by `asc` or `desc` postfix.
-                    /// This list is case-insensitive, default sorting order is ascending, redundant space characters
-                    /// are insignificant. Example: `name asc,update_time, create_time desc` Supported fields are: -
-                    /// `create_time`: corresponds to time the JobTrigger was created. - `update_time`: corresponds to
-                    /// time the JobTrigger was last updated. - `last_run_time`: corresponds to the last time the
-                    /// JobTrigger ran. - `name`: corresponds to JobTrigger's name. - `display_name`: corresponds to
-                    /// JobTrigger's display name. - `status`: corresponds to JobTrigger's status.
+                    /// Comma-separated list of triggeredJob fields to order by, followed by `asc` or `desc` postfix.
+                    /// This list is case insensitive. The default sorting order is ascending. Redundant space
+                    /// characters are insignificant. Example: `name asc,update_time, create_time desc` Supported fields
+                    /// are: - `create_time`: corresponds to the time the JobTrigger was created. - `update_time`:
+                    /// corresponds to the time the JobTrigger was last updated. - `last_run_time`: corresponds to the
+                    /// last time the JobTrigger ran. - `name`: corresponds to the JobTrigger's name. - `display_name`:
+                    /// corresponds to the JobTrigger's display name. - `status`: corresponds to JobTrigger's status.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string OrderBy { get; set; }
 
-                    /// <summary>Size of the page, can be limited by a server.</summary>
+                    /// <summary>Size of the page. This value can be limited by a server.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<int> PageSize { get; set; }
 
                     /// <summary>
-                    /// Page token to continue retrieval. Comes from previous call to ListJobTriggers. `order_by` field
-                    /// must not change for subsequent calls.
+                    /// Page token to continue retrieval. Comes from the previous call to ListJobTriggers. `order_by`
+                    /// field must not change for subsequent calls.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string PageToken { get; set; }
@@ -2756,7 +4014,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Updates a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Updates a job trigger. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -2765,11 +4024,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateJobTriggerRequest body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Updates a job trigger. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2JobTrigger>
                 {
@@ -2819,6 +4079,188 @@ namespace Google.Apis.DLP.v2
                 }
             }
 
+            /// <summary>Gets the ProjectDataProfiles resource.</summary>
+            public virtual ProjectDataProfilesResource ProjectDataProfiles { get; }
+
+            /// <summary>The "projectDataProfiles" collection of methods.</summary>
+            public class ProjectDataProfilesResource
+            {
+                private const string Resource = "projectDataProfiles";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public ProjectDataProfilesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Gets a project data profile.</summary>
+                /// <param name="name">
+                /// Required. Resource name, for example
+                /// `organizations/12345/locations/us/projectDataProfiles/53234423`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a project data profile.</summary>
+                public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ProjectDataProfile>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name, for example
+                    /// `organizations/12345/locations/us/projectDataProfiles/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/projectDataProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists project data profiles for an organization.</summary>
+                /// <param name="parent">Required. organizations/{org_id}/locations/{loc_id}</param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists project data profiles for an organization.</summary>
+                public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListProjectDataProfilesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. organizations/{org_id}/locations/{loc_id}</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Allows filtering. Supported syntax: * Filter expressions are made up of one or more
+                    /// restrictions. * Restrictions can be combined by `AND` or `OR` logical operators. A sequence of
+                    /// restrictions implicitly uses `AND`. * A restriction has the form of `{field} {operator}
+                    /// {value}`. * Supported fields/values: - `sensitivity_level` - HIGH|MODERATE|LOW -
+                    /// `data_risk_level` - HIGH|MODERATE|LOW - `status_code` - an RPC status code as defined in
+                    /// https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto * The operator must
+                    /// be `=` or `!=`. Examples: * `project_id = 12345 AND status_code = 1` * `project_id = 12345 AND
+                    /// sensitivity_level = HIGH` The length of this field should be no more than 500 characters.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
+                    /// insignificant. Only one order field at a time is allowed. Examples: * `project_id` *
+                    /// `sensitivity_level desc` Supported fields are: - `project_id`: Google Cloud project ID -
+                    /// `sensitivity_level`: How sensitive the data in a project is, at most. - `data_risk_level`: How
+                    /// much risk is associated with this data. - `profile_last_generated`: When the profile was last
+                    /// updated in epoch seconds.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// Size of the page. This value can be limited by the server. If zero, server returns a page of max
+                    /// size 100.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>Page token to continue retrieval.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/projectDataProfiles";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets the StoredInfoTypes resource.</summary>
             public virtual StoredInfoTypesResource StoredInfoTypes { get; }
 
@@ -2838,28 +4280,28 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Creates a pre-built stored infoType to be used for inspection. See
-                /// https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateStoredInfoTypeRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
                 /// Creates a pre-built stored infoType to be used for inspection. See
-                /// https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2StoredInfoType>
                 {
@@ -2874,13 +4316,14 @@ namespace Google.Apis.DLP.v2
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on the scope of the
                     /// request (project or organization) and whether you have [specified a processing
-                    /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                    /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                    /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                    /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                    /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                    /// parent project with the identifier `example-project`, and specifies the `europe-west3` location
-                    /// for processing data: parent=projects/example-project/locations/europe-west3
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` + Organizations
+                    /// scope, location specified: `organizations/{org_id}/locations/{location_id}` + Organizations
+                    /// scope, no location specified (defaults to global): `organizations/{org_id}` The following
+                    /// example `parent` string specifies a parent project with the identifier `example-project`, and
+                    /// specifies the `europe-west3` location for processing data:
+                    /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -2916,8 +4359,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Deletes a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-                /// more.
+                /// Deletes a stored infoType. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the organization and storedInfoType to be deleted, for example
@@ -2926,12 +4369,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Deletes a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-                /// more.
+                /// Deletes a stored infoType. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
                 {
@@ -2975,8 +4418,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Gets a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-                /// more.
+                /// Gets a stored infoType. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the organization and storedInfoType to be read, for example
@@ -2985,12 +4428,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Gets a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-                /// more.
+                /// Gets a stored infoType. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2StoredInfoType>
                 {
@@ -3034,28 +4477,26 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Lists stored infoTypes. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-                /// more.
+                /// Lists stored infoTypes. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
-                /// Lists stored infoTypes. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-                /// more.
+                /// Lists stored infoTypes. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListStoredInfoTypesResponse>
                 {
@@ -3069,13 +4510,12 @@ namespace Google.Apis.DLP.v2
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on the scope of the
                     /// request (project or organization) and whether you have [specified a processing
-                    /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                    /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                    /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                    /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                    /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                    /// parent project with the identifier `example-project`, and specifies the `europe-west3` location
-                    /// for processing data: parent=projects/example-project/locations/europe-west3
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
+                    /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
+                    /// the `europe-west3` location for processing data:
+                    /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -3085,10 +4525,10 @@ namespace Google.Apis.DLP.v2
                     public virtual string LocationId { get; set; }
 
                     /// <summary>
-                    /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                    /// case-insensitive, default sorting order is ascending, redundant space characters are
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
                     /// insignificant. Example: `name asc, display_name, create_time desc` Supported fields are: -
-                    /// `create_time`: corresponds to time the most recent version of the resource was created. -
+                    /// `create_time`: corresponds to the time the most recent version of the resource was created. -
                     /// `state`: corresponds to the state of the resource. - `name`: corresponds to resource name. -
                     /// `display_name`: corresponds to info type's display name.
                     /// </summary>
@@ -3096,13 +4536,14 @@ namespace Google.Apis.DLP.v2
                     public virtual string OrderBy { get; set; }
 
                     /// <summary>
-                    /// Size of the page, can be limited by server. If zero server returns a page of max size 100.
+                    /// Size of the page. This value can be limited by the server. If zero server returns a page of max
+                    /// size 100.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<int> PageSize { get; set; }
 
                     /// <summary>
-                    /// Page token to continue retrieval. Comes from previous call to `ListStoredInfoTypes`.
+                    /// Page token to continue retrieval. Comes from the previous call to `ListStoredInfoTypes`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string PageToken { get; set; }
@@ -3165,8 +4606,8 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Updates the stored infoType by creating a new version. The existing version will continue to be used
-                /// until the new version is ready. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to
-                /// learn more.
+                /// until the new version is ready. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -3176,13 +4617,13 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateStoredInfoTypeRequest body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
                 /// Updates the stored infoType by creating a new version. The existing version will continue to be used
-                /// until the new version is ready. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to
-                /// learn more.
+                /// until the new version is ready. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2StoredInfoType>
                 {
@@ -3232,6 +4673,250 @@ namespace Google.Apis.DLP.v2
                     }
                 }
             }
+
+            /// <summary>Gets the TableDataProfiles resource.</summary>
+            public virtual TableDataProfilesResource TableDataProfiles { get; }
+
+            /// <summary>The "tableDataProfiles" collection of methods.</summary>
+            public class TableDataProfilesResource
+            {
+                private const string Resource = "tableDataProfiles";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public TableDataProfilesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Delete a TableDataProfile. Will not prevent the profile from being regenerated if the table is still
+                /// included in a discovery configuration.
+                /// </summary>
+                /// <param name="name">Required. Resource name of the table data profile.</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Delete a TableDataProfile. Will not prevent the profile from being regenerated if the table is still
+                /// included in a discovery configuration.
+                /// </summary>
+                public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Resource name of the table data profile.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/tableDataProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a table data profile.</summary>
+                /// <param name="name">
+                /// Required. Resource name, for example `organizations/12345/locations/us/tableDataProfiles/53234423`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a table data profile.</summary>
+                public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2TableDataProfile>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name, for example
+                    /// `organizations/12345/locations/us/tableDataProfiles/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/tableDataProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists table data profiles for an organization.</summary>
+                /// <param name="parent">
+                /// Required. Resource name of the organization or project, for example
+                /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists table data profiles for an organization.</summary>
+                public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListTableDataProfilesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the organization or project, for example
+                    /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Allows filtering. Supported syntax: * Filter expressions are made up of one or more
+                    /// restrictions. * Restrictions can be combined by `AND` or `OR` logical operators. A sequence of
+                    /// restrictions implicitly uses `AND`. * A restriction has the form of `{field} {operator}
+                    /// {value}`. * Supported fields/values: - `project_id` - The Google Cloud project ID. -
+                    /// `dataset_id` - The BigQuery dataset ID. - `table_id` - The ID of the BigQuery table. -
+                    /// `sensitivity_level` - HIGH|MODERATE|LOW - `data_risk_level` - HIGH|MODERATE|LOW -
+                    /// `resource_visibility`: PUBLIC|RESTRICTED - `status_code` - an RPC status code as defined in
+                    /// https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto * The operator must
+                    /// be `=` or `!=`. Examples: * `project_id = 12345 AND status_code = 1` * `project_id = 12345 AND
+                    /// sensitivity_level = HIGH` * `project_id = 12345 AND resource_visibility = PUBLIC` The length of
+                    /// this field should be no more than 500 characters.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
+                    /// insignificant. Only one order field at a time is allowed. Examples: * `project_id asc` *
+                    /// `table_id` * `sensitivity_level desc` Supported fields are: - `project_id`: The Google Cloud
+                    /// project ID. - `dataset_id`: The ID of a BigQuery dataset. - `table_id`: The ID of a BigQuery
+                    /// table. - `sensitivity_level`: How sensitive the data in a table is, at most. -
+                    /// `data_risk_level`: How much risk is associated with this data. - `profile_last_generated`: When
+                    /// the profile was last updated in epoch seconds. - `last_modified`: The last time the resource was
+                    /// modified. - `resource_visibility`: Visibility restriction for this resource. - `row_count`:
+                    /// Number of rows in this resource.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// Size of the page. This value can be limited by the server. If zero, server returns a page of max
+                    /// size 100.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>Page token to continue retrieval.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/tableDataProfiles";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
         }
 
         /// <summary>Gets the StoredInfoTypes resource.</summary>
@@ -3253,28 +4938,28 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// Creates a pre-built stored infoType to be used for inspection. See
-            /// https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on the scope of the request
             /// (project or organization) and whether you have [specified a processing
-            /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location specified:
-            /// `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified (defaults to
-            /// global): `projects/`PROJECT_ID + Organizations scope, location specified:
-            /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified (defaults to
-            /// global): `organizations/`ORG_ID The following example `parent` string specifies a parent project with
-            /// the identifier `example-project`, and specifies the `europe-west3` location for processing data:
+            /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+            /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no location
+            /// specified (defaults to global): `projects/{project_id}` + Organizations scope, location specified:
+            /// `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location specified (defaults
+            /// to global): `organizations/{org_id}` The following example `parent` string specifies a parent project
+            /// with the identifier `example-project`, and specifies the `europe-west3` location for processing data:
             /// parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateStoredInfoTypeRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
             /// Creates a pre-built stored infoType to be used for inspection. See
-            /// https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2StoredInfoType>
             {
@@ -3289,13 +4974,13 @@ namespace Google.Apis.DLP.v2
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -3331,8 +5016,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Deletes a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-            /// more.
+            /// Deletes a stored infoType. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the organization and storedInfoType to be deleted, for example
@@ -3340,12 +5025,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
-            /// Deletes a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-            /// more.
+            /// Deletes a stored infoType. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
             {
@@ -3389,7 +5074,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Gets a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+            /// Gets a stored infoType. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the organization and storedInfoType to be read, for example
@@ -3397,11 +5083,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
-            /// Gets a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+            /// Gets a stored infoType. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2StoredInfoType>
             {
@@ -3445,26 +5132,26 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Lists stored infoTypes. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+            /// Lists stored infoTypes. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on the scope of the request
             /// (project or organization) and whether you have [specified a processing
-            /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location specified:
-            /// `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified (defaults to
-            /// global): `projects/`PROJECT_ID + Organizations scope, location specified:
-            /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified (defaults to
-            /// global): `organizations/`ORG_ID The following example `parent` string specifies a parent project with
-            /// the identifier `example-project`, and specifies the `europe-west3` location for processing data:
-            /// parent=projects/example-project/locations/europe-west3
+            /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+            /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no location
+            /// specified (defaults to global): `projects/{project_id}` The following example `parent` string specifies
+            /// a parent project with the identifier `example-project`, and specifies the `europe-west3` location for
+            /// processing data: parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
-            /// Lists stored infoTypes. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+            /// Lists stored infoTypes. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListStoredInfoTypesResponse>
             {
@@ -3478,13 +5165,11 @@ namespace Google.Apis.DLP.v2
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -3494,24 +5179,25 @@ namespace Google.Apis.DLP.v2
                 public virtual string LocationId { get; set; }
 
                 /// <summary>
-                /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                /// case-insensitive, default sorting order is ascending, redundant space characters are insignificant.
+                /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is case
+                /// insensitive. The default sorting order is ascending. Redundant space characters are insignificant.
                 /// Example: `name asc, display_name, create_time desc` Supported fields are: - `create_time`:
-                /// corresponds to time the most recent version of the resource was created. - `state`: corresponds to
-                /// the state of the resource. - `name`: corresponds to resource name. - `display_name`: corresponds to
-                /// info type's display name.
+                /// corresponds to the time the most recent version of the resource was created. - `state`: corresponds
+                /// to the state of the resource. - `name`: corresponds to resource name. - `display_name`: corresponds
+                /// to info type's display name.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string OrderBy { get; set; }
 
                 /// <summary>
-                /// Size of the page, can be limited by server. If zero server returns a page of max size 100.
+                /// Size of the page. This value can be limited by the server. If zero server returns a page of max size
+                /// 100.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
                 /// <summary>
-                /// Page token to continue retrieval. Comes from previous call to `ListStoredInfoTypes`.
+                /// Page token to continue retrieval. Comes from the previous call to `ListStoredInfoTypes`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
@@ -3574,8 +5260,8 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// Updates the stored infoType by creating a new version. The existing version will continue to be used
-            /// until the new version is ready. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-            /// more.
+            /// until the new version is ready. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -3584,13 +5270,13 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateStoredInfoTypeRequest body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
             /// Updates the stored infoType by creating a new version. The existing version will continue to be used
-            /// until the new version is ready. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-            /// more.
+            /// until the new version is ready. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2StoredInfoType>
             {
@@ -3683,29 +5369,31 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// De-identifies potentially sensitive info from a ContentItem. This method has limits on input size and
-            /// output size. See https://cloud.google.com/dlp/docs/deidentify-sensitive-data to learn more. When no
-            /// InfoTypes or CustomInfoTypes are specified in this request, the system will automatically choose what
-            /// detectors to run. By default this may be all types, but may change over time as detectors are updated.
+            /// output size. See https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data to
+            /// learn more. When no InfoTypes or CustomInfoTypes are specified in this request, the system will
+            /// automatically choose what detectors to run. By default this may be all types, but may change over time
+            /// as detectors are updated.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Parent resource name. The format of this value varies depending on whether you have [specified a
-            /// processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-            /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-            /// (defaults to global): `projects/`PROJECT_ID The following example `parent` string specifies a parent
-            /// project with the identifier `example-project`, and specifies the `europe-west3` location for processing
-            /// data: parent=projects/example-project/locations/europe-west3
+            /// processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+            /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+            /// location specified (defaults to global): `projects/{project_id}` The following example `parent` string
+            /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+            /// location for processing data: parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual DeidentifyRequest Deidentify(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyContentRequest body, string parent)
             {
-                return new DeidentifyRequest(service, body, parent);
+                return new DeidentifyRequest(this.service, body, parent);
             }
 
             /// <summary>
             /// De-identifies potentially sensitive info from a ContentItem. This method has limits on input size and
-            /// output size. See https://cloud.google.com/dlp/docs/deidentify-sensitive-data to learn more. When no
-            /// InfoTypes or CustomInfoTypes are specified in this request, the system will automatically choose what
-            /// detectors to run. By default this may be all types, but may change over time as detectors are updated.
+            /// output size. See https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data to
+            /// learn more. When no InfoTypes or CustomInfoTypes are specified in this request, the system will
+            /// automatically choose what detectors to run. By default this may be all types, but may change over time
+            /// as detectors are updated.
             /// </summary>
             public class DeidentifyRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyContentResponse>
             {
@@ -3719,11 +5407,11 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Parent resource name. The format of this value varies depending on whether you have [specified a
-                /// processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-                /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-                /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
+                /// `parent` string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -3762,29 +5450,31 @@ namespace Google.Apis.DLP.v2
             /// Finds potentially sensitive info in content. This method has limits on input size, processing time, and
             /// output size. When no InfoTypes or CustomInfoTypes are specified in this request, the system will
             /// automatically choose what detectors to run. By default this may be all types, but may change over time
-            /// as detectors are updated. For how to guides, see https://cloud.google.com/dlp/docs/inspecting-images and
-            /// https://cloud.google.com/dlp/docs/inspecting-text,
+            /// as detectors are updated. For how to guides, see
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-images and
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-text,
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Parent resource name. The format of this value varies depending on whether you have [specified a
-            /// processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-            /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-            /// (defaults to global): `projects/`PROJECT_ID The following example `parent` string specifies a parent
-            /// project with the identifier `example-project`, and specifies the `europe-west3` location for processing
-            /// data: parent=projects/example-project/locations/europe-west3
+            /// processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+            /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+            /// location specified (defaults to global): `projects/{project_id}` The following example `parent` string
+            /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+            /// location for processing data: parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual InspectRequest Inspect(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectContentRequest body, string parent)
             {
-                return new InspectRequest(service, body, parent);
+                return new InspectRequest(this.service, body, parent);
             }
 
             /// <summary>
             /// Finds potentially sensitive info in content. This method has limits on input size, processing time, and
             /// output size. When no InfoTypes or CustomInfoTypes are specified in this request, the system will
             /// automatically choose what detectors to run. By default this may be all types, but may change over time
-            /// as detectors are updated. For how to guides, see https://cloud.google.com/dlp/docs/inspecting-images and
-            /// https://cloud.google.com/dlp/docs/inspecting-text,
+            /// as detectors are updated. For how to guides, see
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-images and
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-text,
             /// </summary>
             public class InspectRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectContentResponse>
             {
@@ -3798,11 +5488,11 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Parent resource name. The format of this value varies depending on whether you have [specified a
-                /// processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-                /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-                /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
+                /// `parent` string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -3839,27 +5529,27 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// Re-identifies content that has been de-identified. See
-            /// https://cloud.google.com/dlp/docs/pseudonymization#re-identification_in_free_text_code_example to learn
-            /// more.
+            /// https://cloud.google.com/sensitive-data-protection/docs/pseudonymization#re-identification_in_free_text_code_example
+            /// to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on whether you have [specified
-            /// a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-            /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-            /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string specifies a
-            /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-            /// processing data: parent=projects/example-project/locations/europe-west3
+            /// a processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+            /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+            /// location specified (defaults to global): `projects/{project_id}` The following example `parent` string
+            /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+            /// location for processing data: parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual ReidentifyRequest Reidentify(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ReidentifyContentRequest body, string parent)
             {
-                return new ReidentifyRequest(service, body, parent);
+                return new ReidentifyRequest(this.service, body, parent);
             }
 
             /// <summary>
             /// Re-identifies content that has been de-identified. See
-            /// https://cloud.google.com/dlp/docs/pseudonymization#re-identification_in_free_text_code_example to learn
-            /// more.
+            /// https://cloud.google.com/sensitive-data-protection/docs/pseudonymization#re-identification_in_free_text_code_example
+            /// to learn more.
             /// </summary>
             public class ReidentifyRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ReidentifyContentResponse>
             {
@@ -3873,11 +5563,12 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -3931,29 +5622,31 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Creates a DeidentifyTemplate for re-using frequently used configuration for de-identifying content,
-            /// images, and storage. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+            /// Creates a DeidentifyTemplate for reusing frequently used configuration for de-identifying content,
+            /// images, and storage. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid
+            /// to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on the scope of the request
             /// (project or organization) and whether you have [specified a processing
-            /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location specified:
-            /// `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified (defaults to
-            /// global): `projects/`PROJECT_ID + Organizations scope, location specified:
-            /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified (defaults to
-            /// global): `organizations/`ORG_ID The following example `parent` string specifies a parent project with
-            /// the identifier `example-project`, and specifies the `europe-west3` location for processing data:
+            /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+            /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no location
+            /// specified (defaults to global): `projects/{project_id}` + Organizations scope, location specified:
+            /// `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location specified (defaults
+            /// to global): `organizations/{org_id}` The following example `parent` string specifies a parent project
+            /// with the identifier `example-project`, and specifies the `europe-west3` location for processing data:
             /// parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateDeidentifyTemplateRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
-            /// Creates a DeidentifyTemplate for re-using frequently used configuration for de-identifying content,
-            /// images, and storage. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+            /// Creates a DeidentifyTemplate for reusing frequently used configuration for de-identifying content,
+            /// images, and storage. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid
+            /// to learn more.
             /// </summary>
             public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyTemplate>
             {
@@ -3968,13 +5661,13 @@ namespace Google.Apis.DLP.v2
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -4010,8 +5703,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Deletes a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-            /// more.
+            /// Deletes a DeidentifyTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the organization and deidentify template to be deleted, for example
@@ -4020,12 +5713,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
-            /// Deletes a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-            /// more.
+            /// Deletes a DeidentifyTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
             {
@@ -4069,7 +5762,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Gets a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+            /// Gets a DeidentifyTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the organization and deidentify template to be read, for example
@@ -4078,11 +5772,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
-            /// Gets a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+            /// Gets a DeidentifyTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyTemplate>
             {
@@ -4126,26 +5821,28 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Lists DeidentifyTemplates. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+            /// Lists DeidentifyTemplates. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on the scope of the request
             /// (project or organization) and whether you have [specified a processing
-            /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location specified:
-            /// `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified (defaults to
-            /// global): `projects/`PROJECT_ID + Organizations scope, location specified:
-            /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified (defaults to
-            /// global): `organizations/`ORG_ID The following example `parent` string specifies a parent project with
-            /// the identifier `example-project`, and specifies the `europe-west3` location for processing data:
+            /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+            /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no location
+            /// specified (defaults to global): `projects/{project_id}` + Organizations scope, location specified:
+            /// `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location specified (defaults
+            /// to global): `organizations/{org_id}` The following example `parent` string specifies a parent project
+            /// with the identifier `example-project`, and specifies the `europe-west3` location for processing data:
             /// parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
-            /// Lists DeidentifyTemplates. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+            /// Lists DeidentifyTemplates. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListDeidentifyTemplatesResponse>
             {
@@ -4159,13 +5856,13 @@ namespace Google.Apis.DLP.v2
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -4175,24 +5872,25 @@ namespace Google.Apis.DLP.v2
                 public virtual string LocationId { get; set; }
 
                 /// <summary>
-                /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                /// case-insensitive, default sorting order is ascending, redundant space characters are insignificant.
+                /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is case
+                /// insensitive. The default sorting order is ascending. Redundant space characters are insignificant.
                 /// Example: `name asc,update_time, create_time desc` Supported fields are: - `create_time`: corresponds
-                /// to time the template was created. - `update_time`: corresponds to time the template was last
-                /// updated. - `name`: corresponds to template's name. - `display_name`: corresponds to template's
-                /// display name.
+                /// to the time the template was created. - `update_time`: corresponds to the time the template was last
+                /// updated. - `name`: corresponds to the template's name. - `display_name`: corresponds to the
+                /// template's display name.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string OrderBy { get; set; }
 
                 /// <summary>
-                /// Size of the page, can be limited by server. If zero server returns a page of max size 100.
+                /// Size of the page. This value can be limited by the server. If zero server returns a page of max size
+                /// 100.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
                 /// <summary>
-                /// Page token to continue retrieval. Comes from previous call to `ListDeidentifyTemplates`.
+                /// Page token to continue retrieval. Comes from the previous call to `ListDeidentifyTemplates`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
@@ -4254,8 +5952,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Updates the DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-            /// more.
+            /// Updates the DeidentifyTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -4265,12 +5963,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateDeidentifyTemplateRequest body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Updates the DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-            /// more.
+            /// Updates the DeidentifyTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
             /// </summary>
             public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyTemplate>
             {
@@ -4340,20 +6038,22 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// Starts asynchronous cancellation on a long-running DlpJob. The server makes a best effort to cancel the
-            /// DlpJob, but success is not guaranteed. See https://cloud.google.com/dlp/docs/inspecting-storage and
-            /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+            /// DlpJob, but success is not guaranteed. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+            /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">Required. The name of the DlpJob resource to be cancelled.</param>
             public virtual CancelRequest Cancel(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CancelDlpJobRequest body, string name)
             {
-                return new CancelRequest(service, body, name);
+                return new CancelRequest(this.service, body, name);
             }
 
             /// <summary>
             /// Starts asynchronous cancellation on a long-running DlpJob. The server makes a best effort to cancel the
-            /// DlpJob, but success is not guaranteed. See https://cloud.google.com/dlp/docs/inspecting-storage and
-            /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+            /// DlpJob, but success is not guaranteed. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+            /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
             /// </summary>
             public class CancelRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
             {
@@ -4401,31 +6101,31 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// Creates a new job to inspect storage or calculate risk metrics. See
-            /// https://cloud.google.com/dlp/docs/inspecting-storage and
-            /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more. When no InfoTypes or
-            /// CustomInfoTypes are specified in inspect jobs, the system will automatically choose what detectors to
-            /// run. By default this may be all types, but may change over time as detectors are updated.
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+            /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more. When no
+            /// InfoTypes or CustomInfoTypes are specified in inspect jobs, the system will automatically choose what
+            /// detectors to run. By default this may be all types, but may change over time as detectors are updated.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on whether you have [specified
-            /// a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-            /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-            /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string specifies a
-            /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-            /// processing data: parent=projects/example-project/locations/europe-west3
+            /// a processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+            /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+            /// location specified (defaults to global): `projects/{project_id}` The following example `parent` string
+            /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+            /// location for processing data: parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateDlpJobRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
             /// Creates a new job to inspect storage or calculate risk metrics. See
-            /// https://cloud.google.com/dlp/docs/inspecting-storage and
-            /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more. When no InfoTypes or
-            /// CustomInfoTypes are specified in inspect jobs, the system will automatically choose what detectors to
-            /// run. By default this may be all types, but may change over time as detectors are updated.
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+            /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more. When no
+            /// InfoTypes or CustomInfoTypes are specified in inspect jobs, the system will automatically choose what
+            /// detectors to run. By default this may be all types, but may change over time as detectors are updated.
             /// </summary>
             public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DlpJob>
             {
@@ -4439,11 +6139,12 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -4480,21 +6181,21 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// Deletes a long-running DlpJob. This method indicates that the client is no longer interested in the
-            /// DlpJob result. The job will be cancelled if possible. See
-            /// https://cloud.google.com/dlp/docs/inspecting-storage and
-            /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+            /// DlpJob result. The job will be canceled if possible. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+            /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
             /// </summary>
             /// <param name="name">Required. The name of the DlpJob resource to be deleted.</param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
             /// Deletes a long-running DlpJob. This method indicates that the client is no longer interested in the
-            /// DlpJob result. The job will be cancelled if possible. See
-            /// https://cloud.google.com/dlp/docs/inspecting-storage and
-            /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+            /// DlpJob result. The job will be canceled if possible. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+            /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
             /// </summary>
             public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
             {
@@ -4534,18 +6235,20 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Gets the latest state of a long-running DlpJob. See https://cloud.google.com/dlp/docs/inspecting-storage
-            /// and https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+            /// Gets the latest state of a long-running DlpJob. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+            /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
             /// </summary>
             /// <param name="name">Required. The name of the DlpJob resource.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
-            /// Gets the latest state of a long-running DlpJob. See https://cloud.google.com/dlp/docs/inspecting-storage
-            /// and https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+            /// Gets the latest state of a long-running DlpJob. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+            /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
             /// </summary>
             public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DlpJob>
             {
@@ -4586,26 +6289,26 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// Lists DlpJobs that match the specified filter in the request. See
-            /// https://cloud.google.com/dlp/docs/inspecting-storage and
-            /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+            /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
             /// </summary>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on whether you have [specified
-            /// a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-            /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-            /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string specifies a
-            /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-            /// processing data: parent=projects/example-project/locations/europe-west3
+            /// a processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+            /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+            /// location specified (defaults to global): `projects/{project_id}` The following example `parent` string
+            /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+            /// location for processing data: parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
             /// Lists DlpJobs that match the specified filter in the request. See
-            /// https://cloud.google.com/dlp/docs/inspecting-storage and
-            /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+            /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+            /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
             /// </summary>
             public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListDlpJobsResponse>
             {
@@ -4618,11 +6321,12 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -4632,13 +6336,13 @@ namespace Google.Apis.DLP.v2
                 /// Restrictions can be combined by `AND` or `OR` logical operators. A sequence of restrictions
                 /// implicitly uses `AND`. * A restriction has the form of `{field} {operator} {value}`. * Supported
                 /// fields/values for inspect jobs: - `state` - PENDING|RUNNING|CANCELED|FINISHED|FAILED -
-                /// `inspected_storage` - DATASTORE|CLOUD_STORAGE|BIGQUERY - `trigger_name` - The resource name of the
-                /// trigger that created job. - 'end_time` - Corresponds to time the job finished. - 'start_time` -
-                /// Corresponds to time the job finished. * Supported fields for risk analysis jobs: - `state` -
-                /// RUNNING|CANCELED|FINISHED|FAILED - 'end_time` - Corresponds to time the job finished. - 'start_time`
-                /// - Corresponds to time the job finished. * The operator must be `=` or `!=`. Examples: *
-                /// inspected_storage = cloud_storage AND state = done * inspected_storage = cloud_storage OR
-                /// inspected_storage = bigquery * inspected_storage = cloud_storage AND (state = done OR state =
+                /// `inspected_storage` - DATASTORE|CLOUD_STORAGE|BIGQUERY - `trigger_name` - The name of the trigger
+                /// that created the job. - 'end_time` - Corresponds to the time the job finished. - 'start_time` -
+                /// Corresponds to the time the job finished. * Supported fields for risk analysis jobs: - `state` -
+                /// RUNNING|CANCELED|FINISHED|FAILED - 'end_time` - Corresponds to the time the job finished. -
+                /// 'start_time` - Corresponds to the time the job finished. * The operator must be `=` or `!=`.
+                /// Examples: * inspected_storage = cloud_storage AND state = done * inspected_storage = cloud_storage
+                /// OR inspected_storage = bigquery * inspected_storage = cloud_storage AND (state = done OR state =
                 /// canceled) * end_time &amp;gt; \"2017-12-12T00:00:00+00:00\" The length of this field should be no
                 /// more than 500 characters.
                 /// </summary>
@@ -4650,11 +6354,11 @@ namespace Google.Apis.DLP.v2
                 public virtual string LocationId { get; set; }
 
                 /// <summary>
-                /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                /// case-insensitive, default sorting order is ascending, redundant space characters are insignificant.
+                /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is case
+                /// insensitive. The default sorting order is ascending. Redundant space characters are insignificant.
                 /// Example: `name asc, end_time asc, create_time desc` Supported fields are: - `create_time`:
-                /// corresponds to time the job was created. - `end_time`: corresponds to time the job ended. - `name`:
-                /// corresponds to job's name. - `state`: corresponds to `state`
+                /// corresponds to the time the job was created. - `end_time`: corresponds to the time the job ended. -
+                /// `name`: corresponds to the job's name. - `state`: corresponds to `state`
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string OrderBy { get; set; }
@@ -4779,7 +6483,8 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// Redacts potentially sensitive info from an image. This method has limits on input size, processing time,
-            /// and output size. See https://cloud.google.com/dlp/docs/redacting-sensitive-data-images to learn more.
+            /// and output size. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/redacting-sensitive-data-images to learn more.
             /// When no InfoTypes or CustomInfoTypes are specified in this request, the system will automatically choose
             /// what detectors to run. By default this may be all types, but may change over time as detectors are
             /// updated.
@@ -4787,20 +6492,21 @@ namespace Google.Apis.DLP.v2
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Parent resource name. The format of this value varies depending on whether you have [specified a
-            /// processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-            /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-            /// (defaults to global): `projects/`PROJECT_ID The following example `parent` string specifies a parent
-            /// project with the identifier `example-project`, and specifies the `europe-west3` location for processing
-            /// data: parent=projects/example-project/locations/europe-west3
+            /// processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+            /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+            /// location specified (defaults to global): `projects/{project_id}` The following example `parent` string
+            /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+            /// location for processing data: parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual RedactRequest Redact(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2RedactImageRequest body, string parent)
             {
-                return new RedactRequest(service, body, parent);
+                return new RedactRequest(this.service, body, parent);
             }
 
             /// <summary>
             /// Redacts potentially sensitive info from an image. This method has limits on input size, processing time,
-            /// and output size. See https://cloud.google.com/dlp/docs/redacting-sensitive-data-images to learn more.
+            /// and output size. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/redacting-sensitive-data-images to learn more.
             /// When no InfoTypes or CustomInfoTypes are specified in this request, the system will automatically choose
             /// what detectors to run. By default this may be all types, but may change over time as detectors are
             /// updated.
@@ -4817,11 +6523,11 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Parent resource name. The format of this value varies depending on whether you have [specified a
-                /// processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-                /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-                /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
+                /// `parent` string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -4875,29 +6581,29 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Creates an InspectTemplate for re-using frequently used configuration for inspecting content, images,
-            /// and storage. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Creates an InspectTemplate for reusing frequently used configuration for inspecting content, images, and
+            /// storage. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on the scope of the request
             /// (project or organization) and whether you have [specified a processing
-            /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location specified:
-            /// `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified (defaults to
-            /// global): `projects/`PROJECT_ID + Organizations scope, location specified:
-            /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified (defaults to
-            /// global): `organizations/`ORG_ID The following example `parent` string specifies a parent project with
-            /// the identifier `example-project`, and specifies the `europe-west3` location for processing data:
+            /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+            /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no location
+            /// specified (defaults to global): `projects/{project_id}` + Organizations scope, location specified:
+            /// `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location specified (defaults
+            /// to global): `organizations/{org_id}` The following example `parent` string specifies a parent project
+            /// with the identifier `example-project`, and specifies the `europe-west3` location for processing data:
             /// parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateInspectTemplateRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
-            /// Creates an InspectTemplate for re-using frequently used configuration for inspecting content, images,
-            /// and storage. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Creates an InspectTemplate for reusing frequently used configuration for inspecting content, images, and
+            /// storage. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
             /// </summary>
             public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectTemplate>
             {
@@ -4912,13 +6618,13 @@ namespace Google.Apis.DLP.v2
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -4954,7 +6660,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Deletes an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Deletes an InspectTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the organization and inspectTemplate to be deleted, for example
@@ -4962,11 +6669,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
-            /// Deletes an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Deletes an InspectTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
             /// </summary>
             public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
             {
@@ -5010,7 +6718,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Gets an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Gets an InspectTemplate. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates
+            /// to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the organization and inspectTemplate to be read, for example
@@ -5018,11 +6727,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
-            /// Gets an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Gets an InspectTemplate. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates
+            /// to learn more.
             /// </summary>
             public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectTemplate>
             {
@@ -5066,26 +6776,28 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Lists InspectTemplates. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Lists InspectTemplates. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates
+            /// to learn more.
             /// </summary>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on the scope of the request
             /// (project or organization) and whether you have [specified a processing
-            /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location specified:
-            /// `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified (defaults to
-            /// global): `projects/`PROJECT_ID + Organizations scope, location specified:
-            /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified (defaults to
-            /// global): `organizations/`ORG_ID The following example `parent` string specifies a parent project with
-            /// the identifier `example-project`, and specifies the `europe-west3` location for processing data:
+            /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+            /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no location
+            /// specified (defaults to global): `projects/{project_id}` + Organizations scope, location specified:
+            /// `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location specified (defaults
+            /// to global): `organizations/{org_id}` The following example `parent` string specifies a parent project
+            /// with the identifier `example-project`, and specifies the `europe-west3` location for processing data:
             /// parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
-            /// Lists InspectTemplates. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Lists InspectTemplates. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates
+            /// to learn more.
             /// </summary>
             public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListInspectTemplatesResponse>
             {
@@ -5099,13 +6811,13 @@ namespace Google.Apis.DLP.v2
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -5115,24 +6827,25 @@ namespace Google.Apis.DLP.v2
                 public virtual string LocationId { get; set; }
 
                 /// <summary>
-                /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                /// case-insensitive, default sorting order is ascending, redundant space characters are insignificant.
+                /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is case
+                /// insensitive. The default sorting order is ascending. Redundant space characters are insignificant.
                 /// Example: `name asc,update_time, create_time desc` Supported fields are: - `create_time`: corresponds
-                /// to time the template was created. - `update_time`: corresponds to time the template was last
-                /// updated. - `name`: corresponds to template's name. - `display_name`: corresponds to template's
-                /// display name.
+                /// to the time the template was created. - `update_time`: corresponds to the time the template was last
+                /// updated. - `name`: corresponds to the template's name. - `display_name`: corresponds to the
+                /// template's display name.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string OrderBy { get; set; }
 
                 /// <summary>
-                /// Size of the page, can be limited by server. If zero server returns a page of max size 100.
+                /// Size of the page. This value can be limited by the server. If zero server returns a page of max size
+                /// 100.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
                 /// <summary>
-                /// Page token to continue retrieval. Comes from previous call to `ListInspectTemplates`.
+                /// Page token to continue retrieval. Comes from the previous call to `ListInspectTemplates`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
@@ -5194,7 +6907,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Updates the InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Updates the InspectTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -5203,11 +6917,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateInspectTemplateRequest body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Updates the InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+            /// Updates the InspectTemplate. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
             /// </summary>
             public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectTemplate>
             {
@@ -5286,7 +7001,7 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual ActivateRequest Activate(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ActivateJobTriggerRequest body, string name)
             {
-                return new ActivateRequest(service, body, name);
+                return new ActivateRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -5342,25 +7057,27 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// Creates a job trigger to run DLP actions such as scanning storage for sensitive information on a set
-            /// schedule. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+            /// schedule. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn
+            /// more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on whether you have [specified
-            /// a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-            /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-            /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string specifies a
-            /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-            /// processing data: parent=projects/example-project/locations/europe-west3
+            /// a processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+            /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+            /// location specified (defaults to global): `projects/{project_id}` The following example `parent` string
+            /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+            /// location for processing data: parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateJobTriggerRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
             /// Creates a job trigger to run DLP actions such as scanning storage for sensitive information on a set
-            /// schedule. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+            /// schedule. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn
+            /// more.
             /// </summary>
             public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2JobTrigger>
             {
@@ -5374,11 +7091,12 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -5414,7 +7132,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Deletes a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+            /// Deletes a job trigger. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers
+            /// to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the project and the triggeredJob, for example
@@ -5422,11 +7141,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
-            /// Deletes a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+            /// Deletes a job trigger. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers
+            /// to learn more.
             /// </summary>
             public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
             {
@@ -5469,7 +7189,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Gets a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+            /// Gets a job trigger. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to
+            /// learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the project and the triggeredJob, for example
@@ -5477,11 +7198,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
-            /// Gets a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+            /// Gets a job trigger. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to
+            /// learn more.
             /// </summary>
             public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2JobTrigger>
             {
@@ -5524,23 +7246,25 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Lists job triggers. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+            /// Lists job triggers. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to
+            /// learn more.
             /// </summary>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on whether you have [specified
-            /// a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-            /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-            /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string specifies a
-            /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-            /// processing data: parent=projects/example-project/locations/europe-west3
+            /// a processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+            /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+            /// location specified (defaults to global): `projects/{project_id}` The following example `parent` string
+            /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+            /// location for processing data: parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
-            /// Lists job triggers. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+            /// Lists job triggers. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to
+            /// learn more.
             /// </summary>
             public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListJobTriggersResponse>
             {
@@ -5553,11 +7277,12 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -5583,24 +7308,24 @@ namespace Google.Apis.DLP.v2
                 public virtual string LocationId { get; set; }
 
                 /// <summary>
-                /// Comma separated list of triggeredJob fields to order by, followed by `asc` or `desc` postfix. This
-                /// list is case-insensitive, default sorting order is ascending, redundant space characters are
+                /// Comma-separated list of triggeredJob fields to order by, followed by `asc` or `desc` postfix. This
+                /// list is case insensitive. The default sorting order is ascending. Redundant space characters are
                 /// insignificant. Example: `name asc,update_time, create_time desc` Supported fields are: -
-                /// `create_time`: corresponds to time the JobTrigger was created. - `update_time`: corresponds to time
-                /// the JobTrigger was last updated. - `last_run_time`: corresponds to the last time the JobTrigger ran.
-                /// - `name`: corresponds to JobTrigger's name. - `display_name`: corresponds to JobTrigger's display
-                /// name. - `status`: corresponds to JobTrigger's status.
+                /// `create_time`: corresponds to the time the JobTrigger was created. - `update_time`: corresponds to
+                /// the time the JobTrigger was last updated. - `last_run_time`: corresponds to the last time the
+                /// JobTrigger ran. - `name`: corresponds to the JobTrigger's name. - `display_name`: corresponds to the
+                /// JobTrigger's display name. - `status`: corresponds to JobTrigger's status.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string OrderBy { get; set; }
 
-                /// <summary>Size of the page, can be limited by a server.</summary>
+                /// <summary>Size of the page. This value can be limited by a server.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
                 /// <summary>
-                /// Page token to continue retrieval. Comes from previous call to ListJobTriggers. `order_by` field must
-                /// not change for subsequent calls.
+                /// Page token to continue retrieval. Comes from the previous call to ListJobTriggers. `order_by` field
+                /// must not change for subsequent calls.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
@@ -5698,7 +7423,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Updates a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+            /// Updates a job trigger. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers
+            /// to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -5707,11 +7433,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateJobTriggerRequest body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Updates a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+            /// Updates a job trigger. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers
+            /// to learn more.
             /// </summary>
             public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2JobTrigger>
             {
@@ -5776,13 +7503,638 @@ namespace Google.Apis.DLP.v2
             public LocationsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                ColumnDataProfiles = new ColumnDataProfilesResource(service);
+                Connections = new ConnectionsResource(service);
                 Content = new ContentResource(service);
                 DeidentifyTemplates = new DeidentifyTemplatesResource(service);
+                DiscoveryConfigs = new DiscoveryConfigsResource(service);
                 DlpJobs = new DlpJobsResource(service);
+                FileStoreDataProfiles = new FileStoreDataProfilesResource(service);
                 Image = new ImageResource(service);
                 InspectTemplates = new InspectTemplatesResource(service);
                 JobTriggers = new JobTriggersResource(service);
+                ProjectDataProfiles = new ProjectDataProfilesResource(service);
                 StoredInfoTypes = new StoredInfoTypesResource(service);
+                TableDataProfiles = new TableDataProfilesResource(service);
+            }
+
+            /// <summary>Gets the ColumnDataProfiles resource.</summary>
+            public virtual ColumnDataProfilesResource ColumnDataProfiles { get; }
+
+            /// <summary>The "columnDataProfiles" collection of methods.</summary>
+            public class ColumnDataProfilesResource
+            {
+                private const string Resource = "columnDataProfiles";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public ColumnDataProfilesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Gets a column data profile.</summary>
+                /// <param name="name">
+                /// Required. Resource name, for example `organizations/12345/locations/us/columnDataProfiles/53234423`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a column data profile.</summary>
+                public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ColumnDataProfile>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name, for example
+                    /// `organizations/12345/locations/us/columnDataProfiles/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/columnDataProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists column data profiles for an organization.</summary>
+                /// <param name="parent">
+                /// Required. Resource name of the organization or project, for example
+                /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists column data profiles for an organization.</summary>
+                public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListColumnDataProfilesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the organization or project, for example
+                    /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Allows filtering. Supported syntax: * Filter expressions are made up of one or more
+                    /// restrictions. * Restrictions can be combined by `AND` or `OR` logical operators. A sequence of
+                    /// restrictions implicitly uses `AND`. * A restriction has the form of `{field} {operator}
+                    /// {value}`. * Supported fields/values: - `table_data_profile_name` - The name of the related table
+                    /// data profile. - `project_id` - The Google Cloud project ID. (REQUIRED) - `dataset_id` - The
+                    /// BigQuery dataset ID. (REQUIRED) - `table_id` - The BigQuery table ID. (REQUIRED) - `field_id` -
+                    /// The ID of the BigQuery field. - `info_type` - The infotype detected in the resource. -
+                    /// `sensitivity_level` - HIGH|MEDIUM|LOW - `data_risk_level`: How much risk is associated with this
+                    /// data. - `status_code` - an RPC status code as defined in
+                    /// https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto * The operator must
+                    /// be `=` for project_id, dataset_id, and table_id. Other filters also support `!=`. Examples: *
+                    /// project_id = 12345 AND status_code = 1 * project_id = 12345 AND sensitivity_level = HIGH *
+                    /// project_id = 12345 AND info_type = STREET_ADDRESS The length of this field should be no more
+                    /// than 500 characters.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
+                    /// insignificant. Only one order field at a time is allowed. Examples: * `project_id asc` *
+                    /// `table_id` * `sensitivity_level desc` Supported fields are: - `project_id`: The Google Cloud
+                    /// project ID. - `dataset_id`: The ID of a BigQuery dataset. - `table_id`: The ID of a BigQuery
+                    /// table. - `sensitivity_level`: How sensitive the data in a column is, at most. -
+                    /// `data_risk_level`: How much risk is associated with this data. - `profile_last_generated`: When
+                    /// the profile was last updated in epoch seconds.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// Size of the page. This value can be limited by the server. If zero, server returns a page of max
+                    /// size 100.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>Page token to continue retrieval.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/columnDataProfiles";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the Connections resource.</summary>
+            public virtual ConnectionsResource Connections { get; }
+
+            /// <summary>The "connections" collection of methods.</summary>
+            public class ConnectionsResource
+            {
+                private const string Resource = "connections";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public ConnectionsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Create a Connection to an external data source.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. Parent resource name. The format of this value varies depending on the scope of the
+                /// request (project or organization): + Projects scope: `projects/{project_id}/locations/{location_id}`
+                /// + Organizations scope: `organizations/{org_id}/locations/{location_id}`
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateConnectionRequest body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Create a Connection to an external data source.</summary>
+                public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2Connection>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateConnectionRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Parent resource name. The format of this value varies depending on the scope of the
+                    /// request (project or organization): + Projects scope:
+                    /// `projects/{project_id}/locations/{location_id}` + Organizations scope:
+                    /// `organizations/{org_id}/locations/{location_id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateConnectionRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/connections";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Delete a Connection.</summary>
+                /// <param name="name">
+                /// Required. Resource name of the Connection to be deleted, in the format:
+                /// `projects/{project}/locations/{location}/connections/{connection}`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Delete a Connection.</summary>
+                public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the Connection to be deleted, in the format:
+                    /// `projects/{project}/locations/{location}/connections/{connection}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/connections/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Get a Connection by name.</summary>
+                /// <param name="name">
+                /// Required. Resource name in the format:
+                /// `projects/{project}/locations/{location}/connections/{connection}`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Get a Connection by name.</summary>
+                public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2Connection>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name in the format:
+                    /// `projects/{project}/locations/{location}/connections/{connection}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/connections/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Lists Connections in a parent. Use SearchConnections to see all connections within an organization.
+                /// </summary>
+                /// <param name="parent">
+                /// Required. Resource name of the organization or project, for example,
+                /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>
+                /// Lists Connections in a parent. Use SearchConnections to see all connections within an organization.
+                /// </summary>
+                public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListConnectionsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the organization or project, for example,
+                    /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Optional. Supported field/value: `state` - MISSING|AVAILABLE|ERROR</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>Optional. Number of results per page, max 1000.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. Page token from a previous page to return the next set of results. If set, all other
+                    /// request fields must match the original request.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/connections";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Update a Connection.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Resource name in the format:
+                /// `projects/{project}/locations/{location}/connections/{connection}`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateConnectionRequest body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Update a Connection.</summary>
+                public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2Connection>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateConnectionRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name in the format:
+                    /// `projects/{project}/locations/{location}/connections/{connection}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateConnectionRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/connections/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Searches for Connections in a parent.</summary>
+                /// <param name="parent">
+                /// Required. Resource name of the organization or project with a wildcard location, for example,
+                /// `organizations/433245324/locations/-` or `projects/project-id/locations/-`.
+                /// </param>
+                public virtual SearchRequest Search(string parent)
+                {
+                    return new SearchRequest(this.service, parent);
+                }
+
+                /// <summary>Searches for Connections in a parent.</summary>
+                public class SearchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2SearchConnectionsResponse>
+                {
+                    /// <summary>Constructs a new Search request.</summary>
+                    public SearchRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the organization or project with a wildcard location, for example,
+                    /// `organizations/433245324/locations/-` or `projects/project-id/locations/-`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Optional. Supported field/value: - `state` - MISSING|AVAILABLE|ERROR</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>Optional. Number of results per page, max 1000.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. Page token from a previous page to return the next set of results. If set, all other
+                    /// request fields must match the original request.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "search";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/connections:search";
+
+                    /// <summary>Initializes Search parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Content resource.</summary>
@@ -5804,31 +8156,33 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// De-identifies potentially sensitive info from a ContentItem. This method has limits on input size
-                /// and output size. See https://cloud.google.com/dlp/docs/deidentify-sensitive-data to learn more. When
-                /// no InfoTypes or CustomInfoTypes are specified in this request, the system will automatically choose
-                /// what detectors to run. By default this may be all types, but may change over time as detectors are
-                /// updated.
+                /// and output size. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data to learn more.
+                /// When no InfoTypes or CustomInfoTypes are specified in this request, the system will automatically
+                /// choose what detectors to run. By default this may be all types, but may change over time as
+                /// detectors are updated.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Parent resource name. The format of this value varies depending on whether you have [specified a
-                /// processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-                /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-                /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
+                /// `parent` string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual DeidentifyRequest Deidentify(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyContentRequest body, string parent)
                 {
-                    return new DeidentifyRequest(service, body, parent);
+                    return new DeidentifyRequest(this.service, body, parent);
                 }
 
                 /// <summary>
                 /// De-identifies potentially sensitive info from a ContentItem. This method has limits on input size
-                /// and output size. See https://cloud.google.com/dlp/docs/deidentify-sensitive-data to learn more. When
-                /// no InfoTypes or CustomInfoTypes are specified in this request, the system will automatically choose
-                /// what detectors to run. By default this may be all types, but may change over time as detectors are
-                /// updated.
+                /// and output size. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data to learn more.
+                /// When no InfoTypes or CustomInfoTypes are specified in this request, the system will automatically
+                /// choose what detectors to run. By default this may be all types, but may change over time as
+                /// detectors are updated.
                 /// </summary>
                 public class DeidentifyRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyContentResponse>
                 {
@@ -5842,11 +8196,12 @@ namespace Google.Apis.DLP.v2
 
                     /// <summary>
                     /// Parent resource name. The format of this value varies depending on whether you have [specified a
-                    /// processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-                    /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-                    /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                    /// specifies a parent project with the identifier `example-project`, and specifies the
-                    /// `europe-west3` location for processing data:
+                    /// processing
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
+                    /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
+                    /// the `europe-west3` location for processing data:
                     /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
@@ -5887,21 +8242,21 @@ namespace Google.Apis.DLP.v2
                 /// and output size. When no InfoTypes or CustomInfoTypes are specified in this request, the system will
                 /// automatically choose what detectors to run. By default this may be all types, but may change over
                 /// time as detectors are updated. For how to guides, see
-                /// https://cloud.google.com/dlp/docs/inspecting-images and
-                /// https://cloud.google.com/dlp/docs/inspecting-text,
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-images and
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-text,
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Parent resource name. The format of this value varies depending on whether you have [specified a
-                /// processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-                /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-                /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
+                /// `parent` string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual InspectRequest Inspect(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectContentRequest body, string parent)
                 {
-                    return new InspectRequest(service, body, parent);
+                    return new InspectRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -5909,8 +8264,8 @@ namespace Google.Apis.DLP.v2
                 /// and output size. When no InfoTypes or CustomInfoTypes are specified in this request, the system will
                 /// automatically choose what detectors to run. By default this may be all types, but may change over
                 /// time as detectors are updated. For how to guides, see
-                /// https://cloud.google.com/dlp/docs/inspecting-images and
-                /// https://cloud.google.com/dlp/docs/inspecting-text,
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-images and
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-text,
                 /// </summary>
                 public class InspectRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectContentResponse>
                 {
@@ -5924,11 +8279,12 @@ namespace Google.Apis.DLP.v2
 
                     /// <summary>
                     /// Parent resource name. The format of this value varies depending on whether you have [specified a
-                    /// processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-                    /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-                    /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                    /// specifies a parent project with the identifier `example-project`, and specifies the
-                    /// `europe-west3` location for processing data:
+                    /// processing
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
+                    /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
+                    /// the `europe-west3` location for processing data:
                     /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
@@ -5966,27 +8322,28 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Re-identifies content that has been de-identified. See
-                /// https://cloud.google.com/dlp/docs/pseudonymization#re-identification_in_free_text_code_example to
-                /// learn more.
+                /// https://cloud.google.com/sensitive-data-protection/docs/pseudonymization#re-identification_in_free_text_code_example
+                /// to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual ReidentifyRequest Reidentify(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ReidentifyContentRequest body, string parent)
                 {
-                    return new ReidentifyRequest(service, body, parent);
+                    return new ReidentifyRequest(this.service, body, parent);
                 }
 
                 /// <summary>
                 /// Re-identifies content that has been de-identified. See
-                /// https://cloud.google.com/dlp/docs/pseudonymization#re-identification_in_free_text_code_example to
-                /// learn more.
+                /// https://cloud.google.com/sensitive-data-protection/docs/pseudonymization#re-identification_in_free_text_code_example
+                /// to learn more.
                 /// </summary>
                 public class ReidentifyRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ReidentifyContentResponse>
                 {
@@ -6000,9 +8357,10 @@ namespace Google.Apis.DLP.v2
 
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on whether you have
-                    /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): +
-                    /// Projects scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects
-                    /// scope, no location specified (defaults to global): `projects/`PROJECT_ID The following example
+                    /// [specified a processing
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
                     /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
                     /// the `europe-west3` location for processing data:
                     /// parent=projects/example-project/locations/europe-west3
@@ -6059,29 +8417,31 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Creates a DeidentifyTemplate for re-using frequently used configuration for de-identifying content,
-                /// images, and storage. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+                /// Creates a DeidentifyTemplate for reusing frequently used configuration for de-identifying content,
+                /// images, and storage. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateDeidentifyTemplateRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
-                /// Creates a DeidentifyTemplate for re-using frequently used configuration for de-identifying content,
-                /// images, and storage. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn more.
+                /// Creates a DeidentifyTemplate for reusing frequently used configuration for de-identifying content,
+                /// images, and storage. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyTemplate>
                 {
@@ -6096,13 +8456,14 @@ namespace Google.Apis.DLP.v2
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on the scope of the
                     /// request (project or organization) and whether you have [specified a processing
-                    /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                    /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                    /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                    /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                    /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                    /// parent project with the identifier `example-project`, and specifies the `europe-west3` location
-                    /// for processing data: parent=projects/example-project/locations/europe-west3
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` + Organizations
+                    /// scope, location specified: `organizations/{org_id}/locations/{location_id}` + Organizations
+                    /// scope, no location specified (defaults to global): `organizations/{org_id}` The following
+                    /// example `parent` string specifies a parent project with the identifier `example-project`, and
+                    /// specifies the `europe-west3` location for processing data:
+                    /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -6138,8 +8499,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Deletes a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-                /// more.
+                /// Deletes a DeidentifyTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the organization and deidentify template to be deleted, for example
@@ -6148,12 +8509,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Deletes a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-                /// more.
+                /// Deletes a DeidentifyTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
                 {
@@ -6197,8 +8558,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Gets a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-                /// more.
+                /// Gets a DeidentifyTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the organization and deidentify template to be read, for example
@@ -6207,12 +8568,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Gets a DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-                /// more.
+                /// Gets a DeidentifyTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyTemplate>
                 {
@@ -6256,28 +8617,28 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Lists DeidentifyTemplates. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-                /// more.
+                /// Lists DeidentifyTemplates. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
-                /// Lists DeidentifyTemplates. See https://cloud.google.com/dlp/docs/creating-templates-deid to learn
-                /// more.
+                /// Lists DeidentifyTemplates. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListDeidentifyTemplatesResponse>
                 {
@@ -6291,13 +8652,14 @@ namespace Google.Apis.DLP.v2
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on the scope of the
                     /// request (project or organization) and whether you have [specified a processing
-                    /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                    /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                    /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                    /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                    /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                    /// parent project with the identifier `example-project`, and specifies the `europe-west3` location
-                    /// for processing data: parent=projects/example-project/locations/europe-west3
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` + Organizations
+                    /// scope, location specified: `organizations/{org_id}/locations/{location_id}` + Organizations
+                    /// scope, no location specified (defaults to global): `organizations/{org_id}` The following
+                    /// example `parent` string specifies a parent project with the identifier `example-project`, and
+                    /// specifies the `europe-west3` location for processing data:
+                    /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -6307,24 +8669,25 @@ namespace Google.Apis.DLP.v2
                     public virtual string LocationId { get; set; }
 
                     /// <summary>
-                    /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                    /// case-insensitive, default sorting order is ascending, redundant space characters are
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
                     /// insignificant. Example: `name asc,update_time, create_time desc` Supported fields are: -
-                    /// `create_time`: corresponds to time the template was created. - `update_time`: corresponds to
-                    /// time the template was last updated. - `name`: corresponds to template's name. - `display_name`:
-                    /// corresponds to template's display name.
+                    /// `create_time`: corresponds to the time the template was created. - `update_time`: corresponds to
+                    /// the time the template was last updated. - `name`: corresponds to the template's name. -
+                    /// `display_name`: corresponds to the template's display name.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string OrderBy { get; set; }
 
                     /// <summary>
-                    /// Size of the page, can be limited by server. If zero server returns a page of max size 100.
+                    /// Size of the page. This value can be limited by the server. If zero server returns a page of max
+                    /// size 100.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<int> PageSize { get; set; }
 
                     /// <summary>
-                    /// Page token to continue retrieval. Comes from previous call to `ListDeidentifyTemplates`.
+                    /// Page token to continue retrieval. Comes from the previous call to `ListDeidentifyTemplates`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string PageToken { get; set; }
@@ -6386,8 +8749,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Updates the DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to
-                /// learn more.
+                /// Updates the DeidentifyTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -6397,12 +8760,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateDeidentifyTemplateRequest body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates the DeidentifyTemplate. See https://cloud.google.com/dlp/docs/creating-templates-deid to
-                /// learn more.
+                /// Updates the DeidentifyTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates-deid to learn more.
                 /// </summary>
                 public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DeidentifyTemplate>
                 {
@@ -6453,6 +8816,351 @@ namespace Google.Apis.DLP.v2
                 }
             }
 
+            /// <summary>Gets the DiscoveryConfigs resource.</summary>
+            public virtual DiscoveryConfigsResource DiscoveryConfigs { get; }
+
+            /// <summary>The "discoveryConfigs" collection of methods.</summary>
+            public class DiscoveryConfigsResource
+            {
+                private const string Resource = "discoveryConfigs";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public DiscoveryConfigsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a config for discovery to scan and profile storage.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. Parent resource name. The format of this value varies depending on the scope of the
+                /// request (project or organization): + Projects scope: `projects/{project_id}/locations/{location_id}`
+                /// + Organizations scope: `organizations/{org_id}/locations/{location_id}` The following example
+                /// `parent` string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateDiscoveryConfigRequest body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a config for discovery to scan and profile storage.</summary>
+                public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DiscoveryConfig>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateDiscoveryConfigRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Parent resource name. The format of this value varies depending on the scope of the
+                    /// request (project or organization): + Projects scope:
+                    /// `projects/{project_id}/locations/{location_id}` + Organizations scope:
+                    /// `organizations/{org_id}/locations/{location_id}` The following example `parent` string specifies
+                    /// a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                    /// location for processing data: parent=projects/example-project/locations/europe-west3
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateDiscoveryConfigRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/discoveryConfigs";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a discovery configuration.</summary>
+                /// <param name="name">
+                /// Required. Resource name of the project and the config, for example
+                /// `projects/dlp-test-project/discoveryConfigs/53234423`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a discovery configuration.</summary>
+                public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the project and the config, for example
+                    /// `projects/dlp-test-project/discoveryConfigs/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/discoveryConfigs/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a discovery configuration.</summary>
+                /// <param name="name">
+                /// Required. Resource name of the project and the configuration, for example
+                /// `projects/dlp-test-project/discoveryConfigs/53234423`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a discovery configuration.</summary>
+                public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DiscoveryConfig>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the project and the configuration, for example
+                    /// `projects/dlp-test-project/discoveryConfigs/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/discoveryConfigs/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists discovery configurations.</summary>
+                /// <param name="parent">
+                /// Required. Parent resource name. The format of this value is as follows:
+                /// `projects/{project_id}/locations/{location_id}` The following example `parent` string specifies a
+                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
+                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists discovery configurations.</summary>
+                public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListDiscoveryConfigsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Parent resource name. The format of this value is as follows:
+                    /// `projects/{project_id}/locations/{location_id}` The following example `parent` string specifies
+                    /// a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                    /// location for processing data: parent=projects/example-project/locations/europe-west3
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Comma-separated list of config fields to order by, followed by `asc` or `desc` postfix. This
+                    /// list is case insensitive. The default sorting order is ascending. Redundant space characters are
+                    /// insignificant. Example: `name asc,update_time, create_time desc` Supported fields are: -
+                    /// `last_run_time`: corresponds to the last time the DiscoveryConfig ran. - `name`: corresponds to
+                    /// the DiscoveryConfig's name. - `status`: corresponds to DiscoveryConfig's status.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>Size of the page. This value can be limited by a server.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Page token to continue retrieval. Comes from the previous call to ListDiscoveryConfigs.
+                    /// `order_by` field must not change for subsequent calls.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/discoveryConfigs";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates a discovery configuration.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Resource name of the project and the configuration, for example
+                /// `projects/dlp-test-project/discoveryConfigs/53234423`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateDiscoveryConfigRequest body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates a discovery configuration.</summary>
+                public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DiscoveryConfig>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateDiscoveryConfigRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the project and the configuration, for example
+                    /// `projects/dlp-test-project/discoveryConfigs/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateDiscoveryConfigRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/discoveryConfigs/[^/]+$",
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets the DlpJobs resource.</summary>
             public virtual DlpJobsResource DlpJobs { get; }
 
@@ -6472,20 +9180,22 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Starts asynchronous cancellation on a long-running DlpJob. The server makes a best effort to cancel
-                /// the DlpJob, but success is not guaranteed. See https://cloud.google.com/dlp/docs/inspecting-storage
-                /// and https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+                /// the DlpJob, but success is not guaranteed. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+                /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">Required. The name of the DlpJob resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CancelDlpJobRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
                 /// Starts asynchronous cancellation on a long-running DlpJob. The server makes a best effort to cancel
-                /// the DlpJob, but success is not guaranteed. See https://cloud.google.com/dlp/docs/inspecting-storage
-                /// and https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+                /// the DlpJob, but success is not guaranteed. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+                /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
                 /// </summary>
                 public class CancelRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
                 {
@@ -6533,31 +9243,34 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Creates a new job to inspect storage or calculate risk metrics. See
-                /// https://cloud.google.com/dlp/docs/inspecting-storage and
-                /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more. When no InfoTypes or
-                /// CustomInfoTypes are specified in inspect jobs, the system will automatically choose what detectors
-                /// to run. By default this may be all types, but may change over time as detectors are updated.
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+                /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more. When no
+                /// InfoTypes or CustomInfoTypes are specified in inspect jobs, the system will automatically choose
+                /// what detectors to run. By default this may be all types, but may change over time as detectors are
+                /// updated.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateDlpJobRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
                 /// Creates a new job to inspect storage or calculate risk metrics. See
-                /// https://cloud.google.com/dlp/docs/inspecting-storage and
-                /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more. When no InfoTypes or
-                /// CustomInfoTypes are specified in inspect jobs, the system will automatically choose what detectors
-                /// to run. By default this may be all types, but may change over time as detectors are updated.
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+                /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more. When no
+                /// InfoTypes or CustomInfoTypes are specified in inspect jobs, the system will automatically choose
+                /// what detectors to run. By default this may be all types, but may change over time as detectors are
+                /// updated.
                 /// </summary>
                 public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DlpJob>
                 {
@@ -6571,9 +9284,10 @@ namespace Google.Apis.DLP.v2
 
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on whether you have
-                    /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): +
-                    /// Projects scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects
-                    /// scope, no location specified (defaults to global): `projects/`PROJECT_ID The following example
+                    /// [specified a processing
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
                     /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
                     /// the `europe-west3` location for processing data:
                     /// parent=projects/example-project/locations/europe-west3
@@ -6613,21 +9327,21 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Deletes a long-running DlpJob. This method indicates that the client is no longer interested in the
-                /// DlpJob result. The job will be cancelled if possible. See
-                /// https://cloud.google.com/dlp/docs/inspecting-storage and
-                /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+                /// DlpJob result. The job will be canceled if possible. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+                /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
                 /// </summary>
                 /// <param name="name">Required. The name of the DlpJob resource to be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Deletes a long-running DlpJob. This method indicates that the client is no longer interested in the
-                /// DlpJob result. The job will be cancelled if possible. See
-                /// https://cloud.google.com/dlp/docs/inspecting-storage and
-                /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+                /// DlpJob result. The job will be canceled if possible. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+                /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
                 /// </summary>
                 public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
                 {
@@ -6671,10 +9385,10 @@ namespace Google.Apis.DLP.v2
                 /// that have not yet run.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
-                /// <param name="name">Required. The name of the DlpJob resource to be cancelled.</param>
+                /// <param name="name">Required. The name of the DlpJob resource to be finished.</param>
                 public virtual FinishRequest Finish(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2FinishDlpJobRequest body, string name)
                 {
-                    return new FinishRequest(service, body, name);
+                    return new FinishRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -6691,7 +9405,7 @@ namespace Google.Apis.DLP.v2
                         InitParameters();
                     }
 
-                    /// <summary>Required. The name of the DlpJob resource to be cancelled.</summary>
+                    /// <summary>Required. The name of the DlpJob resource to be finished.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
 
@@ -6727,19 +9441,19 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Gets the latest state of a long-running DlpJob. See
-                /// https://cloud.google.com/dlp/docs/inspecting-storage and
-                /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+                /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
                 /// </summary>
                 /// <param name="name">Required. The name of the DlpJob resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Gets the latest state of a long-running DlpJob. See
-                /// https://cloud.google.com/dlp/docs/inspecting-storage and
-                /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+                /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
                 /// </summary>
                 public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2DlpJob>
                 {
@@ -6789,7 +9503,7 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual HybridInspectRequest HybridInspect(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2HybridInspectDlpJobRequest body, string name)
                 {
-                    return new HybridInspectRequest(service, body, name);
+                    return new HybridInspectRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -6845,26 +9559,27 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Lists DlpJobs that match the specified filter in the request. See
-                /// https://cloud.google.com/dlp/docs/inspecting-storage and
-                /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+                /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
                 /// </summary>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
                 /// Lists DlpJobs that match the specified filter in the request. See
-                /// https://cloud.google.com/dlp/docs/inspecting-storage and
-                /// https://cloud.google.com/dlp/docs/compute-risk-analysis to learn more.
+                /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-storage and
+                /// https://cloud.google.com/sensitive-data-protection/docs/compute-risk-analysis to learn more.
                 /// </summary>
                 public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListDlpJobsResponse>
                 {
@@ -6877,9 +9592,10 @@ namespace Google.Apis.DLP.v2
 
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on whether you have
-                    /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): +
-                    /// Projects scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects
-                    /// scope, no location specified (defaults to global): `projects/`PROJECT_ID The following example
+                    /// [specified a processing
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
                     /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
                     /// the `europe-west3` location for processing data:
                     /// parent=projects/example-project/locations/europe-west3
@@ -6893,11 +9609,11 @@ namespace Google.Apis.DLP.v2
                     /// restrictions implicitly uses `AND`. * A restriction has the form of `{field} {operator}
                     /// {value}`. * Supported fields/values for inspect jobs: - `state` -
                     /// PENDING|RUNNING|CANCELED|FINISHED|FAILED - `inspected_storage` -
-                    /// DATASTORE|CLOUD_STORAGE|BIGQUERY - `trigger_name` - The resource name of the trigger that
-                    /// created job. - 'end_time` - Corresponds to time the job finished. - 'start_time` - Corresponds
-                    /// to time the job finished. * Supported fields for risk analysis jobs: - `state` -
-                    /// RUNNING|CANCELED|FINISHED|FAILED - 'end_time` - Corresponds to time the job finished. -
-                    /// 'start_time` - Corresponds to time the job finished. * The operator must be `=` or `!=`.
+                    /// DATASTORE|CLOUD_STORAGE|BIGQUERY - `trigger_name` - The name of the trigger that created the
+                    /// job. - 'end_time` - Corresponds to the time the job finished. - 'start_time` - Corresponds to
+                    /// the time the job finished. * Supported fields for risk analysis jobs: - `state` -
+                    /// RUNNING|CANCELED|FINISHED|FAILED - 'end_time` - Corresponds to the time the job finished. -
+                    /// 'start_time` - Corresponds to the time the job finished. * The operator must be `=` or `!=`.
                     /// Examples: * inspected_storage = cloud_storage AND state = done * inspected_storage =
                     /// cloud_storage OR inspected_storage = bigquery * inspected_storage = cloud_storage AND (state =
                     /// done OR state = canceled) * end_time &amp;gt; \"2017-12-12T00:00:00+00:00\" The length of this
@@ -6911,11 +9627,11 @@ namespace Google.Apis.DLP.v2
                     public virtual string LocationId { get; set; }
 
                     /// <summary>
-                    /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                    /// case-insensitive, default sorting order is ascending, redundant space characters are
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
                     /// insignificant. Example: `name asc, end_time asc, create_time desc` Supported fields are: -
-                    /// `create_time`: corresponds to time the job was created. - `end_time`: corresponds to time the
-                    /// job ended. - `name`: corresponds to job's name. - `state`: corresponds to `state`
+                    /// `create_time`: corresponds to the time the job was created. - `end_time`: corresponds to the
+                    /// time the job ended. - `name`: corresponds to the job's name. - `state`: corresponds to `state`
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string OrderBy { get; set; }
@@ -7021,6 +9737,253 @@ namespace Google.Apis.DLP.v2
                 }
             }
 
+            /// <summary>Gets the FileStoreDataProfiles resource.</summary>
+            public virtual FileStoreDataProfilesResource FileStoreDataProfiles { get; }
+
+            /// <summary>The "fileStoreDataProfiles" collection of methods.</summary>
+            public class FileStoreDataProfilesResource
+            {
+                private const string Resource = "fileStoreDataProfiles";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public FileStoreDataProfilesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Delete a FileStoreDataProfile. Will not prevent the profile from being regenerated if the resource
+                /// is still included in a discovery configuration.
+                /// </summary>
+                /// <param name="name">Required. Resource name of the file store data profile.</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Delete a FileStoreDataProfile. Will not prevent the profile from being regenerated if the resource
+                /// is still included in a discovery configuration.
+                /// </summary>
+                public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Resource name of the file store data profile.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/fileStoreDataProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a file store data profile.</summary>
+                /// <param name="name">
+                /// Required. Resource name, for example
+                /// `organizations/12345/locations/us/fileStoreDataProfiles/53234423`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a file store data profile.</summary>
+                public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2FileStoreDataProfile>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name, for example
+                    /// `organizations/12345/locations/us/fileStoreDataProfiles/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/fileStoreDataProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists file store data profiles for an organization.</summary>
+                /// <param name="parent">
+                /// Required. Resource name of the organization or project, for example
+                /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists file store data profiles for an organization.</summary>
+                public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListFileStoreDataProfilesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the organization or project, for example
+                    /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Allows filtering. Supported syntax: * Filter expressions are made up of one or more
+                    /// restrictions. * Restrictions can be combined by `AND` or `OR` logical operators. A sequence of
+                    /// restrictions implicitly uses `AND`. * A restriction has the form of `{field} {operator}
+                    /// {value}`. * Supported fields/values: - `project_id` - The Google Cloud project ID. -
+                    /// `account_id` - The AWS account ID. - `file_store_path` - The path like "gs://bucket". -
+                    /// `data_source_type` - The profile's data source type, like "google/storage/bucket". -
+                    /// `data_storage_location` - The location where the file store's data is stored, like
+                    /// "us-central1". - `sensitivity_level` - HIGH|MODERATE|LOW - `data_risk_level` - HIGH|MODERATE|LOW
+                    /// - `resource_visibility`: PUBLIC|RESTRICTED - `status_code` - an RPC status code as defined in
+                    /// https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto * The operator must
+                    /// be `=` or `!=`. Examples: * `project_id = 12345 AND status_code = 1` * `project_id = 12345 AND
+                    /// sensitivity_level = HIGH` * `project_id = 12345 AND resource_visibility = PUBLIC` *
+                    /// `file_store_path = "gs://mybucket"` The length of this field should be no more than 500
+                    /// characters.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This
+                    /// list is case insensitive. The default sorting order is ascending. Redundant space characters are
+                    /// insignificant. Only one order field at a time is allowed. Examples: * `project_id asc` * `name`
+                    /// * `sensitivity_level desc` Supported fields are: - `project_id`: The Google Cloud project ID. -
+                    /// `sensitivity_level`: How sensitive the data in a table is, at most. - `data_risk_level`: How
+                    /// much risk is associated with this data. - `profile_last_generated`: When the profile was last
+                    /// updated in epoch seconds. - `last_modified`: The last time the resource was modified. -
+                    /// `resource_visibility`: Visibility restriction for this resource. - `name`: The name of the
+                    /// profile. - `create_time`: The time the file store was first created.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// Optional. Size of the page. This value can be limited by the server. If zero, server returns a
+                    /// page of max size 100.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>Optional. Page token to continue retrieval.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/fileStoreDataProfiles";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets the Image resource.</summary>
             public virtual ImageResource Image { get; }
 
@@ -7040,29 +10003,31 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Redacts potentially sensitive info from an image. This method has limits on input size, processing
-                /// time, and output size. See https://cloud.google.com/dlp/docs/redacting-sensitive-data-images to
-                /// learn more. When no InfoTypes or CustomInfoTypes are specified in this request, the system will
+                /// time, and output size. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/redacting-sensitive-data-images to learn
+                /// more. When no InfoTypes or CustomInfoTypes are specified in this request, the system will
                 /// automatically choose what detectors to run. By default this may be all types, but may change over
                 /// time as detectors are updated.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Parent resource name. The format of this value varies depending on whether you have [specified a
-                /// processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-                /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-                /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// processing location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
+                /// `parent` string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual RedactRequest Redact(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2RedactImageRequest body, string parent)
                 {
-                    return new RedactRequest(service, body, parent);
+                    return new RedactRequest(this.service, body, parent);
                 }
 
                 /// <summary>
                 /// Redacts potentially sensitive info from an image. This method has limits on input size, processing
-                /// time, and output size. See https://cloud.google.com/dlp/docs/redacting-sensitive-data-images to
-                /// learn more. When no InfoTypes or CustomInfoTypes are specified in this request, the system will
+                /// time, and output size. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/redacting-sensitive-data-images to learn
+                /// more. When no InfoTypes or CustomInfoTypes are specified in this request, the system will
                 /// automatically choose what detectors to run. By default this may be all types, but may change over
                 /// time as detectors are updated.
                 /// </summary>
@@ -7078,11 +10043,12 @@ namespace Google.Apis.DLP.v2
 
                     /// <summary>
                     /// Parent resource name. The format of this value varies depending on whether you have [specified a
-                    /// processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope,
-                    /// location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location
-                    /// specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                    /// specifies a parent project with the identifier `example-project`, and specifies the
-                    /// `europe-west3` location for processing data:
+                    /// processing
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
+                    /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
+                    /// the `europe-west3` location for processing data:
                     /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
@@ -7137,29 +10103,31 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Creates an InspectTemplate for re-using frequently used configuration for inspecting content,
-                /// images, and storage. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Creates an InspectTemplate for reusing frequently used configuration for inspecting content, images,
+                /// and storage. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn
+                /// more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateInspectTemplateRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
-                /// Creates an InspectTemplate for re-using frequently used configuration for inspecting content,
-                /// images, and storage. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Creates an InspectTemplate for reusing frequently used configuration for inspecting content, images,
+                /// and storage. See https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn
+                /// more.
                 /// </summary>
                 public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectTemplate>
                 {
@@ -7174,13 +10142,14 @@ namespace Google.Apis.DLP.v2
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on the scope of the
                     /// request (project or organization) and whether you have [specified a processing
-                    /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                    /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                    /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                    /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                    /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                    /// parent project with the identifier `example-project`, and specifies the `europe-west3` location
-                    /// for processing data: parent=projects/example-project/locations/europe-west3
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` + Organizations
+                    /// scope, location specified: `organizations/{org_id}/locations/{location_id}` + Organizations
+                    /// scope, no location specified (defaults to global): `organizations/{org_id}` The following
+                    /// example `parent` string specifies a parent project with the identifier `example-project`, and
+                    /// specifies the `europe-west3` location for processing data:
+                    /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -7216,7 +10185,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Deletes an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Deletes an InspectTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the organization and inspectTemplate to be deleted, for example
@@ -7225,11 +10195,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Deletes an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Deletes an InspectTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
                 {
@@ -7273,7 +10244,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Gets an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Gets an InspectTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the organization and inspectTemplate to be read, for example
@@ -7282,11 +10254,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Gets an InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Gets an InspectTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectTemplate>
                 {
@@ -7330,26 +10303,28 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Lists InspectTemplates. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Lists InspectTemplates. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
-                /// Lists InspectTemplates. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Lists InspectTemplates. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListInspectTemplatesResponse>
                 {
@@ -7363,13 +10338,14 @@ namespace Google.Apis.DLP.v2
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on the scope of the
                     /// request (project or organization) and whether you have [specified a processing
-                    /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                    /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                    /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                    /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                    /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                    /// parent project with the identifier `example-project`, and specifies the `europe-west3` location
-                    /// for processing data: parent=projects/example-project/locations/europe-west3
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` + Organizations
+                    /// scope, location specified: `organizations/{org_id}/locations/{location_id}` + Organizations
+                    /// scope, no location specified (defaults to global): `organizations/{org_id}` The following
+                    /// example `parent` string specifies a parent project with the identifier `example-project`, and
+                    /// specifies the `europe-west3` location for processing data:
+                    /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -7379,24 +10355,25 @@ namespace Google.Apis.DLP.v2
                     public virtual string LocationId { get; set; }
 
                     /// <summary>
-                    /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                    /// case-insensitive, default sorting order is ascending, redundant space characters are
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
                     /// insignificant. Example: `name asc,update_time, create_time desc` Supported fields are: -
-                    /// `create_time`: corresponds to time the template was created. - `update_time`: corresponds to
-                    /// time the template was last updated. - `name`: corresponds to template's name. - `display_name`:
-                    /// corresponds to template's display name.
+                    /// `create_time`: corresponds to the time the template was created. - `update_time`: corresponds to
+                    /// the time the template was last updated. - `name`: corresponds to the template's name. -
+                    /// `display_name`: corresponds to the template's display name.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string OrderBy { get; set; }
 
                     /// <summary>
-                    /// Size of the page, can be limited by server. If zero server returns a page of max size 100.
+                    /// Size of the page. This value can be limited by the server. If zero server returns a page of max
+                    /// size 100.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<int> PageSize { get; set; }
 
                     /// <summary>
-                    /// Page token to continue retrieval. Comes from previous call to `ListInspectTemplates`.
+                    /// Page token to continue retrieval. Comes from the previous call to `ListInspectTemplates`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string PageToken { get; set; }
@@ -7458,7 +10435,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Updates the InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Updates the InspectTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -7468,11 +10446,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateInspectTemplateRequest body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates the InspectTemplate. See https://cloud.google.com/dlp/docs/creating-templates to learn more.
+                /// Updates the InspectTemplate. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-templates to learn more.
                 /// </summary>
                 public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2InspectTemplate>
                 {
@@ -7551,7 +10530,7 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual ActivateRequest Activate(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ActivateJobTriggerRequest body, string name)
                 {
-                    return new ActivateRequest(service, body, name);
+                    return new ActivateRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -7607,25 +10586,28 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Creates a job trigger to run DLP actions such as scanning storage for sensitive information on a set
-                /// schedule. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// schedule. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn
+                /// more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateJobTriggerRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
                 /// Creates a job trigger to run DLP actions such as scanning storage for sensitive information on a set
-                /// schedule. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// schedule. See https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn
+                /// more.
                 /// </summary>
                 public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2JobTrigger>
                 {
@@ -7639,9 +10621,10 @@ namespace Google.Apis.DLP.v2
 
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on whether you have
-                    /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): +
-                    /// Projects scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects
-                    /// scope, no location specified (defaults to global): `projects/`PROJECT_ID The following example
+                    /// [specified a processing
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
                     /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
                     /// the `europe-west3` location for processing data:
                     /// parent=projects/example-project/locations/europe-west3
@@ -7680,7 +10663,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Deletes a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Deletes a job trigger. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the project and the triggeredJob, for example
@@ -7688,11 +10672,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Deletes a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Deletes a job trigger. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
                 {
@@ -7735,7 +10720,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Gets a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Gets a job trigger. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the project and the triggeredJob, for example
@@ -7743,11 +10729,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Gets a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Gets a job trigger. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2JobTrigger>
                 {
@@ -7800,7 +10787,7 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual HybridInspectRequest HybridInspect(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2HybridInspectJobTriggerRequest body, string name)
                 {
-                    return new HybridInspectRequest(service, body, name);
+                    return new HybridInspectRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -7855,23 +10842,26 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Lists job triggers. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Lists job triggers. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on whether you have
-                /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): + Projects
-                /// scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no
-                /// location specified (defaults to global): `projects/`PROJECT_ID The following example `parent` string
-                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
-                /// location for processing data: parent=projects/example-project/locations/europe-west3
+                /// [specified a processing
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
-                /// Lists job triggers. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Lists job triggers. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListJobTriggersResponse>
                 {
@@ -7884,9 +10874,10 @@ namespace Google.Apis.DLP.v2
 
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on whether you have
-                    /// [specified a processing location](https://cloud.google.com/dlp/docs/specifying-location): +
-                    /// Projects scope, location specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects
-                    /// scope, no location specified (defaults to global): `projects/`PROJECT_ID The following example
+                    /// [specified a processing
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
                     /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
                     /// the `europe-west3` location for processing data:
                     /// parent=projects/example-project/locations/europe-west3
@@ -7915,24 +10906,24 @@ namespace Google.Apis.DLP.v2
                     public virtual string LocationId { get; set; }
 
                     /// <summary>
-                    /// Comma separated list of triggeredJob fields to order by, followed by `asc` or `desc` postfix.
-                    /// This list is case-insensitive, default sorting order is ascending, redundant space characters
-                    /// are insignificant. Example: `name asc,update_time, create_time desc` Supported fields are: -
-                    /// `create_time`: corresponds to time the JobTrigger was created. - `update_time`: corresponds to
-                    /// time the JobTrigger was last updated. - `last_run_time`: corresponds to the last time the
-                    /// JobTrigger ran. - `name`: corresponds to JobTrigger's name. - `display_name`: corresponds to
-                    /// JobTrigger's display name. - `status`: corresponds to JobTrigger's status.
+                    /// Comma-separated list of triggeredJob fields to order by, followed by `asc` or `desc` postfix.
+                    /// This list is case insensitive. The default sorting order is ascending. Redundant space
+                    /// characters are insignificant. Example: `name asc,update_time, create_time desc` Supported fields
+                    /// are: - `create_time`: corresponds to the time the JobTrigger was created. - `update_time`:
+                    /// corresponds to the time the JobTrigger was last updated. - `last_run_time`: corresponds to the
+                    /// last time the JobTrigger ran. - `name`: corresponds to the JobTrigger's name. - `display_name`:
+                    /// corresponds to the JobTrigger's display name. - `status`: corresponds to JobTrigger's status.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string OrderBy { get; set; }
 
-                    /// <summary>Size of the page, can be limited by a server.</summary>
+                    /// <summary>Size of the page. This value can be limited by a server.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<int> PageSize { get; set; }
 
                     /// <summary>
-                    /// Page token to continue retrieval. Comes from previous call to ListJobTriggers. `order_by` field
-                    /// must not change for subsequent calls.
+                    /// Page token to continue retrieval. Comes from the previous call to ListJobTriggers. `order_by`
+                    /// field must not change for subsequent calls.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string PageToken { get; set; }
@@ -8030,7 +11021,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Updates a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Updates a job trigger. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -8039,11 +11031,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateJobTriggerRequest body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates a job trigger. See https://cloud.google.com/dlp/docs/creating-job-triggers to learn more.
+                /// Updates a job trigger. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-job-triggers to learn more.
                 /// </summary>
                 public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2JobTrigger>
                 {
@@ -8093,6 +11086,188 @@ namespace Google.Apis.DLP.v2
                 }
             }
 
+            /// <summary>Gets the ProjectDataProfiles resource.</summary>
+            public virtual ProjectDataProfilesResource ProjectDataProfiles { get; }
+
+            /// <summary>The "projectDataProfiles" collection of methods.</summary>
+            public class ProjectDataProfilesResource
+            {
+                private const string Resource = "projectDataProfiles";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public ProjectDataProfilesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Gets a project data profile.</summary>
+                /// <param name="name">
+                /// Required. Resource name, for example
+                /// `organizations/12345/locations/us/projectDataProfiles/53234423`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a project data profile.</summary>
+                public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ProjectDataProfile>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name, for example
+                    /// `organizations/12345/locations/us/projectDataProfiles/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/projectDataProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists project data profiles for an organization.</summary>
+                /// <param name="parent">Required. organizations/{org_id}/locations/{loc_id}</param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists project data profiles for an organization.</summary>
+                public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListProjectDataProfilesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. organizations/{org_id}/locations/{loc_id}</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Allows filtering. Supported syntax: * Filter expressions are made up of one or more
+                    /// restrictions. * Restrictions can be combined by `AND` or `OR` logical operators. A sequence of
+                    /// restrictions implicitly uses `AND`. * A restriction has the form of `{field} {operator}
+                    /// {value}`. * Supported fields/values: - `sensitivity_level` - HIGH|MODERATE|LOW -
+                    /// `data_risk_level` - HIGH|MODERATE|LOW - `status_code` - an RPC status code as defined in
+                    /// https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto * The operator must
+                    /// be `=` or `!=`. Examples: * `project_id = 12345 AND status_code = 1` * `project_id = 12345 AND
+                    /// sensitivity_level = HIGH` The length of this field should be no more than 500 characters.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
+                    /// insignificant. Only one order field at a time is allowed. Examples: * `project_id` *
+                    /// `sensitivity_level desc` Supported fields are: - `project_id`: Google Cloud project ID -
+                    /// `sensitivity_level`: How sensitive the data in a project is, at most. - `data_risk_level`: How
+                    /// much risk is associated with this data. - `profile_last_generated`: When the profile was last
+                    /// updated in epoch seconds.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// Size of the page. This value can be limited by the server. If zero, server returns a page of max
+                    /// size 100.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>Page token to continue retrieval.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/projectDataProfiles";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets the StoredInfoTypes resource.</summary>
             public virtual StoredInfoTypesResource StoredInfoTypes { get; }
 
@@ -8112,28 +11287,28 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Creates a pre-built stored infoType to be used for inspection. See
-                /// https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateStoredInfoTypeRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
                 /// Creates a pre-built stored infoType to be used for inspection. See
-                /// https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2StoredInfoType>
                 {
@@ -8148,13 +11323,14 @@ namespace Google.Apis.DLP.v2
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on the scope of the
                     /// request (project or organization) and whether you have [specified a processing
-                    /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                    /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                    /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                    /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                    /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                    /// parent project with the identifier `example-project`, and specifies the `europe-west3` location
-                    /// for processing data: parent=projects/example-project/locations/europe-west3
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` + Organizations
+                    /// scope, location specified: `organizations/{org_id}/locations/{location_id}` + Organizations
+                    /// scope, no location specified (defaults to global): `organizations/{org_id}` The following
+                    /// example `parent` string specifies a parent project with the identifier `example-project`, and
+                    /// specifies the `europe-west3` location for processing data:
+                    /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -8190,8 +11366,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Deletes a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-                /// more.
+                /// Deletes a stored infoType. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the organization and storedInfoType to be deleted, for example
@@ -8200,12 +11376,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Deletes a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-                /// more.
+                /// Deletes a stored infoType. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
                 {
@@ -8249,8 +11425,8 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Gets a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-                /// more.
+                /// Gets a stored infoType. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 /// <param name="name">
                 /// Required. Resource name of the organization and storedInfoType to be read, for example
@@ -8259,12 +11435,12 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
-                /// Gets a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-                /// more.
+                /// Gets a stored infoType. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2StoredInfoType>
                 {
@@ -8308,28 +11484,26 @@ namespace Google.Apis.DLP.v2
                 }
 
                 /// <summary>
-                /// Lists stored infoTypes. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-                /// more.
+                /// Lists stored infoTypes. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 /// <param name="parent">
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
-                /// Lists stored infoTypes. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-                /// more.
+                /// Lists stored infoTypes. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListStoredInfoTypesResponse>
                 {
@@ -8343,13 +11517,12 @@ namespace Google.Apis.DLP.v2
                     /// <summary>
                     /// Required. Parent resource name. The format of this value varies depending on the scope of the
                     /// request (project or organization) and whether you have [specified a processing
-                    /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                    /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                    /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                    /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                    /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                    /// parent project with the identifier `example-project`, and specifies the `europe-west3` location
-                    /// for processing data: parent=projects/example-project/locations/europe-west3
+                    /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): +
+                    /// Projects scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects
+                    /// scope, no location specified (defaults to global): `projects/{project_id}` The following example
+                    /// `parent` string specifies a parent project with the identifier `example-project`, and specifies
+                    /// the `europe-west3` location for processing data:
+                    /// parent=projects/example-project/locations/europe-west3
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -8359,10 +11532,10 @@ namespace Google.Apis.DLP.v2
                     public virtual string LocationId { get; set; }
 
                     /// <summary>
-                    /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                    /// case-insensitive, default sorting order is ascending, redundant space characters are
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
                     /// insignificant. Example: `name asc, display_name, create_time desc` Supported fields are: -
-                    /// `create_time`: corresponds to time the most recent version of the resource was created. -
+                    /// `create_time`: corresponds to the time the most recent version of the resource was created. -
                     /// `state`: corresponds to the state of the resource. - `name`: corresponds to resource name. -
                     /// `display_name`: corresponds to info type's display name.
                     /// </summary>
@@ -8370,13 +11543,14 @@ namespace Google.Apis.DLP.v2
                     public virtual string OrderBy { get; set; }
 
                     /// <summary>
-                    /// Size of the page, can be limited by server. If zero server returns a page of max size 100.
+                    /// Size of the page. This value can be limited by the server. If zero server returns a page of max
+                    /// size 100.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<int> PageSize { get; set; }
 
                     /// <summary>
-                    /// Page token to continue retrieval. Comes from previous call to `ListStoredInfoTypes`.
+                    /// Page token to continue retrieval. Comes from the previous call to `ListStoredInfoTypes`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string PageToken { get; set; }
@@ -8439,8 +11613,8 @@ namespace Google.Apis.DLP.v2
 
                 /// <summary>
                 /// Updates the stored infoType by creating a new version. The existing version will continue to be used
-                /// until the new version is ready. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to
-                /// learn more.
+                /// until the new version is ready. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -8450,13 +11624,13 @@ namespace Google.Apis.DLP.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateStoredInfoTypeRequest body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
                 /// Updates the stored infoType by creating a new version. The existing version will continue to be used
-                /// until the new version is ready. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to
-                /// learn more.
+                /// until the new version is ready. See
+                /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
                 /// </summary>
                 public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2StoredInfoType>
                 {
@@ -8506,6 +11680,250 @@ namespace Google.Apis.DLP.v2
                     }
                 }
             }
+
+            /// <summary>Gets the TableDataProfiles resource.</summary>
+            public virtual TableDataProfilesResource TableDataProfiles { get; }
+
+            /// <summary>The "tableDataProfiles" collection of methods.</summary>
+            public class TableDataProfilesResource
+            {
+                private const string Resource = "tableDataProfiles";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public TableDataProfilesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Delete a TableDataProfile. Will not prevent the profile from being regenerated if the table is still
+                /// included in a discovery configuration.
+                /// </summary>
+                /// <param name="name">Required. Resource name of the table data profile.</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Delete a TableDataProfile. Will not prevent the profile from being regenerated if the table is still
+                /// included in a discovery configuration.
+                /// </summary>
+                public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Resource name of the table data profile.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/tableDataProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a table data profile.</summary>
+                /// <param name="name">
+                /// Required. Resource name, for example `organizations/12345/locations/us/tableDataProfiles/53234423`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a table data profile.</summary>
+                public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2TableDataProfile>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name, for example
+                    /// `organizations/12345/locations/us/tableDataProfiles/53234423`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/tableDataProfiles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists table data profiles for an organization.</summary>
+                /// <param name="parent">
+                /// Required. Resource name of the organization or project, for example
+                /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists table data profiles for an organization.</summary>
+                public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListTableDataProfilesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the organization or project, for example
+                    /// `organizations/433245324/locations/europe` or `projects/project-id/locations/asia`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Allows filtering. Supported syntax: * Filter expressions are made up of one or more
+                    /// restrictions. * Restrictions can be combined by `AND` or `OR` logical operators. A sequence of
+                    /// restrictions implicitly uses `AND`. * A restriction has the form of `{field} {operator}
+                    /// {value}`. * Supported fields/values: - `project_id` - The Google Cloud project ID. -
+                    /// `dataset_id` - The BigQuery dataset ID. - `table_id` - The ID of the BigQuery table. -
+                    /// `sensitivity_level` - HIGH|MODERATE|LOW - `data_risk_level` - HIGH|MODERATE|LOW -
+                    /// `resource_visibility`: PUBLIC|RESTRICTED - `status_code` - an RPC status code as defined in
+                    /// https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto * The operator must
+                    /// be `=` or `!=`. Examples: * `project_id = 12345 AND status_code = 1` * `project_id = 12345 AND
+                    /// sensitivity_level = HIGH` * `project_id = 12345 AND resource_visibility = PUBLIC` The length of
+                    /// this field should be no more than 500 characters.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
+                    /// case insensitive. The default sorting order is ascending. Redundant space characters are
+                    /// insignificant. Only one order field at a time is allowed. Examples: * `project_id asc` *
+                    /// `table_id` * `sensitivity_level desc` Supported fields are: - `project_id`: The Google Cloud
+                    /// project ID. - `dataset_id`: The ID of a BigQuery dataset. - `table_id`: The ID of a BigQuery
+                    /// table. - `sensitivity_level`: How sensitive the data in a table is, at most. -
+                    /// `data_risk_level`: How much risk is associated with this data. - `profile_last_generated`: When
+                    /// the profile was last updated in epoch seconds. - `last_modified`: The last time the resource was
+                    /// modified. - `resource_visibility`: Visibility restriction for this resource. - `row_count`:
+                    /// Number of rows in this resource.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// Size of the page. This value can be limited by the server. If zero, server returns a page of max
+                    /// size 100.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>Page token to continue retrieval.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/tableDataProfiles";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
         }
 
         /// <summary>Gets the StoredInfoTypes resource.</summary>
@@ -8527,28 +11945,28 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// Creates a pre-built stored infoType to be used for inspection. See
-            /// https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on the scope of the request
             /// (project or organization) and whether you have [specified a processing
-            /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location specified:
-            /// `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified (defaults to
-            /// global): `projects/`PROJECT_ID + Organizations scope, location specified:
-            /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified (defaults to
-            /// global): `organizations/`ORG_ID The following example `parent` string specifies a parent project with
-            /// the identifier `example-project`, and specifies the `europe-west3` location for processing data:
+            /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+            /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no location
+            /// specified (defaults to global): `projects/{project_id}` + Organizations scope, location specified:
+            /// `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location specified (defaults
+            /// to global): `organizations/{org_id}` The following example `parent` string specifies a parent project
+            /// with the identifier `example-project`, and specifies the `europe-west3` location for processing data:
             /// parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2CreateStoredInfoTypeRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
             /// Creates a pre-built stored infoType to be used for inspection. See
-            /// https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             public class CreateRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2StoredInfoType>
             {
@@ -8563,13 +11981,13 @@ namespace Google.Apis.DLP.v2
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` + Organizations scope, location
+                /// specified: `organizations/{org_id}/locations/{location_id}` + Organizations scope, no location
+                /// specified (defaults to global): `organizations/{org_id}` The following example `parent` string
+                /// specifies a parent project with the identifier `example-project`, and specifies the `europe-west3`
+                /// location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -8605,8 +12023,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Deletes a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-            /// more.
+            /// Deletes a stored infoType. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the organization and storedInfoType to be deleted, for example
@@ -8614,12 +12032,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
-            /// Deletes a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-            /// more.
+            /// Deletes a stored infoType. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             public class DeleteRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GoogleProtobufEmpty>
             {
@@ -8663,7 +12081,8 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Gets a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+            /// Gets a stored infoType. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             /// <param name="name">
             /// Required. Resource name of the organization and storedInfoType to be read, for example
@@ -8671,11 +12090,12 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
-            /// Gets a stored infoType. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+            /// Gets a stored infoType. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             public class GetRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2StoredInfoType>
             {
@@ -8719,26 +12139,26 @@ namespace Google.Apis.DLP.v2
             }
 
             /// <summary>
-            /// Lists stored infoTypes. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+            /// Lists stored infoTypes. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             /// <param name="parent">
             /// Required. Parent resource name. The format of this value varies depending on the scope of the request
             /// (project or organization) and whether you have [specified a processing
-            /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location specified:
-            /// `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified (defaults to
-            /// global): `projects/`PROJECT_ID + Organizations scope, location specified:
-            /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified (defaults to
-            /// global): `organizations/`ORG_ID The following example `parent` string specifies a parent project with
-            /// the identifier `example-project`, and specifies the `europe-west3` location for processing data:
-            /// parent=projects/example-project/locations/europe-west3
+            /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+            /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no location
+            /// specified (defaults to global): `projects/{project_id}` The following example `parent` string specifies
+            /// a parent project with the identifier `example-project`, and specifies the `europe-west3` location for
+            /// processing data: parent=projects/example-project/locations/europe-west3
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
-            /// Lists stored infoTypes. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn more.
+            /// Lists stored infoTypes. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             public class ListRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2ListStoredInfoTypesResponse>
             {
@@ -8752,13 +12172,11 @@ namespace Google.Apis.DLP.v2
                 /// <summary>
                 /// Required. Parent resource name. The format of this value varies depending on the scope of the
                 /// request (project or organization) and whether you have [specified a processing
-                /// location](https://cloud.google.com/dlp/docs/specifying-location): + Projects scope, location
-                /// specified: `projects/`PROJECT_ID`/locations/`LOCATION_ID + Projects scope, no location specified
-                /// (defaults to global): `projects/`PROJECT_ID + Organizations scope, location specified:
-                /// `organizations/`ORG_ID`/locations/`LOCATION_ID + Organizations scope, no location specified
-                /// (defaults to global): `organizations/`ORG_ID The following example `parent` string specifies a
-                /// parent project with the identifier `example-project`, and specifies the `europe-west3` location for
-                /// processing data: parent=projects/example-project/locations/europe-west3
+                /// location](https://cloud.google.com/sensitive-data-protection/docs/specifying-location): + Projects
+                /// scope, location specified: `projects/{project_id}/locations/{location_id}` + Projects scope, no
+                /// location specified (defaults to global): `projects/{project_id}` The following example `parent`
+                /// string specifies a parent project with the identifier `example-project`, and specifies the
+                /// `europe-west3` location for processing data: parent=projects/example-project/locations/europe-west3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -8768,24 +12186,25 @@ namespace Google.Apis.DLP.v2
                 public virtual string LocationId { get; set; }
 
                 /// <summary>
-                /// Comma separated list of fields to order by, followed by `asc` or `desc` postfix. This list is
-                /// case-insensitive, default sorting order is ascending, redundant space characters are insignificant.
+                /// Comma-separated list of fields to order by, followed by `asc` or `desc` postfix. This list is case
+                /// insensitive. The default sorting order is ascending. Redundant space characters are insignificant.
                 /// Example: `name asc, display_name, create_time desc` Supported fields are: - `create_time`:
-                /// corresponds to time the most recent version of the resource was created. - `state`: corresponds to
-                /// the state of the resource. - `name`: corresponds to resource name. - `display_name`: corresponds to
-                /// info type's display name.
+                /// corresponds to the time the most recent version of the resource was created. - `state`: corresponds
+                /// to the state of the resource. - `name`: corresponds to resource name. - `display_name`: corresponds
+                /// to info type's display name.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string OrderBy { get; set; }
 
                 /// <summary>
-                /// Size of the page, can be limited by server. If zero server returns a page of max size 100.
+                /// Size of the page. This value can be limited by the server. If zero server returns a page of max size
+                /// 100.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
                 /// <summary>
-                /// Page token to continue retrieval. Comes from previous call to `ListStoredInfoTypes`.
+                /// Page token to continue retrieval. Comes from the previous call to `ListStoredInfoTypes`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
@@ -8848,8 +12267,8 @@ namespace Google.Apis.DLP.v2
 
             /// <summary>
             /// Updates the stored infoType by creating a new version. The existing version will continue to be used
-            /// until the new version is ready. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-            /// more.
+            /// until the new version is ready. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -8858,13 +12277,13 @@ namespace Google.Apis.DLP.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2UpdateStoredInfoTypeRequest body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
             /// Updates the stored infoType by creating a new version. The existing version will continue to be used
-            /// until the new version is ready. See https://cloud.google.com/dlp/docs/creating-stored-infotypes to learn
-            /// more.
+            /// until the new version is ready. See
+            /// https://cloud.google.com/sensitive-data-protection/docs/creating-stored-infotypes to learn more.
             /// </summary>
             public class PatchRequest : DLPBaseServiceRequest<Google.Apis.DLP.v2.Data.GooglePrivacyDlpV2StoredInfoType>
             {
@@ -8919,16 +12338,23 @@ namespace Google.Apis.DLP.v2
 namespace Google.Apis.DLP.v2.Data
 {
     /// <summary>
-    /// A task to execute on the completion of a job. See https://cloud.google.com/dlp/docs/concepts-actions to learn
-    /// more.
+    /// A task to execute on the completion of a job. See
+    /// https://cloud.google.com/sensitive-data-protection/docs/concepts-actions to learn more.
     /// </summary>
     public class GooglePrivacyDlpV2Action : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Enable email notification for project owners and editors on job's completion/failure.</summary>
+        /// <summary>Create a de-identified copy of the input data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deidentify")]
+        public virtual GooglePrivacyDlpV2Deidentify Deidentify { get; set; }
+
+        /// <summary>
+        /// Sends an email when the job completes. The email goes to IAM project owners and technical [Essential
+        /// Contacts](https://cloud.google.com/resource-manager/docs/managing-notification-contacts).
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("jobNotificationEmails")]
         public virtual GooglePrivacyDlpV2JobNotificationEmails JobNotificationEmails { get; set; }
 
-        /// <summary>Publish a notification to a pubsub topic.</summary>
+        /// <summary>Publish a notification to a Pub/Sub topic.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pubSub")]
         public virtual GooglePrivacyDlpV2PublishToPubSub PubSub { get; set; }
 
@@ -8952,9 +12378,108 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The results of an Action.</summary>
+    public class GooglePrivacyDlpV2ActionDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Outcome of a de-identification action.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deidentifyDetails")]
+        public virtual GooglePrivacyDlpV2DeidentifyDataSourceDetails DeidentifyDetails { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for ActivateJobTrigger.</summary>
     public class GooglePrivacyDlpV2ActivateJobTriggerRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Apply transformation to all findings.</summary>
+    public class GooglePrivacyDlpV2AllInfoTypes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Catch-all for all other tables not specified by other filters. Should always be last, except for single-table
+    /// configurations, which will only have a TableReference target.
+    /// </summary>
+    public class GooglePrivacyDlpV2AllOtherBigQueryTables : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Match database resources not covered by any other filter.</summary>
+    public class GooglePrivacyDlpV2AllOtherDatabaseResources : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Match discovery resources not covered by any other filter.</summary>
+    public class GooglePrivacyDlpV2AllOtherResources : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Apply to all text.</summary>
+    public class GooglePrivacyDlpV2AllText : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Amazon S3 bucket.</summary>
+    public class GooglePrivacyDlpV2AmazonS3Bucket : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The AWS account.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("awsAccount")]
+        public virtual GooglePrivacyDlpV2AwsAccount AwsAccount { get; set; }
+
+        /// <summary>Required. The bucket name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bucketName")]
+        public virtual string BucketName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Amazon S3 bucket conditions.</summary>
+    public class GooglePrivacyDlpV2AmazonS3BucketConditions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Bucket types that should be profiled. Optional. Defaults to TYPE_ALL_SUPPORTED if unspecified.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bucketTypes")]
+        public virtual System.Collections.Generic.IList<string> BucketTypes { get; set; }
+
+        /// <summary>
+        /// Optional. Object classes that should be profiled. Optional. Defaults to ALL_SUPPORTED_CLASSES if
+        /// unspecified.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("objectStorageClasses")]
+        public virtual System.Collections.Generic.IList<string> ObjectStorageClasses { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Amazon S3 bucket regex.</summary>
+    public class GooglePrivacyDlpV2AmazonS3BucketRegex : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The AWS account regex.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("awsAccountRegex")]
+        public virtual GooglePrivacyDlpV2AwsAccountRegex AwsAccountRegex { get; set; }
+
+        /// <summary>Optional. Regex to test the bucket name against. If empty, all buckets match.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bucketNameRegex")]
+        public virtual string BucketNameRegex { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -9029,6 +12554,78 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>AWS account.</summary>
+    public class GooglePrivacyDlpV2AwsAccount : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. AWS account ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("accountId")]
+        public virtual string AccountId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>AWS account regex.</summary>
+    public class GooglePrivacyDlpV2AwsAccountRegex : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Regex to test the AWS account ID against. If empty, all accounts match.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("accountIdRegex")]
+        public virtual string AccountIdRegex { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The AWS starting location for discovery.</summary>
+    public class GooglePrivacyDlpV2AwsDiscoveryStartingLocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The AWS account ID that this discovery config applies to. Within an AWS organization, you can find the AWS
+        /// account ID inside an AWS account ARN. Example:
+        /// arn:{partition}:organizations::{management_account_id}:account/{org_id}/{account_id}
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("accountId")]
+        public virtual string AccountId { get; set; }
+
+        /// <summary>All AWS assets stored in Asset Inventory that didn't match other AWS discovery configs.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allAssetInventoryAssets")]
+        public virtual System.Nullable<bool> AllAssetInventoryAssets { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Target used to match against for discovery with BigQuery tables</summary>
+    public class GooglePrivacyDlpV2BigQueryDiscoveryTarget : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// How often and when to update profiles. New tables that match both the filter and conditions are scanned as
+        /// quickly as possible depending on system capacity.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cadence")]
+        public virtual GooglePrivacyDlpV2DiscoveryGenerationCadence Cadence { get; set; }
+
+        /// <summary>
+        /// In addition to matching the filter, these conditions must be true before a profile is generated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("conditions")]
+        public virtual GooglePrivacyDlpV2DiscoveryBigQueryConditions Conditions { get; set; }
+
+        /// <summary>Tables that match this filter will not have profiles created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disabled")]
+        public virtual GooglePrivacyDlpV2Disabled Disabled { get; set; }
+
+        /// <summary>
+        /// Required. The tables the discovery cadence applies to. The first target with a matching filter will be the
+        /// one to apply to a table.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filter")]
+        public virtual GooglePrivacyDlpV2DiscoveryBigQueryFilter Filter { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Message defining a field of a BigQuery table.</summary>
     public class GooglePrivacyDlpV2BigQueryField : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -9068,7 +12665,8 @@ namespace Google.Apis.DLP.v2.Data
     {
         /// <summary>
         /// References to fields excluded from scanning. This allows you to skip inspection of entire columns which you
-        /// know have no findings.
+        /// know have no findings. When inspecting a table, we recommend that you inspect all columns. Otherwise,
+        /// findings might be affected because hints from excluded columns will not be used.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("excludedFields")]
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2FieldId> ExcludedFields { get; set; }
@@ -9082,7 +12680,10 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("identifyingFields")]
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2FieldId> IdentifyingFields { get; set; }
 
-        /// <summary>Limit scanning only to these fields.</summary>
+        /// <summary>
+        /// Limit scanning only to these fields. When inspecting a table, we recommend that you inspect all columns.
+        /// Otherwise, findings might be affected because hints from excluded columns will not be used.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("includedFields")]
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2FieldId> IncludedFields { get; set; }
 
@@ -9097,17 +12698,60 @@ namespace Google.Apis.DLP.v2.Data
         /// <summary>
         /// Max percentage of rows to scan. The rest are omitted. The number of rows scanned is rounded down. Must be
         /// between 0 and 100, inclusively. Both 0 and 100 means no limit. Defaults to 0. Only one of rows_limit and
-        /// rows_limit_percent can be specified. Cannot be used in conjunction with TimespanConfig.
+        /// rows_limit_percent can be specified. Cannot be used in conjunction with TimespanConfig. Caution: A [known
+        /// issue](https://cloud.google.com/sensitive-data-protection/docs/known-issues#bq-sampling) is causing the
+        /// `rowsLimitPercent` field to behave unexpectedly. We recommend using `rowsLimit` instead.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rowsLimitPercent")]
         public virtual System.Nullable<int> RowsLimitPercent { get; set; }
 
+        /// <summary>How to sample the data.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sampleMethod")]
         public virtual string SampleMethod { get; set; }
 
         /// <summary>Complete BigQuery table reference.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tableReference")]
         public virtual GooglePrivacyDlpV2BigQueryTable TableReference { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A pattern to match against one or more tables, datasets, or projects that contain BigQuery tables. At least one
+    /// pattern must be specified. Regular expressions use RE2 [syntax](https://github.com/google/re2/wiki/Syntax); a
+    /// guide can be found under the google/re2 repository on GitHub.
+    /// </summary>
+    public class GooglePrivacyDlpV2BigQueryRegex : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>If unset, this property matches all datasets.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetIdRegex")]
+        public virtual string DatasetIdRegex { get; set; }
+
+        /// <summary>
+        /// For organizations, if unset, will match all projects. Has no effect for data profile configurations created
+        /// within a project.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectIdRegex")]
+        public virtual string ProjectIdRegex { get; set; }
+
+        /// <summary>If unset, this property matches all tables.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableIdRegex")]
+        public virtual string TableIdRegex { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A collection of regular expressions to determine what tables to match against.</summary>
+    public class GooglePrivacyDlpV2BigQueryRegexes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A single BigQuery regular expression pattern to match against one or more tables, datasets, or projects that
+        /// contain BigQuery tables.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("patterns")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2BigQueryRegex> Patterns { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -9124,8 +12768,8 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string DatasetId { get; set; }
 
         /// <summary>
-        /// The Google Cloud Platform project ID of the project containing the table. If omitted, project ID is inferred
-        /// from the API call.
+        /// The Google Cloud project ID of the project containing the table. If omitted, project ID is inferred from the
+        /// API call.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
@@ -9133,6 +12777,28 @@ namespace Google.Apis.DLP.v2.Data
         /// <summary>Name of the table.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tableId")]
         public virtual string TableId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Specifies a collection of BigQuery tables. Used for Discovery.</summary>
+    public class GooglePrivacyDlpV2BigQueryTableCollection : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A collection of regular expressions to match a BigQuery table against.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("includeRegexes")]
+        public virtual GooglePrivacyDlpV2BigQueryRegexes IncludeRegexes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The types of BigQuery tables supported by Cloud DLP.</summary>
+    public class GooglePrivacyDlpV2BigQueryTableTypes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A set of BigQuery table types.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("types")]
+        public virtual System.Collections.Generic.IList<string> Types { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -9182,11 +12848,11 @@ namespace Google.Apis.DLP.v2.Data
 
     /// <summary>
     /// Generalization function that buckets values based on ranges. The ranges and replacement values are dynamically
-    /// provided by the user for custom behavior, such as 1-30 -&amp;gt; LOW 31-65 -&amp;gt; MEDIUM 66-100 -&amp;gt;
-    /// HIGH This can be used on data of type: number, long, string, timestamp. If the bound `Value` type differs from
+    /// provided by the user for custom behavior, such as 1-30 -&amp;gt; LOW, 31-65 -&amp;gt; MEDIUM, 66-100 -&amp;gt;
+    /// HIGH. This can be used on data of type: number, long, string, timestamp. If the bound `Value` type differs from
     /// the type of data being transformed, we will first attempt converting the type of the data to be transformed to
-    /// match the type of the bound before comparing. See https://cloud.google.com/dlp/docs/concepts-bucketing to learn
-    /// more.
+    /// match the type of the bound before comparing. See
+    /// https://cloud.google.com/sensitive-data-protection/docs/concepts-bucketing to learn more.
     /// </summary>
     public class GooglePrivacyDlpV2BucketingConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -9304,7 +12970,12 @@ namespace Google.Apis.DLP.v2.Data
 
         /// <summary>
         /// Number of characters to mask. If not set, all matching chars will be masked. Skipped characters do not count
-        /// towards this tally.
+        /// towards this tally. If `number_to_mask` is negative, this denotes inverse masking. Cloud DLP masks all but a
+        /// number of characters. For example, suppose you have the following values: - `masking_character` is `*` -
+        /// `number_to_mask` is `-4` - `reverse_order` is `false` - `CharsToIgnore` includes `-` - Input string is
+        /// `1234-5678-9012-3456` The resulting de-identified string is `****-****-****-3456`. Cloud DLP masks all but
+        /// the last four characters. If `reverse_order` is `true`, all but the first four characters are masked as
+        /// `1234-****-****-****`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("numberToMask")]
         public virtual System.Nullable<int> NumberToMask { get; set; }
@@ -9339,6 +13010,116 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Target used to match against for discovery with Cloud SQL tables.</summary>
+    public class GooglePrivacyDlpV2CloudSqlDiscoveryTarget : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// In addition to matching the filter, these conditions must be true before a profile is generated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("conditions")]
+        public virtual GooglePrivacyDlpV2DiscoveryCloudSqlConditions Conditions { get; set; }
+
+        /// <summary>Disable profiling for database resources that match this filter.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disabled")]
+        public virtual GooglePrivacyDlpV2Disabled Disabled { get; set; }
+
+        /// <summary>
+        /// Required. The tables the discovery cadence applies to. The first target with a matching filter will be the
+        /// one to apply to a table.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filter")]
+        public virtual GooglePrivacyDlpV2DiscoveryCloudSqlFilter Filter { get; set; }
+
+        /// <summary>
+        /// How often and when to update profiles. New tables that match both the filter and conditions are scanned as
+        /// quickly as possible depending on system capacity.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("generationCadence")]
+        public virtual GooglePrivacyDlpV2DiscoveryCloudSqlGenerationCadence GenerationCadence { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Use IAM authentication to connect. This requires the Cloud SQL IAM feature to be enabled on the instance, which
+    /// is not the default for Cloud SQL. See https://cloud.google.com/sql/docs/postgres/authentication and
+    /// https://cloud.google.com/sql/docs/mysql/authentication.
+    /// </summary>
+    public class GooglePrivacyDlpV2CloudSqlIamCredential : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Cloud SQL connection properties.</summary>
+    public class GooglePrivacyDlpV2CloudSqlProperties : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Built-in IAM authentication (must be configured in Cloud SQL).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudSqlIam")]
+        public virtual GooglePrivacyDlpV2CloudSqlIamCredential CloudSqlIam { get; set; }
+
+        /// <summary>
+        /// Optional. Immutable. The Cloud SQL instance for which the connection is defined. Only one connection per
+        /// instance is allowed. This can only be set at creation time, and cannot be updated. It is an error to use a
+        /// connection_name from different project or region than the one that holds the connection. For example, a
+        /// Connection resource for Cloud SQL connection_name `project-id:us-central1:sql-instance` must be created
+        /// under the parent `projects/project-id/locations/us-central1`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connectionName")]
+        public virtual string ConnectionName { get; set; }
+
+        /// <summary>
+        /// Required. The database engine used by the Cloud SQL instance that this connection configures.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseEngine")]
+        public virtual string DatabaseEngine { get; set; }
+
+        /// <summary>
+        /// Required. The DLP API will limit its connections to max_connections. Must be 2 or greater.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxConnections")]
+        public virtual System.Nullable<int> MaxConnections { get; set; }
+
+        /// <summary>A username and password stored in Secret Manager.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("usernamePassword")]
+        public virtual GooglePrivacyDlpV2SecretManagerCredential UsernamePassword { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Target used to match against for discovery with Cloud Storage buckets.</summary>
+    public class GooglePrivacyDlpV2CloudStorageDiscoveryTarget : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. In addition to matching the filter, these conditions must be true before a profile is generated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("conditions")]
+        public virtual GooglePrivacyDlpV2DiscoveryFileStoreConditions Conditions { get; set; }
+
+        /// <summary>Optional. Disable profiling for buckets that match this filter.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disabled")]
+        public virtual GooglePrivacyDlpV2Disabled Disabled { get; set; }
+
+        /// <summary>
+        /// Required. The buckets the generation_cadence applies to. The first target with a matching filter will be the
+        /// one to apply to a bucket.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filter")]
+        public virtual GooglePrivacyDlpV2DiscoveryCloudStorageFilter Filter { get; set; }
+
+        /// <summary>
+        /// Optional. How often and when to update profiles. New buckets that match both the filter and conditions are
+        /// scanned as quickly as possible depending on system capacity.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("generationCadence")]
+        public virtual GooglePrivacyDlpV2DiscoveryCloudStorageGenerationCadence GenerationCadence { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Message representing a set of files in Cloud Storage.</summary>
     public class GooglePrivacyDlpV2CloudStorageFileSet : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -9350,13 +13131,15 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Options defining a file or a set of files within a Google Cloud Storage bucket.</summary>
+    /// <summary>Options defining a file or a set of files within a Cloud Storage bucket.</summary>
     public class GooglePrivacyDlpV2CloudStorageOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// Max number of bytes to scan from a file. If a scanned file's size is bigger than this value then the rest of
-        /// the bytes are omitted. Only one of bytes_limit_per_file and bytes_limit_per_file_percent can be specified.
-        /// Cannot be set if de-identification is requested.
+        /// the bytes are omitted. Only one of `bytes_limit_per_file` and `bytes_limit_per_file_percent` can be
+        /// specified. This field can't be set if de-identification is requested. For certain file types, setting this
+        /// field has no effect. For more information, see [Limits on bytes scanned per
+        /// file](https://cloud.google.com/sensitive-data-protection/docs/supported-file-types#max-byte-size-per-file).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bytesLimitPerFile")]
         public virtual System.Nullable<long> BytesLimitPerFile { get; set; }
@@ -9364,8 +13147,10 @@ namespace Google.Apis.DLP.v2.Data
         /// <summary>
         /// Max percentage of bytes to scan from a file. The rest are omitted. The number of bytes scanned is rounded
         /// down. Must be between 0 and 100, inclusively. Both 0 and 100 means no limit. Defaults to 0. Only one of
-        /// bytes_limit_per_file and bytes_limit_per_file_percent can be specified. Cannot be set if de-identification
-        /// is requested.
+        /// bytes_limit_per_file and bytes_limit_per_file_percent can be specified. This field can't be set if
+        /// de-identification is requested. For certain file types, setting this field has no effect. For more
+        /// information, see [Limits on bytes scanned per
+        /// file](https://cloud.google.com/sensitive-data-protection/docs/supported-file-types#max-byte-size-per-file).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bytesLimitPerFilePercent")]
         public virtual System.Nullable<int> BytesLimitPerFilePercent { get; set; }
@@ -9390,6 +13175,7 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("filesLimitPercent")]
         public virtual System.Nullable<int> FilesLimitPercent { get; set; }
 
+        /// <summary>How to sample the data.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sampleMethod")]
         public virtual string SampleMethod { get; set; }
 
@@ -9401,11 +13187,33 @@ namespace Google.Apis.DLP.v2.Data
     public class GooglePrivacyDlpV2CloudStoragePath : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// A url representing a file or path (no wildcards) in Cloud Storage. Example:
-        /// gs://[BUCKET_NAME]/dictionary.txt
+        /// A URL representing a file or path (no wildcards) in Cloud Storage. Example:
+        /// `gs://[BUCKET_NAME]/dictionary.txt`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("path")]
         public virtual string Path { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A pattern to match against one or more file stores. At least one pattern must be specified. Regular expressions
+    /// use RE2 [syntax](https://github.com/google/re2/wiki/Syntax); a guide can be found under the google/re2
+    /// repository on GitHub.
+    /// </summary>
+    public class GooglePrivacyDlpV2CloudStorageRegex : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Regex to test the bucket name against. If empty, all buckets match. Example: "marketing2021" or
+        /// "(marketing)\d{4}" will both match the bucket gs://marketing2021
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bucketNameRegex")]
+        public virtual string BucketNameRegex { get; set; }
+
+        /// <summary>Optional. For organizations, if unset, will match all projects.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectIdRegex")]
+        public virtual string ProjectIdRegex { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -9457,6 +13265,21 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Identifies a single Cloud Storage bucket.</summary>
+    public class GooglePrivacyDlpV2CloudStorageResourceReference : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The bucket to scan.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bucketName")]
+        public virtual string BucketName { get; set; }
+
+        /// <summary>Required. If within a project-level config, then this must match the config's project id.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
+        public virtual string ProjectId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Represents a color in the RGB color space.</summary>
     public class GooglePrivacyDlpV2Color : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -9471,6 +13294,140 @@ namespace Google.Apis.DLP.v2.Data
         /// <summary>The amount of red in the color as a value in the interval [0, 1].</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("red")]
         public virtual System.Nullable<float> Red { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The profile for a scanned column within a table.</summary>
+    public class GooglePrivacyDlpV2ColumnDataProfile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The name of the column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("column")]
+        public virtual string Column { get; set; }
+
+        /// <summary>
+        /// If it's been determined this column can be identified as a single type, this will be set. Otherwise the
+        /// column either has unidentifiable content or mixed types.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("columnInfoType")]
+        public virtual GooglePrivacyDlpV2InfoTypeSummary ColumnInfoType { get; set; }
+
+        /// <summary>The data type of a given column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("columnType")]
+        public virtual string ColumnType { get; set; }
+
+        /// <summary>The data risk level for this column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataRiskLevel")]
+        public virtual GooglePrivacyDlpV2DataRiskLevel DataRiskLevel { get; set; }
+
+        /// <summary>The BigQuery dataset ID, if the resource profiled is a BigQuery table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetId")]
+        public virtual string DatasetId { get; set; }
+
+        /// <summary>
+        /// If supported, the location where the dataset's data is stored. See
+        /// https://cloud.google.com/bigquery/docs/locations for supported BigQuery locations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetLocation")]
+        public virtual string DatasetLocation { get; set; }
+
+        /// <summary>The Google Cloud project ID that owns the profiled resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetProjectId")]
+        public virtual string DatasetProjectId { get; set; }
+
+        /// <summary>Approximate percentage of entries being null in the column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("estimatedNullPercentage")]
+        public virtual string EstimatedNullPercentage { get; set; }
+
+        /// <summary>Approximate uniqueness of the column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("estimatedUniquenessScore")]
+        public virtual string EstimatedUniquenessScore { get; set; }
+
+        /// <summary>
+        /// The likelihood that this column contains free-form text. A value close to 1 may indicate the column is
+        /// likely to contain free-form or natural language text. Range in 0-1.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("freeTextScore")]
+        public virtual System.Nullable<double> FreeTextScore { get; set; }
+
+        /// <summary>The name of the profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Other types found within this column. List will be unordered.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("otherMatches")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2OtherInfoTypeSummary> OtherMatches { get; set; }
+
+        /// <summary>Indicates if a policy tag has been applied to the column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policyState")]
+        public virtual string PolicyState { get; set; }
+
+        private string _profileLastGeneratedRaw;
+
+        private object _profileLastGenerated;
+
+        /// <summary>The last time the profile was generated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("profileLastGenerated")]
+        public virtual string ProfileLastGeneratedRaw
+        {
+            get => _profileLastGeneratedRaw;
+            set
+            {
+                _profileLastGenerated = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _profileLastGeneratedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ProfileLastGeneratedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ProfileLastGeneratedDateTimeOffset instead.")]
+        public virtual object ProfileLastGenerated
+        {
+            get => _profileLastGenerated;
+            set
+            {
+                _profileLastGeneratedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _profileLastGenerated = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ProfileLastGeneratedRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ProfileLastGeneratedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ProfileLastGeneratedRaw);
+            set => ProfileLastGeneratedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Success or error status from the most recent profile generation attempt. May be empty if the profile is
+        /// still being generated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("profileStatus")]
+        public virtual GooglePrivacyDlpV2ProfileStatus ProfileStatus { get; set; }
+
+        /// <summary>The sensitivity of this column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sensitivityScore")]
+        public virtual GooglePrivacyDlpV2SensitivityScore SensitivityScore { get; set; }
+
+        /// <summary>State of a profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The resource name of the table data profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableDataProfile")]
+        public virtual string TableDataProfile { get; set; }
+
+        /// <summary>The resource name of the resource this column is within.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableFullResource")]
+        public virtual string TableFullResource { get; set; }
+
+        /// <summary>The table ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableId")]
+        public virtual string TableId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -9516,6 +13473,36 @@ namespace Google.Apis.DLP.v2.Data
     }
 
     /// <summary>
+    /// A data connection to allow the DLP API to profile data in locations that require additional configuration.
+    /// </summary>
+    public class GooglePrivacyDlpV2Connection : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Connect to a Cloud SQL instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudSql")]
+        public virtual GooglePrivacyDlpV2CloudSqlProperties CloudSql { get; set; }
+
+        /// <summary>
+        /// Output only. Set if status == ERROR, to provide additional details. Will store the last 10 errors sorted
+        /// with the most recent first.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errors")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2Error> Errors { get; set; }
+
+        /// <summary>
+        /// Output only. Name of the connection: `projects/{project}/locations/{location}/connections/{name}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Required. The connection's state in its lifecycle.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// Represents a container that may contain DLP findings. Examples of a container include a file, table, or database
     /// record.
     /// </summary>
@@ -9523,7 +13510,7 @@ namespace Google.Apis.DLP.v2.Data
     {
         /// <summary>
         /// A string representation of the full container name. Examples: - BigQuery: 'Project:DataSetId.TableId' -
-        /// Google Cloud Storage: 'gs://Bucket/folders/filename.txt'
+        /// Cloud Storage: 'gs://Bucket/folders/filename.txt'
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fullPath")]
         public virtual string FullPath { get; set; }
@@ -9536,32 +13523,65 @@ namespace Google.Apis.DLP.v2.Data
 
         /// <summary>
         /// The rest of the path after the root. Examples: - For BigQuery table `project_id:dataset_id.table_id`, the
-        /// relative path is `table_id` - Google Cloud Storage file `gs://bucket/folder/filename.txt`, the relative path
-        /// is `folder/filename.txt`
+        /// relative path is `table_id` - For Cloud Storage file `gs://bucket/folder/filename.txt`, the relative path is
+        /// `folder/filename.txt`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("relativePath")]
         public virtual string RelativePath { get; set; }
 
         /// <summary>
         /// The root of the container. Examples: - For BigQuery table `project_id:dataset_id.table_id`, the root is
-        /// `dataset_id` - For Google Cloud Storage file `gs://bucket/folder/filename.txt`, the root is `gs://bucket`
+        /// `dataset_id` - For Cloud Storage file `gs://bucket/folder/filename.txt`, the root is `gs://bucket`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rootPath")]
         public virtual string RootPath { get; set; }
 
-        /// <summary>Container type, for example BigQuery or Google Cloud Storage.</summary>
+        /// <summary>Container type, for example BigQuery or Cloud Storage.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
-        /// Findings container modification timestamp, if applicable. For Google Cloud Storage contains last file
-        /// modification timestamp. For BigQuery table contains last_modified_time property. For Datastore - not
-        /// populated.
+        /// Findings container modification timestamp, if applicable. For Cloud Storage, this field contains the last
+        /// file modification timestamp. For a BigQuery table, this field contains the last_modified_time property. For
+        /// Datastore, this field isn't populated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
 
-        /// <summary>Findings container version, if available ("generation" for Google Cloud Storage).</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Findings container version, if available ("generation" for Cloud Storage).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
         public virtual string Version { get; set; }
 
@@ -9569,7 +13589,7 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Container structure for the content to inspect.</summary>
+    /// <summary>Type of content to inspect.</summary>
     public class GooglePrivacyDlpV2ContentItem : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Content data to inspect or redact. Replaces `type` and `data`.</summary>
@@ -9577,8 +13597,8 @@ namespace Google.Apis.DLP.v2.Data
         public virtual GooglePrivacyDlpV2ByteContentItem ByteItem { get; set; }
 
         /// <summary>
-        /// Structured content for inspection. See https://cloud.google.com/dlp/docs/inspecting-text#inspecting_a_table
-        /// to learn more.
+        /// Structured content for inspection. See
+        /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-text#inspecting_a_table to learn more.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("table")]
         public virtual GooglePrivacyDlpV2Table Table { get; set; }
@@ -9598,21 +13618,56 @@ namespace Google.Apis.DLP.v2.Data
         /// Name of the container where the finding is located. The top level name is the source file name or table
         /// name. Names of some common storage containers are formatted as follows: * BigQuery tables:
         /// `{project_id}:{dataset_id}.{table_id}` * Cloud Storage files: `gs://{bucket}/{path}` * Datastore namespace:
-        /// {namespace} Nested names could be absent if the embedded object has no string identifier (for an example an
+        /// {namespace} Nested names could be absent if the embedded object has no string identifier (for example, an
         /// image contained within a document).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("containerName")]
         public virtual string ContainerName { get; set; }
 
+        private string _containerTimestampRaw;
+
+        private object _containerTimestamp;
+
         /// <summary>
-        /// Findings container modification timestamp, if applicable. For Google Cloud Storage contains last file
-        /// modification timestamp. For BigQuery table contains last_modified_time property. For Datastore - not
-        /// populated.
+        /// Finding container modification timestamp, if applicable. For Cloud Storage, this field contains the last
+        /// file modification timestamp. For a BigQuery table, this field contains the last_modified_time property. For
+        /// Datastore, this field isn't populated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("containerTimestamp")]
-        public virtual object ContainerTimestamp { get; set; }
+        public virtual string ContainerTimestampRaw
+        {
+            get => _containerTimestampRaw;
+            set
+            {
+                _containerTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _containerTimestampRaw = value;
+            }
+        }
 
-        /// <summary>Findings container version, if available ("generation" for Google Cloud Storage).</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="ContainerTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ContainerTimestampDateTimeOffset instead.")]
+        public virtual object ContainerTimestamp
+        {
+            get => _containerTimestamp;
+            set
+            {
+                _containerTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _containerTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ContainerTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ContainerTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ContainerTimestampRaw);
+            set => ContainerTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Finding container version, if available ("generation" for Cloud Storage).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("containerVersion")]
         public virtual string ContainerVersion { get; set; }
 
@@ -9636,6 +13691,17 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Request message for CreateConnection.</summary>
+    public class GooglePrivacyDlpV2CreateConnectionRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The connection resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connection")]
+        public virtual GooglePrivacyDlpV2Connection Connection { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for CreateDeidentifyTemplate.</summary>
     public class GooglePrivacyDlpV2CreateDeidentifyTemplateRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -9654,6 +13720,25 @@ namespace Google.Apis.DLP.v2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("templateId")]
         public virtual string TemplateId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for CreateDiscoveryConfig.</summary>
+    public class GooglePrivacyDlpV2CreateDiscoveryConfigRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The config ID can contain uppercase and lowercase letters, numbers, and hyphens; that is, it must match the
+        /// regular expression: `[a-zA-Z\d-_]+`. The maximum length is 100 characters. Can be empty to allow the system
+        /// to generate one.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("configId")]
+        public virtual string ConfigId { get; set; }
+
+        /// <summary>Required. The DiscoveryConfig to create.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("discoveryConfig")]
+        public virtual GooglePrivacyDlpV2DiscoveryConfig DiscoveryConfig { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -9772,7 +13857,7 @@ namespace Google.Apis.DLP.v2.Data
         /// decryption as well. If the context is not set, plaintext would be used as is for encryption. If the context
         /// is set but: 1. there is no record present when transforming a given value or 2. the field is not present
         /// when transforming a given value, plaintext would be used as is for encryption. Note that case (1) is
-        /// expected when an `InfoTypeTransformation` is applied to both structured and non-structured `ContentItem`s.
+        /// expected when an `InfoTypeTransformation` is applied to both structured and unstructured `ContentItem`s.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("context")]
         public virtual GooglePrivacyDlpV2FieldId Context { get; set; }
@@ -9813,7 +13898,7 @@ namespace Google.Apis.DLP.v2.Data
     /// Pseudonymization method that generates surrogates via cryptographic hashing. Uses SHA-256. The key size must be
     /// either 32 or 64 bytes. Outputs a base64 encoded representation of the hashed output (for example,
     /// L7k0BHmF1ha5U3NfGykjro4xWi1MPVQPjhMAZbSV9mM=). Currently, only string and integer values can be hashed. See
-    /// https://cloud.google.com/dlp/docs/pseudonymization to learn more.
+    /// https://cloud.google.com/sensitive-data-protection/docs/pseudonymization to learn more.
     /// </summary>
     public class GooglePrivacyDlpV2CryptoHashConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -9854,9 +13939,9 @@ namespace Google.Apis.DLP.v2.Data
     /// surrogate back into the original identifier. The identifier must be encoded as ASCII. For a given crypto key and
     /// context, the same identifier will be replaced with the same surrogate. Identifiers must be at least two
     /// characters long. In the case that the identifier is the empty string, it will be skipped. See
-    /// https://cloud.google.com/dlp/docs/pseudonymization to learn more. Note: We recommend using
+    /// https://cloud.google.com/sensitive-data-protection/docs/pseudonymization to learn more. Note: We recommend using
     /// CryptoDeterministicConfig for all use cases which do not require preserving the input alphabet space and size,
-    /// plus warrant referential integrity.
+    /// plus warrant referential integrity. FPE incurs significant latency costs.
     /// </summary>
     public class GooglePrivacyDlpV2CryptoReplaceFfxFpeConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -9869,7 +13954,7 @@ namespace Google.Apis.DLP.v2.Data
         /// won't be given the same surrogate. If the context is not set, a default tweak will be used. If the context
         /// is set but: 1. there is no record present when transforming a given value or 1. the field is not present
         /// when transforming a given value, a default tweak will be used. Note that case (1) is expected when an
-        /// `InfoTypeTransformation` is applied to both structured and non-structured `ContentItem`s. Currently, the
+        /// `InfoTypeTransformation` is applied to both structured and unstructured `ContentItem`s. Currently, the
         /// referenced field may be of value type integer or string. The tweak is constructed as a sequence of bytes in
         /// big endian byte order such that: - a 64 bit integer is encoded followed by a single byte of value 1 - a
         /// string is encoded in UTF-8 format followed by a single byte of value 2
@@ -9886,8 +13971,7 @@ namespace Google.Apis.DLP.v2.Data
         /// happens before/after encryption/decryption. Each character listed must appear only once. Number of
         /// characters must be in the range [2, 95]. This must be encoded as ASCII. The order of characters does not
         /// matter. The full list of allowed characters is:
-        /// 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
-        /// ~`!@#$%^&amp;amp;*()_-+={[}]|\:;"'&amp;lt;,&amp;gt;.?/
+        /// ``0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~`!@#$%^&amp;amp;*()_-+={[}]|\:;"'&amp;lt;,&amp;gt;.?/``
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customAlphabet")]
         public virtual string CustomAlphabet { get; set; }
@@ -9903,14 +13987,14 @@ namespace Google.Apis.DLP.v2.Data
         /// example, if the name of custom infoType is 'MY_TOKEN_INFO_TYPE' and the surrogate is 'abc', the full
         /// replacement value will be: 'MY_TOKEN_INFO_TYPE(3):abc' This annotation identifies the surrogate when
         /// inspecting content using the custom infoType
-        /// [`SurrogateType`](https://cloud.google.com/dlp/docs/reference/rest/v2/InspectConfig#surrogatetype). This
-        /// facilitates reversal of the surrogate when it occurs in free text. In order for inspection to work properly,
-        /// the name of this infoType must not occur naturally anywhere in your data; otherwise, inspection may find a
-        /// surrogate that does not correspond to an actual identifier. Therefore, choose your custom infoType name
-        /// carefully after considering what your data looks like. One way to select a name that has a high chance of
-        /// yielding reliable detection is to include one or more unicode characters that are highly improbable to exist
-        /// in your data. For example, assuming your data is entered from a regular ASCII keyboard, the symbol with the
-        /// hex code point 29DD might be used like so: ⧝MY_TOKEN_TYPE
+        /// [`SurrogateType`](https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/InspectConfig#surrogatetype).
+        /// This facilitates reversal of the surrogate when it occurs in free text. In order for inspection to work
+        /// properly, the name of this infoType must not occur naturally anywhere in your data; otherwise, inspection
+        /// may find a surrogate that does not correspond to an actual identifier. Therefore, choose your custom
+        /// infoType name carefully after considering what your data looks like. One way to select a name that has a
+        /// high chance of yielding reliable detection is to include one or more unicode characters that are highly
+        /// improbable to exist in your data. For example, assuming your data is entered from a regular ASCII keyboard,
+        /// the symbol with the hex code point 29DD might be used like so: ⧝MY_TOKEN_TYPE
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("surrogateInfoType")]
         public virtual GooglePrivacyDlpV2InfoType SurrogateInfoType { get; set; }
@@ -9964,6 +14048,14 @@ namespace Google.Apis.DLP.v2.Data
         public virtual GooglePrivacyDlpV2Regex Regex { get; set; }
 
         /// <summary>
+        /// Sensitivity for this CustomInfoType. If this CustomInfoType extends an existing InfoType, the sensitivity
+        /// here will take precedence over that of the original InfoType. If unset for a CustomInfoType, it will default
+        /// to HIGH. This only applies to data profiling.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sensitivityScore")]
+        public virtual GooglePrivacyDlpV2SensitivityScore SensitivityScore { get; set; }
+
+        /// <summary>
         /// Load an existing `StoredInfoType` resource for use in `InspectDataSource`. Not currently supported in
         /// `InspectContent`.
         /// </summary>
@@ -9975,6 +14067,333 @@ namespace Google.Apis.DLP.v2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("surrogateType")]
         public virtual GooglePrivacyDlpV2SurrogateType SurrogateType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A task to execute when a data profile has been generated.</summary>
+    public class GooglePrivacyDlpV2DataProfileAction : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Export data profiles into a provided location.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exportData")]
+        public virtual GooglePrivacyDlpV2Export ExportData { get; set; }
+
+        /// <summary>Publish a message into the Pub/Sub topic.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pubSubNotification")]
+        public virtual GooglePrivacyDlpV2PubSubNotification PubSubNotification { get; set; }
+
+        /// <summary>
+        /// Publishes generated data profiles to Google Security Operations. For more information, see [Use Sensitive
+        /// Data Protection data in context-aware
+        /// analytics](https://cloud.google.com/chronicle/docs/detection/usecase-dlp-high-risk-user-download).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("publishToChronicle")]
+        public virtual GooglePrivacyDlpV2PublishToChronicle PublishToChronicle { get; set; }
+
+        /// <summary>Publishes findings to Security Command Center for each data profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("publishToScc")]
+        public virtual GooglePrivacyDlpV2PublishToSecurityCommandCenter PublishToScc { get; set; }
+
+        /// <summary>Tags the profiled resources with the specified tag values.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagResources")]
+        public virtual GooglePrivacyDlpV2TagResources TagResources { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The schema of data to be saved to the BigQuery table when the `DataProfileAction` is enabled.</summary>
+    public class GooglePrivacyDlpV2DataProfileBigQueryRowSchema : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Column data profile column</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("columnProfile")]
+        public virtual GooglePrivacyDlpV2ColumnDataProfile ColumnProfile { get; set; }
+
+        /// <summary>File store data profile column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileStoreProfile")]
+        public virtual GooglePrivacyDlpV2FileStoreDataProfile FileStoreProfile { get; set; }
+
+        /// <summary>Table data profile column</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableProfile")]
+        public virtual GooglePrivacyDlpV2TableDataProfile TableProfile { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Snapshot of the configurations used to generate the profile.</summary>
+    public class GooglePrivacyDlpV2DataProfileConfigSnapshot : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A copy of the configuration used to generate this profile. This is deprecated, and the DiscoveryConfig field
+        /// is preferred moving forward. DataProfileJobConfig will still be written here for Discovery in BigQuery for
+        /// backwards compatibility, but will not be updated with new fields, while DiscoveryConfig will.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataProfileJob")]
+        public virtual GooglePrivacyDlpV2DataProfileJobConfig DataProfileJob { get; set; }
+
+        /// <summary>A copy of the configuration used to generate this profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("discoveryConfig")]
+        public virtual GooglePrivacyDlpV2DiscoveryConfig DiscoveryConfig { get; set; }
+
+        /// <summary>
+        /// A copy of the inspection config used to generate this profile. This is a copy of the inspect_template
+        /// specified in `DataProfileJobConfig`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inspectConfig")]
+        public virtual GooglePrivacyDlpV2InspectConfig InspectConfig { get; set; }
+
+        private string _inspectTemplateModifiedTimeRaw;
+
+        private object _inspectTemplateModifiedTime;
+
+        /// <summary>Timestamp when the template was modified</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inspectTemplateModifiedTime")]
+        public virtual string InspectTemplateModifiedTimeRaw
+        {
+            get => _inspectTemplateModifiedTimeRaw;
+            set
+            {
+                _inspectTemplateModifiedTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _inspectTemplateModifiedTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="InspectTemplateModifiedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use InspectTemplateModifiedTimeDateTimeOffset instead.")]
+        public virtual object InspectTemplateModifiedTime
+        {
+            get => _inspectTemplateModifiedTime;
+            set
+            {
+                _inspectTemplateModifiedTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _inspectTemplateModifiedTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="InspectTemplateModifiedTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? InspectTemplateModifiedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(InspectTemplateModifiedTimeRaw);
+            set => InspectTemplateModifiedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Name of the inspection template used to generate this profile</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inspectTemplateName")]
+        public virtual string InspectTemplateName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Configuration for setting up a job to scan resources for profile generation. Only one data profile configuration
+    /// may exist per organization, folder, or project. The generated data profiles are retained according to the [data
+    /// retention policy] (https://cloud.google.com/sensitive-data-protection/docs/data-profiles#retention).
+    /// </summary>
+    public class GooglePrivacyDlpV2DataProfileJobConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Actions to execute at the completion of the job.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataProfileActions")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2DataProfileAction> DataProfileActions { get; set; }
+
+        /// <summary>
+        /// Detection logic for profile generation. Not all template features are used by profiles. FindingLimits,
+        /// include_quote and exclude_info_types have no impact on data profiling. Multiple templates may be provided if
+        /// there is data in multiple regions. At most one template must be specified per-region (including "global").
+        /// Each region is scanned using the applicable template. If no region-specific template is specified, but a
+        /// "global" template is specified, it will be copied to that region and used instead. If no global or
+        /// region-specific template is provided for a region with data, that region's data will not be scanned. For
+        /// more information, see https://cloud.google.com/sensitive-data-protection/docs/data-profiles#data-residency.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inspectTemplates")]
+        public virtual System.Collections.Generic.IList<string> InspectTemplates { get; set; }
+
+        /// <summary>The data to scan.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual GooglePrivacyDlpV2DataProfileLocation Location { get; set; }
+
+        /// <summary>Must be set only when scanning other clouds.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("otherCloudStartingLocation")]
+        public virtual GooglePrivacyDlpV2OtherCloudDiscoveryStartingLocation OtherCloudStartingLocation { get; set; }
+
+        /// <summary>
+        /// The project that will run the scan. The DLP service account that exists within this project must have access
+        /// to all resources that are profiled, and the DLP API must be enabled.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
+        public virtual string ProjectId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The data that will be profiled.</summary>
+    public class GooglePrivacyDlpV2DataProfileLocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ID of the folder within an organization to scan.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("folderId")]
+        public virtual System.Nullable<long> FolderId { get; set; }
+
+        /// <summary>The ID of an organization to scan.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("organizationId")]
+        public virtual System.Nullable<long> OrganizationId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A condition for determining whether a Pub/Sub should be triggered.</summary>
+    public class GooglePrivacyDlpV2DataProfilePubSubCondition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>An expression.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expressions")]
+        public virtual GooglePrivacyDlpV2PubSubExpressions Expressions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Pub/Sub topic message for a DataProfileAction.PubSubNotification event. To receive a message of protocol buffer
+    /// schema type, convert the message data to an object of this proto class.
+    /// </summary>
+    public class GooglePrivacyDlpV2DataProfilePubSubMessage : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The event that caused the Pub/Sub message to be sent.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("event")]
+        public virtual string Event__ { get; set; }
+
+        /// <summary>
+        /// If `DetailLevel` is `FILE_STORE_PROFILE` this will be fully populated. Otherwise, if `DetailLevel` is
+        /// `RESOURCE_NAME`, then only `name` and `file_store_path` will be populated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileStoreProfile")]
+        public virtual GooglePrivacyDlpV2FileStoreDataProfile FileStoreProfile { get; set; }
+
+        /// <summary>
+        /// If `DetailLevel` is `TABLE_PROFILE` this will be fully populated. Otherwise, if `DetailLevel` is
+        /// `RESOURCE_NAME`, then only `name` and `full_resource` will be populated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("profile")]
+        public virtual GooglePrivacyDlpV2TableDataProfile Profile { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Score is a summary of all elements in the data profile. A higher number means more risk.</summary>
+    public class GooglePrivacyDlpV2DataRiskLevel : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The score applied to the resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("score")]
+        public virtual string Score { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Message used to identify the type of resource being profiled.</summary>
+    public class GooglePrivacyDlpV2DataSourceType : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. An identifying string to the type of resource being profiled. Current values: *
+        /// google/bigquery/table * google/project * google/sql/table * google/gcs/bucket
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataSource")]
+        public virtual string DataSource { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Match database resources using regex filters. Examples of database resources are tables, views, and stored
+    /// procedures.
+    /// </summary>
+    public class GooglePrivacyDlpV2DatabaseResourceCollection : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A collection of regular expressions to match a database resource against.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("includeRegexes")]
+        public virtual GooglePrivacyDlpV2DatabaseResourceRegexes IncludeRegexes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Identifies a single database resource, like a table within a database.</summary>
+    public class GooglePrivacyDlpV2DatabaseResourceReference : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Name of a database within the instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("database")]
+        public virtual string Database { get; set; }
+
+        /// <summary>Required. Name of a database resource, for example, a table within the database.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseResource")]
+        public virtual string DatabaseResource { get; set; }
+
+        /// <summary>
+        /// Required. The instance where this resource is located. For example: Cloud SQL instance ID.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instance")]
+        public virtual string Instance { get; set; }
+
+        /// <summary>Required. If within a project-level config, then this must match the config's project ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
+        public virtual string ProjectId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A pattern to match against one or more database resources. At least one pattern must be specified. Regular
+    /// expressions use RE2 [syntax](https://github.com/google/re2/wiki/Syntax); a guide can be found under the
+    /// google/re2 repository on GitHub.
+    /// </summary>
+    public class GooglePrivacyDlpV2DatabaseResourceRegex : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Regex to test the database name against. If empty, all databases match.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseRegex")]
+        public virtual string DatabaseRegex { get; set; }
+
+        /// <summary>
+        /// Regex to test the database resource's name against. An example of a database resource name is a table's
+        /// name. Other database resource names like view names could be included in the future. If empty, all database
+        /// resources match.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseResourceNameRegex")]
+        public virtual string DatabaseResourceNameRegex { get; set; }
+
+        /// <summary>Regex to test the instance name against. If empty, all instances match.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceRegex")]
+        public virtual string InstanceRegex { get; set; }
+
+        /// <summary>
+        /// For organizations, if unset, will match all projects. Has no effect for configurations created within a
+        /// project.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectIdRegex")]
+        public virtual string ProjectIdRegex { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A collection of regular expressions to determine what database resources to match against.</summary>
+    public class GooglePrivacyDlpV2DatabaseResourceRegexes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A group of regular expression patterns to match against one or more database resources. Maximum of 100
+        /// entries. The sum of all regular expression's length can't exceed 10 KiB.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("patterns")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2DatabaseResourceRegex> Patterns { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -10011,7 +14430,7 @@ namespace Google.Apis.DLP.v2.Data
 
     /// <summary>
     /// Shifts dates by random number of days, with option to be consistent for the same context. See
-    /// https://cloud.google.com/dlp/docs/concepts-date-shifting to learn more.
+    /// https://cloud.google.com/sensitive-data-protection/docs/concepts-date-shifting to learn more.
     /// </summary>
     public class GooglePrivacyDlpV2DateShiftConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -10068,9 +14487,62 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Create a de-identified copy of the requested table or files. A TransformationDetail will be created for each
+    /// transformation. If any rows in BigQuery are skipped during de-identification (transformation errors or row size
+    /// exceeds BigQuery insert API limits) they are placed in the failure output table. If the original row exceeds the
+    /// BigQuery insert API limit it will be truncated when written to the failure output table. The failure output
+    /// table can be set in the action.deidentify.output.big_query_output.deidentified_failure_output_table field, if no
+    /// table is set, a table will be automatically created in the same project and dataset as the original table.
+    /// Compatible with: Inspect
+    /// </summary>
+    public class GooglePrivacyDlpV2Deidentify : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. User settable Cloud Storage bucket and folders to store de-identified files. This field must be
+        /// set for Cloud Storage deidentification. The output Cloud Storage bucket must be different from the input
+        /// bucket. De-identified files will overwrite files in the output path. Form of: gs://bucket/folder/ or
+        /// gs://bucket
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudStorageOutput")]
+        public virtual string CloudStorageOutput { get; set; }
+
+        /// <summary>
+        /// List of user-specified file type groups to transform. If specified, only the files with these file types
+        /// will be transformed. If empty, all supported files will be transformed. Supported types may be automatically
+        /// added over time. If a file type is set in this field that isn't supported by the Deidentify action then the
+        /// job will fail and will not be successfully created/started. Currently the only file types supported are:
+        /// IMAGES, TEXT_FILES, CSV, TSV.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileTypesToTransform")]
+        public virtual System.Collections.Generic.IList<string> FileTypesToTransform { get; set; }
+
+        /// <summary>
+        /// User specified deidentify templates and configs for structured, unstructured, and image files.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transformationConfig")]
+        public virtual GooglePrivacyDlpV2TransformationConfig TransformationConfig { get; set; }
+
+        /// <summary>
+        /// Config for storing transformation details. This is separate from the de-identified content, and contains
+        /// metadata about the successful transformations and/or failures that occurred while de-identifying. This needs
+        /// to be set in order for users to access information about the status of each transformation (see
+        /// TransformationDetails message for more information about what is noted).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transformationDetailsStorageConfig")]
+        public virtual GooglePrivacyDlpV2TransformationDetailsStorageConfig TransformationDetailsStorageConfig { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The configuration that controls how the data will change.</summary>
     public class GooglePrivacyDlpV2DeidentifyConfig : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Treat the dataset as an image and redact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("imageTransformations")]
+        public virtual GooglePrivacyDlpV2ImageTransformations ImageTransformations { get; set; }
+
         /// <summary>
         /// Treat the dataset as free-form text and apply the same free text transformation everywhere.
         /// </summary>
@@ -10095,7 +14567,7 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Request to de-identify a list of items.</summary>
+    /// <summary>Request to de-identify a ContentItem.</summary>
     public class GooglePrivacyDlpV2DeidentifyContentRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -10128,7 +14600,10 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("inspectTemplateName")]
         public virtual string InspectTemplateName { get; set; }
 
-        /// <summary>The item to de-identify. Will be treated as text.</summary>
+        /// <summary>
+        /// The item to de-identify. Will be treated as text. This value must be of type Table if your deidentify_config
+        /// is a RecordTransformations object.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("item")]
         public virtual GooglePrivacyDlpV2ContentItem Item { get; set; }
 
@@ -10155,15 +14630,82 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The results of a Deidentify action from an inspect job.</summary>
+    public class GooglePrivacyDlpV2DeidentifyDataSourceDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Stats about the de-identification operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deidentifyStats")]
+        public virtual GooglePrivacyDlpV2DeidentifyDataSourceStats DeidentifyStats { get; set; }
+
+        /// <summary>De-identification config used for the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestedOptions")]
+        public virtual GooglePrivacyDlpV2RequestedDeidentifyOptions RequestedOptions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Summary of what was modified during a transformation.</summary>
+    public class GooglePrivacyDlpV2DeidentifyDataSourceStats : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Number of successfully applied transformations.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transformationCount")]
+        public virtual System.Nullable<long> TransformationCount { get; set; }
+
+        /// <summary>Number of errors encountered while trying to apply transformations.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transformationErrorCount")]
+        public virtual System.Nullable<long> TransformationErrorCount { get; set; }
+
+        /// <summary>Total size in bytes that were transformed in some way.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transformedBytes")]
+        public virtual System.Nullable<long> TransformedBytes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// DeidentifyTemplates contains instructions on how to de-identify content. See
-    /// https://cloud.google.com/dlp/docs/concepts-templates to learn more.
+    /// https://cloud.google.com/sensitive-data-protection/docs/concepts-templates to learn more.
     /// </summary>
     public class GooglePrivacyDlpV2DeidentifyTemplate : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The creation timestamp of an inspectTemplate.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The core content of the template.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deidentifyConfig")]
@@ -10185,9 +14727,42 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The last update timestamp of an inspectTemplate.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -10324,8 +14899,8 @@ namespace Google.Apis.DLP.v2.Data
     /// next to non-digits. For example, the dictionary word "jen" will match the first three letters of the text
     /// "jen123" but will return no matches for "jennifer". Dictionary words containing a large number of characters
     /// that are not letters or digits may result in unexpected findings because such characters are treated as
-    /// whitespace. The [limits](https://cloud.google.com/dlp/limits) page contains details about the size limits of
-    /// dictionaries. For dictionaries that do not fit within these constraints, consider using
+    /// whitespace. The [limits](https://cloud.google.com/sensitive-data-protection/limits) page contains details about
+    /// the size limits of dictionaries. For dictionaries that do not fit within these constraints, consider using
     /// `LargeCustomDictionaryConfig` in the `StoredInfoType` API.
     /// </summary>
     public class GooglePrivacyDlpV2Dictionary : Google.Apis.Requests.IDirectResponseSchema
@@ -10342,16 +14917,778 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Do not profile the tables.</summary>
+    public class GooglePrivacyDlpV2Disabled : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Requirements that must be true before a table is scanned in discovery for the first time. There is an AND
+    /// relationship between the top-level attributes. Additionally, minimum conditions with an OR relationship that
+    /// must be met before Cloud DLP scans a table can be set (like a minimum row count or a minimum table age).
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryBigQueryConditions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createdAfterRaw;
+
+        private object _createdAfter;
+
+        /// <summary>BigQuery table must have been created after this date. Used to avoid backfilling.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createdAfter")]
+        public virtual string CreatedAfterRaw
+        {
+            get => _createdAfterRaw;
+            set
+            {
+                _createdAfter = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createdAfterRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreatedAfterRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreatedAfterDateTimeOffset instead.")]
+        public virtual object CreatedAfter
+        {
+            get => _createdAfter;
+            set
+            {
+                _createdAfterRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createdAfter = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreatedAfterRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreatedAfterDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreatedAfterRaw);
+            set => CreatedAfterRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>At least one of the conditions must be true for a table to be scanned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("orConditions")]
+        public virtual GooglePrivacyDlpV2OrConditions OrConditions { get; set; }
+
+        /// <summary>Restrict discovery to categories of table types.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("typeCollection")]
+        public virtual string TypeCollection { get; set; }
+
+        /// <summary>Restrict discovery to specific table types.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("types")]
+        public virtual GooglePrivacyDlpV2BigQueryTableTypes Types { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Determines what tables will have profiles generated within an organization or project. Includes the ability to
+    /// filter by regular expression patterns on project ID, dataset ID, and table ID.
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryBigQueryFilter : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Catch-all. This should always be the last filter in the list because anything above it will apply first.
+        /// Should only appear once in a configuration. If none is specified, a default one will be added automatically.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("otherTables")]
+        public virtual GooglePrivacyDlpV2AllOtherBigQueryTables OtherTables { get; set; }
+
+        /// <summary>
+        /// The table to scan. Discovery configurations including this can only include one DiscoveryTarget (the
+        /// DiscoveryTarget with this TableReference).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableReference")]
+        public virtual GooglePrivacyDlpV2TableReference TableReference { get; set; }
+
+        /// <summary>
+        /// A specific set of tables for this filter to apply to. A table collection must be specified in only one
+        /// filter per config. If a table id or dataset is empty, Cloud DLP assumes all tables in that collection must
+        /// be profiled. Must specify a project ID.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tables")]
+        public virtual GooglePrivacyDlpV2BigQueryTableCollection Tables { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Requirements that must be true before a table is profiled for the first time.</summary>
+    public class GooglePrivacyDlpV2DiscoveryCloudSqlConditions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Database engines that should be profiled. Optional. Defaults to ALL_SUPPORTED_DATABASE_ENGINES if
+        /// unspecified.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseEngines")]
+        public virtual System.Collections.Generic.IList<string> DatabaseEngines { get; set; }
+
+        /// <summary>
+        /// Data profiles will only be generated for the database resource types specified in this field. If not
+        /// specified, defaults to [DATABASE_RESOURCE_TYPE_ALL_SUPPORTED_TYPES].
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("types")]
+        public virtual System.Collections.Generic.IList<string> Types { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Determines what tables will have profiles generated within an organization or project. Includes the ability to
+    /// filter by regular expression patterns on project ID, location, instance, database, and database resource name.
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryCloudSqlFilter : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A specific set of database resources for this filter to apply to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("collection")]
+        public virtual GooglePrivacyDlpV2DatabaseResourceCollection Collection { get; set; }
+
+        /// <summary>
+        /// The database resource to scan. Targets including this can only include one target (the target with this
+        /// database resource reference).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseResourceReference")]
+        public virtual GooglePrivacyDlpV2DatabaseResourceReference DatabaseResourceReference { get; set; }
+
+        /// <summary>
+        /// Catch-all. This should always be the last target in the list because anything above it will apply first.
+        /// Should only appear once in a configuration. If none is specified, a default one will be added automatically.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("others")]
+        public virtual GooglePrivacyDlpV2AllOtherDatabaseResources Others { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// How often existing tables should have their profiles refreshed. New tables are scanned as quickly as possible
+    /// depending on system capacity.
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryCloudSqlGenerationCadence : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Governs when to update data profiles when the inspection rules defined by the `InspectTemplate` change. If
+        /// not set, changing the template will not cause a data profile to update.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inspectTemplateModifiedCadence")]
+        public virtual GooglePrivacyDlpV2DiscoveryInspectTemplateModifiedCadence InspectTemplateModifiedCadence { get; set; }
+
+        /// <summary>
+        /// Data changes (non-schema changes) in Cloud SQL tables can't trigger reprofiling. If you set this field,
+        /// profiles are refreshed at this frequency regardless of whether the underlying tables have changed. Defaults
+        /// to never.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("refreshFrequency")]
+        public virtual string RefreshFrequency { get; set; }
+
+        /// <summary>When to reprofile if the schema has changed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("schemaModifiedCadence")]
+        public virtual GooglePrivacyDlpV2SchemaModifiedCadence SchemaModifiedCadence { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Requirements that must be true before a Cloud Storage bucket or object is scanned in discovery for the first
+    /// time. There is an AND relationship between the top-level attributes.
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryCloudStorageConditions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Only objects with the specified attributes will be scanned. Defaults to [ALL_SUPPORTED_BUCKETS] if
+        /// unset.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("includedBucketAttributes")]
+        public virtual System.Collections.Generic.IList<string> IncludedBucketAttributes { get; set; }
+
+        /// <summary>
+        /// Required. Only objects with the specified attributes will be scanned. If an object has one of the specified
+        /// attributes but is inside an excluded bucket, it will not be scanned. Defaults to [ALL_SUPPORTED_OBJECTS]. A
+        /// profile will be created even if no objects match the included_object_attributes.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("includedObjectAttributes")]
+        public virtual System.Collections.Generic.IList<string> IncludedObjectAttributes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Determines which buckets will have profiles generated within an organization or project. Includes the ability to
+    /// filter by regular expression patterns on project ID and bucket name.
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryCloudStorageFilter : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The bucket to scan. Targets including this can only include one target (the target with this
+        /// bucket). This enables profiling the contents of a single bucket, while the other options allow for easy
+        /// profiling of many bucets within a project or an organization.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudStorageResourceReference")]
+        public virtual GooglePrivacyDlpV2CloudStorageResourceReference CloudStorageResourceReference { get; set; }
+
+        /// <summary>Optional. A specific set of buckets for this filter to apply to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("collection")]
+        public virtual GooglePrivacyDlpV2FileStoreCollection Collection { get; set; }
+
+        /// <summary>
+        /// Optional. Catch-all. This should always be the last target in the list because anything above it will apply
+        /// first. Should only appear once in a configuration. If none is specified, a default one will be added
+        /// automatically.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("others")]
+        public virtual GooglePrivacyDlpV2AllOtherResources Others { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// How often existing buckets should have their profiles refreshed. New buckets are scanned as quickly as possible
+    /// depending on system capacity.
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryCloudStorageGenerationCadence : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Governs when to update data profiles when the inspection rules defined by the `InspectTemplate`
+        /// change. If not set, changing the template will not cause a data profile to update.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inspectTemplateModifiedCadence")]
+        public virtual GooglePrivacyDlpV2DiscoveryInspectTemplateModifiedCadence InspectTemplateModifiedCadence { get; set; }
+
+        /// <summary>
+        /// Optional. Data changes in Cloud Storage can't trigger reprofiling. If you set this field, profiles are
+        /// refreshed at this frequency regardless of whether the underlying buckets have changed. Defaults to never.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("refreshFrequency")]
+        public virtual string RefreshFrequency { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Configuration for discovery to scan resources for profile generation. Only one discovery configuration may exist
+    /// per organization, folder, or project. The generated data profiles are retained according to the [data retention
+    /// policy] (https://cloud.google.com/sensitive-data-protection/docs/data-profiles#retention).
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Actions to execute at the completion of scanning.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("actions")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2DataProfileAction> Actions { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The creation timestamp of a DiscoveryConfig.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Display name (max 100 chars)</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// Output only. A stream of errors encountered when the config was activated. Repeated errors may result in the
+        /// config automatically being paused. Output only field. Will return the last 100 errors. Whenever the config
+        /// is modified this list will be cleared.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errors")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2Error> Errors { get; set; }
+
+        /// <summary>
+        /// Detection logic for profile generation. Not all template features are used by Discovery. FindingLimits,
+        /// include_quote and exclude_info_types have no impact on Discovery. Multiple templates may be provided if
+        /// there is data in multiple regions. At most one template must be specified per-region (including "global").
+        /// Each region is scanned using the applicable template. If no region-specific template is specified, but a
+        /// "global" template is specified, it will be copied to that region and used instead. If no global or
+        /// region-specific template is provided for a region with data, that region's data will not be scanned. For
+        /// more information, see https://cloud.google.com/sensitive-data-protection/docs/data-profiles#data-residency.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inspectTemplates")]
+        public virtual System.Collections.Generic.IList<string> InspectTemplates { get; set; }
+
+        private string _lastRunTimeRaw;
+
+        private object _lastRunTime;
+
+        /// <summary>Output only. The timestamp of the last time this config was executed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastRunTime")]
+        public virtual string LastRunTimeRaw
+        {
+            get => _lastRunTimeRaw;
+            set
+            {
+                _lastRunTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastRunTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastRunTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastRunTimeDateTimeOffset instead.")]
+        public virtual object LastRunTime
+        {
+            get => _lastRunTime;
+            set
+            {
+                _lastRunTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastRunTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastRunTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastRunTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastRunTimeRaw);
+            set => LastRunTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Unique resource name for the DiscoveryConfig, assigned by the service when the DiscoveryConfig is created,
+        /// for example `projects/dlp-test-project/locations/global/discoveryConfigs/53234423`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Only set when the parent is an org.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("orgConfig")]
+        public virtual GooglePrivacyDlpV2OrgConfig OrgConfig { get; set; }
+
+        /// <summary>Must be set only when scanning other clouds.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("otherCloudStartingLocation")]
+        public virtual GooglePrivacyDlpV2OtherCloudDiscoveryStartingLocation OtherCloudStartingLocation { get; set; }
+
+        /// <summary>Required. A status for this configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual string Status { get; set; }
+
+        /// <summary>Target to match against for determining what to scan and how frequently.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targets")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2DiscoveryTarget> Targets { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The last update timestamp of a DiscoveryConfig.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Requirements that must be true before a file store is scanned in discovery for the first time. There is an AND
+    /// relationship between the top-level attributes.
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryFileStoreConditions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Cloud Storage conditions.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudStorageConditions")]
+        public virtual GooglePrivacyDlpV2DiscoveryCloudStorageConditions CloudStorageConditions { get; set; }
+
+        private string _createdAfterRaw;
+
+        private object _createdAfter;
+
+        /// <summary>Optional. File store must have been created after this date. Used to avoid backfilling.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createdAfter")]
+        public virtual string CreatedAfterRaw
+        {
+            get => _createdAfterRaw;
+            set
+            {
+                _createdAfter = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createdAfterRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreatedAfterRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreatedAfterDateTimeOffset instead.")]
+        public virtual object CreatedAfter
+        {
+            get => _createdAfter;
+            set
+            {
+                _createdAfterRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createdAfter = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreatedAfterRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreatedAfterDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreatedAfterRaw);
+            set => CreatedAfterRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. Minimum age a file store must have. If set, the value must be 1 hour or greater.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minAge")]
+        public virtual object MinAge { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// What must take place for a profile to be updated and how frequently it should occur. New tables are scanned as
+    /// quickly as possible depending on system capacity.
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryGenerationCadence : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Governs when to update data profiles when the inspection rules defined by the `InspectTemplate` change. If
+        /// not set, changing the template will not cause a data profile to update.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inspectTemplateModifiedCadence")]
+        public virtual GooglePrivacyDlpV2DiscoveryInspectTemplateModifiedCadence InspectTemplateModifiedCadence { get; set; }
+
+        /// <summary>
+        /// Frequency at which profiles should be updated, regardless of whether the underlying resource has changed.
+        /// Defaults to never.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("refreshFrequency")]
+        public virtual string RefreshFrequency { get; set; }
+
+        /// <summary>Governs when to update data profiles when a schema is modified.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("schemaModifiedCadence")]
+        public virtual GooglePrivacyDlpV2DiscoverySchemaModifiedCadence SchemaModifiedCadence { get; set; }
+
+        /// <summary>Governs when to update data profiles when a table is modified.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableModifiedCadence")]
+        public virtual GooglePrivacyDlpV2DiscoveryTableModifiedCadence TableModifiedCadence { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The cadence at which to update data profiles when the inspection rules defined by the `InspectTemplate` change.
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryInspectTemplateModifiedCadence : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// How frequently data profiles can be updated when the template is modified. Defaults to never.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("frequency")]
+        public virtual string Frequency { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Requirements that must be true before a resource is profiled for the first time.</summary>
+    public class GooglePrivacyDlpV2DiscoveryOtherCloudConditions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Amazon S3 bucket conditions.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("amazonS3BucketConditions")]
+        public virtual GooglePrivacyDlpV2AmazonS3BucketConditions AmazonS3BucketConditions { get; set; }
+
+        /// <summary>
+        /// Minimum age a resource must be before Cloud DLP can profile it. Value must be 1 hour or greater.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minAge")]
+        public virtual object MinAge { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Determines which resources from the other cloud will have profiles generated. Includes the ability to filter by
+    /// resource names.
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryOtherCloudFilter : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A collection of resources for this filter to apply to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("collection")]
+        public virtual GooglePrivacyDlpV2OtherCloudResourceCollection Collection { get; set; }
+
+        /// <summary>
+        /// Optional. Catch-all. This should always be the last target in the list because anything above it will apply
+        /// first. Should only appear once in a configuration. If none is specified, a default one will be added
+        /// automatically.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("others")]
+        public virtual GooglePrivacyDlpV2AllOtherResources Others { get; set; }
+
+        /// <summary>
+        /// The resource to scan. Configs using this filter can only have one target (the target with this single
+        /// resource reference).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("singleResource")]
+        public virtual GooglePrivacyDlpV2OtherCloudSingleResourceReference SingleResource { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// How often existing resources should have their profiles refreshed. New resources are scanned as quickly as
+    /// possible depending on system capacity.
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryOtherCloudGenerationCadence : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Governs when to update data profiles when the inspection rules defined by the `InspectTemplate`
+        /// change. If not set, changing the template will not cause a data profile to update.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inspectTemplateModifiedCadence")]
+        public virtual GooglePrivacyDlpV2DiscoveryInspectTemplateModifiedCadence InspectTemplateModifiedCadence { get; set; }
+
+        /// <summary>
+        /// Optional. Frequency to update profiles regardless of whether the underlying resource has changes. Defaults
+        /// to never.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("refreshFrequency")]
+        public virtual string RefreshFrequency { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The cadence at which to update data profiles when a schema is modified.</summary>
+    public class GooglePrivacyDlpV2DiscoverySchemaModifiedCadence : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>How frequently profiles may be updated when schemas are modified. Defaults to monthly.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("frequency")]
+        public virtual string Frequency { get; set; }
+
+        /// <summary>
+        /// The type of events to consider when deciding if the table's schema has been modified and should have the
+        /// profile updated. Defaults to NEW_COLUMNS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("types")]
+        public virtual System.Collections.Generic.IList<string> Types { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The location to begin a discovery scan. Denotes an organization ID or folder ID within an organization.
+    /// </summary>
+    public class GooglePrivacyDlpV2DiscoveryStartingLocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ID of the folder within an organization to be scanned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("folderId")]
+        public virtual System.Nullable<long> FolderId { get; set; }
+
+        /// <summary>The ID of an organization to scan.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("organizationId")]
+        public virtual System.Nullable<long> OrganizationId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The cadence at which to update data profiles when a table is modified.</summary>
+    public class GooglePrivacyDlpV2DiscoveryTableModifiedCadence : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>How frequently data profiles can be updated when tables are modified. Defaults to never.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("frequency")]
+        public virtual string Frequency { get; set; }
+
+        /// <summary>
+        /// The type of events to consider when deciding if the table has been modified and should have the profile
+        /// updated. Defaults to MODIFIED_TIMESTAMP.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("types")]
+        public virtual System.Collections.Generic.IList<string> Types { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Target used to match against for Discovery.</summary>
+    public class GooglePrivacyDlpV2DiscoveryTarget : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>BigQuery target for Discovery. The first target to match a table will be the one applied.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bigQueryTarget")]
+        public virtual GooglePrivacyDlpV2BigQueryDiscoveryTarget BigQueryTarget { get; set; }
+
+        /// <summary>
+        /// Cloud SQL target for Discovery. The first target to match a table will be the one applied.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudSqlTarget")]
+        public virtual GooglePrivacyDlpV2CloudSqlDiscoveryTarget CloudSqlTarget { get; set; }
+
+        /// <summary>
+        /// Cloud Storage target for Discovery. The first target to match a table will be the one applied.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudStorageTarget")]
+        public virtual GooglePrivacyDlpV2CloudStorageDiscoveryTarget CloudStorageTarget { get; set; }
+
+        /// <summary>
+        /// Other clouds target for discovery. The first target to match a resource will be the one applied.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("otherCloudTarget")]
+        public virtual GooglePrivacyDlpV2OtherCloudDiscoveryTarget OtherCloudTarget { get; set; }
+
+        /// <summary>
+        /// Discovery target that looks for credentials and secrets stored in cloud resource metadata and reports them
+        /// as vulnerabilities to Security Command Center. Only one target of this type is allowed.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("secretsTarget")]
+        public virtual GooglePrivacyDlpV2SecretsDiscoveryTarget SecretsTarget { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Combines all of the information about a DLP job.</summary>
     public class GooglePrivacyDlpV2DlpJob : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Events that should occur after the job has completed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("actionDetails")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2ActionDetails> ActionDetails { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Time when the job was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Time when the job finished.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>A stream of errors encountered running the job.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("errors")]
@@ -10365,6 +15702,43 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("jobTriggerName")]
         public virtual string JobTriggerName { get; set; }
 
+        private string _lastModifiedRaw;
+
+        private object _lastModified;
+
+        /// <summary>Time when the job was last modified by the system.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastModified")]
+        public virtual string LastModifiedRaw
+        {
+            get => _lastModifiedRaw;
+            set
+            {
+                _lastModified = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastModifiedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastModifiedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastModifiedDateTimeOffset instead.")]
+        public virtual object LastModified
+        {
+            get => _lastModified;
+            set
+            {
+                _lastModifiedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastModified = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastModifiedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastModifiedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastModifiedRaw);
+            set => LastModifiedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
         /// <summary>The server-assigned name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -10373,9 +15747,42 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("riskDetails")]
         public virtual GooglePrivacyDlpV2AnalyzeDataSourceRiskDetails RiskDetails { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Time when the job started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>State of a job.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -10426,7 +15833,13 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("details")]
         public virtual GoogleRpcStatus Details { get; set; }
 
-        /// <summary>The times the error occurred.</summary>
+        /// <summary>Additional information about the error.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("extraInfo")]
+        public virtual string ExtraInfo { get; set; }
+
+        /// <summary>
+        /// The times the error occurred. List includes the oldest timestamp and the last 9 timestamps.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timestamps")]
         public virtual System.Collections.Generic.IList<object> Timestamps { get; set; }
 
@@ -10434,7 +15847,30 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>List of exclude infoTypes.</summary>
+    /// <summary>
+    /// The rule to exclude findings based on a hotword. For record inspection of tables, column names are considered
+    /// hotwords. An example of this is to exclude a finding if it belongs to a BigQuery column that matches a specific
+    /// pattern.
+    /// </summary>
+    public class GooglePrivacyDlpV2ExcludeByHotword : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Regular expression pattern defining what qualifies as a hotword.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hotwordRegex")]
+        public virtual GooglePrivacyDlpV2Regex HotwordRegex { get; set; }
+
+        /// <summary>
+        /// Range of characters within which the entire hotword must reside. The total length of the window cannot
+        /// exceed 1000 characters. The windowBefore property in proximity should be set to 1 if the hotword needs to be
+        /// included in a column header.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("proximity")]
+        public virtual GooglePrivacyDlpV2Proximity Proximity { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>List of excluded infoTypes.</summary>
     public class GooglePrivacyDlpV2ExcludeInfoTypes : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -10461,6 +15897,13 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("dictionary")]
         public virtual GooglePrivacyDlpV2Dictionary Dictionary { get; set; }
 
+        /// <summary>
+        /// Drop if the hotword rule is contained in the proximate context. For tabular data, the context includes the
+        /// column name.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludeByHotword")]
+        public virtual GooglePrivacyDlpV2ExcludeByHotword ExcludeByHotword { get; set; }
+
         /// <summary>Set of infoTypes for which findings would affect this rule.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("excludeInfoTypes")]
         public virtual GooglePrivacyDlpV2ExcludeInfoTypes ExcludeInfoTypes { get; set; }
@@ -10477,7 +15920,38 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>An expression, consisting or an operator and conditions.</summary>
+    /// <summary>
+    /// If set, the detailed data profiles will be persisted to the location of your choice whenever updated.
+    /// </summary>
+    public class GooglePrivacyDlpV2Export : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Store all profiles to BigQuery. * The system will create a new dataset and table for you if none are are
+        /// provided. The dataset will be named `sensitive_data_protection_discovery` and table will be named
+        /// `discovery_profiles`. This table will be placed in the same project as the container project running the
+        /// scan. After the first profile is generated and the dataset and table are created, the discovery scan
+        /// configuration will be updated with the dataset and table names. * See [Analyze data profiles stored in
+        /// BigQuery](https://cloud.google.com/sensitive-data-protection/docs/analyze-data-profiles). * See [Sample
+        /// queries for your BigQuery
+        /// table](https://cloud.google.com/sensitive-data-protection/docs/analyze-data-profiles#sample_sql_queries). *
+        /// Data is inserted using [streaming
+        /// insert](https://cloud.google.com/blog/products/bigquery/life-of-a-bigquery-streaming-insert) and so data may
+        /// be in the buffer for a period of time after the profile has finished. * The Pub/Sub notification is sent
+        /// before the streaming buffer is guaranteed to be written, so data may not be instantly visible to queries by
+        /// the time your topic receives the Pub/Sub notification. * The best practice is to use the same table for an
+        /// entire organization so that you can take advantage of the [provided Looker
+        /// reports](https://cloud.google.com/sensitive-data-protection/docs/analyze-data-profiles#use_a_premade_report).
+        /// If you use VPC Service Controls to define security perimeters, then you must use a separate table for each
+        /// boundary.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("profileTable")]
+        public virtual GooglePrivacyDlpV2BigQueryTable ProfileTable { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An expression, consisting of an operator and conditions.</summary>
     public class GooglePrivacyDlpV2Expressions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Conditions to apply to the expression.</summary>
@@ -10539,6 +16013,80 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The file cluster summary.</summary>
+    public class GooglePrivacyDlpV2FileClusterSummary : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The data risk level of this cluster. RISK_LOW if nothing has been scanned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataRiskLevel")]
+        public virtual GooglePrivacyDlpV2DataRiskLevel DataRiskLevel { get; set; }
+
+        /// <summary>
+        /// A list of errors detected while scanning this cluster. The list is truncated to 10 per cluster.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errors")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2Error> Errors { get; set; }
+
+        /// <summary>The file cluster type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileClusterType")]
+        public virtual GooglePrivacyDlpV2FileClusterType FileClusterType { get; set; }
+
+        /// <summary>
+        /// A sample of file types scanned in this cluster. Empty if no files were scanned. File extensions can be
+        /// derived from the file name or the file content.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileExtensionsScanned")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2FileExtensionInfo> FileExtensionsScanned { get; set; }
+
+        /// <summary>
+        /// A sample of file types seen in this cluster. Empty if no files were seen. File extensions can be derived
+        /// from the file name or the file content.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileExtensionsSeen")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2FileExtensionInfo> FileExtensionsSeen { get; set; }
+
+        /// <summary>InfoTypes detected in this cluster.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileStoreInfoTypeSummaries")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2FileStoreInfoTypeSummary> FileStoreInfoTypeSummaries { get; set; }
+
+        /// <summary>
+        /// True if no files exist in this cluster. If the file store had more files than could be listed, this will be
+        /// false even if no files for this cluster were seen and file_extensions_seen is empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("noFilesExist")]
+        public virtual System.Nullable<bool> NoFilesExist { get; set; }
+
+        /// <summary>
+        /// The sensitivity score of this cluster. The score will be SENSITIVITY_LOW if nothing has been scanned.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sensitivityScore")]
+        public virtual GooglePrivacyDlpV2SensitivityScore SensitivityScore { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Message used to identify file cluster type being profiled.</summary>
+    public class GooglePrivacyDlpV2FileClusterType : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Cluster type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cluster")]
+        public virtual string Cluster { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information regarding the discovered file extension.</summary>
+    public class GooglePrivacyDlpV2FileExtensionInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The file extension if set. (aka .pdf, .jpg, .txt)</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileExtension")]
+        public virtual string FileExtension { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Set of files to scan.</summary>
     public class GooglePrivacyDlpV2FileSet : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -10562,12 +16110,322 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Match file stores (e.g. buckets) using regex filters.</summary>
+    public class GooglePrivacyDlpV2FileStoreCollection : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. A collection of regular expressions to match a file store against.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("includeRegexes")]
+        public virtual GooglePrivacyDlpV2FileStoreRegexes IncludeRegexes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The profile for a file store. * Cloud Storage: maps 1:1 with a bucket. * Amazon S3: maps 1:1 with a bucket.
+    /// </summary>
+    public class GooglePrivacyDlpV2FileStoreDataProfile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The snapshot of the configurations used to generate the profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("configSnapshot")]
+        public virtual GooglePrivacyDlpV2DataProfileConfigSnapshot ConfigSnapshot { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>The time the file store was first created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The data risk level of this resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataRiskLevel")]
+        public virtual GooglePrivacyDlpV2DataRiskLevel DataRiskLevel { get; set; }
+
+        /// <summary>The resource type that was profiled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataSourceType")]
+        public virtual GooglePrivacyDlpV2DataSourceType DataSourceType { get; set; }
+
+        /// <summary>
+        /// For resources that have multiple storage locations, these are those regions. For Cloud Storage this is the
+        /// list of regions chosen for dual-region storage. `file_store_location` will normally be the corresponding
+        /// multi-region for the list of individual locations. The first region is always picked as the processing and
+        /// storage location for the data profile.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataStorageLocations")]
+        public virtual System.Collections.Generic.IList<string> DataStorageLocations { get; set; }
+
+        /// <summary>FileClusterSummary per each cluster.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileClusterSummaries")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2FileClusterSummary> FileClusterSummaries { get; set; }
+
+        /// <summary>InfoTypes detected in this file store.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileStoreInfoTypeSummaries")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2FileStoreInfoTypeSummary> FileStoreInfoTypeSummaries { get; set; }
+
+        /// <summary>The file store does not have any files.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileStoreIsEmpty")]
+        public virtual System.Nullable<bool> FileStoreIsEmpty { get; set; }
+
+        /// <summary>
+        /// The location of the file store. * Cloud Storage:
+        /// https://cloud.google.com/storage/docs/locations#available-locations * Amazon S3:
+        /// https://docs.aws.amazon.com/general/latest/gr/rande.html#regional-endpoints
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileStoreLocation")]
+        public virtual string FileStoreLocation { get; set; }
+
+        /// <summary>The file store path. * Cloud Storage: `gs://{bucket}` * Amazon S3: `s3://{bucket}`</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileStorePath")]
+        public virtual string FileStorePath { get; set; }
+
+        /// <summary>
+        /// The resource name of the resource profiled.
+        /// https://cloud.google.com/apis/design/resource_names#full_resource_name Example format of an S3 bucket full
+        /// resource name:
+        /// `//cloudasset.googleapis.com/organizations/{org_id}/otherCloudConnections/aws/arn:aws:s3:::{bucket_name}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fullResource")]
+        public virtual string FullResource { get; set; }
+
+        private string _lastModifiedTimeRaw;
+
+        private object _lastModifiedTime;
+
+        /// <summary>The time the file store was last modified.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastModifiedTime")]
+        public virtual string LastModifiedTimeRaw
+        {
+            get => _lastModifiedTimeRaw;
+            set
+            {
+                _lastModifiedTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastModifiedTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastModifiedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastModifiedTimeDateTimeOffset instead.")]
+        public virtual object LastModifiedTime
+        {
+            get => _lastModifiedTime;
+            set
+            {
+                _lastModifiedTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastModifiedTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastModifiedTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastModifiedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastModifiedTimeRaw);
+            set => LastModifiedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The location type of the file store (region, dual-region, multi-region, etc). If dual-region, expect
+        /// data_storage_locations to be populated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("locationType")]
+        public virtual string LocationType { get; set; }
+
+        /// <summary>The name of the profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        private string _profileLastGeneratedRaw;
+
+        private object _profileLastGenerated;
+
+        /// <summary>The last time the profile was generated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("profileLastGenerated")]
+        public virtual string ProfileLastGeneratedRaw
+        {
+            get => _profileLastGeneratedRaw;
+            set
+            {
+                _profileLastGenerated = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _profileLastGeneratedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ProfileLastGeneratedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ProfileLastGeneratedDateTimeOffset instead.")]
+        public virtual object ProfileLastGenerated
+        {
+            get => _profileLastGenerated;
+            set
+            {
+                _profileLastGeneratedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _profileLastGenerated = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ProfileLastGeneratedRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ProfileLastGeneratedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ProfileLastGeneratedRaw);
+            set => ProfileLastGeneratedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Success or error status from the most recent profile generation attempt. May be empty if the profile is
+        /// still being generated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("profileStatus")]
+        public virtual GooglePrivacyDlpV2ProfileStatus ProfileStatus { get; set; }
+
+        /// <summary>The resource name of the project data profile for this file store.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectDataProfile")]
+        public virtual string ProjectDataProfile { get; set; }
+
+        /// <summary>
+        /// The Google Cloud project ID that owns the resource. For Amazon S3 buckets, this is the AWS Account Id.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
+        public virtual string ProjectId { get; set; }
+
+        /// <summary>
+        /// Attributes of the resource being profiled. Currently used attributes: * customer_managed_encryption: boolean
+        /// - true: the resource is encrypted with a customer-managed key. - false: the resource is encrypted with a
+        /// provider-managed key.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceAttributes")]
+        public virtual System.Collections.Generic.IDictionary<string, GooglePrivacyDlpV2Value> ResourceAttributes { get; set; }
+
+        /// <summary>The labels applied to the resource at the time the profile was generated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceLabels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> ResourceLabels { get; set; }
+
+        /// <summary>How broadly a resource has been shared.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceVisibility")]
+        public virtual string ResourceVisibility { get; set; }
+
+        /// <summary>The sensitivity score of this resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sensitivityScore")]
+        public virtual GooglePrivacyDlpV2SensitivityScore SensitivityScore { get; set; }
+
+        /// <summary>State of a profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information regarding the discovered InfoType.</summary>
+    public class GooglePrivacyDlpV2FileStoreInfoTypeSummary : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The InfoType seen.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("infoType")]
+        public virtual GooglePrivacyDlpV2InfoType InfoType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A pattern to match against one or more file stores.</summary>
+    public class GooglePrivacyDlpV2FileStoreRegex : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Regex for Cloud Storage.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudStorageRegex")]
+        public virtual GooglePrivacyDlpV2CloudStorageRegex CloudStorageRegex { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A collection of regular expressions to determine what file store to match against.</summary>
+    public class GooglePrivacyDlpV2FileStoreRegexes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The group of regular expression patterns to match against one or more file stores. Maximum of 100
+        /// entries. The sum of all regular expression's length can't exceed 10 KiB.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("patterns")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2FileStoreRegex> Patterns { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Represents a piece of potentially sensitive content.</summary>
     public class GooglePrivacyDlpV2Finding : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Timestamp when finding was detected.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The unique finding id.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("findingId")]
@@ -10577,9 +16435,42 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("infoType")]
         public virtual GooglePrivacyDlpV2InfoType InfoType { get; set; }
 
+        private string _jobCreateTimeRaw;
+
+        private object _jobCreateTime;
+
         /// <summary>Time the job started that produced this finding.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("jobCreateTime")]
-        public virtual object JobCreateTime { get; set; }
+        public virtual string JobCreateTimeRaw
+        {
+            get => _jobCreateTimeRaw;
+            set
+            {
+                _jobCreateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _jobCreateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="JobCreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use JobCreateTimeDateTimeOffset instead.")]
+        public virtual object JobCreateTime
+        {
+            get => _jobCreateTime;
+            set
+            {
+                _jobCreateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _jobCreateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="JobCreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? JobCreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(JobCreateTimeRaw);
+            set => JobCreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The job that stored the finding.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("jobName")]
@@ -10638,7 +16529,10 @@ namespace Google.Apis.DLP.v2.Data
     }
 
     /// <summary>
-    /// Configuration to control the number of findings returned. Cannot be set if de-identification is requested.
+    /// Configuration to control the number of findings returned for inspection. This is not used for de-identification
+    /// or data profiling. When redacting sensitive data from images, finding limits don't apply. They can cause
+    /// unexpected or inconsistent results, where only some data is redacted. Don't include finding limits in
+    /// RedactImage requests. Otherwise, Cloud DLP returns an error.
     /// </summary>
     public class GooglePrivacyDlpV2FindingLimits : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -10647,16 +16541,20 @@ namespace Google.Apis.DLP.v2.Data
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2InfoTypeLimit> MaxFindingsPerInfoType { get; set; }
 
         /// <summary>
-        /// Max number of findings that will be returned for each item scanned. When set within `InspectJobConfig`, the
-        /// maximum returned is 2000 regardless if this is set higher. When set within `InspectContentRequest`, this
-        /// field is ignored.
+        /// Max number of findings that are returned for each item scanned. When set within an InspectContentRequest,
+        /// this field is ignored. This value isn't a hard limit. If the number of findings for an item reaches this
+        /// limit, the inspection of that item ends gradually, not abruptly. Therefore, the actual number of findings
+        /// that Cloud DLP returns for the item can be multiple times higher than this value.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maxFindingsPerItem")]
         public virtual System.Nullable<int> MaxFindingsPerItem { get; set; }
 
         /// <summary>
-        /// Max number of findings that will be returned per request/job. When set within `InspectContentRequest`, the
-        /// maximum returned is 2000 regardless if this is set higher.
+        /// Max number of findings that are returned per request or job. If you set this field in an
+        /// InspectContentRequest, the resulting maximum value is the value that you set or 3,000, whichever is lower.
+        /// This value isn't a hard limit. If an inspection reaches this limit, the inspection ends gradually, not
+        /// abruptly. Therefore, the actual number of findings that Cloud DLP returns can be multiple times higher than
+        /// this value.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maxFindingsPerRequest")]
         public virtual System.Nullable<int> MaxFindingsPerRequest { get; set; }
@@ -10679,7 +16577,8 @@ namespace Google.Apis.DLP.v2.Data
     /// lower_bound = 10 and upper_bound = 20, all values that are within this bucket will be replaced with "10-20".
     /// This can be used on data of type: double, long. If the bound Value type differs from the type of data being
     /// transformed, we will first attempt converting the type of the data to be transformed to match the type of the
-    /// bound before comparing. See https://cloud.google.com/dlp/docs/concepts-bucketing to learn more.
+    /// bound before comparing. See https://cloud.google.com/sensitive-data-protection/docs/concepts-bucketing to learn
+    /// more.
     /// </summary>
     public class GooglePrivacyDlpV2FixedSizeBucketingConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -10723,11 +16622,14 @@ namespace Google.Apis.DLP.v2.Data
         public virtual GooglePrivacyDlpV2LikelihoodAdjustment LikelihoodAdjustment { get; set; }
 
         /// <summary>
-        /// Proximity of the finding within which the entire hotword must reside. The total length of the window cannot
-        /// exceed 1000 characters. Note that the finding itself will be included in the window, so that hotwords may be
-        /// used to match substrings of the finding itself. For example, the certainty of a phone number regex
-        /// "\(\d{3}\) \d{3}-\d{4}" could be adjusted upwards if the area code is known to be the local area code of a
-        /// company office using the hotword regex "\(xxx\)", where "xxx" is the area code in question.
+        /// Range of characters within which the entire hotword must reside. The total length of the window cannot
+        /// exceed 1000 characters. The finding itself will be included in the window, so that hotwords can be used to
+        /// match substrings of the finding itself. Suppose you want Cloud DLP to promote the likelihood of the phone
+        /// number regex "\(\d{3}\) \d{3}-\d{4}" if the area code is known to be the area code of a company's office. In
+        /// this case, use the hotword regex "\(xxx\)", where "xxx" is the area code in question. For tabular data, if
+        /// you want to modify the likelihood of an entire column of findngs, see [Hotword example: Set the match
+        /// likelihood of a table column]
+        /// (https://cloud.google.com/sensitive-data-protection/docs/creating-custom-infotypes-likelihood#match-column-values).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("proximity")]
         public virtual GooglePrivacyDlpV2Proximity Proximity { get; set; }
@@ -10932,17 +16834,63 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Configuration for determining how redaction of images should occur.</summary>
+    public class GooglePrivacyDlpV2ImageTransformation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Apply transformation to all findings not specified in other ImageTransformation's selected_info_types. Only
+        /// one instance is allowed within the ImageTransformations message.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allInfoTypes")]
+        public virtual GooglePrivacyDlpV2AllInfoTypes AllInfoTypes { get; set; }
+
+        /// <summary>
+        /// Apply transformation to all text that doesn't match an infoType. Only one instance is allowed within the
+        /// ImageTransformations message.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allText")]
+        public virtual GooglePrivacyDlpV2AllText AllText { get; set; }
+
+        /// <summary>
+        /// The color to use when redacting content from an image. If not specified, the default is black.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("redactionColor")]
+        public virtual GooglePrivacyDlpV2Color RedactionColor { get; set; }
+
+        /// <summary>Apply transformation to the selected info_types.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selectedInfoTypes")]
+        public virtual GooglePrivacyDlpV2SelectedInfoTypes SelectedInfoTypes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A type of transformation that is applied over images.</summary>
+    public class GooglePrivacyDlpV2ImageTransformations : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of transforms to make.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transforms")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2ImageTransformation> Transforms { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Type of information detected by the API.</summary>
     public class GooglePrivacyDlpV2InfoType : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the
-        /// names listed at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type. When
-        /// sending Cloud DLP results to Data Catalog, infoType names should conform to the pattern
-        /// `[A-Za-z0-9$-_]{1,64}`.
+        /// names listed at https://cloud.google.com/sensitive-data-protection/docs/infotypes-reference when specifying
+        /// a built-in type. When sending Cloud DLP results to Data Catalog, infoType names should conform to the
+        /// pattern `[A-Za-z0-9$_-]{1,64}`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>Optional custom sensitivity for this InfoType. This only applies to data profiling.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sensitivityScore")]
+        public virtual GooglePrivacyDlpV2SensitivityScore SensitivityScore { get; set; }
 
         /// <summary>Optional version name for this InfoType.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
@@ -10952,9 +16900,34 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Classification of infoTypes to organize them according to geographic location, industry, and data type.
+    /// </summary>
+    public class GooglePrivacyDlpV2InfoTypeCategory : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The group of relevant businesses where this infoType is commonly used</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("industryCategory")]
+        public virtual string IndustryCategory { get; set; }
+
+        /// <summary>The region or country that issued the ID or document represented by the infoType.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("locationCategory")]
+        public virtual string LocationCategory { get; set; }
+
+        /// <summary>The class of identifiers where this infoType belongs</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("typeCategory")]
+        public virtual string TypeCategory { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>InfoType description.</summary>
     public class GooglePrivacyDlpV2InfoTypeDescription : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The category of the infoType.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("categories")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2InfoTypeCategory> Categories { get; set; }
+
         /// <summary>Description of the infotype. Translated when language is provided in the request.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual string Description { get; set; }
@@ -10963,13 +16936,50 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
+        /// <summary>A sample that is a true positive for this infoType.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("example")]
+        public virtual string Example { get; set; }
+
         /// <summary>Internal name of the infoType.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        /// <summary>The default sensitivity of the infoType.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sensitivityScore")]
+        public virtual GooglePrivacyDlpV2SensitivityScore SensitivityScore { get; set; }
+
         /// <summary>Which parts of the API supports this InfoType.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("supportedBy")]
         public virtual System.Collections.Generic.IList<string> SupportedBy { get; set; }
+
+        /// <summary>A list of available versions for the infotype.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versions")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2VersionDescription> Versions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Configuration for setting a minimum likelihood per infotype. Used to customize the minimum likelihood level for
+    /// specific infotypes in the request. For example, use this if you want to lower the precision for PERSON_NAME
+    /// without lowering the precision for the other infotypes in the request.
+    /// </summary>
+    public class GooglePrivacyDlpV2InfoTypeLikelihood : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Type of information the likelihood threshold applies to. Only one likelihood per info_type should be
+        /// provided. If InfoTypeLikelihood does not have an info_type, the configuration fails.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("infoType")]
+        public virtual GooglePrivacyDlpV2InfoType InfoType { get; set; }
+
+        /// <summary>
+        /// Only returns findings equal to or above this threshold. This field is required or else the configuration
+        /// fails.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minLikelihood")]
+        public virtual string MinLikelihood { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -11002,6 +17012,21 @@ namespace Google.Apis.DLP.v2.Data
         public virtual System.Nullable<long> Count { get; set; }
 
         /// <summary>The type of finding this stat is for.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("infoType")]
+        public virtual GooglePrivacyDlpV2InfoType InfoType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The infoType details for this column.</summary>
+    public class GooglePrivacyDlpV2InfoTypeSummary : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Not populated for predicted infotypes.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("estimatedPrevalence")]
+        public virtual System.Nullable<int> EstimatedPrevalence { get; set; }
+
+        /// <summary>The infoType.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("infoType")]
         public virtual GooglePrivacyDlpV2InfoType InfoType { get; set; }
 
@@ -11049,51 +17074,67 @@ namespace Google.Apis.DLP.v2.Data
     /// </summary>
     public class GooglePrivacyDlpV2InspectConfig : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>
-        /// List of options defining data content to scan. If empty, text, images, and other content will be included.
-        /// </summary>
+        /// <summary>Deprecated and unused.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("contentOptions")]
         public virtual System.Collections.Generic.IList<string> ContentOptions { get; set; }
 
         /// <summary>
-        /// CustomInfoTypes provided by the user. See https://cloud.google.com/dlp/docs/creating-custom-infotypes to
-        /// learn more.
+        /// CustomInfoTypes provided by the user. See
+        /// https://cloud.google.com/sensitive-data-protection/docs/creating-custom-infotypes to learn more.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customInfoTypes")]
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2CustomInfoType> CustomInfoTypes { get; set; }
 
-        /// <summary>When true, excludes type information of the findings.</summary>
+        /// <summary>
+        /// When true, excludes type information of the findings. This is not used for data profiling.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("excludeInfoTypes")]
         public virtual System.Nullable<bool> ExcludeInfoTypes { get; set; }
 
         /// <summary>
         /// When true, a contextual quote from the data that triggered a finding is included in the response; see
-        /// Finding.quote.
+        /// Finding.quote. This is not used for data profiling.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("includeQuote")]
         public virtual System.Nullable<bool> IncludeQuote { get; set; }
 
         /// <summary>
         /// Restricts what info_types to look for. The values must correspond to InfoType values returned by
-        /// ListInfoTypes or listed at https://cloud.google.com/dlp/docs/infotypes-reference. When no InfoTypes or
-        /// CustomInfoTypes are specified in a request, the system may automatically choose what detectors to run. By
-        /// default this may be all types, but may change over time as detectors are updated. If you need precise
-        /// control and predictability as to what detectors are run you should specify specific InfoTypes listed in the
-        /// reference, otherwise a default list will be used, which may change over time.
+        /// ListInfoTypes or listed at https://cloud.google.com/sensitive-data-protection/docs/infotypes-reference. When
+        /// no InfoTypes or CustomInfoTypes are specified in a request, the system may automatically choose a default
+        /// list of detectors to run, which may change over time. If you need precise control and predictability as to
+        /// what detectors are run you should specify specific InfoTypes listed in the reference, otherwise a default
+        /// list will be used, which may change over time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("infoTypes")]
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2InfoType> InfoTypes { get; set; }
 
-        /// <summary>Configuration to control the number of findings returned.</summary>
+        /// <summary>
+        /// Configuration to control the number of findings returned. This is not used for data profiling. When
+        /// redacting sensitive data from images, finding limits don't apply. They can cause unexpected or inconsistent
+        /// results, where only some data is redacted. Don't include finding limits in RedactImage requests. Otherwise,
+        /// Cloud DLP returns an error. When set within an InspectJobConfig, the specified maximum values aren't hard
+        /// limits. If an inspection job reaches these limits, the job ends gradually, not abruptly. Therefore, the
+        /// actual number of findings that Cloud DLP returns can be multiple times higher than these maximum values.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("limits")]
         public virtual GooglePrivacyDlpV2FindingLimits Limits { get; set; }
 
         /// <summary>
-        /// Only returns findings equal or above this threshold. The default is POSSIBLE. See
-        /// https://cloud.google.com/dlp/docs/likelihood to learn more.
+        /// Only returns findings equal to or above this threshold. The default is POSSIBLE. In general, the highest
+        /// likelihood setting yields the fewest findings in results and the lowest chance of a false positive. For more
+        /// information, see [Match likelihood](https://cloud.google.com/sensitive-data-protection/docs/likelihood).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minLikelihood")]
         public virtual string MinLikelihood { get; set; }
+
+        /// <summary>
+        /// Minimum likelihood per infotype. For each infotype, a user can specify a minimum likelihood. The system only
+        /// returns a finding if its likelihood is above this threshold. If this field is not set, the system uses the
+        /// InspectConfig min_likelihood.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minLikelihoodPerInfoType")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2InfoTypeLikelihood> MinLikelihoodPerInfoType { get; set; }
 
         /// <summary>
         /// Set of rules to apply to the findings for this InspectConfig. Exclusion rules, contained in the set are
@@ -11210,14 +17251,47 @@ namespace Google.Apis.DLP.v2.Data
 
     /// <summary>
     /// The inspectTemplate contains a configuration (set of types of sensitive data to be detected) to be used anywhere
-    /// you otherwise would normally specify InspectConfig. See https://cloud.google.com/dlp/docs/concepts-templates to
-    /// learn more.
+    /// you otherwise would normally specify InspectConfig. See
+    /// https://cloud.google.com/sensitive-data-protection/docs/concepts-templates to learn more.
     /// </summary>
     public class GooglePrivacyDlpV2InspectTemplate : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The creation timestamp of an inspectTemplate.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Short description (max 256 chars).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -11239,9 +17313,42 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The last update timestamp of an inspectTemplate.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -11280,7 +17387,10 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Enable email notification to project owners and editors on jobs's completion/failure.</summary>
+    /// <summary>
+    /// Sends an email when the job completes. The email goes to IAM project owners and technical [Essential
+    /// Contacts](https://cloud.google.com/resource-manager/docs/managing-notification-contacts).
+    /// </summary>
     public class GooglePrivacyDlpV2JobNotificationEmails : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The ETag of the item.</summary>
@@ -11288,14 +17398,47 @@ namespace Google.Apis.DLP.v2.Data
     }
 
     /// <summary>
-    /// Contains a configuration to make dlp api calls on a repeating basis. See
-    /// https://cloud.google.com/dlp/docs/concepts-job-triggers to learn more.
+    /// Contains a configuration to make API calls on a repeating basis. See
+    /// https://cloud.google.com/sensitive-data-protection/docs/concepts-job-triggers to learn more.
     /// </summary>
     public class GooglePrivacyDlpV2JobTrigger : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The creation timestamp of a triggeredJob.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>User provided description (max 256 chars)</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -11317,9 +17460,42 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("inspectJob")]
         public virtual GooglePrivacyDlpV2InspectJobConfig InspectJob { get; set; }
 
+        private string _lastRunTimeRaw;
+
+        private object _lastRunTime;
+
         /// <summary>Output only. The timestamp of the last time this trigger executed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastRunTime")]
-        public virtual object LastRunTime { get; set; }
+        public virtual string LastRunTimeRaw
+        {
+            get => _lastRunTimeRaw;
+            set
+            {
+                _lastRunTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastRunTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastRunTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastRunTimeDateTimeOffset instead.")]
+        public virtual object LastRunTime
+        {
+            get => _lastRunTime;
+            set
+            {
+                _lastRunTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastRunTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastRunTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastRunTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastRunTimeRaw);
+            set => LastRunTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Unique resource name for the triggeredJob, assigned by the service when the triggeredJob is created, for
@@ -11339,9 +17515,42 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("triggers")]
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2Trigger> Triggers { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The last update timestamp of a triggeredJob.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -11576,8 +17785,8 @@ namespace Google.Apis.DLP.v2.Data
     /// Include to use an existing data crypto key wrapped by KMS. The wrapped key must be a 128-, 192-, or 256-bit key.
     /// Authorization requires the following IAM permissions when sending a request to perform a crypto transformation
     /// using a KMS-wrapped crypto key: dlp.kms.encrypt For more information, see [Creating a wrapped key]
-    /// (https://cloud.google.com/dlp/docs/create-wrapped-key). Note: When you use Cloud KMS for cryptographic
-    /// operations, [charges apply](https://cloud.google.com/kms/pricing).
+    /// (https://cloud.google.com/sensitive-data-protection/docs/create-wrapped-key). Note: When you use Cloud KMS for
+    /// cryptographic operations, [charges apply](https://cloud.google.com/kms/pricing).
     /// </summary>
     public class GooglePrivacyDlpV2KmsWrappedCryptoKey : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -11680,9 +17889,9 @@ namespace Google.Apis.DLP.v2.Data
 
     /// <summary>
     /// Configuration for a custom dictionary created from a data source of any size up to the maximum size defined in
-    /// the [limits](https://cloud.google.com/dlp/limits) page. The artifacts of dictionary creation are stored in the
-    /// specified Google Cloud Storage location. Consider using `CustomInfoType.Dictionary` for smaller dictionaries
-    /// that satisfy the size requirements.
+    /// the [limits](https://cloud.google.com/sensitive-data-protection/limits) page. The artifacts of dictionary
+    /// creation are stored in the specified Cloud Storage location. Consider using `CustomInfoType.Dictionary` for
+    /// smaller dictionaries that satisfy the size requirements.
     /// </summary>
     public class GooglePrivacyDlpV2LargeCustomDictionaryConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -11695,9 +17904,9 @@ namespace Google.Apis.DLP.v2.Data
         public virtual GooglePrivacyDlpV2CloudStorageFileSet CloudStorageFileSet { get; set; }
 
         /// <summary>
-        /// Location to store dictionary artifacts in Google Cloud Storage. These files will only be accessible by
-        /// project owners and the DLP API. If any of these artifacts are modified, the dictionary is considered invalid
-        /// and can no longer be used.
+        /// Location to store dictionary artifacts in Cloud Storage. These files will only be accessible by project
+        /// owners and the DLP API. If any of these artifacts are modified, the dictionary is considered invalid and can
+        /// no longer be used.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("outputPath")]
         public virtual GooglePrivacyDlpV2CloudStoragePath OutputPath { get; set; }
@@ -11751,6 +17960,38 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>List of profiles generated for a given organization or project.</summary>
+    public class GooglePrivacyDlpV2ListColumnDataProfilesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of data profiles.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("columnDataProfiles")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2ColumnDataProfile> ColumnDataProfiles { get; set; }
+
+        /// <summary>The next page token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for ListConnections.</summary>
+    public class GooglePrivacyDlpV2ListConnectionsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of connections.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connections")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2Connection> Connections { get; set; }
+
+        /// <summary>
+        /// Token to retrieve the next page of results. An empty value means there are no more results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Response message for ListDeidentifyTemplates.</summary>
     public class GooglePrivacyDlpV2ListDeidentifyTemplatesResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -11759,8 +18000,26 @@ namespace Google.Apis.DLP.v2.Data
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2DeidentifyTemplate> DeidentifyTemplates { get; set; }
 
         /// <summary>
-        /// If the next page is available then the next page token to be used in following ListDeidentifyTemplates
+        /// If the next page is available then the next page token to be used in the following ListDeidentifyTemplates
         /// request.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for ListDiscoveryConfigs.</summary>
+    public class GooglePrivacyDlpV2ListDiscoveryConfigsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of configs, up to page_size in ListDiscoveryConfigsRequest.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("discoveryConfigs")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2DiscoveryConfig> DiscoveryConfigs { get; set; }
+
+        /// <summary>
+        /// If the next page is available then this value is the next page token to be used in the following
+        /// ListDiscoveryConfigs request.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -11777,6 +18036,21 @@ namespace Google.Apis.DLP.v2.Data
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2DlpJob> Jobs { get; set; }
 
         /// <summary>The standard List next-page token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>List of file store data profiles generated for a given organization or project.</summary>
+    public class GooglePrivacyDlpV2ListFileStoreDataProfilesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of data profiles.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileStoreDataProfiles")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2FileStoreDataProfile> FileStoreDataProfiles { get; set; }
+
+        /// <summary>The next page token.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
 
@@ -11803,7 +18077,8 @@ namespace Google.Apis.DLP.v2.Data
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2InspectTemplate> InspectTemplates { get; set; }
 
         /// <summary>
-        /// If the next page is available then the next page token to be used in following ListInspectTemplates request.
+        /// If the next page is available then the next page token to be used in the following ListInspectTemplates
+        /// request.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -11820,10 +18095,26 @@ namespace Google.Apis.DLP.v2.Data
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2JobTrigger> JobTriggers { get; set; }
 
         /// <summary>
-        /// If the next page is available then the next page token to be used in following ListJobTriggers request.
+        /// If the next page is available then this value is the next page token to be used in the following
+        /// ListJobTriggers request.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>List of profiles generated for a given organization or project.</summary>
+    public class GooglePrivacyDlpV2ListProjectDataProfilesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The next page token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>List of data profiles.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectDataProfiles")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2ProjectDataProfile> ProjectDataProfiles { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -11833,7 +18124,8 @@ namespace Google.Apis.DLP.v2.Data
     public class GooglePrivacyDlpV2ListStoredInfoTypesResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// If the next page is available then the next page token to be used in following ListStoredInfoTypes request.
+        /// If the next page is available then the next page token to be used in the following ListStoredInfoTypes
+        /// request.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -11841,6 +18133,21 @@ namespace Google.Apis.DLP.v2.Data
         /// <summary>List of storedInfoTypes, up to page_size in ListStoredInfoTypesRequest.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storedInfoTypes")]
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2StoredInfoType> StoredInfoTypes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>List of profiles generated for a given organization or project.</summary>
+    public class GooglePrivacyDlpV2ListTableDataProfilesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The next page token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>List of data profiles.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableDataProfiles")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2TableDataProfile> TableDataProfiles { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -11932,6 +18239,170 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// There is an OR relationship between these attributes. They are used to determine if a table should be scanned or
+    /// not in Discovery.
+    /// </summary>
+    public class GooglePrivacyDlpV2OrConditions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Minimum age a table must have before Cloud DLP can profile it. Value must be 1 hour or greater.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minAge")]
+        public virtual object MinAge { get; set; }
+
+        /// <summary>Minimum number of rows that should be present before Cloud DLP profiles a table</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minRowCount")]
+        public virtual System.Nullable<int> MinRowCount { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Project and scan location information. Only set when the parent is an org.</summary>
+    public class GooglePrivacyDlpV2OrgConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The data to scan: folder, org, or project</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual GooglePrivacyDlpV2DiscoveryStartingLocation Location { get; set; }
+
+        /// <summary>
+        /// The project that will run the scan. The DLP service account that exists within this project must have access
+        /// to all resources that are profiled, and the DLP API must be enabled.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
+        public virtual string ProjectId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The other cloud starting location for discovery.</summary>
+    public class GooglePrivacyDlpV2OtherCloudDiscoveryStartingLocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The AWS starting location for discovery.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("awsLocation")]
+        public virtual GooglePrivacyDlpV2AwsDiscoveryStartingLocation AwsLocation { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Target used to match against for discovery of resources from other clouds. An [AWS connector in Security Command
+    /// Center (Enterprise](https://cloud.google.com/security-command-center/docs/connect-scc-to-aws) is required to use
+    /// this feature.
+    /// </summary>
+    public class GooglePrivacyDlpV2OtherCloudDiscoveryTarget : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. In addition to matching the filter, these conditions must be true before a profile is generated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("conditions")]
+        public virtual GooglePrivacyDlpV2DiscoveryOtherCloudConditions Conditions { get; set; }
+
+        /// <summary>
+        /// Required. The type of data profiles generated by this discovery target. Supported values are: *
+        /// aws/s3/bucket
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataSourceType")]
+        public virtual GooglePrivacyDlpV2DataSourceType DataSourceType { get; set; }
+
+        /// <summary>Disable profiling for resources that match this filter.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disabled")]
+        public virtual GooglePrivacyDlpV2Disabled Disabled { get; set; }
+
+        /// <summary>
+        /// Required. The resources that the discovery cadence applies to. The first target with a matching filter will
+        /// be the one to apply to a resource.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filter")]
+        public virtual GooglePrivacyDlpV2DiscoveryOtherCloudFilter Filter { get; set; }
+
+        /// <summary>
+        /// How often and when to update data profiles. New resources that match both the filter and conditions are
+        /// scanned as quickly as possible depending on system capacity.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("generationCadence")]
+        public virtual GooglePrivacyDlpV2DiscoveryOtherCloudGenerationCadence GenerationCadence { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Match resources using regex filters.</summary>
+    public class GooglePrivacyDlpV2OtherCloudResourceCollection : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A collection of regular expressions to match a resource against.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("includeRegexes")]
+        public virtual GooglePrivacyDlpV2OtherCloudResourceRegexes IncludeRegexes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A pattern to match against one or more resources. At least one pattern must be specified. Regular expressions
+    /// use RE2 [syntax](https://github.com/google/re2/wiki/Syntax); a guide can be found under the google/re2
+    /// repository on GitHub.
+    /// </summary>
+    public class GooglePrivacyDlpV2OtherCloudResourceRegex : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Regex for Amazon S3 buckets.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("amazonS3BucketRegex")]
+        public virtual GooglePrivacyDlpV2AmazonS3BucketRegex AmazonS3BucketRegex { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A collection of regular expressions to determine what resources to match against.</summary>
+    public class GooglePrivacyDlpV2OtherCloudResourceRegexes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A group of regular expression patterns to match against one or more resources. Maximum of 100 entries. The
+        /// sum of all regular expression's length can't exceed 10 KiB.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("patterns")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2OtherCloudResourceRegex> Patterns { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Identifies a single resource, like a single Amazon S3 bucket.</summary>
+    public class GooglePrivacyDlpV2OtherCloudSingleResourceReference : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Amazon S3 bucket.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("amazonS3Bucket")]
+        public virtual GooglePrivacyDlpV2AmazonS3Bucket AmazonS3Bucket { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Infotype details for other infoTypes found within a column.</summary>
+    public class GooglePrivacyDlpV2OtherInfoTypeSummary : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Approximate percentage of non-null rows that contained data detected by this infotype.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("estimatedPrevalence")]
+        public virtual System.Nullable<int> EstimatedPrevalence { get; set; }
+
+        /// <summary>
+        /// Whether this infoType was excluded from sensitivity and risk analysis due to factors such as low prevalence
+        /// (subject to change).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludedFromAnalysis")]
+        public virtual System.Nullable<bool> ExcludedFromAnalysis { get; set; }
+
+        /// <summary>The other infoType.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("infoType")]
+        public virtual GooglePrivacyDlpV2InfoType InfoType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Cloud repository for storing output.</summary>
     public class GooglePrivacyDlpV2OutputStorageConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -11948,12 +18419,12 @@ namespace Google.Apis.DLP.v2.Data
 
         /// <summary>
         /// Store findings in an existing table or a new table in an existing dataset. If table_id is not set a new one
-        /// will be generated for you with the following format: dlp_googleapis_yyyy_mm_dd_[dlp_job_id]. Pacific
-        /// timezone will be used for generating the date details. For Inspect, each column in an existing output table
-        /// must have the same name, type, and mode of a field in the `Finding` object. For Risk, an existing output
-        /// table should be the output of a previous Risk analysis job run on the same source table, with the same
-        /// privacy metric and quasi-identifiers. Risk jobs that analyze the same table but compute a different privacy
-        /// metric, or use different sets of quasi-identifiers, cannot store their results in the same table.
+        /// will be generated for you with the following format: dlp_googleapis_yyyy_mm_dd_[dlp_job_id]. Pacific time
+        /// zone will be used for generating the date details. For Inspect, each column in an existing output table must
+        /// have the same name, type, and mode of a field in the `Finding` object. For Risk, an existing output table
+        /// should be the output of a previous Risk analysis job run on the same source table, with the same privacy
+        /// metric and quasi-identifiers. Risk jobs that analyze the same table but compute a different privacy metric,
+        /// or use different sets of quasi-identifiers, cannot store their results in the same table.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("table")]
         public virtual GooglePrivacyDlpV2BigQueryTable Table { get; set; }
@@ -12031,7 +18502,10 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cryptoHashConfig")]
         public virtual GooglePrivacyDlpV2CryptoHashConfig CryptoHashConfig { get; set; }
 
-        /// <summary>Ffx-Fpe</summary>
+        /// <summary>
+        /// Ffx-Fpe. Strongly discouraged, consider using CryptoDeterministicConfig instead. Fpe is computationally
+        /// expensive incurring latency costs.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cryptoReplaceFfxFpeConfig")]
         public virtual GooglePrivacyDlpV2CryptoReplaceFfxFpeConfig CryptoReplaceFfxFpeConfig { get; set; }
 
@@ -12098,6 +18572,130 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Success or errors for the profile generation.</summary>
+    public class GooglePrivacyDlpV2ProfileStatus : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Profiling status code and optional message. The `status.code` value is 0 (default value) for OK.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual GoogleRpcStatus Status { get; set; }
+
+        private string _timestampRaw;
+
+        private object _timestamp;
+
+        /// <summary>Time when the profile generation status was updated</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timestamp")]
+        public virtual string TimestampRaw
+        {
+            get => _timestampRaw;
+            set
+            {
+                _timestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimestampDateTimeOffset instead.")]
+        public virtual object Timestamp
+        {
+            get => _timestamp;
+            set
+            {
+                _timestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _timestamp = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimestampRaw);
+            set => TimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An aggregated profile for this project, based on the resources profiled within it.</summary>
+    public class GooglePrivacyDlpV2ProjectDataProfile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The data risk level of this project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataRiskLevel")]
+        public virtual GooglePrivacyDlpV2DataRiskLevel DataRiskLevel { get; set; }
+
+        /// <summary>The number of file store data profiles generated for this project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileStoreDataProfileCount")]
+        public virtual System.Nullable<long> FileStoreDataProfileCount { get; set; }
+
+        /// <summary>The resource name of the profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        private string _profileLastGeneratedRaw;
+
+        private object _profileLastGenerated;
+
+        /// <summary>The last time the profile was generated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("profileLastGenerated")]
+        public virtual string ProfileLastGeneratedRaw
+        {
+            get => _profileLastGeneratedRaw;
+            set
+            {
+                _profileLastGenerated = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _profileLastGeneratedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ProfileLastGeneratedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ProfileLastGeneratedDateTimeOffset instead.")]
+        public virtual object ProfileLastGenerated
+        {
+            get => _profileLastGenerated;
+            set
+            {
+                _profileLastGeneratedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _profileLastGenerated = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ProfileLastGeneratedRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ProfileLastGeneratedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ProfileLastGeneratedRaw);
+            set => ProfileLastGeneratedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Success or error status of the last attempt to profile the project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("profileStatus")]
+        public virtual GooglePrivacyDlpV2ProfileStatus ProfileStatus { get; set; }
+
+        /// <summary>Project ID or account that was profiled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
+        public virtual string ProjectId { get; set; }
+
+        /// <summary>The sensitivity score of this project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sensitivityScore")]
+        public virtual GooglePrivacyDlpV2SensitivityScore SensitivityScore { get; set; }
+
+        /// <summary>The number of table data profiles generated for this project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableDataProfileCount")]
+        public virtual System.Nullable<long> TableDataProfileCount { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Message for specifying a window around a finding to apply a detection rule.</summary>
     public class GooglePrivacyDlpV2Proximity : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -12105,7 +18703,12 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("windowAfter")]
         public virtual System.Nullable<int> WindowAfter { get; set; }
 
-        /// <summary>Number of characters before the finding to consider.</summary>
+        /// <summary>
+        /// Number of characters before the finding to consider. For tabular data, if you want to modify the likelihood
+        /// of an entire column of findngs, set this to 1. For more information, see [Hotword example: Set the match
+        /// likelihood of a table column]
+        /// (https://cloud.google.com/sensitive-data-protection/docs/creating-custom-infotypes-likelihood#match-column-values).
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("windowBefore")]
         public virtual System.Nullable<int> WindowBefore { get; set; }
 
@@ -12113,13 +18716,79 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A condition consisting of a value.</summary>
+    public class GooglePrivacyDlpV2PubSubCondition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The minimum data risk score that triggers the condition.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minimumRiskScore")]
+        public virtual string MinimumRiskScore { get; set; }
+
+        /// <summary>The minimum sensitivity level that triggers the condition.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minimumSensitivityScore")]
+        public virtual string MinimumSensitivityScore { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An expression, consisting of an operator and conditions.</summary>
+    public class GooglePrivacyDlpV2PubSubExpressions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Conditions to apply to the expression.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("conditions")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2PubSubCondition> Conditions { get; set; }
+
+        /// <summary>The operator to apply to the collection of conditions.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("logicalOperator")]
+        public virtual string LogicalOperator { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
-    /// Publish findings of a DlpJob to Data Catalog. Labels summarizing the results of the DlpJob will be applied to
-    /// the entry for the resource scanned in Data Catalog. Any labels previously written by another DlpJob will be
-    /// deleted. InfoType naming patterns are strictly enforced when using this feature. Note that the findings will be
-    /// persisted in Data Catalog storage and are governed by Data Catalog service-specific policy, see
-    /// https://cloud.google.com/terms/service-terms Only a single instance of this action can be specified and only
-    /// allowed if all resources being scanned are BigQuery tables. Compatible with: Inspect
+    /// Send a Pub/Sub message into the given Pub/Sub topic to connect other systems to data profile generation. The
+    /// message payload data will be the byte serialization of `DataProfilePubSubMessage`.
+    /// </summary>
+    public class GooglePrivacyDlpV2PubSubNotification : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// How much data to include in the Pub/Sub message. If the user wishes to limit the size of the message, they
+        /// can use resource_name and fetch the profile fields they wish to. Per table profile (not per column).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("detailOfMessage")]
+        public virtual string DetailOfMessage { get; set; }
+
+        /// <summary>
+        /// The type of event that triggers a Pub/Sub. At most one `PubSubNotification` per EventType is permitted.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("event")]
+        public virtual string Event__ { get; set; }
+
+        /// <summary>Conditions (e.g., data risk or sensitivity level) for triggering a Pub/Sub.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pubsubCondition")]
+        public virtual GooglePrivacyDlpV2DataProfilePubSubCondition PubsubCondition { get; set; }
+
+        /// <summary>
+        /// Cloud Pub/Sub topic to send notifications to. Format is projects/{project}/topics/{topic}.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("topic")]
+        public virtual string Topic { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Publish findings of a DlpJob to Data Catalog. In Data Catalog, tag templates are applied to the resource that
+    /// Cloud DLP scanned. Data Catalog tag templates are stored in the same project and region where the BigQuery table
+    /// exists. For Cloud DLP to create and apply the tag template, the Cloud DLP service agent must have the
+    /// `roles/datacatalog.tagTemplateOwner` permission on the project. The tag template contains fields summarizing the
+    /// results of the DlpJob. Any field values previously written by another DlpJob are deleted. InfoType naming
+    /// patterns are strictly enforced when using this feature. Findings are persisted in Data Catalog storage and are
+    /// governed by service-specific policies for Data Catalog. For more information, see [Service Specific
+    /// Terms](https://cloud.google.com/terms/service-terms). Only a single instance of this action can be specified.
+    /// This action is allowed only if all resources being scanned are BigQuery tables. Compatible with: Inspect
     /// </summary>
     public class GooglePrivacyDlpV2PublishFindingsToCloudDataCatalog : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -12128,12 +18797,12 @@ namespace Google.Apis.DLP.v2.Data
     }
 
     /// <summary>
-    /// Publish the result summary of a DlpJob to the Cloud Security Command Center (CSCC Alpha). This action is only
-    /// available for projects which are parts of an organization and whitelisted for the alpha Cloud Security Command
-    /// Center. The action will publish count of finding instances and their info types. The summary of findings will be
-    /// persisted in CSCC and are governed by CSCC service-specific policy, see
-    /// https://cloud.google.com/terms/service-terms Only a single instance of this action can be specified. Compatible
-    /// with: Inspect
+    /// Publish the result summary of a DlpJob to [Security Command
+    /// Center](https://cloud.google.com/security-command-center). This action is available for only projects that
+    /// belong to an organization. This action publishes the count of finding instances and their infoTypes. The summary
+    /// of findings are persisted in Security Command Center and are governed by [service-specific policies for Security
+    /// Command Center](https://cloud.google.com/terms/service-terms). Only a single instance of this action can be
+    /// specified. Compatible with: Inspect
     /// </summary>
     public class GooglePrivacyDlpV2PublishSummaryToCscc : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -12141,11 +18810,18 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Message expressing intention to publish to Google Security Operations.</summary>
+    public class GooglePrivacyDlpV2PublishToChronicle : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
-    /// Publish a message into given Pub/Sub topic when DlpJob has completed. The message contains a single field,
+    /// Publish a message into a given Pub/Sub topic when DlpJob has completed. The message contains a single field,
     /// `DlpJobName`, which is equal to the finished job's
-    /// [`DlpJob.name`](https://cloud.google.com/dlp/docs/reference/rest/v2/projects.dlpJobs#DlpJob). Compatible with:
-    /// Inspect, Risk
+    /// [`DlpJob.name`](https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/projects.dlpJobs#DlpJob).
+    /// Compatible with: Inspect, Risk
     /// </summary>
     public class GooglePrivacyDlpV2PublishToPubSub : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -12157,6 +18833,15 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("topic")]
         public virtual string Topic { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// If set, a summary finding will be created or updated in Security Command Center for each profile.
+    /// </summary>
+    public class GooglePrivacyDlpV2PublishToSecurityCommandCenter : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -12285,9 +18970,11 @@ namespace Google.Apis.DLP.v2.Data
     /// <summary>Message for a unique key indicating a record that contains a finding.</summary>
     public class GooglePrivacyDlpV2RecordKey : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Datastore key</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bigQueryKey")]
         public virtual GooglePrivacyDlpV2BigQueryKey BigQueryKey { get; set; }
 
+        /// <summary>BigQuery key</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("datastoreKey")]
         public virtual GooglePrivacyDlpV2DatastoreKey DatastoreKey { get; set; }
 
@@ -12330,6 +19017,60 @@ namespace Google.Apis.DLP.v2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("condition")]
         public virtual GooglePrivacyDlpV2RecordCondition Condition { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The field in a record to transform.</summary>
+    public class GooglePrivacyDlpV2RecordTransformation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _containerTimestampRaw;
+
+        private object _containerTimestamp;
+
+        /// <summary>Findings container modification timestamp, if applicable.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("containerTimestamp")]
+        public virtual string ContainerTimestampRaw
+        {
+            get => _containerTimestampRaw;
+            set
+            {
+                _containerTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _containerTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ContainerTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ContainerTimestampDateTimeOffset instead.")]
+        public virtual object ContainerTimestamp
+        {
+            get => _containerTimestamp;
+            set
+            {
+                _containerTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _containerTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ContainerTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ContainerTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ContainerTimestampRaw);
+            set => ContainerTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Container version, if available ("generation" for Cloud Storage).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("containerVersion")]
+        public virtual string ContainerVersion { get; set; }
+
+        /// <summary>For record transformations, provide a field.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fieldId")]
+        public virtual GooglePrivacyDlpV2FieldId FieldId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -12483,7 +19224,7 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Results of re-identifying a item.</summary>
+    /// <summary>Results of re-identifying an item.</summary>
     public class GooglePrivacyDlpV2ReidentifyContentResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The re-identified item.</summary>
@@ -12502,8 +19243,9 @@ namespace Google.Apis.DLP.v2.Data
     public class GooglePrivacyDlpV2ReplaceDictionaryConfig : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// A list of words to select from for random replacement. The [limits](https://cloud.google.com/dlp/limits)
-        /// page contains details about the size limits of dictionaries.
+        /// A list of words to select from for random replacement. The
+        /// [limits](https://cloud.google.com/sensitive-data-protection/limits) page contains details about the size
+        /// limits of dictionaries.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("wordList")]
         public virtual GooglePrivacyDlpV2WordList WordList { get; set; }
@@ -12526,6 +19268,33 @@ namespace Google.Apis.DLP.v2.Data
     /// <summary>Replace each matching finding with the name of the info_type.</summary>
     public class GooglePrivacyDlpV2ReplaceWithInfoTypeConfig : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>De-identification options.</summary>
+    public class GooglePrivacyDlpV2RequestedDeidentifyOptions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Snapshot of the state of the `DeidentifyTemplate` from the Deidentify action at the time this job was run.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("snapshotDeidentifyTemplate")]
+        public virtual GooglePrivacyDlpV2DeidentifyTemplate SnapshotDeidentifyTemplate { get; set; }
+
+        /// <summary>
+        /// Snapshot of the state of the image transformation `DeidentifyTemplate` from the `Deidentify` action at the
+        /// time this job was run.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("snapshotImageRedactTemplate")]
+        public virtual GooglePrivacyDlpV2DeidentifyTemplate SnapshotImageRedactTemplate { get; set; }
+
+        /// <summary>
+        /// Snapshot of the state of the structured `DeidentifyTemplate` from the `Deidentify` action at the time this
+        /// job was run.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("snapshotStructuredDeidentifyTemplate")]
+        public virtual GooglePrivacyDlpV2DeidentifyTemplate SnapshotStructuredDeidentifyTemplate { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -12567,6 +19336,12 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("infoTypeStats")]
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2InfoTypeStats> InfoTypeStats { get; set; }
 
+        /// <summary>
+        /// Number of rows scanned after sampling and time filtering (applicable for row based stores such as BigQuery).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("numRowsProcessed")]
+        public virtual System.Nullable<long> NumRowsProcessed { get; set; }
+
         /// <summary>Total size in bytes that were processed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("processedBytes")]
         public virtual System.Nullable<long> ProcessedBytes { get; set; }
@@ -12580,8 +19355,8 @@ namespace Google.Apis.DLP.v2.Data
     }
 
     /// <summary>
-    /// Configuration for a risk analysis job. See https://cloud.google.com/dlp/docs/concepts-risk-analysis to learn
-    /// more.
+    /// Configuration for a risk analysis job. See
+    /// https://cloud.google.com/sensitive-data-protection/docs/concepts-risk-analysis to learn more.
     /// </summary>
     public class GooglePrivacyDlpV2RiskAnalysisJobConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -12630,12 +19405,109 @@ namespace Google.Apis.DLP.v2.Data
     public class GooglePrivacyDlpV2Schedule : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// With this option a job is started a regular periodic basis. For example: every day (86400 seconds). A
+        /// With this option a job is started on a regular periodic basis. For example: every day (86400 seconds). A
         /// scheduled start time will be skipped if the previous execution has not ended when its scheduled time occurs.
         /// This value must be set to a time duration greater than or equal to 1 day and can be no longer than 60 days.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("recurrencePeriodDuration")]
         public virtual object RecurrencePeriodDuration { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>How frequently to modify the profile when the table's schema is modified.</summary>
+    public class GooglePrivacyDlpV2SchemaModifiedCadence : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Frequency to regenerate data profiles when the schema is modified. Defaults to monthly.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("frequency")]
+        public virtual string Frequency { get; set; }
+
+        /// <summary>The types of schema modifications to consider. Defaults to NEW_COLUMNS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("types")]
+        public virtual System.Collections.Generic.IList<string> Types { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for SearchConnections.</summary>
+    public class GooglePrivacyDlpV2SearchConnectionsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// List of connections that match the search query. Note that only a subset of the fields will be populated,
+        /// and only "name" is guaranteed to be set. For full details of a Connection, call GetConnection with the name.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connections")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2Connection> Connections { get; set; }
+
+        /// <summary>
+        /// Token to retrieve the next page of results. An empty value means there are no more results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A credential consisting of a username and password, where the password is stored in a Secret Manager resource.
+    /// Note: Secret Manager [charges apply](https://cloud.google.com/secret-manager/pricing).
+    /// </summary>
+    public class GooglePrivacyDlpV2SecretManagerCredential : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The name of the Secret Manager resource that stores the password, in the form
+        /// `projects/project-id/secrets/secret-name/versions/version`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("passwordSecretVersionName")]
+        public virtual string PasswordSecretVersionName { get; set; }
+
+        /// <summary>Required. The username.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("username")]
+        public virtual string Username { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Discovery target for credentials and secrets in cloud resource metadata. This target does not include any
+    /// filtering or frequency controls. Cloud DLP will scan cloud resource metadata for secrets daily. No inspect
+    /// template should be included in the discovery config for a security benchmarks scan. Instead, the built-in list
+    /// of secrets and credentials infoTypes will be used (see
+    /// https://cloud.google.com/sensitive-data-protection/docs/infotypes-reference#credentials_and_secrets).
+    /// Credentials and secrets discovered will be reported as vulnerabilities to Security Command Center.
+    /// </summary>
+    public class GooglePrivacyDlpV2SecretsDiscoveryTarget : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Apply transformation to the selected info_types.</summary>
+    public class GooglePrivacyDlpV2SelectedInfoTypes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. InfoTypes to apply the transformation to. Required. Provided InfoType must be unique within the
+        /// ImageTransformations message.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("infoTypes")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2InfoType> InfoTypes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Score is calculated from of all elements in the data profile. A higher level means the data is more sensitive.
+    /// </summary>
+    public class GooglePrivacyDlpV2SensitivityScore : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The sensitivity score applied to the resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("score")]
+        public virtual string Score { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -12675,7 +19547,7 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("bigQueryOptions")]
         public virtual GooglePrivacyDlpV2BigQueryOptions BigQueryOptions { get; set; }
 
-        /// <summary>Google Cloud Storage options.</summary>
+        /// <summary>Cloud Storage options.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cloudStorageOptions")]
         public virtual GooglePrivacyDlpV2CloudStorageOptions CloudStorageOptions { get; set; }
 
@@ -12687,6 +19559,7 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("hybridOptions")]
         public virtual GooglePrivacyDlpV2HybridOptions HybridOptions { get; set; }
 
+        /// <summary>Configuration of the timespan of the items to include in scanning.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timespanConfig")]
         public virtual GooglePrivacyDlpV2TimespanConfig TimespanConfig { get; set; }
 
@@ -12697,6 +19570,7 @@ namespace Google.Apis.DLP.v2.Data
     /// <summary>Storage metadata label to indicate which metadata entry contains findings.</summary>
     public class GooglePrivacyDlpV2StorageMetadataLabel : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Label name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("key")]
         public virtual string Key { get; set; }
 
@@ -12727,7 +19601,7 @@ namespace Google.Apis.DLP.v2.Data
 
     /// <summary>
     /// Configuration for stored infoTypes. All fields and subfield are provided by the user. For more information, see
-    /// https://cloud.google.com/dlp/docs/creating-custom-infotypes.
+    /// https://cloud.google.com/sensitive-data-protection/docs/creating-custom-infotypes.
     /// </summary>
     public class GooglePrivacyDlpV2StoredInfoTypeConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -12775,17 +19649,50 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("config")]
         public virtual GooglePrivacyDlpV2StoredInfoTypeConfig Config { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Create timestamp of the version. Read-only, determined by the system when the version is created.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Errors that occurred when creating this storedInfoType version, or anomalies detected in the storedInfoType
         /// data that render it unusable. Only the five most recent errors will be displayed, with the most recent error
-        /// appearing first. For example, some of the data for stored custom dictionaries is put in the user's Google
-        /// Cloud Storage bucket, and if this data is modified or deleted by the user or another system, the dictionary
+        /// appearing first. For example, some of the data for stored custom dictionaries is put in the user's Cloud
+        /// Storage bucket, and if this data is modified or deleted by the user or another system, the dictionary
         /// becomes invalid. If any errors occur, fix the problem indicated by the error message and use the
         /// UpdateStoredInfoType API method to create another version of the storedInfoType to continue using it,
         /// reusing the same `config` if it was not the source of the error.
@@ -12810,12 +19717,45 @@ namespace Google.Apis.DLP.v2.Data
     /// <summary>A reference to a StoredInfoType to use with scanning.</summary>
     public class GooglePrivacyDlpV2StoredType : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Timestamp indicating when the version of the `StoredInfoType` used for inspection was created. Output-only
         /// field, populated by the system.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Resource name of the requested `StoredInfoType`, for example
@@ -12852,7 +19792,7 @@ namespace Google.Apis.DLP.v2.Data
 
     /// <summary>
     /// Message for detecting output from deidentification transformations such as
-    /// [`CryptoReplaceFfxFpeConfig`](https://cloud.google.com/dlp/docs/reference/rest/v2/organizations.deidentifyTemplates#cryptoreplaceffxfpeconfig).
+    /// [`CryptoReplaceFfxFpeConfig`](https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/organizations.deidentifyTemplates#cryptoreplaceffxfpeconfig).
     /// These types of transformations are those that perform pseudonymization, thereby producing a "surrogate" as
     /// output. This should be used in conjunction with a field on the transformation such as `surrogate_info_type`.
     /// This CustomInfoType does not support the use of `detection_rules`.
@@ -12865,7 +19805,8 @@ namespace Google.Apis.DLP.v2.Data
 
     /// <summary>
     /// Structured content to inspect. Up to 50,000 `Value`s per request allowed. See
-    /// https://cloud.google.com/dlp/docs/inspecting-structured-text#inspecting_a_table to learn more.
+    /// https://cloud.google.com/sensitive-data-protection/docs/inspecting-structured-text#inspecting_a_table to learn
+    /// more.
     /// </summary>
     public class GooglePrivacyDlpV2Table : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -12876,6 +19817,266 @@ namespace Google.Apis.DLP.v2.Data
         /// <summary>Rows of the table.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rows")]
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2Row> Rows { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The profile for a scanned table.</summary>
+    public class GooglePrivacyDlpV2TableDataProfile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The snapshot of the configurations used to generate the profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("configSnapshot")]
+        public virtual GooglePrivacyDlpV2DataProfileConfigSnapshot ConfigSnapshot { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>The time at which the table was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The data risk level of this table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataRiskLevel")]
+        public virtual GooglePrivacyDlpV2DataRiskLevel DataRiskLevel { get; set; }
+
+        /// <summary>The resource type that was profiled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataSourceType")]
+        public virtual GooglePrivacyDlpV2DataSourceType DataSourceType { get; set; }
+
+        /// <summary>If the resource is BigQuery, the dataset ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetId")]
+        public virtual string DatasetId { get; set; }
+
+        /// <summary>
+        /// If supported, the location where the dataset's data is stored. See
+        /// https://cloud.google.com/bigquery/docs/locations for supported locations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetLocation")]
+        public virtual string DatasetLocation { get; set; }
+
+        /// <summary>The Google Cloud project ID that owns the resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetProjectId")]
+        public virtual string DatasetProjectId { get; set; }
+
+        /// <summary>How the table is encrypted.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("encryptionStatus")]
+        public virtual string EncryptionStatus { get; set; }
+
+        private string _expirationTimeRaw;
+
+        private object _expirationTime;
+
+        /// <summary>Optional. The time when this table expires.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expirationTime")]
+        public virtual string ExpirationTimeRaw
+        {
+            get => _expirationTimeRaw;
+            set
+            {
+                _expirationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expirationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpirationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpirationTimeDateTimeOffset instead.")]
+        public virtual object ExpirationTime
+        {
+            get => _expirationTime;
+            set
+            {
+                _expirationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expirationTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpirationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpirationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpirationTimeRaw);
+            set => ExpirationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The number of columns skipped in the table because of an error.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("failedColumnCount")]
+        public virtual System.Nullable<long> FailedColumnCount { get; set; }
+
+        /// <summary>
+        /// The Cloud Asset Inventory resource that was profiled in order to generate this TableDataProfile.
+        /// https://cloud.google.com/apis/design/resource_names#full_resource_name
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fullResource")]
+        public virtual string FullResource { get; set; }
+
+        private string _lastModifiedTimeRaw;
+
+        private object _lastModifiedTime;
+
+        /// <summary>The time when this table was last modified</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastModifiedTime")]
+        public virtual string LastModifiedTimeRaw
+        {
+            get => _lastModifiedTimeRaw;
+            set
+            {
+                _lastModifiedTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastModifiedTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastModifiedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastModifiedTimeDateTimeOffset instead.")]
+        public virtual object LastModifiedTime
+        {
+            get => _lastModifiedTime;
+            set
+            {
+                _lastModifiedTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastModifiedTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastModifiedTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastModifiedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastModifiedTimeRaw);
+            set => LastModifiedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The name of the profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Other infoTypes found in this table's data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("otherInfoTypes")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2OtherInfoTypeSummary> OtherInfoTypes { get; set; }
+
+        /// <summary>The infoTypes predicted from this table's data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("predictedInfoTypes")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2InfoTypeSummary> PredictedInfoTypes { get; set; }
+
+        private string _profileLastGeneratedRaw;
+
+        private object _profileLastGenerated;
+
+        /// <summary>The last time the profile was generated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("profileLastGenerated")]
+        public virtual string ProfileLastGeneratedRaw
+        {
+            get => _profileLastGeneratedRaw;
+            set
+            {
+                _profileLastGenerated = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _profileLastGeneratedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ProfileLastGeneratedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ProfileLastGeneratedDateTimeOffset instead.")]
+        public virtual object ProfileLastGenerated
+        {
+            get => _profileLastGenerated;
+            set
+            {
+                _profileLastGeneratedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _profileLastGenerated = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ProfileLastGeneratedRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ProfileLastGeneratedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ProfileLastGeneratedRaw);
+            set => ProfileLastGeneratedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Success or error status from the most recent profile generation attempt. May be empty if the profile is
+        /// still being generated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("profileStatus")]
+        public virtual GooglePrivacyDlpV2ProfileStatus ProfileStatus { get; set; }
+
+        /// <summary>The resource name of the project data profile for this table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectDataProfile")]
+        public virtual string ProjectDataProfile { get; set; }
+
+        /// <summary>The labels applied to the resource at the time the profile was generated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceLabels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> ResourceLabels { get; set; }
+
+        /// <summary>How broadly a resource has been shared.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceVisibility")]
+        public virtual string ResourceVisibility { get; set; }
+
+        /// <summary>
+        /// Number of rows in the table when the profile was generated. This will not be populated for BigLake tables.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rowCount")]
+        public virtual System.Nullable<long> RowCount { get; set; }
+
+        /// <summary>The number of columns profiled in the table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scannedColumnCount")]
+        public virtual System.Nullable<long> ScannedColumnCount { get; set; }
+
+        /// <summary>The sensitivity score of this table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sensitivityScore")]
+        public virtual GooglePrivacyDlpV2SensitivityScore SensitivityScore { get; set; }
+
+        /// <summary>State of a profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The table ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableId")]
+        public virtual string TableId { get; set; }
+
+        /// <summary>The size of the table when the profile was generated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableSizeBytes")]
+        public virtual System.Nullable<long> TableSizeBytes { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -12907,6 +20108,89 @@ namespace Google.Apis.DLP.v2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("identifyingFields")]
         public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2FieldId> IdentifyingFields { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Message defining the location of a BigQuery table with the projectId inferred from the parent project.
+    /// </summary>
+    public class GooglePrivacyDlpV2TableReference : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Dataset ID of the table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetId")]
+        public virtual string DatasetId { get; set; }
+
+        /// <summary>Name of the table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableId")]
+        public virtual string TableId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The tag to attach to profiles matching the condition. At most one `TagCondition` can be specified per
+    /// sensitivity level.
+    /// </summary>
+    public class GooglePrivacyDlpV2TagCondition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Conditions attaching the tag to a resource on its profile having this sensitivity score.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sensitivityScore")]
+        public virtual GooglePrivacyDlpV2SensitivityScore SensitivityScore { get; set; }
+
+        /// <summary>The tag value to attach to resources.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tag")]
+        public virtual GooglePrivacyDlpV2TagValue Tag { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// If set, attaches the [tags] (https://cloud.google.com/resource-manager/docs/tags/tags-overview) provided to
+    /// profiled resources. Tags support [access control](https://cloud.google.com/iam/docs/tags-access-control). You
+    /// can conditionally grant or deny access to a resource based on whether the resource has a specific tag.
+    /// </summary>
+    public class GooglePrivacyDlpV2TagResources : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Whether applying a tag to a resource should lower the risk of the profile for that resource. For example, in
+        /// conjunction with an [IAM deny policy](https://cloud.google.com/iam/docs/deny-overview), you can deny all
+        /// principals a permission if a tag value is present, mitigating the risk of the resource. This also lowers the
+        /// data risk of resources at the lower levels of the resource hierarchy. For example, reducing the data risk of
+        /// a table data profile also reduces the data risk of the constituent column data profiles.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lowerDataRiskToLow")]
+        public virtual System.Nullable<bool> LowerDataRiskToLow { get; set; }
+
+        /// <summary>
+        /// The profile generations for which the tag should be attached to resources. If you attach a tag to only new
+        /// profiles, then if the sensitivity score of a profile subsequently changes, its tag doesn't change. By
+        /// default, this field includes only new profiles. To include both new and updated profiles for tagging, this
+        /// field should explicitly include both `PROFILE_GENERATION_NEW` and `PROFILE_GENERATION_UPDATE`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("profileGenerationsToTag")]
+        public virtual System.Collections.Generic.IList<string> ProfileGenerationsToTag { get; set; }
+
+        /// <summary>The tags to associate with different conditions.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagConditions")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2TagCondition> TagConditions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A value of a tag.</summary>
+    public class GooglePrivacyDlpV2TagValue : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The namespaced name for the tag value to attach to resources. Must be in the format
+        /// `{parent_id}/{tag_key_short_name}/{short_name}`, for example, "123456/environment/prod".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("namespacedValue")]
+        public virtual string NamespacedValue { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -12982,42 +20266,252 @@ namespace Google.Apis.DLP.v2.Data
 
     /// <summary>
     /// Configuration of the timespan of the items to include in scanning. Currently only supported when inspecting
-    /// Google Cloud Storage and BigQuery.
+    /// Cloud Storage and BigQuery.
     /// </summary>
     public class GooglePrivacyDlpV2TimespanConfig : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// When the job is started by a JobTrigger we will automatically figure out a valid start_time to avoid
         /// scanning files that have not been modified since the last time the JobTrigger executed. This will be based
-        /// on the time of the execution of the last run of the JobTrigger.
+        /// on the time of the execution of the last run of the JobTrigger or the timespan end_time used in the last run
+        /// of the JobTrigger. **For BigQuery** Inspect jobs triggered by automatic population will scan data that is at
+        /// least three hours old when the job starts. This is because streaming buffer rows are not read during
+        /// inspection and reading up to the current timestamp will result in skipped rows. See the [known
+        /// issue](https://cloud.google.com/sensitive-data-protection/docs/known-issues#recently-streamed-data) related
+        /// to this operation.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("enableAutoPopulationOfTimespanConfig")]
         public virtual System.Nullable<bool> EnableAutoPopulationOfTimespanConfig { get; set; }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>
         /// Exclude files, tables, or rows newer than this value. If not set, no upper time limit is applied.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>
         /// Exclude files, tables, or rows older than this value. If not set, no lower time limit is applied.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Specification of the field containing the timestamp of scanned items. Used for data sources like Datastore
-        /// and BigQuery. For BigQuery: If this value is not specified and the table was modified between the given
+        /// and BigQuery. **For BigQuery** If this value is not specified and the table was modified between the given
         /// start and end times, the entire table will be scanned. If this value is specified, then rows are filtered
         /// based on the given start and end times. Rows with a `NULL` value in the provided BigQuery column are
         /// skipped. Valid data types of the provided BigQuery column are: `INTEGER`, `DATE`, `TIMESTAMP`, and
-        /// `DATETIME`. For Datastore: If this value is specified, then entities are filtered based on the given start
-        /// and end times. If an entity does not contain the provided timestamp property or contains empty or invalid
-        /// values, then it is included. Valid data types of the provided timestamp property are: `TIMESTAMP`.
+        /// `DATETIME`. If your BigQuery table is [partitioned at ingestion
+        /// time](https://cloud.google.com/bigquery/docs/partitioned-tables#ingestion_time), you can use any of the
+        /// following pseudo-columns as your timestamp field. When used with Cloud DLP, these pseudo-column names are
+        /// case sensitive. - `_PARTITIONTIME` - `_PARTITIONDATE` - `_PARTITION_LOAD_TIME` **For Datastore** If this
+        /// value is specified, then entities are filtered based on the given start and end times. If an entity does not
+        /// contain the provided timestamp property or contains empty or invalid values, then it is included. Valid data
+        /// types of the provided timestamp property are: `TIMESTAMP`. See the [known
+        /// issue](https://cloud.google.com/sensitive-data-protection/docs/known-issues#bq-timespan) related to this
+        /// operation.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timestampField")]
         public virtual GooglePrivacyDlpV2FieldId TimestampField { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// User specified templates and configs for how to deidentify structured, unstructures, and image files. User must
+    /// provide either a unstructured deidentify template or at least one redact image config.
+    /// </summary>
+    public class GooglePrivacyDlpV2TransformationConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// De-identify template. If this template is specified, it will serve as the default de-identify template. This
+        /// template cannot contain `record_transformations` since it can be used for unstructured content such as
+        /// free-form text files. If this template is not set, a default `ReplaceWithInfoTypeConfig` will be used to
+        /// de-identify unstructured content.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deidentifyTemplate")]
+        public virtual string DeidentifyTemplate { get; set; }
+
+        /// <summary>
+        /// Image redact template. If this template is specified, it will serve as the de-identify template for images.
+        /// If this template is not set, all findings in the image will be redacted with a black box.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("imageRedactTemplate")]
+        public virtual string ImageRedactTemplate { get; set; }
+
+        /// <summary>
+        /// Structured de-identify template. If this template is specified, it will serve as the de-identify template
+        /// for structured content such as delimited files and tables. If this template is not set but the
+        /// `deidentify_template` is set, then `deidentify_template` will also apply to the structured content. If
+        /// neither template is set, a default `ReplaceWithInfoTypeConfig` will be used to de-identify structured
+        /// content.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("structuredDeidentifyTemplate")]
+        public virtual string StructuredDeidentifyTemplate { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A flattened description of a `PrimitiveTransformation` or `RecordSuppression`.</summary>
+    public class GooglePrivacyDlpV2TransformationDescription : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A human-readable string representation of the `RecordCondition` corresponding to this transformation. Set if
+        /// a `RecordCondition` was used to determine whether or not to apply this transformation. Examples: *
+        /// (age_field &amp;gt; 85) * (age_field &amp;lt;= 18) * (zip_field exists) * (zip_field == 01234)
+        /// &amp;amp;&amp;amp; (city_field != "Springville") * (zip_field == 01234) &amp;amp;&amp;amp; (age_field
+        /// &amp;lt;= 18) &amp;amp;&amp;amp; (city_field exists)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("condition")]
+        public virtual string Condition { get; set; }
+
+        /// <summary>
+        /// A description of the transformation. This is empty for a RECORD_SUPPRESSION, or is the output of calling
+        /// toString() on the `PrimitiveTransformation` protocol buffer message for any other type of transformation.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Set if the transformation was limited to a specific `InfoType`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("infoType")]
+        public virtual GooglePrivacyDlpV2InfoType InfoType { get; set; }
+
+        /// <summary>The transformation type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Details about a single transformation. This object contains a description of the transformation, information
+    /// about whether the transformation was successfully applied, and the precise location where the transformation
+    /// occurred. These details are stored in a user-specified BigQuery table.
+    /// </summary>
+    public class GooglePrivacyDlpV2TransformationDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The top level name of the container where the transformation is located (this will be the source file name
+        /// or table name).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("containerName")]
+        public virtual string ContainerName { get; set; }
+
+        /// <summary>The name of the job that completed the transformation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceName")]
+        public virtual string ResourceName { get; set; }
+
+        /// <summary>
+        /// Status of the transformation, if transformation was not successful, this will specify what caused it to
+        /// fail, otherwise it will show that the transformation was successful.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("statusDetails")]
+        public virtual GooglePrivacyDlpV2TransformationResultStatus StatusDetails { get; set; }
+
+        /// <summary>
+        /// Description of transformation. This would only contain more than one element if there were multiple matching
+        /// transformations and which one to apply was ambiguous. Not set for states that contain no transformation,
+        /// currently only state that contains no transformation is
+        /// TransformationResultStateType.METADATA_UNRETRIEVABLE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transformation")]
+        public virtual System.Collections.Generic.IList<GooglePrivacyDlpV2TransformationDescription> Transformation { get; set; }
+
+        /// <summary>The precise location of the transformed content in the original container.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transformationLocation")]
+        public virtual GooglePrivacyDlpV2TransformationLocation TransformationLocation { get; set; }
+
+        /// <summary>
+        /// The number of bytes that were transformed. If transformation was unsuccessful or did not take place because
+        /// there was no content to transform, this will be zero.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transformedBytes")]
+        public virtual System.Nullable<long> TransformedBytes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Config for storing transformation details.</summary>
+    public class GooglePrivacyDlpV2TransformationDetailsStorageConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The BigQuery table in which to store the output. This may be an existing table or in a new table in an
+        /// existing dataset. If table_id is not set a new one will be generated for you with the following format:
+        /// dlp_googleapis_transformation_details_yyyy_mm_dd_[dlp_job_id]. Pacific time zone will be used for generating
+        /// the date details.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("table")]
+        public virtual GooglePrivacyDlpV2BigQueryTable Table { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -13044,6 +20538,31 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Specifies the location of a transformation.</summary>
+    public class GooglePrivacyDlpV2TransformationLocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Information about the functionality of the container where this finding occurred, if available.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("containerType")]
+        public virtual string ContainerType { get; set; }
+
+        /// <summary>
+        /// For infotype transformations, link to the corresponding findings ID so that location information does not
+        /// need to be duplicated. Each findings ID correlates to an entry in the findings output table, this table only
+        /// gets created when users specify to save findings (add the save findings action to the request).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("findingId")]
+        public virtual string FindingId { get; set; }
+
+        /// <summary>For record transformations, provide a field and container information.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("recordTransformation")]
+        public virtual GooglePrivacyDlpV2RecordTransformation RecordTransformation { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Overview of the modifications that occurred.</summary>
     public class GooglePrivacyDlpV2TransformationOverview : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -13054,6 +20573,24 @@ namespace Google.Apis.DLP.v2.Data
         /// <summary>Total size in bytes that were transformed in some way.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("transformedBytes")]
         public virtual System.Nullable<long> TransformedBytes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The outcome of a transformation.</summary>
+    public class GooglePrivacyDlpV2TransformationResultStatus : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Detailed error codes and messages</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual GoogleRpcStatus Details { get; set; }
+
+        /// <summary>
+        /// Transformation result status type, this will be either SUCCESS, or it will be the reason for why the
+        /// transformation was not completely successful.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resultStatusType")]
+        public virtual string ResultStatusType { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -13147,12 +20684,42 @@ namespace Google.Apis.DLP.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Request message for UpdateConnection.</summary>
+    public class GooglePrivacyDlpV2UpdateConnectionRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The connection with new values for the relevant fields.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connection")]
+        public virtual GooglePrivacyDlpV2Connection Connection { get; set; }
+
+        /// <summary>Optional. Mask to control which fields get updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
+        public virtual object UpdateMask { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for UpdateDeidentifyTemplate.</summary>
     public class GooglePrivacyDlpV2UpdateDeidentifyTemplateRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>New DeidentifyTemplate value.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deidentifyTemplate")]
         public virtual GooglePrivacyDlpV2DeidentifyTemplate DeidentifyTemplate { get; set; }
+
+        /// <summary>Mask to control which fields get updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
+        public virtual object UpdateMask { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for UpdateDiscoveryConfig.</summary>
+    public class GooglePrivacyDlpV2UpdateDiscoveryConfigRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. New DiscoveryConfig value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("discoveryConfig")]
+        public virtual GooglePrivacyDlpV2DiscoveryConfig DiscoveryConfig { get; set; }
 
         /// <summary>Mask to control which fields get updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
@@ -13246,9 +20813,44 @@ namespace Google.Apis.DLP.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeValue")]
         public virtual GoogleTypeTimeOfDay TimeValue { get; set; }
 
+        private string _timestampValueRaw;
+
+        private object _timestampValue;
+
         /// <summary>timestamp</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timestampValue")]
-        public virtual object TimestampValue { get; set; }
+        public virtual string TimestampValueRaw
+        {
+            get => _timestampValueRaw;
+            set
+            {
+                _timestampValue = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timestampValueRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimestampValueRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimestampValueDateTimeOffset instead.")]
+        public virtual object TimestampValue
+        {
+            get => _timestampValue;
+            set
+            {
+                _timestampValueRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _timestampValue = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="TimestampValueRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimestampValueDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimestampValueRaw);
+            set => TimestampValueRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -13264,6 +20866,21 @@ namespace Google.Apis.DLP.v2.Data
         /// <summary>A value contained in the field in question.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("value")]
         public virtual GooglePrivacyDlpV2Value Value { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Details about each available version for an infotype.</summary>
+    public class GooglePrivacyDlpV2VersionDescription : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Description of the version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Name of the version</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual string Version { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -13286,8 +20903,7 @@ namespace Google.Apis.DLP.v2.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class GoogleProtobufEmpty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -13327,10 +20943,10 @@ namespace Google.Apis.DLP.v2.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class GoogleTypeDate : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -13360,23 +20976,26 @@ namespace Google.Apis.DLP.v2.Data
     public class GoogleTypeTimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }

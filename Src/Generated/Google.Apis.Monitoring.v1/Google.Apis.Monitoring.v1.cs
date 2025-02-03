@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.Monitoring.v1
             Locations = new LocationsResource(this);
             Operations = new OperationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://monitoring.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://monitoring.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.Monitoring.v1
         public override string Name => "monitoring";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://monitoring.googleapis.com/";
-        #else
-            "https://monitoring.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://monitoring.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Monitoring API.</summary>
         public class Scope
@@ -375,7 +370,7 @@ namespace Google.Apis.Monitoring.v1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.Monitoring.v1.Data.MonitoredProject body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -437,7 +432,7 @@ namespace Google.Apis.Monitoring.v1
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes a MonitoredProject from the specified Metrics Scope.</summary>
@@ -494,7 +489,7 @@ namespace Google.Apis.Monitoring.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -548,7 +543,7 @@ namespace Google.Apis.Monitoring.v1
                 /// </summary>
                 public virtual ListMetricsScopesByMonitoredProjectRequest ListMetricsScopesByMonitoredProject()
                 {
-                    return new ListMetricsScopesByMonitoredProjectRequest(service);
+                    return new ListMetricsScopesByMonitoredProjectRequest(this.service);
                 }
 
                 /// <summary>
@@ -619,7 +614,7 @@ namespace Google.Apis.Monitoring.v1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -710,7 +705,7 @@ namespace Google.Apis.Monitoring.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Monitoring.v1.Data.Dashboard body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -789,7 +784,7 @@ namespace Google.Apis.Monitoring.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -848,7 +843,7 @@ namespace Google.Apis.Monitoring.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -907,7 +902,7 @@ namespace Google.Apis.Monitoring.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -938,9 +933,9 @@ namespace Google.Apis.Monitoring.v1
                 public virtual System.Nullable<int> PageSize { get; set; }
 
                 /// <summary>
-                /// If this field is not empty then it must contain the nextPageToken value returned by a previous call
-                /// to this method. Using this field causes the method to return additional results from the previous
-                /// method call.
+                /// Optional. If this field is not empty then it must contain the nextPageToken value returned by a
+                /// previous call to this method. Using this field causes the method to return additional results from
+                /// the previous method call.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
@@ -991,10 +986,10 @@ namespace Google.Apis.Monitoring.v1
             /// Identity and Access Management (https://cloud.google.com/iam).
             /// </summary>
             /// <param name="body">The body of the request.</param>
-            /// <param name="name">Immutable. The resource name of the dashboard.</param>
+            /// <param name="name">Identifier. The resource name of the dashboard.</param>
             public virtual PatchRequest Patch(Google.Apis.Monitoring.v1.Data.Dashboard body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -1012,7 +1007,7 @@ namespace Google.Apis.Monitoring.v1
                     InitParameters();
                 }
 
-                /// <summary>Immutable. The resource name of the dashboard.</summary>
+                /// <summary>Identifier. The resource name of the dashboard.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
 
@@ -1151,9 +1146,9 @@ namespace Google.Apis.Monitoring.v1
 
                             /// <summary>Lists possible values for a given label name.</summary>
                             /// <param name="name">
-                            /// The workspace on which to execute the request. It is not part of the open source API but
-                            /// used as a request path prefix to distinguish different virtual Prometheus instances of
-                            /// Google Prometheus Engine. The format is: projects/PROJECT_ID_OR_NUMBER.
+                            /// Required. The workspace on which to execute the request. It is not part of the open
+                            /// source API but used as a request path prefix to distinguish different virtual Prometheus
+                            /// instances of Google Prometheus Engine. The format is: projects/PROJECT_ID_OR_NUMBER.
                             /// </param>
                             /// <param name="location">
                             /// Location of the resource information. Has to be "global" now.
@@ -1161,7 +1156,7 @@ namespace Google.Apis.Monitoring.v1
                             /// <param name="label">The label name for which values are queried.</param>
                             public virtual ValuesRequest Values(string name, string location, string label)
                             {
-                                return new ValuesRequest(service, name, location, label);
+                                return new ValuesRequest(this.service, name, location, label);
                             }
 
                             /// <summary>Lists possible values for a given label name.</summary>
@@ -1177,9 +1172,10 @@ namespace Google.Apis.Monitoring.v1
                                 }
 
                                 /// <summary>
-                                /// The workspace on which to execute the request. It is not part of the open source API
-                                /// but used as a request path prefix to distinguish different virtual Prometheus
-                                /// instances of Google Prometheus Engine. The format is: projects/PROJECT_ID_OR_NUMBER.
+                                /// Required. The workspace on which to execute the request. It is not part of the open
+                                /// source API but used as a request path prefix to distinguish different virtual
+                                /// Prometheus instances of Google Prometheus Engine. The format is:
+                                /// projects/PROJECT_ID_OR_NUMBER.
                                 /// </summary>
                                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                                 public virtual string Name { get; private set; }
@@ -1306,7 +1302,7 @@ namespace Google.Apis.Monitoring.v1
                             /// </param>
                             public virtual ListRequest List(string name, string location)
                             {
-                                return new ListRequest(service, name, location);
+                                return new ListRequest(this.service, name, location);
                             }
 
                             /// <summary>Lists metadata for metrics.</summary>
@@ -1393,18 +1389,93 @@ namespace Google.Apis.Monitoring.v1
                             }
                         }
 
+                        /// <summary>Lists labels for metrics.</summary>
+                        /// <param name="body">The body of the request.</param>
+                        /// <param name="name">
+                        /// Required. The workspace on which to execute the request. It is not part of the open source
+                        /// API but used as a request path prefix to distinguish different virtual Prometheus instances
+                        /// of Google Prometheus Engine. The format is: projects/PROJECT_ID_OR_NUMBER.
+                        /// </param>
+                        /// <param name="location">Location of the resource information. Has to be "global" now.</param>
+                        public virtual LabelsRequest Labels(Google.Apis.Monitoring.v1.Data.QueryLabelsRequest body, string name, string location)
+                        {
+                            return new LabelsRequest(this.service, body, name, location);
+                        }
+
+                        /// <summary>Lists labels for metrics.</summary>
+                        public class LabelsRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v1.Data.HttpBody>
+                        {
+                            /// <summary>Constructs a new Labels request.</summary>
+                            public LabelsRequest(Google.Apis.Services.IClientService service, Google.Apis.Monitoring.v1.Data.QueryLabelsRequest body, string name, string location) : base(service)
+                            {
+                                Name = name;
+                                Location = location;
+                                Body = body;
+                                InitParameters();
+                            }
+
+                            /// <summary>
+                            /// Required. The workspace on which to execute the request. It is not part of the open
+                            /// source API but used as a request path prefix to distinguish different virtual Prometheus
+                            /// instances of Google Prometheus Engine. The format is: projects/PROJECT_ID_OR_NUMBER.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                            public virtual string Name { get; private set; }
+
+                            /// <summary>Location of the resource information. Has to be "global" now.</summary>
+                            [Google.Apis.Util.RequestParameterAttribute("location", Google.Apis.Util.RequestParameterType.Path)]
+                            public virtual string Location { get; private set; }
+
+                            /// <summary>Gets or sets the body of this request.</summary>
+                            Google.Apis.Monitoring.v1.Data.QueryLabelsRequest Body { get; set; }
+
+                            /// <summary>Returns the body of the request.</summary>
+                            protected override object GetBody() => Body;
+
+                            /// <summary>Gets the method name.</summary>
+                            public override string MethodName => "labels";
+
+                            /// <summary>Gets the HTTP method.</summary>
+                            public override string HttpMethod => "POST";
+
+                            /// <summary>Gets the REST path.</summary>
+                            public override string RestPath => "v1/{+name}/location/{location}/prometheus/api/v1/labels";
+
+                            /// <summary>Initializes Labels parameter list.</summary>
+                            protected override void InitParameters()
+                            {
+                                base.InitParameters();
+                                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "name",
+                                    IsRequired = true,
+                                    ParameterType = "path",
+                                    DefaultValue = null,
+                                    Pattern = @"^projects/[^/]+$",
+                                });
+                                RequestParameters.Add("location", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "location",
+                                    IsRequired = true,
+                                    ParameterType = "path",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                            }
+                        }
+
                         /// <summary>Evaluate a PromQL query at a single point in time.</summary>
                         /// <param name="body">The body of the request.</param>
                         /// <param name="name">
-                        /// The project on which to execute the request. Data associcated with the project's workspace
-                        /// stored under the The format is: projects/PROJECT_ID_OR_NUMBER. Open source API but used as a
-                        /// request path prefix to distinguish different virtual Prometheus instances of Google
-                        /// Prometheus Engine.
+                        /// Required. The project on which to execute the request. Data associcated with the project's
+                        /// workspace stored under the The format is: projects/PROJECT_ID_OR_NUMBER. Open source API but
+                        /// used as a request path prefix to distinguish different virtual Prometheus instances of
+                        /// Google Prometheus Engine.
                         /// </param>
                         /// <param name="location">Location of the resource information. Has to be "global" now.</param>
                         public virtual QueryRequest Query(Google.Apis.Monitoring.v1.Data.QueryInstantRequest body, string name, string location)
                         {
-                            return new QueryRequest(service, body, name, location);
+                            return new QueryRequest(this.service, body, name, location);
                         }
 
                         /// <summary>Evaluate a PromQL query at a single point in time.</summary>
@@ -1420,10 +1491,10 @@ namespace Google.Apis.Monitoring.v1
                             }
 
                             /// <summary>
-                            /// The project on which to execute the request. Data associcated with the project's
-                            /// workspace stored under the The format is: projects/PROJECT_ID_OR_NUMBER. Open source API
-                            /// but used as a request path prefix to distinguish different virtual Prometheus instances
-                            /// of Google Prometheus Engine.
+                            /// Required. The project on which to execute the request. Data associcated with the
+                            /// project's workspace stored under the The format is: projects/PROJECT_ID_OR_NUMBER. Open
+                            /// source API but used as a request path prefix to distinguish different virtual Prometheus
+                            /// instances of Google Prometheus Engine.
                             /// </summary>
                             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                             public virtual string Name { get; private set; }
@@ -1470,18 +1541,95 @@ namespace Google.Apis.Monitoring.v1
                             }
                         }
 
+                        /// <summary>Lists exemplars relevant to a given PromQL query,</summary>
+                        /// <param name="body">The body of the request.</param>
+                        /// <param name="name">
+                        /// Required. The project on which to execute the request. Data associcated with the project's
+                        /// workspace stored under the The format is: projects/PROJECT_ID_OR_NUMBER. Open source API but
+                        /// used as a request path prefix to distinguish different virtual Prometheus instances of
+                        /// Google Prometheus Engine.
+                        /// </param>
+                        /// <param name="location">Location of the resource information. Has to be "global" now.</param>
+                        public virtual QueryExemplarsRequest QueryExemplars(Google.Apis.Monitoring.v1.Data.QueryExemplarsRequest body, string name, string location)
+                        {
+                            return new QueryExemplarsRequest(this.service, body, name, location);
+                        }
+
+                        /// <summary>Lists exemplars relevant to a given PromQL query,</summary>
+                        public class QueryExemplarsRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v1.Data.HttpBody>
+                        {
+                            /// <summary>Constructs a new QueryExemplars request.</summary>
+                            public QueryExemplarsRequest(Google.Apis.Services.IClientService service, Google.Apis.Monitoring.v1.Data.QueryExemplarsRequest body, string name, string location) : base(service)
+                            {
+                                Name = name;
+                                Location = location;
+                                Body = body;
+                                InitParameters();
+                            }
+
+                            /// <summary>
+                            /// Required. The project on which to execute the request. Data associcated with the
+                            /// project's workspace stored under the The format is: projects/PROJECT_ID_OR_NUMBER. Open
+                            /// source API but used as a request path prefix to distinguish different virtual Prometheus
+                            /// instances of Google Prometheus Engine.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                            public virtual string Name { get; private set; }
+
+                            /// <summary>Location of the resource information. Has to be "global" now.</summary>
+                            [Google.Apis.Util.RequestParameterAttribute("location", Google.Apis.Util.RequestParameterType.Path)]
+                            public virtual string Location { get; private set; }
+
+                            /// <summary>Gets or sets the body of this request.</summary>
+                            Google.Apis.Monitoring.v1.Data.QueryExemplarsRequest Body { get; set; }
+
+                            /// <summary>Returns the body of the request.</summary>
+                            protected override object GetBody() => Body;
+
+                            /// <summary>Gets the method name.</summary>
+                            public override string MethodName => "query_exemplars";
+
+                            /// <summary>Gets the HTTP method.</summary>
+                            public override string HttpMethod => "POST";
+
+                            /// <summary>Gets the REST path.</summary>
+                            public override string RestPath => "v1/{+name}/location/{location}/prometheus/api/v1/query_exemplars";
+
+                            /// <summary>Initializes QueryExemplars parameter list.</summary>
+                            protected override void InitParameters()
+                            {
+                                base.InitParameters();
+                                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "name",
+                                    IsRequired = true,
+                                    ParameterType = "path",
+                                    DefaultValue = null,
+                                    Pattern = @"^projects/[^/]+$",
+                                });
+                                RequestParameters.Add("location", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "location",
+                                    IsRequired = true,
+                                    ParameterType = "path",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                            }
+                        }
+
                         /// <summary>Evaluate a PromQL query with start, end time range.</summary>
                         /// <param name="body">The body of the request.</param>
                         /// <param name="name">
-                        /// The project on which to execute the request. Data associcated with the project's workspace
-                        /// stored under the The format is: projects/PROJECT_ID_OR_NUMBER. Open source API but used as a
-                        /// request path prefix to distinguish different virtual Prometheus instances of Google
-                        /// Prometheus Engine.
+                        /// Required. The project on which to execute the request. Data associcated with the project's
+                        /// workspace stored under the The format is: projects/PROJECT_ID_OR_NUMBER. Open source API but
+                        /// used as a request path prefix to distinguish different virtual Prometheus instances of
+                        /// Google Prometheus Engine.
                         /// </param>
                         /// <param name="location">Location of the resource information. Has to be "global" now.</param>
                         public virtual QueryRangeRequest QueryRange(Google.Apis.Monitoring.v1.Data.QueryRangeRequest body, string name, string location)
                         {
-                            return new QueryRangeRequest(service, body, name, location);
+                            return new QueryRangeRequest(this.service, body, name, location);
                         }
 
                         /// <summary>Evaluate a PromQL query with start, end time range.</summary>
@@ -1497,10 +1645,10 @@ namespace Google.Apis.Monitoring.v1
                             }
 
                             /// <summary>
-                            /// The project on which to execute the request. Data associcated with the project's
-                            /// workspace stored under the The format is: projects/PROJECT_ID_OR_NUMBER. Open source API
-                            /// but used as a request path prefix to distinguish different virtual Prometheus instances
-                            /// of Google Prometheus Engine.
+                            /// Required. The project on which to execute the request. Data associcated with the
+                            /// project's workspace stored under the The format is: projects/PROJECT_ID_OR_NUMBER. Open
+                            /// source API but used as a request path prefix to distinguish different virtual Prometheus
+                            /// instances of Google Prometheus Engine.
                             /// </summary>
                             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                             public virtual string Name { get; private set; }
@@ -1559,7 +1707,7 @@ namespace Google.Apis.Monitoring.v1
                         /// </param>
                         public virtual SeriesRequest Series(Google.Apis.Monitoring.v1.Data.QuerySeriesRequest body, string name, string location)
                         {
-                            return new SeriesRequest(service, body, name, location);
+                            return new SeriesRequest(this.service, body, name, location);
                         }
 
                         /// <summary>Lists metadata for metrics.</summary>
@@ -1703,6 +1851,31 @@ namespace Google.Apis.Monitoring.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Preview: An identifier for an aggregation function. Aggregation functions are SQL functions that group or
+    /// transform data from multiple points to a single point. This is a preview feature and may be subject to change
+    /// before final release.
+    /// </summary>
+    public class AggregationFunction : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Parameters applied to the aggregation function. Only used for functions that require them.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parameters")]
+        public virtual System.Collections.Generic.IList<Parameter> Parameters { get; set; }
+
+        /// <summary>
+        /// Required. The type of aggregation function, must be one of the following: "none" - no function. "percentile"
+        /// - APPROX_QUANTILES() - 1 parameter numeric value "average" - AVG() "count" - COUNT() "count-distinct" -
+        /// COUNT(DISTINCT) "count-distinct-approx" - APPROX_COUNT_DISTINCT() "max" - MAX() "min" - MIN() "sum" - SUM()
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A chart that displays alert policy data.</summary>
     public class AlertChart : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1732,12 +1905,64 @@ namespace Google.Apis.Monitoring.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Preview: A breakdown is an aggregation applied to the measures over a specified column. A breakdown can result
+    /// in multiple series across a category for the provided measure. This is a preview feature and may be subject to
+    /// change before final release.
+    /// </summary>
+    public class Breakdown : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The Aggregation function is applied across all data in each breakdown created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("aggregationFunction")]
+        public virtual AggregationFunction AggregationFunction { get; set; }
+
+        /// <summary>Required. The name of the column in the dataset containing the breakdown values.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("column")]
+        public virtual string Column { get; set; }
+
+        /// <summary>
+        /// Required. A limit to the number of breakdowns. If set to zero then all possible breakdowns are applied. The
+        /// list of breakdowns is dependent on the value of the sort_order field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("limit")]
+        public virtual System.Nullable<int> Limit { get; set; }
+
+        /// <summary>Required. The sort order is applied to the values of the breakdown column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sortOrder")]
+        public virtual string SortOrder { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Options to control visual rendering of a chart.</summary>
     public class ChartOptions : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Preview: Configures whether the charted values are shown on the horizontal or vertical axis. By default,
+        /// values are represented the vertical axis. This is a preview feature and may be subject to change before
+        /// final release.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayHorizontal")]
+        public virtual System.Nullable<bool> DisplayHorizontal { get; set; }
+
         /// <summary>The chart mode.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mode")]
         public virtual string Mode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A widget that groups the other widgets. All widgets that are within the area spanned by the grouping widget are
+    /// considered member widgets.
+    /// </summary>
+    public class CollapsibleGroup : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The collapsed state of the widget on first page load.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("collapsed")]
+        public virtual System.Nullable<bool> Collapsed { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1776,17 +2001,73 @@ namespace Google.Apis.Monitoring.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The persistent settings for a table's columns.</summary>
+    public class ColumnSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Whether the column should be left / middle / right aligned</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("alignment")]
+        public virtual string Alignment { get; set; }
+
+        /// <summary>Required. The id of the column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("column")]
+        public virtual string Column { get; set; }
+
+        /// <summary>Optional. Display name of the column</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// Optional. The thresholds used to determine how the table cell should be rendered given the time series'
+        /// current value.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("thresholds")]
+        public virtual System.Collections.Generic.IList<Threshold> Thresholds { get; set; }
+
+        /// <summary>Required. Whether the column should be visible on page load.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("visible")]
+        public virtual System.Nullable<bool> Visible { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Data structure to storing column's sort strategy</summary>
+    public class ColumnSortingOptions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Column name to sort data by</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("column")]
+        public virtual string Column { get; set; }
+
+        /// <summary>
+        /// Optional. A sorting direction that determines ascending or descending order. This is a legacy field kept for
+        /// backwards compatibility with table.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("direction")]
+        public virtual string Direction { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A Google Stackdriver dashboard. Dashboards define the content and layout of pages in the Stackdriver web
     /// application.
     /// </summary>
     public class Dashboard : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Configuration for event annotations to display on this dashboard.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("annotations")]
+        public virtual DashboardAnnotations Annotations { get; set; }
+
         /// <summary>
         /// The content is divided into equally spaced columns and the widgets are arranged vertically.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("columnLayout")]
         public virtual ColumnLayout ColumnLayout { get; set; }
+
+        /// <summary>Filters to reduce the amount of data charted based on the filter criteria.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dashboardFilters")]
+        public virtual System.Collections.Generic.IList<DashboardFilter> DashboardFilters { get; set; }
 
         /// <summary>Required. The mutable, human-readable name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
@@ -1818,7 +2099,7 @@ namespace Google.Apis.Monitoring.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("mosaicLayout")]
         public virtual MosaicLayout MosaicLayout { get; set; }
 
-        /// <summary>Immutable. The resource name of the dashboard.</summary>
+        /// <summary>Identifier. The resource name of the dashboard.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
@@ -1829,15 +2110,105 @@ namespace Google.Apis.Monitoring.v1.Data
         public virtual RowLayout RowLayout { get; set; }
     }
 
+    /// <summary>Dashboard-level configuration for annotations</summary>
+    public class DashboardAnnotations : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Dashboard level defaults for names of logging resources to search for events. Currently only projects are
+        /// supported. Each individual EventAnnotation may have its own overrides. If both this field and the per
+        /// annotation field is empty, then the scoping project is used. Limit: 50 projects. For example:
+        /// “projects/some-project-id”
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("defaultResourceNames")]
+        public virtual System.Collections.Generic.IList<string> DefaultResourceNames { get; set; }
+
+        /// <summary>
+        /// List of annotation configurations for this dashboard. Each entry specifies one event type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventAnnotations")]
+        public virtual System.Collections.Generic.IList<EventAnnotation> EventAnnotations { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A filter to reduce the amount of data charted in relevant widgets.</summary>
+    public class DashboardFilter : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The specified filter type</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filterType")]
+        public virtual string FilterType { get; set; }
+
+        /// <summary>
+        /// Optional. The key for the label. This must be omitted if the filter_type is VALUE_ONLY but is required
+        /// otherwise.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labelKey")]
+        public virtual string LabelKey { get; set; }
+
+        /// <summary>A list of possible string values for the filter</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stringArray")]
+        public virtual StringArray StringArray { get; set; }
+
+        /// <summary>
+        /// An array of variable-length string values. If this field is set, value_type must be set to STRING_ARRAY or
+        /// VALUE_TYPE_UNSPECIFIED
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stringArrayValue")]
+        public virtual StringArray StringArrayValue { get; set; }
+
+        /// <summary>
+        /// A variable-length string value. If this field is set, value_type must be set to STRING or
+        /// VALUE_TYPE_UNSPECIFIED
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stringValue")]
+        public virtual string StringValue { get; set; }
+
+        /// <summary>
+        /// The placeholder text that can be referenced in a filter string or MQL query. If omitted, the dashboard
+        /// filter will be applied to all relevant widgets in the dashboard.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("templateVariable")]
+        public virtual string TemplateVariable { get; set; }
+
+        /// <summary>
+        /// A query to run to fetch possible values for the filter. Only OpsAnalyticsQueries are supported
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeSeriesQuery")]
+        public virtual TimeSeriesQuery TimeSeriesQuery { get; set; }
+
+        /// <summary>
+        /// The type of the filter value. If value_type is not provided, it will be inferred from the default_value. If
+        /// neither value_type nor default_value is provided, value_type will be set to STRING by default.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("valueType")]
+        public virtual string ValueType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Groups a time series query definition with charting options.</summary>
     public class DataSet : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Optional. The collection of breakdowns to be applied to the dataset.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("breakdowns")]
+        public virtual System.Collections.Generic.IList<Breakdown> Breakdowns { get; set; }
+
+        /// <summary>Optional. A collection of dimension columns.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dimensions")]
+        public virtual System.Collections.Generic.IList<Dimension> Dimensions { get; set; }
+
         /// <summary>
         /// A template string for naming TimeSeries in the resulting data set. This should be a string with
         /// interpolations of the form ${label_name}, which will resolve to the label's value.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("legendTemplate")]
         public virtual string LegendTemplate { get; set; }
+
+        /// <summary>Optional. A collection of measures.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("measures")]
+        public virtual System.Collections.Generic.IList<Measure> Measures { get; set; }
 
         /// <summary>
         /// Optional. The lower bound on data point frequency for this data set, implemented by specifying the minimum
@@ -1852,6 +2223,10 @@ namespace Google.Apis.Monitoring.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("plotType")]
         public virtual string PlotType { get; set; }
 
+        /// <summary>Optional. A collection of sort options, affects the order of the data and legend.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sort")]
+        public virtual System.Collections.Generic.IList<ColumnSortingOptions> Sort { get; set; }
+
         /// <summary>Optional. The target axis to use for plotting the metric.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("targetAxis")]
         public virtual string TargetAxis { get; set; }
@@ -1859,6 +2234,66 @@ namespace Google.Apis.Monitoring.v1.Data
         /// <summary>Required. Fields for querying time series data from the Stackdriver metrics API.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timeSeriesQuery")]
         public virtual TimeSeriesQuery TimeSeriesQuery { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A chart dimension. Dimensions are a structured label, class, or category for a set of measurements in your data.
+    /// </summary>
+    public class Dimension : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The name of the column in the source SQL query that is used to chart the dimension.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("column")]
+        public virtual string Column { get; set; }
+
+        /// <summary>
+        /// Optional. The type of the dimension column. This is relevant only if one of the bin_size fields is set. If
+        /// it is empty, the type TIMESTAMP or INT64 will be assumed based on which bin_size field is set. If populated,
+        /// this should be set to one of the following types: DATE, TIME, DATETIME, TIMESTAMP, BIGNUMERIC, INT64,
+        /// NUMERIC, FLOAT64.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("columnType")]
+        public virtual string ColumnType { get; set; }
+
+        /// <summary>
+        /// Optional. float_bin_size is used when the column type used for a dimension is a floating point numeric
+        /// column.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("floatBinSize")]
+        public virtual System.Nullable<double> FloatBinSize { get; set; }
+
+        /// <summary>
+        /// A limit to the number of bins generated. When 0 is specified, the maximum count is not enforced.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxBinCount")]
+        public virtual System.Nullable<int> MaxBinCount { get; set; }
+
+        /// <summary>numeric_bin_size is used when the column type used for a dimension is numeric or string.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("numericBinSize")]
+        public virtual System.Nullable<int> NumericBinSize { get; set; }
+
+        /// <summary>
+        /// The column name to sort on for binning. This column can be the same column as this dimension or any other
+        /// column used as a measure in the results. If sort_order is set to NONE, then this value is not used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sortColumn")]
+        public virtual string SortColumn { get; set; }
+
+        /// <summary>The sort order applied to the sort column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sortOrder")]
+        public virtual string SortOrder { get; set; }
+
+        /// <summary>
+        /// time_bin_size is used when the data type specified by column is a time type and the bin size is determined
+        /// by a time duration. If column_type is DATE, this must be a whole value multiple of 1 day. If column_type is
+        /// TIME, this must be less than or equal to 24 hours.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeBinSize")]
+        public virtual object TimeBinSize { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1887,11 +2322,76 @@ namespace Google.Apis.Monitoring.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for Empty is empty JSON
-    /// object {}.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A widget that displays a list of error groups.</summary>
+    public class ErrorReportingPanel : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The resource name of the Google Cloud Platform project. Written as projects/{projectID} or
+        /// projects/{projectNumber}, where {projectID} and {projectNumber} can be found in the Google Cloud console
+        /// (https://support.google.com/cloud/answer/6158840).Examples: projects/my-project-123, projects/5551234.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectNames")]
+        public virtual System.Collections.Generic.IList<string> ProjectNames { get; set; }
+
+        /// <summary>
+        /// An identifier of the service, such as the name of the executable, job, or Google App Engine service name.
+        /// This field is expected to have a low number of values that are relatively stable over time, as opposed to
+        /// version, which can be changed whenever new code is deployed.Contains the service name for error reports
+        /// extracted from Google App Engine logs or default if the App Engine default service is used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("services")]
+        public virtual System.Collections.Generic.IList<string> Services { get; set; }
+
+        /// <summary>
+        /// Represents the source code version that the developer provided, which could represent a version label or a
+        /// Git SHA-1 hash, for example. For App Engine standard environment, the version is set to the version of the
+        /// app.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versions")]
+        public virtual System.Collections.Generic.IList<string> Versions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Annotation configuration for one event type on a dashboard</summary>
+    public class EventAnnotation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Solely for UI display. Should not be used programmatically.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Whether or not to show the events on the dashboard by default</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enabled")]
+        public virtual System.Nullable<bool> Enabled { get; set; }
+
+        /// <summary>The type of event to display.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventType")]
+        public virtual string EventType { get; set; }
+
+        /// <summary>
+        /// string filtering the events - event dependant. Example values: "resource.labels.pod_name = 'pod-1'"
+        /// "protoPayload.authenticationInfo.principalEmail='user@example.com'"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filter")]
+        public virtual string Filter { get; set; }
+
+        /// <summary>
+        /// Per annotation level override for the names of logging resources to search for events. Currently only
+        /// projects are supported. If both this field and the per annotation field is empty, it will default to the
+        /// host project. Limit: 50 projects. For example: “projects/another-project-id”
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceNames")]
+        public virtual System.Collections.Generic.IList<string> ResourceNames { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2025,6 +2525,119 @@ namespace Google.Apis.Monitoring.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A widget that displays a list of incidents</summary>
+    public class IncidentList : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The monitored resource for which incidents are listed. The resource doesn't need to be fully
+        /// specified. That is, you can specify the resource type but not the values of the resource labels. The
+        /// resource type and labels are used for filtering.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("monitoredResources")]
+        public virtual System.Collections.Generic.IList<MonitoredResource> MonitoredResources { get; set; }
+
+        /// <summary>
+        /// Optional. A list of alert policy names to filter the incident list by. Don't include the project ID prefix
+        /// in the policy name. For example, use alertPolicies/utilization.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policyNames")]
+        public virtual System.Collections.Generic.IList<string> PolicyNames { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a time interval, encoded as a Timestamp start (inclusive) and a Timestamp end (exclusive).The start
+    /// must be less than or equal to the end. When the start equals the end, the interval is empty (matches no time).
+    /// When both start and end are unspecified, the interval matches any time.
+    /// </summary>
+    public class Interval : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>
+        /// Optional. Exclusive end of the interval.If specified, a Timestamp matching this interval will have to be
+        /// before the end.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>
+        /// Optional. Inclusive start of the interval.If specified, a Timestamp matching this interval will have to be
+        /// the same or after the start.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The ListDashboards request.</summary>
     public class ListDashboardsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2066,11 +2679,33 @@ namespace Google.Apis.Monitoring.v1.Data
         public virtual string Filter { get; set; }
 
         /// <summary>
-        /// The names of logging resources to collect logs for. Does not implicitly include the current host project.
-        /// Currently only projects are supported. There must be at least one resource_name.
+        /// The names of logging resources to collect logs for. Currently projects and storage views are supported. If
+        /// empty, the widget will default to the host project.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resourceNames")]
         public virtual System.Collections.Generic.IList<string> ResourceNames { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A chart measure. Measures represent a measured property in your chart data such as rainfall in inches, number of
+    /// units sold, revenue gained, etc.
+    /// </summary>
+    public class Measure : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The aggregation function applied to the input column. This must not be set to "none" unless
+        /// binning is disabled on the dimension. The aggregation function is used to group points on the dimension
+        /// bins.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("aggregationFunction")]
+        public virtual AggregationFunction AggregationFunction { get; set; }
+
+        /// <summary>Required. The column name within in the dataset used for the measure.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("column")]
+        public virtual string Column { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2082,9 +2717,42 @@ namespace Google.Apis.Monitoring.v1.Data
     /// </summary>
     public class MetricsScope : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time when this Metrics Scope was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The list of projects monitored by this Metrics Scope.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("monitoredProjects")]
@@ -2098,9 +2766,42 @@ namespace Google.Apis.Monitoring.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time when this Metrics Scope record was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2112,9 +2813,42 @@ namespace Google.Apis.Monitoring.v1.Data
     /// </summary>
     public class MonitoredProject : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time when this MonitoredProject was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Immutable. The resource name of the MonitoredProject. On input, the resource name includes the scoping
@@ -2129,13 +2863,44 @@ namespace Google.Apis.Monitoring.v1.Data
     }
 
     /// <summary>
+    /// An object representing a resource that can be used for monitoring, logging, billing, or other purposes. Examples
+    /// include virtual machine instances, databases, and storage devices such as disks. The type field identifies a
+    /// MonitoredResourceDescriptor object that describes the resource's schema. Information in the labels field
+    /// identifies the actual resource and its attributes according to the schema. For example, a particular Compute
+    /// Engine VM instance could be represented by the following object, because the MonitoredResourceDescriptor for
+    /// "gce_instance" has labels "project_id", "instance_id" and "zone": { "type": "gce_instance", "labels": {
+    /// "project_id": "my-project", "instance_id": "12345678901234", "zone": "us-central1-a" }}
+    /// </summary>
+    public class MonitoredResource : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Values for all of the labels listed in the associated monitored resource descriptor. For example,
+        /// Compute Engine VM instances use the labels "project_id", "instance_id", and "zone".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
+        /// Required. The monitored resource type. This field must match the type field of a MonitoredResourceDescriptor
+        /// object. For example, the type of a Compute Engine VM instance is gce_instance. For a list of types, see
+        /// Monitoring resource types (https://cloud.google.com/monitoring/api/resources) and Logging resource types
+        /// (https://cloud.google.com/logging/docs/api/v2/resource-list).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// A mosaic layout divides the available space into a grid of blocks, and overlays the grid with tiles. Unlike
     /// GridLayout, tiles may span multiple grid blocks and can be placed at arbitrary locations in the grid.
     /// </summary>
     public class MosaicLayout : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The number of columns in the mosaic grid. The number of columns must be between 1 and 12, inclusive.
+        /// The number of columns in the mosaic grid. The number of columns must be between 1 and 48, inclusive.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("columns")]
         public virtual System.Nullable<int> Columns { get; set; }
@@ -2178,10 +2943,10 @@ namespace Google.Apis.Monitoring.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as Delete, the response is google.protobuf.Empty. If the original method is standard Get/Create/Update,
-        /// the response should be the resource. For other methods, the response should have the type XxxResponse, where
-        /// Xxx is the original method name. For example, if the original method name is TakeSnapshot(), the inferred
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// Delete, the response is google.protobuf.Empty. If the original method is standard Get/Create/Update, the
+        /// response should be the resource. For other methods, the response should have the type XxxResponse, where Xxx
+        /// is the original method name. For example, if the original method name is TakeSnapshot(), the inferred
         /// response type is TakeSnapshotResponse.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("response")]
@@ -2194,17 +2959,97 @@ namespace Google.Apis.Monitoring.v1.Data
     /// <summary>Contains metadata for longrunning operation for the edit Metrics Scope endpoints.</summary>
     public class OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time when the batch request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Current state of the batch operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The time when the operation result was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Preview: A query that produces an aggregated response and supporting data. This is a preview feature and may be
+    /// subject to change before final release.
+    /// </summary>
+    public class OpsAnalyticsQuery : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A SQL query to fetch time series, category series, or numeric series data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sql")]
+        public virtual string Sql { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2234,6 +3079,24 @@ namespace Google.Apis.Monitoring.v1.Data
     }
 
     /// <summary>
+    /// Preview: Parameter value applied to the aggregation function. This is a preview feature and may be subject to
+    /// change before final release.
+    /// </summary>
+    public class Parameter : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A floating-point parameter value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("doubleValue")]
+        public virtual System.Nullable<double> DoubleValue { get; set; }
+
+        /// <summary>An integer parameter value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("intValue")]
+        public virtual System.Nullable<long> IntValue { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// Describes a ranking-based time series filter. Each input time series is ranked with an aligner. The filter will
     /// allow up to num_time_series time series to pass through it, selecting them based on the relative ranking.For
     /// example, if ranking_method is METHOD_MEAN,direction is BOTTOM, and num_time_series is 3, then the 3 times series
@@ -2244,6 +3107,10 @@ namespace Google.Apis.Monitoring.v1.Data
         /// <summary>How to use the ranking to select time series that pass through the filter.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("direction")]
         public virtual string Direction { get; set; }
+
+        /// <summary>Select the top N streams/time series within this time interval</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("interval")]
+        public virtual Interval Interval { get; set; }
 
         /// <summary>How many time series to allow to pass through the filter.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("numTimeSeries")]
@@ -2260,6 +3127,96 @@ namespace Google.Apis.Monitoring.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A widget that displays timeseries data as a pie or a donut.</summary>
+    public class PieChart : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Indicates the visualization type for the PieChart.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("chartType")]
+        public virtual string ChartType { get; set; }
+
+        /// <summary>Required. The queries for the chart's data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataSets")]
+        public virtual System.Collections.Generic.IList<PieChartDataSet> DataSets { get; set; }
+
+        /// <summary>Optional. Indicates whether or not the pie chart should show slices' labels</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("showLabels")]
+        public virtual System.Nullable<bool> ShowLabels { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Groups a time series query definition.</summary>
+    public class PieChartDataSet : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A dimension is a structured label, class, or category for a set of measurements in your data.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dimensions")]
+        public virtual System.Collections.Generic.IList<Dimension> Dimensions { get; set; }
+
+        /// <summary>
+        /// A measure is a measured value of a property in your data. For example, rainfall in inches, number of units
+        /// sold, revenue gained, etc.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("measures")]
+        public virtual System.Collections.Generic.IList<Measure> Measures { get; set; }
+
+        /// <summary>
+        /// Optional. The lower bound on data point frequency for this data set, implemented by specifying the minimum
+        /// alignment period to use in a time series query. For example, if the data is published once every 10 minutes,
+        /// the min_alignment_period should be at least 10 minutes. It would not make sense to fetch and align data at
+        /// one minute intervals.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minAlignmentPeriod")]
+        public virtual object MinAlignmentPeriod { get; set; }
+
+        /// <summary>
+        /// Optional. A template for the name of the slice. This name will be displayed in the legend and the tooltip of
+        /// the pie chart. It replaces the auto-generated names for the slices. For example, if the template is set to
+        /// ${resource.labels.zone}, the zone's value will be used for the name instead of the default name.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sliceNameTemplate")]
+        public virtual string SliceNameTemplate { get; set; }
+
+        /// <summary>
+        /// Required. The query for the PieChart. See, google.monitoring.dashboard.v1.TimeSeriesQuery.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeSeriesQuery")]
+        public virtual TimeSeriesQuery TimeSeriesQuery { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// QueryExemplarsRequest holds all parameters of the Prometheus upstream API for querying exemplars.
+    /// </summary>
+    public class QueryExemplarsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The end time to evaluate the query for. Either floating point UNIX seconds or RFC3339 formatted timestamp.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("end")]
+        public virtual string End { get; set; }
+
+        /// <summary>
+        /// A PromQL query string. Query language documentation:
+        /// https://prometheus.io/docs/prometheus/latest/querying/basics/.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("query")]
+        public virtual string Query { get; set; }
+
+        /// <summary>
+        /// The start time to evaluate the query for. Either floating point UNIX seconds or RFC3339 formatted timestamp.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("start")]
+        public virtual string Start { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// QueryInstantRequest holds all parameters of the Prometheus upstream instant query API plus GCM specific
     /// parameters.
@@ -2267,7 +3224,7 @@ namespace Google.Apis.Monitoring.v1.Data
     public class QueryInstantRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// A PromQL query string. Query lanauge documentation:
+        /// A PromQL query string. Query language documentation:
         /// https://prometheus.io/docs/prometheus/latest/querying/basics/.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("query")]
@@ -2294,6 +3251,34 @@ namespace Google.Apis.Monitoring.v1.Data
     }
 
     /// <summary>
+    /// QueryLabelsRequest holds all parameters of the Prometheus upstream API for returning a list of label names.
+    /// </summary>
+    public class QueryLabelsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The end time to evaluate the query for. Either floating point UNIX seconds or RFC3339 formatted timestamp.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("end")]
+        public virtual string End { get; set; }
+
+        /// <summary>
+        /// A list of matchers encoded in the Prometheus label matcher format to constrain the values to series that
+        /// satisfy them.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("match")]
+        public virtual string Match { get; set; }
+
+        /// <summary>
+        /// The start time to evaluate the query for. Either floating point UNIX seconds or RFC3339 formatted timestamp.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("start")]
+        public virtual string Start { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// QueryRangeRequest holds all parameters of the Prometheus upstream range query API plus GCM specific parameters.
     /// </summary>
     public class QueryRangeRequest : Google.Apis.Requests.IDirectResponseSchema
@@ -2305,7 +3290,7 @@ namespace Google.Apis.Monitoring.v1.Data
         public virtual string End { get; set; }
 
         /// <summary>
-        /// A PromQL query string. Query lanauge documentation:
+        /// A PromQL query string. Query language documentation:
         /// https://prometheus.io/docs/prometheus/latest/querying/basics/.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("query")]
@@ -2417,9 +3402,35 @@ namespace Google.Apis.Monitoring.v1.Data
     /// </summary>
     public class Scorecard : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Will cause the Scorecard to show only the value, with no indicator to its value relative to its thresholds.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("blankView")]
+        public virtual Empty BlankView { get; set; }
+
+        /// <summary>
+        /// Optional. The collection of breakdowns to be applied to the dataset. A breakdown is a way to slice the data.
+        /// For example, you can break down the data by region.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("breakdowns")]
+        public virtual System.Collections.Generic.IList<Breakdown> Breakdowns { get; set; }
+
+        /// <summary>
+        /// Optional. A dimension is a structured label, class, or category for a set of measurements in your data.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dimensions")]
+        public virtual System.Collections.Generic.IList<Dimension> Dimensions { get; set; }
+
         /// <summary>Will cause the scorecard to show a gauge chart.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gaugeView")]
         public virtual GaugeView GaugeView { get; set; }
+
+        /// <summary>
+        /// Optional. A measure is a measured value of a property in your data. For example, rainfall in inches, number
+        /// of units sold, revenue gained, etc.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("measures")]
+        public virtual System.Collections.Generic.IList<Measure> Measures { get; set; }
 
         /// <summary>Will cause the scorecard to show a spark chart.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sparkChartView")]
@@ -2433,7 +3444,7 @@ namespace Google.Apis.Monitoring.v1.Data
         /// x also puts it in a danger state. (Danger trumps warning.)As an example, consider a scorecard with the
         /// following four thresholds: { value: 90, category: 'DANGER', trigger: 'ABOVE', }, { value: 70, category:
         /// 'WARNING', trigger: 'ABOVE', }, { value: 10, category: 'DANGER', trigger: 'BELOW', }, { value: 20, category:
-        /// 'WARNING', trigger: 'BELOW', }Then: values less than or equal to 10 would put the scorecard in a DANGER
+        /// 'WARNING', trigger: 'BELOW', } Then: values less than or equal to 10 would put the scorecard in a DANGER
         /// state, values greater than 10 but less than or equal to 20 a WARNING state, values strictly between 20 and
         /// 70 an OK state, values greater than or equal to 70 but less than 90 a WARNING state, and values greater than
         /// or equal to 90 a DANGER state.
@@ -2445,6 +3456,34 @@ namespace Google.Apis.Monitoring.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeSeriesQuery")]
         public virtual TimeSeriesQuery TimeSeriesQuery { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A widget that defines a new section header. Sections populate a table of contents and allow easier navigation of
+    /// long-form content.
+    /// </summary>
+    public class SectionHeader : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Whether to insert a divider below the section in the table of contents</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dividerBelow")]
+        public virtual System.Nullable<bool> DividerBelow { get; set; }
+
+        /// <summary>The subtitle of the section</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subtitle")]
+        public virtual string Subtitle { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A widget that groups the other widgets by using a dropdown menu. All widgets that are within the area spanned by
+    /// the grouping widget are considered member widgets.
+    /// </summary>
+    public class SingleViewGroup : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2559,6 +3598,17 @@ namespace Google.Apis.Monitoring.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>An array of strings</summary>
+    public class StringArray : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The values of the array</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("values")]
+        public virtual System.Collections.Generic.IList<string> Values { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Groups a time series query definition with table options.</summary>
     public class TableDataSet : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2594,10 +3644,7 @@ namespace Google.Apis.Monitoring.v1.Data
     /// <summary>Table display options that can be reused.</summary>
     public class TableDisplayOptions : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>
-        /// Optional. Columns to display in the table. Leave empty to display all available columns. Note: This field is
-        /// for future features and is not currently used.
-        /// </summary>
+        /// <summary>Optional. This field is unused and has been replaced by TimeSeriesTable.column_settings</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("shownColumns")]
         public virtual System.Collections.Generic.IList<string> ShownColumns { get; set; }
 
@@ -2615,6 +3662,47 @@ namespace Google.Apis.Monitoring.v1.Data
         /// <summary>How the text content is formatted.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("format")]
         public virtual string Format { get; set; }
+
+        /// <summary>How the text is styled</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("style")]
+        public virtual TextStyle Style { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Properties that determine how the title and content are styled</summary>
+    public class TextStyle : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The background color as a hex string. "#RRGGBB" or "#RGB"</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backgroundColor")]
+        public virtual string BackgroundColor { get; set; }
+
+        /// <summary>
+        /// Font sizes for both the title and content. The title will still be larger relative to the content.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fontSize")]
+        public virtual string FontSize { get; set; }
+
+        /// <summary>The horizontal alignment of both the title and content</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("horizontalAlignment")]
+        public virtual string HorizontalAlignment { get; set; }
+
+        /// <summary>The amount of padding around the widget</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("padding")]
+        public virtual string Padding { get; set; }
+
+        /// <summary>The pointer location for this widget (also sometimes called a "tail")</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pointerLocation")]
+        public virtual string PointerLocation { get; set; }
+
+        /// <summary>The text color as a hex string. "#RRGGBB" or "#RGB"</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("textColor")]
+        public virtual string TextColor { get; set; }
+
+        /// <summary>The vertical alignment of both the title and content</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verticalAlignment")]
+        public virtual string VerticalAlignment { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2761,6 +3849,25 @@ namespace Google.Apis.Monitoring.v1.Data
     /// </summary>
     public class TimeSeriesQuery : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Preview: A query used to fetch a time series, category series, or numeric series with SQL. This is a preview
+        /// feature and may be subject to change before final release.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("opsAnalyticsQuery")]
+        public virtual OpsAnalyticsQuery OpsAnalyticsQuery { get; set; }
+
+        /// <summary>
+        /// Optional. If set, Cloud Monitoring will treat the full query duration as the alignment period so that there
+        /// will be only 1 output value.*Note: This could override the configured alignment period except for the cases
+        /// where a series of data points are expected, like - XyChart - Scorecard's spark chart
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("outputFullDuration")]
+        public virtual System.Nullable<bool> OutputFullDuration { get; set; }
+
+        /// <summary>A query used to fetch time series with PromQL.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("prometheusQuery")]
+        public virtual string PrometheusQuery { get; set; }
+
         /// <summary>Filter parameters to fetch time series.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timeSeriesFilter")]
         public virtual TimeSeriesFilter TimeSeriesFilter { get; set; }
@@ -2769,7 +3876,7 @@ namespace Google.Apis.Monitoring.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeSeriesFilterRatio")]
         public virtual TimeSeriesFilterRatio TimeSeriesFilterRatio { get; set; }
 
-        /// <summary>A query used to fetch time series.</summary>
+        /// <summary>A query used to fetch time series with MQL.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timeSeriesQueryLanguage")]
         public virtual string TimeSeriesQueryLanguage { get; set; }
 
@@ -2789,9 +3896,17 @@ namespace Google.Apis.Monitoring.v1.Data
     /// <summary>A table that displays time series data.</summary>
     public class TimeSeriesTable : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Optional. The list of the persistent column settings for the table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("columnSettings")]
+        public virtual System.Collections.Generic.IList<ColumnSettings> ColumnSettings { get; set; }
+
         /// <summary>Required. The data displayed in this table.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataSets")]
         public virtual System.Collections.Generic.IList<TableDataSet> DataSets { get; set; }
+
+        /// <summary>Optional. Store rendering strategy</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metricVisualization")]
+        public virtual string MetricVisualization { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2800,6 +3915,10 @@ namespace Google.Apis.Monitoring.v1.Data
     /// <summary>A protocol buffer message type.</summary>
     public class Type : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The source edition string, only valid when syntax is SYNTAX_EDITIONS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("edition")]
+        public virtual string Edition { get; set; }
+
         /// <summary>The list of fields.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fields")]
         public virtual System.Collections.Generic.IList<Field> Fields { get; set; }
@@ -2841,13 +3960,47 @@ namespace Google.Apis.Monitoring.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("blank")]
         public virtual Empty Blank { get; set; }
 
+        /// <summary>
+        /// A widget that groups the other widgets. All widgets that are within the area spanned by the grouping widget
+        /// are considered member widgets.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("collapsibleGroup")]
+        public virtual CollapsibleGroup CollapsibleGroup { get; set; }
+
+        /// <summary>A widget that displays a list of error groups.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errorReportingPanel")]
+        public virtual ErrorReportingPanel ErrorReportingPanel { get; set; }
+
+        /// <summary>
+        /// Optional. The widget id. Ids may be made up of alphanumerics, dashes and underscores. Widget ids are
+        /// optional.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>A widget that shows list of incidents.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("incidentList")]
+        public virtual IncidentList IncidentList { get; set; }
+
         /// <summary>A widget that shows a stream of logs.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("logsPanel")]
         public virtual LogsPanel LogsPanel { get; set; }
 
+        /// <summary>A widget that displays timeseries data as a pie chart.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pieChart")]
+        public virtual PieChart PieChart { get; set; }
+
         /// <summary>A scorecard summarizing time series data.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scorecard")]
         public virtual Scorecard Scorecard { get; set; }
+
+        /// <summary>A widget that defines a section header for easier navigation of the dashboard.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sectionHeader")]
+        public virtual SectionHeader SectionHeader { get; set; }
+
+        /// <summary>A widget that groups the other widgets by using a dropdown menu.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("singleViewGroup")]
+        public virtual SingleViewGroup SingleViewGroup { get; set; }
 
         /// <summary>A raw string or markdown displaying textual content.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("text")]
@@ -2892,15 +4045,15 @@ namespace Google.Apis.Monitoring.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeshiftDuration")]
         public virtual object TimeshiftDuration { get; set; }
 
-        /// <summary>The properties applied to the X axis.</summary>
+        /// <summary>The properties applied to the x-axis.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("xAxis")]
         public virtual Axis XAxis { get; set; }
 
-        /// <summary>The properties applied to the Y2 axis.</summary>
+        /// <summary>The properties applied to the y2-axis.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("y2Axis")]
         public virtual Axis Y2Axis { get; set; }
 
-        /// <summary>The properties applied to the Y axis.</summary>
+        /// <summary>The properties applied to the y-axis.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("yAxis")]
         public virtual Axis YAxis { get; set; }
 

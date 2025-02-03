@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.Vault.v1
         {
             Matters = new MattersResource(this);
             Operations = new OperationsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://vault.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://vault.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.Vault.v1
         public override string Name => "vault";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://vault.googleapis.com/";
-        #else
-            "https://vault.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://vault.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Vault API.</summary>
         public class Scope
@@ -310,7 +305,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="matterId">The matter ID.</param>
             public virtual CreateRequest Create(Google.Apis.Vault.v1.Data.Export body, string matterId)
             {
-                return new CreateRequest(service, body, matterId);
+                return new CreateRequest(this.service, body, matterId);
             }
 
             /// <summary>Creates an export.</summary>
@@ -363,7 +358,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="exportId">The export ID.</param>
             public virtual DeleteRequest Delete(string matterId, string exportId)
             {
-                return new DeleteRequest(service, matterId, exportId);
+                return new DeleteRequest(this.service, matterId, exportId);
             }
 
             /// <summary>Deletes an export.</summary>
@@ -422,7 +417,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="exportId">The export ID.</param>
             public virtual GetRequest Get(string matterId, string exportId)
             {
-                return new GetRequest(service, matterId, exportId);
+                return new GetRequest(this.service, matterId, exportId);
             }
 
             /// <summary>Gets an export.</summary>
@@ -480,7 +475,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="matterId">The matter ID.</param>
             public virtual ListRequest List(string matterId)
             {
-                return new ListRequest(service, matterId);
+                return new ListRequest(this.service, matterId);
             }
 
             /// <summary>Lists details about the exports in the specified matter.</summary>
@@ -590,7 +585,7 @@ namespace Google.Apis.Vault.v1
                 /// <param name="holdId">The hold ID.</param>
                 public virtual CreateRequest Create(Google.Apis.Vault.v1.Data.HeldAccount body, string matterId, string holdId)
                 {
-                    return new CreateRequest(service, body, matterId, holdId);
+                    return new CreateRequest(this.service, body, matterId, holdId);
                 }
 
                 /// <summary>
@@ -660,7 +655,7 @@ namespace Google.Apis.Vault.v1
                 /// <param name="accountId">The ID of the account to remove from the hold.</param>
                 public virtual DeleteRequest Delete(string matterId, string holdId, string accountId)
                 {
-                    return new DeleteRequest(service, matterId, holdId, accountId);
+                    return new DeleteRequest(this.service, matterId, holdId, accountId);
                 }
 
                 /// <summary>Removes an account from a hold.</summary>
@@ -737,7 +732,7 @@ namespace Google.Apis.Vault.v1
                 /// <param name="holdId">The hold ID.</param>
                 public virtual ListRequest List(string matterId, string holdId)
                 {
-                    return new ListRequest(service, matterId, holdId);
+                    return new ListRequest(this.service, matterId, holdId);
                 }
 
                 /// <summary>
@@ -806,7 +801,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="holdId">The hold ID.</param>
             public virtual AddHeldAccountsRequest AddHeldAccounts(Google.Apis.Vault.v1.Data.AddHeldAccountsRequest body, string matterId, string holdId)
             {
-                return new AddHeldAccountsRequest(service, body, matterId, holdId);
+                return new AddHeldAccountsRequest(this.service, body, matterId, holdId);
             }
 
             /// <summary>
@@ -875,7 +870,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="matterId">The matter ID.</param>
             public virtual CreateRequest Create(Google.Apis.Vault.v1.Data.Hold body, string matterId)
             {
-                return new CreateRequest(service, body, matterId);
+                return new CreateRequest(this.service, body, matterId);
             }
 
             /// <summary>Creates a hold in the specified matter.</summary>
@@ -931,7 +926,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="holdId">The hold ID.</param>
             public virtual DeleteRequest Delete(string matterId, string holdId)
             {
-                return new DeleteRequest(service, matterId, holdId);
+                return new DeleteRequest(this.service, matterId, holdId);
             }
 
             /// <summary>
@@ -993,7 +988,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="holdId">The hold ID.</param>
             public virtual GetRequest Get(string matterId, string holdId)
             {
-                return new GetRequest(service, matterId, holdId);
+                return new GetRequest(this.service, matterId, holdId);
             }
 
             /// <summary>Gets the specified hold.</summary>
@@ -1082,7 +1077,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="matterId">The matter ID.</param>
             public virtual ListRequest List(string matterId)
             {
-                return new ListRequest(service, matterId);
+                return new ListRequest(this.service, matterId);
             }
 
             /// <summary>Lists the holds in a matter.</summary>
@@ -1191,7 +1186,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="holdId">The hold ID.</param>
             public virtual RemoveHeldAccountsRequest RemoveHeldAccounts(Google.Apis.Vault.v1.Data.RemoveHeldAccountsRequest body, string matterId, string holdId)
             {
-                return new RemoveHeldAccountsRequest(service, body, matterId, holdId);
+                return new RemoveHeldAccountsRequest(this.service, body, matterId, holdId);
             }
 
             /// <summary>
@@ -1264,7 +1259,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="holdId">The ID of the hold.</param>
             public virtual UpdateRequest Update(Google.Apis.Vault.v1.Data.Hold body, string matterId, string holdId)
             {
-                return new UpdateRequest(service, body, matterId, holdId);
+                return new UpdateRequest(this.service, body, matterId, holdId);
             }
 
             /// <summary>
@@ -1352,7 +1347,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="matterId">The ID of the matter to create the saved query in.</param>
             public virtual CreateRequest Create(Google.Apis.Vault.v1.Data.SavedQuery body, string matterId)
             {
-                return new CreateRequest(service, body, matterId);
+                return new CreateRequest(this.service, body, matterId);
             }
 
             /// <summary>Creates a saved query.</summary>
@@ -1405,7 +1400,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="savedQueryId">ID of the saved query to delete.</param>
             public virtual DeleteRequest Delete(string matterId, string savedQueryId)
             {
-                return new DeleteRequest(service, matterId, savedQueryId);
+                return new DeleteRequest(this.service, matterId, savedQueryId);
             }
 
             /// <summary>Deletes the specified saved query.</summary>
@@ -1464,7 +1459,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="savedQueryId">ID of the saved query to retrieve.</param>
             public virtual GetRequest Get(string matterId, string savedQueryId)
             {
-                return new GetRequest(service, matterId, savedQueryId);
+                return new GetRequest(this.service, matterId, savedQueryId);
             }
 
             /// <summary>Retrieves the specified saved query.</summary>
@@ -1522,7 +1517,7 @@ namespace Google.Apis.Vault.v1
             /// <param name="matterId">The ID of the matter to get the saved queries for.</param>
             public virtual ListRequest List(string matterId)
             {
-                return new ListRequest(service, matterId);
+                return new ListRequest(this.service, matterId);
             }
 
             /// <summary>Lists the saved queries in a matter.</summary>
@@ -1596,7 +1591,7 @@ namespace Google.Apis.Vault.v1
         /// <param name="matterId">The matter ID.</param>
         public virtual AddPermissionsRequest AddPermissions(Google.Apis.Vault.v1.Data.AddMatterPermissionsRequest body, string matterId)
         {
-            return new AddPermissionsRequest(service, body, matterId);
+            return new AddPermissionsRequest(this.service, body, matterId);
         }
 
         /// <summary>Adds an account as a matter collaborator.</summary>
@@ -1649,7 +1644,7 @@ namespace Google.Apis.Vault.v1
         /// <param name="matterId">The matter ID.</param>
         public virtual CloseRequest Close(Google.Apis.Vault.v1.Data.CloseMatterRequest body, string matterId)
         {
-            return new CloseRequest(service, body, matterId);
+            return new CloseRequest(this.service, body, matterId);
         }
 
         /// <summary>Closes the specified matter. Returns the matter with updated state.</summary>
@@ -1702,7 +1697,7 @@ namespace Google.Apis.Vault.v1
         /// <param name="matterId">The matter ID.</param>
         public virtual CountRequest Count(Google.Apis.Vault.v1.Data.CountArtifactsRequest body, string matterId)
         {
-            return new CountRequest(service, body, matterId);
+            return new CountRequest(this.service, body, matterId);
         }
 
         /// <summary>Counts the accounts processed by the specified query.</summary>
@@ -1757,7 +1752,7 @@ namespace Google.Apis.Vault.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.Vault.v1.Data.Matter body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -1799,7 +1794,7 @@ namespace Google.Apis.Vault.v1
         /// <param name="matterId">The matter ID</param>
         public virtual DeleteRequest Delete(string matterId)
         {
-            return new DeleteRequest(service, matterId);
+            return new DeleteRequest(this.service, matterId);
         }
 
         /// <summary>Deletes the specified matter. Returns the matter with updated state.</summary>
@@ -1844,7 +1839,7 @@ namespace Google.Apis.Vault.v1
         /// <param name="matterId">The matter ID.</param>
         public virtual GetRequest Get(string matterId)
         {
-            return new GetRequest(service, matterId);
+            return new GetRequest(this.service, matterId);
         }
 
         /// <summary>Gets the specified matter.</summary>
@@ -1919,7 +1914,7 @@ namespace Google.Apis.Vault.v1
         /// <summary>Lists matters the requestor has access to.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists matters the requestor has access to.</summary>
@@ -2043,7 +2038,7 @@ namespace Google.Apis.Vault.v1
         /// <param name="matterId">The matter ID.</param>
         public virtual RemovePermissionsRequest RemovePermissions(Google.Apis.Vault.v1.Data.RemoveMatterPermissionsRequest body, string matterId)
         {
-            return new RemovePermissionsRequest(service, body, matterId);
+            return new RemovePermissionsRequest(this.service, body, matterId);
         }
 
         /// <summary>Removes an account as a matter collaborator.</summary>
@@ -2096,7 +2091,7 @@ namespace Google.Apis.Vault.v1
         /// <param name="matterId">The matter ID.</param>
         public virtual ReopenRequest Reopen(Google.Apis.Vault.v1.Data.ReopenMatterRequest body, string matterId)
         {
-            return new ReopenRequest(service, body, matterId);
+            return new ReopenRequest(this.service, body, matterId);
         }
 
         /// <summary>Reopens the specified matter. Returns the matter with updated state.</summary>
@@ -2149,7 +2144,7 @@ namespace Google.Apis.Vault.v1
         /// <param name="matterId">The matter ID.</param>
         public virtual UndeleteRequest Undelete(Google.Apis.Vault.v1.Data.UndeleteMatterRequest body, string matterId)
         {
-            return new UndeleteRequest(service, body, matterId);
+            return new UndeleteRequest(this.service, body, matterId);
         }
 
         /// <summary>Undeletes the specified matter. Returns the matter with updated state.</summary>
@@ -2205,7 +2200,7 @@ namespace Google.Apis.Vault.v1
         /// <param name="matterId">The matter ID.</param>
         public virtual UpdateRequest Update(Google.Apis.Vault.v1.Data.Matter body, string matterId)
         {
-            return new UpdateRequest(service, body, matterId);
+            return new UpdateRequest(this.service, body, matterId);
         }
 
         /// <summary>
@@ -2277,13 +2272,13 @@ namespace Google.Apis.Vault.v1
         /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether
         /// the cancellation succeeded or whether the operation completed despite cancellation. On successful
         /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
-        /// with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+        /// with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="name">The name of the operation resource to be cancelled.</param>
         public virtual CancelRequest Cancel(Google.Apis.Vault.v1.Data.CancelOperationRequest body, string name)
         {
-            return new CancelRequest(service, body, name);
+            return new CancelRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -2292,7 +2287,7 @@ namespace Google.Apis.Vault.v1
         /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether
         /// the cancellation succeeded or whether the operation completed despite cancellation. On successful
         /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
-        /// with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+        /// with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
         /// </summary>
         public class CancelRequest : VaultBaseServiceRequest<Google.Apis.Vault.v1.Data.Empty>
         {
@@ -2346,7 +2341,7 @@ namespace Google.Apis.Vault.v1
         /// <param name="name">The name of the operation resource to be deleted.</param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>
@@ -2398,7 +2393,7 @@ namespace Google.Apis.Vault.v1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -2444,25 +2439,17 @@ namespace Google.Apis.Vault.v1
 
         /// <summary>
         /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
-        /// it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding to use
-        /// different resource name schemes, such as `users/*/operations`. To override the binding, API services can add
-        /// a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For backwards
-        /// compatibility, the default name includes the operations collection id, however overriding users must ensure
-        /// the name binding is the parent resource, without the operations collection id.
+        /// it returns `UNIMPLEMENTED`.
         /// </summary>
         /// <param name="name">The name of the operation's parent resource.</param>
         public virtual ListRequest List(string name)
         {
-            return new ListRequest(service, name);
+            return new ListRequest(this.service, name);
         }
 
         /// <summary>
         /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
-        /// it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding to use
-        /// different resource name schemes, such as `users/*/operations`. To override the binding, API services can add
-        /// a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For backwards
-        /// compatibility, the default name includes the operations collection id, however overriding users must ensure
-        /// the name binding is the parent resource, without the operations collection id.
+        /// it returns `UNIMPLEMENTED`.
         /// </summary>
         public class ListRequest : VaultBaseServiceRequest<Google.Apis.Vault.v1.Data.ListOperationsResponse>
         {
@@ -2656,6 +2643,94 @@ namespace Google.Apis.Vault.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The options for Calendar exports.</summary>
+    public class CalendarExportOptions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The file format for exported text messages.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exportFormat")]
+        public virtual string ExportFormat { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Additional options for Calendar search</summary>
+    public class CalendarOptions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Matches only those events whose location contains all of the words in the given set. If the string contains
+        /// quoted phrases, this method only matches those events whose location contain the exact phrase. Entries in
+        /// the set are considered in "and". Word splitting example: ["New Zealand"] vs ["New","Zealand"] "New Zealand":
+        /// matched by both "New and better Zealand": only matched by the later
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("locationQuery")]
+        public virtual System.Collections.Generic.IList<string> LocationQuery { get; set; }
+
+        /// <summary>
+        /// Matches only those events that do not contain any of the words in the given set in title, description,
+        /// location, or attendees. Entries in the set are considered in "or".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minusWords")]
+        public virtual System.Collections.Generic.IList<string> MinusWords { get; set; }
+
+        /// <summary>
+        /// Matches only those events whose attendees contain all of the words in the given set. Entries in the set are
+        /// considered in "and".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("peopleQuery")]
+        public virtual System.Collections.Generic.IList<string> PeopleQuery { get; set; }
+
+        /// <summary>
+        /// Matches only events for which the custodian gave one of these responses. If the set is empty or contains
+        /// ATTENDEE_RESPONSE_UNSPECIFIED there will be no filtering on responses.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("responseStatuses")]
+        public virtual System.Collections.Generic.IList<string> ResponseStatuses { get; set; }
+
+        private string _versionDateRaw;
+
+        private object _versionDate;
+
+        /// <summary>
+        /// Search the current version of the Calendar event, but export the contents of the last version saved before
+        /// 12:00 AM UTC on the specified date. Enter the date in UTC.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versionDate")]
+        public virtual string VersionDateRaw
+        {
+            get => _versionDateRaw;
+            set
+            {
+                _versionDate = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _versionDateRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="VersionDateRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use VersionDateDateTimeOffset instead.")]
+        public virtual object VersionDate
+        {
+            get => _versionDate;
+            set
+            {
+                _versionDateRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _versionDate = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="VersionDateRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? VersionDateDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(VersionDateRaw);
+            set => VersionDateRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The request message for Operations.CancelOperation.</summary>
     public class CancelOperationRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2685,10 +2760,10 @@ namespace Google.Apis.Vault.v1.Data
     public class CloudStorageFile : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The name of the Cloud Storage bucket for the export file. You can use this value in the [Cloud Storage JSON
-        /// or XML APIs](https://cloud.google.com/storage/docs/apis), but not to list the bucket contents. Instead, you
-        /// can [get individual export files](https://cloud.google.com/storage/docs/json_api/v1/objects/get) by object
-        /// name.
+        /// The name of the Cloud Storage bucket for the export file. You can use this value in the Cloud Storage [JSON
+        /// API](https://cloud.google.com/storage/docs/json_api) or [XML
+        /// API](https://cloud.google.com/storage/docs/xml-api), but not to list the bucket contents. Instead, you can
+        /// [get individual export files](https://cloud.google.com/storage/docs/json_api/v1/objects/get) by object name.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bucketName")]
         public virtual string BucketName { get; set; }
@@ -2698,8 +2773,9 @@ namespace Google.Apis.Vault.v1.Data
         public virtual string Md5Hash { get; set; }
 
         /// <summary>
-        /// The name of the Cloud Storage object for the export file. You can use this value in the [Cloud Storage JSON
-        /// or XML APIs](https://cloud.google.com/storage/docs/apis).
+        /// The name of the Cloud Storage object for the export file. You can use this value in the Cloud Storage [JSON
+        /// API](https://cloud.google.com/storage/docs/json_api) or [XML
+        /// API](https://cloud.google.com/storage/docs/xml-api).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("objectName")]
         public virtual string ObjectName { get; set; }
@@ -2726,6 +2802,10 @@ namespace Google.Apis.Vault.v1.Data
     /// <summary>Service-specific options for holds.</summary>
     public class CorpusQuery : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Service-specific options for Calendar holds. If set, **CorpusType** must be **CALENDAR**.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("calendarQuery")]
+        public virtual HeldCalendarQuery CalendarQuery { get; set; }
+
         /// <summary>Service-specific options for Drive holds. If set, **CorpusType** must be **DRIVE**.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("driveQuery")]
         public virtual HeldDriveQuery DriveQuery { get; set; }
@@ -2755,9 +2835,42 @@ namespace Google.Apis.Vault.v1.Data
     /// <summary>Long running operation metadata for CountArtifacts.</summary>
     public class CountArtifactsMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>End time of count operation. Available when operation is done.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The matter ID of the associated matter.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("matterId")]
@@ -2767,9 +2880,42 @@ namespace Google.Apis.Vault.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("query")]
         public virtual Query Query { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Creation time of count operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2823,9 +2969,17 @@ namespace Google.Apis.Vault.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Additional options for Drive search</summary>
+    /// <summary>Additional options for Drive search.</summary>
     public class DriveOptions : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Set whether the results include only content encrypted with [Google Workspace Client-side
+        /// encryption](https://support.google.com/a?p=cse_ov) content, only unencrypted content, or both. Defaults to
+        /// both. Currently supported for Drive.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clientSideEncryptedOption")]
+        public virtual string ClientSideEncryptedOption { get; set; }
+
         /// <summary>Set to **true** to include shared drives.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("includeSharedDrives")]
         public virtual System.Nullable<bool> IncludeSharedDrives { get; set; }
@@ -2834,12 +2988,45 @@ namespace Google.Apis.Vault.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("includeTeamDrives")]
         public virtual System.Nullable<bool> IncludeTeamDrives { get; set; }
 
+        private string _versionDateRaw;
+
+        private object _versionDate;
+
         /// <summary>
         /// Search the current version of the Drive file, but export the contents of the last version saved before 12:00
         /// AM UTC on the specified date. Enter the date in UTC.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("versionDate")]
-        public virtual object VersionDate { get; set; }
+        public virtual string VersionDateRaw
+        {
+            get => _versionDateRaw;
+            set
+            {
+                _versionDate = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _versionDateRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="VersionDateRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use VersionDateDateTimeOffset instead.")]
+        public virtual object VersionDate
+        {
+            get => _versionDate;
+            set
+            {
+                _versionDateRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _versionDate = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="VersionDateRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? VersionDateDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(VersionDateRaw);
+            set => VersionDateRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2848,8 +3035,7 @@ namespace Google.Apis.Vault.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2869,9 +3055,42 @@ namespace Google.Apis.Vault.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cloudStorageSink")]
         public virtual CloudStorageSink CloudStorageSink { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time when the export was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Additional export options.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("exportOptions")]
@@ -2885,9 +3104,18 @@ namespace Google.Apis.Vault.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("matterId")]
         public virtual string MatterId { get; set; }
 
-        /// <summary>The export name.</summary>
+        /// <summary>
+        /// The export name. Don't use special characters (~!$'(),;@:/?) in the name, they can prevent you from
+        /// downloading exports.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Output only. Identifies the parent export that spawned this child export. This is only set on child exports.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parentExportId")]
+        public virtual string ParentExportId { get; set; }
 
         /// <summary>The query parameters used to create the export.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("query")]
@@ -2912,6 +3140,10 @@ namespace Google.Apis.Vault.v1.Data
     /// <summary>Additional options for exports</summary>
     public class ExportOptions : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Option available for Calendar export.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("calendarOptions")]
+        public virtual CalendarExportOptions CalendarOptions { get; set; }
+
         /// <summary>Options for Drive exports.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("driveOptions")]
         public virtual DriveExportOptions DriveOptions { get; set; }
@@ -3015,7 +3247,8 @@ namespace Google.Apis.Vault.v1.Data
     public class HangoutsChatInfo : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// A list of Chat spaces IDs, as provided by the [Chat API](https://developers.google.com/hangouts/chat).
+        /// A list of Chat spaces IDs, as provided by the [Chat API](https://developers.google.com/chat). There is a
+        /// limit of exporting from 500 Chat spaces per request.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("roomId")]
         public virtual System.Collections.Generic.IList<string> RoomId { get; set; }
@@ -3057,14 +3290,54 @@ namespace Google.Apis.Vault.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("firstName")]
         public virtual string FirstName { get; set; }
 
+        private string _holdTimeRaw;
+
+        private object _holdTime;
+
         /// <summary>Output only. When the account was put on hold.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("holdTime")]
-        public virtual object HoldTime { get; set; }
+        public virtual string HoldTimeRaw
+        {
+            get => _holdTimeRaw;
+            set
+            {
+                _holdTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _holdTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="HoldTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use HoldTimeDateTimeOffset instead.")]
+        public virtual object HoldTime
+        {
+            get => _holdTime;
+            set
+            {
+                _holdTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _holdTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="HoldTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? HoldTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(HoldTimeRaw);
+            set => HoldTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The last name of the account holder.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastName")]
         public virtual string LastName { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Options for Calendar holds.</summary>
+    public class HeldCalendarQuery : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3087,17 +3360,83 @@ namespace Google.Apis.Vault.v1.Data
     /// <summary>Query options for group holds.</summary>
     public class HeldGroupsQuery : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// The end time for the query. Specify in GMT. The value is rounded to 12 AM on the specified date.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>
         /// The start time for the query. Specify in GMT. The value is rounded to 12 AM on the specified date.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The [search operators](https://support.google.com/vault/answer/2474474) used to refine the messages covered
@@ -3124,17 +3463,83 @@ namespace Google.Apis.Vault.v1.Data
     /// <summary>Query options for Gmail holds.</summary>
     public class HeldMailQuery : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// The end time for the query. Specify in GMT. The value is rounded to 12 AM on the specified date.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>
         /// The start time for the query. Specify in GMT. The value is rounded to 12 AM on the specified date.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The [search operators](https://support.google.com/vault/answer/2474474) used to refine the messages covered
@@ -3150,9 +3555,42 @@ namespace Google.Apis.Vault.v1.Data
     /// <summary>The organizational unit covered by a hold. This structure is immutable.</summary>
     public class HeldOrgUnit : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _holdTimeRaw;
+
+        private object _holdTime;
+
         /// <summary>When the organizational unit was put on hold. This property is immutable.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("holdTime")]
-        public virtual object HoldTime { get; set; }
+        public virtual string HoldTimeRaw
+        {
+            get => _holdTimeRaw;
+            set
+            {
+                _holdTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _holdTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="HoldTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use HoldTimeDateTimeOffset instead.")]
+        public virtual object HoldTime
+        {
+            get => _holdTime;
+            set
+            {
+                _holdTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _holdTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="HoldTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? HoldTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(HoldTimeRaw);
+            set => HoldTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The organizational unit's immutable ID as provided by the [Admin
@@ -3215,9 +3653,42 @@ namespace Google.Apis.Vault.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("query")]
         public virtual CorpusQuery Query { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The last time this hold was modified.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3353,9 +3824,17 @@ namespace Google.Apis.Vault.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("exportFormat")]
         public virtual string ExportFormat { get; set; }
 
+        /// <summary>Optional. To enable exporting linked Drive files, set to **true**.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exportLinkedDriveFiles")]
+        public virtual System.Nullable<bool> ExportLinkedDriveFiles { get; set; }
+
         /// <summary>To export confidential mode content, set to **true**.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("showConfidentialModeContent")]
         public virtual System.Nullable<bool> ShowConfidentialModeContent { get; set; }
+
+        /// <summary>To use the new export system, set to **true**.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("useNewExport")]
+        public virtual System.Nullable<bool> UseNewExport { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3364,6 +3843,13 @@ namespace Google.Apis.Vault.v1.Data
     /// <summary>Additional options for Gmail search</summary>
     public class MailOptions : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Specifies whether the results should include encrypted content, unencrypted content, or both. Defaults to
+        /// including both.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clientSideEncryptedOption")]
+        public virtual string ClientSideEncryptedOption { get; set; }
+
         /// <summary>Set to **true** to exclude drafts.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("excludeDrafts")]
         public virtual System.Nullable<bool> ExcludeDrafts { get; set; }
@@ -3393,6 +3879,10 @@ namespace Google.Apis.Vault.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("matterPermissions")]
         public virtual System.Collections.Generic.IList<MatterPermission> MatterPermissions { get; set; }
+
+        /// <summary>Optional. The requested data region for the matter.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("matterRegion")]
+        public virtual string MatterRegion { get; set; }
 
         /// <summary>The name of the matter.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -3455,8 +3945,8 @@ namespace Google.Apis.Vault.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -3489,6 +3979,10 @@ namespace Google.Apis.Vault.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("accountInfo")]
         public virtual AccountInfo AccountInfo { get; set; }
 
+        /// <summary>Set Calendar search-specific options.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("calendarOptions")]
+        public virtual CalendarOptions CalendarOptions { get; set; }
+
         /// <summary>The Google Workspace service to search.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("corpus")]
         public virtual string Corpus { get; set; }
@@ -3501,11 +3995,44 @@ namespace Google.Apis.Vault.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("driveOptions")]
         public virtual DriveOptions DriveOptions { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// The end time for the search query. Specify in GMT. The value is rounded to 12 AM on the specified date.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required when **SearchMethod** is **ROOM**. (read-only)</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hangoutsChatInfo")]
@@ -3538,11 +4065,48 @@ namespace Google.Apis.Vault.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sharedDriveInfo")]
         public virtual SharedDriveInfo SharedDriveInfo { get; set; }
 
+        /// <summary>Required when **SearchMethod** is **SITES_URL**.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sitesUrlInfo")]
+        public virtual SitesUrlInfo SitesUrlInfo { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>
         /// The start time for the search query. Specify in GMT. The value is rounded to 12 AM on the specified date.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required when **SearchMethod** is **TEAM_DRIVE**.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("teamDriveInfo")]
@@ -3631,9 +4195,42 @@ namespace Google.Apis.Vault.v1.Data
     /// </summary>
     public class SavedQuery : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The server-generated timestamp when the saved query was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The name of the saved query.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
@@ -3666,6 +4263,17 @@ namespace Google.Apis.Vault.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sharedDriveIds")]
         public virtual System.Collections.Generic.IList<string> SharedDriveIds { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The published site URLs of new Google Sites to search</summary>
+    public class SitesUrlInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A list of published site URLs.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("urls")]
+        public virtual System.Collections.Generic.IList<string> Urls { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

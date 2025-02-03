@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ namespace Google.Apis.Monitoring.v3
             Projects = new ProjectsResource(this);
             Services = new ServicesResource(this);
             UptimeCheckIps = new UptimeCheckIpsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://monitoring.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://monitoring.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -48,23 +50,16 @@ namespace Google.Apis.Monitoring.v3
         public override string Name => "monitoring";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://monitoring.googleapis.com/";
-        #else
-            "https://monitoring.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://monitoring.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Monitoring API.</summary>
         public class Scope
@@ -337,7 +332,7 @@ namespace Google.Apis.Monitoring.v3
                 this.service = service;
             }
 
-            /// <summary>Lists time series that match a filter. This method does not require a Workspace.</summary>
+            /// <summary>Lists time series that match a filter.</summary>
             /// <param name="name">
             /// Required. The project (https://cloud.google.com/monitoring/api/v3#project_name), organization or folder
             /// on which to execute the request. The format is: projects/[PROJECT_ID_OR_NUMBER]
@@ -345,10 +340,10 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
-            /// <summary>Lists time series that match a filter. This method does not require a Workspace.</summary>
+            /// <summary>Lists time series that match a filter.</summary>
             public class ListRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.ListTimeSeriesResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -729,16 +724,67 @@ namespace Google.Apis.Monitoring.v3
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
 
-                /// <summary>Required. The end of the time interval.</summary>
-                [Google.Apis.Util.RequestParameterAttribute("interval.endTime", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual object IntervalEndTime { get; set; }
+                private object _intervalEndTime;
 
                 /// <summary>
-                /// Optional. The beginning of the time interval. The default value for the start time is the end time.
-                /// The start time must not be later than the end time.
+                /// String representation of <see cref="IntervalEndTimeDateTimeOffset"/>, formatted for inclusion in the
+                /// HTTP request.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("interval.endTime", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string IntervalEndTimeRaw { get; private set; }
+
+                /// <summary><seealso cref="object"/> representation of <see cref="IntervalEndTimeRaw"/>.</summary>
+                [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IntervalEndTimeDateTimeOffset instead.")]
+                public virtual object IntervalEndTime
+                {
+                    get => _intervalEndTime;
+                    set
+                    {
+                        IntervalEndTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                        _intervalEndTime = value;
+                    }
+                }
+
+                public virtual System.DateTimeOffset? IntervalEndTimeDateTimeOffset
+                {
+                    get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IntervalEndTimeRaw);
+                    set
+                    {
+                        IntervalEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                        _intervalEndTime = value;
+                    }
+                }
+
+                private object _intervalStartTime;
+
+                /// <summary>
+                /// String representation of <see cref="IntervalStartTimeDateTimeOffset"/>, formatted for inclusion in
+                /// the HTTP request.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("interval.startTime", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual object IntervalStartTime { get; set; }
+                public virtual string IntervalStartTimeRaw { get; private set; }
+
+                /// <summary><seealso cref="object"/> representation of <see cref="IntervalStartTimeRaw"/>.</summary>
+                [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IntervalStartTimeDateTimeOffset instead.")]
+                public virtual object IntervalStartTime
+                {
+                    get => _intervalStartTime;
+                    set
+                    {
+                        IntervalStartTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                        _intervalStartTime = value;
+                    }
+                }
+
+                public virtual System.DateTimeOffset? IntervalStartTimeDateTimeOffset
+                {
+                    get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IntervalStartTimeRaw);
+                    set
+                    {
+                        IntervalStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                        _intervalStartTime = value;
+                    }
+                }
 
                 /// <summary>
                 /// Unsupported: must be left blank. The points in each time series are currently returned in reverse
@@ -1315,7 +1361,7 @@ namespace Google.Apis.Monitoring.v3
                 this.service = service;
             }
 
-            /// <summary>Lists time series that match a filter. This method does not require a Workspace.</summary>
+            /// <summary>Lists time series that match a filter.</summary>
             /// <param name="name">
             /// Required. The project (https://cloud.google.com/monitoring/api/v3#project_name), organization or folder
             /// on which to execute the request. The format is: projects/[PROJECT_ID_OR_NUMBER]
@@ -1323,10 +1369,10 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
-            /// <summary>Lists time series that match a filter. This method does not require a Workspace.</summary>
+            /// <summary>Lists time series that match a filter.</summary>
             public class ListRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.ListTimeSeriesResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -1707,16 +1753,67 @@ namespace Google.Apis.Monitoring.v3
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
 
-                /// <summary>Required. The end of the time interval.</summary>
-                [Google.Apis.Util.RequestParameterAttribute("interval.endTime", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual object IntervalEndTime { get; set; }
+                private object _intervalEndTime;
 
                 /// <summary>
-                /// Optional. The beginning of the time interval. The default value for the start time is the end time.
-                /// The start time must not be later than the end time.
+                /// String representation of <see cref="IntervalEndTimeDateTimeOffset"/>, formatted for inclusion in the
+                /// HTTP request.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("interval.endTime", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string IntervalEndTimeRaw { get; private set; }
+
+                /// <summary><seealso cref="object"/> representation of <see cref="IntervalEndTimeRaw"/>.</summary>
+                [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IntervalEndTimeDateTimeOffset instead.")]
+                public virtual object IntervalEndTime
+                {
+                    get => _intervalEndTime;
+                    set
+                    {
+                        IntervalEndTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                        _intervalEndTime = value;
+                    }
+                }
+
+                public virtual System.DateTimeOffset? IntervalEndTimeDateTimeOffset
+                {
+                    get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IntervalEndTimeRaw);
+                    set
+                    {
+                        IntervalEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                        _intervalEndTime = value;
+                    }
+                }
+
+                private object _intervalStartTime;
+
+                /// <summary>
+                /// String representation of <see cref="IntervalStartTimeDateTimeOffset"/>, formatted for inclusion in
+                /// the HTTP request.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("interval.startTime", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual object IntervalStartTime { get; set; }
+                public virtual string IntervalStartTimeRaw { get; private set; }
+
+                /// <summary><seealso cref="object"/> representation of <see cref="IntervalStartTimeRaw"/>.</summary>
+                [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IntervalStartTimeDateTimeOffset instead.")]
+                public virtual object IntervalStartTime
+                {
+                    get => _intervalStartTime;
+                    set
+                    {
+                        IntervalStartTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                        _intervalStartTime = value;
+                    }
+                }
+
+                public virtual System.DateTimeOffset? IntervalStartTimeDateTimeOffset
+                {
+                    get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IntervalStartTimeRaw);
+                    set
+                    {
+                        IntervalStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                        _intervalStartTime = value;
+                    }
+                }
 
                 /// <summary>
                 /// Unsupported: must be left blank. The points in each time series are currently returned in reverse
@@ -2280,6 +2377,7 @@ namespace Google.Apis.Monitoring.v3
             MonitoredResourceDescriptors = new MonitoredResourceDescriptorsResource(service);
             NotificationChannelDescriptors = new NotificationChannelDescriptorsResource(service);
             NotificationChannels = new NotificationChannelsResource(service);
+            Snoozes = new SnoozesResource(service);
             TimeSeries = new TimeSeriesResource(service);
             UptimeCheckConfigs = new UptimeCheckConfigsResource(service);
         }
@@ -2301,22 +2399,30 @@ namespace Google.Apis.Monitoring.v3
                 this.service = service;
             }
 
-            /// <summary>Creates a new alerting policy.</summary>
+            /// <summary>
+            /// Creates a new alerting policy.Design your application to single-thread API calls that modify the state
+            /// of alerting policies in a single project. This includes calls to CreateAlertPolicy, DeleteAlertPolicy
+            /// and UpdateAlertPolicy.
+            /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
             /// Required. The project (https://cloud.google.com/monitoring/api/v3#project_name) in which to create the
             /// alerting policy. The format is: projects/[PROJECT_ID_OR_NUMBER] Note that this field names the parent
             /// container in which the alerting policy will be written, not the name of the created policy. |name| must
-            /// be a host project of a workspace, otherwise INVALID_ARGUMENT error will return. The alerting policy that
-            /// is returned will have a name that contains a normalized representation of this name as a prefix but adds
-            /// a suffix of the form /alertPolicies/[ALERT_POLICY_ID], identifying the policy in the container.
+            /// be a host project of a Metrics Scope, otherwise INVALID_ARGUMENT error will return. The alerting policy
+            /// that is returned will have a name that contains a normalized representation of this name as a prefix but
+            /// adds a suffix of the form /alertPolicies/[ALERT_POLICY_ID], identifying the policy in the container.
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Monitoring.v3.Data.AlertPolicy body, string name)
             {
-                return new CreateRequest(service, body, name);
+                return new CreateRequest(this.service, body, name);
             }
 
-            /// <summary>Creates a new alerting policy.</summary>
+            /// <summary>
+            /// Creates a new alerting policy.Design your application to single-thread API calls that modify the state
+            /// of alerting policies in a single project. This includes calls to CreateAlertPolicy, DeleteAlertPolicy
+            /// and UpdateAlertPolicy.
+            /// </summary>
             public class CreateRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.AlertPolicy>
             {
                 /// <summary>Constructs a new Create request.</summary>
@@ -2331,7 +2437,7 @@ namespace Google.Apis.Monitoring.v3
                 /// Required. The project (https://cloud.google.com/monitoring/api/v3#project_name) in which to create
                 /// the alerting policy. The format is: projects/[PROJECT_ID_OR_NUMBER] Note that this field names the
                 /// parent container in which the alerting policy will be written, not the name of the created policy.
-                /// |name| must be a host project of a workspace, otherwise INVALID_ARGUMENT error will return. The
+                /// |name| must be a host project of a Metrics Scope, otherwise INVALID_ARGUMENT error will return. The
                 /// alerting policy that is returned will have a name that contains a normalized representation of this
                 /// name as a prefix but adds a suffix of the form /alertPolicies/[ALERT_POLICY_ID], identifying the
                 /// policy in the container.
@@ -2369,17 +2475,25 @@ namespace Google.Apis.Monitoring.v3
                 }
             }
 
-            /// <summary>Deletes an alerting policy.</summary>
+            /// <summary>
+            /// Deletes an alerting policy.Design your application to single-thread API calls that modify the state of
+            /// alerting policies in a single project. This includes calls to CreateAlertPolicy, DeleteAlertPolicy and
+            /// UpdateAlertPolicy.
+            /// </summary>
             /// <param name="name">
             /// Required. The alerting policy to delete. The format is:
             /// projects/[PROJECT_ID_OR_NUMBER]/alertPolicies/[ALERT_POLICY_ID] For more information, see AlertPolicy.
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
-            /// <summary>Deletes an alerting policy.</summary>
+            /// <summary>
+            /// Deletes an alerting policy.Design your application to single-thread API calls that modify the state of
+            /// alerting policies in a single project. This includes calls to CreateAlertPolicy, DeleteAlertPolicy and
+            /// UpdateAlertPolicy.
+            /// </summary>
             public class DeleteRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.Empty>
             {
                 /// <summary>Constructs a new Delete request.</summary>
@@ -2428,7 +2542,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a single alerting policy.</summary>
@@ -2481,7 +2595,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists the existing alerting policies for the workspace.</summary>
@@ -2504,30 +2618,30 @@ namespace Google.Apis.Monitoring.v3
                 public virtual string Name { get; private set; }
 
                 /// <summary>
-                /// If provided, this field specifies the criteria that must be met by alert policies to be included in
-                /// the response.For more details, see sorting and filtering
+                /// Optional. If provided, this field specifies the criteria that must be met by alert policies to be
+                /// included in the response.For more details, see sorting and filtering
                 /// (https://cloud.google.com/monitoring/api/v3/sorting-and-filtering).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
 
                 /// <summary>
-                /// A comma-separated list of fields by which to sort the result. Supports the same set of field
-                /// references as the filter field. Entries can be prefixed with a minus sign to sort by the field in
-                /// descending order.For more details, see sorting and filtering
+                /// Optional. A comma-separated list of fields by which to sort the result. Supports the same set of
+                /// field references as the filter field. Entries can be prefixed with a minus sign to sort by the field
+                /// in descending order.For more details, see sorting and filtering
                 /// (https://cloud.google.com/monitoring/api/v3/sorting-and-filtering).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string OrderBy { get; set; }
 
-                /// <summary>The maximum number of results to return in a single response.</summary>
+                /// <summary>Optional. The maximum number of results to return in a single response.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
                 /// <summary>
-                /// If this field is not empty then it must contain the nextPageToken value returned by a previous call
-                /// to this method. Using this field causes the method to return more results from the previous method
-                /// call.
+                /// Optional. If this field is not empty then it must contain the nextPageToken value returned by a
+                /// previous call to this method. Using this field causes the method to return more results from the
+                /// previous method call.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
@@ -2591,24 +2705,28 @@ namespace Google.Apis.Monitoring.v3
             /// <summary>
             /// Updates an alerting policy. You can either replace the entire policy with a new one or replace only
             /// certain fields in the current alerting policy by specifying the fields to be updated via updateMask.
-            /// Returns the updated alerting policy.
+            /// Returns the updated alerting policy.Design your application to single-thread API calls that modify the
+            /// state of alerting policies in a single project. This includes calls to CreateAlertPolicy,
+            /// DeleteAlertPolicy and UpdateAlertPolicy.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
-            /// Required if the policy exists. The resource name for this policy. The format is:
-            /// projects/[PROJECT_ID_OR_NUMBER]/alertPolicies/[ALERT_POLICY_ID] [ALERT_POLICY_ID] is assigned by
-            /// Stackdriver Monitoring when the policy is created. When calling the alertPolicies.create method, do not
-            /// include the name field in the alerting policy passed as part of the request.
+            /// Identifier. Required if the policy exists. The resource name for this policy. The format is:
+            /// projects/[PROJECT_ID_OR_NUMBER]/alertPolicies/[ALERT_POLICY_ID] [ALERT_POLICY_ID] is assigned by Cloud
+            /// Monitoring when the policy is created. When calling the alertPolicies.create method, do not include the
+            /// name field in the alerting policy passed as part of the request.
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Monitoring.v3.Data.AlertPolicy body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
             /// Updates an alerting policy. You can either replace the entire policy with a new one or replace only
             /// certain fields in the current alerting policy by specifying the fields to be updated via updateMask.
-            /// Returns the updated alerting policy.
+            /// Returns the updated alerting policy.Design your application to single-thread API calls that modify the
+            /// state of alerting policies in a single project. This includes calls to CreateAlertPolicy,
+            /// DeleteAlertPolicy and UpdateAlertPolicy.
             /// </summary>
             public class PatchRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.AlertPolicy>
             {
@@ -2621,10 +2739,10 @@ namespace Google.Apis.Monitoring.v3
                 }
 
                 /// <summary>
-                /// Required if the policy exists. The resource name for this policy. The format is:
+                /// Identifier. Required if the policy exists. The resource name for this policy. The format is:
                 /// projects/[PROJECT_ID_OR_NUMBER]/alertPolicies/[ALERT_POLICY_ID] [ALERT_POLICY_ID] is assigned by
-                /// Stackdriver Monitoring when the policy is created. When calling the alertPolicies.create method, do
-                /// not include the name field in the alerting policy passed as part of the request.
+                /// Cloud Monitoring when the policy is created. When calling the alertPolicies.create method, do not
+                /// include the name field in the alerting policy passed as part of the request.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
@@ -2703,8 +2821,8 @@ namespace Google.Apis.Monitoring.v3
             }
 
             /// <summary>
-            /// Stackdriver Monitoring Agent only: Creates a new time series.This method is only for use by the
-            /// Stackdriver Monitoring Agent. Use projects.timeSeries.create instead.
+            /// Cloud Monitoring Agent only: Creates a new time series.This method is only for use by the Cloud
+            /// Monitoring Agent. Use projects.timeSeries.create instead.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -2713,12 +2831,12 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Monitoring.v3.Data.CreateCollectdTimeSeriesRequest body, string name)
             {
-                return new CreateRequest(service, body, name);
+                return new CreateRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Stackdriver Monitoring Agent only: Creates a new time series.This method is only for use by the
-            /// Stackdriver Monitoring Agent. Use projects.timeSeries.create instead.
+            /// Cloud Monitoring Agent only: Creates a new time series.This method is only for use by the Cloud
+            /// Monitoring Agent. Use projects.timeSeries.create instead.
             /// </summary>
             public class CreateRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.CreateCollectdTimeSeriesResponse>
             {
@@ -2810,7 +2928,7 @@ namespace Google.Apis.Monitoring.v3
                 /// </param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>Lists the monitored resources that are members of a group.</summary>
@@ -2839,16 +2957,69 @@ namespace Google.Apis.Monitoring.v3
                     [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string Filter { get; set; }
 
-                    /// <summary>Required. The end of the time interval.</summary>
-                    [Google.Apis.Util.RequestParameterAttribute("interval.endTime", Google.Apis.Util.RequestParameterType.Query)]
-                    public virtual object IntervalEndTime { get; set; }
+                    private object _intervalEndTime;
 
                     /// <summary>
-                    /// Optional. The beginning of the time interval. The default value for the start time is the end
-                    /// time. The start time must not be later than the end time.
+                    /// String representation of <see cref="IntervalEndTimeDateTimeOffset"/>, formatted for inclusion in
+                    /// the HTTP request.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("interval.endTime", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string IntervalEndTimeRaw { get; private set; }
+
+                    /// <summary><seealso cref="object"/> representation of <see cref="IntervalEndTimeRaw"/>.</summary>
+                    [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IntervalEndTimeDateTimeOffset instead.")]
+                    public virtual object IntervalEndTime
+                    {
+                        get => _intervalEndTime;
+                        set
+                        {
+                            IntervalEndTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                            _intervalEndTime = value;
+                        }
+                    }
+
+                    public virtual System.DateTimeOffset? IntervalEndTimeDateTimeOffset
+                    {
+                        get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IntervalEndTimeRaw);
+                        set
+                        {
+                            IntervalEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                            _intervalEndTime = value;
+                        }
+                    }
+
+                    private object _intervalStartTime;
+
+                    /// <summary>
+                    /// String representation of <see cref="IntervalStartTimeDateTimeOffset"/>, formatted for inclusion
+                    /// in the HTTP request.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("interval.startTime", Google.Apis.Util.RequestParameterType.Query)]
-                    public virtual object IntervalStartTime { get; set; }
+                    public virtual string IntervalStartTimeRaw { get; private set; }
+
+                    /// <summary>
+                    /// <seealso cref="object"/> representation of <see cref="IntervalStartTimeRaw"/>.
+                    /// </summary>
+                    [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IntervalStartTimeDateTimeOffset instead.")]
+                    public virtual object IntervalStartTime
+                    {
+                        get => _intervalStartTime;
+                        set
+                        {
+                            IntervalStartTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                            _intervalStartTime = value;
+                        }
+                    }
+
+                    public virtual System.DateTimeOffset? IntervalStartTimeDateTimeOffset
+                    {
+                        get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IntervalStartTimeRaw);
+                        set
+                        {
+                            IntervalStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                            _intervalStartTime = value;
+                        }
+                    }
 
                     /// <summary>A positive number that is the maximum number of results to return.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
@@ -2935,7 +3106,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Monitoring.v3.Data.Group body, string name)
             {
-                return new CreateRequest(service, body, name);
+                return new CreateRequest(this.service, body, name);
             }
 
             /// <summary>Creates a new group.</summary>
@@ -3004,7 +3175,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes an existing group.</summary>
@@ -3068,7 +3239,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a single group.</summary>
@@ -3118,7 +3289,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists the existing groups.</summary>
@@ -3247,7 +3418,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual UpdateRequest Update(Google.Apis.Monitoring.v3.Data.Group body, string name)
             {
-                return new UpdateRequest(service, body, name);
+                return new UpdateRequest(this.service, body, name);
             }
 
             /// <summary>Updates an existing group. You can change any group attributes except name.</summary>
@@ -3331,9 +3502,9 @@ namespace Google.Apis.Monitoring.v3
             }
 
             /// <summary>
-            /// Creates a new metric descriptor. The creation is executed asynchronously and callers may check the
-            /// returned operation to track its progress. User-created metric descriptors define custom metrics
-            /// (https://cloud.google.com/monitoring/custom-metrics).
+            /// Creates a new metric descriptor. The creation is executed asynchronously. User-created metric
+            /// descriptors define custom metrics (https://cloud.google.com/monitoring/custom-metrics). The metric
+            /// descriptor is updated if it already exists, except that metric labels are never removed.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -3342,13 +3513,13 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Monitoring.v3.Data.MetricDescriptor body, string name)
             {
-                return new CreateRequest(service, body, name);
+                return new CreateRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Creates a new metric descriptor. The creation is executed asynchronously and callers may check the
-            /// returned operation to track its progress. User-created metric descriptors define custom metrics
-            /// (https://cloud.google.com/monitoring/custom-metrics).
+            /// Creates a new metric descriptor. The creation is executed asynchronously. User-created metric
+            /// descriptors define custom metrics (https://cloud.google.com/monitoring/custom-metrics). The metric
+            /// descriptor is updated if it already exists, except that metric labels are never removed.
             /// </summary>
             public class CreateRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.MetricDescriptor>
             {
@@ -3408,7 +3579,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -3456,7 +3627,7 @@ namespace Google.Apis.Monitoring.v3
                 }
             }
 
-            /// <summary>Gets a single metric descriptor. This method does not require a Workspace.</summary>
+            /// <summary>Gets a single metric descriptor.</summary>
             /// <param name="name">
             /// Required. The metric descriptor on which to execute the request. The format is:
             /// projects/[PROJECT_ID_OR_NUMBER]/metricDescriptors/[METRIC_ID] An example value of [METRIC_ID] is
@@ -3464,10 +3635,10 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
-            /// <summary>Gets a single metric descriptor. This method does not require a Workspace.</summary>
+            /// <summary>Gets a single metric descriptor.</summary>
             public class GetRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.MetricDescriptor>
             {
                 /// <summary>Constructs a new Get request.</summary>
@@ -3509,21 +3680,17 @@ namespace Google.Apis.Monitoring.v3
                 }
             }
 
-            /// <summary>
-            /// Lists metric descriptors that match a filter. This method does not require a Workspace.
-            /// </summary>
+            /// <summary>Lists metric descriptors that match a filter.</summary>
             /// <param name="name">
             /// Required. The project (https://cloud.google.com/monitoring/api/v3#project_name) on which to execute the
             /// request. The format is: projects/[PROJECT_ID_OR_NUMBER]
             /// </param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
-            /// <summary>
-            /// Lists metric descriptors that match a filter. This method does not require a Workspace.
-            /// </summary>
+            /// <summary>Lists metric descriptors that match a filter.</summary>
             public class ListRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.ListMetricDescriptorsResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -3541,23 +3708,39 @@ namespace Google.Apis.Monitoring.v3
                 public virtual string Name { get; private set; }
 
                 /// <summary>
-                /// If this field is empty, all custom and system-defined metric descriptors are returned. Otherwise,
-                /// the filter (https://cloud.google.com/monitoring/api/v3/filters) specifies which metric descriptors
-                /// are to be returned. For example, the following filter matches all custom metrics
+                /// Optional. If true, only metrics and monitored resource types that have recent data (within roughly
+                /// 25 hours) will be included in the response. - If a metric descriptor enumerates monitored resource
+                /// types, only the monitored resource types for which the metric type has recent data will be included
+                /// in the returned metric descriptor, and if none of them have recent data, the metric descriptor will
+                /// not be returned. - If a metric descriptor does not enumerate the compatible monitored resource
+                /// types, it will be returned only if the metric type has recent data for some monitored resource type.
+                /// The returned descriptor will not enumerate any monitored resource types.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("activeOnly", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<bool> ActiveOnly { get; set; }
+
+                /// <summary>
+                /// Optional. If this field is empty, all custom and system-defined metric descriptors are returned.
+                /// Otherwise, the filter (https://cloud.google.com/monitoring/api/v3/filters) specifies which metric
+                /// descriptors are to be returned. For example, the following filter matches all custom metrics
                 /// (https://cloud.google.com/monitoring/custom-metrics): metric.type =
                 /// starts_with("custom.googleapis.com/")
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
 
-                /// <summary>A positive number that is the maximum number of results to return.</summary>
+                /// <summary>
+                /// Optional. A positive number that is the maximum number of results to return. The default and maximum
+                /// value is 10,000. If a page_size &amp;lt;= 0 or &amp;gt; 10,000 is submitted, will instead return a
+                /// maximum of 10,000 results.
+                /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
                 /// <summary>
-                /// If this field is not empty then it must contain the nextPageToken value returned by a previous call
-                /// to this method. Using this field causes the method to return additional results from the previous
-                /// method call.
+                /// Optional. If this field is not empty then it must contain the nextPageToken value returned by a
+                /// previous call to this method. Using this field causes the method to return additional results from
+                /// the previous method call.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
@@ -3582,6 +3765,14 @@ namespace Google.Apis.Monitoring.v3
                         ParameterType = "path",
                         DefaultValue = null,
                         Pattern = @"^projects/[^/]+$",
+                    });
+                    RequestParameters.Add("activeOnly", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "activeOnly",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
                     });
                     RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
                     {
@@ -3628,9 +3819,7 @@ namespace Google.Apis.Monitoring.v3
                 this.service = service;
             }
 
-            /// <summary>
-            /// Gets a single monitored resource descriptor. This method does not require a Workspace.
-            /// </summary>
+            /// <summary>Gets a single monitored resource descriptor.</summary>
             /// <param name="name">
             /// Required. The monitored resource descriptor to get. The format is:
             /// projects/[PROJECT_ID_OR_NUMBER]/monitoredResourceDescriptors/[RESOURCE_TYPE] The [RESOURCE_TYPE] is a
@@ -3638,12 +3827,10 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
-            /// <summary>
-            /// Gets a single monitored resource descriptor. This method does not require a Workspace.
-            /// </summary>
+            /// <summary>Gets a single monitored resource descriptor.</summary>
             public class GetRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.MonitoredResourceDescriptor>
             {
                 /// <summary>Constructs a new Get request.</summary>
@@ -3685,21 +3872,17 @@ namespace Google.Apis.Monitoring.v3
                 }
             }
 
-            /// <summary>
-            /// Lists monitored resource descriptors that match a filter. This method does not require a Workspace.
-            /// </summary>
+            /// <summary>Lists monitored resource descriptors that match a filter.</summary>
             /// <param name="name">
             /// Required. The project (https://cloud.google.com/monitoring/api/v3#project_name) on which to execute the
             /// request. The format is: projects/[PROJECT_ID_OR_NUMBER]
             /// </param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
-            /// <summary>
-            /// Lists monitored resource descriptors that match a filter. This method does not require a Workspace.
-            /// </summary>
+            /// <summary>Lists monitored resource descriptors that match a filter.</summary>
             public class ListRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.ListMonitoredResourceDescriptorsResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -3813,7 +3996,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -3873,7 +4056,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>
@@ -3973,7 +4156,9 @@ namespace Google.Apis.Monitoring.v3
 
             /// <summary>
             /// Creates a new notification channel, representing a single notification endpoint such as an email
-            /// address, SMS number, or PagerDuty service.
+            /// address, SMS number, or PagerDuty service.Design your application to single-thread API calls that modify
+            /// the state of notification channels in a single project. This includes calls to
+            /// CreateNotificationChannel, DeleteNotificationChannel and UpdateNotificationChannel.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -3985,12 +4170,14 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Monitoring.v3.Data.NotificationChannel body, string name)
             {
-                return new CreateRequest(service, body, name);
+                return new CreateRequest(this.service, body, name);
             }
 
             /// <summary>
             /// Creates a new notification channel, representing a single notification endpoint such as an email
-            /// address, SMS number, or PagerDuty service.
+            /// address, SMS number, or PagerDuty service.Design your application to single-thread API calls that modify
+            /// the state of notification channels in a single project. This includes calls to
+            /// CreateNotificationChannel, DeleteNotificationChannel and UpdateNotificationChannel.
             /// </summary>
             public class CreateRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.NotificationChannel>
             {
@@ -4042,17 +4229,25 @@ namespace Google.Apis.Monitoring.v3
                 }
             }
 
-            /// <summary>Deletes a notification channel.</summary>
+            /// <summary>
+            /// Deletes a notification channel.Design your application to single-thread API calls that modify the state
+            /// of notification channels in a single project. This includes calls to CreateNotificationChannel,
+            /// DeleteNotificationChannel and UpdateNotificationChannel.
+            /// </summary>
             /// <param name="name">
             /// Required. The channel for which to execute the request. The format is:
             /// projects/[PROJECT_ID_OR_NUMBER]/notificationChannels/[CHANNEL_ID]
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
-            /// <summary>Deletes a notification channel.</summary>
+            /// <summary>
+            /// Deletes a notification channel.Design your application to single-thread API calls that modify the state
+            /// of notification channels in a single project. This includes calls to CreateNotificationChannel,
+            /// DeleteNotificationChannel and UpdateNotificationChannel.
+            /// </summary>
             public class DeleteRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.Empty>
             {
                 /// <summary>Constructs a new Delete request.</summary>
@@ -4071,8 +4266,8 @@ namespace Google.Apis.Monitoring.v3
 
                 /// <summary>
                 /// If true, the notification channel will be deleted regardless of its use in alert policies (the
-                /// policies will be updated to remove the channel). If false, channels that are still referenced by an
-                /// existing alerting policy will fail to be deleted in a delete operation.
+                /// policies will be updated to remove the channel). If false, this operation will fail if the
+                /// notification channel is referenced by existing alerting policies.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("force", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> Force { get; set; }
@@ -4121,7 +4316,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -4194,7 +4389,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual GetVerificationCodeRequest GetVerificationCode(Google.Apis.Monitoring.v3.Data.GetNotificationChannelVerificationCodeRequest body, string name)
             {
-                return new GetVerificationCodeRequest(service, body, name);
+                return new GetVerificationCodeRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -4261,7 +4456,10 @@ namespace Google.Apis.Monitoring.v3
                 }
             }
 
-            /// <summary>Lists the notification channels that have been created for the project.</summary>
+            /// <summary>
+            /// Lists the notification channels that have been created for the project. To list the types of
+            /// notification channels that are supported, use the ListNotificationChannelDescriptors method.
+            /// </summary>
             /// <param name="name">
             /// Required. The project (https://cloud.google.com/monitoring/api/v3#project_name) on which to execute the
             /// request. The format is: projects/[PROJECT_ID_OR_NUMBER] This names the container in which to look for
@@ -4270,10 +4468,13 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
-            /// <summary>Lists the notification channels that have been created for the project.</summary>
+            /// <summary>
+            /// Lists the notification channels that have been created for the project. To list the types of
+            /// notification channels that are supported, use the ListNotificationChannelDescriptors method.
+            /// </summary>
             public class ListRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.ListNotificationChannelsResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -4293,32 +4494,32 @@ namespace Google.Apis.Monitoring.v3
                 public virtual string Name { get; private set; }
 
                 /// <summary>
-                /// If provided, this field specifies the criteria that must be met by notification channels to be
-                /// included in the response.For more details, see sorting and filtering
+                /// Optional. If provided, this field specifies the criteria that must be met by notification channels
+                /// to be included in the response.For more details, see sorting and filtering
                 /// (https://cloud.google.com/monitoring/api/v3/sorting-and-filtering).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
 
                 /// <summary>
-                /// A comma-separated list of fields by which to sort the result. Supports the same set of fields as in
-                /// filter. Entries can be prefixed with a minus sign to sort in descending rather than ascending
-                /// order.For more details, see sorting and filtering
+                /// Optional. A comma-separated list of fields by which to sort the result. Supports the same set of
+                /// fields as in filter. Entries can be prefixed with a minus sign to sort in descending rather than
+                /// ascending order.For more details, see sorting and filtering
                 /// (https://cloud.google.com/monitoring/api/v3/sorting-and-filtering).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string OrderBy { get; set; }
 
                 /// <summary>
-                /// The maximum number of results to return in a single response. If not set to a positive number, a
-                /// reasonable value will be chosen by the service.
+                /// Optional. The maximum number of results to return in a single response. If not set to a positive
+                /// number, a reasonable value will be chosen by the service.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
                 /// <summary>
-                /// If non-empty, page_token must contain a value returned as the next_page_token in a previous response
-                /// to request the next set of results.
+                /// Optional. If non-empty, page_token must contain a value returned as the next_page_token in a
+                /// previous response to request the next set of results.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
@@ -4380,21 +4581,27 @@ namespace Google.Apis.Monitoring.v3
             }
 
             /// <summary>
-            /// Updates a notification channel. Fields not specified in the field mask remain unchanged.
+            /// Updates a notification channel. Fields not specified in the field mask remain unchanged.Design your
+            /// application to single-thread API calls that modify the state of notification channels in a single
+            /// project. This includes calls to CreateNotificationChannel, DeleteNotificationChannel and
+            /// UpdateNotificationChannel.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
-            /// The full REST resource name for this channel. The format is:
+            /// Identifier. The full REST resource name for this channel. The format is:
             /// projects/[PROJECT_ID_OR_NUMBER]/notificationChannels/[CHANNEL_ID] The [CHANNEL_ID] is automatically
             /// assigned by the server on creation.
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Monitoring.v3.Data.NotificationChannel body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Updates a notification channel. Fields not specified in the field mask remain unchanged.
+            /// Updates a notification channel. Fields not specified in the field mask remain unchanged.Design your
+            /// application to single-thread API calls that modify the state of notification channels in a single
+            /// project. This includes calls to CreateNotificationChannel, DeleteNotificationChannel and
+            /// UpdateNotificationChannel.
             /// </summary>
             public class PatchRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.NotificationChannel>
             {
@@ -4407,14 +4614,14 @@ namespace Google.Apis.Monitoring.v3
                 }
 
                 /// <summary>
-                /// The full REST resource name for this channel. The format is:
+                /// Identifier. The full REST resource name for this channel. The format is:
                 /// projects/[PROJECT_ID_OR_NUMBER]/notificationChannels/[CHANNEL_ID] The [CHANNEL_ID] is automatically
                 /// assigned by the server on creation.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
 
-                /// <summary>The fields to update.</summary>
+                /// <summary>Optional. The fields to update.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual object UpdateMask { get; set; }
 
@@ -4464,7 +4671,7 @@ namespace Google.Apis.Monitoring.v3
             /// <param name="name">Required. The notification channel to which to send a verification code.</param>
             public virtual SendVerificationCodeRequest SendVerificationCode(Google.Apis.Monitoring.v3.Data.SendNotificationChannelVerificationCodeRequest body, string name)
             {
-                return new SendVerificationCodeRequest(service, body, name);
+                return new SendVerificationCodeRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -4523,7 +4730,7 @@ namespace Google.Apis.Monitoring.v3
             /// <param name="name">Required. The notification channel to verify.</param>
             public virtual VerifyRequest Verify(Google.Apis.Monitoring.v3.Data.VerifyNotificationChannelRequest body, string name)
             {
-                return new VerifyRequest(service, body, name);
+                return new VerifyRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -4575,6 +4782,334 @@ namespace Google.Apis.Monitoring.v3
             }
         }
 
+        /// <summary>Gets the Snoozes resource.</summary>
+        public virtual SnoozesResource Snoozes { get; }
+
+        /// <summary>The "snoozes" collection of methods.</summary>
+        public class SnoozesResource
+        {
+            private const string Resource = "snoozes";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public SnoozesResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// Creates a Snooze that will prevent alerts, which match the provided criteria, from being opened. The
+            /// Snooze applies for a specific time interval.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. The project (https://cloud.google.com/monitoring/api/v3#project_name) in which a Snooze should
+            /// be created. The format is: projects/[PROJECT_ID_OR_NUMBER]
+            /// </param>
+            public virtual CreateRequest Create(Google.Apis.Monitoring.v3.Data.Snooze body, string parent)
+            {
+                return new CreateRequest(this.service, body, parent);
+            }
+
+            /// <summary>
+            /// Creates a Snooze that will prevent alerts, which match the provided criteria, from being opened. The
+            /// Snooze applies for a specific time interval.
+            /// </summary>
+            public class CreateRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.Snooze>
+            {
+                /// <summary>Constructs a new Create request.</summary>
+                public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Monitoring.v3.Data.Snooze body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The project (https://cloud.google.com/monitoring/api/v3#project_name) in which a Snooze
+                /// should be created. The format is: projects/[PROJECT_ID_OR_NUMBER]
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Monitoring.v3.Data.Snooze Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "create";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v3/{+parent}/snoozes";
+
+                /// <summary>Initializes Create parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Retrieves a Snooze by name.</summary>
+            /// <param name="name">
+            /// Required. The ID of the Snooze to retrieve. The format is:
+            /// projects/[PROJECT_ID_OR_NUMBER]/snoozes/[SNOOZE_ID]
+            /// </param>
+            public virtual GetRequest Get(string name)
+            {
+                return new GetRequest(this.service, name);
+            }
+
+            /// <summary>Retrieves a Snooze by name.</summary>
+            public class GetRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.Snooze>
+            {
+                /// <summary>Constructs a new Get request.</summary>
+                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The ID of the Snooze to retrieve. The format is:
+                /// projects/[PROJECT_ID_OR_NUMBER]/snoozes/[SNOOZE_ID]
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "get";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v3/{+name}";
+
+                /// <summary>Initializes Get parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/snoozes/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Lists the Snoozes associated with a project. Can optionally pass in filter, which specifies predicates
+            /// to match Snoozes.
+            /// </summary>
+            /// <param name="parent">
+            /// Required. The project (https://cloud.google.com/monitoring/api/v3#project_name) whose Snoozes should be
+            /// listed. The format is: projects/[PROJECT_ID_OR_NUMBER]
+            /// </param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>
+            /// Lists the Snoozes associated with a project. Can optionally pass in filter, which specifies predicates
+            /// to match Snoozes.
+            /// </summary>
+            public class ListRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.ListSnoozesResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The project (https://cloud.google.com/monitoring/api/v3#project_name) whose Snoozes should
+                /// be listed. The format is: projects/[PROJECT_ID_OR_NUMBER]
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. Optional filter to restrict results to the given criteria. The following fields are
+                /// supported. interval.start_time interval.end_timeFor example:
+                /// ```
+                /// interval.start_time &amp;gt;
+                /// "2022-03-11T00:00:00-08:00" AND interval.end_time &amp;lt; "2022-03-12T00:00:00-08:00"
+                /// ```
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
+
+                /// <summary>
+                /// Optional. The maximum number of results to return for a single query. The server may further
+                /// constrain the maximum number of results returned in a single page. The value should be in the range
+                /// 1, 1000. If the value given is outside this range, the server will decide the number of results to
+                /// be returned.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>
+                /// Optional. The next_page_token from a previous call to ListSnoozesRequest to get the next page of
+                /// results.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v3/{+parent}/snoozes";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+$",
+                    });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Updates a Snooze, identified by its name, with the parameters in the given Snooze object.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. Identifier. The name of the Snooze. The format is:
+            /// projects/[PROJECT_ID_OR_NUMBER]/snoozes/[SNOOZE_ID] The ID of the Snooze will be generated by the
+            /// system.
+            /// </param>
+            public virtual PatchRequest Patch(Google.Apis.Monitoring.v3.Data.Snooze body, string name)
+            {
+                return new PatchRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Updates a Snooze, identified by its name, with the parameters in the given Snooze object.
+            /// </summary>
+            public class PatchRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.Snooze>
+            {
+                /// <summary>Constructs a new Patch request.</summary>
+                public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Monitoring.v3.Data.Snooze body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. Identifier. The name of the Snooze. The format is:
+                /// projects/[PROJECT_ID_OR_NUMBER]/snoozes/[SNOOZE_ID] The ID of the Snooze will be generated by the
+                /// system.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>
+                /// Required. The fields to update.For each field listed in update_mask: If the Snooze object supplied
+                /// in the UpdateSnoozeRequest has a value for that field, the value of the field in the existing Snooze
+                /// will be set to the value of the field in the supplied Snooze. If the field does not have a value in
+                /// the supplied Snooze, the field in the existing Snooze is set to its default value.Fields not listed
+                /// retain their existing value.The following are the field names that are accepted in update_mask:
+                /// display_name interval.start_time interval.end_timeThat said, the start time and end time of the
+                /// Snooze determines which fields can legally be updated. Before attempting an update, users should
+                /// consult the documentation for UpdateSnoozeRequest, which talks about which fields can be updated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual object UpdateMask { get; set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Monitoring.v3.Data.Snooze Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "patch";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "PATCH";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v3/{+name}";
+
+                /// <summary>Initializes Patch parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/snoozes/[^/]+$",
+                    });
+                    RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "updateMask",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+        }
+
         /// <summary>Gets the TimeSeries resource.</summary>
         public virtual TimeSeriesResource TimeSeries { get; }
 
@@ -4595,7 +5130,8 @@ namespace Google.Apis.Monitoring.v3
             /// <summary>
             /// Creates or adds data to one or more time series. The response is empty if all time series in the request
             /// were written. If any time series could not be written, a corresponding failure message is included in
-            /// the error response.
+            /// the error response. This method does not support resource locations constraint of an organization policy
+            /// (https://cloud.google.com/resource-manager/docs/organization-policy/defining-locations#setting_the_organization_policy).
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -4604,13 +5140,14 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Monitoring.v3.Data.CreateTimeSeriesRequest body, string name)
             {
-                return new CreateRequest(service, body, name);
+                return new CreateRequest(this.service, body, name);
             }
 
             /// <summary>
             /// Creates or adds data to one or more time series. The response is empty if all time series in the request
             /// were written. If any time series could not be written, a corresponding failure message is included in
-            /// the error response.
+            /// the error response. This method does not support resource locations constraint of an organization policy
+            /// (https://cloud.google.com/resource-manager/docs/organization-policy/defining-locations#setting_the_organization_policy).
             /// </summary>
             public class CreateRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.Empty>
             {
@@ -4673,7 +5210,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual CreateServiceRequest CreateService(Google.Apis.Monitoring.v3.Data.CreateTimeSeriesRequest body, string name)
             {
-                return new CreateServiceRequest(service, body, name);
+                return new CreateServiceRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -4730,7 +5267,7 @@ namespace Google.Apis.Monitoring.v3
                 }
             }
 
-            /// <summary>Lists time series that match a filter. This method does not require a Workspace.</summary>
+            /// <summary>Lists time series that match a filter.</summary>
             /// <param name="name">
             /// Required. The project (https://cloud.google.com/monitoring/api/v3#project_name), organization or folder
             /// on which to execute the request. The format is: projects/[PROJECT_ID_OR_NUMBER]
@@ -4738,10 +5275,10 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
-            /// <summary>Lists time series that match a filter. This method does not require a Workspace.</summary>
+            /// <summary>Lists time series that match a filter.</summary>
             public class ListRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.ListTimeSeriesResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -5122,16 +5659,67 @@ namespace Google.Apis.Monitoring.v3
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
 
-                /// <summary>Required. The end of the time interval.</summary>
-                [Google.Apis.Util.RequestParameterAttribute("interval.endTime", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual object IntervalEndTime { get; set; }
+                private object _intervalEndTime;
 
                 /// <summary>
-                /// Optional. The beginning of the time interval. The default value for the start time is the end time.
-                /// The start time must not be later than the end time.
+                /// String representation of <see cref="IntervalEndTimeDateTimeOffset"/>, formatted for inclusion in the
+                /// HTTP request.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("interval.endTime", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string IntervalEndTimeRaw { get; private set; }
+
+                /// <summary><seealso cref="object"/> representation of <see cref="IntervalEndTimeRaw"/>.</summary>
+                [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IntervalEndTimeDateTimeOffset instead.")]
+                public virtual object IntervalEndTime
+                {
+                    get => _intervalEndTime;
+                    set
+                    {
+                        IntervalEndTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                        _intervalEndTime = value;
+                    }
+                }
+
+                public virtual System.DateTimeOffset? IntervalEndTimeDateTimeOffset
+                {
+                    get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IntervalEndTimeRaw);
+                    set
+                    {
+                        IntervalEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                        _intervalEndTime = value;
+                    }
+                }
+
+                private object _intervalStartTime;
+
+                /// <summary>
+                /// String representation of <see cref="IntervalStartTimeDateTimeOffset"/>, formatted for inclusion in
+                /// the HTTP request.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("interval.startTime", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual object IntervalStartTime { get; set; }
+                public virtual string IntervalStartTimeRaw { get; private set; }
+
+                /// <summary><seealso cref="object"/> representation of <see cref="IntervalStartTimeRaw"/>.</summary>
+                [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IntervalStartTimeDateTimeOffset instead.")]
+                public virtual object IntervalStartTime
+                {
+                    get => _intervalStartTime;
+                    set
+                    {
+                        IntervalStartTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                        _intervalStartTime = value;
+                    }
+                }
+
+                public virtual System.DateTimeOffset? IntervalStartTimeDateTimeOffset
+                {
+                    get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IntervalStartTimeRaw);
+                    set
+                    {
+                        IntervalStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                        _intervalStartTime = value;
+                    }
+                }
 
                 /// <summary>
                 /// Unsupported: must be left blank. The points in each time series are currently returned in reverse
@@ -5675,7 +6263,9 @@ namespace Google.Apis.Monitoring.v3
             }
 
             /// <summary>
-            /// Queries time series using Monitoring Query Language. This method does not require a Workspace.
+            /// Queries time series by using Monitoring Query Language (MQL). We recommend using PromQL instead of MQL.
+            /// For more information about the status of MQL, see the MQL deprecation notice
+            /// (https://cloud.google.com/stackdriver/docs/deprecations/mql).
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -5684,11 +6274,13 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual QueryRequest Query(Google.Apis.Monitoring.v3.Data.QueryTimeSeriesRequest body, string name)
             {
-                return new QueryRequest(service, body, name);
+                return new QueryRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Queries time series using Monitoring Query Language. This method does not require a Workspace.
+            /// Queries time series by using Monitoring Query Language (MQL). We recommend using PromQL instead of MQL.
+            /// For more information about the status of MQL, see the MQL deprecation notice
+            /// (https://cloud.google.com/stackdriver/docs/deprecations/mql).
             /// </summary>
             public class QueryRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.QueryTimeSeriesResponse>
             {
@@ -5763,7 +6355,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Monitoring.v3.Data.UptimeCheckConfig body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a new Uptime check configuration.</summary>
@@ -5825,7 +6417,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -5880,7 +6472,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a single Uptime check configuration.</summary>
@@ -5934,7 +6526,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -5956,6 +6548,14 @@ namespace Google.Apis.Monitoring.v3
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// If provided, this field specifies the criteria that must be met by uptime checks to be included in
+                /// the response.For more details, see Filtering syntax
+                /// (https://cloud.google.com/monitoring/api/v3/sorting-and-filtering#filter_syntax).
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
 
                 /// <summary>
                 /// The maximum number of results to return in a single response. The server may further constrain the
@@ -5994,6 +6594,14 @@ namespace Google.Apis.Monitoring.v3
                         DefaultValue = null,
                         Pattern = @"^projects/[^/]+$",
                     });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
                     {
                         Name = "pageSize",
@@ -6020,7 +6628,7 @@ namespace Google.Apis.Monitoring.v3
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
-            /// A unique resource name for this Uptime check configuration. The format is:
+            /// Identifier. A unique resource name for this Uptime check configuration. The format is:
             /// projects/[PROJECT_ID_OR_NUMBER]/uptimeCheckConfigs/[UPTIME_CHECK_ID] [PROJECT_ID_OR_NUMBER] is the
             /// Workspace host project associated with the Uptime check.This field should be omitted when creating the
             /// Uptime check configuration; on create, the resource name is assigned by the server and included in the
@@ -6028,7 +6636,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Monitoring.v3.Data.UptimeCheckConfig body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -6047,7 +6655,7 @@ namespace Google.Apis.Monitoring.v3
                 }
 
                 /// <summary>
-                /// A unique resource name for this Uptime check configuration. The format is:
+                /// Identifier. A unique resource name for this Uptime check configuration. The format is:
                 /// projects/[PROJECT_ID_OR_NUMBER]/uptimeCheckConfigs/[UPTIME_CHECK_ID] [PROJECT_ID_OR_NUMBER] is the
                 /// Workspace host project associated with the Uptime check.This field should be omitted when creating
                 /// the Uptime check configuration; on create, the resource name is assigned by the server and included
@@ -6144,7 +6752,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Monitoring.v3.Data.ServiceLevelObjective body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Create a ServiceLevelObjective for the given Service.</summary>
@@ -6167,7 +6775,7 @@ namespace Google.Apis.Monitoring.v3
 
                 /// <summary>
                 /// Optional. The ServiceLevelObjective id to use for this ServiceLevelObjective. If omitted, an id will
-                /// be generated instead. Must match the pattern [a-z0-9\-]+
+                /// be generated instead. Must match the pattern ^[a-zA-Z0-9-_:.]+$
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("serviceLevelObjectiveId", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string ServiceLevelObjectiveId { get; set; }
@@ -6217,7 +6825,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Delete the given ServiceLevelObjective.</summary>
@@ -6268,7 +6876,7 @@ namespace Google.Apis.Monitoring.v3
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Get a ServiceLevelObjective by name.</summary>
@@ -6358,12 +6966,12 @@ namespace Google.Apis.Monitoring.v3
             /// <summary>List the ServiceLevelObjectives for the given Service.</summary>
             /// <param name="parent">
             /// Required. Resource name of the parent containing the listed SLOs, either a project or a Monitoring
-            /// Workspace. The formats are: projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]
+            /// Metrics Scope. The formats are: projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]
             /// workspaces/[HOST_PROJECT_ID_OR_NUMBER]/services/-
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>List the ServiceLevelObjectives for the given Service.</summary>
@@ -6378,7 +6986,7 @@ namespace Google.Apis.Monitoring.v3
 
                 /// <summary>
                 /// Required. Resource name of the parent containing the listed SLOs, either a project or a Monitoring
-                /// Workspace. The formats are: projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]
+                /// Metrics Scope. The formats are: projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]
                 /// workspaces/[HOST_PROJECT_ID_OR_NUMBER]/services/-
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
@@ -6497,12 +7105,12 @@ namespace Google.Apis.Monitoring.v3
             /// <summary>Update the given ServiceLevelObjective.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
-            /// Resource name for this ServiceLevelObjective. The format is:
+            /// Identifier. Resource name for this ServiceLevelObjective. The format is:
             /// projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]/serviceLevelObjectives/[SLO_NAME]
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Monitoring.v3.Data.ServiceLevelObjective body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Update the given ServiceLevelObjective.</summary>
@@ -6517,7 +7125,7 @@ namespace Google.Apis.Monitoring.v3
                 }
 
                 /// <summary>
-                /// Resource name for this ServiceLevelObjective. The format is:
+                /// Identifier. Resource name for this ServiceLevelObjective. The format is:
                 /// projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]/serviceLevelObjectives/[SLO_NAME]
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -6569,12 +7177,12 @@ namespace Google.Apis.Monitoring.v3
         /// <summary>Create a Service.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="parent">
-        /// Required. Resource name (https://cloud.google.com/monitoring/api/v3#project_name) of the parent workspace.
-        /// The format is: projects/[PROJECT_ID_OR_NUMBER]
+        /// Required. Resource name (https://cloud.google.com/monitoring/api/v3#project_name) of the parent Metrics
+        /// Scope. The format is: projects/[PROJECT_ID_OR_NUMBER]
         /// </param>
         public virtual CreateRequest Create(Google.Apis.Monitoring.v3.Data.Service body, string parent)
         {
-            return new CreateRequest(service, body, parent);
+            return new CreateRequest(this.service, body, parent);
         }
 
         /// <summary>Create a Service.</summary>
@@ -6589,8 +7197,8 @@ namespace Google.Apis.Monitoring.v3
             }
 
             /// <summary>
-            /// Required. Resource name (https://cloud.google.com/monitoring/api/v3#project_name) of the parent
-            /// workspace. The format is: projects/[PROJECT_ID_OR_NUMBER]
+            /// Required. Resource name (https://cloud.google.com/monitoring/api/v3#project_name) of the parent Metrics
+            /// Scope. The format is: projects/[PROJECT_ID_OR_NUMBER]
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Parent { get; private set; }
@@ -6647,7 +7255,7 @@ namespace Google.Apis.Monitoring.v3
         /// </param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>Soft delete this Service.</summary>
@@ -6698,7 +7306,7 @@ namespace Google.Apis.Monitoring.v3
         /// </param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Get the named Service.</summary>
@@ -6742,18 +7350,18 @@ namespace Google.Apis.Monitoring.v3
             }
         }
 
-        /// <summary>List Services for this workspace.</summary>
+        /// <summary>List Services for this Metrics Scope.</summary>
         /// <param name="parent">
         /// Required. Resource name of the parent containing the listed services, either a project
-        /// (https://cloud.google.com/monitoring/api/v3#project_name) or a Monitoring Workspace. The formats are:
+        /// (https://cloud.google.com/monitoring/api/v3#project_name) or a Monitoring Metrics Scope. The formats are:
         /// projects/[PROJECT_ID_OR_NUMBER] workspaces/[HOST_PROJECT_ID_OR_NUMBER]
         /// </param>
         public virtual ListRequest List(string parent)
         {
-            return new ListRequest(service, parent);
+            return new ListRequest(this.service, parent);
         }
 
-        /// <summary>List Services for this workspace.</summary>
+        /// <summary>List Services for this Metrics Scope.</summary>
         public class ListRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.ListServicesResponse>
         {
             /// <summary>Constructs a new List request.</summary>
@@ -6765,22 +7373,25 @@ namespace Google.Apis.Monitoring.v3
 
             /// <summary>
             /// Required. Resource name of the parent containing the listed services, either a project
-            /// (https://cloud.google.com/monitoring/api/v3#project_name) or a Monitoring Workspace. The formats are:
-            /// projects/[PROJECT_ID_OR_NUMBER] workspaces/[HOST_PROJECT_ID_OR_NUMBER]
+            /// (https://cloud.google.com/monitoring/api/v3#project_name) or a Monitoring Metrics Scope. The formats
+            /// are: projects/[PROJECT_ID_OR_NUMBER] workspaces/[HOST_PROJECT_ID_OR_NUMBER]
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Parent { get; private set; }
 
             /// <summary>
-            /// A filter specifying what Services to return. The filter currently supports the following fields: -
-            /// `identifier_case` - `app_engine.module_id` - `cloud_endpoints.service` (reserved for future use) -
-            /// `mesh_istio.mesh_uid` - `mesh_istio.service_namespace` - `mesh_istio.service_name` -
-            /// `cluster_istio.location` (deprecated) - `cluster_istio.cluster_name` (deprecated) -
-            /// `cluster_istio.service_namespace` (deprecated) - `cluster_istio.service_name` (deprecated)
-            /// identifier_case refers to which option in the identifier oneof is populated. For example, the filter
-            /// identifier_case = "CUSTOM" would match all services with a value for the custom field. Valid options are
-            /// "CUSTOM", "APP_ENGINE", "MESH_ISTIO", plus "CLUSTER_ISTIO" (deprecated) and "CLOUD_ENDPOINTS" (reserved
-            /// for future use).
+            /// A filter specifying what Services to return. The filter supports filtering on a particular
+            /// service-identifier type or one of its attributes.To filter on a particular service-identifier type, the
+            /// identifier_case refers to which option in the identifier field is populated. For example, the filter
+            /// identifier_case = "CUSTOM" would match all services with a value for the custom field. Valid options
+            /// include "CUSTOM", "APP_ENGINE", "MESH_ISTIO", and the other options listed at
+            /// https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services#ServiceTo filter on an attribute of a
+            /// service-identifier type, apply the filter name by using the snake case of the service-identifier type
+            /// and the attribute of that service-identifier type, and join the two with a period. For example, to
+            /// filter by the meshUid field of the MeshIstio service-identifier type, you must filter on
+            /// mesh_istio.mesh_uid = "123" to match all services with mesh UID "123". Service-identifier types and
+            /// their attributes are described at
+            /// https://cloud.google.com/monitoring/api/ref_v3/rest/v3/services#Service
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; set; }
@@ -6850,11 +7461,12 @@ namespace Google.Apis.Monitoring.v3
         /// <summary>Update this Service.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="name">
-        /// Resource name for this Service. The format is: projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]
+        /// Identifier. Resource name for this Service. The format is:
+        /// projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Monitoring.v3.Data.Service body, string name)
         {
-            return new PatchRequest(service, body, name);
+            return new PatchRequest(this.service, body, name);
         }
 
         /// <summary>Update this Service.</summary>
@@ -6869,7 +7481,8 @@ namespace Google.Apis.Monitoring.v3
             }
 
             /// <summary>
-            /// Resource name for this Service. The format is: projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]
+            /// Identifier. Resource name for this Service. The format is:
+            /// projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Name { get; private set; }
@@ -6931,13 +7544,13 @@ namespace Google.Apis.Monitoring.v3
             this.service = service;
         }
 
-        /// <summary>Returns the list of IP addresses that checkers run from</summary>
+        /// <summary>Returns the list of IP addresses that checkers run from.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
-        /// <summary>Returns the list of IP addresses that checkers run from</summary>
+        /// <summary>Returns the list of IP addresses that checkers run from.</summary>
         public class ListRequest : MonitoringBaseServiceRequest<Google.Apis.Monitoring.v3.Data.ListUptimeCheckIpsResponse>
         {
             /// <summary>Constructs a new List request.</summary>
@@ -7072,12 +7685,12 @@ namespace Google.Apis.Monitoring.v3.Data
 
     /// <summary>
     /// A description of the conditions under which some aspect of your system is considered to be "unhealthy" and the
-    /// ways to notify people or services about this state. For an overview of alert policies, see Introduction to
+    /// ways to notify people or services about this state. For an overview of alerting policies, see Introduction to
     /// Alerting (https://cloud.google.com/monitoring/alerts/).
     /// </summary>
     public class AlertPolicy : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Control over how this alert policy's notification channels are notified.</summary>
+        /// <summary>Control over how this alerting policy's notification channels are notified.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("alertStrategy")]
         public virtual AlertStrategy AlertStrategy { get; set; }
 
@@ -7091,7 +7704,8 @@ namespace Google.Apis.Monitoring.v3.Data
         /// <summary>
         /// A list of conditions for the policy. The conditions are combined by AND or OR according to the combiner
         /// field. If the combined conditions evaluate to true, then an incident is created. A policy can have from one
-        /// to six conditions. If condition_time_series_query_language is present, it must be the only condition.
+        /// to six conditions. If condition_time_series_query_language is present, it must be the only condition. If
+        /// condition_monitoring_query_language is present, it must be the only condition.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("conditions")]
         public virtual System.Collections.Generic.IList<Condition> Conditions { get; set; }
@@ -7106,7 +7720,10 @@ namespace Google.Apis.Monitoring.v3.Data
         /// <summary>
         /// A short name or phrase used to identify the policy in dashboards, notifications, and incidents. To avoid
         /// confusion, don't use the same display name for multiple policies in the same project. The name is limited to
-        /// 512 Unicode characters.
+        /// 512 Unicode characters.The convention for the display_name of a PrometheusQueryLanguageCondition is "{rule
+        /// group name}/{alert name}", where the {rule group name} and {alert name} should be taken from the
+        /// corresponding Prometheus configuration file. This convention is not enforced. In any case the display_name
+        /// is not a unique key of the AlertPolicy.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
@@ -7137,8 +7754,8 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual MutationRecord MutationRecord { get; set; }
 
         /// <summary>
-        /// Required if the policy exists. The resource name for this policy. The format is:
-        /// projects/[PROJECT_ID_OR_NUMBER]/alertPolicies/[ALERT_POLICY_ID] [ALERT_POLICY_ID] is assigned by Stackdriver
+        /// Identifier. Required if the policy exists. The resource name for this policy. The format is:
+        /// projects/[PROJECT_ID_OR_NUMBER]/alertPolicies/[ALERT_POLICY_ID] [ALERT_POLICY_ID] is assigned by Cloud
         /// Monitoring when the policy is created. When calling the alertPolicies.create method, do not include the name
         /// field in the alerting policy passed as part of the request.
         /// </summary>
@@ -7156,17 +7773,27 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual System.Collections.Generic.IList<string> NotificationChannels { get; set; }
 
         /// <summary>
+        /// Optional. The severity of an alerting policy indicates how important incidents generated by that policy are.
+        /// The severity level will be displayed on the Incident detail page and in notifications.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("severity")]
+        public virtual string Severity { get; set; }
+
+        /// <summary>
         /// User-supplied key/value data to be used for organizing and identifying the AlertPolicy objects.The field can
         /// contain up to 64 entries. Each key and value is limited to 63 Unicode characters or 128 bytes, whichever is
         /// smaller. Labels and values can contain only lowercase letters, numerals, underscores, and dashes. Keys must
-        /// begin with a letter.
+        /// begin with a letter.Note that Prometheus {alert name} is a valid Prometheus label names
+        /// (https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels), whereas Prometheus {rule group}
+        /// is an unrestricted UTF-8 string. This means that they cannot be stored as-is in user labels, because they
+        /// may contain characters that are not allowed in user-label values.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userLabels")]
         public virtual System.Collections.Generic.IDictionary<string, string> UserLabels { get; set; }
 
         /// <summary>
-        /// Read-only description of how the alert policy is invalid. OK if the alert policy is valid. If not OK, the
-        /// alert policy will not generate incidents.
+        /// Read-only description of how the alerting policy is invalid. This field is only set when the alerting policy
+        /// is invalid. An invalid alerting policy will not generate incidents.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("validity")]
         public virtual Status Validity { get; set; }
@@ -7181,14 +7808,25 @@ namespace Google.Apis.Monitoring.v3.Data
     public class AlertStrategy : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// If an alert policy that was active has no data for this long, any open incidents will close
+        /// If an alerting policy that was active has no data for this long, any open incidents will close
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("autoClose")]
         public virtual object AutoClose { get; set; }
 
+        /// <summary>Control how notifications will be sent out, on a per-channel basis.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("notificationChannelStrategy")]
+        public virtual System.Collections.Generic.IList<NotificationChannelStrategy> NotificationChannelStrategy { get; set; }
+
         /// <summary>
-        /// Required for alert policies with a LogMatch condition.This limit is not implemented for alert policies that
-        /// are not log-based.
+        /// For log-based alert policies, the notification prompts is always OPENED. For non log-based alert policies,
+        /// the notification prompts can be OPENED or OPENED, CLOSED.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("notificationPrompts")]
+        public virtual System.Collections.Generic.IList<string> NotificationPrompts { get; set; }
+
+        /// <summary>
+        /// Required for log-based alerting policies, i.e. policies with a LogMatch condition.This limit is not
+        /// implemented for alerting policies that do not have a LogMatch condition.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("notificationRateLimit")]
         public virtual NotificationRateLimit NotificationRateLimit { get; set; }
@@ -7202,7 +7840,7 @@ namespace Google.Apis.Monitoring.v3.Data
     {
         /// <summary>
         /// The ID of the App Engine module underlying this service. Corresponds to the module_id resource label in the
-        /// gae_app monitored resource: https://cloud.google.com/monitoring/api/resources#tag_gae_app
+        /// gae_app monitored resource (https://cloud.google.com/monitoring/api/resources#tag_gae_app).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("moduleId")]
         public virtual string ModuleId { get; set; }
@@ -7231,6 +7869,32 @@ namespace Google.Apis.Monitoring.v3.Data
         /// <summary>The username to use when authenticating with the HTTP server.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("username")]
         public virtual string Username { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A well-known service type, defined by its service type and service labels. Documentation and examples here
+    /// (https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/api/api-structures#basic-svc-w-basic-sli).
+    /// </summary>
+    public class BasicService : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Labels that specify the resource that emits the monitoring data which is used for SLO reporting of this
+        /// Service. Documentation and valid values for given service types here
+        /// (https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/api/api-structures#basic-svc-w-basic-sli).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceLabels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> ServiceLabels { get; set; }
+
+        /// <summary>
+        /// The type of service that this basic service defines, e.g. APP_ENGINE service type. Documentation and valid
+        /// values here
+        /// (https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/api/api-structures#basic-svc-w-basic-sli).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceType")]
+        public virtual string ServiceType { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7286,6 +7950,20 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A test that uses an alerting result in a boolean column produced by the SQL query.</summary>
+    public class BooleanTest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The name of the column containing the boolean value. If the value in a row is NULL, that row is
+        /// ignored.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("column")]
+        public virtual string Column { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// BucketOptions describes the bucket boundaries used to create a histogram for the distribution. The buckets can
     /// be in a linear sequence, an exponential sequence, or each bucket can be specified explicitly. BucketOptions does
@@ -7320,10 +7998,53 @@ namespace Google.Apis.Monitoring.v3.Data
     {
         /// <summary>
         /// The name of the Cloud Endpoints service underlying this service. Corresponds to the service resource label
-        /// in the api monitored resource: https://cloud.google.com/monitoring/api/resources#tag_api
+        /// in the api monitored resource (https://cloud.google.com/monitoring/api/resources#tag_api).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("service")]
         public virtual string Service { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A Synthetic Monitor deployed to a Cloud Functions V2 instance.</summary>
+    public class CloudFunctionV2Target : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. The cloud_run_revision Monitored Resource associated with the GCFv2. The Synthetic Monitor
+        /// execution results (metrics, logs, and spans) are reported against this Monitored Resource. This field is
+        /// output only.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudRunRevision")]
+        public virtual MonitoredResource CloudRunRevision { get; set; }
+
+        /// <summary>
+        /// Required. Fully qualified GCFv2 resource name i.e.
+        /// projects/{project}/locations/{location}/functions/{function} Required.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Cloud Run service. Learn more at https://cloud.google.com/run.</summary>
+    public class CloudRun : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The location the service is run. Corresponds to the location resource label in the cloud_run_revision
+        /// monitored resource (https://cloud.google.com/monitoring/api/resources#tag_cloud_run_revision).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>
+        /// The name of the Cloud Run service. Corresponds to the service_name resource label in the cloud_run_revision
+        /// monitored resource (https://cloud.google.com/monitoring/api/resources#tag_cloud_run_revision).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceName")]
+        public virtual string ServiceName { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7373,9 +8094,42 @@ namespace Google.Apis.Monitoring.v3.Data
     /// </summary>
     public class CollectdPayload : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The end time of the interval.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The measurement metadata. Example: "process_id" -&gt; 12345</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
@@ -7389,9 +8143,42 @@ namespace Google.Apis.Monitoring.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("pluginInstance")]
         public virtual string PluginInstance { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The start time of the interval.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The measurement type. Example: "memory".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
@@ -7497,6 +8284,14 @@ namespace Google.Apis.Monitoring.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("conditionMonitoringQueryLanguage")]
         public virtual MonitoringQueryLanguageCondition ConditionMonitoringQueryLanguage { get; set; }
 
+        /// <summary>A condition that uses the Prometheus query language to define alerts.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("conditionPrometheusQueryLanguage")]
+        public virtual PrometheusQueryLanguageCondition ConditionPrometheusQueryLanguage { get; set; }
+
+        /// <summary>A condition that periodically evaluates a SQL query result.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("conditionSql")]
+        public virtual SqlCondition ConditionSql { get; set; }
+
         /// <summary>A condition that compares a time series against a threshold.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("conditionThreshold")]
         public virtual MetricThreshold ConditionThreshold { get; set; }
@@ -7511,14 +8306,14 @@ namespace Google.Apis.Monitoring.v3.Data
         /// <summary>
         /// Required if the condition exists. The unique resource name for this condition. Its format is:
         /// projects/[PROJECT_ID_OR_NUMBER]/alertPolicies/[POLICY_ID]/conditions/[CONDITION_ID] [CONDITION_ID] is
-        /// assigned by Stackdriver Monitoring when the condition is created as part of a new or updated alerting
-        /// policy.When calling the alertPolicies.create method, do not include the name field in the conditions of the
-        /// requested alerting policy. Stackdriver Monitoring creates the condition identifiers and includes them in the
-        /// new policy.When calling the alertPolicies.update method to update a policy, including a condition name
-        /// causes the existing condition to be updated. Conditions without names are added to the updated policy.
-        /// Existing conditions are deleted if they are not updated.Best practice is to preserve [CONDITION_ID] if you
-        /// make only small changes, such as those to condition thresholds, durations, or trigger values. Otherwise,
-        /// treat the change as a new condition and let the existing condition be deleted.
+        /// assigned by Cloud Monitoring when the condition is created as part of a new or updated alerting policy.When
+        /// calling the alertPolicies.create method, do not include the name field in the conditions of the requested
+        /// alerting policy. Cloud Monitoring creates the condition identifiers and includes them in the new policy.When
+        /// calling the alertPolicies.update method to update a policy, including a condition name causes the existing
+        /// condition to be updated. Conditions without names are added to the updated policy. Existing conditions are
+        /// deleted if they are not updated.Best practice is to preserve [CONDITION_ID] if you make only small changes,
+        /// such as those to condition thresholds, durations, or trigger values. Otherwise, treat the change as a new
+        /// condition and let the existing condition be deleted.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -7535,11 +8330,15 @@ namespace Google.Apis.Monitoring.v3.Data
     public class ContentMatcher : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// String or regex content to match. Maximum 1024 bytes. An empty content string indicates no content matching
-        /// is to be performed.
+        /// String, regex or JSON content to match. Maximum 1024 bytes. An empty content string indicates no content
+        /// matching is to be performed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("content")]
         public virtual string Content { get; set; }
+
+        /// <summary>Matcher information for MATCHES_JSON_PATH and NOT_MATCHES_JSON_PATH</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("jsonPathMatcher")]
+        public virtual JsonPathMatcher JsonPathMatcher { get; set; }
 
         /// <summary>
         /// The type of content matcher that will be applied to the server output, compared to the content string when
@@ -7633,9 +8432,64 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Custom view of service telemetry. Currently a place-holder pending final design.</summary>
+    /// <summary>
+    /// Criteria specific to the AlertPolicys that this Snooze applies to. The Snooze will suppress alerts that come
+    /// from one of the AlertPolicys whose names are supplied.
+    /// </summary>
+    public class Criteria : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The filter string to match on Alert fields when silencing the alerts. It follows the standard
+        /// https://google.aip.dev/160 syntax. A filter string used to apply the snooze to specific incidents that have
+        /// matching filter values. Filters can be defined for snoozes that apply to one alerting policy. Filters must
+        /// be a string formatted as one or more resource labels with specific label values. If multiple resource labels
+        /// are used, then they must be connected with an AND operator. For example, the following filter applies the
+        /// snooze to incidents that have an instance ID of 1234567890 and a zone of us-central1-a:
+        /// resource.labels.instance_id="1234567890" AND resource.labels.zone="us-central1-a"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filter")]
+        public virtual string Filter { get; set; }
+
+        /// <summary>
+        /// The specific AlertPolicy names for the alert that should be snoozed. The format is:
+        /// projects/[PROJECT_ID_OR_NUMBER]/alertPolicies/[POLICY_ID] There is a limit of 16 policies per snooze. This
+        /// limit is checked during snooze creation. Exactly 1 alert policy is required if filter is specified at the
+        /// same time.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policies")]
+        public virtual System.Collections.Generic.IList<string> Policies { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Use a custom service to designate a service that you want to monitor when none of the other service types (like
+    /// App Engine, Cloud Run, or a GKE type) matches your intended service.
+    /// </summary>
     public class Custom : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Used to schedule the query to run every so many days.</summary>
+    public class Daily : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The time of day (in UTC) at which the query should run. If left unspecified, the server picks an
+        /// arbitrary time of day and runs the query at the same time each day.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("executionTime")]
+        public virtual TimeOfDay ExecutionTime { get; set; }
+
+        /// <summary>
+        /// Required. The number of days between runs. Must be greater than or equal to 1 day and less than or equal to
+        /// 31 days.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("periodicity")]
+        public virtual System.Nullable<int> Periodicity { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -7729,15 +8583,24 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A content string and a MIME type that describes the content string's format.</summary>
+    /// <summary>Documentation that is included in the notifications and incidents pertaining to this policy.</summary>
     public class Documentation : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The text of the documentation, interpreted according to mime_type. The content may not exceed 8,192 Unicode
+        /// The body of the documentation, interpreted according to mime_type. The content may not exceed 8,192 Unicode
         /// characters and may not exceed more than 10,240 bytes when encoded in UTF-8 format, whichever is smaller.
+        /// This text can be templatized by using variables
+        /// (https://cloud.google.com/monitoring/alerts/doc-variables#doc-vars).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("content")]
         public virtual string Content { get; set; }
+
+        /// <summary>
+        /// Optional. Links to content such as playbooks, repositories, and other resources. This field can contain up
+        /// to 3 entries.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("links")]
+        public virtual System.Collections.Generic.IList<Link> Links { get; set; }
 
         /// <summary>
         /// The format of the content field. Presently, only the value "text/markdown" is supported. See Markdown
@@ -7745,6 +8608,19 @@ namespace Google.Apis.Monitoring.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mimeType")]
         public virtual string MimeType { get; set; }
+
+        /// <summary>
+        /// Optional. The subject line of the notification. The subject line may not exceed 10,240 bytes. In
+        /// notifications generated by this policy, the contents of the subject line after variable expansion will be
+        /// truncated to 255 bytes or shorter at the latest UTF-8 character boundary. The 255-byte limit is recommended
+        /// by this thread (https://stackoverflow.com/questions/1592291/what-is-the-email-subject-length-limit). It is
+        /// both the limit imposed by some third-party ticketing products and it is common to define textual fields in
+        /// databases as VARCHAR(255).The contents of the subject line can be templatized by using variables
+        /// (https://cloud.google.com/monitoring/alerts/doc-variables#doc-vars). If this field is missing or empty, a
+        /// default subject line will be generated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subject")]
+        public virtual string Subject { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7773,8 +8649,7 @@ namespace Google.Apis.Monitoring.v3.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for Empty is empty JSON
-    /// object {}.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -7815,9 +8690,42 @@ namespace Google.Apis.Monitoring.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("attachments")]
         public virtual System.Collections.Generic.IList<System.Collections.Generic.IDictionary<string, object>> Attachments { get; set; }
 
+        private string _timestampRaw;
+
+        private object _timestamp;
+
         /// <summary>The observation (sampling) time of the above value.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timestamp")]
-        public virtual object Timestamp { get; set; }
+        public virtual string TimestampRaw
+        {
+            get => _timestampRaw;
+            set
+            {
+                _timestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimestampDateTimeOffset instead.")]
+        public virtual object Timestamp
+        {
+            get => _timestamp;
+            set
+            {
+                _timestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _timestamp = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimestampRaw);
+            set => TimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Value of the exemplar point. This value determines to which bucket the exemplar belongs.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("value")]
@@ -7847,7 +8755,7 @@ namespace Google.Apis.Monitoring.v3.Data
     /// Specifies an exponential sequence of buckets that have a width that is proportional to the value of the lower
     /// bound. Each bucket represents a constant relative uncertainty on a specific value in the bucket.There are
     /// num_finite_buckets + 2 (= N) buckets. Bucket i has the following boundaries:Upper bound (0 &amp;lt;= i &amp;lt;
-    /// N-1): scale * (growth_factor ^ i). Lower bound (1 &amp;lt;= i &amp;lt; N): scale * (growth_factor ^ (i - 1)).
+    /// N-1): scale * (growth_factor ^ i).Lower bound (1 &amp;lt;= i &amp;lt; N): scale * (growth_factor ^ (i - 1)).
     /// </summary>
     public class Exponential : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -7920,9 +8828,31 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Options used when forecasting the time series and testing the predicted value against the threshold.
+    /// </summary>
+    public class ForecastOptions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The length of time into the future to forecast whether a time series will violate the threshold.
+        /// If the predicted value is found to violate the threshold, and the violation is observed in all forecasts
+        /// made for the configured duration, then the time series is considered to be failing. The forecast horizon can
+        /// range from 1 hour to 60 hours.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("forecastHorizon")]
+        public virtual object ForecastHorizon { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The GetNotificationChannelVerificationCode request.</summary>
     public class GetNotificationChannelVerificationCodeRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
         /// <summary>
         /// The desired expiration time. If specified, the API will guarantee that the returned code will not be valid
         /// after the specified timestamp; however, the API cannot guarantee that the returned code will be valid for at
@@ -7932,7 +8862,36 @@ namespace Google.Apis.Monitoring.v3.Data
         /// though the API does impose an upper limit on the maximum expiration that is permitted).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7949,12 +8908,145 @@ namespace Google.Apis.Monitoring.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("code")]
         public virtual string Code { get; set; }
 
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
         /// <summary>
         /// The expiration time associated with the code that was returned. If an expiration was provided in the
         /// request, this is the minimum of the requested expiration in the request and the max permitted expiration.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// GKE Namespace. The field names correspond to the resource metadata labels on monitored resources that fall under
+    /// a namespace (for example, k8s_container or k8s_pod).
+    /// </summary>
+    public class GkeNamespace : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The name of the parent cluster.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clusterName")]
+        public virtual string ClusterName { get; set; }
+
+        /// <summary>The location of the parent cluster. This may be a zone or region.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>The name of this namespace.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("namespaceName")]
+        public virtual string NamespaceName { get; set; }
+
+        /// <summary>
+        /// Output only. The project this resource lives in. For legacy services migrated from the Custom type, this may
+        /// be a distinct project from the one parenting the service itself.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
+        public virtual string ProjectId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// GKE Service. The "service" here represents a Kubernetes service object
+    /// (https://kubernetes.io/docs/concepts/services-networking/service). The field names correspond to the resource
+    /// labels on k8s_service monitored resources (https://cloud.google.com/monitoring/api/resources#tag_k8s_service).
+    /// </summary>
+    public class GkeService : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The name of the parent cluster.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clusterName")]
+        public virtual string ClusterName { get; set; }
+
+        /// <summary>The location of the parent cluster. This may be a zone or region.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>The name of the parent namespace.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("namespaceName")]
+        public virtual string NamespaceName { get; set; }
+
+        /// <summary>
+        /// Output only. The project this resource lives in. For legacy services migrated from the Custom type, this may
+        /// be a distinct project from the one parenting the service itself.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
+        public virtual string ProjectId { get; set; }
+
+        /// <summary>The name of this service.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceName")]
+        public virtual string ServiceName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A GKE Workload (Deployment, StatefulSet, etc). The field names correspond to the metadata labels on monitored
+    /// resources that fall under a workload (for example, k8s_container or k8s_pod).
+    /// </summary>
+    public class GkeWorkload : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The name of the parent cluster.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clusterName")]
+        public virtual string ClusterName { get; set; }
+
+        /// <summary>The location of the parent cluster. This may be a zone or region.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>The name of the parent namespace.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("namespaceName")]
+        public virtual string NamespaceName { get; set; }
+
+        /// <summary>
+        /// Output only. The project this resource lives in. For legacy services migrated from the Custom type, this may
+        /// be a distinct project from the one parenting the service itself.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
+        public virtual string ProjectId { get; set; }
+
+        /// <summary>The name of this workload.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("topLevelControllerName")]
+        public virtual string TopLevelControllerName { get; set; }
+
+        /// <summary>The type of this workload (for example, "Deployment" or "DaemonSet")</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("topLevelControllerType")]
+        public virtual string TopLevelControllerType { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -8028,10 +9120,41 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Used to schedule the query to run every so many hours.</summary>
+    public class Hourly : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The number of minutes after the hour (in UTC) to run the query. Must be greater than or equal to 0
+        /// minutes and less than or equal to 59 minutes. If left unspecified, then an arbitrary offset is used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minuteOffset")]
+        public virtual System.Nullable<int> MinuteOffset { get; set; }
+
+        /// <summary>
+        /// Required. The number of hours between runs. Must be greater than or equal to 1 hour and less than or equal
+        /// to 48 hours.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("periodicity")]
+        public virtual System.Nullable<int> Periodicity { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Information involved in an HTTP/HTTPS Uptime check request.</summary>
     public class HttpCheck : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The authentication information. Optional when creating an HTTP check; defaults to empty.</summary>
+        /// <summary>
+        /// If present, the check will only pass if the HTTP response status code is in this set of status codes. If
+        /// empty, the HTTP status code will only pass if the HTTP status code is 200-299.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("acceptedResponseStatusCodes")]
+        public virtual System.Collections.Generic.IList<ResponseStatusCode> AcceptedResponseStatusCodes { get; set; }
+
+        /// <summary>
+        /// The authentication information. Optional when creating an HTTP check; defaults to empty. Do not set both
+        /// auth_method and auth_info.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("authInfo")]
         public virtual BasicAuthentication AuthInfo { get; set; }
 
@@ -8039,8 +9162,8 @@ namespace Google.Apis.Monitoring.v3.Data
         /// The request body associated with the HTTP POST request. If content_type is URL_ENCODED, the body passed in
         /// must be URL-encoded. Users can provide a Content-Length header via the headers field or the API will do so.
         /// If the request_method is GET and body is not empty, the API will return an error. The maximum byte size is 1
-        /// megabyte. Note: As with all bytes fields, JSON representations are base64 encoded. e.g.: "foo=bar" in
-        /// URL-encoded form is "foo%3Dbar" and in base64 encoding is "Zm9vJTI1M0RiYXI=".
+        /// megabyte.Note: If client libraries aren't used (which performs the conversion automatically) base64 encode
+        /// your body data since the field is of bytes type.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("body")]
         public virtual string Body { get; set; }
@@ -8054,6 +9177,14 @@ namespace Google.Apis.Monitoring.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("contentType")]
         public virtual string ContentType { get; set; }
+
+        /// <summary>
+        /// A user provided content type header to use for the check. The invalid configurations outlined in the
+        /// content_type field apply to custom_content_type, as well as the following: 1. content_type is URL_ENCODED
+        /// and custom_content_type is set. 2. content_type is USER_PROVIDED and custom_content_type is not set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customContentType")]
+        public virtual string CustomContentType { get; set; }
 
         /// <summary>
         /// The list of headers to send as part of the Uptime check request. If two headers have the same key and
@@ -8082,6 +9213,10 @@ namespace Google.Apis.Monitoring.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("path")]
         public virtual string Path { get; set; }
 
+        /// <summary>Contains information needed to add pings to an HTTP check.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pingConfig")]
+        public virtual PingConfig PingConfig { get; set; }
+
         /// <summary>
         /// Optional (defaults to 80 when use_ssl is false, and 443 when use_ssl is true). The TCP port on the HTTP
         /// server against which to run the check. Will be combined with host (specified within the monitored_resource)
@@ -8096,6 +9231,13 @@ namespace Google.Apis.Monitoring.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestMethod")]
         public virtual string RequestMethod { get; set; }
+
+        /// <summary>
+        /// If specified, Uptime will generate and attach an OIDC JWT token for the Monitoring service agent service
+        /// account as an Authorization header in the HTTP request when probing.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceAgentAuthentication")]
+        public virtual ServiceAgentAuthentication ServiceAgentAuthentication { get; set; }
 
         /// <summary>If true, use HTTPS instead of HTTP to run the check.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("useSsl")]
@@ -8117,8 +9259,8 @@ namespace Google.Apis.Monitoring.v3.Data
     public class InternalChecker : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The checker's human-readable name. The display name should be unique within a Stackdriver Workspace in order
-        /// to make it easier to identify; however, uniqueness is not enforced.
+        /// The checker's human-readable name. The display name should be unique within a Cloud Monitoring Metrics Scope
+        /// in order to make it easier to identify; however, uniqueness is not enforced.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
@@ -8132,8 +9274,8 @@ namespace Google.Apis.Monitoring.v3.Data
 
         /// <summary>
         /// A unique resource name for this InternalChecker. The format is:
-        /// projects/[PROJECT_ID_OR_NUMBER]/internalCheckers/[INTERNAL_CHECKER_ID] [PROJECT_ID_OR_NUMBER] is the
-        /// Stackdriver Workspace project for the Uptime check config associated with the internal checker.
+        /// projects/[PROJECT_ID_OR_NUMBER]/internalCheckers/[INTERNAL_CHECKER_ID] [PROJECT_ID_OR_NUMBER] is the Cloud
+        /// Monitoring Metrics Scope project for the Uptime check config associated with the internal checker.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -8146,7 +9288,7 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string Network { get; set; }
 
         /// <summary>
-        /// The GCP project ID where the internal checker lives. Not necessary the same as the Workspace project.
+        /// The GCP project ID where the internal checker lives. Not necessary the same as the Metrics Scope project.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("peerProjectId")]
         public virtual string PeerProjectId { get; set; }
@@ -8187,6 +9329,28 @@ namespace Google.Apis.Monitoring.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("meshUid")]
         public virtual string MeshUid { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Information needed to perform a JSONPath content match. Used for ContentMatcherOption::MATCHES_JSON_PATH and
+    /// ContentMatcherOption::NOT_MATCHES_JSON_PATH.
+    /// </summary>
+    public class JsonPathMatcher : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The type of JSONPath match that will be applied to the JSON output (ContentMatcher.content)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("jsonMatcher")]
+        public virtual string JsonMatcher { get; set; }
+
+        /// <summary>
+        /// JSONPath within the response output pointing to the expected ContentMatcher::content to match against.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("jsonPath")]
+        public virtual string JsonPath { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -8252,7 +9416,7 @@ namespace Google.Apis.Monitoring.v3.Data
     /// Specifies a linear sequence of buckets that all have the same width (except overflow and underflow). Each bucket
     /// represents a constant absolute uncertainty on the specific value in the bucket.There are num_finite_buckets + 2
     /// (= N) buckets. Bucket i has the following boundaries:Upper bound (0 &amp;lt;= i &amp;lt; N-1): offset + (width *
-    /// i). Lower bound (1 &amp;lt;= i &amp;lt; N): offset + (width * (i - 1)).
+    /// i).Lower bound (1 &amp;lt;= i &amp;lt; N): offset + (width * (i - 1)).
     /// </summary>
     public class Linear : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -8267,6 +9431,28 @@ namespace Google.Apis.Monitoring.v3.Data
         /// <summary>Must be greater than 0.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("width")]
         public virtual System.Nullable<double> Width { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Links to content such as playbooks, repositories, and other resources.</summary>
+    public class Link : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A short display name for the link. The display name must not be empty or exceed 63 characters. Example:
+        /// "playbook".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// The url of a webpage. A url can be templatized by using variables in the path or the query parameters. The
+        /// total length of a URL should not exceed 2083 characters before and after variable expansion. Example:
+        /// "https://my_domain.com/playbook?name=${resource.name}"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("url")]
+        public virtual string Url { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -8455,6 +9641,24 @@ namespace Google.Apis.Monitoring.v3.Data
         /// <summary>The Services matching the specified filter.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("services")]
         public virtual System.Collections.Generic.IList<Service> Services { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The results of a successful ListSnoozes call, containing the matching Snoozes.</summary>
+    public class ListSnoozesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Page token for repeated calls to ListSnoozes, to fetch additional pages of results. If this is empty or
+        /// missing, there are no more pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>Snoozes matching this list call.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("snoozes")]
+        public virtual System.Collections.Generic.IList<Snooze> Snoozes { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -8804,6 +10008,10 @@ namespace Google.Apis.Monitoring.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("samplePeriod")]
         public virtual object SamplePeriod { get; set; }
 
+        /// <summary>The scope of the timeseries data of the metric.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeSeriesResourceHierarchyLevel")]
+        public virtual System.Collections.Generic.IList<string> TimeSeriesResourceHierarchyLevel { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -8887,6 +10095,13 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual object Duration { get; set; }
 
         /// <summary>
+        /// A condition control that determines how metric-threshold conditions are evaluated when data stops arriving.
+        /// To use this control, the value of the duration field must be greater than or equal to 60 seconds.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("evaluationMissingData")]
+        public virtual string EvaluationMissingData { get; set; }
+
+        /// <summary>
         /// Required. A filter (https://cloud.google.com/monitoring/api/v3/filters) that identifies which time series
         /// should be compared with the threshold.The filter is similar to the one that is specified in the
         /// ListTimeSeries request (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.timeSeries/list)
@@ -8896,6 +10111,14 @@ namespace Google.Apis.Monitoring.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("filter")]
         public virtual string Filter { get; set; }
+
+        /// <summary>
+        /// When this field is present, the MetricThreshold condition forecasts whether the time series is predicted to
+        /// violate the threshold within the forecast_horizon. When this field is not set, the MetricThreshold tests the
+        /// current value of the timeseries against the threshold.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("forecastOptions")]
+        public virtual ForecastOptions ForecastOptions { get; set; }
 
         /// <summary>A value against which to compare the time series.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("thresholdValue")]
@@ -8914,14 +10137,28 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Used to schedule the query to run every so many minutes.</summary>
+    public class Minutes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Number of minutes between runs. The interval must be greater than or equal to 5 minutes and less
+        /// than or equal to 1440 minutes.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("periodicity")]
+        public virtual System.Nullable<int> Periodicity { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// An object representing a resource that can be used for monitoring, logging, billing, or other purposes. Examples
     /// include virtual machine instances, databases, and storage devices such as disks. The type field identifies a
     /// MonitoredResourceDescriptor object that describes the resource's schema. Information in the labels field
     /// identifies the actual resource and its attributes according to the schema. For example, a particular Compute
     /// Engine VM instance could be represented by the following object, because the MonitoredResourceDescriptor for
-    /// "gce_instance" has labels "instance_id" and "zone": { "type": "gce_instance", "labels": { "instance_id":
-    /// "12345678901234", "zone": "us-central1-a" }}
+    /// "gce_instance" has labels "project_id", "instance_id" and "zone": { "type": "gce_instance", "labels": {
+    /// "project_id": "my-project", "instance_id": "12345678901234", "zone": "us-central1-a" }}
     /// </summary>
     public class MonitoredResource : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -8990,7 +10227,7 @@ namespace Google.Apis.Monitoring.v3.Data
 
         /// <summary>
         /// Required. The monitored resource type. For example, the type "cloudsql_database" represents databases in
-        /// Google Cloud SQL. For a list of types, see Monitoring resource types
+        /// Google Cloud SQL. For a list of types, see Monitored resource types
         /// (https://cloud.google.com/monitoring/api/resources) and Logging resource types
         /// (https://cloud.google.com/logging/docs/api/v2/resource-list).
         /// </summary>
@@ -9027,7 +10264,7 @@ namespace Google.Apis.Monitoring.v3.Data
     }
 
     /// <summary>
-    /// A condition type that allows alert policies to be defined using Monitoring Query Language
+    /// A condition type that allows alerting policies to be defined using Monitoring Query Language
     /// (https://cloud.google.com/monitoring/mql).
     /// </summary>
     public class MonitoringQueryLanguageCondition : Google.Apis.Requests.IDirectResponseSchema
@@ -9042,6 +10279,12 @@ namespace Google.Apis.Monitoring.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("duration")]
         public virtual object Duration { get; set; }
+
+        /// <summary>
+        /// A condition control that determines how metric-threshold conditions are evaluated when data stops arriving.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("evaluationMissingData")]
+        public virtual string EvaluationMissingData { get; set; }
 
         /// <summary>
         /// Monitoring Query Language (https://cloud.google.com/monitoring/mql) query that outputs a boolean stream.
@@ -9065,9 +10308,42 @@ namespace Google.Apis.Monitoring.v3.Data
     /// <summary>Describes a change made to a configuration.</summary>
     public class MutationRecord : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _mutateTimeRaw;
+
+        private object _mutateTime;
+
         /// <summary>When the change occurred.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mutateTime")]
-        public virtual object MutateTime { get; set; }
+        public virtual string MutateTimeRaw
+        {
+            get => _mutateTimeRaw;
+            set
+            {
+                _mutateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _mutateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="MutateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use MutateTimeDateTimeOffset instead.")]
+        public virtual object MutateTime
+        {
+            get => _mutateTime;
+            set
+            {
+                _mutateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _mutateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="MutateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? MutateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(MutateTimeRaw);
+            set => MutateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The email address of the user making the change.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mutatedBy")]
@@ -9125,7 +10401,7 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual System.Collections.Generic.IList<MutationRecord> MutationRecords { get; set; }
 
         /// <summary>
-        /// The full REST resource name for this channel. The format is:
+        /// Identifier. The full REST resource name for this channel. The format is:
         /// projects/[PROJECT_ID_OR_NUMBER]/notificationChannels/[CHANNEL_ID] The [CHANNEL_ID] is automatically assigned
         /// by the server on creation.
         /// </summary>
@@ -9224,7 +10500,30 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Control over the rate of notifications sent to this alert policy's notification channels.</summary>
+    /// <summary>
+    /// Control over how the notification channels in notification_channels are notified when this alert fires, on a
+    /// per-channel basis.
+    /// </summary>
+    public class NotificationChannelStrategy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The full REST resource name for the notification channels that these settings apply to. Each of these
+        /// correspond to the name field in one of the NotificationChannel objects referenced in the
+        /// notification_channels field of this AlertPolicy. The format is:
+        /// projects/[PROJECT_ID_OR_NUMBER]/notificationChannels/[CHANNEL_ID]
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("notificationChannelNames")]
+        public virtual System.Collections.Generic.IList<string> NotificationChannelNames { get; set; }
+
+        /// <summary>The frequency at which to send reminder notifications for open incidents.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("renotifyInterval")]
+        public virtual object RenotifyInterval { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Control over the rate of notifications sent to this alerting policy's notification channels.</summary>
     public class NotificationRateLimit : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Not more than one notification per period.</summary>
@@ -9238,17 +10537,83 @@ namespace Google.Apis.Monitoring.v3.Data
     /// <summary>Contains metadata for longrunning operation for the edit Metrics Scope endpoints.</summary>
     public class OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time when the batch request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Current state of the batch operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The time when the operation result was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -9298,6 +10663,20 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Information involved in sending ICMP pings alongside public HTTP/TCP checks. For HTTP, the pings are performed
+    /// for each part of the redirect chain.
+    /// </summary>
+    public class PingConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Number of ICMP pings. A maximum of 3 ICMP pings is currently supported.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pingsCount")]
+        public virtual System.Nullable<int> PingsCount { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A single data point in a time series.</summary>
     public class Point : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -9338,7 +10717,100 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The QueryTimeSeries request.</summary>
+    /// <summary>
+    /// A condition type that allows alerting policies to be defined using Prometheus Query Language (PromQL)
+    /// (https://prometheus.io/docs/prometheus/latest/querying/basics/).The PrometheusQueryLanguageCondition message
+    /// contains information from a Prometheus alerting rule and its associated rule group.A Prometheus alerting rule is
+    /// described here (https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/). The semantics of a
+    /// Prometheus alerting rule is described here
+    /// (https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/#rule).A Prometheus rule group is
+    /// described here (https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/). The semantics of a
+    /// Prometheus rule group is described here
+    /// (https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/#rule_group).Because Cloud Alerting
+    /// has no representation of a Prometheus rule group resource, we must embed the information of the parent rule
+    /// group inside each of the conditions that refer to it. We must also update the contents of all Prometheus alerts
+    /// in case the information of their rule group changes.The PrometheusQueryLanguageCondition protocol buffer
+    /// combines the information of the corresponding rule group and alerting rule. The structure of the
+    /// PrometheusQueryLanguageCondition protocol buffer does NOT mimic the structure of the Prometheus rule group and
+    /// alerting rule YAML declarations. The PrometheusQueryLanguageCondition protocol buffer may change in the future
+    /// to support future rule group and/or alerting rule features. There are no new such features at the present time
+    /// (2023-06-26).
+    /// </summary>
+    public class PrometheusQueryLanguageCondition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The alerting rule name of this alert in the corresponding Prometheus configuration file.Some
+        /// external tools may require this field to be populated correctly in order to refer to the original Prometheus
+        /// configuration file. The rule group name and the alert name are necessary to update the relevant
+        /// AlertPolicies in case the definition of the rule group changes in the future.This field is optional. If this
+        /// field is not empty, then it must be a valid Prometheus label name
+        /// (https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels). This field may not exceed 2048
+        /// Unicode characters in length.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("alertRule")]
+        public virtual string AlertRule { get; set; }
+
+        /// <summary>
+        /// Optional. Whether to disable metric existence validation for this condition.This allows alerting policies to
+        /// be defined on metrics that do not yet exist, improving advanced customer workflows such as configuring
+        /// alerting policies using Terraform.Users with the monitoring.alertPolicyViewer role are able to see the name
+        /// of the non-existent metric in the alerting policy condition.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disableMetricValidation")]
+        public virtual System.Nullable<bool> DisableMetricValidation { get; set; }
+
+        /// <summary>
+        /// Optional. Alerts are considered firing once their PromQL expression was evaluated to be "true" for this
+        /// long. Alerts whose PromQL expression was not evaluated to be "true" for long enough are considered pending.
+        /// Must be a non-negative duration or missing. This field is optional. Its default value is zero.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("duration")]
+        public virtual object Duration { get; set; }
+
+        /// <summary>
+        /// Optional. How often this rule should be evaluated. Must be a positive multiple of 30 seconds or missing.
+        /// This field is optional. Its default value is 30 seconds. If this PrometheusQueryLanguageCondition was
+        /// generated from a Prometheus alerting rule, then this value should be taken from the enclosing rule group.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("evaluationInterval")]
+        public virtual object EvaluationInterval { get; set; }
+
+        /// <summary>
+        /// Optional. Labels to add to or overwrite in the PromQL query result. Label names must be valid
+        /// (https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels). Label values can be templatized
+        /// by using variables (https://cloud.google.com/monitoring/alerts/doc-variables#doc-vars). The only available
+        /// variable names are the names of the labels in the PromQL result, including "__name__" and "value". "labels"
+        /// may be empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
+        /// Required. The PromQL expression to evaluate. Every evaluation cycle this expression is evaluated at the
+        /// current time, and all resultant time series become pending/firing alerts. This field must not be empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("query")]
+        public virtual string Query { get; set; }
+
+        /// <summary>
+        /// Optional. The rule group name of this alert in the corresponding Prometheus configuration file.Some external
+        /// tools may require this field to be populated correctly in order to refer to the original Prometheus
+        /// configuration file. The rule group name and the alert name are necessary to update the relevant
+        /// AlertPolicies in case the definition of the rule group changes in the future.This field is optional. If this
+        /// field is not empty, then it must contain a valid UTF-8 string. This field may not exceed 2048 Unicode
+        /// characters in length.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ruleGroup")]
+        public virtual string RuleGroup { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The QueryTimeSeries request. For information about the status of Monitoring Query Language (MQL), see the MQL
+    /// deprecation notice (https://cloud.google.com/stackdriver/docs/deprecations/mql).
+    /// </summary>
     public class QueryTimeSeriesRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>A positive number that is the maximum number of time_series_data to return.</summary>
@@ -9363,7 +10835,10 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The QueryTimeSeries response.</summary>
+    /// <summary>
+    /// The QueryTimeSeries response. For information about the status of Monitoring Query Language (MQL), see the MQL
+    /// deprecation notice (https://cloud.google.com/stackdriver/docs/deprecations/mql).
+    /// </summary>
     public class QueryTimeSeriesResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -9448,6 +10923,40 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// A status to accept. Either a status code class like "2xx", or an integer status code like "200".
+    /// </summary>
+    public class ResponseStatusCode : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A class of status codes to accept.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("statusClass")]
+        public virtual string StatusClass { get; set; }
+
+        /// <summary>A status code to accept.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("statusValue")]
+        public virtual System.Nullable<int> StatusValue { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A test that checks if the number of rows in the result set violates some threshold.</summary>
+    public class RowCountTest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The comparison to apply between the number of rows returned by the query and the threshold.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("comparison")]
+        public virtual string Comparison { get; set; }
+
+        /// <summary>Required. The value against which to compare the row count.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("threshold")]
+        public virtual System.Nullable<long> Threshold { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The SendNotificationChannelVerificationCode request.</summary>
     public class SendNotificationChannelVerificationCodeRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -9466,9 +10975,21 @@ namespace Google.Apis.Monitoring.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("appEngine")]
         public virtual AppEngine AppEngine { get; set; }
 
+        /// <summary>
+        /// Message that contains the service type and service labels of this service if it is a basic service.
+        /// Documentation and examples here
+        /// (https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/api/api-structures#basic-svc-w-basic-sli).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("basicService")]
+        public virtual BasicService BasicService { get; set; }
+
         /// <summary>Type used for Cloud Endpoints services.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cloudEndpoints")]
         public virtual CloudEndpoints CloudEndpoints { get; set; }
+
+        /// <summary>Type used for Cloud Run services.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudRun")]
+        public virtual CloudRun CloudRun { get; set; }
 
         /// <summary>Type used for Istio services that live in a Kubernetes cluster.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("clusterIstio")]
@@ -9482,6 +11003,18 @@ namespace Google.Apis.Monitoring.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
+        /// <summary>Type used for GKE Namespaces.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gkeNamespace")]
+        public virtual GkeNamespace GkeNamespace { get; set; }
+
+        /// <summary>Type used for GKE Services (the Kubernetes concept of a service).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gkeService")]
+        public virtual GkeService GkeService { get; set; }
+
+        /// <summary>Type used for GKE Workloads.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gkeWorkload")]
+        public virtual GkeWorkload GkeWorkload { get; set; }
+
         /// <summary>
         /// Type used for canonical services scoped to an Istio mesh. Metrics for Istio are documented here
         /// (https://istio.io/latest/docs/reference/config/metrics/)
@@ -9494,7 +11027,8 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual MeshIstio MeshIstio { get; set; }
 
         /// <summary>
-        /// Resource name for this Service. The format is: projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]
+        /// Identifier. Resource name for this Service. The format is:
+        /// projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -9511,6 +11045,22 @@ namespace Google.Apis.Monitoring.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userLabels")]
         public virtual System.Collections.Generic.IDictionary<string, string> UserLabels { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Contains information needed for generating either an OpenID Connect token
+    /// (https://developers.google.com/identity/protocols/OpenIDConnect) or OAuth token
+    /// (https://developers.google.com/identity/protocols/oauth2). The token will be generated for the Monitoring
+    /// service agent service account.
+    /// </summary>
+    public class ServiceAgentAuthentication : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Type of authentication.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -9567,13 +11117,13 @@ namespace Google.Apis.Monitoring.v3.Data
 
         /// <summary>
         /// The fraction of service that must be good in order for this objective to be met. 0 &amp;lt; goal &amp;lt;=
-        /// 0.999.
+        /// 0.9999.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("goal")]
         public virtual System.Nullable<double> Goal { get; set; }
 
         /// <summary>
-        /// Resource name for this ServiceLevelObjective. The format is:
+        /// Identifier. Resource name for this ServiceLevelObjective. The format is:
         /// projects/[PROJECT_ID_OR_NUMBER]/services/[SERVICE_ID]/serviceLevelObjectives/[SLO_NAME]
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -9602,6 +11152,42 @@ namespace Google.Apis.Monitoring.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userLabels")]
         public virtual System.Collections.Generic.IDictionary<string, string> UserLabels { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A Snooze will prevent any alerts from being opened, and close any that are already open. The Snooze will work on
+    /// alerts that match the criteria defined in the Snooze. The Snooze will be active from interval.start_time through
+    /// interval.end_time.
+    /// </summary>
+    public class Snooze : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. This defines the criteria for applying the Snooze. See Criteria for more information.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("criteria")]
+        public virtual Criteria Criteria { get; set; }
+
+        /// <summary>Required. A display name for the Snooze. This can be, at most, 512 unicode characters.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// Required. The Snooze will be active from interval.start_time through interval.end_time. interval.start_time
+        /// cannot be in the past. There is a 15 second clock skew to account for the time it takes for a request to
+        /// reach the API from the UI.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("interval")]
+        public virtual TimeInterval Interval { get; set; }
+
+        /// <summary>
+        /// Required. Identifier. The name of the Snooze. The format is:
+        /// projects/[PROJECT_ID_OR_NUMBER]/snoozes/[SNOOZE_ID] The ID of the Snooze will be generated by the system.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -9644,6 +11230,47 @@ namespace Google.Apis.Monitoring.v3.Data
     }
 
     /// <summary>
+    /// A condition that allows alerting policies to be defined using GoogleSQL. SQL conditions examine a sliding window
+    /// of logs using GoogleSQL. Alert policies with SQL conditions may incur additional billing.
+    /// </summary>
+    public class SqlCondition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Test the boolean value in the indicated column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("booleanTest")]
+        public virtual BooleanTest BooleanTest { get; set; }
+
+        /// <summary>Schedule the query to execute every so many days.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("daily")]
+        public virtual Daily Daily { get; set; }
+
+        /// <summary>Schedule the query to execute every so many hours.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hourly")]
+        public virtual Hourly Hourly { get; set; }
+
+        /// <summary>Schedule the query to execute every so many minutes.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
+        public virtual Minutes Minutes { get; set; }
+
+        /// <summary>
+        /// Required. The Log Analytics SQL query to run, as a string. The query must conform to the required shape.
+        /// Specifically, the query must not try to filter the input by time. A filter will automatically be applied to
+        /// filter the input so that the query receives all rows received since the last time the query was run.For
+        /// example, the following query extracts all log entries containing an HTTP request: SELECT timestamp,
+        /// log_name, severity, http_request, resource, labels FROM my-project.global._Default._AllLogs WHERE
+        /// http_request IS NOT NULL
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("query")]
+        public virtual string Query { get; set; }
+
+        /// <summary>Test the row count against a threshold.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rowCountTest")]
+        public virtual RowCountTest RowCountTest { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// The Status type defines a logical error model that is suitable for different programming environments, including
     /// REST APIs and RPC APIs. It is used by gRPC (https://github.com/grpc). Each Status message contains three pieces
     /// of data: error code, error message, and error details.You can find out more about this error model and how to
@@ -9672,9 +11299,24 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Describes a Synthetic Monitor to be invoked by Uptime.</summary>
+    public class SyntheticMonitorTarget : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Target a Synthetic Monitor GCFv2 instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudFunctionV2")]
+        public virtual CloudFunctionV2Target CloudFunctionV2 { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Information required for a TCP Uptime check request.</summary>
     public class TcpCheck : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Contains information needed to add pings to a TCP check.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pingConfig")]
+        public virtual PingConfig PingConfig { get; set; }
+
         /// <summary>
         /// The TCP port on the server against which to run the check. Will be combined with host (specified within the
         /// monitored_resource) to construct the full URL. Required.
@@ -9706,35 +11348,135 @@ namespace Google.Apis.Monitoring.v3.Data
     /// no older than the data retention period for the metric. Writes: A closed time interval. It extends from the
     /// start time to the end time, and includes both: [startTime, endTime]. Valid time intervals depend on the
     /// MetricKind (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind) of the
-    /// metric value. The end time must not be earlier than the start time. When writing data points, the start time
-    /// must not be more than 25 hours in the past and the end time must not be more than five minutes in the future.
-    /// For GAUGE metrics, the startTime value is technically optional; if no value is specified, the start time
-    /// defaults to the value of the end time, and the interval represents a single point in time. If both start and end
-    /// times are specified, they must be identical. Such an interval is valid only for GAUGE metrics, which are
-    /// point-in-time measurements. The end time of a new interval must be at least a millisecond after the end time of
-    /// the previous interval. For DELTA metrics, the start time and end time must specify a non-zero interval, with
-    /// subsequent points specifying contiguous and non-overlapping intervals. For DELTA metrics, the start time of the
-    /// next interval must be at least a millisecond after the end time of the previous interval. For CUMULATIVE
-    /// metrics, the start time and end time must specify a non-zero interval, with subsequent points specifying the
-    /// same start time and increasing end times, until an event resets the cumulative value to zero and sets a new
-    /// start time for the following points. The new start time must be at least a millisecond after the end time of the
-    /// previous interval. The start time of a new interval must be at least a millisecond after the end time of the
-    /// previous interval because intervals are closed. If the start time of a new interval is the same as the end time
-    /// of the previous interval, then data written at the new start time could overwrite data written at the previous
-    /// end time.
+    /// metric value. The end time must not be earlier than the start time, and the end time must not be more than 25
+    /// hours in the past or more than five minutes in the future. For GAUGE metrics, the startTime value is technically
+    /// optional; if no value is specified, the start time defaults to the value of the end time, and the interval
+    /// represents a single point in time. If both start and end times are specified, they must be identical. Such an
+    /// interval is valid only for GAUGE metrics, which are point-in-time measurements. The end time of a new interval
+    /// must be at least a millisecond after the end time of the previous interval. For DELTA metrics, the start time
+    /// and end time must specify a non-zero interval, with subsequent points specifying contiguous and non-overlapping
+    /// intervals. For DELTA metrics, the start time of the next interval must be at least a millisecond after the end
+    /// time of the previous interval. For CUMULATIVE metrics, the start time and end time must specify a non-zero
+    /// interval, with subsequent points specifying the same start time and increasing end times, until an event resets
+    /// the cumulative value to zero and sets a new start time for the following points. The new start time must be at
+    /// least a millisecond after the end time of the previous interval. The start time of a new interval must be at
+    /// least a millisecond after the end time of the previous interval because intervals are closed. If the start time
+    /// of a new interval is the same as the end time of the previous interval, then data written at the new start time
+    /// could overwrite data written at the previous end time.
     /// </summary>
     public class TimeInterval : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Required. The end of the time interval.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>
         /// Optional. The beginning of the time interval. The default value for the start time is the end time. The
         /// start time must not be later than the end time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a time of day. The date and time zone are either not significant or are specified elsewhere. An API
+    /// may choose to allow leap seconds. Related types are google.type.Date and google.protobuf.Timestamp.
+    /// </summary>
+    public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hours")]
+        public virtual System.Nullable<int> Hours { get; set; }
+
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
+        public virtual System.Nullable<int> Minutes { get; set; }
+
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
+        public virtual System.Nullable<int> Nanos { get; set; }
+
+        /// <summary>
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
+        public virtual System.Nullable<int> Seconds { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -9747,6 +11489,13 @@ namespace Google.Apis.Monitoring.v3.Data
     /// </summary>
     public class TimeSeries : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Input only. A detailed description of the time series that will be associated with the
+        /// google.api.MetricDescriptor for the metric. Once set, this field cannot be changed through CreateTimeSeries.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
         /// <summary>
         /// Output only. The associated monitored resource metadata. When reading a time series, this field will include
         /// metadata labels that are explicitly named in the reduction. When creating a time series, this field is
@@ -9789,7 +11538,8 @@ namespace Google.Apis.Monitoring.v3.Data
 
         /// <summary>
         /// The units in which the metric value is reported. It is only applicable if the value_type is INT64, DOUBLE,
-        /// or DISTRIBUTION. The unit defines the representation of the stored metric values.
+        /// or DISTRIBUTION. The unit defines the representation of the stored metric values. This field can only be
+        /// changed through CreateTimeSeries when it is empty.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("unit")]
         public virtual string Unit { get; set; }
@@ -9903,6 +11653,10 @@ namespace Google.Apis.Monitoring.v3.Data
     /// <summary>A protocol buffer message type.</summary>
     public class Type : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The source edition string, only valid when syntax is SYNTAX_EDITIONS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("edition")]
+        public virtual string Edition { get; set; }
+
         /// <summary>The list of fields.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fields")]
         public virtual System.Collections.Generic.IList<Field> Fields { get; set; }
@@ -9964,6 +11718,10 @@ namespace Google.Apis.Monitoring.v3.Data
     /// <summary>This message configures which resources and services to monitor for availability.</summary>
     public class UptimeCheckConfig : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The type of checkers to use to execute the Uptime check.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("checkerType")]
+        public virtual string CheckerType { get; set; }
+
         /// <summary>
         /// The content that is expected to appear in the data returned by the target server against which the check is
         /// run. Currently, only the first entry in the content_matchers list is supported, and additional entries will
@@ -9974,8 +11732,8 @@ namespace Google.Apis.Monitoring.v3.Data
         public virtual System.Collections.Generic.IList<ContentMatcher> ContentMatchers { get; set; }
 
         /// <summary>
-        /// A human-friendly name for the Uptime check configuration. The display name should be unique within a
-        /// Stackdriver Workspace in order to make it easier to identify; however, uniqueness is not enforced. Required.
+        /// A human-friendly name for the Uptime check configuration. The display name should be unique within a Cloud
+        /// Monitoring Workspace in order to make it easier to identify; however, uniqueness is not enforced. Required.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
@@ -10002,13 +11760,13 @@ namespace Google.Apis.Monitoring.v3.Data
         /// <summary>
         /// The monitored resource (https://cloud.google.com/monitoring/api/resources) associated with the
         /// configuration. The following monitored resource types are valid for this field: uptime_url, gce_instance,
-        /// gae_app, aws_ec2_instance, aws_elb_load_balancer k8s_service
+        /// gae_app, aws_ec2_instance, aws_elb_load_balancer k8s_service servicedirectory_service cloud_run_revision
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("monitoredResource")]
         public virtual MonitoredResource MonitoredResource { get; set; }
 
         /// <summary>
-        /// A unique resource name for this Uptime check configuration. The format is:
+        /// Identifier. A unique resource name for this Uptime check configuration. The format is:
         /// projects/[PROJECT_ID_OR_NUMBER]/uptimeCheckConfigs/[UPTIME_CHECK_ID] [PROJECT_ID_OR_NUMBER] is the Workspace
         /// host project associated with the Uptime check.This field should be omitted when creating the Uptime check
         /// configuration; on create, the resource name is assigned by the server and included in the response.
@@ -10035,6 +11793,10 @@ namespace Google.Apis.Monitoring.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("selectedRegions")]
         public virtual System.Collections.Generic.IList<string> SelectedRegions { get; set; }
 
+        /// <summary>Specifies a Synthetic Monitor to invoke.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("syntheticMonitor")]
+        public virtual SyntheticMonitorTarget SyntheticMonitor { get; set; }
+
         /// <summary>Contains information needed to make a TCP check.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tcpCheck")]
         public virtual TcpCheck TcpCheck { get; set; }
@@ -10044,6 +11806,15 @@ namespace Google.Apis.Monitoring.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timeout")]
         public virtual object Timeout { get; set; }
+
+        /// <summary>
+        /// User-supplied key/value data to be used for organizing and identifying the UptimeCheckConfig objects.The
+        /// field can contain up to 64 entries. Each key and value is limited to 63 Unicode characters or 128 bytes,
+        /// whichever is smaller. Labels and values can contain only lowercase letters, numerals, underscores, and
+        /// dashes. Keys must begin with a letter.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userLabels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> UserLabels { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

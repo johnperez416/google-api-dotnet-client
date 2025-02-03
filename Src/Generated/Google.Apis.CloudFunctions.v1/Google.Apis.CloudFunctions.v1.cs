@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.CloudFunctions.v1
         {
             Operations = new OperationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudfunctions.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudfunctions.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.CloudFunctions.v1
         public override string Name => "cloudfunctions";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudfunctions.googleapis.com/";
-        #else
-            "https://cloudfunctions.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudfunctions.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Functions API.</summary>
         public class Scope
@@ -292,7 +287,7 @@ namespace Google.Apis.CloudFunctions.v1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -338,24 +333,16 @@ namespace Google.Apis.CloudFunctions.v1
 
         /// <summary>
         /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
-        /// it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding to use
-        /// different resource name schemes, such as `users/*/operations`. To override the binding, API services can add
-        /// a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For backwards
-        /// compatibility, the default name includes the operations collection id, however overriding users must ensure
-        /// the name binding is the parent resource, without the operations collection id.
+        /// it returns `UNIMPLEMENTED`.
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
         /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
-        /// it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding to use
-        /// different resource name schemes, such as `users/*/operations`. To override the binding, API services can add
-        /// a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For backwards
-        /// compatibility, the default name includes the operations collection id, however overriding users must ensure
-        /// the name binding is the parent resource, without the operations collection id.
+        /// it returns `UNIMPLEMENTED`.
         /// </summary>
         public class ListRequest : CloudFunctionsBaseServiceRequest<Google.Apis.CloudFunctions.v1.Data.ListOperationsResponse>
         {
@@ -365,29 +352,19 @@ namespace Google.Apis.CloudFunctions.v1
                 InitParameters();
             }
 
-            /// <summary>
-            /// Required. A filter for matching the requested operations. The supported formats of *filter* are: To
-            /// query for a specific function: project:*,location:*,function:* To query for all of the latest operations
-            /// for a project: project:*,latest:true
-            /// </summary>
+            /// <summary>The standard list filter.</summary>
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; set; }
 
-            /// <summary>Must not be set.</summary>
+            /// <summary>The name of the operation's parent resource.</summary>
             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Name { get; set; }
 
-            /// <summary>
-            /// The maximum number of records that should be returned. Requested page size cannot exceed 100. If not
-            /// set, the default page size is 100. Pagination is only supported when querying for a specific function.
-            /// </summary>
+            /// <summary>The standard list page size.</summary>
             [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<int> PageSize { get; set; }
 
-            /// <summary>
-            /// Token identifying which result to start with, which is returned by a previous list call. Pagination is
-            /// only supported when querying for a specific function.
-            /// </summary>
+            /// <summary>The standard list page token.</summary>
             [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string PageToken { get; set; }
 
@@ -499,7 +476,7 @@ namespace Google.Apis.CloudFunctions.v1
                 /// <param name="name">Required. The name of the function to be called.</param>
                 public virtual CallRequest Call(Google.Apis.CloudFunctions.v1.Data.CallFunctionRequest body, string name)
                 {
-                    return new CallRequest(service, body, name);
+                    return new CallRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -562,7 +539,7 @@ namespace Google.Apis.CloudFunctions.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CloudFunctions.v1.Data.CloudFunction body, string location)
                 {
-                    return new CreateRequest(service, body, location);
+                    return new CreateRequest(this.service, body, location);
                 }
 
                 /// <summary>
@@ -623,7 +600,7 @@ namespace Google.Apis.CloudFunctions.v1
                 /// <param name="name">Required. The name of the function which should be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -678,7 +655,7 @@ namespace Google.Apis.CloudFunctions.v1
                 /// </param>
                 public virtual GenerateDownloadUrlRequest GenerateDownloadUrl(Google.Apis.CloudFunctions.v1.Data.GenerateDownloadUrlRequest body, string name)
                 {
-                    return new GenerateDownloadUrlRequest(service, body, name);
+                    return new GenerateDownloadUrlRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -752,7 +729,7 @@ namespace Google.Apis.CloudFunctions.v1
                 /// </param>
                 public virtual GenerateUploadUrlRequest GenerateUploadUrl(Google.Apis.CloudFunctions.v1.Data.GenerateUploadUrlRequest body, string parent)
                 {
-                    return new GenerateUploadUrlRequest(service, body, parent);
+                    return new GenerateUploadUrlRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -819,7 +796,7 @@ namespace Google.Apis.CloudFunctions.v1
                 /// <param name="name">Required. The name of the function which details should be obtained.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Returns a function with the given name from the requested project.</summary>
@@ -835,6 +812,16 @@ namespace Google.Apis.CloudFunctions.v1
                     /// <summary>Required. The name of the function which details should be obtained.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The optional version of the function whose details should be obtained. The version of
+                    /// a 1st Gen function is an integer that starts from 1 and gets incremented on redeployments. Each
+                    /// deployment creates a config version of the underlying function. GCF may keep historical configs
+                    /// for old versions. This field can be specified to fetch the historical configs. Leave it blank or
+                    /// set to 0 to get the latest version of the function.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("versionId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<long> VersionId { get; set; }
 
                     /// <summary>Gets the method name.</summary>
                     public override string MethodName => "get";
@@ -857,6 +844,14 @@ namespace Google.Apis.CloudFunctions.v1
                             DefaultValue = null,
                             Pattern = @"^projects/[^/]+/locations/[^/]+/functions/[^/]+$",
                         });
+                        RequestParameters.Add("versionId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "versionId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
                     }
                 }
 
@@ -865,12 +860,13 @@ namespace Google.Apis.CloudFunctions.v1
                 /// and does not have a policy set.
                 /// </summary>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                 {
-                    return new GetIamPolicyRequest(service, resource);
+                    return new GetIamPolicyRequest(this.service, resource);
                 }
 
                 /// <summary>
@@ -887,8 +883,9 @@ namespace Google.Apis.CloudFunctions.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -948,7 +945,7 @@ namespace Google.Apis.CloudFunctions.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Returns a list of functions that belong to the requested project.</summary>
@@ -1030,7 +1027,7 @@ namespace Google.Apis.CloudFunctions.v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CloudFunctions.v1.Data.CloudFunction body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates existing function.</summary>
@@ -1098,12 +1095,13 @@ namespace Google.Apis.CloudFunctions.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudFunctions.v1.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -1120,8 +1118,9 @@ namespace Google.Apis.CloudFunctions.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -1162,12 +1161,13 @@ namespace Google.Apis.CloudFunctions.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudFunctions.v1.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -1185,8 +1185,9 @@ namespace Google.Apis.CloudFunctions.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -1226,7 +1227,7 @@ namespace Google.Apis.CloudFunctions.v1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -1245,7 +1246,7 @@ namespace Google.Apis.CloudFunctions.v1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -1325,7 +1326,8 @@ namespace Google.Apis.CloudFunctions.v1.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1366,6 +1368,15 @@ namespace Google.Apis.CloudFunctions.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Security patches are applied automatically to the runtime without requiring the function to be redeployed.
+    /// </summary>
+    public class AutomaticUpdatePolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Associates `members`, or principals, with a `role`.</summary>
     public class Binding : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1380,16 +1391,37 @@ namespace Google.Apis.CloudFunctions.v1.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -1397,15 +1429,19 @@ namespace Google.Apis.CloudFunctions.v1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -1449,10 +1485,13 @@ namespace Google.Apis.CloudFunctions.v1.Data
 
     /// <summary>
     /// Describes a Cloud Function that contains user computation executed in response to an event. It encapsulate
-    /// function and triggers configurations. Next tag: 36
+    /// function and triggers configurations.
     /// </summary>
     public class CloudFunction : Google.Apis.Requests.IDirectResponseSchema
     {
+        [Newtonsoft.Json.JsonPropertyAttribute("automaticUpdatePolicy")]
+        public virtual AutomaticUpdatePolicy AutomaticUpdatePolicy { get; set; }
+
         /// <summary>The amount of memory in MB available for a function. Defaults to 256MB.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("availableMemoryMb")]
         public virtual System.Nullable<int> AvailableMemoryMb { get; set; }
@@ -1472,6 +1511,13 @@ namespace Google.Apis.CloudFunctions.v1.Data
         public virtual string BuildName { get; set; }
 
         /// <summary>
+        /// A service account the user provides for use with Cloud Build. The format of this field is
+        /// `projects/{projectId}/serviceAccounts/{serviceAccountEmail}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("buildServiceAccount")]
+        public virtual string BuildServiceAccount { get; set; }
+
+        /// <summary>
         /// Name of the Cloud Build Custom Worker Pool that should be used to build the function. The format of this
         /// field is `projects/{project}/locations/{region}/workerPools/{workerPool}` where `{project}` and `{region}`
         /// are the project id and region respectively where the worker pool is defined and `{workerPool}` is the short
@@ -1487,22 +1533,29 @@ namespace Google.Apis.CloudFunctions.v1.Data
         public virtual string Description { get; set; }
 
         /// <summary>
-        /// User managed repository created in Artifact Registry optionally with a customer managed encryption key. If
-        /// specified, deployments will use Artifact Registry. If unspecified and the deployment is eligible to use
-        /// Artifact Registry, GCF will create and use a repository named 'gcf-artifacts' for every deployed region.
-        /// This is the repository to which the function docker image will be pushed after it is built by Cloud Build.
-        /// It must match the pattern `projects/{project}/locations/{location}/repositories/{repository}`. Cross-project
-        /// repositories are not supported. Cross-location repositories are not supported. Repository format must be
-        /// 'DOCKER'.
+        /// Docker Registry to use for this deployment. Deprecated: Container Registry option will no longer be
+        /// available after March 2025: https://cloud.google.com/artifact-registry/docs/transition/transition-from-gcr
+        /// Please use Artifact Registry instead, which is the default choice. If unspecified, it defaults to
+        /// `ARTIFACT_REGISTRY`. If `docker_repository` field is specified, this field should either be left unspecified
+        /// or set to `ARTIFACT_REGISTRY`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dockerRegistry")]
+        public virtual string DockerRegistry { get; set; }
+
+        /// <summary>
+        /// User-managed repository created in Artifact Registry to which the function's Docker image will be pushed
+        /// after it is built by Cloud Build. May optionally be encrypted with a customer-managed encryption key (CMEK).
+        /// If unspecified and `docker_registry` is not explicitly set to `CONTAINER_REGISTRY`, GCF will create and use
+        /// a default Artifact Registry repository named 'gcf-artifacts' in the region. It must match the pattern
+        /// `projects/{project}/locations/{location}/repositories/{repository}`. Cross-project repositories are not
+        /// supported. Cross-location repositories are not supported. Repository format must be 'DOCKER'.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dockerRepository")]
         public virtual string DockerRepository { get; set; }
 
         /// <summary>
         /// The name of the function (as defined in source code) that will be executed. Defaults to the resource name
-        /// suffix, if not specified. For backward compatibility, if function with given name is not found, then the
-        /// system will try to use function named "function". For Node.js this is name of a function exported by the
-        /// module specified in `source_location`.
+        /// suffix (ID of the function), if not specified.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("entryPoint")]
         public virtual string EntryPoint { get; set; }
@@ -1568,17 +1621,12 @@ namespace Google.Apis.CloudFunctions.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
-        /// <summary>
-        /// The VPC Network that this cloud function can connect to. It can be either the fully-qualified URI, or the
-        /// short name of the network resource. If the short network name is used, the network must belong to the same
-        /// project. Otherwise, it must belong to a project within the same organization. The format of this field is
-        /// either `projects/{project}/global/networks/{network}` or `{network}`, where `{project}` is a project id
-        /// where the network is defined, and `{network}` is the short name of the network. This field is mutually
-        /// exclusive with `vpc_connector` and will be replaced by it. See [the VPC
-        /// documentation](https://cloud.google.com/compute/docs/vpc) for more information on connecting Cloud projects.
-        /// </summary>
+        /// <summary>Deprecated: use vpc_connector</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("network")]
         public virtual string Network { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("onDeployUpdatePolicy")]
+        public virtual OnDeployUpdatePolicy OnDeployUpdatePolicy { get; set; }
 
         /// <summary>
         /// The runtime in which to run the function. Required when deploying a new function, optional when updating an
@@ -1640,9 +1688,42 @@ namespace Google.Apis.CloudFunctions.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeout")]
         public virtual object Timeout { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The last update timestamp of a Cloud Function.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The version identifier of the Cloud Function. Each deployment attempt results in a new version
@@ -1797,6 +1878,20 @@ namespace Google.Apis.CloudFunctions.v1.Data
     /// <summary>Request of `GenerateSourceUploadUrl` method.</summary>
     public class GenerateUploadUrlRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Resource name of a KMS crypto key (managed by the user) used to encrypt/decrypt function source code objects
+        /// in intermediate Cloud Storage buckets. When you generate an upload url and upload your source code, it gets
+        /// copied to an intermediate Cloud Storage bucket. The source code is then copied to a versioned directory in
+        /// the sources bucket in the consumer project during the function deployment. It must match the pattern
+        /// `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`. The Google Cloud
+        /// Functions service account (service-{project_number}@gcf-admin-robot.iam.gserviceaccount.com) must be granted
+        /// the role 'Cloud KMS CryptoKey Encrypter/Decrypter (roles/cloudkms.cryptoKeyEncrypterDecrypter)' on the
+        /// Key/KeyRing/Project/Organization (least access preferred). GCF will delegate access to the Google Storage
+        /// service account in the internal project.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
+        public virtual string KmsKeyName { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1884,7 +1979,7 @@ namespace Google.Apis.CloudFunctions.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -1911,6 +2006,19 @@ namespace Google.Apis.CloudFunctions.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Security patches are only applied when a function is redeployed.</summary>
+    public class OnDeployUpdatePolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. Contains the runtime version which was used during latest function deployment.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("runtimeVersion")]
+        public virtual string RuntimeVersion { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1946,8 +2054,8 @@ namespace Google.Apis.CloudFunctions.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -1997,9 +2105,42 @@ namespace Google.Apis.CloudFunctions.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The last update timestamp of the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Version id of the function created or updated by an API call. This field is only populated for Create and
@@ -2021,18 +2162,26 @@ namespace Google.Apis.CloudFunctions.v1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2094,8 +2243,7 @@ namespace Google.Apis.CloudFunctions.v1.Data
 
     /// <summary>
     /// Configuration for a secret environment variable. It has the information necessary to fetch the secret value from
-    /// secret manager and expose it as an environment variable. Secret value is not a part of the configuration. Secret
-    /// values are only fetched when a new clone starts.
+    /// secret manager and expose it as an environment variable.
     /// </summary>
     public class SecretEnvVar : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2104,7 +2252,7 @@ namespace Google.Apis.CloudFunctions.v1.Data
         public virtual string Key { get; set; }
 
         /// <summary>
-        /// Project identifier (preferrably project number but can also be the project ID) of the project that contains
+        /// Project identifier (preferably project number but can also be the project ID) of the project that contains
         /// the secret. If not set, it will be populated with the function's project assuming that the secret exists in
         /// the same project as of the function.
         /// </summary>
@@ -2117,7 +2265,8 @@ namespace Google.Apis.CloudFunctions.v1.Data
 
         /// <summary>
         /// Version of the secret (version number or the string 'latest'). It is recommended to use a numeric version
-        /// for secret environment variables as any updates to the secret value is not reflected until new clones start.
+        /// for secret environment variables as any updates to the secret value is not reflected until new instances
+        /// start.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
         public virtual string Version { get; set; }
@@ -2138,8 +2287,8 @@ namespace Google.Apis.CloudFunctions.v1.Data
         public virtual string Path { get; set; }
 
         /// <summary>
-        /// Version of the secret (version number or the string 'latest'). It is preferrable to use `latest` version
-        /// with secret volumes as secret value changes are reflected immediately.
+        /// Version of the secret (version number or the string 'latest'). It is preferable to use `latest` version with
+        /// secret volumes as secret value changes are reflected immediately.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
         public virtual string Version { get; set; }
@@ -2193,7 +2342,7 @@ namespace Google.Apis.CloudFunctions.v1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -2230,7 +2379,7 @@ namespace Google.Apis.CloudFunctions.v1.Data
         /// (branch): `https://source.developers.google.com/projects/*/repos/*/moveable-aliases/*/paths/*` In
         /// particular, to refer to HEAD use `master` moveable alias. To refer to a specific fixed alias (tag):
         /// `https://source.developers.google.com/projects/*/repos/*/fixed-aliases/*/paths/*` You may omit `paths/*` if
-        /// you want to use the main directory.
+        /// you want to use the main directory. The function response may add an empty `/paths/` to the URL.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("url")]
         public virtual string Url { get; set; }
@@ -2272,7 +2421,7 @@ namespace Google.Apis.CloudFunctions.v1.Data
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>

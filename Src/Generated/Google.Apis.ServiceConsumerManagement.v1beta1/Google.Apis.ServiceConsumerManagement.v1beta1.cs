@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
         {
             Operations = new OperationsResource(this);
             Services = new ServicesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://serviceconsumermanagement.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://serviceconsumermanagement.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
         public override string Name => "serviceconsumermanagement";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://serviceconsumermanagement.googleapis.com/";
-        #else
-            "https://serviceconsumermanagement.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://serviceconsumermanagement.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Service Consumer Management API.</summary>
         public class Scope
@@ -292,7 +287,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -386,6 +381,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                 {
                     this.service = service;
                     ProducerOverrides = new ProducerOverridesResource(service);
+                    ProducerQuotaPolicies = new ProducerQuotaPoliciesResource(service);
                 }
 
                 /// <summary>Gets the ProducerOverrides resource.</summary>
@@ -420,7 +416,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1QuotaOverride body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -455,6 +451,13 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("force", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual System.Nullable<bool> Force { get; set; }
+
+                        /// <summary>
+                        /// If force option is set to true, force_justification is suggested to be set to log the reason
+                        /// in audit logs.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("forceJustification", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string ForceJustification { get; set; }
 
                         /// <summary>
                         /// The list of quota safety checks to ignore before the override mutation. Unlike 'force' field
@@ -544,6 +547,14 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                                 DefaultValue = null,
                                 Pattern = null,
                             });
+                            RequestParameters.Add("forceJustification", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "forceJustification",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
                             RequestParameters.Add("forceOnly", new Google.Apis.Discovery.Parameter
                             {
                                 Name = "forceOnly",
@@ -562,7 +573,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes a producer override.</summary>
@@ -589,6 +600,13 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("force", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual System.Nullable<bool> Force { get; set; }
+
+                        /// <summary>
+                        /// If force option is set to true, force_justification is suggested to be set to log the reason
+                        /// in audit logs.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("forceJustification", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string ForceJustification { get; set; }
 
                         /// <summary>
                         /// The list of quota safety checks to ignore before the override mutation. Unlike 'force' field
@@ -672,6 +690,14 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                                 DefaultValue = null,
                                 Pattern = null,
                             });
+                            RequestParameters.Add("forceJustification", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "forceJustification",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
                             RequestParameters.Add("forceOnly", new Google.Apis.Discovery.Parameter
                             {
                                 Name = "forceOnly",
@@ -691,7 +717,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists all producer overrides on this limit.</summary>
@@ -770,7 +796,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1QuotaOverride body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>Updates a producer override.</summary>
@@ -798,6 +824,13 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("force", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual System.Nullable<bool> Force { get; set; }
+
+                        /// <summary>
+                        /// If force option is set to true, force_justification is suggested to be set to log the reason
+                        /// in audit logs.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("forceJustification", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string ForceJustification { get; set; }
 
                         /// <summary>
                         /// The list of quota safety checks to ignore before the override mutation. Unlike 'force' field
@@ -893,6 +926,14 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                                 DefaultValue = null,
                                 Pattern = null,
                             });
+                            RequestParameters.Add("forceJustification", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "forceJustification",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
                             RequestParameters.Add("forceOnly", new Google.Apis.Discovery.Parameter
                             {
                                 Name = "forceOnly",
@@ -913,6 +954,430 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                     }
                 }
 
+                /// <summary>Gets the ProducerQuotaPolicies resource.</summary>
+                public virtual ProducerQuotaPoliciesResource ProducerQuotaPolicies { get; }
+
+                /// <summary>The "producerQuotaPolicies" collection of methods.</summary>
+                public class ProducerQuotaPoliciesResource
+                {
+                    private const string Resource = "producerQuotaPolicies";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public ProducerQuotaPoliciesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Creates a producer quota policy. A producer quota policy is applied by the owner or
+                    /// administrator of a service at an org or folder node to set the default quota limit for all
+                    /// consumers under the node where the policy is created. To create multiple policies at once, use
+                    /// ImportProducerQuotaPolicies instead. If a policy with the specified dimensions already exists,
+                    /// this call will fail. To overwrite an existing policy if one is already present ("upsert"
+                    /// semantics), use ImportProducerQuotaPolicies instead.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// Required. The resource name of the parent quota limit. An example name would be:
+                    /// `services/compute.googleapis.com/organizations/123/consumerQuotaMetrics/compute.googleapis.com%2Fcpus/limits/%2Fproject%2Fregion`
+                    /// </param>
+                    public virtual CreateRequest Create(Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1ProducerQuotaPolicy body, string parent)
+                    {
+                        return new CreateRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>
+                    /// Creates a producer quota policy. A producer quota policy is applied by the owner or
+                    /// administrator of a service at an org or folder node to set the default quota limit for all
+                    /// consumers under the node where the policy is created. To create multiple policies at once, use
+                    /// ImportProducerQuotaPolicies instead. If a policy with the specified dimensions already exists,
+                    /// this call will fail. To overwrite an existing policy if one is already present ("upsert"
+                    /// semantics), use ImportProducerQuotaPolicies instead.
+                    /// </summary>
+                    public class CreateRequest : ServiceConsumerManagementBaseServiceRequest<Google.Apis.ServiceConsumerManagement.v1beta1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Create request.</summary>
+                        public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1ProducerQuotaPolicy body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The resource name of the parent quota limit. An example name would be:
+                        /// `services/compute.googleapis.com/organizations/123/consumerQuotaMetrics/compute.googleapis.com%2Fcpus/limits/%2Fproject%2Fregion`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Whether to force the creation of the quota policy. If the policy creation would decrease the
+                        /// default limit of any consumer tier by more than 10 percent, the call is rejected, as a
+                        /// safety measure to avoid accidentally decreasing quota too quickly. Setting the force
+                        /// parameter to true ignores this restriction.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("force", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<bool> Force { get; set; }
+
+                        /// <summary>
+                        /// If force option is set to true, force_justification is suggested to be set to log the reason
+                        /// in audit logs.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("forceJustification", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string ForceJustification { get; set; }
+
+                        /// <summary>If set to true, validate the request, but do not actually update.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1ProducerQuotaPolicy Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "create";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+parent}/producerQuotaPolicies";
+
+                        /// <summary>Initializes Create parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^services/[^/]+/[^/]+/[^/]+/consumerQuotaMetrics/[^/]+/limits/[^/]+$",
+                            });
+                            RequestParameters.Add("force", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "force",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("forceJustification", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "forceJustification",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "validateOnly",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Deletes a producer quota policy.</summary>
+                    /// <param name="name">
+                    /// Required. The resource name of the policy to delete. An example name would be:
+                    /// `services/compute.googleapis.com/organizations/123/consumerQuotaMetrics/compute.googleapis.com%2Fcpus/limits/%2Fproject%2Fregion/producerQuotaPolicies/4a3f2c1d`
+                    /// </param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>Deletes a producer quota policy.</summary>
+                    public class DeleteRequest : ServiceConsumerManagementBaseServiceRequest<Google.Apis.ServiceConsumerManagement.v1beta1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The resource name of the policy to delete. An example name would be:
+                        /// `services/compute.googleapis.com/organizations/123/consumerQuotaMetrics/compute.googleapis.com%2Fcpus/limits/%2Fproject%2Fregion/producerQuotaPolicies/4a3f2c1d`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>
+                        /// Whether to force the deletion of the quota policy. If the policy deletion would decrease the
+                        /// default limit of any consumer tier by more than 10 percent, the call is rejected, as a
+                        /// safety measure to avoid accidentally decreasing quota too quickly. Setting the force
+                        /// parameter to true ignores this restriction.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("force", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<bool> Force { get; set; }
+
+                        /// <summary>
+                        /// If force option is set to true, force_justification is suggested to be set to log the reason
+                        /// in audit logs.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("forceJustification", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string ForceJustification { get; set; }
+
+                        /// <summary>If set to true, validate the request, but do not actually update.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^services/[^/]+/[^/]+/[^/]+/consumerQuotaMetrics/[^/]+/limits/[^/]+/producerQuotaPolicies/[^/]+$",
+                            });
+                            RequestParameters.Add("force", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "force",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("forceJustification", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "forceJustification",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "validateOnly",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Lists all producer policies created at current consumer node for a limit.</summary>
+                    /// <param name="parent">
+                    /// Required. The resource name of the parent quota limit. An example name would be:
+                    /// `services/compute.googleapis.com/organizations/123/consumerQuotaMetrics/compute.googleapis.com%2Fcpus/limits/%2Fproject%2Fregion`
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists all producer policies created at current consumer node for a limit.</summary>
+                    public class ListRequest : ServiceConsumerManagementBaseServiceRequest<Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1ListProducerQuotaPoliciesResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The resource name of the parent quota limit. An example name would be:
+                        /// `services/compute.googleapis.com/organizations/123/consumerQuotaMetrics/compute.googleapis.com%2Fcpus/limits/%2Fproject%2Fregion`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>Requested size of the next page of data.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// Token identifying which result to start with; returned by a previous list call.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+parent}/producerQuotaPolicies";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^services/[^/]+/[^/]+/[^/]+/consumerQuotaMetrics/[^/]+/limits/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Updates a producer quota policy.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">
+                    /// The resource name of the producer policy. An example name would be:
+                    /// `services/compute.googleapis.com/organizations/123/consumerQuotaMetrics/compute.googleapis.com%2Fcpus/limits/%2Fproject%2Fregion/producerQuotaPolicies/4a3f2c1d`
+                    /// </param>
+                    public virtual PatchRequest Patch(Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1ProducerQuotaPolicy body, string name)
+                    {
+                        return new PatchRequest(this.service, body, name);
+                    }
+
+                    /// <summary>Updates a producer quota policy.</summary>
+                    public class PatchRequest : ServiceConsumerManagementBaseServiceRequest<Google.Apis.ServiceConsumerManagement.v1beta1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Patch request.</summary>
+                        public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1ProducerQuotaPolicy body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// The resource name of the producer policy. An example name would be:
+                        /// `services/compute.googleapis.com/organizations/123/consumerQuotaMetrics/compute.googleapis.com%2Fcpus/limits/%2Fproject%2Fregion/producerQuotaPolicies/4a3f2c1d`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>
+                        /// Whether to force the update of the quota policy. If the policy update would decrease the
+                        /// default limit of any consumer tier by more than 10 percent, the call is rejected, as a
+                        /// safety measure to avoid accidentally decreasing quota too quickly. Setting the force
+                        /// parameter to true ignores this restriction.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("force", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<bool> Force { get; set; }
+
+                        /// <summary>
+                        /// If force option is set to true, force_justification is suggested to be set to log the reason
+                        /// in audit logs.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("forceJustification", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string ForceJustification { get; set; }
+
+                        /// <summary>
+                        /// Update only the specified fields. If unset, all modifiable fields will be updated.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual object UpdateMask { get; set; }
+
+                        /// <summary>If set to true, validate the request, but do not actually update.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1ProducerQuotaPolicy Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "patch";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "PATCH";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+name}";
+
+                        /// <summary>Initializes Patch parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^services/[^/]+/[^/]+/[^/]+/consumerQuotaMetrics/[^/]+/limits/[^/]+/producerQuotaPolicies/[^/]+$",
+                            });
+                            RequestParameters.Add("force", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "force",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("forceJustification", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "forceJustification",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "updateMask",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "validateOnly",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
                 /// <summary>Retrieves a summary of quota information for a specific quota limit.</summary>
                 /// <param name="name">
                 /// The resource name of the quota limit, returned by a ListConsumerQuotaMetrics or
@@ -921,7 +1386,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Retrieves a summary of quota information for a specific quota limit.</summary>
@@ -1012,7 +1477,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Retrieves a summary of quota information for a specific quota metric.</summary>
@@ -1105,7 +1570,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
             /// </param>
             public virtual ImportProducerOverridesRequest ImportProducerOverrides(Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1ImportProducerOverridesRequest body, string parent)
             {
-                return new ImportProducerOverridesRequest(service, body, parent);
+                return new ImportProducerOverridesRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1160,6 +1625,71 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
             }
 
             /// <summary>
+            /// Create or update multiple producer quota policies atomically, all on the same ancestor, but on many
+            /// different metrics or limits. The name field in the quota policy message should not be set.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// The resource name of the consumer. An example name would be:
+            /// `services/compute.googleapis.com/organizations/123`
+            /// </param>
+            public virtual ImportProducerQuotaPoliciesRequest ImportProducerQuotaPolicies(Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1ImportProducerQuotaPoliciesRequest body, string parent)
+            {
+                return new ImportProducerQuotaPoliciesRequest(this.service, body, parent);
+            }
+
+            /// <summary>
+            /// Create or update multiple producer quota policies atomically, all on the same ancestor, but on many
+            /// different metrics or limits. The name field in the quota policy message should not be set.
+            /// </summary>
+            public class ImportProducerQuotaPoliciesRequest : ServiceConsumerManagementBaseServiceRequest<Google.Apis.ServiceConsumerManagement.v1beta1.Data.Operation>
+            {
+                /// <summary>Constructs a new ImportProducerQuotaPolicies request.</summary>
+                public ImportProducerQuotaPoliciesRequest(Google.Apis.Services.IClientService service, Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1ImportProducerQuotaPoliciesRequest body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// The resource name of the consumer. An example name would be:
+                /// `services/compute.googleapis.com/organizations/123`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.ServiceConsumerManagement.v1beta1.Data.V1Beta1ImportProducerQuotaPoliciesRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "importProducerQuotaPolicies";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta1/{+parent}/consumerQuotaMetrics:importProducerQuotaPolicies";
+
+                /// <summary>Initializes ImportProducerQuotaPolicies parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^services/[^/]+/[^/]+/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
             /// Retrieves a summary of all quota information about this consumer that is visible to the service
             /// producer, for each quota metric defined by the service. Each metric includes information about all of
             /// its defined limits. Each limit includes the limit configuration (quota unit, preciseness, default
@@ -1171,7 +1701,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -1392,12 +1922,13 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual string JwksUri { get; set; }
 
         /// <summary>
-        /// Defines the locations to extract the JWT. JWT locations can be either from HTTP headers or URL query
-        /// parameters. The rule is that the first match wins. The checking order is: checking all headers first, then
-        /// URL query parameters. If not specified, default to use following 3 locations: 1) Authorization: Bearer 2)
-        /// x-goog-iap-jwt-assertion 3) access_token query parameter Default locations can be specified as followings:
-        /// jwt_locations: - header: Authorization value_prefix: "Bearer " - header: x-goog-iap-jwt-assertion - query:
-        /// access_token
+        /// Defines the locations to extract the JWT. For now it is only used by the Cloud Endpoints to store the
+        /// OpenAPI extension [x-google-jwt-locations]
+        /// (https://cloud.google.com/endpoints/docs/openapi/openapi-extensions#x-google-jwt-locations) JWT locations
+        /// can be one of HTTP headers, URL query parameters or cookies. The rule is that the first match wins. If not
+        /// specified, default to use following 3 locations: 1) Authorization: Bearer 2) x-goog-iap-jwt-assertion 3)
+        /// access_token query parameter Default locations can be specified as followings: jwt_locations: - header:
+        /// Authorization value_prefix: "Bearer " - header: x-goog-iap-jwt-assertion - query: access_token
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("jwtLocations")]
         public virtual System.Collections.Generic.IList<JwtLocation> JwtLocations { get; set; }
@@ -1537,11 +2068,19 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("jwtAudience")]
         public virtual string JwtAudience { get; set; }
 
+        /// <summary>Deprecated, do not use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minDeadline")]
+        public virtual System.Nullable<double> MinDeadline { get; set; }
+
         /// <summary>
         /// The number of seconds to wait for the completion of a long running operation. The default is no deadline.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("operationDeadline")]
         public virtual System.Nullable<double> OperationDeadline { get; set; }
+
+        /// <summary>The map between request protocol and the backend address.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("overridesByRequestProtocol")]
+        public virtual System.Collections.Generic.IDictionary<string, BackendRule> OverridesByRequestProtocol { get; set; }
 
         [Newtonsoft.Json.JsonPropertyAttribute("pathTranslation")]
         public virtual string PathTranslation { get; set; }
@@ -1615,6 +2154,84 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Details about how and where to publish client libraries.</summary>
+    public class ClientLibrarySettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Settings for C++ client libraries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cppSettings")]
+        public virtual CppSettings CppSettings { get; set; }
+
+        /// <summary>Settings for .NET client libraries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dotnetSettings")]
+        public virtual DotnetSettings DotnetSettings { get; set; }
+
+        /// <summary>Settings for Go client libraries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("goSettings")]
+        public virtual GoSettings GoSettings { get; set; }
+
+        /// <summary>Settings for legacy Java features, supported in the Service YAML.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("javaSettings")]
+        public virtual JavaSettings JavaSettings { get; set; }
+
+        /// <summary>Launch stage of this version of the API.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("launchStage")]
+        public virtual string LaunchStage { get; set; }
+
+        /// <summary>Settings for Node client libraries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nodeSettings")]
+        public virtual NodeSettings NodeSettings { get; set; }
+
+        /// <summary>Settings for PHP client libraries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("phpSettings")]
+        public virtual PhpSettings PhpSettings { get; set; }
+
+        /// <summary>Settings for Python client libraries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pythonSettings")]
+        public virtual PythonSettings PythonSettings { get; set; }
+
+        /// <summary>
+        /// When using transport=rest, the client request will encode enums as numbers rather than strings.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("restNumericEnums")]
+        public virtual System.Nullable<bool> RestNumericEnums { get; set; }
+
+        /// <summary>Settings for Ruby client libraries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rubySettings")]
+        public virtual RubySettings RubySettings { get; set; }
+
+        /// <summary>
+        /// Version of the API to apply these settings to. This is the full protobuf package for the API, ending in the
+        /// version element. Examples: "google.cloud.speech.v1" and "google.spanner.admin.database.v1".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual string Version { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Required information for every language.</summary>
+    public class CommonLanguageSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The destination where API teams want this client library to be published.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("destinations")]
+        public virtual System.Collections.Generic.IList<string> Destinations { get; set; }
+
+        /// <summary>
+        /// Link to automatically generated reference documentation. Example:
+        /// https://cloud.google.com/nodejs/docs/reference/asset/latest
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("referenceDocsUri")]
+        public virtual string ReferenceDocsUri { get; set; }
+
+        /// <summary>Configuration for which RPCs should be generated in the GAPIC client.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selectiveGapicGeneration")]
+        public virtual SelectiveGapicGeneration SelectiveGapicGeneration { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// `Context` defines which contexts an API requests. Example: context: rules: - selector: "*" requested: -
     /// google.rpc.context.ProjectContext - google.rpc.context.OriginContext The above specifies that all methods in the
@@ -1656,11 +2273,17 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("allowedResponseExtensions")]
         public virtual System.Collections.Generic.IList<string> AllowedResponseExtensions { get; set; }
 
-        /// <summary>A list of full type names of provided contexts.</summary>
+        /// <summary>
+        /// A list of full type names of provided contexts. It is used to support propagating HTTP headers and ETags
+        /// from the response extension.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("provided")]
         public virtual System.Collections.Generic.IList<string> Provided { get; set; }
 
-        /// <summary>A list of full type names of requested contexts.</summary>
+        /// <summary>
+        /// A list of full type names of requested contexts, only the requested context will be made available to the
+        /// backend.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requested")]
         public virtual System.Collections.Generic.IList<string> Requested { get; set; }
 
@@ -1673,17 +2296,32 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
     }
 
     /// <summary>
-    /// Selects and configures the service controller used by the service. The service controller handles features like
-    /// abuse, quota, billing, logging, monitoring, etc.
+    /// Selects and configures the service controller used by the service. Example: control: environment:
+    /// servicecontrol.googleapis.com
     /// </summary>
     public class Control : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The service control environment to use. If empty, no control plane feature (like quota and billing) will be
-        /// enabled.
+        /// The service controller environment to use. If empty, no control plane feature (like quota and billing) will
+        /// be enabled. The recommended value for most services is servicecontrol.googleapis.com
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("environment")]
         public virtual string Environment { get; set; }
+
+        /// <summary>Defines policies applying to the API methods of the service.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("methodPolicies")]
+        public virtual System.Collections.Generic.IList<MethodPolicy> MethodPolicies { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Settings for C++ client libraries.</summary>
+    public class CppSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Some settings.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("common")]
+        public virtual CommonLanguageSettings Common { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1747,7 +2385,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
     /// <summary>
     /// `Documentation` provides the information for describing a service. Example: documentation: summary: &amp;gt; The
     /// Google Calendar API gives access to most calendar features. pages: - name: Overview content: (== include
-    /// google/foo/overview.md ==) - name: Tutorial content: (== include google/foo/tutorial.md ==) subpages; - name:
+    /// google/foo/overview.md ==) - name: Tutorial content: (== include google/foo/tutorial.md ==) subpages: - name:
     /// Java content: (== include google/foo/tutorial_java.md ==) rules: - selector: google.calendar.Calendar.Get
     /// description: &amp;gt; ... - selector: google.calendar.Calendar.Put description: &amp;gt; ... Documentation is
     /// provided in markdown syntax. In addition to standard markdown features, definition lists, tables and fenced code
@@ -1767,6 +2405,13 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
     /// </summary>
     public class Documentation : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional information about the IAM configuration. This is typically used to link to documentation about a
+        /// product's IAM roles and permissions.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("additionalIamInfo")]
+        public virtual string AdditionalIamInfo { get; set; }
+
         /// <summary>The URL to the root of documentation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("documentationRootUrl")]
         public virtual string DocumentationRootUrl { get; set; }
@@ -1790,6 +2435,13 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rules")]
         public virtual System.Collections.Generic.IList<DocumentationRule> Rules { get; set; }
+
+        /// <summary>
+        /// Specifies section and content to override boilerplate content provided by go/api-docgen. Currently overrides
+        /// following sections: 1. rest.service.client_libraries
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sectionOverrides")]
+        public virtual System.Collections.Generic.IList<Page> SectionOverrides { get; set; }
 
         /// <summary>
         /// Specifies the service root url if the default one (the service name from the yaml file) is not suitable.
@@ -1829,6 +2481,13 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual string Description { get; set; }
 
         /// <summary>
+        /// String of comma or space separated case-sensitive words for which method/field name replacement will be
+        /// disabled by go/api-docgen.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disableReplacementWords")]
+        public virtual string DisableReplacementWords { get; set; }
+
+        /// <summary>
         /// The selector is a comma-separated list of patterns for any element such as a method, a field, an enum value.
         /// Each pattern is a qualified name of the element which may end in "*", indicating a wildcard. Wildcards are
         /// only allowed at the end and for a whole component of the qualified name, i.e. "foo.*" is ok, but not
@@ -1842,11 +2501,57 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Settings for Dotnet client libraries.</summary>
+    public class DotnetSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Some settings.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("common")]
+        public virtual CommonLanguageSettings Common { get; set; }
+
+        /// <summary>
+        /// Namespaces which must be aliased in snippets due to a known (but non-generator-predictable) naming collision
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("forcedNamespaceAliases")]
+        public virtual System.Collections.Generic.IList<string> ForcedNamespaceAliases { get; set; }
+
+        /// <summary>
+        /// Method signatures (in the form "service.method(signature)") which are provided separately, so shouldn't be
+        /// generated. Snippets *calling* these methods are still generated, however.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("handwrittenSignatures")]
+        public virtual System.Collections.Generic.IList<string> HandwrittenSignatures { get; set; }
+
+        /// <summary>
+        /// List of full resource types to ignore during generation. This is typically used for API-specific Location
+        /// resources, which should be handled by the generator as if they were actually the common Location resources.
+        /// Example entry: "documentai.googleapis.com/Location"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ignoredResources")]
+        public virtual System.Collections.Generic.IList<string> IgnoredResources { get; set; }
+
+        /// <summary>
+        /// Map from full resource types to the effective short name for the resource. This is used when otherwise
+        /// resource named from different services would cause naming collisions. Example entry:
+        /// "datalabeling.googleapis.com/Dataset": "DataLabelingDataset"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("renamedResources")]
+        public virtual System.Collections.Generic.IDictionary<string, string> RenamedResources { get; set; }
+
+        /// <summary>
+        /// Map from original service names to renamed versions. This is used when the default generated types would
+        /// cause a naming conflict. (Neither name is fully-qualified.) Example: Subscriber to SubscriberServiceApi.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("renamedServices")]
+        public virtual System.Collections.Generic.IDictionary<string, string> RenamedServices { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1866,6 +2571,13 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
     /// </summary>
     public class Endpoint : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Aliases for this endpoint, these will be served by the same UrlMap as the parent endpoint, and will be
+        /// provisioned in the GCP stack for the Regional Endpoints.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("aliases")]
+        public virtual System.Collections.Generic.IList<string> Aliases { get; set; }
+
         /// <summary>
         /// Allowing [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing), aka cross-domain traffic,
         /// would allow the backends served from this endpoint to receive and respond to HTTP OPTIONS requests. The
@@ -1894,6 +2606,10 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
     /// <summary>Enum type definition.</summary>
     public class Enum : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The source edition string, only valid when syntax is SYNTAX_EDITIONS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("edition")]
+        public virtual string Edition { get; set; }
+
         /// <summary>Enum value definitions.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("enumvalue")]
         public virtual System.Collections.Generic.IList<EnumValue> Enumvalue { get; set; }
@@ -1932,6 +2648,32 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         /// <summary>Protocol buffer options.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("options")]
         public virtual System.Collections.Generic.IList<Option> Options { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Experimental features to be included during client library generation. These fields will be deprecated once the
+    /// feature graduates and is enabled by default.
+    /// </summary>
+    public class ExperimentalFeatures : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Enables generation of protobuf code using new types that are more Pythonic which are included in
+        /// `protobuf&amp;gt;=5.29.x`. This feature will be enabled by default 1 month after launching the feature in
+        /// preview packages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protobufPythonicTypesEnabled")]
+        public virtual System.Nullable<bool> ProtobufPythonicTypesEnabled { get; set; }
+
+        /// <summary>
+        /// Enables generation of asynchronous REST clients if `rest` transport is enabled. By default, asynchronous
+        /// REST clients will not be generated. This feature will be enabled by default 1 month after launching the
+        /// feature in preview packages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("restAsyncIoEnabled")]
+        public virtual System.Nullable<bool> RestAsyncIoEnabled { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1991,6 +2733,59 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
     }
 
     /// <summary>
+    /// Google API Policy Annotation This message defines a simple API policy annotation that can be used to annotate
+    /// API request and response message fields with applicable policies. One field may have multiple applicable
+    /// policies that must all be satisfied before a request can be processed. This policy annotation is used to
+    /// generate the overall policy that will be used for automatic runtime policy enforcement and documentation
+    /// generation.
+    /// </summary>
+    public class FieldPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Specifies the required permission(s) for the resource referred to by the field. It requires the field
+        /// contains a valid resource reference, and the request must pass the permission checks to proceed. For
+        /// example, "resourcemanager.projects.get".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourcePermission")]
+        public virtual string ResourcePermission { get; set; }
+
+        /// <summary>Specifies the resource type for the resource referred to by the field.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceType")]
+        public virtual string ResourceType { get; set; }
+
+        /// <summary>
+        /// Selects one or more request or response message fields to apply this `FieldPolicy`. When a `FieldPolicy` is
+        /// used in proto annotation, the selector must be left as empty. The service config generator will
+        /// automatically fill the correct value. When a `FieldPolicy` is used in service config, the selector must be a
+        /// comma-separated string with valid request or response field paths, such as "foo.bar" or "foo.bar,foo.baz".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selector")]
+        public virtual string Selector { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Settings for Go client libraries.</summary>
+    public class GoSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Some settings.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("common")]
+        public virtual CommonLanguageSettings Common { get; set; }
+
+        /// <summary>
+        /// Map of service names to renamed services. Keys are the package relative service names and values are the
+        /// name to be used for the service client and call options. publishing: go_settings: renamed_services:
+        /// Publisher: TopicAdmin
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("renamedServices")]
+        public virtual System.Collections.Generic.IDictionary<string, string> RenamedServices { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// Defines the HTTP configuration for an API service. It contains a list of HttpRule, each specifying the mapping
     /// of an RPC method to one or more HTTP REST API methods.
     /// </summary>
@@ -2016,7 +2811,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
     }
 
     /// <summary>
-    /// # gRPC Transcoding gRPC Transcoding is a feature for mapping between a gRPC method and one or more HTTP REST
+    /// gRPC Transcoding gRPC Transcoding is a feature for mapping between a gRPC method and one or more HTTP REST
     /// endpoints. It allows developers to build a single API service that supports both gRPC APIs and REST APIs. Many
     /// systems, including [Google APIs](https://github.com/googleapis/googleapis), [Cloud
     /// Endpoints](https://cloud.google.com/endpoints), [gRPC Gateway](https://github.com/grpc-ecosystem/grpc-gateway),
@@ -2030,72 +2825,71 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
     /// request message are mapped to the URL path. Example: service Messaging { rpc GetMessage(GetMessageRequest)
     /// returns (Message) { option (google.api.http) = { get: "/v1/{name=messages/*}" }; } } message GetMessageRequest {
     /// string name = 1; // Mapped to URL path. } message Message { string text = 1; // The resource content. } This
-    /// enables an HTTP REST to gRPC mapping as below: HTTP | gRPC -----|----- `GET /v1/messages/123456` |
-    /// `GetMessage(name: "messages/123456")` Any fields in the request message which are not bound by the path template
-    /// automatically become HTTP query parameters if there is no HTTP request body. For example: service Messaging {
-    /// rpc GetMessage(GetMessageRequest) returns (Message) { option (google.api.http) = {
-    /// get:"/v1/messages/{message_id}" }; } } message GetMessageRequest { message SubMessage { string subfield = 1; }
-    /// string message_id = 1; // Mapped to URL path. int64 revision = 2; // Mapped to URL query parameter `revision`.
-    /// SubMessage sub = 3; // Mapped to URL query parameter `sub.subfield`. } This enables a HTTP JSON to RPC mapping
-    /// as below: HTTP | gRPC -----|----- `GET /v1/messages/123456?revision=2&amp;amp;sub.subfield=foo` |
-    /// `GetMessage(message_id: "123456" revision: 2 sub: SubMessage(subfield: "foo"))` Note that fields which are
-    /// mapped to URL query parameters must have a primitive type or a repeated primitive type or a non-repeated message
-    /// type. In the case of a repeated type, the parameter can be repeated in the URL as `...?param=A&amp;amp;param=B`.
-    /// In the case of a message type, each field of the message is mapped to a separate parameter, such as
-    /// `...?foo.a=A&amp;amp;foo.b=B&amp;amp;foo.c=C`. For HTTP methods that allow a request body, the `body` field
-    /// specifies the mapping. Consider a REST update method on the message resource collection: service Messaging { rpc
-    /// UpdateMessage(UpdateMessageRequest) returns (Message) { option (google.api.http) = { patch:
-    /// "/v1/messages/{message_id}" body: "message" }; } } message UpdateMessageRequest { string message_id = 1; //
-    /// mapped to the URL Message message = 2; // mapped to the body } The following HTTP JSON to RPC mapping is
-    /// enabled, where the representation of the JSON in the request body is determined by protos JSON encoding: HTTP |
-    /// gRPC -----|----- `PATCH /v1/messages/123456 { "text": "Hi!" }` | `UpdateMessage(message_id: "123456" message {
-    /// text: "Hi!" })` The special name `*` can be used in the body mapping to define that every field not bound by the
-    /// path template should be mapped to the request body. This enables the following alternative definition of the
-    /// update method: service Messaging { rpc UpdateMessage(Message) returns (Message) { option (google.api.http) = {
-    /// patch: "/v1/messages/{message_id}" body: "*" }; } } message Message { string message_id = 1; string text = 2; }
-    /// The following HTTP JSON to RPC mapping is enabled: HTTP | gRPC -----|----- `PATCH /v1/messages/123456 { "text":
-    /// "Hi!" }` | `UpdateMessage(message_id: "123456" text: "Hi!")` Note that when using `*` in the body mapping, it is
-    /// not possible to have HTTP parameters, as all fields not bound by the path end in the body. This makes this
-    /// option more rarely used in practice when defining REST APIs. The common usage of `*` is in custom methods which
-    /// don't use the URL at all for transferring data. It is possible to define multiple HTTP methods for one RPC by
-    /// using the `additional_bindings` option. Example: service Messaging { rpc GetMessage(GetMessageRequest) returns
-    /// (Message) { option (google.api.http) = { get: "/v1/messages/{message_id}" additional_bindings { get:
-    /// "/v1/users/{user_id}/messages/{message_id}" } }; } } message GetMessageRequest { string message_id = 1; string
-    /// user_id = 2; } This enables the following two alternative HTTP JSON to RPC mappings: HTTP | gRPC -----|-----
-    /// `GET /v1/messages/123456` | `GetMessage(message_id: "123456")` `GET /v1/users/me/messages/123456` |
-    /// `GetMessage(user_id: "me" message_id: "123456")` ## Rules for HTTP mapping 1. Leaf request fields (recursive
-    /// expansion nested messages in the request message) are classified into three categories: - Fields referred by the
-    /// path template. They are passed via the URL path. - Fields referred by the HttpRule.body. They are passed via the
-    /// HTTP request body. - All other fields are passed via the URL query parameters, and the parameter name is the
-    /// field path in the request message. A repeated field can be represented as multiple query parameters under the
-    /// same name. 2. If HttpRule.body is "*", there is no URL query parameter, all fields are passed via URL path and
-    /// HTTP request body. 3. If HttpRule.body is omitted, there is no HTTP request body, all fields are passed via URL
-    /// path and URL query parameters. ### Path template syntax Template = "/" Segments [ Verb ] ; Segments = Segment {
-    /// "/" Segment } ; Segment = "*" | "**" | LITERAL | Variable ; Variable = "{" FieldPath [ "=" Segments ] "}" ;
-    /// FieldPath = IDENT { "." IDENT } ; Verb = ":" LITERAL ; The syntax `*` matches a single URL path segment. The
-    /// syntax `**` matches zero or more URL path segments, which must be the last part of the URL path except the
-    /// `Verb`. The syntax `Variable` matches part of the URL path as specified by its template. A variable template
-    /// must not contain other variables. If a variable matches a single path segment, its template may be omitted, e.g.
-    /// `{var}` is equivalent to `{var=*}`. The syntax `LITERAL` matches literal text in the URL path. If the `LITERAL`
-    /// contains any reserved character, such characters should be percent-encoded before the matching. If a variable
-    /// contains exactly one path segment, such as `"{var}"` or `"{var=*}"`, when such a variable is expanded into a URL
-    /// path on the client side, all characters except `[-_.~0-9a-zA-Z]` are percent-encoded. The server side does the
-    /// reverse decoding. Such variables show up in the [Discovery
-    /// Document](https://developers.google.com/discovery/v1/reference/apis) as `{var}`. If a variable contains multiple
-    /// path segments, such as `"{var=foo/*}"` or `"{var=**}"`, when such a variable is expanded into a URL path on the
-    /// client side, all characters except `[-_.~/0-9a-zA-Z]` are percent-encoded. The server side does the reverse
-    /// decoding, except "%2F" and "%2f" are left unchanged. Such variables show up in the [Discovery
-    /// Document](https://developers.google.com/discovery/v1/reference/apis) as `{+var}`. ## Using gRPC API Service
+    /// enables an HTTP REST to gRPC mapping as below: - HTTP: `GET /v1/messages/123456` - gRPC: `GetMessage(name:
+    /// "messages/123456")` Any fields in the request message which are not bound by the path template automatically
+    /// become HTTP query parameters if there is no HTTP request body. For example: service Messaging { rpc
+    /// GetMessage(GetMessageRequest) returns (Message) { option (google.api.http) = { get:"/v1/messages/{message_id}"
+    /// }; } } message GetMessageRequest { message SubMessage { string subfield = 1; } string message_id = 1; // Mapped
+    /// to URL path. int64 revision = 2; // Mapped to URL query parameter `revision`. SubMessage sub = 3; // Mapped to
+    /// URL query parameter `sub.subfield`. } This enables a HTTP JSON to RPC mapping as below: - HTTP: `GET
+    /// /v1/messages/123456?revision=2&amp;amp;sub.subfield=foo` - gRPC: `GetMessage(message_id: "123456" revision: 2
+    /// sub: SubMessage(subfield: "foo"))` Note that fields which are mapped to URL query parameters must have a
+    /// primitive type or a repeated primitive type or a non-repeated message type. In the case of a repeated type, the
+    /// parameter can be repeated in the URL as `...?param=A&amp;amp;param=B`. In the case of a message type, each field
+    /// of the message is mapped to a separate parameter, such as `...?foo.a=A&amp;amp;foo.b=B&amp;amp;foo.c=C`. For
+    /// HTTP methods that allow a request body, the `body` field specifies the mapping. Consider a REST update method on
+    /// the message resource collection: service Messaging { rpc UpdateMessage(UpdateMessageRequest) returns (Message) {
+    /// option (google.api.http) = { patch: "/v1/messages/{message_id}" body: "message" }; } } message
+    /// UpdateMessageRequest { string message_id = 1; // mapped to the URL Message message = 2; // mapped to the body }
+    /// The following HTTP JSON to RPC mapping is enabled, where the representation of the JSON in the request body is
+    /// determined by protos JSON encoding: - HTTP: `PATCH /v1/messages/123456 { "text": "Hi!" }` - gRPC:
+    /// `UpdateMessage(message_id: "123456" message { text: "Hi!" })` The special name `*` can be used in the body
+    /// mapping to define that every field not bound by the path template should be mapped to the request body. This
+    /// enables the following alternative definition of the update method: service Messaging { rpc
+    /// UpdateMessage(Message) returns (Message) { option (google.api.http) = { patch: "/v1/messages/{message_id}" body:
+    /// "*" }; } } message Message { string message_id = 1; string text = 2; } The following HTTP JSON to RPC mapping is
+    /// enabled: - HTTP: `PATCH /v1/messages/123456 { "text": "Hi!" }` - gRPC: `UpdateMessage(message_id: "123456" text:
+    /// "Hi!")` Note that when using `*` in the body mapping, it is not possible to have HTTP parameters, as all fields
+    /// not bound by the path end in the body. This makes this option more rarely used in practice when defining REST
+    /// APIs. The common usage of `*` is in custom methods which don't use the URL at all for transferring data. It is
+    /// possible to define multiple HTTP methods for one RPC by using the `additional_bindings` option. Example: service
+    /// Messaging { rpc GetMessage(GetMessageRequest) returns (Message) { option (google.api.http) = { get:
+    /// "/v1/messages/{message_id}" additional_bindings { get: "/v1/users/{user_id}/messages/{message_id}" } }; } }
+    /// message GetMessageRequest { string message_id = 1; string user_id = 2; } This enables the following two
+    /// alternative HTTP JSON to RPC mappings: - HTTP: `GET /v1/messages/123456` - gRPC: `GetMessage(message_id:
+    /// "123456")` - HTTP: `GET /v1/users/me/messages/123456` - gRPC: `GetMessage(user_id: "me" message_id: "123456")`
+    /// Rules for HTTP mapping 1. Leaf request fields (recursive expansion nested messages in the request message) are
+    /// classified into three categories: - Fields referred by the path template. They are passed via the URL path. -
+    /// Fields referred by the HttpRule.body. They are passed via the HTTP request body. - All other fields are passed
+    /// via the URL query parameters, and the parameter name is the field path in the request message. A repeated field
+    /// can be represented as multiple query parameters under the same name. 2. If HttpRule.body is "*", there is no URL
+    /// query parameter, all fields are passed via URL path and HTTP request body. 3. If HttpRule.body is omitted, there
+    /// is no HTTP request body, all fields are passed via URL path and URL query parameters. Path template syntax
+    /// Template = "/" Segments [ Verb ] ; Segments = Segment { "/" Segment } ; Segment = "*" | "**" | LITERAL |
+    /// Variable ; Variable = "{" FieldPath [ "=" Segments ] "}" ; FieldPath = IDENT { "." IDENT } ; Verb = ":" LITERAL
+    /// ; The syntax `*` matches a single URL path segment. The syntax `**` matches zero or more URL path segments,
+    /// which must be the last part of the URL path except the `Verb`. The syntax `Variable` matches part of the URL
+    /// path as specified by its template. A variable template must not contain other variables. If a variable matches a
+    /// single path segment, its template may be omitted, e.g. `{var}` is equivalent to `{var=*}`. The syntax `LITERAL`
+    /// matches literal text in the URL path. If the `LITERAL` contains any reserved character, such characters should
+    /// be percent-encoded before the matching. If a variable contains exactly one path segment, such as `"{var}"` or
+    /// `"{var=*}"`, when such a variable is expanded into a URL path on the client side, all characters except
+    /// `[-_.~0-9a-zA-Z]` are percent-encoded. The server side does the reverse decoding. Such variables show up in the
+    /// [Discovery Document](https://developers.google.com/discovery/v1/reference/apis) as `{var}`. If a variable
+    /// contains multiple path segments, such as `"{var=foo/*}"` or `"{var=**}"`, when such a variable is expanded into
+    /// a URL path on the client side, all characters except `[-_.~/0-9a-zA-Z]` are percent-encoded. The server side
+    /// does the reverse decoding, except "%2F" and "%2f" are left unchanged. Such variables show up in the [Discovery
+    /// Document](https://developers.google.com/discovery/v1/reference/apis) as `{+var}`. Using gRPC API Service
     /// Configuration gRPC API Service Configuration (service config) is a configuration language for configuring a gRPC
     /// service to become a user-facing product. The service config is simply the YAML representation of the
     /// `google.api.Service` proto message. As an alternative to annotating your proto file, you can configure gRPC
     /// transcoding in your service config YAML files. You do this by specifying a `HttpRule` that maps the gRPC method
     /// to a REST endpoint, achieving the same effect as the proto annotation. This can be particularly useful if you
     /// have a proto that is reused in multiple services. Note that any transcoding specified in the service config will
-    /// override any matching transcoding configuration in the proto. Example: http: rules: # Selects a gRPC method and
-    /// applies HttpRule to it. - selector: example.v1.Messaging.GetMessage get:
-    /// /v1/messages/{message_id}/{sub.subfield} ## Special notes When gRPC Transcoding is used to map a gRPC to JSON
-    /// REST endpoints, the proto to JSON conversion must follow the [proto3
+    /// override any matching transcoding configuration in the proto. The following example selects a gRPC method and
+    /// applies an `HttpRule` to it: http: rules: - selector: example.v1.Messaging.GetMessage get:
+    /// /v1/messages/{message_id}/{sub.subfield} Special notes When gRPC Transcoding is used to map a gRPC to JSON REST
+    /// endpoints, the proto to JSON conversion must follow the [proto3
     /// specification](https://developers.google.com/protocol-buffers/docs/proto3#json). While the single segment
     /// variable follows the semantics of [RFC 6570](https://tools.ietf.org/html/rfc6570) Section 3.2.2 Simple String
     /// Expansion, the multi segment variable **does not** follow RFC 6570 Section 3.2.3 Reserved Expansion. The reason
@@ -2170,9 +2964,44 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Settings for Java client libraries.</summary>
+    public class JavaSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Some settings.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("common")]
+        public virtual CommonLanguageSettings Common { get; set; }
+
+        /// <summary>
+        /// The package name to use in Java. Clobbers the java_package option set in the protobuf. This should be used
+        /// **only** by APIs who have already set the language_settings.java.package_name" field in gapic.yaml. API
+        /// teams should use the protobuf java_package option where possible. Example of a YAML configuration::
+        /// publishing: java_settings: library_package: com.google.cloud.pubsub.v1
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("libraryPackage")]
+        public virtual string LibraryPackage { get; set; }
+
+        /// <summary>
+        /// Configure the Java class name to use instead of the service's for its corresponding generated GAPIC client.
+        /// Keys are fully-qualified service names as they appear in the protobuf (including the full the
+        /// language_settings.java.interface_names" field in gapic.yaml. API teams should otherwise use the service name
+        /// as it appears in the protobuf. Example of a YAML configuration:: publishing: java_settings:
+        /// service_class_names: - google.pubsub.v1.Publisher: TopicAdmin - google.pubsub.v1.Subscriber:
+        /// SubscriptionAdmin
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceClassNames")]
+        public virtual System.Collections.Generic.IDictionary<string, string> ServiceClassNames { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Specifies a location to extract JWT from an API request.</summary>
     public class JwtLocation : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Specifies cookie name to extract JWT token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cookie")]
+        public virtual string Cookie { get; set; }
+
         /// <summary>Specifies HTTP header name to extract JWT token.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("header")]
         public virtual string Header { get; set; }
@@ -2307,6 +3136,36 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Describes settings to use when generating API methods that use the long-running operation pattern. All default
+    /// values below are from those used in the client library generators (e.g.
+    /// [Java](https://github.com/googleapis/gapic-generator-java/blob/04c2faa191a9b5a10b92392fe8482279c4404803/src/main/java/com/google/api/generator/gapic/composer/common/RetrySettingsComposer.java)).
+    /// </summary>
+    public class LongRunning : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Initial delay after which the first poll request will be made. Default value: 5 seconds.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("initialPollDelay")]
+        public virtual object InitialPollDelay { get; set; }
+
+        /// <summary>Maximum time between two subsequent poll requests. Default value: 45 seconds.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxPollDelay")]
+        public virtual object MaxPollDelay { get; set; }
+
+        /// <summary>
+        /// Multiplier to gradually increase delay between subsequent polls until it reaches max_poll_delay. Default
+        /// value: 1.5.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pollDelayMultiplier")]
+        public virtual System.Nullable<float> PollDelayMultiplier { get; set; }
+
+        /// <summary>Total polling timeout. Default value: 5 minutes.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("totalPollTimeout")]
+        public virtual object TotalPollTimeout { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Method represents a method of an API interface.</summary>
     public class Method : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2337,6 +3196,59 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         /// <summary>The source syntax of this method.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("syntax")]
         public virtual string Syntax { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Defines policies applying to an RPC method.</summary>
+    public class MethodPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Policies that are applicable to the request message.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestPolicies")]
+        public virtual System.Collections.Generic.IList<FieldPolicy> RequestPolicies { get; set; }
+
+        /// <summary>
+        /// Selects a method to which these policies should be enforced, for example,
+        /// "google.pubsub.v1.Subscriber.CreateSubscription". Refer to selector for syntax details. NOTE: This field
+        /// must not be set in the proto annotation. It will be automatically filled by the service config compiler .
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selector")]
+        public virtual string Selector { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes the generator configuration for a method.</summary>
+    public class MethodSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// List of top-level fields of the request message, that should be automatically populated by the client
+        /// libraries based on their (google.api.field_info).format. Currently supported format: UUID4. Example of a
+        /// YAML configuration: publishing: method_settings: - selector: google.example.v1.ExampleService.CreateExample
+        /// auto_populated_fields: - request_id
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("autoPopulatedFields")]
+        public virtual System.Collections.Generic.IList<string> AutoPopulatedFields { get; set; }
+
+        /// <summary>
+        /// Describes settings to use for long-running operations when generating API methods for RPCs. Complements RPCs
+        /// that use the annotations in google/longrunning/operations.proto. Example of a YAML configuration::
+        /// publishing: method_settings: - selector: google.cloud.speech.v2.Speech.BatchRecognize long_running:
+        /// initial_poll_delay: 60s # 1 minute poll_delay_multiplier: 1.5 max_poll_delay: 360s # 6 minutes
+        /// total_poll_timeout: 54000s # 90 minutes
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("longRunning")]
+        public virtual LongRunning LongRunning { get; set; }
+
+        /// <summary>
+        /// The fully qualified name of the method, for which the options below apply. This is used to find the method
+        /// to apply the options. Example: publishing: method_settings: - selector:
+        /// google.storage.control.v2.StorageControl.CreateFolder # method settings for CreateFolder...
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selector")]
+        public virtual string Selector { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2477,6 +3389,10 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("samplePeriod")]
         public virtual object SamplePeriod { get; set; }
 
+        /// <summary>The scope of the timeseries data of the metric.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeSeriesResourceHierarchyLevel")]
+        public virtual System.Collections.Generic.IList<string> TimeSeriesResourceHierarchyLevel { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2585,7 +3501,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
 
         /// <summary>
         /// Required. The monitored resource type. For example, the type `"cloudsql_database"` represents databases in
-        /// Google Cloud SQL. For a list of types, see [Monitoring resource
+        /// Google Cloud SQL. For a list of types, see [Monitored resource
         /// types](https://cloud.google.com/monitoring/api/resources) and [Logging resource
         /// types](https://cloud.google.com/logging/docs/api/v2/resource-list).
         /// </summary>
@@ -2660,6 +3576,17 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Settings for Node client libraries.</summary>
+    public class NodeSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Some settings.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("common")]
+        public virtual CommonLanguageSettings Common { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// OAuth scopes are a way to define data and permissions on data. For example, there are scopes defined for
     /// "Read-only access to Google Calendar" and "Access to Cloud Platform". Users can consent to a scope for an
@@ -2715,8 +3642,8 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -2783,16 +3710,118 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Settings for Php client libraries.</summary>
+    public class PhpSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Some settings.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("common")]
+        public virtual CommonLanguageSettings Common { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// This message configures the settings for publishing [Google Cloud Client
+    /// libraries](https://cloud.google.com/apis/docs/cloud-client-libraries) generated from the service config.
+    /// </summary>
+    public class Publishing : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Used as a tracking tag when collecting data about the APIs developer relations artifacts like docs, packages
+        /// delivered to package managers, etc. Example: "speech".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiShortName")]
+        public virtual string ApiShortName { get; set; }
+
+        /// <summary>
+        /// GitHub teams to be added to CODEOWNERS in the directory in GitHub containing source code for the client
+        /// libraries for this API.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("codeownerGithubTeams")]
+        public virtual System.Collections.Generic.IList<string> CodeownerGithubTeams { get; set; }
+
+        /// <summary>A prefix used in sample code when demarking regions to be included in documentation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("docTagPrefix")]
+        public virtual string DocTagPrefix { get; set; }
+
+        /// <summary>
+        /// Link to product home page. Example: https://cloud.google.com/asset-inventory/docs/overview
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("documentationUri")]
+        public virtual string DocumentationUri { get; set; }
+
+        /// <summary>GitHub label to apply to issues and pull requests opened for this API.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("githubLabel")]
+        public virtual string GithubLabel { get; set; }
+
+        /// <summary>
+        /// Client library settings. If the same version string appears multiple times in this list, then the last one
+        /// wins. Settings from earlier settings with the same version string are discarded.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("librarySettings")]
+        public virtual System.Collections.Generic.IList<ClientLibrarySettings> LibrarySettings { get; set; }
+
+        /// <summary>
+        /// A list of API method settings, e.g. the behavior for methods that use the long-running operation pattern.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("methodSettings")]
+        public virtual System.Collections.Generic.IList<MethodSettings> MethodSettings { get; set; }
+
+        /// <summary>
+        /// Link to a *public* URI where users can report issues. Example:
+        /// https://issuetracker.google.com/issues/new?component=190865&amp;amp;template=1161103
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newIssueUri")]
+        public virtual string NewIssueUri { get; set; }
+
+        /// <summary>For whom the client library is being published.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("organization")]
+        public virtual string Organization { get; set; }
+
+        /// <summary>
+        /// Optional link to proto reference documentation. Example:
+        /// https://cloud.google.com/pubsub/lite/docs/reference/rpc
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protoReferenceDocumentationUri")]
+        public virtual string ProtoReferenceDocumentationUri { get; set; }
+
+        /// <summary>
+        /// Optional link to REST reference documentation. Example:
+        /// https://cloud.google.com/pubsub/lite/docs/reference/rest
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("restReferenceDocumentationUri")]
+        public virtual string RestReferenceDocumentationUri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Settings for Python client libraries.</summary>
+    public class PythonSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Some settings.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("common")]
+        public virtual CommonLanguageSettings Common { get; set; }
+
+        /// <summary>Experimental features to be included during client library generation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("experimentalFeatures")]
+        public virtual ExperimentalFeatures ExperimentalFeatures { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Quota configuration helps to achieve fairness and budgeting in service usage. The metric based quota
     /// configuration works this way: - The service configuration defines a set of metrics. - For API calls, the
     /// quota.metric_rules maps methods to metrics with corresponding costs. - The quota.limits defines limits on the
     /// metrics, which will be used for quota checks at runtime. An example quota configuration in yaml format: quota:
     /// limits: - name: apiWriteQpsPerProject metric: library.googleapis.com/write_calls unit: "1/min/{project}" # rate
-    /// limit for consumer projects values: STANDARD: 10000 # The metric rules bind all methods to the read_calls
-    /// metric, # except for the UpdateBook and DeleteBook methods. These two methods # are mapped to the write_calls
-    /// metric, with the UpdateBook method # consuming at twice rate as the DeleteBook method. metric_rules: - selector:
-    /// "*" metric_costs: library.googleapis.com/read_calls: 1 - selector:
+    /// limit for consumer projects values: STANDARD: 10000 (The metric rules bind all methods to the read_calls metric,
+    /// except for the UpdateBook and DeleteBook methods. These two methods are mapped to the write_calls metric, with
+    /// the UpdateBook method consuming at twice rate as the DeleteBook method.) metric_rules: - selector: "*"
+    /// metric_costs: library.googleapis.com/read_calls: 1 - selector:
     /// google.example.library.v1.LibraryService.UpdateBook metric_costs: library.googleapis.com/write_calls: 2 -
     /// selector: google.example.library.v1.LibraryService.DeleteBook metric_costs: library.googleapis.com/write_calls:
     /// 1 Corresponding Metric definition: metrics: - name: library.googleapis.com/read_calls display_name: Read
@@ -2801,12 +3830,12 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
     /// </summary>
     public class Quota : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>List of `QuotaLimit` definitions for the service.</summary>
+        /// <summary>List of QuotaLimit definitions for the service.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("limits")]
         public virtual System.Collections.Generic.IList<QuotaLimit> Limits { get; set; }
 
         /// <summary>
-        /// List of `MetricRule` definitions, each one mapping a selected method to one or more metrics.
+        /// List of MetricRule definitions, each one mapping a selected method to one or more metrics.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("metricRules")]
         public virtual System.Collections.Generic.IList<MetricRule> MetricRules { get; set; }
@@ -2886,10 +3915,10 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Specify the unit of the quota limit. It uses the same syntax as Metric.unit. The supported unit kinds are
-        /// determined by the quota backend system. Here are some examples: * "1/min/{project}" for quota per minute per
-        /// project. Note: the order of unit components is insignificant. The "1" at the beginning is required to follow
-        /// the metric unit syntax.
+        /// Specify the unit of the quota limit. It uses the same syntax as MetricDescriptor.unit. The supported unit
+        /// kinds are determined by the quota backend system. Here are some examples: * "1/min/{project}" for quota per
+        /// minute per project. Note: the order of unit components is insignificant. The "1" at the beginning is
+        /// required to follow the metric unit syntax.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("unit")]
         public virtual string Unit { get; set; }
@@ -2900,6 +3929,32 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("values")]
         public virtual System.Collections.Generic.IDictionary<string, System.Nullable<long>> Values { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Settings for Ruby client libraries.</summary>
+    public class RubySettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Some settings.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("common")]
+        public virtual CommonLanguageSettings Common { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// This message is used to configure the generation of a subset of the RPCs in a service for client libraries.
+    /// </summary>
+    public class SelectiveGapicGeneration : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// An allowlist of the fully qualified names of RPCs that should be included on public client surfaces.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("methods")]
+        public virtual System.Collections.Generic.IList<string> Methods { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3023,6 +4078,13 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         /// <summary>The Google project that owns this service.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("producerProjectId")]
         public virtual string ProducerProjectId { get; set; }
+
+        /// <summary>
+        /// Settings for [Google Cloud Client libraries](https://cloud.google.com/apis/docs/cloud-client-libraries)
+        /// generated from APIs defined as protocol buffers.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("publishing")]
+        public virtual Publishing Publishing { get; set; }
 
         /// <summary>Quota configuration.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("quota")]
@@ -3193,6 +4255,10 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
     /// <summary>A protocol buffer message type.</summary>
     public class Type : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The source edition string, only valid when syntax is SYNTAX_EDITIONS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("edition")]
+        public virtual string Edition { get; set; }
+
         /// <summary>The list of fields.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fields")]
         public virtual System.Collections.Generic.IList<Field> Fields { get; set; }
@@ -3317,7 +4383,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
 
         /// <summary>
         /// The resource name of the quota limit. An example name would be:
-        /// `services/compute.googleapis.com/projects/123/quotas/metrics/compute.googleapis.com%2Fcpus/limits/%2Fproject%2Fregion`
+        /// `services/compute.googleapis.com/projects/123/consumerQuotaMetrics/compute.googleapis.com%2Fcpus/limits/%2Fproject%2Fregion`
         /// The resource name is intended to be opaque and should not be parsed for its component strings, since its
         /// representation could change in the future.
         /// </summary>
@@ -3330,6 +4396,12 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("quotaBuckets")]
         public virtual System.Collections.Generic.IList<V1Beta1QuotaBucket> QuotaBuckets { get; set; }
+
+        /// <summary>
+        /// List of all supported locations. This field is present only if the limit has a {region} or {zone} dimension.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("supportedLocations")]
+        public virtual System.Collections.Generic.IList<string> SupportedLocations { get; set; }
 
         /// <summary>
         /// The limit unit. An example unit would be: `1/{project}/{region}` Note that `{project}` and `{region}` are
@@ -3368,7 +4440,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
 
         /// <summary>
         /// The resource name of the quota settings on this metric for this consumer. An example name would be:
-        /// `services/serviceconsumermanagement.googleapis.com/projects/123/quota/metrics/compute.googleapis.com%2Fcpus
+        /// `services/serviceconsumermanagement.googleapis.com/projects/123/consumerQuotaMetrics/compute.googleapis.com%2Fcpus`
         /// The resource name is intended to be opaque and should not be parsed for its component strings, since its
         /// representation could change in the future.
         /// </summary>
@@ -3428,6 +4500,12 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual System.Nullable<bool> Force { get; set; }
 
         /// <summary>
+        /// If force option is set to true, force_justification is suggested to be set to log the reason in audit logs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("forceJustification")]
+        public virtual string ForceJustification { get; set; }
+
+        /// <summary>
         /// The list of quota safety checks to ignore before the override mutation. Unlike 'force' field that ignores
         /// all the quota safety checks, the 'force_only' field ignores only the specified checks; other checks are
         /// still enforced. The 'force' and 'force_only' fields cannot both be set.
@@ -3449,6 +4527,43 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         /// <summary>The overrides that were created from the imported data.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("overrides")]
         public virtual System.Collections.Generic.IList<V1Beta1QuotaOverride> Overrides { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for ImportProducerQuotaPolicies</summary>
+    public class V1Beta1ImportProducerQuotaPoliciesRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Whether quota policy can result in a decrease of effective limit. Don't allow any decreases if force is not
+        /// specified. If force is specified, then don't allow any decreases below 120% of the 7d quota usage, or for
+        /// cases where usage cannot be examined (custom dimensions/ per user/per resource), only allow a 10% decrease.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("force")]
+        public virtual System.Nullable<bool> Force { get; set; }
+
+        /// <summary>
+        /// If force or force_skip_quota_usage_check option is set to true, force_justification is suggested to be set
+        /// to log the reason in audit logs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("forceJustification")]
+        public virtual string ForceJustification { get; set; }
+
+        /// <summary>
+        /// If set to true, skip the quota usage check. This field is only used when the effective limit can be
+        /// decreased. If the force field is not set, this field will be ignored.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("forceSkipQuotaUsageCheck")]
+        public virtual System.Nullable<bool> ForceSkipQuotaUsageCheck { get; set; }
+
+        /// <summary>The import data is specified in the request message itself</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inlineSource")]
+        public virtual V1Beta1PolicyInlineSource InlineSource { get; set; }
+
+        /// <summary>If set to true, validate the request, but do not actually update.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateOnly")]
+        public virtual System.Nullable<bool> ValidateOnly { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3495,6 +4610,21 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Response message for ListProducerQuotaPolicies.</summary>
+    public class V1Beta1ListProducerQuotaPoliciesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Token identifying which result to start with; returned by a previous list call.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>Producer policies on this limit.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("producerQuotaPolicies")]
+        public virtual System.Collections.Generic.IList<V1Beta1ProducerQuotaPolicy> ProducerQuotaPolicies { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Import data embedded in the request message</summary>
     public class V1Beta1OverrideInlineSource : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3505,6 +4635,20 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("overrides")]
         public virtual System.Collections.Generic.IList<V1Beta1QuotaOverride> Overrides { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Import data embedded in the request message</summary>
+    public class V1Beta1PolicyInlineSource : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The policies to create. Each policy must have a value for 'metric' and 'unit', to specify which metric and
+        /// which limit the policy should be applied to.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policies")]
+        public virtual System.Collections.Generic.IList<V1Beta1ProducerQuotaPolicy> Policies { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3522,7 +4666,7 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
 
         /// <summary>
         ///  If this map is nonempty, then this policy applies only to specific values for dimensions defined in the
-        /// limit unit. For example, an policy on a limit with the unit 1/{project}/{region} could contain an entry with
+        /// limit unit. For example, a policy on a limit with the unit 1/{project}/{region} could contain an entry with
         /// the key "region" and the value "us-east-1"; the policy is only applied to quota consumed in that region.
         /// This map has the following restrictions: * Keys that are not defined in the limit's unit are not valid keys.
         /// Any string appearing in {brackets} in the unit (besides {project} or {user}) is a defined key. * "project"
@@ -3599,6 +4743,17 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("producerOverride")]
         public virtual V1Beta1QuotaOverride ProducerOverride { get; set; }
 
+        /// <summary>Producer policy inherited from the closet ancestor of the current consumer.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("producerQuotaPolicy")]
+        public virtual V1Beta1ProducerQuotaPolicy ProducerQuotaPolicy { get; set; }
+
+        /// <summary>
+        /// Rollout information of this quota bucket. This field is present only if the effective limit will change due
+        /// to the ongoing rollout of the service config.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rolloutInfo")]
+        public virtual V1Beta1RolloutInfo RolloutInfo { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3670,6 +4825,17 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>[Output only] Rollout information of a quota.</summary>
+    public class V1Beta1RolloutInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Whether there is an ongoing rollout for the default limit or not.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("defaultLimitOngoingRollout")]
+        public virtual System.Nullable<bool> DefaultLimitOngoingRollout { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A service identity in the Identity and Access Management API.</summary>
     public class V1Beta1ServiceIdentity : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3716,7 +4882,10 @@ namespace Google.Apis.ServiceConsumerManagement.v1beta1.Data
     /// <summary>A default identity in the Identity and Access Management API.</summary>
     public class V1beta1DefaultIdentity : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The email address of the default identity.</summary>
+        /// <summary>
+        /// The email address of the default identity. Calling GenerateDefaultIdentity with a deleted or purged default
+        /// identity should expect does_not_exist@invalid-project.iam.gserviceaccount.com placeholder email.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("email")]
         public virtual string Email { get; set; }
 

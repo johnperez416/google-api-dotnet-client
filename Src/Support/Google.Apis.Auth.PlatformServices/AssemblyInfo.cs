@@ -22,5 +22,4 @@ using System.Runtime.CompilerServices;
 [assembly: TypeForwardedTo(typeof(Google.Apis.Auth.OAuth2.GoogleCredential))]
 [assembly: TypeForwardedTo(typeof(Google.Apis.Auth.OAuth2.GoogleWebAuthorizationBroker))]
 [assembly: TypeForwardedTo(typeof(Google.Apis.Auth.OAuth2.LocalServerCodeReceiver))]
-[assembly: TypeForwardedTo(typeof(Google.Apis.Auth.OAuth2.PromptCodeReceiver))]
 [assembly: TypeForwardedTo(typeof(Google.Apis.Auth.OAuth2.ServiceAccountCredential))]

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,10 @@ namespace Google.Apis.CloudScheduler.v1
         /// <param name="initializer">The service initializer.</param>
         public CloudSchedulerService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
+            Operations = new OperationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudscheduler.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudscheduler.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +47,16 @@ namespace Google.Apis.CloudScheduler.v1
         public override string Name => "cloudscheduler";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudscheduler.googleapis.com/";
-        #else
-            "https://cloudscheduler.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudscheduler.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Scheduler API.</summary>
         public class Scope
@@ -81,6 +77,9 @@ namespace Google.Apis.CloudScheduler.v1
             /// </summary>
             public const string CloudPlatform = "https://www.googleapis.com/auth/cloud-platform";
         }
+
+        /// <summary>Gets the Operations resource.</summary>
+        public virtual OperationsResource Operations { get; }
 
         /// <summary>Gets the Projects resource.</summary>
         public virtual ProjectsResource Projects { get; }
@@ -267,6 +266,279 @@ namespace Google.Apis.CloudScheduler.v1
         }
     }
 
+    /// <summary>The "operations" collection of methods.</summary>
+    public class OperationsResource
+    {
+        private const string Resource = "operations";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public OperationsResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>
+        /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the
+        /// operation, but success is not guaranteed. If the server doesn't support this method, it returns
+        /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether
+        /// the cancellation succeeded or whether the operation completed despite cancellation. On successful
+        /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
+        /// with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="name">The name of the operation resource to be cancelled.</param>
+        public virtual CancelRequest Cancel(Google.Apis.CloudScheduler.v1.Data.CancelOperationRequest body, string name)
+        {
+            return new CancelRequest(this.service, body, name);
+        }
+
+        /// <summary>
+        /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the
+        /// operation, but success is not guaranteed. If the server doesn't support this method, it returns
+        /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether
+        /// the cancellation succeeded or whether the operation completed despite cancellation. On successful
+        /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
+        /// with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
+        /// </summary>
+        public class CancelRequest : CloudSchedulerBaseServiceRequest<Google.Apis.CloudScheduler.v1.Data.Empty>
+        {
+            /// <summary>Constructs a new Cancel request.</summary>
+            public CancelRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudScheduler.v1.Data.CancelOperationRequest body, string name) : base(service)
+            {
+                Name = name;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>The name of the operation resource to be cancelled.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.CloudScheduler.v1.Data.CancelOperationRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "cancel";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}:cancel";
+
+            /// <summary>Initializes Cancel parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^operations/.*$",
+                });
+            }
+        }
+
+        /// <summary>
+        /// Deletes a long-running operation. This method indicates that the client is no longer interested in the
+        /// operation result. It does not cancel the operation. If the server doesn't support this method, it returns
+        /// `google.rpc.Code.UNIMPLEMENTED`.
+        /// </summary>
+        /// <param name="name">The name of the operation resource to be deleted.</param>
+        public virtual DeleteRequest Delete(string name)
+        {
+            return new DeleteRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Deletes a long-running operation. This method indicates that the client is no longer interested in the
+        /// operation result. It does not cancel the operation. If the server doesn't support this method, it returns
+        /// `google.rpc.Code.UNIMPLEMENTED`.
+        /// </summary>
+        public class DeleteRequest : CloudSchedulerBaseServiceRequest<Google.Apis.CloudScheduler.v1.Data.Empty>
+        {
+            /// <summary>Constructs a new Delete request.</summary>
+            public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>The name of the operation resource to be deleted.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "delete";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "DELETE";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes Delete parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^operations/.*$",
+                });
+            }
+        }
+
+        /// <summary>
+        /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation result
+        /// at intervals as recommended by the API service.
+        /// </summary>
+        /// <param name="name">The name of the operation resource.</param>
+        public virtual GetRequest Get(string name)
+        {
+            return new GetRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation result
+        /// at intervals as recommended by the API service.
+        /// </summary>
+        public class GetRequest : CloudSchedulerBaseServiceRequest<Google.Apis.CloudScheduler.v1.Data.Operation>
+        {
+            /// <summary>Constructs a new Get request.</summary>
+            public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>The name of the operation resource.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "get";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes Get parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^operations/.*$",
+                });
+            }
+        }
+
+        /// <summary>
+        /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
+        /// it returns `UNIMPLEMENTED`.
+        /// </summary>
+        /// <param name="name">The name of the operation's parent resource.</param>
+        public virtual ListRequest List(string name)
+        {
+            return new ListRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
+        /// it returns `UNIMPLEMENTED`.
+        /// </summary>
+        public class ListRequest : CloudSchedulerBaseServiceRequest<Google.Apis.CloudScheduler.v1.Data.ListOperationsResponse>
+        {
+            /// <summary>Constructs a new List request.</summary>
+            public ListRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>The name of the operation's parent resource.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>The standard list filter.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Filter { get; set; }
+
+            /// <summary>The standard list page size.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> PageSize { get; set; }
+
+            /// <summary>The standard list page token.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PageToken { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "list";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes List parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^operations$",
+                });
+                RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "filter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageSize",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageToken",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
     /// <summary>The "projects" collection of methods.</summary>
     public class ProjectsResource
     {
@@ -324,7 +596,7 @@ namespace Google.Apis.CloudScheduler.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CloudScheduler.v1.Data.Job body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a job.</summary>
@@ -380,7 +652,7 @@ namespace Google.Apis.CloudScheduler.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes a job.</summary>
@@ -429,7 +701,7 @@ namespace Google.Apis.CloudScheduler.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a job.</summary>
@@ -478,7 +750,7 @@ namespace Google.Apis.CloudScheduler.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists jobs.</summary>
@@ -508,8 +780,7 @@ namespace Google.Apis.CloudScheduler.v1
                     /// <summary>
                     /// A token identifying a page of results the server will return. To request the first page results,
                     /// page_token must be empty. To request the next page of results, page_token must be the value of
-                    /// next_page_token returned from the previous call to ListJobs. It is an error to switch the value
-                    /// of filter or order_by while iterating through pages.
+                    /// next_page_token returned from the previous call to ListJobs.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string PageToken { get; set; }
@@ -574,7 +845,7 @@ namespace Google.Apis.CloudScheduler.v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CloudScheduler.v1.Data.Job body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -660,7 +931,7 @@ namespace Google.Apis.CloudScheduler.v1
                 /// </param>
                 public virtual PauseRequest Pause(Google.Apis.CloudScheduler.v1.Data.PauseJobRequest body, string name)
                 {
-                    return new PauseRequest(service, body, name);
+                    return new PauseRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -725,7 +996,7 @@ namespace Google.Apis.CloudScheduler.v1
                 /// </param>
                 public virtual ResumeRequest Resume(Google.Apis.CloudScheduler.v1.Data.ResumeJobRequest body, string name)
                 {
-                    return new ResumeRequest(service, body, name);
+                    return new ResumeRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -789,7 +1060,7 @@ namespace Google.Apis.CloudScheduler.v1
                 /// </param>
                 public virtual RunRequest Run(Google.Apis.CloudScheduler.v1.Data.RunJobRequest body, string name)
                 {
-                    return new RunRequest(service, body, name);
+                    return new RunRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -847,7 +1118,7 @@ namespace Google.Apis.CloudScheduler.v1
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -892,7 +1163,7 @@ namespace Google.Apis.CloudScheduler.v1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -911,7 +1182,7 @@ namespace Google.Apis.CloudScheduler.v1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -1006,14 +1277,16 @@ namespace Google.Apis.CloudScheduler.v1.Data
         /// is created. Cloud Scheduler sets some headers to default values: * `User-Agent`: By default, this header is
         /// `"AppEngine-Google; (+http://code.google.com/appengine)"`. This header can be modified, but Cloud Scheduler
         /// will append `"AppEngine-Google; (+http://code.google.com/appengine)"` to the modified `User-Agent`. *
-        /// `X-CloudScheduler`: This header will be set to true. If the job has an body, Cloud Scheduler sets the
-        /// following headers: * `Content-Type`: By default, the `Content-Type` header is set to
-        /// `"application/octet-stream"`. The default can be overridden by explictly setting `Content-Type` to a
-        /// particular media type when the job is created. For example, `Content-Type` can be set to
-        /// `"application/json"`. * `Content-Length`: This is computed by Cloud Scheduler. This value is output only. It
-        /// cannot be changed. The headers below are output only. They cannot be set or overridden: * `X-Google-*`: For
-        /// Google internal use only. * `X-AppEngine-*`: For Google internal use only. In addition, some App Engine
-        /// headers, which contain job-specific information, are also be sent to the job handler.
+        /// `X-CloudScheduler`: This header will be set to true. * `X-CloudScheduler-JobName`: This header will contain
+        /// the job name. * `X-CloudScheduler-ScheduleTime`: For Cloud Scheduler jobs specified in the unix-cron format,
+        /// this header will contain the job schedule as an offset of UTC parsed according to RFC3339. If the job has a
+        /// body and the following headers are not set by the user, Cloud Scheduler sets default values: *
+        /// `Content-Type`: This will be set to `"application/octet-stream"`. You can override this default by
+        /// explicitly setting `Content-Type` to a particular media type when creating the job. For example, you can set
+        /// `Content-Type` to `"application/json"`. The headers below are output only. They cannot be set or overridden:
+        /// * `Content-Length`: This is computed by Cloud Scheduler. * `X-Google-*`: For Google internal use only. *
+        /// `X-AppEngine-*`: For Google internal use only. In addition, some App Engine headers, which contain
+        /// job-specific information, are also be sent to the job handler.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("headers")]
         public virtual System.Collections.Generic.IDictionary<string, string> Headers { get; set; }
@@ -1068,7 +1341,7 @@ namespace Google.Apis.CloudScheduler.v1.Data
         /// <summary>
         /// App instance. By default, the job is sent to an instance which is available when the job is attempted.
         /// Requests can only be sent to a specific instance if [manual scaling is used in App Engine
-        /// Standard](https://cloud.google.com/appengine/docs/python/an-overview-of-app-engine?hl=en_US#scaling_types_and_instance_classes).
+        /// Standard](https://cloud.google.com/appengine/docs/python/an-overview-of-app-engine?#scaling_types_and_instance_classes).
         /// App Engine Flex does not support instances. For more information, see [App Engine Standard request
         /// routing](https://cloud.google.com/appengine/docs/standard/python/how-requests-are-routed) and [App Engine
         /// Flex request routing](https://cloud.google.com/appengine/docs/flexible/python/how-requests-are-routed).
@@ -1094,11 +1367,17 @@ namespace Google.Apis.CloudScheduler.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The request message for Operations.CancelOperation.</summary>
+    public class CancelOperationRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1122,14 +1401,20 @@ namespace Google.Apis.CloudScheduler.v1.Data
         public virtual string Body { get; set; }
 
         /// <summary>
-        /// The user can specify HTTP request headers to send with the job's HTTP request. This map contains the header
-        /// field names and values. Repeated headers are not supported, but a header value can contain commas. These
-        /// headers represent a subset of the headers that will accompany the job's HTTP request. Some HTTP request
-        /// headers will be ignored or replaced. A partial list of headers that will be ignored or replaced is below: -
-        /// Host: This will be computed by Cloud Scheduler and derived from uri. * `Content-Length`: This will be
-        /// computed by Cloud Scheduler. * `User-Agent`: This will be set to `"Google-Cloud-Scheduler"`. * `X-Google-*`:
-        /// Google internal use only. * `X-AppEngine-*`: Google internal use only. The total size of headers must be
-        /// less than 80KB.
+        /// HTTP request headers. This map contains the header field names and values. The user can specify HTTP request
+        /// headers to send with the job's HTTP request. Repeated headers are not supported, but a header value can
+        /// contain commas. The following headers represent a subset of the headers that accompany the job's HTTP
+        /// request. Some HTTP request headers are ignored or replaced. A partial list of headers that are ignored or
+        /// replaced is below: * Host: This will be computed by Cloud Scheduler and derived from uri. *
+        /// `Content-Length`: This will be computed by Cloud Scheduler. * `User-Agent`: This will be set to
+        /// `"Google-Cloud-Scheduler"`. * `X-Google-*`: Google internal use only. * `X-AppEngine-*`: Google internal use
+        /// only. * `X-CloudScheduler`: This header will be set to true. * `X-CloudScheduler-JobName`: This header will
+        /// contain the job name. * `X-CloudScheduler-ScheduleTime`: For Cloud Scheduler jobs specified in the unix-cron
+        /// format, this header will contain the job schedule as an offset of UTC parsed according to RFC3339. If the
+        /// job has a body and the following headers are not set by the user, Cloud Scheduler sets default values: *
+        /// `Content-Type`: This will be set to `"application/octet-stream"`. You can override this default by
+        /// explicitly setting `Content-Type` to a particular media type when creating the job. For example, you can set
+        /// `Content-Type` to `"application/json"`. The total size of headers must be less than 80KB.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("headers")]
         public virtual System.Collections.Generic.IDictionary<string, string> Headers { get; set; }
@@ -1168,7 +1453,7 @@ namespace Google.Apis.CloudScheduler.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Configuration for a job. The maximum allowed size for a job is 100KB.</summary>
+    /// <summary>Configuration for a job. The maximum allowed size for a job is 1MB.</summary>
     public class Job : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>App Engine HTTP target.</summary>
@@ -1178,9 +1463,13 @@ namespace Google.Apis.CloudScheduler.v1.Data
         /// <summary>
         /// The deadline for job attempts. If the request handler does not respond by this deadline then the request is
         /// cancelled and the attempt is marked as a `DEADLINE_EXCEEDED` failure. The failed attempt can be viewed in
-        /// execution logs. Cloud Scheduler will retry the job according to the RetryConfig. The allowed duration for
-        /// this deadline is: * For HTTP targets, between 15 seconds and 30 minutes. * For App Engine HTTP targets,
-        /// between 15 seconds and 24 hours.
+        /// execution logs. Cloud Scheduler will retry the job according to the RetryConfig. The default and the allowed
+        /// values depend on the type of target: * For HTTP targets, the default is 3 minutes. The deadline must be in
+        /// the interval [15 seconds, 30 minutes]. * For App Engine HTTP targets, 0 indicates that the request has the
+        /// default deadline. The default deadline depends on the scaling type of the service: 10 minutes for standard
+        /// apps with automatic scaling, 24 hours for standard apps with manual and basic scaling, and 60 minutes for
+        /// flex apps. If the request deadline is set, it must be in the interval [15 seconds, 24 hours 15 seconds]. *
+        /// For Pub/Sub targets, this field is ignored.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("attemptDeadline")]
         public virtual object AttemptDeadline { get; set; }
@@ -1196,9 +1485,44 @@ namespace Google.Apis.CloudScheduler.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("httpTarget")]
         public virtual HttpTarget HttpTarget { get; set; }
 
+        private string _lastAttemptTimeRaw;
+
+        private object _lastAttemptTime;
+
         /// <summary>Output only. The time the last job attempt started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastAttemptTime")]
-        public virtual object LastAttemptTime { get; set; }
+        public virtual string LastAttemptTimeRaw
+        {
+            get => _lastAttemptTimeRaw;
+            set
+            {
+                _lastAttemptTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastAttemptTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastAttemptTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastAttemptTimeDateTimeOffset instead.")]
+        public virtual object LastAttemptTime
+        {
+            get => _lastAttemptTime;
+            set
+            {
+                _lastAttemptTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastAttemptTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastAttemptTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastAttemptTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastAttemptTimeRaw);
+            set => LastAttemptTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optionally caller-specified in CreateJob, after which it becomes output only. The job name. For example:
@@ -1223,24 +1547,60 @@ namespace Google.Apis.CloudScheduler.v1.Data
 
         /// <summary>
         /// Required, except when used with UpdateJob. Describes the schedule on which the job will be executed. The
-        /// schedule can be either of the following types: * [Crontab](http://en.wikipedia.org/wiki/Cron#Overview) *
+        /// schedule can be either of the following types: * [Crontab](https://en.wikipedia.org/wiki/Cron#Overview) *
         /// English-like [schedule](https://cloud.google.com/scheduler/docs/configuring/cron-job-schedules) As a general
         /// rule, execution `n + 1` of a job will not begin until execution `n` has finished. Cloud Scheduler will never
         /// allow two simultaneously outstanding executions. For example, this implies that if the `n+1`th execution is
         /// scheduled to run at 16:00 but the `n`th execution takes until 16:15, the `n+1`th execution will not start
         /// until `16:15`. A scheduled start time will be delayed if the previous execution has not ended when its
         /// scheduled time occurs. If retry_count &amp;gt; 0 and a job attempt fails, the job will be tried a total of
-        /// retry_count times, with exponential backoff, until the next scheduled start time.
+        /// retry_count times, with exponential backoff, until the next scheduled start time. If retry_count is 0, a job
+        /// attempt will not be retried if it fails. Instead the Cloud Scheduler system will wait for the next scheduled
+        /// execution time. Setting retry_count to 0 does not prevent failed jobs from running according to schedule
+        /// after the failure.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("schedule")]
         public virtual string Schedule { get; set; }
+
+        private string _scheduleTimeRaw;
+
+        private object _scheduleTime;
 
         /// <summary>
         /// Output only. The next time the job is scheduled. Note that this may be a retry of a previously failed
         /// attempt or the next execution time according to the schedule.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleTime")]
-        public virtual object ScheduleTime { get; set; }
+        public virtual string ScheduleTimeRaw
+        {
+            get => _scheduleTimeRaw;
+            set
+            {
+                _scheduleTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleTimeDateTimeOffset instead.")]
+        public virtual object ScheduleTime
+        {
+            get => _scheduleTime;
+            set
+            {
+                _scheduleTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleTimeRaw);
+            set => ScheduleTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. State of the job.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -1259,9 +1619,44 @@ namespace Google.Apis.CloudScheduler.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeZone")]
         public virtual string TimeZone { get; set; }
 
+        private string _userUpdateTimeRaw;
+
+        private object _userUpdateTime;
+
         /// <summary>Output only. The creation time of the job.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userUpdateTime")]
-        public virtual object UserUpdateTime { get; set; }
+        public virtual string UserUpdateTimeRaw
+        {
+            get => _userUpdateTimeRaw;
+            set
+            {
+                _userUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _userUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UserUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UserUpdateTimeDateTimeOffset instead.")]
+        public virtual object UserUpdateTime
+        {
+            get => _userUpdateTime;
+            set
+            {
+                _userUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _userUpdateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="UserUpdateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UserUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UserUpdateTimeRaw);
+            set => UserUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1301,7 +1696,22 @@ namespace Google.Apis.CloudScheduler.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>The response message for Operations.ListOperations.</summary>
+    public class ListOperationsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The standard List next-page token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>A list of operations that matches the specified filter in the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("operations")]
+        public virtual System.Collections.Generic.IList<Operation> Operations { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -1384,6 +1794,154 @@ namespace Google.Apis.CloudScheduler.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>This resource represents a long-running operation that is the result of a network API call.</summary>
+    public class Operation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed,
+        /// and either `error` or `response` is available.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("done")]
+        public virtual System.Nullable<bool> Done { get; set; }
+
+        /// <summary>The error result of the operation in case of failure or cancellation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("error")]
+        public virtual Status Error { get; set; }
+
+        /// <summary>
+        /// Service-specific metadata associated with the operation. It typically contains progress information and
+        /// common metadata such as create time. Some services might not provide such metadata. Any method that returns
+        /// a long-running operation should document the metadata type, if any.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Metadata { get; set; }
+
+        /// <summary>
+        /// The server-assigned name, which is only unique within the same service that originally returns it. If you
+        /// use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
+        /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
+        /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("response")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Response { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Represents the metadata of the long-running operation.</summary>
+    public class OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. API version used to start the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
+        public virtual string ApiVersion { get; set; }
+
+        /// <summary>
+        /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
+        /// been cancelled successfully have google.longrunning.Operation.error value with a google.rpc.Status.code of
+        /// `1`, corresponding to `Code.CANCELLED`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cancelRequested")]
+        public virtual System.Nullable<bool> CancelRequested { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The time the operation was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>Output only. The time the operation finished running.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. Human-readable status of the operation, if any.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("statusDetail")]
+        public virtual string StatusDetail { get; set; }
+
+        /// <summary>Output only. Server-defined resource path for the target of the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("target")]
+        public virtual string Target { get; set; }
+
+        /// <summary>Output only. Name of the verb executed by the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verb")]
+        public virtual string Verb { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for PauseJob.</summary>
     public class PauseJobRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1401,14 +1959,14 @@ namespace Google.Apis.CloudScheduler.v1.Data
     public class PubsubMessage : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Attributes for this message. If this field is empty, the message must contain non-empty data. This can be
-        /// used to filter messages on the subscription.
+        /// Optional. Attributes for this message. If this field is empty, the message must contain non-empty data. This
+        /// can be used to filter messages on the subscription.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("attributes")]
         public virtual System.Collections.Generic.IDictionary<string, string> Attributes { get; set; }
 
         /// <summary>
-        /// The message data field. If this field is empty, the message must contain at least one attribute.
+        /// Optional. The message data field. If this field is empty, the message must contain at least one attribute.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("data")]
         public virtual string Data { get; set; }
@@ -1422,20 +1980,54 @@ namespace Google.Apis.CloudScheduler.v1.Data
         public virtual string MessageId { get; set; }
 
         /// <summary>
-        /// If non-empty, identifies related messages for which publish order should be respected. If a `Subscription`
-        /// has `enable_message_ordering` set to `true`, messages published with the same non-empty `ordering_key` value
-        /// will be delivered to subscribers in the order in which they are received by the Pub/Sub system. All
-        /// `PubsubMessage`s published in a given `PublishRequest` must specify the same `ordering_key` value.
+        /// Optional. If non-empty, identifies related messages for which publish order should be respected. If a
+        /// `Subscription` has `enable_message_ordering` set to `true`, messages published with the same non-empty
+        /// `ordering_key` value will be delivered to subscribers in the order in which they are received by the Pub/Sub
+        /// system. All `PubsubMessage`s published in a given `PublishRequest` must specify the same `ordering_key`
+        /// value. For more information, see [ordering messages](https://cloud.google.com/pubsub/docs/ordering).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("orderingKey")]
         public virtual string OrderingKey { get; set; }
+
+        private string _publishTimeRaw;
+
+        private object _publishTime;
 
         /// <summary>
         /// The time at which the message was published, populated by the server when it receives the `Publish` call. It
         /// must not be populated by the publisher in a `Publish` call.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("publishTime")]
-        public virtual object PublishTime { get; set; }
+        public virtual string PublishTimeRaw
+        {
+            get => _publishTimeRaw;
+            set
+            {
+                _publishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _publishTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="PublishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishTimeDateTimeOffset instead.")]
+        public virtual object PublishTime
+        {
+            get => _publishTime;
+            set
+            {
+                _publishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _publishTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PublishTimeRaw);
+            set => PublishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1459,7 +2051,7 @@ namespace Google.Apis.CloudScheduler.v1.Data
 
         /// <summary>
         /// Required. The name of the Cloud Pub/Sub topic to which messages will be published when a job is delivered.
-        /// The topic name must be in the same format as required by PubSub's
+        /// The topic name must be in the same format as required by Pub/Sub's
         /// [PublishRequest.name](https://cloud.google.com/pubsub/docs/reference/rpc/google.pubsub.v1#publishrequest),
         /// for example `projects/PROJECT_ID/topics/TOPIC_ID`. The topic must be in the same project as the Cloud
         /// Scheduler job.
@@ -1496,9 +2088,9 @@ namespace Google.Apis.CloudScheduler.v1.Data
         /// The time between retries will double `max_doublings` times. A job's retry interval starts at
         /// min_backoff_duration, then doubles `max_doublings` times, then increases linearly, and finally retries at
         /// intervals of max_backoff_duration up to retry_count times. For example, if min_backoff_duration is 10s,
-        /// max_backoff_duration is 300s, and `max_doublings` is 3, then the a job will first be retried in 10s. The
-        /// retry interval will double three times, and then increase linearly by 2^3 * 10s. Finally, the job will retry
-        /// at intervals of max_backoff_duration until the job has been attempted retry_count times. Thus, the requests
+        /// max_backoff_duration is 300s, and `max_doublings` is 3, then the job will first be retried in 10s. The retry
+        /// interval will double three times, and then increase linearly by 2^3 * 10s. Finally, the job will retry at
+        /// intervals of max_backoff_duration until the job has been attempted retry_count times. Thus, the requests
         /// will retry at 10s, 20s, 40s, 80s, 160s, 240s, 300s, 300s, .... The default value of this field is 5.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maxDoublings")]
@@ -1521,11 +2113,12 @@ namespace Google.Apis.CloudScheduler.v1.Data
 
         /// <summary>
         /// The number of attempts that the system will make to run a job using the exponential backoff procedure
-        /// described by max_doublings. The default value of retry_count is zero. If retry_count is zero, a job attempt
-        /// will *not* be retried if it fails. Instead the Cloud Scheduler system will wait for the next scheduled
-        /// execution time. If retry_count is set to a non-zero number then Cloud Scheduler will retry failed attempts,
-        /// using exponential backoff, retry_count times, or until the next scheduled execution time, whichever comes
-        /// first. Values greater than 5 and negative values are not allowed.
+        /// described by max_doublings. The default value of retry_count is zero. If retry_count is 0, a job attempt
+        /// will not be retried if it fails. Instead the Cloud Scheduler system will wait for the next scheduled
+        /// execution time. Setting retry_count to 0 does not prevent failed jobs from running according to schedule
+        /// after the failure. If retry_count is set to a non-zero number then Cloud Scheduler will retry failed
+        /// attempts, using exponential backoff, retry_count times, or until the next scheduled execution time,
+        /// whichever comes first. Values greater than 5 and negative values are not allowed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("retryCount")]
         public virtual System.Nullable<int> RetryCount { get; set; }

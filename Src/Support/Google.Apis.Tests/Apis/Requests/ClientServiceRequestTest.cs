@@ -113,6 +113,11 @@ namespace Google.Apis.Tests.Apis.Requests
                 });
             }
 
+            // Normally requests override the ApiVersion with a constant (if at all) but it's
+            // convenient for us to be able to do it on mutable basis for tests.
+            public override string ApiVersion => ApiVersionImpl;
+            public string ApiVersionImpl { get; set; }
+
             public override string MethodName => httpMethod;
 
             public override string RestPath => OverrideRestPath ?? "restPath" + CallNum;
@@ -128,15 +133,12 @@ namespace Google.Apis.Tests.Apis.Requests
         }
 
         /// <summary>A mock message handler which returns an error.</summary>
-        class ErrorMessageHanlder : CountableMessageHandler
+        class ErrorMessageHandler : CountableMessageHandler
         {
-            public string ExpectedError =
+            public const string ExpectedError = 
                 @"Message[Login Required] Location[Authorization - header] Reason[required] Domain[global]";
-
-            protected override Task<HttpResponseMessage> SendAsyncCore(HttpRequestMessage request,
-                CancellationToken cancellationToken)
-            {
-                var error = @"{
+            public const string ErrorContent =
+                @"{
                     ""error"": {
                         ""errors"": [
                             {
@@ -152,10 +154,16 @@ namespace Google.Apis.Tests.Apis.Requests
                     }
                 }";
 
+            public const string ExpectedExceptionMessage = "The service TestService has thrown an exception. HttpStatusCode is Unauthorized. Login Required";
+
+            protected override Task<HttpResponseMessage> SendAsyncCore(HttpRequestMessage request,
+                CancellationToken cancellationToken)
+            {
+
                 var response = new HttpResponseMessage
                     {
-                        Content = new StringContent(error),
-                        StatusCode = System.Net.HttpStatusCode.Unauthorized
+                        Content = new StringContent(ErrorContent),
+                        StatusCode = HttpStatusCode.Unauthorized
                     };
 
                 TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
@@ -347,12 +355,12 @@ namespace Google.Apis.Tests.Apis.Requests
 
         /// <summary>Tests that canceling a outgoing request to the server works as expected.</summary>
         [Fact]
-        public void ExecuteAsync_Cancel()
+        public async Task ExecuteAsync_Cancel()
         {
-            SubtestExecuteAsync_Cancel(1);
-            SubtestExecuteAsync_Cancel(5);
-            SubtestExecuteAsync_Cancel(10);
-            SubtestExecuteAsync_Cancel(11);
+            await SubtestExecuteAsync_Cancel(1);
+            await SubtestExecuteAsync_Cancel(5);
+            await SubtestExecuteAsync_Cancel(10);
+            await SubtestExecuteAsync_Cancel(11);
         }
 
         /// <summary>
@@ -361,7 +369,7 @@ namespace Google.Apis.Tests.Apis.Requests
         /// <param name="cancelRequestNum">
         /// The index of the "server"'s request which a cancel token will be mimic.
         /// </param>
-        private void SubtestExecuteAsync_Cancel(int cancelRequestNum)
+        private async Task SubtestExecuteAsync_Cancel(int cancelRequestNum)
         {
             var handler = new CancelRedirectMessageHandler();
             handler.CancellationTokenSource = new CancellationTokenSource();
@@ -376,25 +384,18 @@ namespace Google.Apis.Tests.Apis.Requests
             using (var service = new MockClientService(initializer))
             {
                 request = new TestClientServiceRequest(service, "POST", new MockRequest());
-                try
+                var exception = await Assert.ThrowsAnyAsync<Exception>(() => request.ExecuteAsync(handler.CancellationTokenSource.Token));
+                if (exception is OperationCanceledException)
                 {
-                    request.ExecuteAsync(handler.CancellationTokenSource.Token).Wait();
-                    Assert.True(false, "Exception expected");
+                    // We expect a task canceled exception in case the canceled request is less or equal total
+                    // number of retries.
+                    Assert.False(cancelRequestNum > service.HttpClient.MessageHandler.NumRedirects + 1);
                 }
-                catch (AggregateException ex)
+                else
                 {
-                    if (ex.InnerException is TaskCanceledException)
-                    {
-                        // We expect a task canceled exception in case the canceled request is less or equal total
-                        // number of retries.
-                        Assert.False(cancelRequestNum > service.HttpClient.MessageHandler.NumRedirects + 1);
-                    }
-                    else
-                    {
-                        // Canceled exception wasn't thrown, in that case the cancel request number is bigger than
-                        // the actual number of tries.
-                        Assert.True(cancelRequestNum > service.HttpClient.MessageHandler.NumTries + 1);
-                    }
+                    // Canceled exception wasn't thrown, in that case the cancel request number is bigger than
+                    // the actual number of tries.
+                    Assert.True(cancelRequestNum > service.HttpClient.MessageHandler.NumTries + 1);
                 }
 
                 var expectedCalls = Math.Min(service.HttpClient.MessageHandler.NumRedirects + 1, cancelRequestNum);
@@ -582,7 +583,8 @@ namespace Google.Apis.Tests.Apis.Requests
         /// operation fails.
         /// </summary>
         /// <param name="backOff">Indicates if back-off handler is attached to the service.</param>
-        private void SubtestExecuteAsync_ThrowException(bool backOff)
+        [Theory, CombinatorialData]            
+        public async Task SubtestExecuteAsync_ThrowException(bool backOff)
         {
             var handler = new MockMessageHandler(true);
             var initializer = new BaseClientService.Initializer()
@@ -597,45 +599,17 @@ namespace Google.Apis.Tests.Apis.Requests
             using (var service = new MockClientService(initializer))
             {
                 var request = new TestClientServiceRequest(service, "GET", null);
-                var task = request.ExecuteAsync();
-                try
-                {
-                    var result = task.Result;
-                    Assert.True(false, "Exception should be thrown");
-                }
-                catch (AggregateException ex)
-                {
-                    Assert.IsAssignableFrom< InvalidOperationMockException>(ex.InnerException);
-                }
-
+                await Assert.ThrowsAnyAsync<InvalidOperationMockException>(() => request.ExecuteAsync());
                 int calls = backOff ? service.HttpClient.MessageHandler.NumTries : 1;
                 Assert.Equal(calls, handler.Calls);
             }
-        }
-
-        /// <summary>
-        /// Tests async execute when an exception is thrown during a request and exponential back-off is enabled.
-        /// </summary>
-        [Fact]
-        public void ExecuteAsync_ThrowException_WithBackOff()
-        {
-            SubtestExecuteAsync_ThrowException(true);
-        }
-
-        /// <summary>
-        /// Tests async execute when an exception is thrown during a request and exponential back-off is disabled.
-        /// </summary>
-        [Fact]
-        public void ExecuteAsync_ThrowException_WithoutBackOff()
-        {
-            SubtestExecuteAsync_ThrowException(false);
         }
 
         /// <summary>Tests execute when server returned an error.</summary>
         [Fact]
         public void Execute_Error()
         {
-            var handler = new ErrorMessageHanlder();
+            var handler = new ErrorMessageHandler();
             var initializer = new BaseClientService.Initializer()
             {
                 HttpClientFactory = new MockHttpClientFactory(handler)
@@ -644,24 +618,19 @@ namespace Google.Apis.Tests.Apis.Requests
             using (var service = new MockClientService(initializer))
             {
                 var request = new TestClientServiceRequest(service, "GET", null);
-                try
-                {
-                    request.Execute();
-                    Assert.True(false, "Exception expected");
-                }
-                catch (Exception ex)
-                {
-                    Assert.True(ex.Message.Contains(handler.ExpectedError), "Error message is invalid");
-                }
+                var exception = Assert.Throws<GoogleApiException>(() => request.Execute());
+
                 Assert.Equal(1, handler.Calls);
+                Assert.Equal(ErrorMessageHandler.ExpectedExceptionMessage, exception.Message);
+                Assert.Contains(ErrorMessageHandler.ExpectedError, exception.ToString());
             }
         }
 
         /// <summary>Tests execute when server returned an error.</summary>
         [Fact]
-        public void ExecuteAsync_Error()
+        public async Task ExecuteAsync_Error()
         {
-            var handler = new ErrorMessageHanlder();
+            var handler = new ErrorMessageHandler();
             var initializer = new BaseClientService.Initializer
             {
                 HttpClientFactory = new MockHttpClientFactory(handler)
@@ -670,29 +639,18 @@ namespace Google.Apis.Tests.Apis.Requests
             using (var service = new MockClientService(initializer))
             {
                 var request = new TestClientServiceRequest(service, "GET", null);
+                var exception = await Assert.ThrowsAsync<GoogleApiException>(() => request.ExecuteAsync());
                 AutoResetEvent resetEvent = new AutoResetEvent(false);
-                var task = request.ExecuteAsync();
-                var error = string.Empty;
-                task.ContinueWith(t =>
-                    {
-                        // should not ENTER this code, the task should fail
-                        resetEvent.Set();
-                    }, TaskContinuationOptions.OnlyOnRanToCompletion);
-                task.ContinueWith(t =>
-                    {
-                        // catch the error
-                        error = t.Exception.InnerException.ToString();
-                        resetEvent.Set();
-                    }, TaskContinuationOptions.NotOnRanToCompletion);
-                resetEvent.WaitOne();
-                Assert.True(error.Contains(handler.ExpectedError), "Error message is invalid");
+                
                 Assert.Equal(1, handler.Calls);
+                Assert.Equal(ErrorMessageHandler.ExpectedExceptionMessage, exception.Message);
+                Assert.Contains(ErrorMessageHandler.ExpectedError, exception.ToString());
             }
         }
 
         /// <summary>Tests async execution of multiple request simultaneously.</summary>
         [Fact]
-        public void ExecuteAsync_Simultaneously()
+        public async Task ExecuteAsync_Simultaneously()
         {
             var tasks = new List<Task<MockResponse>>();
             var handler = new ConcurrentCallsHandler();
@@ -712,14 +670,14 @@ namespace Google.Apis.Tests.Apis.Requests
                 {
                     var request = new TestClientServiceRequest(service, "GET", null) { CallNum = i };
                     var task = request.ExecuteAsync();
-                    task.ContinueWith(c => ce.Signal());
+                    _ = task.ContinueWith(c => ce.Signal());
                     tasks.Add(task);
                 }
                 ce.Wait();
 
                 for (var i = 1; i <= tasks.Count; ++i)
                 {
-                    var response = tasks[i - 1].Result;
+                    var response = await tasks[i - 1];
 
                     // check that we got the right response. Name should be equal to the index number modulo 10 (or 
                     // index number plus one module 10, if it's an even request - because even request should fail in 
@@ -895,17 +853,8 @@ namespace Google.Apis.Tests.Apis.Requests
             using (var service = new MockClientService("https://build_request_params"))
             {
                 var request = new ClientServiceRequestWithQueryParameters(service, "GET", null);
-                // request.Required is missing!
-                try
-                {
-                    var httpRequest = request.CreateRequest();
-                    Assert.True(false, "Exception expected");
-                }
-                catch (GoogleApiException ex)
-                {
-                    Assert.True(ex.Message.Contains("Parameter \"required\" is missing"),
-                        "Exception with missing parameter should be thrown");
-                }
+                var exception = Assert.Throws<GoogleApiException>(() => request.CreateRequest());
+                Assert.Contains("Parameter \"required\" is missing", exception.Message);
             }
         }
 
@@ -1205,15 +1154,187 @@ namespace Google.Apis.Tests.Apis.Requests
                 Task.FromResult(_fn(request));
         }
 
-        [Theory]
-        [InlineData("", "Error response is null")]
-        [InlineData("not json", "not json")]
-        [InlineData("{error:{message:\"json error\"}}", "Google.Apis.Requests.RequestError\njson error [0]\nNo individual errors\n")]
-        public void ResponseError(string content, string expectedExceptionMessage)
+        // This is a valid JSON, but not one we recognize
+        const string ErrorJson_Unknown =
+            "{ " +
+                "\"error\":\"invalid_target\", " +
+                "\"error_description\":\"The target service indicated by the \\\"audience\\\" parameters is invalid. This might either be because the pool or provider is disabled or deleted or because it doesn't exist.\" " +
+            "}";
+
+        // HttpContent and HttpStatusCode for the response.
+        // Expected ex.Message and ex.ToString() content.
+        public static TheoryData<HttpContent, HttpStatusCode, string, string> DeserializeErrorThrows =>
+            new TheoryData<HttpContent, HttpStatusCode, string, string>
+            {
+                {
+                    new StringContent(ErrorJson_Unknown),
+                    HttpStatusCode.BadRequest,
+                    "The service TestService has thrown an exception. HttpStatusCode is BadRequest. No error message was specified.",
+                    $"The service TestService has thrown an exception.{Environment.NewLine}" +
+                    $"HttpStatusCode is BadRequest.{Environment.NewLine}" +
+                    $"No JSON error details were specified.{Environment.NewLine}" +
+                    $"Raw error details are: {ErrorJson_Unknown}"
+                },
+                {
+                    new StringContent(""),
+                    HttpStatusCode.BadRequest,
+                    "The service TestService has thrown an exception. HttpStatusCode is BadRequest. No error message was specified.",
+                    $"The service TestService has thrown an exception.{Environment.NewLine}" +
+                    $"HttpStatusCode is BadRequest.{Environment.NewLine}" +
+                    $"No JSON error details were specified.{Environment.NewLine}" +
+                    $"Raw error details are empty or white spaces only."
+                },
+                {
+                    new StringContent("not json"),
+                    HttpStatusCode.BadRequest,
+                    $"The service TestService has thrown an exception. HttpStatusCode is BadRequest. No error message was specified.",
+                    $"The service TestService has thrown an exception.{Environment.NewLine}" +
+                    $"HttpStatusCode is BadRequest.{Environment.NewLine}" +
+                    $"No JSON error details were specified.{Environment.NewLine}" +
+                    $"Raw error details are: not json"
+                },
+                {
+                    null,
+                    0,
+                    $"The service TestService has thrown an exception. No HttpStatusCode was specified. No error message was specified.",
+#if NET6_0_OR_GREATER
+                    // Even though we tell our handler to return a response with null content,
+                    // in .NET 6 we get a StringContent with empty string content.
+                    // This just documents that behaviour.
+                    $"The service TestService has thrown an exception.{Environment.NewLine}" +
+                    $"No HttpStatusCode was specified.{Environment.NewLine}" +
+                    $"No JSON error details were specified.{Environment.NewLine}" +
+                    $"Raw error details are empty or white spaces only."
+#else
+                    $"The service TestService has thrown an exception.{Environment.NewLine}" +
+                    $"No HttpStatusCode was specified.{Environment.NewLine}" +
+                    $"No error details were specified."
+#endif
+                },
+                {
+                    null,
+                    HttpStatusCode.BadRequest,
+                    $"The service TestService has thrown an exception. HttpStatusCode is BadRequest. No error message was specified.",
+#if NET6_0_OR_GREATER
+                    // Even though we tell our handler to return a response with null content,
+                    // in .NET 6 we get a StringContent with empty string content.
+                    // This just documents that behaviour.
+                    $"The service TestService has thrown an exception.{Environment.NewLine}" +
+                    $"HttpStatusCode is BadRequest.{Environment.NewLine}" +
+                    $"No JSON error details were specified.{Environment.NewLine}" +
+                    $"Raw error details are empty or white spaces only."
+#else
+                    $"The service TestService has thrown an exception.{Environment.NewLine}" +
+                    $"HttpStatusCode is BadRequest.{Environment.NewLine}" +
+                    $"No error details were specified."
+#endif
+                }
+            };
+
+        // Content and HttpStatusCode for the response.
+        // Expected error.Message and error.ToString().
+        public static TheoryData<string, HttpStatusCode, string, string> DeserializeErrorSucceeds =>
+            new TheoryData<string, HttpStatusCode, string, string>
+            {
+                {
+                    "{\"error\":{\"message\":\"json error\"}}",
+                    HttpStatusCode.BadRequest,
+                    $"json error",
+                    $"Google.Apis.Requests.RequestError{Environment.NewLine}" +
+                    $"json error [0]{Environment.NewLine}" +
+                    $"No individual errors{Environment.NewLine}"
+                },
+                {
+                    "{\"error\":{\"message\":\"json error\",\"errors\":[{\"message\":\"individual error\",\"domain\":\"global\",\"reason\":\"badRequest\"}]}}",
+                    HttpStatusCode.BadRequest,
+                    $"json error",
+                    $"Google.Apis.Requests.RequestError{Environment.NewLine}" +
+                    $"json error [0]{Environment.NewLine}" +
+                    $"Errors [{Environment.NewLine}" +
+                    $"\tMessage[individual error] Location[ - ] Reason[badRequest] Domain[global]{Environment.NewLine}" +
+                    $"]{Environment.NewLine}"
+                },
+            };
+
+        // HttpContent and HttpStatusCode for the response.
+        // Expected ex.Message and ex.ToString() content.
+        public static TheoryData<HttpContent, HttpStatusCode, string, string> ResponseErrorData
         {
-            var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+            get
+            {
+                var data = new TheoryData<HttpContent, HttpStatusCode, string, string>();
+
+                // Regardless of whether deserialization of the error succeeds or fails,
+                // the request execution has failed, so service client should throw.
+
+                foreach(var success in DeserializeErrorSucceeds)
+                {
+                    string content = (string)success[0];
+                    HttpStatusCode statusCode = (HttpStatusCode)success[1];
+                    string errorMessage = (string)success[2];
+                    string errorToString = (string)success[3];
+
+                    data.Add(
+                        new StringContent(content),
+                        statusCode,
+                        $"The service TestService has thrown an exception. HttpStatusCode is {statusCode}. {errorMessage}",
+                        $"The service TestService has thrown an exception.{Environment.NewLine}" +
+                        $"HttpStatusCode is {statusCode}.{Environment.NewLine}" +
+                        $"{errorToString}");
+                }
+
+                foreach(var failure in DeserializeErrorThrows)
+                {
+                    data.Add((HttpContent)failure[0], (HttpStatusCode)failure[1], (string)failure[2], (string)failure[3]);
+                }
+
+                return data;
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(DeserializeErrorThrows))]
+        public async Task DeserializeError_Throws(
+            HttpContent content, HttpStatusCode statusCode, string expectedExceptionMessage, string expectedToStringContent)
+        {
+            var response = new HttpResponseMessage(statusCode)
+            {
+                Content = content
+            };
+            using (var service = new MockClientService())
+            {
+                var ex = await Assert.ThrowsAsync<GoogleApiException>(() => service.DeserializeError(response));
+                Assert.Equal(expectedExceptionMessage, ex.Message);
+                Assert.Equal(statusCode, ex.HttpStatusCode);
+                Assert.Contains(expectedToStringContent, ex.ToString());
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(DeserializeErrorSucceeds))]
+        public async Task DeserializeError_Succeeds(string content, HttpStatusCode statusCode, string expectedErrorMessage, string expectedToString)
+        {
+            var response = new HttpResponseMessage(statusCode)
             {
                 Content = new StringContent(content)
+            };
+            using (var service = new MockClientService())
+            {
+                RequestError error = await service.DeserializeError(response);
+                Assert.False(error.IsOnlyRawContent);
+                Assert.Equal(expectedErrorMessage, error.Message);
+                Assert.Equal(expectedToString, error.ToString());
+                Assert.Equal(content, error.ErrorResponseContent);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ResponseErrorData))]
+        public void ResponseError(HttpContent content, HttpStatusCode statusCode, string expectedExceptionMessage, string expectedToStringContent)
+        {
+            var response = new HttpResponseMessage(statusCode)
+            {
+                Content = content
             };
             using (var service = new MockClientService(new BaseClientService.Initializer
             {
@@ -1222,8 +1343,9 @@ namespace Google.Apis.Tests.Apis.Requests
             {
                 var request = new TestClientServiceRequest(service, "GET", null);
                 var ex = Assert.Throws<GoogleApiException>(() => request.Execute());
-                Assert.Equal(expectedExceptionMessage, ex.Message.Replace("\r\n", "\n"));
-                Assert.Equal(HttpStatusCode.BadRequest, ex.HttpStatusCode);
+                Assert.Equal(expectedExceptionMessage, ex.Message);
+                Assert.Contains(expectedToStringContent, ex.ToString());
+                Assert.Equal(statusCode, ex.HttpStatusCode);
             }
         }
 
@@ -1247,8 +1369,8 @@ namespace Google.Apis.Tests.Apis.Requests
                 var handler = new TestUnsuccessfulResponseHandler();
                 request.AddUnsuccessfulResponseHandler(handler);
                 var httpRequest = request.CreateRequest();
-                Assert.Equal(handler, ((List<IHttpUnsuccessfulResponseHandler>)httpRequest.Properties
-                    [ConfigurableMessageHandler.UnsuccessfulResponseHandlerKey]).Single());
+                var properties = TestHelpers.GetRequestProperties(httpRequest);
+                Assert.Equal(handler, ((List<IHttpUnsuccessfulResponseHandler>) properties[ConfigurableMessageHandler.UnsuccessfulResponseHandlerKey]).Single());
                 Assert.Throws<GoogleApiException>(() => request.Execute());
                 Assert.True(handler.Count > 0);
             }
@@ -1273,8 +1395,8 @@ namespace Google.Apis.Tests.Apis.Requests
                 var handler = new TestExceptionHandler();
                 request.AddExceptionHandler(handler);
                 var httpRequest = request.CreateRequest();
-                Assert.Equal(handler, ((List<IHttpExceptionHandler>)httpRequest.Properties
-                    [ConfigurableMessageHandler.ExceptionHandlerKey]).Single());
+                var properties = TestHelpers.GetRequestProperties(httpRequest);
+                Assert.Equal(handler, ((List<IHttpExceptionHandler>) properties[ConfigurableMessageHandler.ExceptionHandlerKey]).Single());
                 var ex = Assert.Throws<Exception>(() => request.Execute());
                 Assert.Equal("mymsg", ex.Message);
                 Assert.True(handler.Count > 0);
@@ -1300,8 +1422,8 @@ namespace Google.Apis.Tests.Apis.Requests
                 var interceptor = new TestExecuteInterceptor();
                 request.AddExecuteInterceptor(interceptor);
                 var httpRequest = request.CreateRequest();
-                Assert.Equal(interceptor, ((List<IHttpExecuteInterceptor>)httpRequest.Properties
-                    [ConfigurableMessageHandler.ExecuteInterceptorKey]).Single());
+                var properties = TestHelpers.GetRequestProperties(httpRequest);
+                Assert.Equal(interceptor, ((List<IHttpExecuteInterceptor>) properties[ConfigurableMessageHandler.ExecuteInterceptorKey]).Single());
                 Assert.Throws<Exception>(() => request.Execute());
                 Assert.True(interceptor.Count > 0);
             }
@@ -1399,6 +1521,67 @@ namespace Google.Apis.Tests.Apis.Requests
                 Required = requiredValue,
                 Optional = optionalValue
             };
+        }
+
+        [Fact]
+        public async Task ApiVersion_NotSet()
+        {
+            HttpRequestMessage lastRequest = null;
+            var handler = new TestHttpHandler(req =>
+            {
+                lastRequest = req;
+                return new HttpResponseMessage
+                {
+                    // In .NET Framework 4.6.2 Content is null and since the request here succeedds,
+                    // we attempt to parse the response and get NullReferenceException.
+                    // Note this is a test problem and not a production code problem because Content
+                    // won't be null on a successful response.
+                    // In .NET 6, Content will be EmptyContent.
+                    Content = new StringContent("")
+                };
+            });
+            var initializer = new BaseClientService.Initializer
+            {
+                HttpClientFactory = new MockHttpClientFactory(handler)
+            };
+
+            var service = new MockClientService(initializer);
+            var request = new TestClientServiceRequest(service, "GET", null);
+            await request.ExecuteAsync();
+
+            Assert.NotNull(lastRequest);
+            Assert.False(lastRequest.Headers.Contains(ClientServiceRequest<MockRequest>.ApiVersionHeaderName));
+        }
+
+        [Fact]
+        public async Task ApiVersion_Set()
+        {
+            HttpRequestMessage lastRequest = null;
+            var handler = new TestHttpHandler(req =>
+            {
+                lastRequest = req;
+                return new HttpResponseMessage
+                {
+                    // In .NET Framework 4.6.2 Content is null and since the request here succeedds,
+                    // we attempt to parse the response and get NullReferenceException.
+                    // Note this is a test problem and not a production code problem because Content
+                    // won't be null on a successful response.
+                    // In .NET 6, Content will be EmptyContent.
+                    Content = new StringContent("")
+                };
+            });
+            var initializer = new BaseClientService.Initializer
+            {
+                HttpClientFactory = new MockHttpClientFactory(handler)
+            };
+
+            var service = new MockClientService(initializer);
+            var request = new TestClientServiceRequest(service, "GET", null) { ApiVersionImpl = "test-version" };
+            await request.ExecuteAsync();
+
+            Assert.NotNull(lastRequest);
+            var value = Assert.Single(lastRequest.Headers.GetValues(ClientServiceRequest<MockRequest>.ApiVersionHeaderName));
+            Assert.Equal("test-version", value);
         }
     }
 }

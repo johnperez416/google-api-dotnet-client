@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.PagespeedInsights.v5
         public PagespeedInsightsService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Pagespeedapi = new PagespeedapiResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://pagespeedonline.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://pagespeedonline.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.PagespeedInsights.v5
         public override string Name => "pagespeedonline";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://pagespeedonline.googleapis.com/";
-        #else
-            "https://pagespeedonline.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://pagespeedonline.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the PageSpeed Insights API.</summary>
         public class Scope
@@ -282,7 +277,7 @@ namespace Google.Apis.PagespeedInsights.v5
         /// <param name="url">Required. The URL to fetch and analyze</param>
         public virtual RunpagespeedRequest Runpagespeed(string url)
         {
-            return new RunpagespeedRequest(service, url);
+            return new RunpagespeedRequest(this.service, url);
         }
 
         /// <summary>
@@ -352,7 +347,8 @@ namespace Google.Apis.PagespeedInsights.v5
                 PERFORMANCE = 3,
 
                 /// <summary>
-                /// Progressive Web App (PWA), category pertaining to a website's ability to be run as a PWA.
+                /// Progressive Web App (PWA), category pertaining to a website's ability to be run as a PWA. This is
+                /// deprecated in Lighthouse's 12.0 release.
                 /// </summary>
                 [Google.Apis.Util.StringValueAttribute("PWA")]
                 PWA = 4,
@@ -536,7 +532,10 @@ namespace Google.Apis.PagespeedInsights.v5.Data
         [Newtonsoft.Json.JsonPropertyAttribute("performance")]
         public virtual LighthouseCategoryV5 Performance { get; set; }
 
-        /// <summary>The Progressive-Web-App (PWA) category, containing all pwa related audits.</summary>
+        /// <summary>
+        /// The Progressive-Web-App (PWA) category, containing all pwa related audits. This is deprecated in
+        /// Lighthouse's 12.0 release.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pwa")]
         public virtual LighthouseCategoryV5 Pwa { get; set; }
 
@@ -602,6 +601,10 @@ namespace Google.Apis.PagespeedInsights.v5.Data
         [Newtonsoft.Json.JsonPropertyAttribute("benchmarkIndex")]
         public virtual System.Nullable<double> BenchmarkIndex { get; set; }
 
+        /// <summary>The version of libraries with which these results were generated. Ex: axe-core.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("credits")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Credits { get; set; }
+
         /// <summary>The user agent string of the version of Chrome used.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hostUserAgent")]
         public virtual string HostUserAgent { get; set; }
@@ -620,6 +623,37 @@ namespace Google.Apis.PagespeedInsights.v5.Data
         /// <summary>Internationalized strings that are formatted to the locale in configSettings.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rendererFormattedStrings")]
         public virtual RendererFormattedStrings RendererFormattedStrings { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Message containing an Entity.</summary>
+    public class LhrEntity : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. An optional category name for the entity.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("category")]
+        public virtual string Category { get; set; }
+
+        /// <summary>Optional. An optional homepage URL of the entity.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("homepage")]
+        public virtual string Homepage { get; set; }
+
+        /// <summary>Optional. An optional flag indicating if the entity is the first party.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isFirstParty")]
+        public virtual System.Nullable<bool> IsFirstParty { get; set; }
+
+        /// <summary>Optional. An optional flag indicating if the entity is not recognized.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isUnrecognized")]
+        public virtual System.Nullable<bool> IsUnrecognized { get; set; }
+
+        /// <summary>Required. Name of the entity.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Required. A list of URL origin strings that belong to this entity.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("origins")]
+        public virtual System.Collections.Generic.IList<string> Origins { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -651,6 +685,10 @@ namespace Google.Apis.PagespeedInsights.v5.Data
         /// <summary>The audit's id.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
+
+        /// <summary>The metric savings of the audit.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metricSavings")]
+        public virtual MetricSavings MetricSavings { get; set; }
 
         /// <summary>The unit of the numeric_value field. Used to format the numeric value for display.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("numericUnit")]
@@ -736,6 +774,10 @@ namespace Google.Apis.PagespeedInsights.v5.Data
         [Newtonsoft.Json.JsonPropertyAttribute("configSettings")]
         public virtual ConfigSettings ConfigSettings { get; set; }
 
+        /// <summary>Entity classification data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entities")]
+        public virtual System.Collections.Generic.IList<LhrEntity> Entities { get; set; }
+
         /// <summary>Environment settings that were used when making this LHR.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("environment")]
         public virtual Environment Environment { get; set; }
@@ -744,9 +786,17 @@ namespace Google.Apis.PagespeedInsights.v5.Data
         [Newtonsoft.Json.JsonPropertyAttribute("fetchTime")]
         public virtual string FetchTime { get; set; }
 
+        /// <summary>URL displayed on the page after Lighthouse finishes.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("finalDisplayedUrl")]
+        public virtual string FinalDisplayedUrl { get; set; }
+
         /// <summary>The final resolved url that was audited.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finalUrl")]
         public virtual string FinalUrl { get; set; }
+
+        /// <summary>Screenshot data of the full page, along with node rects relevant to the audit results.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fullPageScreenshot")]
+        public virtual object FullPageScreenshot { get; set; }
 
         /// <summary>The internationalization strings that are required to render the LHR.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("i18n")]
@@ -755,6 +805,10 @@ namespace Google.Apis.PagespeedInsights.v5.Data
         /// <summary>The lighthouse version that was used to generate this LHR.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lighthouseVersion")]
         public virtual string LighthouseVersion { get; set; }
+
+        /// <summary>URL of the main document request of the final navigation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mainDocumentUrl")]
+        public virtual string MainDocumentUrl { get; set; }
 
         /// <summary>The original requested url.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestedUrl")]
@@ -782,6 +836,33 @@ namespace Google.Apis.PagespeedInsights.v5.Data
         /// <summary>The user agent that was used to run this LHR.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userAgent")]
         public virtual string UserAgent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The metric savings of the audit.</summary>
+    public class MetricSavings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Optional numeric value representing the audit's savings for the CLS metric.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("CLS")]
+        public virtual System.Nullable<double> CLS { get; set; }
+
+        /// <summary>Optional. Optional numeric value representing the audit's savings for the FCP metric.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("FCP")]
+        public virtual System.Nullable<double> FCP { get; set; }
+
+        /// <summary>Optional. Optional numeric value representing the audit's savings for the INP metric.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("INP")]
+        public virtual System.Nullable<double> INP { get; set; }
+
+        /// <summary>Optional. Optional numeric value representing the audit's savings for the LCP metric.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("LCP")]
+        public virtual System.Nullable<double> LCP { get; set; }
+
+        /// <summary>Optional. Optional numeric value representing the audit's savings for the TBT metric.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("TBT")]
+        public virtual System.Nullable<double> TBT { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

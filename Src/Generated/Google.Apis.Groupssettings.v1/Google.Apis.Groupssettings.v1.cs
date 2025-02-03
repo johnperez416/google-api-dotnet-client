@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Groupssettings.v1
         public GroupssettingsService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Groups = new GroupsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://www.googleapis.com/groups/v1/groups/");
+            BatchUri = GetEffectiveUri(null, "https://www.googleapis.com/batch/groupssettings/v1");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Groupssettings.v1
         public override string Name => "groupssettings";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://www.googleapis.com/groups/v1/groups/";
-        #else
-            "https://www.googleapis.com/groups/v1/groups/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "groups/v1/groups/";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://www.googleapis.com/batch/groupssettings/v1";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch/groupssettings/v1";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Groups Settings API.</summary>
         public class Scope
@@ -214,7 +209,7 @@ namespace Google.Apis.Groupssettings.v1
         /// <param name="groupUniqueId">The group's email address.</param>
         public virtual GetRequest Get(string groupUniqueId)
         {
-            return new GetRequest(service, groupUniqueId);
+            return new GetRequest(this.service, groupUniqueId);
         }
 
         /// <summary>Gets one resource by id.</summary>
@@ -260,7 +255,7 @@ namespace Google.Apis.Groupssettings.v1
         /// <param name="groupUniqueId">The group's email address.</param>
         public virtual PatchRequest Patch(Google.Apis.Groupssettings.v1.Data.Groups body, string groupUniqueId)
         {
-            return new PatchRequest(service, body, groupUniqueId);
+            return new PatchRequest(this.service, body, groupUniqueId);
         }
 
         /// <summary>Updates an existing resource. This method supports patch semantics.</summary>
@@ -313,7 +308,7 @@ namespace Google.Apis.Groupssettings.v1
         /// <param name="groupUniqueId">The group's email address.</param>
         public virtual UpdateRequest Update(Google.Apis.Groupssettings.v1.Data.Groups body, string groupUniqueId)
         {
-            return new UpdateRequest(service, body, groupUniqueId);
+            return new UpdateRequest(this.service, body, groupUniqueId);
         }
 
         /// <summary>Updates an existing resource.</summary>
@@ -685,12 +680,12 @@ namespace Google.Apis.Groupssettings.v1.Data
         public virtual string WhoCanInvite { get; set; }
 
         /// <summary>
-        /// Permission to join group. Possible values are:   - ANYONE_CAN_JOIN: Anyone in the account domain can join.
-        /// This includes accounts with multiple domains.  - ALL_IN_DOMAIN_CAN_JOIN: Any Internet user who is outside
-        /// your domain can access your Google Groups service and view the list of groups in your Groups directory.
-        /// Warning: Group owners can add external addresses, outside of the domain to their groups. They can also allow
-        /// people outside your domain to join their groups. If you later disable this option, any external addresses
-        /// already added to users' groups remain in those groups.  - INVITED_CAN_JOIN: Candidates for membership can be
+        /// Permission to join group. Possible values are:   - ANYONE_CAN_JOIN: Any Internet user who is outside your
+        /// domain can access your Google Groups service and view the list of groups in your Groups directory. Warning:
+        /// Group owners can add external addresses, outside of the domain to their groups. They can also allow people
+        /// outside your domain to join their groups. If you later disable this option, any external addresses already
+        /// added to users' groups remain in those groups.  - ALL_IN_DOMAIN_CAN_JOIN: Anyone in the account domain can
+        /// join. This includes accounts with multiple domains.  - INVITED_CAN_JOIN: Candidates for membership can be
         /// invited to join.   - CAN_REQUEST_TO_JOIN: Non members can request an invitation to join.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("whoCanJoin")]

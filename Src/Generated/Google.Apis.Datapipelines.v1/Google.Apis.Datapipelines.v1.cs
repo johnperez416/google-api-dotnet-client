@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Datapipelines.v1
         public DatapipelinesService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://datapipelines.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://datapipelines.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Datapipelines.v1
         public override string Name => "datapipelines";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://datapipelines.googleapis.com/";
-        #else
-            "https://datapipelines.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://datapipelines.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Data pipelines API.</summary>
         public class Scope
@@ -315,6 +310,114 @@ namespace Google.Apis.Datapipelines.v1
                 public PipelinesResource(Google.Apis.Services.IClientService service)
                 {
                     this.service = service;
+                    Jobs = new JobsResource(service);
+                }
+
+                /// <summary>Gets the Jobs resource.</summary>
+                public virtual JobsResource Jobs { get; }
+
+                /// <summary>The "jobs" collection of methods.</summary>
+                public class JobsResource
+                {
+                    private const string Resource = "jobs";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public JobsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Lists jobs for a given pipeline. Throws a "FORBIDDEN" error if the caller doesn't have
+                    /// permission to access it.
+                    /// </summary>
+                    /// <param name="parent">
+                    /// Required. The pipeline name. For example:
+                    /// `projects/PROJECT_ID/locations/LOCATION_ID/pipelines/PIPELINE_ID`.
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>
+                    /// Lists jobs for a given pipeline. Throws a "FORBIDDEN" error if the caller doesn't have
+                    /// permission to access it.
+                    /// </summary>
+                    public class ListRequest : DatapipelinesBaseServiceRequest<Google.Apis.Datapipelines.v1.Data.GoogleCloudDatapipelinesV1ListJobsResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The pipeline name. For example:
+                        /// `projects/PROJECT_ID/locations/LOCATION_ID/pipelines/PIPELINE_ID`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// The maximum number of entities to return. The service may return fewer than this value, even
+                        /// if there are additional pages. If unspecified, the max limit will be determined by the
+                        /// backend implementation.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// A page token, received from a previous `ListJobs` call. Provide this to retrieve the
+                        /// subsequent page. When paginating, all other parameters provided to `ListJobs` must match the
+                        /// call that provided the page token.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+parent}/jobs";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/pipelines/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>
@@ -328,7 +431,7 @@ namespace Google.Apis.Datapipelines.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.Datapipelines.v1.Data.GoogleCloudDatapipelinesV1Pipeline body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -391,7 +494,7 @@ namespace Google.Apis.Datapipelines.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -442,12 +545,12 @@ namespace Google.Apis.Datapipelines.v1
                 /// "FORBIDDEN" error if the caller doesn't have permission to access it.
                 /// </summary>
                 /// <param name="name">
-                /// Required. The pipeeline name. For example:
+                /// Required. The pipeline name. For example:
                 /// `projects/PROJECT_ID/locations/LOCATION_ID/pipelines/PIPELINE_ID`.
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -464,7 +567,7 @@ namespace Google.Apis.Datapipelines.v1
                     }
 
                     /// <summary>
-                    /// Required. The pipeeline name. For example:
+                    /// Required. The pipeline name. For example:
                     /// `projects/PROJECT_ID/locations/LOCATION_ID/pipelines/PIPELINE_ID`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -495,7 +598,111 @@ namespace Google.Apis.Datapipelines.v1
                 }
 
                 /// <summary>
-                /// Updates a pipeline. If successful, the updated [Pipeline] is returned. Returns `NOT_FOUND` if the
+                /// Lists pipelines. Returns a "FORBIDDEN" error if the caller doesn't have permission to access it.
+                /// </summary>
+                /// <param name="parent">
+                /// Required. The location name. For example: `projects/PROJECT_ID/locations/LOCATION_ID`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>
+                /// Lists pipelines. Returns a "FORBIDDEN" error if the caller doesn't have permission to access it.
+                /// </summary>
+                public class ListRequest : DatapipelinesBaseServiceRequest<Google.Apis.Datapipelines.v1.Data.GoogleCloudDatapipelinesV1ListPipelinesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The location name. For example: `projects/PROJECT_ID/locations/LOCATION_ID`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// An expression for filtering the results of the request. If unspecified, all pipelines will be
+                    /// returned. Multiple filters can be applied and must be comma separated. Fields eligible for
+                    /// filtering are: + `type`: The type of the pipeline (streaming or batch). Allowed values are
+                    /// `ALL`, `BATCH`, and `STREAMING`. + `status`: The activity status of the pipeline. Allowed values
+                    /// are `ALL`, `ACTIVE`, `ARCHIVED`, and `PAUSED`. For example, to limit results to active batch
+                    /// processing pipelines: type:BATCH,status:ACTIVE
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// The maximum number of entities to return. The service may return fewer than this value, even if
+                    /// there are additional pages. If unspecified, the max limit is yet to be determined by the backend
+                    /// implementation.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A page token, received from a previous `ListPipelines` call. Provide this to retrieve the
+                    /// subsequent page. When paginating, all other parameters provided to `ListPipelines` must match
+                    /// the call that provided the page token.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/pipelines";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Updates a pipeline. If successful, the updated Pipeline is returned. Returns `NOT_FOUND` if the
                 /// pipeline doesn't exist. If UpdatePipeline does not return successfully, you can retry the
                 /// UpdatePipeline request until you receive a successful response.
                 /// </summary>
@@ -504,20 +711,20 @@ namespace Google.Apis.Datapipelines.v1
                 /// The pipeline name. For example: `projects/PROJECT_ID/locations/LOCATION_ID/pipelines/PIPELINE_ID`. *
                 /// `PROJECT_ID` can contain letters ([A-Za-z]), numbers ([0-9]), hyphens (-), colons (:), and periods
                 /// (.). For more information, see [Identifying
-                /// projects](https://cloud.google.com/resource-manager/docs/creating-managing-projects#identifying_projects)
+                /// projects](https://cloud.google.com/resource-manager/docs/creating-managing-projects#identifying_projects).
                 /// * `LOCATION_ID` is the canonical ID for the pipeline's location. The list of available locations can
-                /// be obtained by calling ListLocations. Note that the Data Pipelines service is not available in all
-                /// regions. It depends on Cloud Scheduler, an App Engine application, so it's only available in [App
-                /// Engine regions](https://cloud.google.com/about/locations#region). * `PIPELINE_ID` is the ID of the
-                /// pipeline. Must be unique for the selected project and location.
+                /// be obtained by calling `google.cloud.location.Locations.ListLocations`. Note that the Data Pipelines
+                /// service is not available in all regions. It depends on Cloud Scheduler, an App Engine application,
+                /// so it's only available in [App Engine regions](https://cloud.google.com/about/locations#region). *
+                /// `PIPELINE_ID` is the ID of the pipeline. Must be unique for the selected project and location.
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.Datapipelines.v1.Data.GoogleCloudDatapipelinesV1Pipeline body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates a pipeline. If successful, the updated [Pipeline] is returned. Returns `NOT_FOUND` if the
+                /// Updates a pipeline. If successful, the updated Pipeline is returned. Returns `NOT_FOUND` if the
                 /// pipeline doesn't exist. If UpdatePipeline does not return successfully, you can retry the
                 /// UpdatePipeline request until you receive a successful response.
                 /// </summary>
@@ -536,12 +743,13 @@ namespace Google.Apis.Datapipelines.v1
                     /// `projects/PROJECT_ID/locations/LOCATION_ID/pipelines/PIPELINE_ID`. * `PROJECT_ID` can contain
                     /// letters ([A-Za-z]), numbers ([0-9]), hyphens (-), colons (:), and periods (.). For more
                     /// information, see [Identifying
-                    /// projects](https://cloud.google.com/resource-manager/docs/creating-managing-projects#identifying_projects)
+                    /// projects](https://cloud.google.com/resource-manager/docs/creating-managing-projects#identifying_projects).
                     /// * `LOCATION_ID` is the canonical ID for the pipeline's location. The list of available locations
-                    /// can be obtained by calling ListLocations. Note that the Data Pipelines service is not available
-                    /// in all regions. It depends on Cloud Scheduler, an App Engine application, so it's only available
-                    /// in [App Engine regions](https://cloud.google.com/about/locations#region). * `PIPELINE_ID` is the
-                    /// ID of the pipeline. Must be unique for the selected project and location.
+                    /// can be obtained by calling `google.cloud.location.Locations.ListLocations`. Note that the Data
+                    /// Pipelines service is not available in all regions. It depends on Cloud Scheduler, an App Engine
+                    /// application, so it's only available in [App Engine
+                    /// regions](https://cloud.google.com/about/locations#region). * `PIPELINE_ID` is the ID of the
+                    /// pipeline. Must be unique for the selected project and location.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -591,7 +799,7 @@ namespace Google.Apis.Datapipelines.v1
                 /// <summary>
                 /// Creates a job for the specified pipeline directly. You can use this method when the internal
                 /// scheduler is not configured and you want to trigger the job directly or through an external system.
-                /// Returns a "NOT_FOUND" error if the pipeline doesn't exist. Returns a "FOBIDDEN" error if the user
+                /// Returns a "NOT_FOUND" error if the pipeline doesn't exist. Returns a "FORBIDDEN" error if the user
                 /// doesn't have permission to access the pipeline or run jobs for the pipeline.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
@@ -601,13 +809,13 @@ namespace Google.Apis.Datapipelines.v1
                 /// </param>
                 public virtual RunRequest Run(Google.Apis.Datapipelines.v1.Data.GoogleCloudDatapipelinesV1RunPipelineRequest body, string name)
                 {
-                    return new RunRequest(service, body, name);
+                    return new RunRequest(this.service, body, name);
                 }
 
                 /// <summary>
                 /// Creates a job for the specified pipeline directly. You can use this method when the internal
                 /// scheduler is not configured and you want to trigger the job directly or through an external system.
-                /// Returns a "NOT_FOUND" error if the pipeline doesn't exist. Returns a "FOBIDDEN" error if the user
+                /// Returns a "NOT_FOUND" error if the pipeline doesn't exist. Returns a "FORBIDDEN" error if the user
                 /// doesn't have permission to access the pipeline or run jobs for the pipeline.
                 /// </summary>
                 public class RunRequest : DatapipelinesBaseServiceRequest<Google.Apis.Datapipelines.v1.Data.GoogleCloudDatapipelinesV1RunPipelineResponse>
@@ -659,8 +867,7 @@ namespace Google.Apis.Datapipelines.v1
 
                 /// <summary>
                 /// Freezes pipeline execution permanently. If there's a corresponding scheduler entry, it's deleted,
-                /// and the pipeline state is changed to "ARCHIVED". However, pipeline metadata is retained. Upon
-                /// success, the pipeline state is updated to ARCHIVED.
+                /// and the pipeline state is changed to "ARCHIVED". However, pipeline metadata is retained.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -669,13 +876,12 @@ namespace Google.Apis.Datapipelines.v1
                 /// </param>
                 public virtual StopRequest Stop(Google.Apis.Datapipelines.v1.Data.GoogleCloudDatapipelinesV1StopPipelineRequest body, string name)
                 {
-                    return new StopRequest(service, body, name);
+                    return new StopRequest(this.service, body, name);
                 }
 
                 /// <summary>
                 /// Freezes pipeline execution permanently. If there's a corresponding scheduler entry, it's deleted,
-                /// and the pipeline state is changed to "ARCHIVED". However, pipeline metadata is retained. Upon
-                /// success, the pipeline state is updated to ARCHIVED.
+                /// and the pipeline state is changed to "ARCHIVED". However, pipeline metadata is retained.
                 /// </summary>
                 public class StopRequest : DatapipelinesBaseServiceRequest<Google.Apis.Datapipelines.v1.Data.GoogleCloudDatapipelinesV1Pipeline>
                 {
@@ -722,113 +928,6 @@ namespace Google.Apis.Datapipelines.v1
                             Pattern = @"^projects/[^/]+/locations/[^/]+/pipelines/[^/]+$",
                         });
                     }
-                }
-            }
-
-            /// <summary>
-            /// Lists pipelines. Returns a "NOT_FOUND" error if the list is empty. Returns a "FORBIDDEN" error if the
-            /// caller doesn't have permission to access it.
-            /// </summary>
-            /// <param name="parent">
-            /// Required. The location name. For example: `projects/PROJECT_ID/locations/LOCATION_ID`.
-            /// </param>
-            public virtual ListPipelinesRequest ListPipelines(string parent)
-            {
-                return new ListPipelinesRequest(service, parent);
-            }
-
-            /// <summary>
-            /// Lists pipelines. Returns a "NOT_FOUND" error if the list is empty. Returns a "FORBIDDEN" error if the
-            /// caller doesn't have permission to access it.
-            /// </summary>
-            public class ListPipelinesRequest : DatapipelinesBaseServiceRequest<Google.Apis.Datapipelines.v1.Data.GoogleCloudDatapipelinesV1ListPipelinesResponse>
-            {
-                /// <summary>Constructs a new ListPipelines request.</summary>
-                public ListPipelinesRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
-                {
-                    Parent = parent;
-                    InitParameters();
-                }
-
-                /// <summary>
-                /// Required. The location name. For example: `projects/PROJECT_ID/locations/LOCATION_ID`.
-                /// </summary>
-                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
-                public virtual string Parent { get; private set; }
-
-                /// <summary>
-                /// An expression for filtering the results of the request. If unspecified, all pipelines will be
-                /// returned. Multiple filters can be applied and must be comma separated. Fields eligible for filtering
-                /// are: + `type`: The type of the pipeline (streaming or batch). Allowed values are `ALL`, `BATCH`, and
-                /// `STREAMING`. + `executor_type`: The type of pipeline execution layer. This is always Dataflow for
-                /// now, but more executors may be added later. Allowed values are `ALL` and `DATAFLOW`. + `status`: The
-                /// activity status of the pipeline. Allowed values are `ALL`, `ACTIVE`, `ARCHIVED`, and `PAUSED`. For
-                /// example, to limit results to active batch processing pipelines: type:BATCH,status:ACTIVE
-                /// </summary>
-                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual string Filter { get; set; }
-
-                /// <summary>
-                /// The maximum number of entities to return. The service may return fewer than this value, even if
-                /// there are additional pages. If unspecified, the max limit is yet to be determined by the backend
-                /// implementation.
-                /// </summary>
-                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual System.Nullable<int> PageSize { get; set; }
-
-                /// <summary>
-                /// A page token, received from a previous `ListPipelines` call. Provide this to retrieve the subsequent
-                /// page. When paginating, all other parameters provided to `ListPipelines` must match the call that
-                /// provided the page token.
-                /// </summary>
-                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual string PageToken { get; set; }
-
-                /// <summary>Gets the method name.</summary>
-                public override string MethodName => "listPipelines";
-
-                /// <summary>Gets the HTTP method.</summary>
-                public override string HttpMethod => "GET";
-
-                /// <summary>Gets the REST path.</summary>
-                public override string RestPath => "v1/{+parent}";
-
-                /// <summary>Initializes ListPipelines parameter list.</summary>
-                protected override void InitParameters()
-                {
-                    base.InitParameters();
-                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "parent",
-                        IsRequired = true,
-                        ParameterType = "path",
-                        DefaultValue = null,
-                        Pattern = @"^projects/[^/]+/locations/[^/]+$",
-                    });
-                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "filter",
-                        IsRequired = false,
-                        ParameterType = "query",
-                        DefaultValue = null,
-                        Pattern = null,
-                    });
-                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "pageSize",
-                        IsRequired = false,
-                        ParameterType = "query",
-                        DefaultValue = null,
-                        Pattern = null,
-                    });
-                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "pageToken",
-                        IsRequired = false,
-                        ParameterType = "query",
-                        DefaultValue = null,
-                        Pattern = null,
-                    });
                 }
             }
         }
@@ -975,17 +1074,83 @@ namespace Google.Apis.Datapipelines.v1.Data
     /// </summary>
     public class GoogleCloudDatapipelinesV1Job : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time of job creation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>All the details that are specific to a Dataflow job.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataflowJobDetails")]
         public virtual GoogleCloudDatapipelinesV1DataflowJobDetails DataflowJobDetails { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Output only. The time of job termination. This is absent if the job is still running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The internal ID for the job.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
@@ -1148,6 +1313,26 @@ namespace Google.Apis.Datapipelines.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Response message for ListJobs</summary>
+    public class GoogleCloudDatapipelinesV1ListJobsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Results that were accessible to the caller. Results are always in descending order of job creation date.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("jobs")]
+        public virtual System.Collections.Generic.IList<GoogleCloudDatapipelinesV1Job> Jobs { get; set; }
+
+        /// <summary>
+        /// A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no
+        /// subsequent pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Response message for ListPipelines.</summary>
     public class GoogleCloudDatapipelinesV1ListPipelinesResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1169,15 +1354,50 @@ namespace Google.Apis.Datapipelines.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The main pipeline entity and all the needed metadata to launch and manage linked jobs.</summary>
+    /// <summary>
+    /// The main pipeline entity and all the necessary metadata for launching and managing linked jobs.
+    /// </summary>
     public class GoogleCloudDatapipelinesV1Pipeline : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Output only. Immutable. The timestamp when the pipeline was initially created. Set by the Data Pipelines
         /// service.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Required. The display name of the pipeline. It can contain only letters ([A-Za-z]), numbers ([0-9]), hyphens
@@ -1190,23 +1410,58 @@ namespace Google.Apis.Datapipelines.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("jobCount")]
         public virtual System.Nullable<int> JobCount { get; set; }
 
+        private string _lastUpdateTimeRaw;
+
+        private object _lastUpdateTime;
+
         /// <summary>
         /// Output only. Immutable. The timestamp when the pipeline was last modified. Set by the Data Pipelines
         /// service.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdateTime")]
-        public virtual object LastUpdateTime { get; set; }
+        public virtual string LastUpdateTimeRaw
+        {
+            get => _lastUpdateTimeRaw;
+            set
+            {
+                _lastUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdateTimeDateTimeOffset instead.")]
+        public virtual object LastUpdateTime
+        {
+            get => _lastUpdateTime;
+            set
+            {
+                _lastUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdateTimeRaw);
+            set => LastUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The pipeline name. For example: `projects/PROJECT_ID/locations/LOCATION_ID/pipelines/PIPELINE_ID`. *
         /// `PROJECT_ID` can contain letters ([A-Za-z]), numbers ([0-9]), hyphens (-), colons (:), and periods (.). For
         /// more information, see [Identifying
-        /// projects](https://cloud.google.com/resource-manager/docs/creating-managing-projects#identifying_projects) *
+        /// projects](https://cloud.google.com/resource-manager/docs/creating-managing-projects#identifying_projects). *
         /// `LOCATION_ID` is the canonical ID for the pipeline's location. The list of available locations can be
-        /// obtained by calling ListLocations. Note that the Data Pipelines service is not available in all regions. It
-        /// depends on Cloud Scheduler, an App Engine application, so it's only available in [App Engine
-        /// regions](https://cloud.google.com/about/locations#region). * `PIPELINE_ID` is the ID of the pipeline. Must
-        /// be unique for the selected project and location.
+        /// obtained by calling `google.cloud.location.Locations.ListLocations`. Note that the Data Pipelines service is
+        /// not available in all regions. It depends on Cloud Scheduler, an App Engine application, so it's only
+        /// available in [App Engine regions](https://cloud.google.com/about/locations#region). * `PIPELINE_ID` is the
+        /// ID of the pipeline. Must be unique for the selected project and location.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -1381,9 +1636,42 @@ namespace Google.Apis.Datapipelines.v1.Data
     /// <summary>Details of the schedule the pipeline runs on.</summary>
     public class GoogleCloudDatapipelinesV1ScheduleSpec : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _nextJobTimeRaw;
+
+        private object _nextJobTime;
+
         /// <summary>Output only. When the next Scheduler job is going to run.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextJobTime")]
-        public virtual object NextJobTime { get; set; }
+        public virtual string NextJobTimeRaw
+        {
+            get => _nextJobTimeRaw;
+            set
+            {
+                _nextJobTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _nextJobTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="NextJobTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use NextJobTimeDateTimeOffset instead.")]
+        public virtual object NextJobTime
+        {
+            get => _nextJobTime;
+            set
+            {
+                _nextJobTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _nextJobTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="NextJobTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? NextJobTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(NextJobTimeRaw);
+            set => NextJobTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Unix-cron format of the schedule. This information is retrieved from the linked Cloud Scheduler.
@@ -1450,8 +1738,7 @@ namespace Google.Apis.Datapipelines.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class GoogleProtobufEmpty : Google.Apis.Requests.IDirectResponseSchema
     {

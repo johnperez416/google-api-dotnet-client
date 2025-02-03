@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,10 @@ namespace Google.Apis.CloudTasks.v2beta2
         /// <param name="initializer">The service initializer.</param>
         public CloudTasksService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
+            Api = new ApiResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudtasks.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudtasks.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +47,16 @@ namespace Google.Apis.CloudTasks.v2beta2
         public override string Name => "cloudtasks";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudtasks.googleapis.com/";
-        #else
-            "https://cloudtasks.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudtasks.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Tasks API.</summary>
         public class Scope
@@ -81,6 +77,9 @@ namespace Google.Apis.CloudTasks.v2beta2
             /// </summary>
             public const string CloudPlatform = "https://www.googleapis.com/auth/cloud-platform";
         }
+
+        /// <summary>Gets the Api resource.</summary>
+        public virtual ApiResource Api { get; }
 
         /// <summary>Gets the Projects resource.</summary>
         public virtual ProjectsResource Projects { get; }
@@ -267,6 +266,103 @@ namespace Google.Apis.CloudTasks.v2beta2
         }
     }
 
+    /// <summary>The "api" collection of methods.</summary>
+    public class ApiResource
+    {
+        private const string Resource = "api";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public ApiResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+            Queue = new QueueResource(service);
+        }
+
+        /// <summary>Gets the Queue resource.</summary>
+        public virtual QueueResource Queue { get; }
+
+        /// <summary>The "queue" collection of methods.</summary>
+        public class QueueResource
+        {
+            private const string Resource = "queue";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public QueueResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// Update queue list by uploading a queue.yaml file. The queue.yaml file is supplied in the request body as
+            /// a YAML encoded string. This method was added to support gcloud clients versions before 322.0.0. New
+            /// clients should use CreateQueue instead of this method.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            public virtual UpdateRequest Update(Google.Apis.CloudTasks.v2beta2.Data.HttpBody body)
+            {
+                return new UpdateRequest(this.service, body);
+            }
+
+            /// <summary>
+            /// Update queue list by uploading a queue.yaml file. The queue.yaml file is supplied in the request body as
+            /// a YAML encoded string. This method was added to support gcloud clients versions before 322.0.0. New
+            /// clients should use CreateQueue instead of this method.
+            /// </summary>
+            public class UpdateRequest : CloudTasksBaseServiceRequest<Google.Apis.CloudTasks.v2beta2.Data.Empty>
+            {
+                /// <summary>Constructs a new Update request.</summary>
+                public UpdateRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudTasks.v2beta2.Data.HttpBody body) : base(service)
+                {
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The App ID is supplied as an HTTP parameter. Unlike internal usage of App ID, it does not
+                /// include a region prefix. Rather, the App ID represents the Project ID against which to make the
+                /// request.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("appId", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string AppId { get; set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.CloudTasks.v2beta2.Data.HttpBody Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "update";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "api/queue/update";
+
+                /// <summary>Initializes Update parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("appId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "appId",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+        }
+    }
+
     /// <summary>The "projects" collection of methods.</summary>
     public class ProjectsResource
     {
@@ -349,7 +445,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                     /// </param>
                     public virtual AcknowledgeRequest Acknowledge(Google.Apis.CloudTasks.v2beta2.Data.AcknowledgeTaskRequest body, string name)
                     {
-                        return new AcknowledgeRequest(service, body, name);
+                        return new AcknowledgeRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -407,6 +503,99 @@ namespace Google.Apis.CloudTasks.v2beta2
                     }
 
                     /// <summary>
+                    /// Creates and buffers a new task without the need to explicitly define a Task message. The queue
+                    /// must have HTTP target. To create the task with a custom ID, use the following format and set
+                    /// TASK_ID to your desired ID:
+                    /// projects/PROJECT_ID/locations/LOCATION_ID/queues/QUEUE_ID/tasks/TASK_ID:buffer To create the
+                    /// task with an automatically generated ID, use the following format:
+                    /// projects/PROJECT_ID/locations/LOCATION_ID/queues/QUEUE_ID/tasks:buffer.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="queue">
+                    /// Required. The parent queue name. For example:
+                    /// projects/PROJECT_ID/locations/LOCATION_ID/queues/QUEUE_ID` The queue must already exist.
+                    /// </param>
+                    /// <param name="taskId">
+                    /// Optional. Task ID for the task being created. If not provided, a random task ID is assigned to
+                    /// the task.
+                    /// </param>
+                    public virtual BufferRequest Buffer(Google.Apis.CloudTasks.v2beta2.Data.BufferTaskRequest body, string queue, string taskId)
+                    {
+                        return new BufferRequest(this.service, body, queue, taskId);
+                    }
+
+                    /// <summary>
+                    /// Creates and buffers a new task without the need to explicitly define a Task message. The queue
+                    /// must have HTTP target. To create the task with a custom ID, use the following format and set
+                    /// TASK_ID to your desired ID:
+                    /// projects/PROJECT_ID/locations/LOCATION_ID/queues/QUEUE_ID/tasks/TASK_ID:buffer To create the
+                    /// task with an automatically generated ID, use the following format:
+                    /// projects/PROJECT_ID/locations/LOCATION_ID/queues/QUEUE_ID/tasks:buffer.
+                    /// </summary>
+                    public class BufferRequest : CloudTasksBaseServiceRequest<Google.Apis.CloudTasks.v2beta2.Data.BufferTaskResponse>
+                    {
+                        /// <summary>Constructs a new Buffer request.</summary>
+                        public BufferRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudTasks.v2beta2.Data.BufferTaskRequest body, string queue, string taskId) : base(service)
+                        {
+                            Queue = queue;
+                            TaskId = taskId;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The parent queue name. For example:
+                        /// projects/PROJECT_ID/locations/LOCATION_ID/queues/QUEUE_ID` The queue must already exist.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("queue", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Queue { get; private set; }
+
+                        /// <summary>
+                        /// Optional. Task ID for the task being created. If not provided, a random task ID is assigned
+                        /// to the task.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("taskId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string TaskId { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.CloudTasks.v2beta2.Data.BufferTaskRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "buffer";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2beta2/{+queue}/tasks/{taskId}:buffer";
+
+                        /// <summary>Initializes Buffer parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("queue", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "queue",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/queues/[^/]+$",
+                            });
+                            RequestParameters.Add("taskId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "taskId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>
                     /// Cancel a pull task's lease. The worker can use this method to cancel a task's lease by setting
                     /// its schedule_time to now. This will make the task available to be leased to the next caller of
                     /// LeaseTasks.
@@ -418,7 +607,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                     /// </param>
                     public virtual CancelLeaseRequest CancelLease(Google.Apis.CloudTasks.v2beta2.Data.CancelLeaseRequest body, string name)
                     {
-                        return new CancelLeaseRequest(service, body, name);
+                        return new CancelLeaseRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -485,7 +674,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.CloudTasks.v2beta2.Data.CreateTaskRequest body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -550,7 +739,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -604,7 +793,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets a task.</summary>
@@ -714,7 +903,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                     /// </param>
                     public virtual LeaseRequest Lease(Google.Apis.CloudTasks.v2beta2.Data.LeaseTasksRequest body, string parent)
                     {
-                        return new LeaseRequest(service, body, parent);
+                        return new LeaseRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -784,7 +973,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -927,7 +1116,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                     /// </param>
                     public virtual RenewLeaseRequest RenewLease(Google.Apis.CloudTasks.v2beta2.Data.RenewLeaseRequest body, string name)
                     {
-                        return new RenewLeaseRequest(service, body, name);
+                        return new RenewLeaseRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1001,7 +1190,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                     /// </param>
                     public virtual RunRequest Run(Google.Apis.CloudTasks.v2beta2.Data.RunTaskRequest body, string name)
                     {
-                        return new RunRequest(service, body, name);
+                        return new RunRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1079,7 +1268,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CloudTasks.v2beta2.Data.Queue body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1139,9 +1328,14 @@ namespace Google.Apis.CloudTasks.v2beta2
 
                 /// <summary>
                 /// Deletes a queue. This command will delete the queue even if it has tasks in it. Note: If you delete
-                /// a queue, a queue with the same name can't be created for 7 days. WARNING: Using this method may have
-                /// unintended side effects if you are using an App Engine `queue.yaml` or `queue.xml` file to manage
-                /// your queues. Read [Overview of Queue Management and
+                /// a queue, you may be prevented from creating a new queue with the same name as the deleted queue for
+                /// a tombstone window of up to 3 days. During this window, the CreateQueue operation may appear to
+                /// recreate the queue, but this can be misleading. If you attempt to create a queue with the same name
+                /// as one that is in the tombstone window, run GetQueue to confirm that the queue creation was
+                /// successful. If GetQueue returns 200 response code, your queue was successfully created with the name
+                /// of the previously deleted queue. Otherwise, your queue did not successfully recreate. WARNING: Using
+                /// this method may have unintended side effects if you are using an App Engine `queue.yaml` or
+                /// `queue.xml` file to manage your queues. Read [Overview of Queue Management and
                 /// queue.yaml](https://cloud.google.com/tasks/docs/queue-yaml) before using this method.
                 /// </summary>
                 /// <param name="name">
@@ -1149,14 +1343,19 @@ namespace Google.Apis.CloudTasks.v2beta2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Deletes a queue. This command will delete the queue even if it has tasks in it. Note: If you delete
-                /// a queue, a queue with the same name can't be created for 7 days. WARNING: Using this method may have
-                /// unintended side effects if you are using an App Engine `queue.yaml` or `queue.xml` file to manage
-                /// your queues. Read [Overview of Queue Management and
+                /// a queue, you may be prevented from creating a new queue with the same name as the deleted queue for
+                /// a tombstone window of up to 3 days. During this window, the CreateQueue operation may appear to
+                /// recreate the queue, but this can be misleading. If you attempt to create a queue with the same name
+                /// as one that is in the tombstone window, run GetQueue to confirm that the queue creation was
+                /// successful. If GetQueue returns 200 response code, your queue was successfully created with the name
+                /// of the previously deleted queue. Otherwise, your queue did not successfully recreate. WARNING: Using
+                /// this method may have unintended side effects if you are using an App Engine `queue.yaml` or
+                /// `queue.xml` file to manage your queues. Read [Overview of Queue Management and
                 /// queue.yaml](https://cloud.google.com/tasks/docs/queue-yaml) before using this method.
                 /// </summary>
                 public class DeleteRequest : CloudTasksBaseServiceRequest<Google.Apis.CloudTasks.v2beta2.Data.Empty>
@@ -1206,7 +1405,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a queue.</summary>
@@ -1274,12 +1473,13 @@ namespace Google.Apis.CloudTasks.v2beta2
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.CloudTasks.v2beta2.Data.GetIamPolicyRequest body, string resource)
                 {
-                    return new GetIamPolicyRequest(service, body, resource);
+                    return new GetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -1299,8 +1499,9 @@ namespace Google.Apis.CloudTasks.v2beta2
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -1341,7 +1542,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists queues. Queues are returned in lexicographical order.</summary>
@@ -1475,7 +1676,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CloudTasks.v2beta2.Data.Queue body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1567,7 +1768,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                 /// </param>
                 public virtual PauseRequest Pause(Google.Apis.CloudTasks.v2beta2.Data.PauseQueueRequest body, string name)
                 {
-                    return new PauseRequest(service, body, name);
+                    return new PauseRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1633,7 +1834,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                 /// </param>
                 public virtual PurgeRequest Purge(Google.Apis.CloudTasks.v2beta2.Data.PurgeQueueRequest body, string name)
                 {
-                    return new PurgeRequest(service, body, name);
+                    return new PurgeRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1701,7 +1902,7 @@ namespace Google.Apis.CloudTasks.v2beta2
                 /// </param>
                 public virtual ResumeRequest Resume(Google.Apis.CloudTasks.v2beta2.Data.ResumeQueueRequest body, string name)
                 {
-                    return new ResumeRequest(service, body, name);
+                    return new ResumeRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1766,12 +1967,13 @@ namespace Google.Apis.CloudTasks.v2beta2
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudTasks.v2beta2.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -1791,8 +1993,9 @@ namespace Google.Apis.CloudTasks.v2beta2
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -1835,12 +2038,13 @@ namespace Google.Apis.CloudTasks.v2beta2
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudTasks.v2beta2.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -1860,8 +2064,9 @@ namespace Google.Apis.CloudTasks.v2beta2
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -1901,7 +2106,7 @@ namespace Google.Apis.CloudTasks.v2beta2
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -1942,11 +2147,66 @@ namespace Google.Apis.CloudTasks.v2beta2
                 }
             }
 
+            /// <summary>
+            /// Gets the CMEK config. Gets the Customer Managed Encryption Key configured with the Cloud Tasks lcoation.
+            /// By default there is no kms_key configured.
+            /// </summary>
+            /// <param name="name">
+            /// Required. The config. For example: projects/PROJECT_ID/locations/LOCATION_ID/CmekConfig`
+            /// </param>
+            public virtual GetCmekConfigRequest GetCmekConfig(string name)
+            {
+                return new GetCmekConfigRequest(this.service, name);
+            }
+
+            /// <summary>
+            /// Gets the CMEK config. Gets the Customer Managed Encryption Key configured with the Cloud Tasks lcoation.
+            /// By default there is no kms_key configured.
+            /// </summary>
+            public class GetCmekConfigRequest : CloudTasksBaseServiceRequest<Google.Apis.CloudTasks.v2beta2.Data.CmekConfig>
+            {
+                /// <summary>Constructs a new GetCmekConfig request.</summary>
+                public GetCmekConfigRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The config. For example: projects/PROJECT_ID/locations/LOCATION_ID/CmekConfig`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "getCmekConfig";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v2beta2/{+name}";
+
+                /// <summary>Initializes GetCmekConfig parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/locations/[^/]+/cmekConfig$",
+                    });
+                }
+            }
+
             /// <summary>Lists information about the supported locations for this service.</summary>
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -1965,7 +2225,7 @@ namespace Google.Apis.CloudTasks.v2beta2
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -2030,6 +2290,85 @@ namespace Google.Apis.CloudTasks.v2beta2
                     });
                 }
             }
+
+            /// <summary>
+            /// Creates or Updates a CMEK config. Updates the Customer Managed Encryption Key assotiated with the Cloud
+            /// Tasks location (Creates if the key does not already exist). All new tasks created in the location will
+            /// be encrypted at-rest with the KMS-key provided in the config.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Output only. The config resource name which includes the project and location and must end in
+            /// 'cmekConfig', in the format projects/PROJECT_ID/locations/LOCATION_ID/cmekConfig`
+            /// </param>
+            public virtual UpdateCmekConfigRequest UpdateCmekConfig(Google.Apis.CloudTasks.v2beta2.Data.CmekConfig body, string name)
+            {
+                return new UpdateCmekConfigRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Creates or Updates a CMEK config. Updates the Customer Managed Encryption Key assotiated with the Cloud
+            /// Tasks location (Creates if the key does not already exist). All new tasks created in the location will
+            /// be encrypted at-rest with the KMS-key provided in the config.
+            /// </summary>
+            public class UpdateCmekConfigRequest : CloudTasksBaseServiceRequest<Google.Apis.CloudTasks.v2beta2.Data.CmekConfig>
+            {
+                /// <summary>Constructs a new UpdateCmekConfig request.</summary>
+                public UpdateCmekConfigRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudTasks.v2beta2.Data.CmekConfig body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Output only. The config resource name which includes the project and location and must end in
+                /// 'cmekConfig', in the format projects/PROJECT_ID/locations/LOCATION_ID/cmekConfig`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>List of fields to be updated in this request.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual object UpdateMask { get; set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.CloudTasks.v2beta2.Data.CmekConfig Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "updateCmekConfig";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "PATCH";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v2beta2/{+name}";
+
+                /// <summary>Initializes UpdateCmekConfig parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/locations/[^/]+/cmekConfig$",
+                    });
+                    RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "updateMask",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
         }
     }
 }
@@ -2038,12 +2377,45 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
     /// <summary>Request message for acknowledging a task using AcknowledgeTask.</summary>
     public class AcknowledgeTaskRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _scheduleTimeRaw;
+
+        private object _scheduleTime;
+
         /// <summary>
         /// Required. The task's current schedule time, available in the schedule_time returned by LeaseTasks response
         /// or RenewLease response. This restriction is to ensure that your worker currently holds the lease.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleTime")]
-        public virtual object ScheduleTime { get; set; }
+        public virtual string ScheduleTimeRaw
+        {
+            get => _scheduleTimeRaw;
+            set
+            {
+                _scheduleTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleTimeDateTimeOffset instead.")]
+        public virtual object ScheduleTime
+        {
+            get => _scheduleTime;
+            set
+            {
+                _scheduleTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleTimeRaw);
+            set => ScheduleTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2228,12 +2600,45 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
     /// <summary>The status of a task attempt.</summary>
     public class AttemptStatus : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _dispatchTimeRaw;
+
+        private object _dispatchTime;
+
         /// <summary>
         /// Output only. The time that this attempt was dispatched. `dispatch_time` will be truncated to the nearest
         /// microsecond.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dispatchTime")]
-        public virtual object DispatchTime { get; set; }
+        public virtual string DispatchTimeRaw
+        {
+            get => _dispatchTimeRaw;
+            set
+            {
+                _dispatchTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _dispatchTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DispatchTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DispatchTimeDateTimeOffset instead.")]
+        public virtual object DispatchTime
+        {
+            get => _dispatchTime;
+            set
+            {
+                _dispatchTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _dispatchTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DispatchTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DispatchTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DispatchTimeRaw);
+            set => DispatchTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The response from the target for this attempt. If the task has not been attempted or the task
@@ -2242,19 +2647,85 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("responseStatus")]
         public virtual Status ResponseStatus { get; set; }
 
+        private string _responseTimeRaw;
+
+        private object _responseTime;
+
         /// <summary>
         /// Output only. The time that this attempt response was received. `response_time` will be truncated to the
         /// nearest microsecond.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("responseTime")]
-        public virtual object ResponseTime { get; set; }
+        public virtual string ResponseTimeRaw
+        {
+            get => _responseTimeRaw;
+            set
+            {
+                _responseTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _responseTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ResponseTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ResponseTimeDateTimeOffset instead.")]
+        public virtual object ResponseTime
+        {
+            get => _responseTime;
+            set
+            {
+                _responseTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _responseTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ResponseTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ResponseTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ResponseTimeRaw);
+            set => ResponseTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _scheduleTimeRaw;
+
+        private object _scheduleTime;
 
         /// <summary>
         /// Output only. The time that this attempt was scheduled. `schedule_time` will be truncated to the nearest
         /// microsecond.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleTime")]
-        public virtual object ScheduleTime { get; set; }
+        public virtual string ScheduleTimeRaw
+        {
+            get => _scheduleTimeRaw;
+            set
+            {
+                _scheduleTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleTimeDateTimeOffset instead.")]
+        public virtual object ScheduleTime
+        {
+            get => _scheduleTime;
+            set
+            {
+                _scheduleTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleTimeRaw);
+            set => ScheduleTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2274,16 +2745,37 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -2291,18 +2783,47 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for BufferTask.</summary>
+    public class BufferTaskRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Body of the HTTP request. The body can take any generic value. The value is written to the
+        /// HttpRequest of the [Task].
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("body")]
+        public virtual HttpBody Body { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for BufferTask.</summary>
+    public class BufferTaskResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The created task.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("task")]
+        public virtual Task Task { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2321,12 +2842,69 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("responseView")]
         public virtual string ResponseView { get; set; }
 
+        private string _scheduleTimeRaw;
+
+        private object _scheduleTime;
+
         /// <summary>
         /// Required. The task's current schedule time, available in the schedule_time returned by LeaseTasks response
         /// or RenewLease response. This restriction is to ensure that your worker currently holds the lease.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleTime")]
-        public virtual object ScheduleTime { get; set; }
+        public virtual string ScheduleTimeRaw
+        {
+            get => _scheduleTimeRaw;
+            set
+            {
+                _scheduleTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleTimeDateTimeOffset instead.")]
+        public virtual object ScheduleTime
+        {
+            get => _scheduleTime;
+            set
+            {
+                _scheduleTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleTimeRaw);
+            set => ScheduleTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Describes the customer-managed encryption key (CMEK) configuration associated with a project and location.
+    /// </summary>
+    public class CmekConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Resource name of the Cloud KMS key, of the form
+        /// `projects/PROJECT_ID/locations/LOCATION_ID/keyRings/KEY_RING_ID/cryptoKeys/KEY_ID`, that will be used to
+        /// encrypt the Queues &amp;amp; Tasks in the region. Setting this as blank will turn off CMEK encryption.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKey")]
+        public virtual string KmsKey { get; set; }
+
+        /// <summary>
+        /// Output only. The config resource name which includes the project and location and must end in 'cmekConfig',
+        /// in the format projects/PROJECT_ID/locations/LOCATION_ID/cmekConfig`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2352,13 +2930,12 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         /// set in the task returned in the response. If schedule_time is not set or is in the past then Cloud Tasks
         /// will set it to the current time. Task De-duplication: Explicitly specifying a task ID enables task
         /// de-duplication. If a task's ID is identical to that of an existing task or a task that was deleted or
-        /// completed recently then the call will fail with ALREADY_EXISTS. If the task's queue was created using Cloud
-        /// Tasks, then another task with the same name can't be created for ~1hour after the original task was deleted
-        /// or completed. If the task's queue was created using queue.yaml or queue.xml, then another task with the same
-        /// name can't be created for ~9days after the original task was deleted or completed. Because there is an extra
-        /// lookup cost to identify duplicate task names, these CreateTask calls have significantly increased latency.
-        /// Using hashed strings for the task id or for the prefix of the task id is recommended. Choosing task ids that
-        /// are sequential or have sequential prefixes, for example using a timestamp, causes an increase in latency and
+        /// completed recently then the call will fail with ALREADY_EXISTS. The IDs of deleted tasks are not immediately
+        /// available for reuse. It can take up to 4 hours (or 9 days if the task's queue was created using a queue.yaml
+        /// or queue.xml) for the task ID to be released and made available again. Because there is an extra lookup cost
+        /// to identify duplicate task names, these CreateTask calls have significantly increased latency. Using hashed
+        /// strings for the task id or for the prefix of the task id is recommended. Choosing task ids that are
+        /// sequential or have sequential prefixes, for example using a timestamp, causes an increase in latency and
         /// error rates in all task commands. The infrastructure relies on an approximately uniform distribution of task
         /// ids to store and serve tasks efficiently.
         /// </summary>
@@ -2372,8 +2949,7 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2450,6 +3026,193 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestedPolicyVersion")]
         public virtual System.Nullable<int> RequestedPolicyVersion { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Defines a header message. A header can have a key and a value.</summary>
+    public class Header : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The key of the header.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("key")]
+        public virtual string Key { get; set; }
+
+        /// <summary>The value of the header.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("value")]
+        public virtual string Value { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Wraps the Header object.</summary>
+    public class HeaderOverride : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Header embodying a key and a value. Do not put business sensitive or personally identifying data in the HTTP
+        /// Header Override Configuration or other similar fields in accordance with Section 12 (Resource Fields) of the
+        /// [Service Specific Terms](https://cloud.google.com/terms/service-terms).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("header")]
+        public virtual Header Header { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Message that represents an arbitrary HTTP body. It should only be used for payload formats that can't be
+    /// represented as JSON, such as raw binary or an HTML page. This message can be used both in streaming and
+    /// non-streaming API methods in the request as well as the response. It can be used as a top-level request field,
+    /// which is convenient if one wants to extract parameters from either the URL or HTTP template into the request
+    /// fields and also want access to the raw HTTP body. Example: message GetResourceRequest { // A unique request id.
+    /// string request_id = 1; // The raw HTTP body is bound to this field. google.api.HttpBody http_body = 2; } service
+    /// ResourceService { rpc GetResource(GetResourceRequest) returns (google.api.HttpBody); rpc
+    /// UpdateResource(google.api.HttpBody) returns (google.protobuf.Empty); } Example with streaming methods: service
+    /// CaldavService { rpc GetCalendar(stream google.api.HttpBody) returns (stream google.api.HttpBody); rpc
+    /// UpdateCalendar(stream google.api.HttpBody) returns (stream google.api.HttpBody); } Use of this type only changes
+    /// how the request and response bodies are handled, all other features will continue to work unchanged.
+    /// </summary>
+    public class HttpBody : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The HTTP Content-Type header value specifying the content type of the body.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("contentType")]
+        public virtual string ContentType { get; set; }
+
+        /// <summary>The HTTP request/response body as raw binary.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("data")]
+        public virtual string Data { get; set; }
+
+        /// <summary>
+        /// Application specific response metadata. Must be set in the first response for streaming APIs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("extensions")]
+        public virtual System.Collections.Generic.IList<System.Collections.Generic.IDictionary<string, object>> Extensions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// HTTP request. The task will be pushed to the worker as an HTTP request. An HTTP request embodies a url, an http
+    /// method, headers, body and authorization for the http task.
+    /// </summary>
+    public class HttpRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// HTTP request body. A request body is allowed only if the HTTP method is POST, PUT, or PATCH. It is an error
+        /// to set body on a task with an incompatible HttpMethod.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("body")]
+        public virtual string Body { get; set; }
+
+        /// <summary>
+        /// HTTP request headers. This map contains the header field names and values. Headers can be set when running
+        /// the task is created or task is created. These headers represent a subset of the headers that will accompany
+        /// the task's HTTP request. Some HTTP request headers will be ignored or replaced. A partial list of headers
+        /// that will be ignored or replaced is: * Any header that is prefixed with "X-CloudTasks-" will be treated as
+        /// service header. Service headers define properties of the task and are predefined in CloudTask. * Host: This
+        /// will be computed by Cloud Tasks and derived from HttpRequest.url. * Content-Length: This will be computed by
+        /// Cloud Tasks. * User-Agent: This will be set to `"Google-Cloud-Tasks"`. * `X-Google-*`: Google use only. *
+        /// `X-AppEngine-*`: Google use only. `Content-Type` won't be set by Cloud Tasks. You can explicitly set
+        /// `Content-Type` to a media type when the task is created. For example, `Content-Type` can be set to
+        /// `"application/octet-stream"` or `"application/json"`. Headers which can have multiple values (according to
+        /// RFC2616) can be specified using comma-separated values. The size of the headers must be less than 80KB.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("headers")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Headers { get; set; }
+
+        /// <summary>The HTTP method to use for the request. The default is POST.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("httpMethod")]
+        public virtual string HttpMethod { get; set; }
+
+        /// <summary>
+        /// If specified, an [OAuth token](https://developers.google.com/identity/protocols/OAuth2) will be generated
+        /// and attached as an `Authorization` header in the HTTP request. This type of authorization should generally
+        /// only be used when calling Google APIs hosted on *.googleapis.com.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oauthToken")]
+        public virtual OAuthToken OauthToken { get; set; }
+
+        /// <summary>
+        /// If specified, an [OIDC](https://developers.google.com/identity/protocols/OpenIDConnect) token will be
+        /// generated and attached as an `Authorization` header in the HTTP request. This type of authorization can be
+        /// used for many scenarios, including calling Cloud Run, or endpoints where you intend to validate the token
+        /// yourself.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oidcToken")]
+        public virtual OidcToken OidcToken { get; set; }
+
+        /// <summary>
+        /// Required. The full url path that the request will be sent to. This string must begin with either "http://"
+        /// or "https://". Some examples are: `http://acme.com` and `https://acme.com/sales:8080`. Cloud Tasks will
+        /// encode some characters for safety and compatibility. The maximum allowed URL length is 2083 characters after
+        /// encoding. The `Location` header response from a redirect response [`300` - `399`] may be followed. The
+        /// redirect is not counted as a separate attempt.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("url")]
+        public virtual string Url { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// HTTP target. When specified as a Queue, all the tasks with [HttpRequest] will be overridden according to the
+    /// target.
+    /// </summary>
+    public class HttpTarget : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// HTTP target headers. This map contains the header field names and values. Headers will be set when running
+        /// the task is created and/or task is created. These headers represent a subset of the headers that will
+        /// accompany the task's HTTP request. Some HTTP request headers will be ignored or replaced. A partial list of
+        /// headers that will be ignored or replaced is: * Any header that is prefixed with "X-CloudTasks-" will be
+        /// treated as service header. Service headers define properties of the task and are predefined in CloudTask. *
+        /// Host: This will be computed by Cloud Tasks and derived from HttpRequest.url. * Content-Length: This will be
+        /// computed by Cloud Tasks. * User-Agent: This will be set to `"Google-CloudTasks"`. * `X-Google-*`: Google use
+        /// only. * `X-AppEngine-*`: Google use only. `Content-Type` won't be set by Cloud Tasks. You can explicitly set
+        /// `Content-Type` to a media type when the task is created. For example, `Content-Type` can be set to
+        /// `"application/octet-stream"` or `"application/json"`. Headers which can have multiple values (according to
+        /// RFC2616) can be specified using comma-separated values. The size of the headers must be less than 80KB.
+        /// Queue-level headers to override headers of all the tasks in the queue. Do not put business sensitive or
+        /// personally identifying data in the HTTP Header Override Configuration or other similar fields in accordance
+        /// with Section 12 (Resource Fields) of the [Service Specific
+        /// Terms](https://cloud.google.com/terms/service-terms).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("headerOverrides")]
+        public virtual System.Collections.Generic.IList<HeaderOverride> HeaderOverrides { get; set; }
+
+        /// <summary>
+        /// The HTTP method to use for the request. When specified, it overrides HttpRequest for the task. Note that if
+        /// the value is set to HttpMethod the HttpRequest of the task will be ignored at execution time.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("httpMethod")]
+        public virtual string HttpMethod { get; set; }
+
+        /// <summary>
+        /// If specified, an [OAuth token](https://developers.google.com/identity/protocols/OAuth2) is generated and
+        /// attached as an `Authorization` header in the HTTP request. This type of authorization should generally be
+        /// used only when calling Google APIs hosted on *.googleapis.com. Note that both the service account email and
+        /// the scope MUST be specified when using the queue-level authorization override.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oauthToken")]
+        public virtual OAuthToken OauthToken { get; set; }
+
+        /// <summary>
+        /// If specified, an [OIDC](https://developers.google.com/identity/protocols/OpenIDConnect) token is generated
+        /// and attached as an `Authorization` header in the HTTP request. This type of authorization can be used for
+        /// many scenarios, including calling Cloud Run, or endpoints where you intend to validate the token yourself.
+        /// Note that both the service account email and the audience MUST be specified when using the queue-level
+        /// authorization override.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oidcToken")]
+        public virtual OidcToken OidcToken { get; set; }
+
+        /// <summary>Uri override. When specified, overrides the execution Uri for all the tasks in the queue.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uriOverride")]
+        public virtual UriOverride UriOverride { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2569,7 +3332,7 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -2601,6 +3364,68 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Contains information needed for generating an [OAuth
+    /// token](https://developers.google.com/identity/protocols/OAuth2). This type of authorization should generally
+    /// only be used when calling Google APIs hosted on *.googleapis.com.
+    /// </summary>
+    public class OAuthToken : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// OAuth scope to be used for generating OAuth access token. If not specified,
+        /// "https://www.googleapis.com/auth/cloud-platform" will be used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scope")]
+        public virtual string Scope { get; set; }
+
+        /// <summary>
+        /// [Service account email](https://cloud.google.com/iam/docs/service-accounts) to be used for generating OAuth
+        /// token. The service account must be within the same project as the queue. The caller must have
+        /// iam.serviceAccounts.actAs permission for the service account.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceAccountEmail")]
+        public virtual string ServiceAccountEmail { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Contains information needed for generating an [OpenID Connect
+    /// token](https://developers.google.com/identity/protocols/OpenIDConnect). This type of authorization can be used
+    /// for many scenarios, including calling Cloud Run, or endpoints where you intend to validate the token yourself.
+    /// </summary>
+    public class OidcToken : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Audience to be used when generating OIDC token. If not specified, the URI specified in target will be used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("audience")]
+        public virtual string Audience { get; set; }
+
+        /// <summary>
+        /// [Service account email](https://cloud.google.com/iam/docs/service-accounts) to be used for generating OIDC
+        /// token. The service account must be within the same project as the queue. The caller must have
+        /// iam.serviceAccounts.actAs permission for the service account.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceAccountEmail")]
+        public virtual string ServiceAccountEmail { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>PathOverride. Path message defines path override for HTTP targets.</summary>
+    public class PathOverride : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The URI path (e.g., /users/1234). Default is an empty string.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("path")]
+        public virtual string Path { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for PauseQueue.</summary>
     public class PauseQueueRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2617,18 +3442,26 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2714,6 +3547,17 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>QueryOverride. Query message defines query override for HTTP targets.</summary>
+    public class QueryOverride : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The query parameters (e.g., qparam1=123&amp;qparam2=456). Default is an empty string.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("queryParams")]
+        public virtual string QueryParams { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A queue is a container of related tasks. Queues are configured to manage how those tasks are dispatched.
     /// Configurable properties include rate limits, retry options, target types, and others.
@@ -2723,6 +3567,10 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         /// <summary>App Engine HTTP target. An App Engine queue is a queue that has an AppEngineHttpTarget.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("appEngineHttpTarget")]
         public virtual AppEngineHttpTarget AppEngineHttpTarget { get; set; }
+
+        /// <summary>An http_target is used to override the target values for HTTP tasks.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("httpTarget")]
+        public virtual HttpTarget HttpTarget { get; set; }
 
         /// <summary>
         /// Caller-specified and required in CreateQueue, after which it becomes output only. The queue name. The queue
@@ -2741,6 +3589,10 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("pullTarget")]
         public virtual PullTarget PullTarget { get; set; }
 
+        private string _purgeTimeRaw;
+
+        private object _purgeTime;
+
         /// <summary>
         /// Output only. The last time this queue was purged. All tasks that were created before this time were purged.
         /// A queue can be purged using PurgeQueue, the [App Engine Task Queue SDK, or the Cloud
@@ -2749,7 +3601,36 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         /// been purged.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("purgeTime")]
-        public virtual object PurgeTime { get; set; }
+        public virtual string PurgeTimeRaw
+        {
+            get => _purgeTimeRaw;
+            set
+            {
+                _purgeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _purgeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="PurgeTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PurgeTimeDateTimeOffset instead.")]
+        public virtual object PurgeTime
+        {
+            get => _purgeTime;
+            set
+            {
+                _purgeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _purgeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PurgeTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PurgeTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PurgeTimeRaw);
+            set => PurgeTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Rate limits for task dispatches. rate_limits and retry_config are related because they both control task
@@ -2836,12 +3717,47 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("executedLastMinuteCount")]
         public virtual System.Nullable<long> ExecutedLastMinuteCount { get; set; }
 
+        private string _oldestEstimatedArrivalTimeRaw;
+
+        private object _oldestEstimatedArrivalTime;
+
         /// <summary>
         /// Output only. An estimation of the nearest time in the future where a task in the queue is scheduled to be
         /// executed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("oldestEstimatedArrivalTime")]
-        public virtual object OldestEstimatedArrivalTime { get; set; }
+        public virtual string OldestEstimatedArrivalTimeRaw
+        {
+            get => _oldestEstimatedArrivalTimeRaw;
+            set
+            {
+                _oldestEstimatedArrivalTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _oldestEstimatedArrivalTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="OldestEstimatedArrivalTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use OldestEstimatedArrivalTimeDateTimeOffset instead.")]
+        public virtual object OldestEstimatedArrivalTime
+        {
+            get => _oldestEstimatedArrivalTime;
+            set
+            {
+                _oldestEstimatedArrivalTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _oldestEstimatedArrivalTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="OldestEstimatedArrivalTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? OldestEstimatedArrivalTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(OldestEstimatedArrivalTimeRaw);
+            set => OldestEstimatedArrivalTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. An estimation of the number of tasks in the queue, that is, the tasks in the queue that haven't
@@ -2926,12 +3842,45 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("responseView")]
         public virtual string ResponseView { get; set; }
 
+        private string _scheduleTimeRaw;
+
+        private object _scheduleTime;
+
         /// <summary>
         /// Required. The task's current schedule time, available in the schedule_time returned by LeaseTasks response
         /// or RenewLease response. This restriction is to ensure that your worker currently holds the lease.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleTime")]
-        public virtual object ScheduleTime { get; set; }
+        public virtual string ScheduleTimeRaw
+        {
+            get => _scheduleTimeRaw;
+            set
+            {
+                _scheduleTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleTimeDateTimeOffset instead.")]
+        public virtual object ScheduleTime
+        {
+            get => _scheduleTime;
+            set
+            {
+                _scheduleTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleTimeRaw);
+            set => ScheduleTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3030,7 +3979,7 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -3079,11 +4028,50 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("appEngineHttpRequest")]
         public virtual AppEngineHttpRequest AppEngineHttpRequest { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Output only. The time that the task was created. `create_time` will be truncated to the nearest second.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// HTTP request that is sent to the task's target. An HTTP task is a task that has HttpRequest set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("httpRequest")]
+        public virtual HttpRequest HttpRequest { get; set; }
 
         /// <summary>
         /// Optionally caller-specified in CreateTask. The task name. The task name must have the following format:
@@ -3106,6 +4094,10 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("pullMessage")]
         public virtual PullMessage PullMessage { get; set; }
 
+        private string _scheduleTimeRaw;
+
+        private object _scheduleTime;
+
         /// <summary>
         /// The time when the task is scheduled to be attempted. For App Engine queues, this is when the task will be
         /// attempted or retried. For pull queues, this is the time when the task is available to be leased; if a task
@@ -3113,7 +4105,36 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         /// leased plus the lease_duration. `schedule_time` will be truncated to the nearest microsecond.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleTime")]
-        public virtual object ScheduleTime { get; set; }
+        public virtual string ScheduleTimeRaw
+        {
+            get => _scheduleTimeRaw;
+            set
+            {
+                _scheduleTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleTimeDateTimeOffset instead.")]
+        public virtual object ScheduleTime
+        {
+            get => _scheduleTime;
+            set
+            {
+                _scheduleTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleTimeRaw);
+            set => ScheduleTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The task status.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
@@ -3165,7 +4186,7 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>
@@ -3182,6 +4203,59 @@ namespace Google.Apis.CloudTasks.v2beta2.Data
         /// <summary>A subset of `TestPermissionsRequest.permissions` that the caller is allowed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("permissions")]
         public virtual System.Collections.Generic.IList<string> Permissions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Uri Override. When specified, all the HTTP tasks inside the queue will be partially or fully overridden
+    /// depending on the configured values.
+    /// </summary>
+    public class UriOverride : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Host override. When specified, replaces the host part of the task URL. For example, if the task URL is
+        /// "https://www.google.com," and host value is set to "example.net", the overridden URI will be changed to
+        /// "https://example.net." Host value cannot be an empty string (INVALID_ARGUMENT).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("host")]
+        public virtual string Host { get; set; }
+
+        /// <summary>
+        /// URI path. When specified, replaces the existing path of the task URL. Setting the path value to an empty
+        /// string clears the URI path segment.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pathOverride")]
+        public virtual PathOverride PathOverride { get; set; }
+
+        /// <summary>
+        /// Port override. When specified, replaces the port part of the task URI. For instance, for a URI
+        /// http://www.google.com/foo and port=123, the overridden URI becomes http://www.google.com:123/foo. Note that
+        /// the port value must be a positive integer. Setting the port to 0 (Zero) clears the URI port.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("port")]
+        public virtual System.Nullable<long> Port { get; set; }
+
+        /// <summary>
+        /// URI Query. When specified, replaces the query part of the task URI. Setting the query value to an empty
+        /// string clears the URI query segment.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("queryOverride")]
+        public virtual QueryOverride QueryOverride { get; set; }
+
+        /// <summary>
+        /// Scheme override. When specified, the task URI scheme is replaced by the provided value (HTTP or HTTPS).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scheme")]
+        public virtual string Scheme { get; set; }
+
+        /// <summary>
+        /// URI Override Enforce Mode When specified, determines the Target UriOverride mode. If not specified, it
+        /// defaults to ALWAYS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uriOverrideEnforceMode")]
+        public virtual string UriOverrideEnforceMode { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,7 +35,10 @@ namespace Google.Apis.AndroidManagement.v1
         public AndroidManagementService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Enterprises = new EnterprisesResource(this);
+            ProvisioningInfo = new ProvisioningInfoResource(this);
             SignupUrls = new SignupUrlsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://androidmanagement.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://androidmanagement.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +48,16 @@ namespace Google.Apis.AndroidManagement.v1
         public override string Name => "androidmanagement";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://androidmanagement.googleapis.com/";
-        #else
-            "https://androidmanagement.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://androidmanagement.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Android Management API.</summary>
         public class Scope
@@ -79,6 +75,9 @@ namespace Google.Apis.AndroidManagement.v1
 
         /// <summary>Gets the Enterprises resource.</summary>
         public virtual EnterprisesResource Enterprises { get; }
+
+        /// <summary>Gets the ProvisioningInfo resource.</summary>
+        public virtual ProvisioningInfoResource ProvisioningInfo { get; }
 
         /// <summary>Gets the SignupUrls resource.</summary>
         public virtual SignupUrlsResource SignupUrls { get; }
@@ -280,6 +279,7 @@ namespace Google.Apis.AndroidManagement.v1
             Applications = new ApplicationsResource(service);
             Devices = new DevicesResource(service);
             EnrollmentTokens = new EnrollmentTokensResource(service);
+            MigrationTokens = new MigrationTokensResource(service);
             Policies = new PoliciesResource(service);
             WebApps = new WebAppsResource(service);
             WebTokens = new WebTokensResource(service);
@@ -308,7 +308,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets info about an application.</summary>
@@ -413,7 +413,7 @@ namespace Google.Apis.AndroidManagement.v1
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(string name)
                 {
-                    return new CancelRequest(service, name);
+                    return new CancelRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -462,66 +462,13 @@ namespace Google.Apis.AndroidManagement.v1
                 }
 
                 /// <summary>
-                /// Deletes a long-running operation. This method indicates that the client is no longer interested in
-                /// the operation result. It does not cancel the operation. If the server doesn't support this method,
-                /// it returns google.rpc.Code.UNIMPLEMENTED.
-                /// </summary>
-                /// <param name="name">The name of the operation resource to be deleted.</param>
-                public virtual DeleteRequest Delete(string name)
-                {
-                    return new DeleteRequest(service, name);
-                }
-
-                /// <summary>
-                /// Deletes a long-running operation. This method indicates that the client is no longer interested in
-                /// the operation result. It does not cancel the operation. If the server doesn't support this method,
-                /// it returns google.rpc.Code.UNIMPLEMENTED.
-                /// </summary>
-                public class DeleteRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.Empty>
-                {
-                    /// <summary>Constructs a new Delete request.</summary>
-                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
-                    {
-                        Name = name;
-                        InitParameters();
-                    }
-
-                    /// <summary>The name of the operation resource to be deleted.</summary>
-                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
-                    public virtual string Name { get; private set; }
-
-                    /// <summary>Gets the method name.</summary>
-                    public override string MethodName => "delete";
-
-                    /// <summary>Gets the HTTP method.</summary>
-                    public override string HttpMethod => "DELETE";
-
-                    /// <summary>Gets the REST path.</summary>
-                    public override string RestPath => "v1/{+name}";
-
-                    /// <summary>Initializes Delete parameter list.</summary>
-                    protected override void InitParameters()
-                    {
-                        base.InitParameters();
-                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
-                        {
-                            Name = "name",
-                            IsRequired = true,
-                            ParameterType = "path",
-                            DefaultValue = null,
-                            Pattern = @"^enterprises/[^/]+/devices/[^/]+/operations/[^/]+$",
-                        });
-                    }
-                }
-
-                /// <summary>
                 /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
                 /// result at intervals as recommended by the API service.
                 /// </summary>
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -567,27 +514,17 @@ namespace Google.Apis.AndroidManagement.v1
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding
-                /// to use different resource name schemes, such as users/*/operations. To override the binding, API
-                /// services can add a binding such as "/v1/{name=users/*}/operations" to their service configuration.
-                /// For backwards compatibility, the default name includes the operations collection id, however
-                /// overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns UNIMPLEMENTED.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding
-                /// to use different resource name schemes, such as users/*/operations. To override the binding, API
-                /// services can add a binding such as "/v1/{name=users/*}/operations" to their service configuration.
-                /// For backwards compatibility, the default name includes the operations collection id, however
-                /// overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns UNIMPLEMENTED.
                 /// </summary>
                 public class ListRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.ListOperationsResponse>
                 {
@@ -663,16 +600,22 @@ namespace Google.Apis.AndroidManagement.v1
                 }
             }
 
-            /// <summary>Deletes a device. This operation wipes the device.</summary>
+            /// <summary>
+            /// Deletes a device. This operation wipes the device. Deleted devices do not show up in
+            /// enterprises.devices.list calls and a 404 is returned from enterprises.devices.get.
+            /// </summary>
             /// <param name="name">
             /// The name of the device in the form enterprises/{enterpriseId}/devices/{deviceId}.
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
-            /// <summary>Deletes a device. This operation wipes the device.</summary>
+            /// <summary>
+            /// Deletes a device. This operation wipes the device. Deleted devices do not show up in
+            /// enterprises.devices.list calls and a 404 is returned from enterprises.devices.get.
+            /// </summary>
             public class DeleteRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.Empty>
             {
                 /// <summary>Constructs a new Delete request.</summary>
@@ -765,16 +708,16 @@ namespace Google.Apis.AndroidManagement.v1
                 }
             }
 
-            /// <summary>Gets a device.</summary>
+            /// <summary>Gets a device. Deleted devices will respond with a 404 error.</summary>
             /// <param name="name">
             /// The name of the device in the form enterprises/{enterpriseId}/devices/{deviceId}.
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
-            /// <summary>Gets a device.</summary>
+            /// <summary>Gets a device. Deleted devices will respond with a 404 error.</summary>
             public class GetRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.Device>
             {
                 /// <summary>Constructs a new Get request.</summary>
@@ -822,7 +765,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// </param>
             public virtual IssueCommandRequest IssueCommand(Google.Apis.AndroidManagement.v1.Data.Command body, string name)
             {
-                return new IssueCommandRequest(service, body, name);
+                return new IssueCommandRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -873,14 +816,18 @@ namespace Google.Apis.AndroidManagement.v1
                 }
             }
 
-            /// <summary>Lists devices for a given enterprise.</summary>
+            /// <summary>
+            /// Lists devices for a given enterprise. Deleted devices are not returned in the response.
+            /// </summary>
             /// <param name="parent">The name of the enterprise in the form enterprises/{enterpriseId}.</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
-            /// <summary>Lists devices for a given enterprise.</summary>
+            /// <summary>
+            /// Lists devices for a given enterprise. Deleted devices are not returned in the response.
+            /// </summary>
             public class ListRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.ListDevicesResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -949,7 +896,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.AndroidManagement.v1.Data.Device body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates a device.</summary>
@@ -1029,15 +976,21 @@ namespace Google.Apis.AndroidManagement.v1
                 this.service = service;
             }
 
-            /// <summary>Creates an enrollment token for a given enterprise.</summary>
+            /// <summary>
+            /// Creates an enrollment token for a given enterprise. It's up to the caller's responsibility to manage the
+            /// lifecycle of newly created tokens and deleting them when they're not intended to be used anymore.
+            /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">The name of the enterprise in the form enterprises/{enterpriseId}.</param>
             public virtual CreateRequest Create(Google.Apis.AndroidManagement.v1.Data.EnrollmentToken body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
-            /// <summary>Creates an enrollment token for a given enterprise.</summary>
+            /// <summary>
+            /// Creates an enrollment token for a given enterprise. It's up to the caller's responsibility to manage the
+            /// lifecycle of newly created tokens and deleting them when they're not intended to be used anymore.
+            /// </summary>
             public class CreateRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.EnrollmentToken>
             {
                 /// <summary>Constructs a new Create request.</summary>
@@ -1091,7 +1044,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -1136,6 +1089,370 @@ namespace Google.Apis.AndroidManagement.v1
                     });
                 }
             }
+
+            /// <summary>
+            /// Gets an active, unexpired enrollment token. A partial view of the enrollment token is returned. Only the
+            /// following fields are populated: name, expirationTimestamp, allowPersonalUsage, value, qrCode. This
+            /// method is meant to help manage active enrollment tokens lifecycle. For security reasons, it's
+            /// recommended to delete active enrollment tokens as soon as they're not intended to be used anymore.
+            /// </summary>
+            /// <param name="name">
+            /// Required. The name of the enrollment token in the form
+            /// enterprises/{enterpriseId}/enrollmentTokens/{enrollmentTokenId}.
+            /// </param>
+            public virtual GetRequest Get(string name)
+            {
+                return new GetRequest(this.service, name);
+            }
+
+            /// <summary>
+            /// Gets an active, unexpired enrollment token. A partial view of the enrollment token is returned. Only the
+            /// following fields are populated: name, expirationTimestamp, allowPersonalUsage, value, qrCode. This
+            /// method is meant to help manage active enrollment tokens lifecycle. For security reasons, it's
+            /// recommended to delete active enrollment tokens as soon as they're not intended to be used anymore.
+            /// </summary>
+            public class GetRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.EnrollmentToken>
+            {
+                /// <summary>Constructs a new Get request.</summary>
+                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The name of the enrollment token in the form
+                /// enterprises/{enterpriseId}/enrollmentTokens/{enrollmentTokenId}.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "get";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes Get parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^enterprises/[^/]+/enrollmentTokens/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Lists active, unexpired enrollment tokens for a given enterprise. The list items contain only a partial
+            /// view of EnrollmentToken object. Only the following fields are populated: name, expirationTimestamp,
+            /// allowPersonalUsage, value, qrCode. This method is meant to help manage active enrollment tokens
+            /// lifecycle. For security reasons, it's recommended to delete active enrollment tokens as soon as they're
+            /// not intended to be used anymore.
+            /// </summary>
+            /// <param name="parent">
+            /// Required. The name of the enterprise in the form enterprises/{enterpriseId}.
+            /// </param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>
+            /// Lists active, unexpired enrollment tokens for a given enterprise. The list items contain only a partial
+            /// view of EnrollmentToken object. Only the following fields are populated: name, expirationTimestamp,
+            /// allowPersonalUsage, value, qrCode. This method is meant to help manage active enrollment tokens
+            /// lifecycle. For security reasons, it's recommended to delete active enrollment tokens as soon as they're
+            /// not intended to be used anymore.
+            /// </summary>
+            public class ListRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.ListEnrollmentTokensResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>Required. The name of the enterprise in the form enterprises/{enterpriseId}.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// The requested page size. The service may return fewer than this value. If unspecified, at most 10
+                /// items will be returned. The maximum value is 100; values above 100 will be coerced to 100.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>A token identifying a page of results returned by the server.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/enrollmentTokens";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^enterprises/[^/]+$",
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+        }
+
+        /// <summary>Gets the MigrationTokens resource.</summary>
+        public virtual MigrationTokensResource MigrationTokens { get; }
+
+        /// <summary>The "migrationTokens" collection of methods.</summary>
+        public class MigrationTokensResource
+        {
+            private const string Resource = "migrationTokens";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public MigrationTokensResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// Creates a migration token, to migrate an existing device from being managed by the EMM's Device Policy
+            /// Controller (DPC) to being managed by the Android Management API. See the guide
+            /// (https://developers.google.com/android/management/dpc-migration) for more details.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. The enterprise in which this migration token is created. This must be the same enterprise
+            /// which already manages the device in the Play EMM API. Format: enterprises/{enterprise}
+            /// </param>
+            public virtual CreateRequest Create(Google.Apis.AndroidManagement.v1.Data.MigrationToken body, string parent)
+            {
+                return new CreateRequest(this.service, body, parent);
+            }
+
+            /// <summary>
+            /// Creates a migration token, to migrate an existing device from being managed by the EMM's Device Policy
+            /// Controller (DPC) to being managed by the Android Management API. See the guide
+            /// (https://developers.google.com/android/management/dpc-migration) for more details.
+            /// </summary>
+            public class CreateRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.MigrationToken>
+            {
+                /// <summary>Constructs a new Create request.</summary>
+                public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.AndroidManagement.v1.Data.MigrationToken body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The enterprise in which this migration token is created. This must be the same enterprise
+                /// which already manages the device in the Play EMM API. Format: enterprises/{enterprise}
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.AndroidManagement.v1.Data.MigrationToken Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "create";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/migrationTokens";
+
+                /// <summary>Initializes Create parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^enterprises/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Gets a migration token.</summary>
+            /// <param name="name">
+            /// Required. The name of the migration token to retrieve. Format:
+            /// enterprises/{enterprise}/migrationTokens/{migration_token}
+            /// </param>
+            public virtual GetRequest Get(string name)
+            {
+                return new GetRequest(this.service, name);
+            }
+
+            /// <summary>Gets a migration token.</summary>
+            public class GetRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.MigrationToken>
+            {
+                /// <summary>Constructs a new Get request.</summary>
+                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The name of the migration token to retrieve. Format:
+                /// enterprises/{enterprise}/migrationTokens/{migration_token}
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "get";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes Get parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^enterprises/[^/]+/migrationTokens/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Lists migration tokens.</summary>
+            /// <param name="parent">
+            /// Required. The enterprise which the migration tokens belong to. Format: enterprises/{enterprise}
+            /// </param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>Lists migration tokens.</summary>
+            public class ListRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.ListMigrationTokensResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The enterprise which the migration tokens belong to. Format: enterprises/{enterprise}
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// The maximum number of migration tokens to return. Fewer migration tokens may be returned. If
+                /// unspecified, at most 100 migration tokens will be returned. The maximum value is 100; values above
+                /// 100 will be coerced to 100.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>
+                /// A page token, received from a previous ListMigrationTokens call. Provide this to retrieve the
+                /// subsequent page.When paginating, all other parameters provided to ListMigrationTokens must match the
+                /// call that provided the page token.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/migrationTokens";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^enterprises/[^/]+$",
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
         }
 
         /// <summary>Gets the Policies resource.</summary>
@@ -1163,7 +1480,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -1214,7 +1531,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a policy.</summary>
@@ -1261,7 +1578,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// <param name="parent">The name of the enterprise in the form enterprises/{enterpriseId}.</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists policies for a given enterprise.</summary>
@@ -1333,7 +1650,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.AndroidManagement.v1.Data.Policy body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates or creates a policy.</summary>
@@ -1420,7 +1737,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// <param name="parent">The name of the enterprise in the form enterprises/{enterpriseId}.</param>
             public virtual CreateRequest Create(Google.Apis.AndroidManagement.v1.Data.WebApp body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a web app.</summary>
@@ -1474,7 +1791,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a web app.</summary>
@@ -1523,7 +1840,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a web app.</summary>
@@ -1570,7 +1887,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// <param name="parent">The name of the enterprise in the form enterprises/{enterpriseId}.</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists web apps for a given enterprise.</summary>
@@ -1587,7 +1904,9 @@ namespace Google.Apis.AndroidManagement.v1
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
 
-                /// <summary>The requested page size. The actual page size may be fixed to a min or max value.</summary>
+                /// <summary>
+                /// The requested page size. This is a hint and the actual page size in the response may be different.
+                /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
@@ -1642,7 +1961,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.AndroidManagement.v1.Data.WebApp body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates a web app.</summary>
@@ -1731,7 +2050,7 @@ namespace Google.Apis.AndroidManagement.v1
             /// <param name="parent">The name of the enterprise in the form enterprises/{enterpriseId}.</param>
             public virtual CreateRequest Create(Google.Apis.AndroidManagement.v1.Data.WebToken body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1782,14 +2101,18 @@ namespace Google.Apis.AndroidManagement.v1
             }
         }
 
-        /// <summary>Creates an enterprise. This is the last step in the enterprise signup flow.</summary>
+        /// <summary>
+        /// Creates an enterprise. This is the last step in the enterprise signup flow. See also: SigninDetail
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.AndroidManagement.v1.Data.Enterprise body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
-        /// <summary>Creates an enterprise. This is the last step in the enterprise signup flow.</summary>
+        /// <summary>
+        /// Creates an enterprise. This is the last step in the enterprise signup flow. See also: SigninDetail
+        /// </summary>
         public class CreateRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.Enterprise>
         {
             /// <summary>Constructs a new Create request.</summary>
@@ -1801,15 +2124,19 @@ namespace Google.Apis.AndroidManagement.v1
 
             /// <summary>
             /// Whether the enterprise admin has seen and agreed to the managed Google Play Agreement
-            /// (https://www.android.com/enterprise/terms/). Always set this to true when creating an EMM-managed
-            /// enterprise. Do not create the enterprise until the admin has viewed and accepted the agreement.
+            /// (https://www.android.com/enterprise/terms/). Do not set this field for any customer-managed enterprise
+            /// (https://developers.google.com/android/management/create-enterprise#customer-managed_enterprises). Set
+            /// this to field to true for all EMM-managed enterprises
+            /// (https://developers.google.com/android/management/create-enterprise#emm-managed_enterprises).
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("agreementAccepted", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> AgreementAccepted { get; set; }
 
             /// <summary>
-            /// The enterprise token appended to the callback URL. Only set this when creating a customer-managed
-            /// enterprise.
+            /// The enterprise token appended to the callback URL. Set this when creating a customer-managed enterprise
+            /// (https://developers.google.com/android/management/create-enterprise#customer-managed_enterprises) and
+            /// not when creating a deprecated EMM-managed enterprise
+            /// (https://developers.google.com/android/management/create-enterprise#emm-managed_enterprises).
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("enterpriseToken", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string EnterpriseToken { get; set; }
@@ -1819,8 +2146,11 @@ namespace Google.Apis.AndroidManagement.v1
             public virtual string ProjectId { get; set; }
 
             /// <summary>
-            /// The name of the SignupUrl used to sign up for the enterprise. Only set this when creating a
-            /// customer-managed enterprise.
+            /// The name of the SignupUrl used to sign up for the enterprise. Set this when creating a customer-managed
+            /// enterprise
+            /// (https://developers.google.com/android/management/create-enterprise#customer-managed_enterprises) and
+            /// not when creating a deprecated EMM-managed enterprise
+            /// (https://developers.google.com/android/management/create-enterprise#emm-managed_enterprises).
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("signupUrlName", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string SignupUrlName { get; set; }
@@ -1879,14 +2209,22 @@ namespace Google.Apis.AndroidManagement.v1
             }
         }
 
-        /// <summary>Deletes an enterprise. Only available for EMM-managed enterprises.</summary>
+        /// <summary>
+        /// Permanently deletes an enterprise and all accounts and data associated with it. Warning: this will result in
+        /// a cascaded deletion of all AM API devices associated with the deleted enterprise. Only available for
+        /// EMM-managed enterprises.
+        /// </summary>
         /// <param name="name">The name of the enterprise in the form enterprises/{enterpriseId}.</param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
-        /// <summary>Deletes an enterprise. Only available for EMM-managed enterprises.</summary>
+        /// <summary>
+        /// Permanently deletes an enterprise and all accounts and data associated with it. Warning: this will result in
+        /// a cascaded deletion of all AM API devices associated with the deleted enterprise. Only available for
+        /// EMM-managed enterprises.
+        /// </summary>
         public class DeleteRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.Empty>
         {
             /// <summary>Constructs a new Delete request.</summary>
@@ -1928,7 +2266,7 @@ namespace Google.Apis.AndroidManagement.v1
         /// <param name="name">The name of the enterprise in the form enterprises/{enterpriseId}.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Gets an enterprise.</summary>
@@ -1972,7 +2310,7 @@ namespace Google.Apis.AndroidManagement.v1
         /// <summary>Lists EMM-managed enterprises. Only BASIC fields are returned.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists EMM-managed enterprises. Only BASIC fields are returned.</summary>
@@ -2060,15 +2398,15 @@ namespace Google.Apis.AndroidManagement.v1
             }
         }
 
-        /// <summary>Updates an enterprise.</summary>
+        /// <summary>Updates an enterprise. See also: SigninDetail</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="name">The name of the enterprise in the form enterprises/{enterpriseId}.</param>
         public virtual PatchRequest Patch(Google.Apis.AndroidManagement.v1.Data.Enterprise body, string name)
         {
-            return new PatchRequest(service, body, name);
+            return new PatchRequest(this.service, body, name);
         }
 
-        /// <summary>Updates an enterprise.</summary>
+        /// <summary>Updates an enterprise. See also: SigninDetail</summary>
         public class PatchRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.Enterprise>
         {
             /// <summary>Constructs a new Patch request.</summary>
@@ -2128,6 +2466,72 @@ namespace Google.Apis.AndroidManagement.v1
         }
     }
 
+    /// <summary>The "provisioningInfo" collection of methods.</summary>
+    public class ProvisioningInfoResource
+    {
+        private const string Resource = "provisioningInfo";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public ProvisioningInfoResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>Get the device provisioning information by the identifier provided in the sign-in url.</summary>
+        /// <param name="name">
+        /// Required. The identifier that Android Device Policy passes to the 3P sign-in page in the form of
+        /// provisioningInfo/{provisioning_info}.
+        /// </param>
+        public virtual GetRequest Get(string name)
+        {
+            return new GetRequest(this.service, name);
+        }
+
+        /// <summary>Get the device provisioning information by the identifier provided in the sign-in url.</summary>
+        public class GetRequest : AndroidManagementBaseServiceRequest<Google.Apis.AndroidManagement.v1.Data.ProvisioningInfo>
+        {
+            /// <summary>Constructs a new Get request.</summary>
+            public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The identifier that Android Device Policy passes to the 3P sign-in page in the form of
+            /// provisioningInfo/{provisioning_info}.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "get";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes Get parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^provisioningInfo/[^/]+$",
+                });
+            }
+        }
+    }
+
     /// <summary>The "signupUrls" collection of methods.</summary>
     public class SignupUrlsResource
     {
@@ -2145,7 +2549,7 @@ namespace Google.Apis.AndroidManagement.v1
         /// <summary>Creates an enterprise signup URL.</summary>
         public virtual CreateRequest Create()
         {
-            return new CreateRequest(service);
+            return new CreateRequest(this.service);
         }
 
         /// <summary>Creates an enterprise signup URL.</summary>
@@ -2156,6 +2560,25 @@ namespace Google.Apis.AndroidManagement.v1
             {
                 InitParameters();
             }
+
+            /// <summary>
+            /// Optional. Email address used to prefill the admin field of the enterprise signup form. This value is a
+            /// hint only and can be altered by the user. If allowedDomains is non-empty then this must belong to one of
+            /// the allowedDomains.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("adminEmail", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string AdminEmail { get; set; }
+
+            /// <summary>
+            /// Optional. A list of domains that are permitted for the admin email. The IT admin cannot enter an email
+            /// address with a domain name that is not in this list. Subdomains of domains in this list are not allowed
+            /// but can be allowed by adding a second entry which has *. prefixed to the domain name (e.g.
+            /// *.example.com). If the field is not present or is an empty list then the IT admin is free to use any
+            /// valid domain name. Personal email domains are always allowed, but will result in the creation of a
+            /// managed Google Play Accounts enterprise.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("allowedDomains", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<string> AllowedDomains { get; set; }
 
             /// <summary>
             /// The callback URL that the admin will be redirected to after successfully creating an enterprise. Before
@@ -2184,6 +2607,22 @@ namespace Google.Apis.AndroidManagement.v1
             protected override void InitParameters()
             {
                 base.InitParameters();
+                RequestParameters.Add("adminEmail", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "adminEmail",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("allowedDomains", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "allowedDomains",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("callbackUrl", new Google.Apis.Discovery.Parameter
                 {
                     Name = "callbackUrl",
@@ -2206,22 +2645,48 @@ namespace Google.Apis.AndroidManagement.v1
 }
 namespace Google.Apis.AndroidManagement.v1.Data
 {
-    /// <summary>
-    /// Security policies set to secure values by default. To maintain the security posture of a device, we don't
-    /// recommend overriding any of the default values.
-    /// </summary>
+    /// <summary>A shell command was issued over ADB via “adb shell command”.</summary>
+    public class AdbShellCommandEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Shell command that was issued over ADB via "adb shell command". Redacted to empty string on
+        /// organization-owned managed profile devices.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("shellCmd")]
+        public virtual string ShellCmd { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An ADB interactive shell was opened via “adb shell”. Intentionally empty.</summary>
+    public class AdbShellInteractiveEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Advanced security settings. In most cases, setting these is not needed.</summary>
     public class AdvancedSecurityOverrides : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// Controls Common Criteria Mode—security standards defined in the Common Criteria for Information Technology
         /// Security Evaluation (https://www.commoncriteriaportal.org/) (CC). Enabling Common Criteria Mode increases
-        /// certain security components on a device, including AES-GCM encryption of Bluetooth Long Term Keys, and Wi-Fi
-        /// configuration stores.Warning: Common Criteria Mode enforces a strict security model typically only required
-        /// for IT products used in national security systems and other highly sensitive organizations. Standard device
-        /// use may be affected. Only enabled if required.
+        /// certain security components on a device, see CommonCriteriaMode for details.Warning: Common Criteria Mode
+        /// enforces a strict security model typically only required for IT products used in national security systems
+        /// and other highly sensitive organizations. Standard device use may be affected. Only enabled if required. If
+        /// Common Criteria Mode is turned off after being enabled previously, all user-configured Wi-Fi networks may be
+        /// lost and any enterprise-configured Wi-Fi networks that require user input may need to be reconfigured.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("commonCriteriaMode")]
         public virtual string CommonCriteriaMode { get; set; }
+
+        /// <summary>
+        /// Optional. Controls whether content protection, which scans for deceptive apps, is enabled. This is supported
+        /// on Android 15 and above.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("contentProtectionPolicy")]
+        public virtual string ContentProtectionPolicy { get; set; }
 
         /// <summary>
         /// Controls access to developer settings: developer options and safe boot. Replaces safeBootDisabled
@@ -2236,6 +2701,14 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("googlePlayProtectVerifyApps")]
         public virtual string GooglePlayProtectVerifyApps { get; set; }
+
+        /// <summary>
+        /// Optional. Controls Memory Tagging Extension (MTE)
+        /// (https://source.android.com/docs/security/test/memory-safety/arm-mte) on the device. The device needs to be
+        /// rebooted to apply changes to the MTE policy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mtePolicy")]
+        public virtual string MtePolicy { get; set; }
 
         /// <summary>
         /// Personal apps that can read work profile notifications using a NotificationListenerService
@@ -2289,6 +2762,95 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Information about a process. It contains process name, start time, app Uid, app Pid, seinfo tag, hash of the
+    /// base APK.
+    /// </summary>
+    public class AppProcessInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>SHA-256 hash of the base APK, in hexadecimal format.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apkSha256Hash")]
+        public virtual string ApkSha256Hash { get; set; }
+
+        /// <summary>
+        /// Package names of all packages that are associated with the particular user ID. In most cases, this will be a
+        /// single package name, the package that has been assigned that user ID. If multiple application share a UID
+        /// then all packages sharing UID will be included.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("packageNames")]
+        public virtual System.Collections.Generic.IList<string> PackageNames { get; set; }
+
+        /// <summary>Process ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pid")]
+        public virtual System.Nullable<int> Pid { get; set; }
+
+        /// <summary>Process name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("processName")]
+        public virtual string ProcessName { get; set; }
+
+        /// <summary>SELinux policy info.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("seinfo")]
+        public virtual string Seinfo { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>Process start time.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>UID of the package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uid")]
+        public virtual System.Nullable<int> Uid { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An app process was started. This is available device-wide on fully managed devices and within the work profile
+    /// on organization-owned devices with a work profile.
+    /// </summary>
+    public class AppProcessStartEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Information about a process.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("processInfo")]
+        public virtual AppProcessInfo ProcessInfo { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Id to name association of a app track.</summary>
     public class AppTrackInfo : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2310,18 +2872,101 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>This represents a single version of the app.</summary>
+    public class AppVersion : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>If the value is True, it indicates that this version is a production track.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("production")]
+        public virtual System.Nullable<bool> Production { get; set; }
+
+        /// <summary>
+        /// Track identifiers that the app version is published in. This does not include the production track (see
+        /// production instead).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("trackIds")]
+        public virtual System.Collections.Generic.IList<string> TrackIds { get; set; }
+
+        /// <summary>Unique increasing identifier for the app version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versionCode")]
+        public virtual System.Nullable<int> VersionCode { get; set; }
+
+        /// <summary>
+        /// The string used in the Play store by the app developer to identify the version. The string is not
+        /// necessarily unique or localized (for example, the string could be "1.4").
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versionString")]
+        public virtual string VersionString { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Information about an app.</summary>
     public class Application : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Whether this app is free, free with in-app purchases, or paid. If the pricing is unspecified, this means the
+        /// app is not generally available anymore (even though it might still be available to people who own it).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appPricing")]
+        public virtual string AppPricing { get; set; }
+
         /// <summary>Application tracks visible to the enterprise.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("appTracks")]
         public virtual System.Collections.Generic.IList<AppTrackInfo> AppTracks { get; set; }
+
+        /// <summary>Versions currently available for this app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appVersions")]
+        public virtual System.Collections.Generic.IList<AppVersion> AppVersions { get; set; }
+
+        /// <summary>The name of the author of the apps (for example, the app developer).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("author")]
+        public virtual string Author { get; set; }
+
+        /// <summary>The countries which this app is available in as per ISO 3166-1 alpha-2.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("availableCountries")]
+        public virtual System.Collections.Generic.IList<string> AvailableCountries { get; set; }
+
+        /// <summary>The app category (e.g. RACING, SOCIAL, etc.)</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("category")]
+        public virtual string Category { get; set; }
+
+        /// <summary>The content rating for this app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("contentRating")]
+        public virtual string ContentRating { get; set; }
+
+        /// <summary>The localized promotional description, if available.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>How and to whom the package is made available.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("distributionChannel")]
+        public virtual string DistributionChannel { get; set; }
+
+        /// <summary>Noteworthy features (if any) of this app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("features")]
+        public virtual System.Collections.Generic.IList<string> Features { get; set; }
+
+        /// <summary>Full app description, if available.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fullDescription")]
+        public virtual string FullDescription { get; set; }
+
+        /// <summary>
+        /// A link to an image that can be used as an icon for the app. This image is suitable for use up to a pixel
+        /// size of 512 x 512.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("iconUrl")]
+        public virtual string IconUrl { get; set; }
 
         /// <summary>The set of managed properties available to be pre-configured for the app.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("managedProperties")]
         public virtual System.Collections.Generic.IList<ManagedProperty> ManagedProperties { get; set; }
 
-        /// <summary>The name of the app in the form enterprises/{enterpriseId}/applications/{package_name}.</summary>
+        /// <summary>The minimum Android SDK necessary to run the app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minAndroidSdkVersion")]
+        public virtual System.Nullable<int> MinAndroidSdkVersion { get; set; }
+
+        /// <summary>The name of the app in the form enterprises/{enterprise}/applications/{package_name}.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
@@ -2329,9 +2974,65 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("permissions")]
         public virtual System.Collections.Generic.IList<ApplicationPermission> Permissions { get; set; }
 
+        /// <summary>A link to the (consumer) Google Play details page for the app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("playStoreUrl")]
+        public virtual string PlayStoreUrl { get; set; }
+
+        /// <summary>A localised description of the recent changes made to the app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("recentChanges")]
+        public virtual string RecentChanges { get; set; }
+
+        /// <summary>A list of screenshot links representing the app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("screenshotUrls")]
+        public virtual System.Collections.Generic.IList<string> ScreenshotUrls { get; set; }
+
+        /// <summary>
+        /// A link to a smaller image that can be used as an icon for the app. This image is suitable for use up to a
+        /// pixel size of 128 x 128.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("smallIconUrl")]
+        public virtual string SmallIconUrl { get; set; }
+
         /// <summary>The title of the app. Localized.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("title")]
         public virtual string Title { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The approximate time (within 7 days) the app was last published.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2340,9 +3041,42 @@ namespace Google.Apis.AndroidManagement.v1.Data
     /// <summary>An app-related event.</summary>
     public class ApplicationEvent : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The creation time of the event.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>App event type.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("eventType")]
@@ -2373,7 +3107,11 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Policy for an individual app.</summary>
+    /// <summary>
+    /// Policy for an individual app. Note: Application availability on a given device cannot be changed using this
+    /// policy if installAppsDisabled is enabled. The maximum number of applications that you can specify per policy is
+    /// 3,000.
+    /// </summary>
     public class ApplicationPolicy : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -2384,6 +3122,19 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("accessibleTrackIds")]
         public virtual System.Collections.Generic.IList<string> AccessibleTrackIds { get; set; }
+
+        /// <summary>
+        /// Specifies whether the app is allowed networking when the VPN is not connected and
+        /// alwaysOnVpnPackage.lockdownEnabled is enabled. If set to VPN_LOCKDOWN_ENFORCED, the app is not allowed
+        /// networking, and if set to VPN_LOCKDOWN_EXEMPTION, the app is allowed networking. Only supported on devices
+        /// running Android 10 and above. If this is not supported by the device, the device will contain a
+        /// NonComplianceDetail with non_compliance_reason set to API_LEVEL and a fieldPath. If this is not applicable
+        /// to the app, the device will contain a NonComplianceDetail with non_compliance_reason set to UNSUPPORTED and
+        /// a fieldPath. The fieldPath is set to applications[i].alwaysOnVpnLockdownExemption, where i is the index of
+        /// the package in the applications policy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("alwaysOnVpnLockdownExemption")]
+        public virtual string AlwaysOnVpnLockdownExemption { get; set; }
 
         /// <summary>Controls the auto-update mode for the app.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("autoUpdateMode")]
@@ -2397,6 +3148,12 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ConnectedWorkAndPersonalApp { get; set; }
 
         /// <summary>
+        /// Optional. Whether the app is allowed to act as a credential provider on Android 14 and above.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("credentialProviderPolicy")]
+        public virtual string CredentialProviderPolicy { get; set; }
+
+        /// <summary>
         /// The default policy for all permissions requested by the app. If specified, this overrides the policy-level
         /// default_permission_policy which applies to all apps. It does not override the permission_grants which
         /// applies to all apps.
@@ -2404,7 +3161,10 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("defaultPermissionPolicy")]
         public virtual string DefaultPermissionPolicy { get; set; }
 
-        /// <summary>The scopes delegated to the app from Android Device Policy.</summary>
+        /// <summary>
+        /// The scopes delegated to the app from Android Device Policy. These provide additional privileges for the
+        /// applications they are applied to.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("delegatedScopes")]
         public virtual System.Collections.Generic.IList<string> DelegatedScopes { get; set; }
 
@@ -2419,13 +3179,29 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("extensionConfig")]
         public virtual ExtensionConfig ExtensionConfig { get; set; }
 
+        /// <summary>
+        /// Optional. The constraints for installing the app. You can specify a maximum of one InstallConstraint.
+        /// Multiple constraints are rejected.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("installConstraint")]
+        public virtual System.Collections.Generic.IList<InstallConstraint> InstallConstraint { get; set; }
+
+        /// <summary>
+        /// Optional. Amongst apps with installType set to: FORCE_INSTALLED PREINSTALLEDthis controls the relative
+        /// priority of installation. A value of 0 (default) means this app has no priority over other apps. For values
+        /// between 1 and 10,000, a lower value means a higher priority. Values outside of the range 0 to 10,000
+        /// inclusive are rejected.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("installPriority")]
+        public virtual System.Nullable<int> InstallPriority { get; set; }
+
         /// <summary>The type of installation to perform.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("installType")]
         public virtual string InstallType { get; set; }
 
         /// <summary>
         /// Whether the app is allowed to lock itself in full-screen mode. DEPRECATED. Use InstallType KIOSK or
-        /// kioskCustomLauncherEnabled to to configure a dedicated device.
+        /// kioskCustomLauncherEnabled to configure a dedicated device.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lockTaskAllowed")]
         public virtual System.Nullable<bool> LockTaskAllowed { get; set; }
@@ -2468,6 +3244,19 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("permissionGrants")]
         public virtual System.Collections.Generic.IList<PermissionGrant> PermissionGrants { get; set; }
 
+        /// <summary>
+        /// Optional. Specifies whether user control is permitted for the app. User control includes user actions like
+        /// force-stopping and clearing app data. Supported on Android 11 and above.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userControlSettings")]
+        public virtual string UserControlSettings { get; set; }
+
+        /// <summary>
+        /// Specifies whether the app installed in the work profile is allowed to add widgets to the home screen.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("workProfileWidgets")]
+        public virtual string WorkProfileWidgets { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2483,7 +3272,7 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
-        /// <summary>List of app events. The most recent 20 events are stored in the list.</summary>
+        /// <summary>The list of app events which have occurred in the last 30 hours.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("events")]
         public virtual System.Collections.Generic.IList<ApplicationEvent> Events { get; set; }
 
@@ -2518,6 +3307,10 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        /// <summary>Whether the app is user facing.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userFacingType")]
+        public virtual string UserFacingType { get; set; }
+
         /// <summary>
         /// The app version code, which can be used to determine whether one version is more recent than another.
         /// </summary>
@@ -2543,6 +3336,69 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Batched event logs of events from the device.</summary>
+    public class BatchUsageLogEvents : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If present, the name of the device in the form ‘enterprises/{enterpriseId}/devices/{deviceId}’
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("device")]
+        public virtual string Device { get; set; }
+
+        private string _retrievalTimeRaw;
+
+        private object _retrievalTime;
+
+        /// <summary>The device timestamp when the batch of events were collected from the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("retrievalTime")]
+        public virtual string RetrievalTimeRaw
+        {
+            get => _retrievalTimeRaw;
+            set
+            {
+                _retrievalTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _retrievalTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RetrievalTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RetrievalTimeDateTimeOffset instead.")]
+        public virtual object RetrievalTime
+        {
+            get => _retrievalTime;
+            set
+            {
+                _retrievalTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _retrievalTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RetrievalTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RetrievalTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RetrievalTimeRaw);
+            set => RetrievalTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The list of UsageLogEvent that were reported by the device, sorted chronologically by the event time.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("usageLogEvents")]
+        public virtual System.Collections.Generic.IList<UsageLogEvent> UsageLogEvents { get; set; }
+
+        /// <summary>
+        /// If present, the resource name of the user that owns this device in the form
+        /// ‘enterprises/{enterpriseId}/users/{userId}’.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("user")]
+        public virtual string User { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// An action to block access to apps and data on a fully managed device or in a work profile. This action also
     /// triggers a device or work profile to displays a user-facing notification with information (where possible) on
@@ -2562,6 +3418,71 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("blockScope")]
         public virtual string BlockScope { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A new root certificate was installed into the system's trusted credential storage. This is available device-wide
+    /// on fully managed devices and within the work profile on organization-owned devices with a work profile.
+    /// </summary>
+    public class CertAuthorityInstalledEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Subject of the certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("certificate")]
+        public virtual string Certificate { get; set; }
+
+        /// <summary>Whether the installation event succeeded.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("success")]
+        public virtual System.Nullable<bool> Success { get; set; }
+
+        /// <summary>
+        /// The user in which the certificate install event happened. Only available for devices running Android 11 and
+        /// above.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userId")]
+        public virtual System.Nullable<int> UserId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A root certificate was removed from the system's trusted credential storage. This is available device-wide on
+    /// fully managed devices and within the work profile on organization-owned devices with a work profile.
+    /// </summary>
+    public class CertAuthorityRemovedEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Subject of the certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("certificate")]
+        public virtual string Certificate { get; set; }
+
+        /// <summary>Whether the removal succeeded.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("success")]
+        public virtual System.Nullable<bool> Success { get; set; }
+
+        /// <summary>
+        /// The user in which the certificate removal event occurred. Only available for devices running Android 11 and
+        /// above.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userId")]
+        public virtual System.Nullable<int> UserId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An X.509v3 certificate failed to validate, currently this validation is performed on the Wi-FI access point and
+    /// failure may be due to a mismatch upon server certificate validation. However it may in the future include other
+    /// validation events of an X.509v3 certificate.
+    /// </summary>
+    public class CertValidationFailureEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The reason why certification validation failed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("failureReason")]
+        public virtual string FailureReason { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2607,14 +3528,87 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Parameters associated with the CLEAR_APP_DATA command to clear the data of specified apps from the device.
+    /// </summary>
+    public class ClearAppsDataParams : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The package names of the apps whose data will be cleared when the command is executed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("packageNames")]
+        public virtual System.Collections.Generic.IList<string> PackageNames { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Status of the CLEAR_APP_DATA command to clear the data of specified apps from the device.</summary>
+    public class ClearAppsDataStatus : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The per-app results, a mapping from package names to the respective clearing result.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("results")]
+        public virtual System.Collections.Generic.IDictionary<string, PerAppResult> Results { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A command.</summary>
     public class Command : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Parameters for the CLEAR_APP_DATA command to clear the data of specified apps from the device. See
+        /// ClearAppsDataParams. If this is set, then it is suggested that type should not be set. In this case, the
+        /// server automatically sets it to CLEAR_APP_DATA. It is also acceptable to explicitly set type to
+        /// CLEAR_APP_DATA.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clearAppsDataParams")]
+        public virtual ClearAppsDataParams ClearAppsDataParams { get; set; }
+
+        /// <summary>
+        /// Output only. Status of the CLEAR_APP_DATA command to clear the data of specified apps from the device. See
+        /// ClearAppsDataStatus.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clearAppsDataStatus")]
+        public virtual ClearAppsDataStatus ClearAppsDataStatus { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>
         /// The timestamp at which the command was created. The timestamp is automatically generated by the server.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The duration for which the command is valid. The command will expire if not executed by the device during
@@ -2630,13 +3624,47 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("errorCode")]
         public virtual string ErrorCode { get; set; }
 
-        /// <summary>For commands of type RESET_PASSWORD, optionally specifies the new password.</summary>
+        /// <summary>
+        /// For commands of type RESET_PASSWORD, optionally specifies the new password. Note: The new password must be
+        /// at least 6 characters long if it is numeric in case of Android 14 devices. Else the command will fail with
+        /// INVALID_VALUE.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("newPassword")]
         public virtual string NewPassword { get; set; }
 
         /// <summary>For commands of type RESET_PASSWORD, optionally specifies flags.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resetPasswordFlags")]
         public virtual System.Collections.Generic.IList<string> ResetPasswordFlags { get; set; }
+
+        /// <summary>
+        /// Parameters for the START_LOST_MODE command to put the device into lost mode. See StartLostModeParams. If
+        /// this is set, then it is suggested that type should not be set. In this case, the server automatically sets
+        /// it to START_LOST_MODE. It is also acceptable to explicitly set type to START_LOST_MODE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startLostModeParams")]
+        public virtual StartLostModeParams StartLostModeParams { get; set; }
+
+        /// <summary>
+        /// Output only. Status of the START_LOST_MODE command to put the device into lost mode. See
+        /// StartLostModeStatus.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startLostModeStatus")]
+        public virtual StartLostModeStatus StartLostModeStatus { get; set; }
+
+        /// <summary>
+        /// Parameters for the STOP_LOST_MODE command to take the device out of lost mode. See StopLostModeParams. If
+        /// this is set, then it is suggested that type should not be set. In this case, the server automatically sets
+        /// it to STOP_LOST_MODE. It is also acceptable to explicitly set type to STOP_LOST_MODE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stopLostModeParams")]
+        public virtual StopLostModeParams StopLostModeParams { get; set; }
+
+        /// <summary>
+        /// Output only. Status of the STOP_LOST_MODE command to take the device out of lost mode. See
+        /// StopLostModeStatus.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stopLostModeStatus")]
+        public virtual StopLostModeStatus StopLostModeStatus { get; set; }
 
         /// <summary>The type of the command.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
@@ -2663,6 +3691,10 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// <summary>Whether Common Criteria Mode is enabled.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("commonCriteriaModeStatus")]
         public virtual string CommonCriteriaModeStatus { get; set; }
+
+        /// <summary>Output only. The status of policy signature verification.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policySignatureVerificationStatus")]
+        public virtual string PolicySignatureVerificationStatus { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2703,6 +3735,25 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("packageNamesToDisable")]
         public virtual System.Collections.Generic.IList<string> PackageNamesToDisable { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A TCP connect event was initiated through the standard network stack.</summary>
+    public class ConnectEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The destination IP address of the connect call.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("destinationIpAddress")]
+        public virtual string DestinationIpAddress { get; set; }
+
+        /// <summary>The destination port of the connect call.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("destinationPort")]
+        public virtual System.Nullable<int> DestinationPort { get; set; }
+
+        /// <summary>The package name of the UID that performed the connect call.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("packageName")]
+        public virtual string PackageName { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2769,7 +3820,10 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Cross-profile policies applied on the device.</summary>
+    /// <summary>
+    /// Controls the data from the work profile that can be accessed from the personal profile and vice versa. A
+    /// nonComplianceDetail with MANAGEMENT_MODE is reported if the device does not have a work profile.
+    /// </summary>
     public class CrossProfilePolicies : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -2787,11 +3841,44 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string CrossProfileDataSharing { get; set; }
 
         /// <summary>
-        /// Whether contacts stored in the work profile can be shown in personal profile contact searches and incoming
-        /// calls.
+        /// List of apps which are excluded from the ShowWorkContactsInPersonalProfile setting. For this to be set,
+        /// ShowWorkContactsInPersonalProfile must be set to one of the following values:
+        /// SHOW_WORK_CONTACTS_IN_PERSONAL_PROFILE_ALLOWED. In this case, these exemptions act as a blocklist.
+        /// SHOW_WORK_CONTACTS_IN_PERSONAL_PROFILE_DISALLOWED. In this case, these exemptions act as an allowlist.
+        /// SHOW_WORK_CONTACTS_IN_PERSONAL_PROFILE_DISALLOWED_EXCEPT_SYSTEM. In this case, these exemptions act as an
+        /// allowlist, in addition to the already allowlisted system apps.Supported on Android 14 and above. A
+        /// nonComplianceDetail with API_LEVEL is reported if the Android version is less than 14.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exemptionsToShowWorkContactsInPersonalProfile")]
+        public virtual PackageNameList ExemptionsToShowWorkContactsInPersonalProfile { get; set; }
+
+        /// <summary>
+        /// Whether personal apps can access contacts stored in the work profile.See also
+        /// exemptions_to_show_work_contacts_in_personal_profile.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("showWorkContactsInPersonalProfile")]
         public virtual string ShowWorkContactsInPersonalProfile { get; set; }
+
+        /// <summary>
+        /// Specifies the default behaviour for work profile widgets. If the policy does not specify
+        /// work_profile_widgets for a specific application, it will behave according to the value specified here.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("workProfileWidgetsDefault")]
+        public virtual string WorkProfileWidgetsDefault { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Validates whether Android’s built-in cryptographic library (BoringSSL) is valid. Should always succeed on device
+    /// boot, if it fails, the device should be considered untrusted.
+    /// </summary>
+    public class CryptoSelfTestCompletedEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Whether the test succeeded.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("success")]
+        public virtual System.Nullable<bool> Success { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2800,10 +3887,10 @@ namespace Google.Apis.AndroidManagement.v1.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: A full date, with non-zero year, month, and day values A month and day value, with a zero
-    /// year, such as an anniversary A year on its own, with zero month and day values A year and month value, with a
-    /// zero day, such as a credit card expiration dateRelated types are google.type.TimeOfDay and
-    /// google.protobuf.Timestamp.
+    /// of the following: A full date, with non-zero year, month, and day values. A month and day, with a zero year (for
+    /// example, an anniversary). A year on its own, with a zero month and a zero day. A year and month, with a zero day
+    /// (for example, a credit card expiration date).Related types: google.type.TimeOfDay google.type.DateTime
+    /// google.protobuf.Timestamp
     /// </summary>
     public class Date : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2866,7 +3953,8 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// <summary>
         /// Information about Common Criteria Mode—security standards defined in the Common Criteria for Information
         /// Technology Security Evaluation (https://www.commoncriteriaportal.org/) (CC).This information is only
-        /// available if statusReportingSettings.commonCriteriaModeEnabled is true in the device's policy.
+        /// available if statusReportingSettings.commonCriteriaModeEnabled is true in the device's policy the device is
+        /// company-owned.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("commonCriteriaModeInfo")]
         public virtual CommonCriteriaModeInfo CommonCriteriaModeInfo { get; set; }
@@ -2892,9 +3980,51 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("displays")]
         public virtual System.Collections.Generic.IList<Display> Displays { get; set; }
 
+        /// <summary>
+        /// Output only. Information related to whether this device was migrated from being managed by another Device
+        /// Policy Controller (DPC).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dpcMigrationInfo")]
+        public virtual DpcMigrationInfo DpcMigrationInfo { get; set; }
+
+        private string _enrollmentTimeRaw;
+
+        private object _enrollmentTime;
+
         /// <summary>The time of device enrollment.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("enrollmentTime")]
-        public virtual object EnrollmentTime { get; set; }
+        public virtual string EnrollmentTimeRaw
+        {
+            get => _enrollmentTimeRaw;
+            set
+            {
+                _enrollmentTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _enrollmentTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EnrollmentTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EnrollmentTimeDateTimeOffset instead.")]
+        public virtual object EnrollmentTime
+        {
+            get => _enrollmentTime;
+            set
+            {
+                _enrollmentTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _enrollmentTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="EnrollmentTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EnrollmentTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EnrollmentTimeRaw);
+            set => EnrollmentTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// If the device was enrolled with an enrollment token with additional data provided, this field contains that
@@ -2920,17 +4050,124 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("hardwareStatusSamples")]
         public virtual System.Collections.Generic.IList<HardwareStatus> HardwareStatusSamples { get; set; }
 
+        private string _lastPolicyComplianceReportTimeRaw;
+
+        private object _lastPolicyComplianceReportTime;
+
         /// <summary>Deprecated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastPolicyComplianceReportTime")]
-        public virtual object LastPolicyComplianceReportTime { get; set; }
+        public virtual string LastPolicyComplianceReportTimeRaw
+        {
+            get => _lastPolicyComplianceReportTimeRaw;
+            set
+            {
+                _lastPolicyComplianceReportTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastPolicyComplianceReportTimeRaw = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="object"/> representation of <see cref="LastPolicyComplianceReportTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastPolicyComplianceReportTimeDateTimeOffset instead.")]
+        public virtual object LastPolicyComplianceReportTime
+        {
+            get => _lastPolicyComplianceReportTime;
+            set
+            {
+                _lastPolicyComplianceReportTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastPolicyComplianceReportTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastPolicyComplianceReportTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastPolicyComplianceReportTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastPolicyComplianceReportTimeRaw);
+            set => LastPolicyComplianceReportTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _lastPolicySyncTimeRaw;
+
+        private object _lastPolicySyncTime;
 
         /// <summary>The last time the device fetched its policy.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastPolicySyncTime")]
-        public virtual object LastPolicySyncTime { get; set; }
+        public virtual string LastPolicySyncTimeRaw
+        {
+            get => _lastPolicySyncTimeRaw;
+            set
+            {
+                _lastPolicySyncTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastPolicySyncTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastPolicySyncTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastPolicySyncTimeDateTimeOffset instead.")]
+        public virtual object LastPolicySyncTime
+        {
+            get => _lastPolicySyncTime;
+            set
+            {
+                _lastPolicySyncTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastPolicySyncTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastPolicySyncTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastPolicySyncTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastPolicySyncTimeRaw);
+            set => LastPolicySyncTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _lastStatusReportTimeRaw;
+
+        private object _lastStatusReportTime;
 
         /// <summary>The last time the device sent a status report.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastStatusReportTime")]
-        public virtual object LastStatusReportTime { get; set; }
+        public virtual string LastStatusReportTimeRaw
+        {
+            get => _lastStatusReportTimeRaw;
+            set
+            {
+                _lastStatusReportTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastStatusReportTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastStatusReportTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastStatusReportTimeDateTimeOffset instead.")]
+        public virtual object LastStatusReportTime
+        {
+            get => _lastStatusReportTime;
+            set
+            {
+                _lastStatusReportTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastStatusReportTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastStatusReportTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastStatusReportTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastStatusReportTimeRaw);
+            set => LastStatusReportTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The type of management mode Android Device Policy takes on the device. This influences which policy settings
@@ -2941,7 +4178,8 @@ namespace Google.Apis.AndroidManagement.v1.Data
 
         /// <summary>
         /// Events related to memory and storage measurements in chronological order. This information is only available
-        /// if memoryInfoEnabled is true in the device's policy.
+        /// if memoryInfoEnabled is true in the device's policy.Events are retained for a certain period of time and old
+        /// events are deleted.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("memoryEvents")]
         public virtual System.Collections.Generic.IList<MemoryEvent> MemoryEvents { get; set; }
@@ -3037,6 +4275,82 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Covers controls for device connectivity such as Wi-Fi, USB data access, keyboard/mouse connections, and more.
+    /// </summary>
+    public class DeviceConnectivityManagement : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Controls Wi-Fi configuring privileges. Based on the option set, user will have either full or limited or no
+        /// control in configuring Wi-Fi networks.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("configureWifi")]
+        public virtual string ConfigureWifi { get; set; }
+
+        /// <summary>
+        /// Controls tethering settings. Based on the value set, the user is partially or fully disallowed from using
+        /// different forms of tethering.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tetheringSettings")]
+        public virtual string TetheringSettings { get; set; }
+
+        /// <summary>
+        /// Controls what files and/or data can be transferred via USB. Supported only on company-owned devices.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("usbDataAccess")]
+        public virtual string UsbDataAccess { get; set; }
+
+        /// <summary>
+        /// Controls configuring and using Wi-Fi direct settings. Supported on company-owned devices running Android 13
+        /// and above.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wifiDirectSettings")]
+        public virtual string WifiDirectSettings { get; set; }
+
+        /// <summary>Optional. Wi-Fi roaming policy.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wifiRoamingPolicy")]
+        public virtual WifiRoamingPolicy WifiRoamingPolicy { get; set; }
+
+        /// <summary>
+        /// Restrictions on which Wi-Fi SSIDs the device can connect to. Note that this does not affect which networks
+        /// can be configured on the device. Supported on company-owned devices running Android 13 and above.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wifiSsidPolicy")]
+        public virtual WifiSsidPolicy WifiSsidPolicy { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Controls for device radio settings.</summary>
+    public class DeviceRadioState : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Controls whether airplane mode can be toggled by the user or not.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("airplaneModeState")]
+        public virtual string AirplaneModeState { get; set; }
+
+        /// <summary>Controls whether cellular 2G setting can be toggled by the user or not.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cellularTwoGState")]
+        public virtual string CellularTwoGState { get; set; }
+
+        /// <summary>The minimum required security level of Wi-Fi networks that the device can connect to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minimumWifiSecurityLevel")]
+        public virtual string MinimumWifiSecurityLevel { get; set; }
+
+        /// <summary>
+        /// Controls the state of the ultra wideband setting and whether the user can toggle it on or off.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ultraWidebandState")]
+        public virtual string UltraWidebandState { get; set; }
+
+        /// <summary>Controls current state of Wi-Fi and if user can change its state.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wifiState")]
+        public virtual string WifiState { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Information about security related device settings on device.</summary>
     public class DeviceSettings : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3112,13 +4426,89 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Controls for the display settings.</summary>
+    public class DisplaySettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Controls the screen brightness settings.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("screenBrightnessSettings")]
+        public virtual ScreenBrightnessSettings ScreenBrightnessSettings { get; set; }
+
+        /// <summary>Optional. Controls the screen timeout settings.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("screenTimeoutSettings")]
+        public virtual ScreenTimeoutSettings ScreenTimeoutSettings { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A DNS lookup event was initiated through the standard network stack.</summary>
+    public class DnsEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The hostname that was looked up.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hostname")]
+        public virtual string Hostname { get; set; }
+
+        /// <summary>
+        /// The (possibly truncated) list of the IP addresses returned for DNS lookup (max 10 IPv4 or IPv6 addresses).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ipAddresses")]
+        public virtual System.Collections.Generic.IList<string> IpAddresses { get; set; }
+
+        /// <summary>The package name of the UID that performed the DNS lookup.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("packageName")]
+        public virtual string PackageName { get; set; }
+
+        /// <summary>
+        /// The number of IP addresses returned from the DNS lookup event. May be higher than the amount of ip_addresses
+        /// if there were too many addresses to log.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("totalIpAddressesReturned")]
+        public virtual System.Nullable<long> TotalIpAddressesReturned { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Information related to whether this device was migrated from being managed by another Device Policy Controller
+    /// (DPC).
+    /// </summary>
+    public class DpcMigrationInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. If this device was migrated from another DPC, the additionalData field of the migration token
+        /// is populated here.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("additionalData")]
+        public virtual string AdditionalData { get; set; }
+
+        /// <summary>
+        /// Output only. If this device was migrated from another DPC, this is its package name. Not populated
+        /// otherwise.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("previousDpc")]
+        public virtual string PreviousDpc { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for Empty is empty JSON
-    /// object {}.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Represents that the device has completed enrollment. User should be in the launcher at this point, device at
+    /// this point will be compliant and all setup steps have been completed. Intentionally empty.
+    /// </summary>
+    public class EnrollmentCompleteEvent : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3148,15 +4538,54 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string AllowPersonalUsage { get; set; }
 
         /// <summary>
-        /// The length of time the enrollment token is valid, ranging from 1 minute to 90 days. If not specified, the
-        /// default duration is 1 hour.
+        /// The length of time the enrollment token is valid, ranging from 1 minute to Durations.MAX_VALUE
+        /// (https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/util/Durations.html#MAX_VALUE),
+        /// approximately 10,000 years. If not specified, the default duration is 1 hour. Please note that if requested
+        /// duration causes the resulting expiration_timestamp to exceed Timestamps.MAX_VALUE
+        /// (https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/util/Timestamps.html#MAX_VALUE),
+        /// then expiration_timestamp is coerced to Timestamps.MAX_VALUE.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("duration")]
         public virtual object Duration { get; set; }
 
+        private string _expirationTimestampRaw;
+
+        private object _expirationTimestamp;
+
         /// <summary>The expiration time of the token. This is a read-only field generated by the server.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expirationTimestamp")]
-        public virtual object ExpirationTimestamp { get; set; }
+        public virtual string ExpirationTimestampRaw
+        {
+            get => _expirationTimestampRaw;
+            set
+            {
+                _expirationTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expirationTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpirationTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpirationTimestampDateTimeOffset instead.")]
+        public virtual object ExpirationTimestamp
+        {
+            get => _expirationTimestamp;
+            set
+            {
+                _expirationTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expirationTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpirationTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpirationTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpirationTimestampRaw);
+            set => ExpirationTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The name of the enrollment token, which is generated by the server during creation, in the form
@@ -3190,11 +4619,7 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("qrCode")]
         public virtual string QrCode { get; set; }
 
-        /// <summary>
-        /// The user associated with this enrollment token. If it's specified when the enrollment token is created and
-        /// the user does not exist, the user will be created. This field must not contain personally identifiable
-        /// information. Only the account_identifier field needs to be set.
-        /// </summary>
+        /// <summary>This field is deprecated and the value is ignored.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("user")]
         public virtual User User { get; set; }
 
@@ -3224,9 +4649,15 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("enabledNotificationTypes")]
         public virtual System.Collections.Generic.IList<string> EnabledNotificationTypes { get; set; }
 
-        /// <summary>The name of the enterprise displayed to users.</summary>
+        /// <summary>
+        /// The name of the enterprise displayed to users. This field has a maximum length of 100 characters.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("enterpriseDisplayName")]
         public virtual string EnterpriseDisplayName { get; set; }
+
+        /// <summary>Settings for Google-provided user authentication.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleAuthenticationSettings")]
+        public virtual GoogleAuthenticationSettings GoogleAuthenticationSettings { get; set; }
 
         /// <summary>
         /// An image displayed as a logo during device provisioning. Supported types are: image/bmp, image/gif,
@@ -3251,8 +4682,8 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual System.Nullable<int> PrimaryColor { get; set; }
 
         /// <summary>
-        /// The topic that Cloud Pub/Sub notifications are published to, in the form projects/{project}/topics/{topic}.
-        /// This field is only required if Pub/Sub notifications are enabled.
+        /// The topic which Pub/Sub notifications are published to, in the form projects/{project}/topics/{topic}. This
+        /// field is only required if Pub/Sub notifications are enabled.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pubsubTopic")]
         public virtual string PubsubTopic { get; set; }
@@ -3274,7 +4705,11 @@ namespace Google.Apis.AndroidManagement.v1.Data
 
     /// <summary>
     /// Configuration to enable an app as an extension app, with the capability of interacting with Android Device
-    /// Policy offline.
+    /// Policy offline. For Android versions 11 and above, extension apps are exempt from battery restrictions so will
+    /// not be placed into the restricted App Standby Bucket
+    /// (https://developer.android.com/topic/performance/appstandby#restricted-bucket). Extensions apps are also
+    /// protected against users clearing their data or force-closing the application, although admins can continue to
+    /// use the clear app data command on extension apps if needed for Android 11 and above.
     /// </summary>
     public class ExtensionConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3286,7 +4721,7 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string NotificationReceiver { get; set; }
 
         /// <summary>
-        /// Hex-encoded SHA256 hash of the signing certificate of the extension app. Only hexadecimal string
+        /// Hex-encoded SHA-256 hash of the signing certificate of the extension app. Only hexadecimal string
         /// representations of 64 characters are valid.If not specified, the signature for the corresponding package
         /// name is obtained from the Play Store instead.If this list is empty, the signature of the extension app on
         /// the device must match the signature obtained from the Play Store for the app to be able to communicate with
@@ -3326,14 +4761,37 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A file was downloaded from the device.</summary>
+    public class FilePulledEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The path of the file being pulled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filePath")]
+        public virtual string FilePath { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A file was uploaded onto the device.</summary>
+    public class FilePushedEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The path of the file being pushed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filePath")]
+        public virtual string FilePath { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A system freeze period. When a device’s clock is within the freeze period, all incoming system updates
-    /// (including security patches) are blocked and won’t be installed. When a device is outside the freeze period,
-    /// normal update behavior applies. Leap years are ignored in freeze period calculations, in particular: * If Feb.
-    /// 29th is set as the start or end date of a freeze period, the freeze period will start or end on Feb. 28th
-    /// instead. * When a device’s system clock reads Feb. 29th, it’s treated as Feb. 28th. * When calculating the
-    /// number of days in a freeze period or the time between two freeze periods, Feb. 29th is ignored and not counted
-    /// as a day.
+    /// (including security patches) are blocked and won’t be installed.When the device is outside any set freeze
+    /// periods, the normal policy behavior (automatic, windowed, or postponed) applies.Leap years are ignored in freeze
+    /// period calculations, in particular: If Feb. 29th is set as the start or end date of a freeze period, the freeze
+    /// period will start or end on Feb. 28th instead. When a device’s system clock reads Feb. 29th, it’s treated as
+    /// Feb. 28th. When calculating the number of days in a freeze period or the time between two freeze periods, Feb.
+    /// 29th is ignored and not counted as a day.Note: For Freeze Periods to take effect, SystemUpdateType cannot be
+    /// specified as SYSTEM_UPDATE_TYPE_UNSPECIFIED, because freeze periods require a defined policy to be specified.
     /// </summary>
     public class FreezePeriod : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3351,6 +4809,23 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startDate")]
         public virtual Date StartDate { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Contains settings for Google-provided user authentication.</summary>
+    public class GoogleAuthenticationSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. Whether users need to be authenticated by Google during the enrollment process. IT admin can
+        /// specify if Google authentication is enabled for the enterprise for knowledge worker devices. This value can
+        /// be set only via the Google Admin Console. Google authentication can be used with signin_url In the case
+        /// where Google authentication is required and a signin_url is specified, Google authentication will be
+        /// launched before signin_url.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleAuthenticationRequired")]
+        public virtual string GoogleAuthenticationRequired { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3452,9 +4927,42 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cpuUsages")]
         public virtual System.Collections.Generic.IList<System.Nullable<float>> CpuUsages { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time the measurements were taken.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Fan speeds in RPM for each fan on the device. Empty array means that there are no fans or fan speed is not
@@ -3475,6 +4983,29 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Amongst apps with InstallType set to: FORCE_INSTALLED PREINSTALLEDthis defines a set of restrictions for the app
+    /// installation. At least one of the fields must be set. When multiple fields are set, then all the constraints
+    /// need to be satisfied for the app to be installed.
+    /// </summary>
+    public class InstallConstraint : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Charging constraint.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("chargingConstraint")]
+        public virtual string ChargingConstraint { get; set; }
+
+        /// <summary>Optional. Device idle constraint.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceIdleConstraint")]
+        public virtual string DeviceIdleConstraint { get; set; }
+
+        /// <summary>Optional. Network type constraint.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("networkTypeConstraint")]
+        public virtual string NetworkTypeConstraint { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Response on issuing a command. This is currently empty as a placeholder.</summary>
     public class IssueCommandResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3482,12 +5013,133 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// A cryptographic key including user installed, admin installed and system maintained private key is removed from
+    /// the device either by the user or management. This is available device-wide on fully managed devices and within
+    /// the work profile on organization-owned devices with a work profile.
+    /// </summary>
+    public class KeyDestructionEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>UID of the application which owns the key.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("applicationUid")]
+        public virtual System.Nullable<int> ApplicationUid { get; set; }
+
+        /// <summary>Alias of the key.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyAlias")]
+        public virtual string KeyAlias { get; set; }
+
+        /// <summary>Whether the operation was successful.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("success")]
+        public virtual System.Nullable<bool> Success { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A cryptographic key including user installed, admin installed and system maintained private key is installed on
+    /// the device either by the user or management.This is available device-wide on fully managed devices and within
+    /// the work profile on organization-owned devices with a work profile.
+    /// </summary>
+    public class KeyGeneratedEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>UID of the application which generated the key.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("applicationUid")]
+        public virtual System.Nullable<int> ApplicationUid { get; set; }
+
+        /// <summary>Alias of the key.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyAlias")]
+        public virtual string KeyAlias { get; set; }
+
+        /// <summary>Whether the operation was successful.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("success")]
+        public virtual System.Nullable<bool> Success { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A cryptographic key including user installed, admin installed and system maintained private key is imported on
+    /// the device either by the user or management. This is available device-wide on fully managed devices and within
+    /// the work profile on organization-owned devices with a work profile.
+    /// </summary>
+    public class KeyImportEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>UID of the application which imported the key</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("applicationUid")]
+        public virtual System.Nullable<int> ApplicationUid { get; set; }
+
+        /// <summary>Alias of the key.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyAlias")]
+        public virtual string KeyAlias { get; set; }
+
+        /// <summary>Whether the operation was successful.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("success")]
+        public virtual System.Nullable<bool> Success { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A cryptographic key including user installed, admin installed and system maintained private key is determined to
+    /// be corrupted due to storage corruption, hardware failure or some OS issue. This is available device-wide on
+    /// fully managed devices and within the work profile on organization-owned devices with a work profile.
+    /// </summary>
+    public class KeyIntegrityViolationEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>UID of the application which owns the key</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("applicationUid")]
+        public virtual System.Nullable<int> ApplicationUid { get; set; }
+
+        /// <summary>Alias of the key.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyAlias")]
+        public virtual string KeyAlias { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Keyed app state reported by the app.</summary>
     public class KeyedAppState : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The creation time of the app state on the device.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optionally, a machine-readable value to be read by the EMM. For example, setting values that the admin can
@@ -3503,9 +5155,44 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("key")]
         public virtual string Key { get; set; }
 
+        private string _lastUpdateTimeRaw;
+
+        private object _lastUpdateTime;
+
         /// <summary>The time the app state was most recently updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdateTime")]
-        public virtual object LastUpdateTime { get; set; }
+        public virtual string LastUpdateTimeRaw
+        {
+            get => _lastUpdateTimeRaw;
+            set
+            {
+                _lastUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdateTimeDateTimeOffset instead.")]
+        public virtual object LastUpdateTime
+        {
+            get => _lastUpdateTime;
+            set
+            {
+                _lastUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdateTimeRaw);
+            set => LastUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optionally, a free-form message string to explain the app state. If the state was triggered by a particular
@@ -3518,6 +5205,37 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("severity")]
         public virtual string Severity { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An attempt was made to unlock the device.</summary>
+    public class KeyguardDismissAuthAttemptEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Whether a strong form of authentication (password, PIN, or pattern) was used to unlock device.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("strongAuthMethodUsed")]
+        public virtual System.Nullable<bool> StrongAuthMethodUsed { get; set; }
+
+        /// <summary>Whether the unlock attempt was successful.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("success")]
+        public virtual System.Nullable<bool> Success { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The keyguard was dismissed. Intentionally empty.</summary>
+    public class KeyguardDismissedEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The device was locked either by user or timeout. Intentionally empty.</summary>
+    public class KeyguardSecuredEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3585,6 +5303,21 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Response to a request to list enrollment tokens for a given enterprise.</summary>
+    public class ListEnrollmentTokensResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of enrollment tokens.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enrollmentTokens")]
+        public virtual System.Collections.Generic.IList<EnrollmentToken> EnrollmentTokens { get; set; }
+
+        /// <summary>If there are more results, a token to retrieve next page of results.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Response to a request to list enterprises.</summary>
     public class ListEnterprisesResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3593,6 +5326,24 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual System.Collections.Generic.IList<Enterprise> Enterprises { get; set; }
 
         /// <summary>If there are more results, a token to retrieve next page of results.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response to a request to list migration tokens for a given enterprise.</summary>
+    public class ListMigrationTokensResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The migration tokens from the specified enterprise.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("migrationTokens")]
+        public virtual System.Collections.Generic.IList<MigrationToken> MigrationTokens { get; set; }
+
+        /// <summary>
+        /// A token, which can be sent as page_token to retrieve the next page. If this field is omitted, there are no
+        /// subsequent pages.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
 
@@ -3641,6 +5392,69 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("webApps")]
         public virtual System.Collections.Generic.IList<WebApp> WebApps { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The device location containing the latitude and longitude.</summary>
+    public class Location : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The latitude position of the location</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("latitude")]
+        public virtual System.Nullable<double> Latitude { get; set; }
+
+        /// <summary>The longitude position of the location</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("longitude")]
+        public virtual System.Nullable<double> Longitude { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The usageLog buffer on the device has reached 90% of its capacity, therefore older events may be dropped.
+    /// Intentionally empty.
+    /// </summary>
+    public class LogBufferSizeCriticalEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>usageLog policy has been enabled. Intentionally empty.</summary>
+    public class LoggingStartedEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>usageLog policy has been disabled. Intentionally empty.</summary>
+    public class LoggingStoppedEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A lost mode event containing the device location and battery level as a percentage.</summary>
+    public class LostModeLocationEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The battery level as a number between 0 and 100 inclusive</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("batteryLevel")]
+        public virtual System.Nullable<int> BatteryLevel { get; set; }
+
+        /// <summary>The device location</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual Location Location { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An event indicating an outgoing phone call has been made when a device is in lost mode. Intentionally empty.
+    /// </summary>
+    public class LostModeOutgoingPhoneCallEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3721,7 +5535,40 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>An event related to memory and storage measurements.</summary>
+    /// <summary>Removable media was mounted.</summary>
+    public class MediaMountEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Mount point.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mountPoint")]
+        public virtual string MountPoint { get; set; }
+
+        /// <summary>Volume label. Redacted to empty string on organization-owned managed profile devices.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("volumeLabel")]
+        public virtual string VolumeLabel { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Removable media was unmounted.</summary>
+    public class MediaUnmountEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Mount point.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mountPoint")]
+        public virtual string MountPoint { get; set; }
+
+        /// <summary>Volume label. Redacted to empty string on organization-owned managed profile devices.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("volumeLabel")]
+        public virtual string VolumeLabel { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An event related to memory and storage measurements.To distinguish between new and old events, we recommend
+    /// using the createTime field.
+    /// </summary>
     public class MemoryEvent : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -3731,9 +5578,42 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("byteCount")]
         public virtual System.Nullable<long> ByteCount { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The creation time of the event.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Event type.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("eventType")]
@@ -3753,6 +5633,154 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// <summary>Total RAM on device in bytes.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("totalRam")]
         public virtual System.Nullable<long> TotalRam { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A token to initiate the migration of a device from being managed by a third-party DPC to being managed by
+    /// Android Management API. A migration token is valid only for a single device. See the guide
+    /// (https://developers.google.com/android/management/dpc-migration) for more details.
+    /// </summary>
+    public class MigrationToken : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Immutable. Optional EMM-specified additional data. Once the device is migrated this will be populated in the
+        /// migrationAdditionalData field of the Device resource. This must be at most 1024 characters.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("additionalData")]
+        public virtual string AdditionalData { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Time when this migration token was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. Once this migration token is used to migrate a device, the name of the resulting Device
+        /// resource will be populated here, in the form enterprises/{enterprise}/devices/{device}.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("device")]
+        public virtual string Device { get; set; }
+
+        /// <summary>
+        /// Required. Immutable. The id of the device, as in the Play EMM API. This corresponds to the deviceId
+        /// parameter in Play EMM API's Devices.get
+        /// (https://developers.google.com/android/work/play/emm-api/v1/devices/get#parameters) call.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceId")]
+        public virtual string DeviceId { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>
+        /// Immutable. The time when this migration token expires. This can be at most seven days from the time of
+        /// creation. The migration token is deleted seven days after it expires.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Required. Immutable. The management mode of the device or profile being migrated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("managementMode")]
+        public virtual string ManagementMode { get; set; }
+
+        /// <summary>
+        /// Output only. The name of the migration token, which is generated by the server during creation, in the form
+        /// enterprises/{enterprise}/migrationTokens/{migration_token}.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Required. Immutable. The name of the policy initially applied to the enrolled device, in the form
+        /// enterprises/{enterprise}/policies/{policy}.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policy")]
+        public virtual string Policy { get; set; }
+
+        /// <summary>
+        /// Input only. The time that this migration token is valid for. This is input-only, and for returning a
+        /// migration token the server will populate the expireTime field. This can be at most seven days. The default
+        /// is seven days.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ttl")]
+        public virtual object Ttl { get; set; }
+
+        /// <summary>
+        /// Required. Immutable. The user id of the Managed Google Play account on the device, as in the Play EMM API.
+        /// This corresponds to the userId parameter in Play EMM API's Devices.get
+        /// (https://developers.google.com/android/work/play/emm-api/v1/devices/get#parameters) call.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userId")]
+        public virtual string UserId { get; set; }
+
+        /// <summary>Output only. The value of the migration token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("value")]
+        public virtual string Value { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3827,6 +5855,14 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("settingName")]
         public virtual string SettingName { get; set; }
 
+        /// <summary>Additional context for specific_non_compliance_reason.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("specificNonComplianceContext")]
+        public virtual SpecificNonComplianceContext SpecificNonComplianceContext { get; set; }
+
+        /// <summary>The policy-specific reason the device is not in compliance with the setting.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("specificNonComplianceReason")]
+        public virtual string SpecificNonComplianceReason { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3878,6 +5914,17 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Additional context for non-compliance related to Wi-Fi configuration.</summary>
+    public class OncWifiContext : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The GUID of non-compliant Wi-Fi configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wifiGuid")]
+        public virtual string WifiGuid { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>This resource represents a long-running operation that is the result of a network API call.</summary>
     public class Operation : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3908,14 +5955,36 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as Delete, the response is google.protobuf.Empty. If the original method is standard Get/Create/Update,
-        /// the response should be the resource. For other methods, the response should have the type XxxResponse, where
-        /// Xxx is the original method name. For example, if the original method name is TakeSnapshot(), the inferred
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// Delete, the response is google.protobuf.Empty. If the original method is standard Get/Create/Update, the
+        /// response should be the resource. For other methods, the response should have the type XxxResponse, where Xxx
+        /// is the original method name. For example, if the original method name is TakeSnapshot(), the inferred
         /// response type is TakeSnapshotResponse.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("response")]
         public virtual System.Collections.Generic.IDictionary<string, object> Response { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Device was shutdown. Intentionally empty.</summary>
+    public class OsShutdownEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Device was started.</summary>
+    public class OsStartupEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Verified Boot state.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verifiedBootState")]
+        public virtual string VerifiedBootState { get; set; }
+
+        /// <summary>dm-verity mode.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verityMode")]
+        public virtual string VerityMode { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3927,6 +5996,17 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// <summary>A list of package names.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("packageNames")]
         public virtual System.Collections.Generic.IList<string> PackageNames { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Additional context for non-compliance related to password policies.</summary>
+    public class PasswordPoliciesContext : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The scope of non-compliant password.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("passwordPolicyScope")]
+        public virtual string PasswordPolicyScope { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4016,6 +6096,26 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("requirePasswordUnlock")]
         public virtual string RequirePasswordUnlock { get; set; }
 
+        /// <summary>
+        /// Controls whether a unified lock is allowed for the device and the work profile, on devices running Android 9
+        /// and above with a work profile. This can be set only if password_scope is set to SCOPE_PROFILE, the policy
+        /// will be rejected otherwise. If user has not set a separate work lock and this field is set to
+        /// REQUIRE_SEPARATE_WORK_LOCK, a NonComplianceDetail is reported with nonComplianceReason set to USER_ACTION.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unifiedLockSettings")]
+        public virtual string UnifiedLockSettings { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The result of an attempt to clear the data of a single app.</summary>
+    public class PerAppResult : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The result of an attempt to clear the data of a single app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clearingResult")]
+        public virtual string ClearingResult { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -4093,11 +6193,17 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("accountTypesWithManagementDisabled")]
         public virtual System.Collections.Generic.IList<string> AccountTypesWithManagementDisabled { get; set; }
 
-        /// <summary>Whether camera is disabled.</summary>
+        /// <summary>If true, the camera is disabled on the personal profile.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cameraDisabled")]
         public virtual System.Nullable<bool> CameraDisabled { get; set; }
 
-        /// <summary>Controls how long the work profile can stay off. The duration must be at least 3 days.</summary>
+        /// <summary>
+        /// Controls how long the work profile can stay off. The minimum duration must be at least 3 days. Other details
+        /// are as follows: - If the duration is set to 0, the feature is turned off. - If the duration is set to a
+        /// value smaller than the minimum duration, the feature returns an error. *Note:* If you want to avoid personal
+        /// profiles being suspended during long periods of off-time, you can temporarily set a large value for this
+        /// parameter.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maxDaysWithWorkOff")]
         public virtual System.Nullable<int> MaxDaysWithWorkOff { get; set; }
 
@@ -4111,7 +6217,11 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("personalPlayStoreMode")]
         public virtual string PersonalPlayStoreMode { get; set; }
 
-        /// <summary>Whether screen capture is disabled.</summary>
+        /// <summary>Optional. Controls whether a private space is allowed on the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("privateSpacePolicy")]
+        public virtual string PrivateSpacePolicy { get; set; }
+
+        /// <summary>If true, screen capture is disabled for all users.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("screenCaptureDisabled")]
         public virtual System.Nullable<bool> ScreenCaptureDisabled { get; set; }
 
@@ -4129,18 +6239,21 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("accountTypesWithManagementDisabled")]
         public virtual System.Collections.Generic.IList<string> AccountTypesWithManagementDisabled { get; set; }
 
-        /// <summary>Whether adding new users and profiles is disabled.</summary>
+        /// <summary>
+        /// Whether adding new users and profiles is disabled. For devices where managementMode is DEVICE_OWNER this
+        /// field is ignored and the user is never allowed to add or remove users.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("addUserDisabled")]
         public virtual System.Nullable<bool> AddUserDisabled { get; set; }
 
-        /// <summary>Whether adjusting the master volume is disabled. Also mutes the device.</summary>
+        /// <summary>
+        /// Whether adjusting the master volume is disabled. Also mutes the device. The setting has effect only on fully
+        /// managed devices.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("adjustVolumeDisabled")]
         public virtual System.Nullable<bool> AdjustVolumeDisabled { get; set; }
 
-        /// <summary>
-        /// Security policies set to secure values by default. To maintain the security posture of a device, we don't
-        /// recommend overriding any of the default values.
-        /// </summary>
+        /// <summary>Advanced security settings. In most cases, setting these is not needed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("advancedSecurityOverrides")]
         public virtual AdvancedSecurityOverrides AdvancedSecurityOverrides { get; set; }
 
@@ -4151,24 +6264,30 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("alwaysOnVpnPackage")]
         public virtual AlwaysOnVpnPackage AlwaysOnVpnPackage { get; set; }
 
-        /// <summary>
-        /// The app tracks for Android Device Policy the device can access. The device receives the latest version among
-        /// all accessible tracks. If no tracks are specified, then the device only uses the production track.
-        /// </summary>
+        /// <summary>This setting is not supported. Any value is ignored.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("androidDevicePolicyTracks")]
         public virtual System.Collections.Generic.IList<string> AndroidDevicePolicyTracks { get; set; }
 
         /// <summary>
-        /// Deprecated. Use autoUpdateMode instead.When autoUpdateMode is set to AUTO_UPDATE_POSTPONED or
-        /// AUTO_UPDATE_HIGH_PRIORITY, this field has no effect.The app auto update policy, which controls when
-        /// automatic app updates can be applied.
+        /// Recommended alternative: autoUpdateMode which is set per app, provides greater flexibility around update
+        /// frequency.When autoUpdateMode is set to AUTO_UPDATE_POSTPONED or AUTO_UPDATE_HIGH_PRIORITY, this field has
+        /// no effect.The app auto update policy, which controls when automatic app updates can be applied.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("appAutoUpdatePolicy")]
         public virtual string AppAutoUpdatePolicy { get; set; }
 
-        /// <summary>Policy applied to apps.</summary>
+        /// <summary>Policy applied to apps. This can have at most 3,000 elements.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("applications")]
         public virtual System.Collections.Generic.IList<ApplicationPolicy> Applications { get; set; }
+
+        /// <summary>
+        /// Optional. Controls whether AssistContent
+        /// (https://developer.android.com/reference/android/app/assist/AssistContent) is allowed to be sent to a
+        /// privileged app such as an assistant app. AssistContent includes screenshots and information about an app,
+        /// such as package name. This is supported on Android 15 and above.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("assistContentPolicy")]
+        public virtual string AssistContentPolicy { get; set; }
 
         /// <summary>
         /// Whether auto date, time, and time zone are enabled on a company-owned device. If this is set, then
@@ -4207,7 +6326,19 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("bluetoothDisabled")]
         public virtual System.Nullable<bool> BluetoothDisabled { get; set; }
 
-        /// <summary>Whether all cameras on the device are disabled.</summary>
+        /// <summary>
+        /// Controls the use of the camera and whether the user has access to the camera access toggle.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cameraAccess")]
+        public virtual string CameraAccess { get; set; }
+
+        /// <summary>
+        /// If camera_access is set to any value other than CAMERA_ACCESS_UNSPECIFIED, this has no effect. Otherwise
+        /// this field controls whether cameras are disabled: If true, all cameras are disabled, otherwise they are
+        /// available. For fully managed devices this field applies for all apps on the device. For work profiles, this
+        /// field applies only to apps in the work profile, and the camera access of apps outside the work profile is
+        /// unaffected.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cameraDisabled")]
         public virtual System.Nullable<bool> CameraDisabled { get; set; }
 
@@ -4215,7 +6346,10 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cellBroadcastsConfigDisabled")]
         public virtual System.Nullable<bool> CellBroadcastsConfigDisabled { get; set; }
 
-        /// <summary>Rules for determining apps' access to private keys. See ChoosePrivateKeyRule for details.</summary>
+        /// <summary>
+        /// Rules for determining apps' access to private keys. See ChoosePrivateKeyRule for details. This must be empty
+        /// if any application has CERT_SELECTION delegation scope.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("choosePrivateKeyRules")]
         public virtual System.Collections.Generic.IList<ChoosePrivateKeyRule> ChoosePrivateKeyRules { get; set; }
 
@@ -4230,6 +6364,15 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// <summary>Whether creating windows besides app windows is disabled.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createWindowsDisabled")]
         public virtual System.Nullable<bool> CreateWindowsDisabled { get; set; }
+
+        /// <summary>
+        /// Controls which apps are allowed to act as credential providers on Android 14 and above. These apps store
+        /// credentials, see this (https://developer.android.com/training/sign-in/passkeys) and this
+        /// (https://developer.android.com/reference/androidx/credentials/CredentialManager) for details. See also
+        /// credentialProviderPolicy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("credentialProviderPolicyDefault")]
+        public virtual string CredentialProviderPolicyDefault { get; set; }
 
         /// <summary>Whether configuring user credentials is disabled.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("credentialsConfigDisabled")]
@@ -4251,9 +6394,24 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("defaultPermissionPolicy")]
         public virtual string DefaultPermissionPolicy { get; set; }
 
+        /// <summary>
+        /// Covers controls for device connectivity such as Wi-Fi, USB data access, keyboard/mouse connections, and
+        /// more.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceConnectivityManagement")]
+        public virtual DeviceConnectivityManagement DeviceConnectivityManagement { get; set; }
+
         /// <summary>The device owner information to be shown on the lock screen.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deviceOwnerLockScreenInfo")]
         public virtual UserFacingMessage DeviceOwnerLockScreenInfo { get; set; }
+
+        /// <summary>Covers controls for radio state such as Wi-Fi, bluetooth, and more.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceRadioState")]
+        public virtual DeviceRadioState DeviceRadioState { get; set; }
+
+        /// <summary>Optional. Controls for the display settings.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displaySettings")]
+        public virtual DisplaySettings DisplaySettings { get; set; }
 
         /// <summary>Whether encryption is enabled</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("encryptionPolicy")]
@@ -4289,7 +6447,11 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("installUnknownSourcesAllowed")]
         public virtual System.Nullable<bool> InstallUnknownSourcesAllowed { get; set; }
 
-        /// <summary>Whether the keyguard is disabled.</summary>
+        /// <summary>
+        /// If true, this disables the Lock Screen
+        /// (https://source.android.com/docs/core/display/multi_display/lock-screen) for primary and/or secondary
+        /// displays. This policy is supported only in dedicated device management mode.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("keyguardDisabled")]
         public virtual System.Nullable<bool> KeyguardDisabled { get; set; }
 
@@ -4327,6 +6489,13 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("maximumTimeToLock")]
         public virtual System.Nullable<long> MaximumTimeToLock { get; set; }
 
+        /// <summary>
+        /// Controls the use of the microphone and whether the user has access to the microphone access toggle. This
+        /// applies only on fully managed devices.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("microphoneAccess")]
+        public virtual string MicrophoneAccess { get; set; }
+
         /// <summary>The minimum allowed Android API level.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minimumApiLevel")]
         public virtual System.Nullable<int> MinimumApiLevel { get; set; }
@@ -4354,7 +6523,8 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// being unable to connect to a network if there is no suitable network in the last policy and the device boots
         /// into an app in lock task mode, or the user is otherwise unable to reach device settings.Note: Setting
         /// wifiConfigDisabled to true will override this setting under specific circumstances. Please see
-        /// wifiConfigDisabled for further details.
+        /// wifiConfigDisabled for further details. Setting configureWifi to DISALLOW_CONFIGURING_WIFI will override
+        /// this setting under specific circumstances. Please see DISALLOW_CONFIGURING_WIFI for further details.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("networkEscapeHatchEnabled")]
         public virtual System.Nullable<bool> NetworkEscapeHatchEnabled { get; set; }
@@ -4388,8 +6558,8 @@ namespace Google.Apis.AndroidManagement.v1.Data
 
         /// <summary>
         /// Password requirements. The field password_requirements.require_password_unlock must not be set. DEPRECATED -
-        /// Use password_policies.Note:Complexity-based values of PasswordQuality, that is, COMPLEXITY_LOW,
-        /// COMPLEXITY_MEDIUM, and COMPLEXITY_HIGH, cannot be used here.
+        /// Use passwordPolicies.Note:Complexity-based values of PasswordQuality, that is, COMPLEXITY_LOW,
+        /// COMPLEXITY_MEDIUM, and COMPLEXITY_HIGH, cannot be used here. unified_lock_settings cannot be used here.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("passwordRequirements")]
         public virtual PasswordRequirements PasswordRequirements { get; set; }
@@ -4405,7 +6575,8 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// Specifies permitted accessibility services. If the field is not set, any accessibility service can be used.
         /// If the field is set, only the accessibility services in this list and the system's built-in accessibility
         /// service can be used. In particular, if the field is set to empty, only the system's built-in accessibility
-        /// servicess can be used.
+        /// servicess can be used. This can be set on fully managed devices and on work profiles. When applied to a work
+        /// profile, this affects both the personal profile and the work profile.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("permittedAccessibilityServices")]
         public virtual PackageNameList PermittedAccessibilityServices { get; set; }
@@ -4446,8 +6617,15 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string PreferentialNetworkService { get; set; }
 
         /// <summary>
+        /// Optional. Controls whether printing is allowed. This is supported on devices running Android 9 and above. .
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("printingPolicy")]
+        public virtual string PrintingPolicy { get; set; }
+
+        /// <summary>
         /// Allows showing UI on a device for a user to choose a private key alias if there are no matching rules in
-        /// ChoosePrivateKeyRules. For devices below Android P, setting this may leave enterprise keys vulnerable.
+        /// ChoosePrivateKeyRules. For devices below Android P, setting this may leave enterprise keys vulnerable. This
+        /// value will have no effect if any application has CERT_SELECTION delegation scope.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("privateKeySelectionEnabled")]
         public virtual System.Nullable<bool> PrivateKeySelectionEnabled { get; set; }
@@ -4473,7 +6651,9 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("screenCaptureDisabled")]
         public virtual System.Nullable<bool> ScreenCaptureDisabled { get; set; }
 
-        /// <summary>Whether changing the user icon is disabled.</summary>
+        /// <summary>
+        /// Whether changing the user icon is disabled. The setting has effect only on fully managed devices.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("setUserIconDisabled")]
         public virtual System.Nullable<bool> SetUserIconDisabled { get; set; }
 
@@ -4481,11 +6661,14 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("setWallpaperDisabled")]
         public virtual System.Nullable<bool> SetWallpaperDisabled { get; set; }
 
-        /// <summary>Actions to take during the setup process.</summary>
+        /// <summary>Action to take during the setup process. At most one action may be specified.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("setupActions")]
         public virtual System.Collections.Generic.IList<SetupAction> SetupActions { get; set; }
 
-        /// <summary>Whether location sharing is disabled.</summary>
+        /// <summary>
+        /// Whether location sharing is disabled. share_location_disabled is supported for both fully managed devices
+        /// and personally owned work profiles.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("shareLocationDisabled")]
         public virtual System.Nullable<bool> ShareLocationDisabled { get; set; }
 
@@ -4528,24 +6711,43 @@ namespace Google.Apis.AndroidManagement.v1.Data
 
         /// <summary>
         /// The system update policy, which controls how OS updates are applied. If the update type is WINDOWED, the
-        /// update window will automatically apply to Play app updates as well.
+        /// update window will automatically apply to Play app updates as well.Note: Google Play system updates
+        /// (https://source.android.com/docs/core/ota/modular-system) (also called Mainline updates) are automatically
+        /// downloaded and require a device reboot to be installed. Refer to the mainline section in Manage system
+        /// updates (https://developer.android.com/work/dpc/system-updates#mainline) for further details.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("systemUpdate")]
         public virtual SystemUpdate SystemUpdate { get; set; }
 
-        /// <summary>Whether configuring tethering and portable hotspots is disabled.</summary>
+        /// <summary>
+        /// Whether configuring tethering and portable hotspots is disabled. If tetheringSettings is set to anything
+        /// other than TETHERING_SETTINGS_UNSPECIFIED, this setting is ignored.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tetheringConfigDisabled")]
         public virtual System.Nullable<bool> TetheringConfigDisabled { get; set; }
 
-        /// <summary>Whether user uninstallation of applications is disabled.</summary>
+        /// <summary>
+        /// Whether user uninstallation of applications is disabled. This prevents apps from being uninstalled, even
+        /// those removed using applications
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uninstallAppsDisabled")]
         public virtual System.Nullable<bool> UninstallAppsDisabled { get; set; }
 
-        /// <summary>Whether the microphone is muted and adjusting microphone volume is disabled.</summary>
+        /// <summary>
+        /// If microphone_access is set to any value other than MICROPHONE_ACCESS_UNSPECIFIED, this has no effect.
+        /// Otherwise this field controls whether microphones are disabled: If true, all microphones are disabled,
+        /// otherwise they are available. This is available only on fully managed devices.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("unmuteMicrophoneDisabled")]
         public virtual System.Nullable<bool> UnmuteMicrophoneDisabled { get; set; }
 
-        /// <summary>Whether transferring files over USB is disabled.</summary>
+        /// <summary>Configuration of device activity logging.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("usageLog")]
+        public virtual UsageLog UsageLog { get; set; }
+
+        /// <summary>
+        /// Whether transferring files over USB is disabled. This is supported only on company-owned devices.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("usbFileTransferDisabled")]
         public virtual System.Nullable<bool> UsbFileTransferDisabled { get; set; }
 
@@ -4565,14 +6767,18 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual System.Nullable<bool> VpnConfigDisabled { get; set; }
 
         /// <summary>
-        /// Whether configuring Wi-Fi access points is disabled.Note: If a network connection can't be made at boot time
-        /// and configuring Wi-Fi is disabled then network escape hatch will be shown in order to refresh the device
-        /// policy (see networkEscapeHatchEnabled).
+        /// Whether configuring Wi-Fi networks is disabled. Supported on fully managed devices and work profiles on
+        /// company-owned devices. For fully managed devices, setting this to true removes all configured networks and
+        /// retains only the networks configured using openNetworkConfiguration. For work profiles on company-owned
+        /// devices, existing configured networks are not affected and the user is not allowed to add, remove, or modify
+        /// Wi-Fi networks. If configureWifi is set to anything other than CONFIGURE_WIFI_UNSPECIFIED, this setting is
+        /// ignored. Note: If a network connection can't be made at boot time and configuring Wi-Fi is disabled then
+        /// network escape hatch will be shown in order to refresh the device policy (see networkEscapeHatchEnabled).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("wifiConfigDisabled")]
         public virtual System.Nullable<bool> WifiConfigDisabled { get; set; }
 
-        /// <summary>DEPRECATED - Use wifi_config_disabled.</summary>
+        /// <summary>This is deprecated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("wifiConfigsLockdownEnabled")]
         public virtual System.Nullable<bool> WifiConfigsLockdownEnabled { get; set; }
 
@@ -4582,12 +6788,15 @@ namespace Google.Apis.AndroidManagement.v1.Data
 
     /// <summary>
     /// A rule that defines the actions to take if a device or work profile is not compliant with the policy specified
-    /// in settingName.
+    /// in settingName. In the case of multiple matching or multiple triggered enforcement rules, a merge will occur
+    /// with the most severe action being taken. However, all triggered rules are still kept track of: this includes
+    /// initial trigger time and all associated non-compliance details. In the situation where the most severe
+    /// enforcement rule is satisfied, the next most appropriate action is applied.
     /// </summary>
     public class PolicyEnforcementRule : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// An action to block access to apps and data on a fully managed device or in a work profile. This action also
+        /// An action to block access to apps and data on a company owned device or in a work profile. This action also
         /// triggers a user-facing notification with information (where possible) on how to correct the compliance
         /// issue. Note: wipeAction must also be specified.
         /// </summary>
@@ -4599,7 +6808,7 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string SettingName { get; set; }
 
         /// <summary>
-        /// An action to reset a fully managed device or delete a work profile. Note: blockAction must also be
+        /// An action to reset a company owned device or delete a work profile. Note: blockAction must also be
         /// specified.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("wipeAction")]
@@ -4634,13 +6843,99 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("batteryLevel")]
         public virtual System.Nullable<float> BatteryLevel { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The creation time of the event.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Event type.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("eventType")]
         public virtual string EventType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information about a device that is available during setup.</summary>
+    public class ProvisioningInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The API level of the Android platform version running on the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiLevel")]
+        public virtual System.Nullable<int> ApiLevel { get; set; }
+
+        /// <summary>
+        /// The email address of the authenticated user (only present for Google Account provisioning method).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("authenticatedUserEmail")]
+        public virtual string AuthenticatedUserEmail { get; set; }
+
+        /// <summary>The brand of the device. For example, Google.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("brand")]
+        public virtual string Brand { get; set; }
+
+        /// <summary>The name of the enterprise in the form enterprises/{enterprise}.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enterprise")]
+        public virtual string Enterprise { get; set; }
+
+        /// <summary>For corporate-owned devices, IMEI number of the GSM device. For example, A1000031212.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("imei")]
+        public virtual string Imei { get; set; }
+
+        /// <summary>The management mode of the device or profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("managementMode")]
+        public virtual string ManagementMode { get; set; }
+
+        /// <summary>For corporate-owned devices, MEID number of the CDMA device. For example, A00000292788E1.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("meid")]
+        public virtual string Meid { get; set; }
+
+        /// <summary>The model of the device. For example, Asus Nexus 7.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("model")]
+        public virtual string Model { get; set; }
+
+        /// <summary>The name of this resource in the form provisioningInfo/{provisioning_info}.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Ownership of the managed device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ownership")]
+        public virtual string Ownership { get; set; }
+
+        /// <summary>For corporate-owned devices, The device serial number.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serialNumber")]
+        public virtual string SerialNumber { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4675,6 +6970,70 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The device or profile has been remotely locked via the LOCK command.</summary>
+    public class RemoteLockEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Package name of the admin app requesting the change.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("adminPackageName")]
+        public virtual string AdminPackageName { get; set; }
+
+        /// <summary>User ID of the admin app from the which the change was requested.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("adminUserId")]
+        public virtual System.Nullable<int> AdminUserId { get; set; }
+
+        /// <summary>User ID in which the change was requested in.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetUserId")]
+        public virtual System.Nullable<int> TargetUserId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Controls for the screen brightness settings.</summary>
+    public class ScreenBrightnessSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The screen brightness between 1 and 255 where 1 is the lowest and 255 is the highest brightness. A
+        /// value of 0 (default) means no screen brightness set. Any other value is rejected. screenBrightnessMode must
+        /// be either BRIGHTNESS_AUTOMATIC or BRIGHTNESS_FIXED to set this. Supported on Android 9 and above on fully
+        /// managed devices. A NonComplianceDetail with API_LEVEL is reported if the Android version is less than 9.
+        /// Supported on work profiles on company-owned devices on Android 15 and above.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("screenBrightness")]
+        public virtual System.Nullable<int> ScreenBrightness { get; set; }
+
+        /// <summary>Optional. Controls the screen brightness mode.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("screenBrightnessMode")]
+        public virtual string ScreenBrightnessMode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Controls the screen timeout settings.</summary>
+    public class ScreenTimeoutSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Controls the screen timeout duration. The screen timeout duration must be greater than 0,
+        /// otherwise it is rejected. Additionally, it should not be greater than maximumTimeToLock, otherwise the
+        /// screen timeout is set to maximumTimeToLock and a NonComplianceDetail with INVALID_VALUE reason and
+        /// SCREEN_TIMEOUT_GREATER_THAN_MAXIMUM_TIME_TO_LOCK specific reason is reported. If the screen timeout is less
+        /// than a certain lower bound, it is set to the lower bound. The lower bound may vary across devices. If this
+        /// is set, screenTimeoutMode must be SCREEN_TIMEOUT_ENFORCED. Supported on Android 9 and above on fully managed
+        /// devices. A NonComplianceDetail with API_LEVEL is reported if the Android version is less than 9. Supported
+        /// on work profiles on company-owned devices on Android 15 and above.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("screenTimeout")]
+        public virtual object ScreenTimeout { get; set; }
+
+        /// <summary>Optional. Controls whether the user is allowed to configure the screen timeout.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("screenTimeoutMode")]
+        public virtual string ScreenTimeoutMode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// The security posture of the device, as determined by the current device state and the policies applied.
     /// </summary>
@@ -4699,7 +7058,12 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual UserFacingMessage Description { get; set; }
 
-        /// <summary>An action to launch an app.</summary>
+        /// <summary>
+        /// An action to launch an app. The app will be launched with an intent containing an extra with key
+        /// com.google.android.apps.work.clouddpc.EXTRA_LAUNCHED_AS_SETUP_ACTION set to the boolean value true to
+        /// indicate that this is a setup action flow. If SetupAction references an app, the corresponding installType
+        /// in the application policy must be set as REQUIRED_FOR_SETUP or said setup will fail.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("launchApp")]
         public virtual LaunchAppAction LaunchApp { get; set; }
 
@@ -4711,7 +7075,19 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource containing sign in details for an enterprise.</summary>
+    /// <summary>
+    /// A resource containing sign in details for an enterprise. Use enterprises to manage SigninDetails for a given
+    /// enterprise.For an enterprise, we can have any number of SigninDetails that is uniquely identified by combination
+    /// of the following three fields (signin_url, allow_personal_usage, token_tag). One cannot create two SigninDetails
+    /// with the same (signin_url, allow_personal_usage, token_tag). (token_tag is an optional field).Patch: The
+    /// operation updates the current list of SigninDetails with the new list of SigninDetails. If the stored
+    /// SigninDetail configuration is passed, it returns the same signin_enrollment_token and qr_code. If we pass
+    /// multiple identical SigninDetail configurations that are not stored, it will store the first one amongst those
+    /// SigninDetail configurations. if the configuration already exists we cannot request it more than once in a
+    /// particular patch API call, otherwise it will give a duplicate key error and the whole operation will fail. If we
+    /// remove certain SigninDetail configuration from the request then it will get removed from the storage. We can
+    /// then request another signin_enrollment_token and qr_code for the same SigninDetail configuration.
+    /// </summary>
     public class SigninDetail : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -4724,6 +7100,17 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("allowPersonalUsage")]
         public virtual string AllowPersonalUsage { get; set; }
+
+        /// <summary>
+        /// Optional. Whether the sign-in URL should be used by default for the enterprise. The SigninDetail with
+        /// defaultStatus set to SIGNIN_DETAIL_IS_DEFAULT is used for Google account enrollment method. Only one of an
+        /// enterprise's signinDetails can have defaultStatus set to SIGNIN_DETAIL_IS_DEFAULT. If an Enterprise has at
+        /// least one signinDetails and none of them have defaultStatus set to SIGNIN_DETAIL_IS_DEFAULT then the first
+        /// one from the list is selected and has set defaultStatus to SIGNIN_DETAIL_IS_DEFAULT. If no signinDetails
+        /// specified for the Enterprise then the Google Account device enrollment will fail.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("defaultStatus")]
+        public virtual string DefaultStatus { get; set; }
 
         /// <summary>
         /// A JSON string whose UTF-8 representation can be used to generate a QR code to enroll a device with this
@@ -4749,6 +7136,10 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("signinUrl")]
         public virtual string SigninUrl { get; set; }
+
+        /// <summary>An EMM-specified metadata to distinguish between instances of SigninDetail.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tokenTag")]
+        public virtual string TokenTag { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4784,9 +7175,44 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("androidBuildNumber")]
         public virtual string AndroidBuildNumber { get; set; }
 
+        private string _androidBuildTimeRaw;
+
+        private object _androidBuildTime;
+
         /// <summary>Build time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("androidBuildTime")]
-        public virtual object AndroidBuildTime { get; set; }
+        public virtual string AndroidBuildTimeRaw
+        {
+            get => _androidBuildTimeRaw;
+            set
+            {
+                _androidBuildTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _androidBuildTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="AndroidBuildTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use AndroidBuildTimeDateTimeOffset instead.")]
+        public virtual object AndroidBuildTime
+        {
+            get => _androidBuildTime;
+            set
+            {
+                _androidBuildTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _androidBuildTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="AndroidBuildTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? AndroidBuildTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(AndroidBuildTimeRaw);
+            set => AndroidBuildTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The Android Device Policy app version code.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("androidDevicePolicyVersionCode")]
@@ -4832,6 +7258,71 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Additional context for SpecificNonComplianceReason.</summary>
+    public class SpecificNonComplianceContext : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Additional context for non-compliance related to Wi-Fi configuration. See ONC_WIFI_INVALID_VALUE and
+        /// ONC_WIFI_API_LEVEL
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oncWifiContext")]
+        public virtual OncWifiContext OncWifiContext { get; set; }
+
+        /// <summary>
+        /// Additional context for non-compliance related to password policies. See PASSWORD_POLICIES_PASSWORD_EXPIRED
+        /// and PASSWORD_POLICIES_PASSWORD_NOT_SUFFICIENT.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("passwordPoliciesContext")]
+        public virtual PasswordPoliciesContext PasswordPoliciesContext { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Parameters associated with the START_LOST_MODE command to put the device into lost mode. At least one of the
+    /// parameters, not including the organization name, must be provided in order for the device to be put into lost
+    /// mode.
+    /// </summary>
+    public class StartLostModeParams : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The email address displayed to the user when the device is in lost mode.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lostEmailAddress")]
+        public virtual string LostEmailAddress { get; set; }
+
+        /// <summary>The message displayed to the user when the device is in lost mode.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lostMessage")]
+        public virtual UserFacingMessage LostMessage { get; set; }
+
+        /// <summary>The organization name displayed to the user when the device is in lost mode.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lostOrganization")]
+        public virtual UserFacingMessage LostOrganization { get; set; }
+
+        /// <summary>
+        /// The phone number that will be called when the device is in lost mode and the call owner button is tapped.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lostPhoneNumber")]
+        public virtual UserFacingMessage LostPhoneNumber { get; set; }
+
+        /// <summary>The street address displayed to the user when the device is in lost mode.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lostStreetAddress")]
+        public virtual UserFacingMessage LostStreetAddress { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Status of the START_LOST_MODE command to put the device into lost mode.</summary>
+    public class StartLostModeStatus : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The status. See StartLostModeStatus.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual string Status { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// The Status type defines a logical error model that is suitable for different programming environments, including
     /// REST APIs and RPC APIs. It is used by gRPC (https://github.com/grpc). Each Status message contains three pieces
@@ -4872,7 +7363,9 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("applicationReportsEnabled")]
         public virtual System.Nullable<bool> ApplicationReportsEnabled { get; set; }
 
-        /// <summary>Whether Common Criteria Mode reporting is enabled.</summary>
+        /// <summary>
+        /// Whether Common Criteria Mode reporting is enabled. This is supported only on company-owned devices.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("commonCriteriaModeEnabled")]
         public virtual System.Nullable<bool> CommonCriteriaModeEnabled { get; set; }
 
@@ -4921,7 +7414,41 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Configuration for managing system updates</summary>
+    /// <summary>Parameters associated with the STOP_LOST_MODE command to take the device out of lost mode.</summary>
+    public class StopLostModeParams : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Status of the STOP_LOST_MODE command to take the device out of lost mode.</summary>
+    public class StopLostModeStatus : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The status. See StopLostModeStatus.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual string Status { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A lost mode event indicating the user has attempted to stop lost mode.</summary>
+    public class StopLostModeUserAttemptEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The status of the attempt to stop lost mode.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual string Status { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Configuration for managing system updatesNote: Google Play system updates
+    /// (https://source.android.com/docs/core/ota/modular-system) (also called Mainline updates) are automatically
+    /// downloaded but require a device reboot to be installed. Refer to the mainline section in Manage system updates
+    /// (https://developer.android.com/work/dpc/system-updates#mainline) for further details.
+    /// </summary>
     public class SystemUpdate : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -4959,13 +7486,48 @@ namespace Google.Apis.AndroidManagement.v1.Data
     /// <summary>Information about a potential pending system update.</summary>
     public class SystemUpdateInfo : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _updateReceivedTimeRaw;
+
+        private object _updateReceivedTime;
+
         /// <summary>
         /// The time when the update was first available. A zero value indicates that this field is not set. This field
         /// is set only if an update is available (that is, updateStatus is neither UPDATE_STATUS_UNKNOWN nor
         /// UP_TO_DATE).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateReceivedTime")]
-        public virtual object UpdateReceivedTime { get; set; }
+        public virtual string UpdateReceivedTimeRaw
+        {
+            get => _updateReceivedTimeRaw;
+            set
+            {
+                _updateReceivedTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateReceivedTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateReceivedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateReceivedTimeDateTimeOffset instead.")]
+        public virtual object UpdateReceivedTime
+        {
+            get => _updateReceivedTime;
+            set
+            {
+                _updateReceivedTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateReceivedTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateReceivedTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateReceivedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateReceivedTimeRaw);
+            set => UpdateReceivedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The status of an update: whether an update exists and what type it is.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateStatus")]
@@ -4984,6 +7546,10 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// <summary>The carrier name associated with this SIM card.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("carrierName")]
         public virtual string CarrierName { get; set; }
+
+        /// <summary>Output only. The ICCID associated with this SIM card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("iccId")]
+        public virtual string IccId { get; set; }
 
         /// <summary>The phone number associated with this SIM card.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("phoneNumber")]
@@ -5005,6 +7571,245 @@ namespace Google.Apis.AndroidManagement.v1.Data
         /// <summary>A short header which appears above the HTML content.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("header")]
         public virtual UserFacingMessage Header { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Controls types of device activity logs collected from the device and reported via Pub/Sub notification
+    /// (https://developers.google.com/android/management/notifications).
+    /// </summary>
+    public class UsageLog : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Specifies which log types are enabled. Note that users will receive on-device messaging when usage logging
+        /// is enabled.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enabledLogTypes")]
+        public virtual System.Collections.Generic.IList<string> EnabledLogTypes { get; set; }
+
+        /// <summary>
+        /// Specifies which of the enabled log types can be uploaded over mobile data. By default logs are queued for
+        /// upload when the device connects to WiFi.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uploadOnCellularAllowed")]
+        public virtual System.Collections.Generic.IList<string> UploadOnCellularAllowed { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An event logged on the device.</summary>
+    public class UsageLogEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A shell command was issued over ADB via “adb shell command”. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("adbShellCommandEvent")]
+        public virtual AdbShellCommandEvent AdbShellCommandEvent { get; set; }
+
+        /// <summary>An ADB interactive shell was opened via “adb shell”. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("adbShellInteractiveEvent")]
+        public virtual AdbShellInteractiveEvent AdbShellInteractiveEvent { get; set; }
+
+        /// <summary>An app process was started. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appProcessStartEvent")]
+        public virtual AppProcessStartEvent AppProcessStartEvent { get; set; }
+
+        /// <summary>
+        /// A new root certificate was installed into the system's trusted credential storage. Part of SECURITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("certAuthorityInstalledEvent")]
+        public virtual CertAuthorityInstalledEvent CertAuthorityInstalledEvent { get; set; }
+
+        /// <summary>
+        /// A root certificate was removed from the system's trusted credential storage. Part of SECURITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("certAuthorityRemovedEvent")]
+        public virtual CertAuthorityRemovedEvent CertAuthorityRemovedEvent { get; set; }
+
+        /// <summary>
+        /// An X.509v3 certificate failed to validate, currently this validation is performed on the Wi-FI access point
+        /// and failure may be due to a mismatch upon server certificate validation. However it may in the future
+        /// include other validation events of an X.509v3 certificate. Part of SECURITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("certValidationFailureEvent")]
+        public virtual CertValidationFailureEvent CertValidationFailureEvent { get; set; }
+
+        /// <summary>
+        /// A TCP connect event was initiated through the standard network stack. Part of NETWORK_ACTIVITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connectEvent")]
+        public virtual ConnectEvent ConnectEvent { get; set; }
+
+        /// <summary>
+        /// Validates whether Android’s built-in cryptographic library (BoringSSL) is valid. Should always succeed on
+        /// device boot, if it fails, the device should be considered untrusted. Part of SECURITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cryptoSelfTestCompletedEvent")]
+        public virtual CryptoSelfTestCompletedEvent CryptoSelfTestCompletedEvent { get; set; }
+
+        /// <summary>
+        /// A DNS lookup event was initiated through the standard network stack. Part of NETWORK_ACTIVITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dnsEvent")]
+        public virtual DnsEvent DnsEvent { get; set; }
+
+        /// <summary>Device has completed enrollment. Part of AMAPI_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enrollmentCompleteEvent")]
+        public virtual EnrollmentCompleteEvent EnrollmentCompleteEvent { get; set; }
+
+        /// <summary>Unique id of the event.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventId")]
+        public virtual System.Nullable<long> EventId { get; set; }
+
+        private string _eventTimeRaw;
+
+        private object _eventTime;
+
+        /// <summary>Device timestamp when the event was logged.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventTime")]
+        public virtual string EventTimeRaw
+        {
+            get => _eventTimeRaw;
+            set
+            {
+                _eventTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _eventTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EventTimeDateTimeOffset instead.")]
+        public virtual object EventTime
+        {
+            get => _eventTime;
+            set
+            {
+                _eventTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _eventTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EventTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EventTimeRaw);
+            set => EventTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The particular usage log event type that was reported on the device. Use this to determine which event field
+        /// to access.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventType")]
+        public virtual string EventType { get; set; }
+
+        /// <summary>A file was downloaded from the device. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filePulledEvent")]
+        public virtual FilePulledEvent FilePulledEvent { get; set; }
+
+        /// <summary>A file was uploaded onto the device. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filePushedEvent")]
+        public virtual FilePushedEvent FilePushedEvent { get; set; }
+
+        /// <summary>
+        /// A cryptographic key including user installed, admin installed and system maintained private key is removed
+        /// from the device either by the user or management. Part of SECURITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyDestructionEvent")]
+        public virtual KeyDestructionEvent KeyDestructionEvent { get; set; }
+
+        /// <summary>
+        /// A cryptographic key including user installed, admin installed and system maintained private key is installed
+        /// on the device either by the user or management. Part of SECURITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyGeneratedEvent")]
+        public virtual KeyGeneratedEvent KeyGeneratedEvent { get; set; }
+
+        /// <summary>
+        /// A cryptographic key including user installed, admin installed and system maintained private key is imported
+        /// on the device either by the user or management. Part of SECURITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyImportEvent")]
+        public virtual KeyImportEvent KeyImportEvent { get; set; }
+
+        /// <summary>
+        /// A cryptographic key including user installed, admin installed and system maintained private key is
+        /// determined to be corrupted due to storage corruption, hardware failure or some OS issue. Part of
+        /// SECURITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyIntegrityViolationEvent")]
+        public virtual KeyIntegrityViolationEvent KeyIntegrityViolationEvent { get; set; }
+
+        /// <summary>An attempt was made to unlock the device. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyguardDismissAuthAttemptEvent")]
+        public virtual KeyguardDismissAuthAttemptEvent KeyguardDismissAuthAttemptEvent { get; set; }
+
+        /// <summary>The keyguard was dismissed. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyguardDismissedEvent")]
+        public virtual KeyguardDismissedEvent KeyguardDismissedEvent { get; set; }
+
+        /// <summary>The device was locked either by user or timeout. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyguardSecuredEvent")]
+        public virtual KeyguardSecuredEvent KeyguardSecuredEvent { get; set; }
+
+        /// <summary>
+        /// The audit log buffer has reached 90% of its capacity, therefore older events may be dropped. Part of
+        /// SECURITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("logBufferSizeCriticalEvent")]
+        public virtual LogBufferSizeCriticalEvent LogBufferSizeCriticalEvent { get; set; }
+
+        /// <summary>usageLog policy has been enabled. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loggingStartedEvent")]
+        public virtual LoggingStartedEvent LoggingStartedEvent { get; set; }
+
+        /// <summary>usageLog policy has been disabled. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loggingStoppedEvent")]
+        public virtual LoggingStoppedEvent LoggingStoppedEvent { get; set; }
+
+        /// <summary>A lost mode location update when a device in lost mode.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lostModeLocationEvent")]
+        public virtual LostModeLocationEvent LostModeLocationEvent { get; set; }
+
+        /// <summary>An outgoing phone call has been made when a device in lost mode.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lostModeOutgoingPhoneCallEvent")]
+        public virtual LostModeOutgoingPhoneCallEvent LostModeOutgoingPhoneCallEvent { get; set; }
+
+        /// <summary>Removable media was mounted. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mediaMountEvent")]
+        public virtual MediaMountEvent MediaMountEvent { get; set; }
+
+        /// <summary>Removable media was unmounted. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mediaUnmountEvent")]
+        public virtual MediaUnmountEvent MediaUnmountEvent { get; set; }
+
+        /// <summary>Device was shutdown. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("osShutdownEvent")]
+        public virtual OsShutdownEvent OsShutdownEvent { get; set; }
+
+        /// <summary>Device was started. Part of SECURITY_LOGS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("osStartupEvent")]
+        public virtual OsStartupEvent OsStartupEvent { get; set; }
+
+        /// <summary>
+        /// The device or profile has been remotely locked via the LOCK command. Part of SECURITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("remoteLockEvent")]
+        public virtual RemoteLockEvent RemoteLockEvent { get; set; }
+
+        /// <summary>An attempt to take a device out of lost mode.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stopLostModeUserAttemptEvent")]
+        public virtual StopLostModeUserAttemptEvent StopLostModeUserAttemptEvent { get; set; }
+
+        /// <summary>
+        /// The work profile or company-owned device failed to wipe when requested. This could be user initiated or
+        /// admin initiated e.g. delete was received. Part of SECURITY_LOGS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wipeFailureEvent")]
+        public virtual WipeFailureEvent WipeFailureEvent { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5147,8 +7952,71 @@ namespace Google.Apis.AndroidManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Wi-Fi roaming policy.</summary>
+    public class WifiRoamingPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Wi-Fi roaming settings. SSIDs provided in this list must be unique, the policy will be rejected
+        /// otherwise.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wifiRoamingSettings")]
+        public virtual System.Collections.Generic.IList<WifiRoamingSetting> WifiRoamingSettings { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Wi-Fi roaming setting.</summary>
+    public class WifiRoamingSetting : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Wi-Fi roaming mode for the specified SSID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wifiRoamingMode")]
+        public virtual string WifiRoamingMode { get; set; }
+
+        /// <summary>Required. SSID of the Wi-Fi network.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wifiSsid")]
+        public virtual string WifiSsid { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Represents a Wi-Fi SSID.</summary>
+    public class WifiSsid : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Wi-Fi SSID represented as a string.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wifiSsid")]
+        public virtual string WifiSsidValue { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
-    /// An action to reset a fully managed device or delete a work profile. Note: blockAction must also be specified.
+    /// Restrictions on which Wi-Fi SSIDs the device can connect to. Note that this does not affect which networks can
+    /// be configured on the device. Supported on company-owned devices running Android 13 and above.
+    /// </summary>
+    public class WifiSsidPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Type of the Wi-Fi SSID policy to be applied.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wifiSsidPolicyType")]
+        public virtual string WifiSsidPolicyType { get; set; }
+
+        /// <summary>
+        /// Optional. List of Wi-Fi SSIDs that should be applied in the policy. This field must be non-empty when
+        /// WifiSsidPolicyType is set to WIFI_SSID_ALLOWLIST. If this is set to a non-empty list, then a
+        /// nonComplianceDetail detail with API_LEVEL is reported if the Android version is less than 13 and a
+        /// nonComplianceDetail with MANAGEMENT_MODE is reported for non-company-owned devices.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wifiSsids")]
+        public virtual System.Collections.Generic.IList<WifiSsid> WifiSsids { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An action to reset a company owned device or delete a work profile. Note: blockAction must also be specified.
     /// </summary>
     public class WipeAction : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5166,6 +8034,16 @@ namespace Google.Apis.AndroidManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("wipeAfterDays")]
         public virtual System.Nullable<int> WipeAfterDays { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The work profile or company-owned device failed to wipe when requested. This could be user initiated or admin
+    /// initiated e.g. delete was received. Intentionally empty.
+    /// </summary>
+    public class WipeFailureEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }

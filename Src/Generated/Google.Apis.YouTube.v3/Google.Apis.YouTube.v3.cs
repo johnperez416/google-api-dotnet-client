@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ namespace Google.Apis.YouTube.v3
             LiveStreams = new LiveStreamsResource(this);
             Members = new MembersResource(this);
             MembershipsLevels = new MembershipsLevelsResource(this);
+            PlaylistImages = new PlaylistImagesResource(this);
             PlaylistItems = new PlaylistItemsResource(this);
             Playlists = new PlaylistsResource(this);
             Search = new SearchResource(this);
@@ -61,9 +62,12 @@ namespace Google.Apis.YouTube.v3
             Thumbnails = new ThumbnailsResource(this);
             VideoAbuseReportReasons = new VideoAbuseReportReasonsResource(this);
             VideoCategories = new VideoCategoriesResource(this);
+            VideoTrainability = new VideoTrainabilityResource(this);
             Videos = new VideosResource(this);
             Watermarks = new WatermarksResource(this);
             Youtube = new YoutubeResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://youtube.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://youtube.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -73,23 +77,16 @@ namespace Google.Apis.YouTube.v3
         public override string Name => "youtube";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://youtube.googleapis.com/";
-        #else
-            "https://youtube.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://youtube.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the YouTube Data API v3.</summary>
         public class Scope
@@ -202,6 +199,9 @@ namespace Google.Apis.YouTube.v3
         /// <summary>Gets the MembershipsLevels resource.</summary>
         public virtual MembershipsLevelsResource MembershipsLevels { get; }
 
+        /// <summary>Gets the PlaylistImages resource.</summary>
+        public virtual PlaylistImagesResource PlaylistImages { get; }
+
         /// <summary>Gets the PlaylistItems resource.</summary>
         public virtual PlaylistItemsResource PlaylistItems { get; }
 
@@ -231,6 +231,9 @@ namespace Google.Apis.YouTube.v3
 
         /// <summary>Gets the VideoCategories resource.</summary>
         public virtual VideoCategoriesResource VideoCategories { get; }
+
+        /// <summary>Gets the VideoTrainability resource.</summary>
+        public virtual VideoTrainabilityResource VideoTrainability { get; }
 
         /// <summary>Gets the Videos resource.</summary>
         public virtual VideosResource Videos { get; }
@@ -445,7 +448,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.AbuseReport body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -521,7 +524,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -569,11 +572,67 @@ namespace Google.Apis.YouTube.v3
             [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string PageToken { get; set; }
 
-            [Google.Apis.Util.RequestParameterAttribute("publishedAfter", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual object PublishedAfter { get; set; }
+            private object _publishedAfter;
 
+            /// <summary>
+            /// String representation of <see cref="PublishedAfterDateTimeOffset"/>, formatted for inclusion in the HTTP
+            /// request.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("publishedAfter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PublishedAfterRaw { get; private set; }
+
+            /// <summary><seealso cref="object"/> representation of <see cref="PublishedAfterRaw"/>.</summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAfterDateTimeOffset instead.")]
+            public virtual object PublishedAfter
+            {
+                get => _publishedAfter;
+                set
+                {
+                    PublishedAfterRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                    _publishedAfter = value;
+                }
+            }
+
+            public virtual System.DateTimeOffset? PublishedAfterDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PublishedAfterRaw);
+                set
+                {
+                    PublishedAfterRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                    _publishedAfter = value;
+                }
+            }
+
+            private object _publishedBefore;
+
+            /// <summary>
+            /// String representation of <see cref="PublishedBeforeDateTimeOffset"/>, formatted for inclusion in the
+            /// HTTP request.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("publishedBefore", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual object PublishedBefore { get; set; }
+            public virtual string PublishedBeforeRaw { get; private set; }
+
+            /// <summary><seealso cref="object"/> representation of <see cref="PublishedBeforeRaw"/>.</summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedBeforeDateTimeOffset instead.")]
+            public virtual object PublishedBefore
+            {
+                get => _publishedBefore;
+                set
+                {
+                    PublishedBeforeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                    _publishedBefore = value;
+                }
+            }
+
+            public virtual System.DateTimeOffset? PublishedBeforeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PublishedBeforeRaw);
+                set
+                {
+                    PublishedBeforeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                    _publishedBefore = value;
+                }
+            }
 
             [Google.Apis.Util.RequestParameterAttribute("regionCode", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string RegionCode { get; set; }
@@ -685,7 +744,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id"><c>null</c></param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>Deletes a resource.</summary>
@@ -761,7 +820,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id">The ID of the caption track to download, required for One Platform.</param>
         public virtual DownloadRequest Download(string id)
         {
-            return new DownloadRequest(service, id);
+            return new DownloadRequest(this.service, id);
         }
 
         /// <summary>Downloads a caption track.</summary>
@@ -875,9 +934,7 @@ namespace Google.Apis.YouTube.v3
             public virtual void Download(System.IO.Stream stream)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 mediaDownloader.Download(this.GenerateRequestUri(), stream);
             }
 
@@ -890,9 +947,7 @@ namespace Google.Apis.YouTube.v3
             public virtual Google.Apis.Download.IDownloadProgress DownloadWithStatus(System.IO.Stream stream)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 return mediaDownloader.Download(this.GenerateRequestUri(), stream);
             }
 
@@ -904,9 +959,7 @@ namespace Google.Apis.YouTube.v3
             public virtual System.Threading.Tasks.Task<Google.Apis.Download.IDownloadProgress> DownloadAsync(System.IO.Stream stream)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream);
             }
 
@@ -919,13 +972,10 @@ namespace Google.Apis.YouTube.v3
                 System.Threading.CancellationToken cancellationToken)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream, cancellationToken);
             }
 
-            #if !NET40
             /// <summary>Synchronously download a range of the media into the given stream.</summary>
             /// <remarks>
             /// This method uses the <see cref="MediaDownloader"/> property to perform the download. Progress event
@@ -951,7 +1001,6 @@ namespace Google.Apis.YouTube.v3
                 mediaDownloader.Range = range;
                 return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream, cancellationToken);
             }
-            #endif
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -962,7 +1011,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.Caption body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -1234,7 +1283,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="videoId">Returns the captions for the specified video.</param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part, string videoId)
         {
-            return new ListRequest(service, part, videoId);
+            return new ListRequest(this.service, part, videoId);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -1343,7 +1392,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.YouTube.v3.Data.Caption body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new UpdateRequest(service, body, part);
+            return new UpdateRequest(this.service, body, part);
         }
 
         /// <summary>Updates an existing resource.</summary>
@@ -1626,7 +1675,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="body">The body of the request.</param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.ChannelBannerResource body)
         {
-            return new InsertRequest(service, body);
+            return new InsertRequest(this.service, body);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -1901,7 +1950,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id"><c>null</c></param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>Deletes a resource.</summary>
@@ -1970,7 +2019,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.ChannelSection body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -2077,7 +2126,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -2202,7 +2251,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.YouTube.v3.Data.ChannelSection body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new UpdateRequest(service, body, part);
+            return new UpdateRequest(this.service, body, part);
         }
 
         /// <summary>Updates an existing resource.</summary>
@@ -2299,7 +2348,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -2325,6 +2374,10 @@ namespace Google.Apis.YouTube.v3
             /// <summary>Return the channels within the specified guide category ID.</summary>
             [Google.Apis.Util.RequestParameterAttribute("categoryId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string CategoryId { get; set; }
+
+            /// <summary>Return the channel associated with a YouTube handle.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("forHandle", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string ForHandle { get; set; }
 
             /// <summary>Return the channel associated with a YouTube username.</summary>
             [Google.Apis.Util.RequestParameterAttribute("forUsername", Google.Apis.Util.RequestParameterType.Query)]
@@ -2406,6 +2459,14 @@ namespace Google.Apis.YouTube.v3
                 RequestParameters.Add("categoryId", new Google.Apis.Discovery.Parameter
                 {
                     Name = "categoryId",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("forHandle", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "forHandle",
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = null,
@@ -2497,7 +2558,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.YouTube.v3.Data.Channel body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new UpdateRequest(service, body, part);
+            return new UpdateRequest(this.service, body, part);
         }
 
         /// <summary>Updates an existing resource.</summary>
@@ -2593,7 +2654,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.CommentThread body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -2651,7 +2712,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -2904,7 +2965,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id"><c>null</c></param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>Deletes a resource.</summary>
@@ -2952,7 +3013,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.Comment body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -3010,7 +3071,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -3144,7 +3205,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id">Flags the comments with the given IDs as spam in the caller's opinion.</param>
         public virtual MarkAsSpamRequest MarkAsSpam(Google.Apis.Util.Repeatable<string> id)
         {
-            return new MarkAsSpamRequest(service, id);
+            return new MarkAsSpamRequest(this.service, id);
         }
 
         /// <summary>Expresses the caller's opinion that one or more comments should be flagged as spam.</summary>
@@ -3190,11 +3251,11 @@ namespace Google.Apis.YouTube.v3
         /// <param name="moderationStatus">
         /// Specifies the requested moderation status. Note, comments can be in statuses, which are not available
         /// through this call. For example, this call does not allow to mark a comment as 'likely spam'. Valid values:
-        /// MODERATION_STATUS_PUBLISHED, MODERATION_STATUS_HELD_FOR_REVIEW, MODERATION_STATUS_REJECTED.
+        /// 'heldForReview', 'published' or 'rejected'.
         /// </param>
         public virtual SetModerationStatusRequest SetModerationStatus(Google.Apis.Util.Repeatable<string> id, SetModerationStatusRequest.ModerationStatusEnum moderationStatus)
         {
-            return new SetModerationStatusRequest(service, id, moderationStatus);
+            return new SetModerationStatusRequest(this.service, id, moderationStatus);
         }
 
         /// <summary>Sets the moderation status of one or more comments.</summary>
@@ -3215,7 +3276,7 @@ namespace Google.Apis.YouTube.v3
             /// <summary>
             /// Specifies the requested moderation status. Note, comments can be in statuses, which are not available
             /// through this call. For example, this call does not allow to mark a comment as 'likely spam'. Valid
-            /// values: MODERATION_STATUS_PUBLISHED, MODERATION_STATUS_HELD_FOR_REVIEW, MODERATION_STATUS_REJECTED.
+            /// values: 'heldForReview', 'published' or 'rejected'.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("moderationStatus", Google.Apis.Util.RequestParameterType.Query)]
             public virtual ModerationStatusEnum ModerationStatus { get; private set; }
@@ -3223,7 +3284,7 @@ namespace Google.Apis.YouTube.v3
             /// <summary>
             /// Specifies the requested moderation status. Note, comments can be in statuses, which are not available
             /// through this call. For example, this call does not allow to mark a comment as 'likely spam'. Valid
-            /// values: MODERATION_STATUS_PUBLISHED, MODERATION_STATUS_HELD_FOR_REVIEW, MODERATION_STATUS_REJECTED.
+            /// values: 'heldForReview', 'published' or 'rejected'.
             /// </summary>
             public enum ModerationStatusEnum
             {
@@ -3300,7 +3361,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.YouTube.v3.Data.Comment body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new UpdateRequest(service, body, part);
+            return new UpdateRequest(this.service, body, part);
         }
 
         /// <summary>Updates an existing resource.</summary>
@@ -3374,7 +3435,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -3451,7 +3512,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -3530,7 +3591,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual BindRequest Bind(string id, Google.Apis.Util.Repeatable<string> part)
         {
-            return new BindRequest(service, id, part);
+            return new BindRequest(this.service, id, part);
         }
 
         /// <summary>Bind a broadcast to a stream.</summary>
@@ -3648,7 +3709,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id">Broadcast to delete.</param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>Delete a given broadcast.</summary>
@@ -3742,7 +3803,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.LiveBroadcast body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new stream for the authenticated user.</summary>
@@ -3838,6 +3899,117 @@ namespace Google.Apis.YouTube.v3
             }
         }
 
+        /// <summary>Insert cuepoints in a broadcast</summary>
+        /// <param name="body">The body of the request.</param>
+        public virtual InsertCuepointRequest InsertCuepoint(Google.Apis.YouTube.v3.Data.Cuepoint body)
+        {
+            return new InsertCuepointRequest(this.service, body);
+        }
+
+        /// <summary>Insert cuepoints in a broadcast</summary>
+        public class InsertCuepointRequest : YouTubeBaseServiceRequest<Google.Apis.YouTube.v3.Data.Cuepoint>
+        {
+            /// <summary>Constructs a new InsertCuepoint request.</summary>
+            public InsertCuepointRequest(Google.Apis.Services.IClientService service, Google.Apis.YouTube.v3.Data.Cuepoint body) : base(service)
+            {
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Broadcast to insert ads to, or equivalently `external_video_id` for internal use.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("id", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Id { get; set; }
+
+            /// <summary>
+            /// *Note:* This parameter is intended exclusively for YouTube content partners. The
+            /// *onBehalfOfContentOwner* parameter indicates that the request's authorization credentials identify a
+            /// YouTube CMS user who is acting on behalf of the content owner specified in the parameter value. This
+            /// parameter is intended for YouTube content partners that own and manage many different YouTube channels.
+            /// It allows content owners to authenticate once and get access to all their video and channel data,
+            /// without having to provide authentication credentials for each individual channel. The CMS account that
+            /// the user authenticates with must be linked to the specified YouTube content owner.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("onBehalfOfContentOwner", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OnBehalfOfContentOwner { get; set; }
+
+            /// <summary>
+            /// This parameter can only be used in a properly authorized request. *Note:* This parameter is intended
+            /// exclusively for YouTube content partners. The *onBehalfOfContentOwnerChannel* parameter specifies the
+            /// YouTube channel ID of the channel to which a video is being added. This parameter is required when a
+            /// request specifies a value for the onBehalfOfContentOwner parameter, and it can only be used in
+            /// conjunction with that parameter. In addition, the request must be authorized using a CMS account that is
+            /// linked to the content owner that the onBehalfOfContentOwner parameter specifies. Finally, the channel
+            /// that the onBehalfOfContentOwnerChannel parameter value specifies must be linked to the content owner
+            /// that the onBehalfOfContentOwner parameter specifies. This parameter is intended for YouTube content
+            /// partners that own and manage many different YouTube channels. It allows content owners to authenticate
+            /// once and perform actions on behalf of the channel specified in the parameter value, without having to
+            /// provide authentication credentials for each separate channel.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("onBehalfOfContentOwnerChannel", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OnBehalfOfContentOwnerChannel { get; set; }
+
+            /// <summary>
+            /// The *part* parameter specifies a comma-separated list of one or more liveBroadcast resource properties
+            /// that the API response will include. The part names that you can include in the parameter value are id,
+            /// snippet, contentDetails, and status.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("part", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<string> Part { get; set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.YouTube.v3.Data.Cuepoint Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "insertCuepoint";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "youtube/v3/liveBroadcasts/cuepoint";
+
+            /// <summary>Initializes InsertCuepoint parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("id", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "id",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("onBehalfOfContentOwner", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "onBehalfOfContentOwner",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("onBehalfOfContentOwnerChannel", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "onBehalfOfContentOwnerChannel",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("part", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "part",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
         /// <summary>Retrieve the list of broadcasts associated with the given channel.</summary>
         /// <param name="part">
         /// The *part* parameter specifies a comma-separated list of one or more liveBroadcast resource properties that
@@ -3846,7 +4018,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieve the list of broadcasts associated with the given channel.</summary>
@@ -4067,7 +4239,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual TransitionRequest Transition(TransitionRequest.BroadcastStatusEnum broadcastStatus, string id, Google.Apis.Util.Repeatable<string> part)
         {
-            return new TransitionRequest(service, broadcastStatus, id, part);
+            return new TransitionRequest(this.service, broadcastStatus, id, part);
         }
 
         /// <summary>Transition a broadcast to a given status.</summary>
@@ -4221,7 +4393,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.YouTube.v3.Data.LiveBroadcast body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new UpdateRequest(service, body, part);
+            return new UpdateRequest(this.service, body, part);
         }
 
         /// <summary>Updates an existing broadcast for the authenticated user.</summary>
@@ -4342,7 +4514,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id"><c>null</c></param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>Deletes a chat ban.</summary>
@@ -4391,7 +4563,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.LiveChatBan body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -4462,7 +4634,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id"><c>null</c></param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>Deletes a chat message.</summary>
@@ -4510,7 +4682,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.LiveChatMessage body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -4565,11 +4737,11 @@ namespace Google.Apis.YouTube.v3
         /// <param name="liveChatId">The id of the live chat for which comments should be returned.</param>
         /// <param name="part">
         /// The *part* parameter specifies the liveChatComment resource parts that the API response will include.
-        /// Supported values are id and snippet.
+        /// Supported values are id, snippet, and authorDetails.
         /// </param>
         public virtual ListRequest List(string liveChatId, Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, liveChatId, part);
+            return new ListRequest(this.service, liveChatId, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -4589,7 +4761,7 @@ namespace Google.Apis.YouTube.v3
 
             /// <summary>
             /// The *part* parameter specifies the liveChatComment resource parts that the API response will include.
-            /// Supported values are id and snippet.
+            /// Supported values are id, snippet, and authorDetails.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("part", Google.Apis.Util.RequestParameterType.Query)]
             public virtual Google.Apis.Util.Repeatable<string> Part { get; private set; }
@@ -4600,7 +4772,7 @@ namespace Google.Apis.YouTube.v3
 
             /// <summary>
             /// The *maxResults* parameter specifies the maximum number of items that should be returned in the result
-            /// set.
+            /// set. Not used in the streaming RPC.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("maxResults", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<long> MaxResults { get; set; }
@@ -4679,6 +4851,73 @@ namespace Google.Apis.YouTube.v3
                 });
             }
         }
+
+        /// <summary>Transition a durable chat event.</summary>
+        public virtual TransitionRequest Transition()
+        {
+            return new TransitionRequest(this.service);
+        }
+
+        /// <summary>Transition a durable chat event.</summary>
+        public class TransitionRequest : YouTubeBaseServiceRequest<Google.Apis.YouTube.v3.Data.LiveChatMessage>
+        {
+            /// <summary>Constructs a new Transition request.</summary>
+            public TransitionRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>The ID that uniquely identify the chat message event to transition.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("id", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Id { get; set; }
+
+            /// <summary>The status to which the chat event is going to transition.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("status", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<StatusEnum> Status { get; set; }
+
+            /// <summary>The status to which the chat event is going to transition.</summary>
+            public enum StatusEnum
+            {
+                /// <summary>Default unknown enum value.</summary>
+                [Google.Apis.Util.StringValueAttribute("statusUnspecified")]
+                StatusUnspecified = 0,
+
+                /// <summary>The durable chat event is over.</summary>
+                [Google.Apis.Util.StringValueAttribute("closed")]
+                Closed = 1,
+            }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "transition";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "youtube/v3/liveChat/messages/transition";
+
+            /// <summary>Initializes Transition parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("id", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "id",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("status", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "status",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
     }
 
     /// <summary>The "liveChatModerators" collection of methods.</summary>
@@ -4699,7 +4938,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id"><c>null</c></param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>Deletes a chat moderator.</summary>
@@ -4748,7 +4987,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.LiveChatModerator body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -4808,7 +5047,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(string liveChatId, Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, liveChatId, part);
+            return new ListRequest(this.service, liveChatId, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -4915,7 +5154,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id"><c>null</c></param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>Deletes an existing stream for the authenticated user.</summary>
@@ -5008,7 +5247,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.LiveStream body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new stream for the authenticated user.</summary>
@@ -5112,7 +5351,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieve the list of streams associated with the given channel. --</summary>
@@ -5267,7 +5506,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.YouTube.v3.Data.LiveStream body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new UpdateRequest(service, body, part);
+            return new UpdateRequest(this.service, body, part);
         }
 
         /// <summary>Updates an existing stream for the authenticated user.</summary>
@@ -5388,7 +5627,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of members that match the request criteria for a channel.</summary>
@@ -5540,7 +5779,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of all pricing levels offered by a creator to the fans.</summary>
@@ -5585,6 +5824,698 @@ namespace Google.Apis.YouTube.v3
         }
     }
 
+    /// <summary>The "playlistImages" collection of methods.</summary>
+    public class PlaylistImagesResource
+    {
+        private const string Resource = "playlistImages";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public PlaylistImagesResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>Deletes a resource.</summary>
+        public virtual DeleteRequest Delete()
+        {
+            return new DeleteRequest(this.service);
+        }
+
+        /// <summary>Deletes a resource.</summary>
+        public class DeleteRequest : YouTubeBaseServiceRequest<string>
+        {
+            /// <summary>Constructs a new Delete request.</summary>
+            public DeleteRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>Id to identify this image. This is returned from by the List method.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("id", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Id { get; set; }
+
+            /// <summary>
+            /// *Note:* This parameter is intended exclusively for YouTube content partners. The
+            /// *onBehalfOfContentOwner* parameter indicates that the request's authorization credentials identify a
+            /// YouTube CMS user who is acting on behalf of the content owner specified in the parameter value. This
+            /// parameter is intended for YouTube content partners that own and manage many different YouTube channels.
+            /// It allows content owners to authenticate once and get access to all their video and channel data,
+            /// without having to provide authentication credentials for each individual channel. The CMS account that
+            /// the user authenticates with must be linked to the specified YouTube content owner.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("onBehalfOfContentOwner", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OnBehalfOfContentOwner { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "delete";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "DELETE";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "youtube/v3/playlistImages";
+
+            /// <summary>Initializes Delete parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("id", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "id",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("onBehalfOfContentOwner", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "onBehalfOfContentOwner",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>Inserts a new resource into this collection.</summary>
+        /// <param name="body">The body of the request.</param>
+        public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.PlaylistImage body)
+        {
+            return new InsertRequest(this.service, body);
+        }
+
+        /// <summary>Inserts a new resource into this collection.</summary>
+        public class InsertRequest : YouTubeBaseServiceRequest<Google.Apis.YouTube.v3.Data.PlaylistImage>
+        {
+            /// <summary>Constructs a new Insert request.</summary>
+            public InsertRequest(Google.Apis.Services.IClientService service, Google.Apis.YouTube.v3.Data.PlaylistImage body) : base(service)
+            {
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// *Note:* This parameter is intended exclusively for YouTube content partners. The
+            /// *onBehalfOfContentOwner* parameter indicates that the request's authorization credentials identify a
+            /// YouTube CMS user who is acting on behalf of the content owner specified in the parameter value. This
+            /// parameter is intended for YouTube content partners that own and manage many different YouTube channels.
+            /// It allows content owners to authenticate once and get access to all their video and channel data,
+            /// without having to provide authentication credentials for each individual channel. The CMS account that
+            /// the user authenticates with must be linked to the specified YouTube content owner.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("onBehalfOfContentOwner", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OnBehalfOfContentOwner { get; set; }
+
+            /// <summary>
+            /// This parameter can only be used in a properly authorized request. *Note:* This parameter is intended
+            /// exclusively for YouTube content partners. The *onBehalfOfContentOwnerChannel* parameter specifies the
+            /// YouTube channel ID of the channel to which a video is being added. This parameter is required when a
+            /// request specifies a value for the onBehalfOfContentOwner parameter, and it can only be used in
+            /// conjunction with that parameter. In addition, the request must be authorized using a CMS account that is
+            /// linked to the content owner that the onBehalfOfContentOwner parameter specifies. Finally, the channel
+            /// that the onBehalfOfContentOwnerChannel parameter value specifies must be linked to the content owner
+            /// that the onBehalfOfContentOwner parameter specifies. This parameter is intended for YouTube content
+            /// partners that own and manage many different YouTube channels. It allows content owners to authenticate
+            /// once and perform actions on behalf of the channel specified in the parameter value, without having to
+            /// provide authentication credentials for each separate channel.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("onBehalfOfContentOwnerChannel", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OnBehalfOfContentOwnerChannel { get; set; }
+
+            /// <summary>The *part* parameter specifies the properties that the API response will include.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("part", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<string> Part { get; set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.YouTube.v3.Data.PlaylistImage Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "insert";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "youtube/v3/playlistImages";
+
+            /// <summary>Initializes Insert parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("onBehalfOfContentOwner", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "onBehalfOfContentOwner",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("onBehalfOfContentOwnerChannel", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "onBehalfOfContentOwnerChannel",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("part", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "part",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>Inserts a new resource into this collection.</summary>
+        /// <remarks>
+        /// Considerations regarding <paramref name="stream"/>:
+        /// <list type="bullet">
+        /// <item>
+        /// <description>
+        /// If <paramref name="stream"/> is seekable, then the stream position will be reset to <c>0</c> before reading
+        /// commences. If <paramref name="stream"/> is not seekable, then it will be read from its current position
+        /// </description>
+        /// </item>
+        /// <item>
+        /// <description>
+        /// Caller is responsible for maintaining the <paramref name="stream"/> open until the upload is completed
+        /// </description>
+        /// </item>
+        /// <item><description>Caller is responsible for closing the <paramref name="stream"/></description></item>
+        /// </list>
+        /// </remarks>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="stream">The stream to upload. See remarks for further information.</param>
+        /// <param name="contentType">The content type of the stream to upload.</param>
+        public virtual InsertMediaUpload Insert(Google.Apis.YouTube.v3.Data.PlaylistImage body, System.IO.Stream stream, string contentType)
+        {
+            return new InsertMediaUpload(service, body, stream, contentType);
+        }
+
+        /// <summary>Insert media upload which supports resumable upload.</summary>
+        public class InsertMediaUpload : Google.Apis.Upload.ResumableUpload<Google.Apis.YouTube.v3.Data.PlaylistImage, Google.Apis.YouTube.v3.Data.PlaylistImage>
+        {
+            /// <summary>V1 error format.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("$.xgafv", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<XgafvEnum> Xgafv { get; set; }
+
+            /// <summary>V1 error format.</summary>
+            public enum XgafvEnum
+            {
+                /// <summary>v1 error format</summary>
+                [Google.Apis.Util.StringValueAttribute("1")]
+                Value1 = 0,
+
+                /// <summary>v2 error format</summary>
+                [Google.Apis.Util.StringValueAttribute("2")]
+                Value2 = 1,
+            }
+
+            /// <summary>OAuth access token.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("access_token", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string AccessToken { get; set; }
+
+            /// <summary>Data format for response.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("alt", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<AltEnum> Alt { get; set; }
+
+            /// <summary>Data format for response.</summary>
+            public enum AltEnum
+            {
+                /// <summary>Responses with Content-Type of application/json</summary>
+                [Google.Apis.Util.StringValueAttribute("json")]
+                Json = 0,
+
+                /// <summary>Media download with context-dependent Content-Type</summary>
+                [Google.Apis.Util.StringValueAttribute("media")]
+                Media = 1,
+
+                /// <summary>Responses with Content-Type of application/x-protobuf</summary>
+                [Google.Apis.Util.StringValueAttribute("proto")]
+                Proto = 2,
+            }
+
+            /// <summary>JSONP</summary>
+            [Google.Apis.Util.RequestParameterAttribute("callback", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Callback { get; set; }
+
+            /// <summary>Selector specifying which fields to include in a partial response.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("fields", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Fields { get; set; }
+
+            /// <summary>
+            /// API key. Your API key identifies your project and provides you with API access, quota, and reports.
+            /// Required unless you provide an OAuth 2.0 token.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("key", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Key { get; set; }
+
+            /// <summary>OAuth 2.0 token for the current user.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("oauth_token", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OauthToken { get; set; }
+
+            /// <summary>Returns response with indentations and line breaks.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("prettyPrint", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> PrettyPrint { get; set; }
+
+            /// <summary>
+            /// Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned
+            /// to a user, but should not exceed 40 characters.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("quotaUser", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string QuotaUser { get; set; }
+
+            /// <summary>Legacy upload protocol for media (e.g. "media", "multipart").</summary>
+            [Google.Apis.Util.RequestParameterAttribute("uploadType", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string UploadType { get; set; }
+
+            /// <summary>Upload protocol for media (e.g. "raw", "multipart").</summary>
+            [Google.Apis.Util.RequestParameterAttribute("upload_protocol", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string UploadProtocol { get; set; }
+
+            /// <summary>
+            /// *Note:* This parameter is intended exclusively for YouTube content partners. The
+            /// *onBehalfOfContentOwner* parameter indicates that the request's authorization credentials identify a
+            /// YouTube CMS user who is acting on behalf of the content owner specified in the parameter value. This
+            /// parameter is intended for YouTube content partners that own and manage many different YouTube channels.
+            /// It allows content owners to authenticate once and get access to all their video and channel data,
+            /// without having to provide authentication credentials for each individual channel. The CMS account that
+            /// the user authenticates with must be linked to the specified YouTube content owner.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("onBehalfOfContentOwner", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OnBehalfOfContentOwner { get; set; }
+
+            /// <summary>
+            /// This parameter can only be used in a properly authorized request. *Note:* This parameter is intended
+            /// exclusively for YouTube content partners. The *onBehalfOfContentOwnerChannel* parameter specifies the
+            /// YouTube channel ID of the channel to which a video is being added. This parameter is required when a
+            /// request specifies a value for the onBehalfOfContentOwner parameter, and it can only be used in
+            /// conjunction with that parameter. In addition, the request must be authorized using a CMS account that is
+            /// linked to the content owner that the onBehalfOfContentOwner parameter specifies. Finally, the channel
+            /// that the onBehalfOfContentOwnerChannel parameter value specifies must be linked to the content owner
+            /// that the onBehalfOfContentOwner parameter specifies. This parameter is intended for YouTube content
+            /// partners that own and manage many different YouTube channels. It allows content owners to authenticate
+            /// once and perform actions on behalf of the channel specified in the parameter value, without having to
+            /// provide authentication credentials for each separate channel.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("onBehalfOfContentOwnerChannel", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OnBehalfOfContentOwnerChannel { get; set; }
+
+            /// <summary>The *part* parameter specifies the properties that the API response will include.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("part", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<string> Part { get; set; }
+
+            /// <summary>Constructs a new Insert media upload instance.</summary>
+            /// <remarks>
+            /// Considerations regarding <paramref name="stream"/>:
+            /// <list type="bullet">
+            /// <item>
+            /// <description>
+            /// If <paramref name="stream"/> is seekable, then the stream position will be reset to <c>0</c> before
+            /// reading commences. If <paramref name="stream"/> is not seekable, then it will be read from its current
+            /// position
+            /// </description>
+            /// </item>
+            /// <item>
+            /// <description>
+            /// Caller is responsible for maintaining the <paramref name="stream"/> open until the upload is completed
+            /// </description>
+            /// </item>
+            /// <item><description>Caller is responsible for closing the <paramref name="stream"/></description></item>
+            /// </list>
+            /// </remarks>
+            public InsertMediaUpload(Google.Apis.Services.IClientService service, Google.Apis.YouTube.v3.Data.PlaylistImage body, System.IO.Stream stream, string contentType)
+                : base(service, string.Format("/{0}/{1}{2}", "upload", service.BasePath, "youtube/v3/playlistImages"), "POST", stream, contentType)
+            {
+                Body = body;
+            }
+        }
+
+        /// <summary>Retrieves a list of resources, possibly filtered.</summary>
+        public virtual ListRequest List()
+        {
+            return new ListRequest(this.service);
+        }
+
+        /// <summary>Retrieves a list of resources, possibly filtered.</summary>
+        public class ListRequest : YouTubeBaseServiceRequest<Google.Apis.YouTube.v3.Data.PlaylistImageListResponse>
+        {
+            /// <summary>Constructs a new List request.</summary>
+            public ListRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>
+            /// The *maxResults* parameter specifies the maximum number of items that should be returned in the result
+            /// set.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("maxResults", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<long> MaxResults { get; set; }
+
+            /// <summary>
+            /// *Note:* This parameter is intended exclusively for YouTube content partners. The
+            /// *onBehalfOfContentOwner* parameter indicates that the request's authorization credentials identify a
+            /// YouTube CMS user who is acting on behalf of the content owner specified in the parameter value. This
+            /// parameter is intended for YouTube content partners that own and manage many different YouTube channels.
+            /// It allows content owners to authenticate once and get access to all their video and channel data,
+            /// without having to provide authentication credentials for each individual channel. The CMS account that
+            /// the user authenticates with must be linked to the specified YouTube content owner.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("onBehalfOfContentOwner", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OnBehalfOfContentOwner { get; set; }
+
+            /// <summary>
+            /// This parameter can only be used in a properly authorized request. *Note:* This parameter is intended
+            /// exclusively for YouTube content partners. The *onBehalfOfContentOwnerChannel* parameter specifies the
+            /// YouTube channel ID of the channel to which a video is being added. This parameter is required when a
+            /// request specifies a value for the onBehalfOfContentOwner parameter, and it can only be used in
+            /// conjunction with that parameter. In addition, the request must be authorized using a CMS account that is
+            /// linked to the content owner that the onBehalfOfContentOwner parameter specifies. Finally, the channel
+            /// that the onBehalfOfContentOwnerChannel parameter value specifies must be linked to the content owner
+            /// that the onBehalfOfContentOwner parameter specifies. This parameter is intended for YouTube content
+            /// partners that own and manage many different YouTube channels. It allows content owners to authenticate
+            /// once and perform actions on behalf of the channel specified in the parameter value, without having to
+            /// provide authentication credentials for each separate channel.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("onBehalfOfContentOwnerChannel", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OnBehalfOfContentOwnerChannel { get; set; }
+
+            /// <summary>
+            /// The *pageToken* parameter identifies a specific page in the result set that should be returned. In an
+            /// API response, the nextPageToken and prevPageToken properties identify other pages that could be
+            /// retrieved.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PageToken { get; set; }
+
+            /// <summary>Return PlaylistImages for this playlist id.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Parent { get; set; }
+
+            /// <summary>
+            /// The *part* parameter specifies a comma-separated list of one or more playlistImage resource properties
+            /// that the API response will include. If the parameter identifies a property that contains child
+            /// properties, the child properties will be included in the response.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("part", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<string> Part { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "list";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "youtube/v3/playlistImages";
+
+            /// <summary>Initializes List parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("maxResults", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "maxResults",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = "5",
+                    Pattern = null,
+                });
+                RequestParameters.Add("onBehalfOfContentOwner", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "onBehalfOfContentOwner",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("onBehalfOfContentOwnerChannel", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "onBehalfOfContentOwnerChannel",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageToken",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "parent",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("part", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "part",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>Updates an existing resource.</summary>
+        /// <param name="body">The body of the request.</param>
+        public virtual UpdateRequest Update(Google.Apis.YouTube.v3.Data.PlaylistImage body)
+        {
+            return new UpdateRequest(this.service, body);
+        }
+
+        /// <summary>Updates an existing resource.</summary>
+        public class UpdateRequest : YouTubeBaseServiceRequest<Google.Apis.YouTube.v3.Data.PlaylistImage>
+        {
+            /// <summary>Constructs a new Update request.</summary>
+            public UpdateRequest(Google.Apis.Services.IClientService service, Google.Apis.YouTube.v3.Data.PlaylistImage body) : base(service)
+            {
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// *Note:* This parameter is intended exclusively for YouTube content partners. The
+            /// *onBehalfOfContentOwner* parameter indicates that the request's authorization credentials identify a
+            /// YouTube CMS user who is acting on behalf of the content owner specified in the parameter value. This
+            /// parameter is intended for YouTube content partners that own and manage many different YouTube channels.
+            /// It allows content owners to authenticate once and get access to all their video and channel data,
+            /// without having to provide authentication credentials for each individual channel. The CMS account that
+            /// the user authenticates with must be linked to the specified YouTube content owner.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("onBehalfOfContentOwner", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OnBehalfOfContentOwner { get; set; }
+
+            /// <summary>The *part* parameter specifies the properties that the API response will include.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("part", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<string> Part { get; set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.YouTube.v3.Data.PlaylistImage Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "update";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "PUT";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "youtube/v3/playlistImages";
+
+            /// <summary>Initializes Update parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("onBehalfOfContentOwner", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "onBehalfOfContentOwner",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("part", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "part",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>Updates an existing resource.</summary>
+        /// <remarks>
+        /// Considerations regarding <paramref name="stream"/>:
+        /// <list type="bullet">
+        /// <item>
+        /// <description>
+        /// If <paramref name="stream"/> is seekable, then the stream position will be reset to <c>0</c> before reading
+        /// commences. If <paramref name="stream"/> is not seekable, then it will be read from its current position
+        /// </description>
+        /// </item>
+        /// <item>
+        /// <description>
+        /// Caller is responsible for maintaining the <paramref name="stream"/> open until the upload is completed
+        /// </description>
+        /// </item>
+        /// <item><description>Caller is responsible for closing the <paramref name="stream"/></description></item>
+        /// </list>
+        /// </remarks>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="stream">The stream to upload. See remarks for further information.</param>
+        /// <param name="contentType">The content type of the stream to upload.</param>
+        public virtual UpdateMediaUpload Update(Google.Apis.YouTube.v3.Data.PlaylistImage body, System.IO.Stream stream, string contentType)
+        {
+            return new UpdateMediaUpload(service, body, stream, contentType);
+        }
+
+        /// <summary>Update media upload which supports resumable upload.</summary>
+        public class UpdateMediaUpload : Google.Apis.Upload.ResumableUpload<Google.Apis.YouTube.v3.Data.PlaylistImage, Google.Apis.YouTube.v3.Data.PlaylistImage>
+        {
+            /// <summary>V1 error format.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("$.xgafv", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<XgafvEnum> Xgafv { get; set; }
+
+            /// <summary>V1 error format.</summary>
+            public enum XgafvEnum
+            {
+                /// <summary>v1 error format</summary>
+                [Google.Apis.Util.StringValueAttribute("1")]
+                Value1 = 0,
+
+                /// <summary>v2 error format</summary>
+                [Google.Apis.Util.StringValueAttribute("2")]
+                Value2 = 1,
+            }
+
+            /// <summary>OAuth access token.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("access_token", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string AccessToken { get; set; }
+
+            /// <summary>Data format for response.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("alt", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<AltEnum> Alt { get; set; }
+
+            /// <summary>Data format for response.</summary>
+            public enum AltEnum
+            {
+                /// <summary>Responses with Content-Type of application/json</summary>
+                [Google.Apis.Util.StringValueAttribute("json")]
+                Json = 0,
+
+                /// <summary>Media download with context-dependent Content-Type</summary>
+                [Google.Apis.Util.StringValueAttribute("media")]
+                Media = 1,
+
+                /// <summary>Responses with Content-Type of application/x-protobuf</summary>
+                [Google.Apis.Util.StringValueAttribute("proto")]
+                Proto = 2,
+            }
+
+            /// <summary>JSONP</summary>
+            [Google.Apis.Util.RequestParameterAttribute("callback", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Callback { get; set; }
+
+            /// <summary>Selector specifying which fields to include in a partial response.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("fields", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Fields { get; set; }
+
+            /// <summary>
+            /// API key. Your API key identifies your project and provides you with API access, quota, and reports.
+            /// Required unless you provide an OAuth 2.0 token.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("key", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Key { get; set; }
+
+            /// <summary>OAuth 2.0 token for the current user.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("oauth_token", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OauthToken { get; set; }
+
+            /// <summary>Returns response with indentations and line breaks.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("prettyPrint", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> PrettyPrint { get; set; }
+
+            /// <summary>
+            /// Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned
+            /// to a user, but should not exceed 40 characters.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("quotaUser", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string QuotaUser { get; set; }
+
+            /// <summary>Legacy upload protocol for media (e.g. "media", "multipart").</summary>
+            [Google.Apis.Util.RequestParameterAttribute("uploadType", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string UploadType { get; set; }
+
+            /// <summary>Upload protocol for media (e.g. "raw", "multipart").</summary>
+            [Google.Apis.Util.RequestParameterAttribute("upload_protocol", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string UploadProtocol { get; set; }
+
+            /// <summary>
+            /// *Note:* This parameter is intended exclusively for YouTube content partners. The
+            /// *onBehalfOfContentOwner* parameter indicates that the request's authorization credentials identify a
+            /// YouTube CMS user who is acting on behalf of the content owner specified in the parameter value. This
+            /// parameter is intended for YouTube content partners that own and manage many different YouTube channels.
+            /// It allows content owners to authenticate once and get access to all their video and channel data,
+            /// without having to provide authentication credentials for each individual channel. The CMS account that
+            /// the user authenticates with must be linked to the specified YouTube content owner.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("onBehalfOfContentOwner", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string OnBehalfOfContentOwner { get; set; }
+
+            /// <summary>The *part* parameter specifies the properties that the API response will include.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("part", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<string> Part { get; set; }
+
+            /// <summary>Constructs a new Update media upload instance.</summary>
+            /// <remarks>
+            /// Considerations regarding <paramref name="stream"/>:
+            /// <list type="bullet">
+            /// <item>
+            /// <description>
+            /// If <paramref name="stream"/> is seekable, then the stream position will be reset to <c>0</c> before
+            /// reading commences. If <paramref name="stream"/> is not seekable, then it will be read from its current
+            /// position
+            /// </description>
+            /// </item>
+            /// <item>
+            /// <description>
+            /// Caller is responsible for maintaining the <paramref name="stream"/> open until the upload is completed
+            /// </description>
+            /// </item>
+            /// <item><description>Caller is responsible for closing the <paramref name="stream"/></description></item>
+            /// </list>
+            /// </remarks>
+            public UpdateMediaUpload(Google.Apis.Services.IClientService service, Google.Apis.YouTube.v3.Data.PlaylistImage body, System.IO.Stream stream, string contentType)
+                : base(service, string.Format("/{0}/{1}{2}", "upload", service.BasePath, "youtube/v3/playlistImages"), "PUT", stream, contentType)
+            {
+                Body = body;
+            }
+        }
+    }
+
     /// <summary>The "playlistItems" collection of methods.</summary>
     public class PlaylistItemsResource
     {
@@ -5603,7 +6534,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id"><c>null</c></param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>Deletes a resource.</summary>
@@ -5671,7 +6602,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.PlaylistItem body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -5752,7 +6683,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -5901,7 +6832,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.YouTube.v3.Data.PlaylistItem body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new UpdateRequest(service, body, part);
+            return new UpdateRequest(this.service, body, part);
         }
 
         /// <summary>Updates an existing resource.</summary>
@@ -5998,7 +6929,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id"><c>null</c></param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>Deletes a resource.</summary>
@@ -6066,7 +6997,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.Playlist body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -6171,7 +7102,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -6198,7 +7129,7 @@ namespace Google.Apis.YouTube.v3
             [Google.Apis.Util.RequestParameterAttribute("channelId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string ChannelId { get; set; }
 
-            /// <summary>Returen content in specified language</summary>
+            /// <summary>Return content in specified language</summary>
             [Google.Apis.Util.RequestParameterAttribute("hl", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Hl { get; set; }
 
@@ -6353,7 +7284,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.YouTube.v3.Data.Playlist body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new UpdateRequest(service, body, part);
+            return new UpdateRequest(this.service, body, part);
         }
 
         /// <summary>Updates an existing resource.</summary>
@@ -6450,7 +7381,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of search resources</summary>
@@ -6608,13 +7539,67 @@ namespace Google.Apis.YouTube.v3
             [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string PageToken { get; set; }
 
-            /// <summary>Filter on resources published after this date.</summary>
-            [Google.Apis.Util.RequestParameterAttribute("publishedAfter", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual object PublishedAfter { get; set; }
+            private object _publishedAfter;
 
-            /// <summary>Filter on resources published before this date.</summary>
+            /// <summary>
+            /// String representation of <see cref="PublishedAfterDateTimeOffset"/>, formatted for inclusion in the HTTP
+            /// request.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("publishedAfter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PublishedAfterRaw { get; private set; }
+
+            /// <summary><seealso cref="object"/> representation of <see cref="PublishedAfterRaw"/>.</summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAfterDateTimeOffset instead.")]
+            public virtual object PublishedAfter
+            {
+                get => _publishedAfter;
+                set
+                {
+                    PublishedAfterRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                    _publishedAfter = value;
+                }
+            }
+
+            public virtual System.DateTimeOffset? PublishedAfterDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PublishedAfterRaw);
+                set
+                {
+                    PublishedAfterRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                    _publishedAfter = value;
+                }
+            }
+
+            private object _publishedBefore;
+
+            /// <summary>
+            /// String representation of <see cref="PublishedBeforeDateTimeOffset"/>, formatted for inclusion in the
+            /// HTTP request.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("publishedBefore", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual object PublishedBefore { get; set; }
+            public virtual string PublishedBeforeRaw { get; private set; }
+
+            /// <summary><seealso cref="object"/> representation of <see cref="PublishedBeforeRaw"/>.</summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedBeforeDateTimeOffset instead.")]
+            public virtual object PublishedBefore
+            {
+                get => _publishedBefore;
+                set
+                {
+                    PublishedBeforeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                    _publishedBefore = value;
+                }
+            }
+
+            public virtual System.DateTimeOffset? PublishedBeforeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PublishedBeforeRaw);
+                set
+                {
+                    PublishedBeforeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                    _publishedBefore = value;
+                }
+            }
 
             /// <summary>Textual search terms to match.</summary>
             [Google.Apis.Util.RequestParameterAttribute("q", Google.Apis.Util.RequestParameterType.Query)]
@@ -6623,10 +7608,6 @@ namespace Google.Apis.YouTube.v3
             /// <summary>Display the content as seen by viewers in this country.</summary>
             [Google.Apis.Util.RequestParameterAttribute("regionCode", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string RegionCode { get; set; }
-
-            /// <summary>Search related to a resource.</summary>
-            [Google.Apis.Util.RequestParameterAttribute("relatedToVideoId", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual string RelatedToVideoId { get; set; }
 
             /// <summary>Return results relevant to this language.</summary>
             [Google.Apis.Util.RequestParameterAttribute("relevanceLanguage", Google.Apis.Util.RequestParameterType.Query)]
@@ -6816,6 +7797,24 @@ namespace Google.Apis.YouTube.v3
                 /// </summary>
                 [Google.Apis.Util.StringValueAttribute("creativeCommon")]
                 CreativeCommon = 2,
+            }
+
+            [Google.Apis.Util.RequestParameterAttribute("videoPaidProductPlacement", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<VideoPaidProductPlacementEnum> VideoPaidProductPlacement { get; set; }
+
+            public enum VideoPaidProductPlacementEnum
+            {
+                /// <summary></summary>
+                [Google.Apis.Util.StringValueAttribute("videoPaidProductPlacementUnspecified")]
+                VideoPaidProductPlacementUnspecified = 0,
+
+                /// <summary>Return all videos, paid product placement or not.</summary>
+                [Google.Apis.Util.StringValueAttribute("any")]
+                Any = 1,
+
+                /// <summary>Restrict results to only videos with paid product placement.</summary>
+                [Google.Apis.Util.StringValueAttribute("true")]
+                True__ = 2,
             }
 
             /// <summary>Filter on syndicated videos.</summary>
@@ -7011,14 +8010,6 @@ namespace Google.Apis.YouTube.v3
                     DefaultValue = null,
                     Pattern = null,
                 });
-                RequestParameters.Add("relatedToVideoId", new Google.Apis.Discovery.Parameter
-                {
-                    Name = "relatedToVideoId",
-                    IsRequired = false,
-                    ParameterType = "query",
-                    DefaultValue = null,
-                    Pattern = null,
-                });
                 RequestParameters.Add("relevanceLanguage", new Google.Apis.Discovery.Parameter
                 {
                     Name = "relevanceLanguage",
@@ -7107,6 +8098,14 @@ namespace Google.Apis.YouTube.v3
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("videoPaidProductPlacement", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "videoPaidProductPlacement",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("videoSyndicated", new Google.Apis.Discovery.Parameter
                 {
                     Name = "videoSyndicated",
@@ -7145,7 +8144,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id"><c>null</c></param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>Deletes a resource.</summary>
@@ -7193,7 +8192,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.Subscription body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -7254,7 +8253,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -7503,7 +8502,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -7610,7 +8609,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="part"><c>null</c></param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.TestItem body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>POST method.</summary>
@@ -7688,7 +8687,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="type">Type of the link to be deleted.</param>
         public virtual DeleteRequest Delete(string linkingToken, DeleteRequest.TypeEnum type)
         {
-            return new DeleteRequest(service, linkingToken, type);
+            return new DeleteRequest(this.service, linkingToken, type);
         }
 
         /// <summary>Deletes a resource.</summary>
@@ -7789,7 +8788,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.ThirdPartyLink body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -7859,11 +8858,11 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
-        public class ListRequest : YouTubeBaseServiceRequest<Google.Apis.YouTube.v3.Data.ThirdPartyLink>
+        public class ListRequest : YouTubeBaseServiceRequest<Google.Apis.YouTube.v3.Data.ThirdPartyLinkListResponse>
         {
             /// <summary>Constructs a new List request.</summary>
             public ListRequest(Google.Apis.Services.IClientService service, Google.Apis.Util.Repeatable<string> part) : base(service)
@@ -7962,7 +8961,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.YouTube.v3.Data.ThirdPartyLink body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new UpdateRequest(service, body, part);
+            return new UpdateRequest(this.service, body, part);
         }
 
         /// <summary>Updates an existing resource.</summary>
@@ -8047,7 +9046,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="videoId">Returns the Thumbnail with the given video IDs for Stubby or Apiary.</param>
         public virtual SetRequest Set(string videoId)
         {
-            return new SetRequest(service, videoId);
+            return new SetRequest(this.service, videoId);
         }
 
         /// <summary>
@@ -8285,7 +9284,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -8362,7 +9361,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -8441,6 +9440,64 @@ namespace Google.Apis.YouTube.v3
         }
     }
 
+    /// <summary>The "videoTrainability" collection of methods.</summary>
+    public class VideoTrainabilityResource
+    {
+        private const string Resource = "videoTrainability";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public VideoTrainabilityResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>Returns the trainability status of a video.</summary>
+        public virtual GetRequest Get()
+        {
+            return new GetRequest(this.service);
+        }
+
+        /// <summary>Returns the trainability status of a video.</summary>
+        public class GetRequest : YouTubeBaseServiceRequest<Google.Apis.YouTube.v3.Data.VideoTrainability>
+        {
+            /// <summary>Constructs a new Get request.</summary>
+            public GetRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>The ID of the video to retrieve.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("id", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Id { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "get";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "youtube/v3/videoTrainability";
+
+            /// <summary>Initializes Get parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("id", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "id",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
     /// <summary>The "videos" collection of methods.</summary>
     public class VideosResource
     {
@@ -8459,7 +9516,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id"><c>null</c></param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>Deletes a resource.</summary>
@@ -8523,7 +9580,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="id"><c>null</c></param>
         public virtual GetRatingRequest GetRating(Google.Apis.Util.Repeatable<string> id)
         {
-            return new GetRatingRequest(service, id);
+            return new GetRatingRequest(this.service, id);
         }
 
         /// <summary>Retrieves the ratings that the authorized user gave to a list of specified videos.</summary>
@@ -8595,7 +9652,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.YouTube.v3.Data.Video body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new InsertRequest(service, body, part);
+            return new InsertRequest(this.service, body, part);
         }
 
         /// <summary>Inserts a new resource into this collection.</summary>
@@ -8937,7 +9994,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> part)
         {
-            return new ListRequest(service, part);
+            return new ListRequest(this.service, part);
         }
 
         /// <summary>Retrieves a list of resources, possibly filtered.</summary>
@@ -9187,7 +10244,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="rating"><c>null</c></param>
         public virtual RateRequest Rate(string id, RateRequest.RatingEnum rating)
         {
-            return new RateRequest(service, id, rating);
+            return new RateRequest(this.service, id, rating);
         }
 
         /// <summary>Adds a like or dislike rating to a video or removes a rating from a video.</summary>
@@ -9258,7 +10315,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="body">The body of the request.</param>
         public virtual ReportAbuseRequest ReportAbuse(Google.Apis.YouTube.v3.Data.VideoAbuseReport body)
         {
-            return new ReportAbuseRequest(service, body);
+            return new ReportAbuseRequest(this.service, body);
         }
 
         /// <summary>Report abuse for a video.</summary>
@@ -9330,7 +10387,7 @@ namespace Google.Apis.YouTube.v3
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.YouTube.v3.Data.Video body, Google.Apis.Util.Repeatable<string> part)
         {
-            return new UpdateRequest(service, body, part);
+            return new UpdateRequest(this.service, body, part);
         }
 
         /// <summary>Updates an existing resource.</summary>
@@ -9431,7 +10488,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="channelId"><c>null</c></param>
         public virtual SetRequest Set(Google.Apis.YouTube.v3.Data.InvideoBranding body, string channelId)
         {
-            return new SetRequest(service, body, channelId);
+            return new SetRequest(this.service, body, channelId);
         }
 
         /// <summary>Allows upload of watermark image and setting it for a channel.</summary>
@@ -9652,7 +10709,7 @@ namespace Google.Apis.YouTube.v3
         /// <param name="channelId"><c>null</c></param>
         public virtual UnsetRequest Unset(string channelId)
         {
-            return new UnsetRequest(service, channelId);
+            return new UnsetRequest(this.service, channelId);
         }
 
         /// <summary>Allows removal of channel watermark.</summary>
@@ -9749,7 +10806,7 @@ namespace Google.Apis.YouTube.v3
             /// <param name="body">The body of the request.</param>
             public virtual UpdateCommentThreadsRequest UpdateCommentThreads(Google.Apis.YouTube.v3.Data.CommentThread body)
             {
-                return new UpdateCommentThreadsRequest(service, body);
+                return new UpdateCommentThreadsRequest(this.service, body);
             }
 
             /// <summary>Updates an existing resource.</summary>
@@ -10267,9 +11324,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("publishedAt")]
         public virtual string PublishedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(PublishedAtRaw);
+            set => PublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="PublishedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> PublishedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? PublishedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(PublishedAtRaw);
             set => PublishedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -10402,9 +11468,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdated")]
         public virtual string LastUpdatedRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(LastUpdatedRaw);
+            set => LastUpdatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> LastUpdated
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdatedDateTimeOffset instead.")]
+        public virtual System.DateTime? LastUpdated
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(LastUpdatedRaw);
             set => LastUpdatedRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -10659,9 +11734,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeLinked")]
         public virtual string TimeLinkedRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimeLinkedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimeLinkedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeLinkedRaw);
+            set => TimeLinkedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="TimeLinkedRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> TimeLinked
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeLinkedDateTimeOffset instead.")]
+        public virtual System.DateTime? TimeLinked
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeLinkedRaw);
             set => TimeLinkedRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -11034,9 +12118,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("publishedAt")]
         public virtual string PublishedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(PublishedAtRaw);
+            set => PublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="PublishedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> PublishedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? PublishedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(PublishedAtRaw);
             set => PublishedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -11094,6 +12187,12 @@ namespace Google.Apis.YouTube.v3.Data
     public class ChannelStatus : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Whether the channel is considered ypp monetization enabled. See go/yppornot for more details.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isChannelMonetizationEnabled")]
+        public virtual System.Nullable<bool> IsChannelMonetizationEnabled { get; set; }
+
+        /// <summary>
         /// If true, then the user is linked to either a YouTube username or G+ account. Otherwise, the user doesn't
         /// have a public YouTube identity.
         /// </summary>
@@ -11124,6 +12223,18 @@ namespace Google.Apis.YouTube.v3.Data
     /// <summary>Information specific to a store on a merchandising platform linked to a YouTube channel.</summary>
     public class ChannelToStoreLinkDetails : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Information specific to billing (read-only).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("billingDetails")]
+        public virtual ChannelToStoreLinkDetailsBillingDetails BillingDetails { get; set; }
+
+        /// <summary>Information specific to merchant affiliate program (read-only).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("merchantAffiliateProgramDetails")]
+        public virtual ChannelToStoreLinkDetailsMerchantAffiliateProgramDetails MerchantAffiliateProgramDetails { get; set; }
+
+        /// <summary>Google Merchant Center id of the store.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("merchantId")]
+        public virtual System.Nullable<ulong> MerchantId { get; set; }
+
         /// <summary>Name of the store.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storeName")]
         public virtual string StoreName { get; set; }
@@ -11131,6 +12242,28 @@ namespace Google.Apis.YouTube.v3.Data
         /// <summary>Landing page of the store.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storeUrl")]
         public virtual string StoreUrl { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information specific to billing.</summary>
+    public class ChannelToStoreLinkDetailsBillingDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The current billing profile status.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("billingStatus")]
+        public virtual string BillingStatus { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information specific to merchant affiliate program.</summary>
+    public class ChannelToStoreLinkDetailsMerchantAffiliateProgramDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The current merchant affiliate program status.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual string Status { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -11260,9 +12393,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("publishedAt")]
         public virtual string PublishedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(PublishedAtRaw);
+            set => PublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="PublishedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> PublishedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? PublishedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(PublishedAtRaw);
             set => PublishedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -11287,9 +12429,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("updatedAt")]
         public virtual string UpdatedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdatedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdatedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(UpdatedAtRaw);
+            set => UpdatedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="UpdatedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> UpdatedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdatedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? UpdatedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(UpdatedAtRaw);
             set => UpdatedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -11793,6 +12944,69 @@ namespace Google.Apis.YouTube.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Note that there may be a 5-second end-point resolution issue. For instance, if a cuepoint comes in for 22:03:27,
+    /// we may stuff the cuepoint into 22:03:25 or 22:03:30, depending. This is an artifact of HLS.
+    /// </summary>
+    public class Cuepoint : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("cueType")]
+        public virtual string CueType { get; set; }
+
+        /// <summary>The duration of this cuepoint.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("durationSecs")]
+        public virtual System.Nullable<long> DurationSecs { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>The identifier for cuepoint resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>
+        /// The time when the cuepoint should be inserted by offset to the broadcast actual start time.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("insertionOffsetTimeMs")]
+        public virtual System.Nullable<long> InsertionOffsetTimeMs { get; set; }
+
+        /// <summary>
+        /// The wall clock time at which the cuepoint should be inserted. Only one of insertion_offset_time_ms and
+        /// walltime_ms may be set at a time.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("walltimeMs")]
+        public virtual System.Nullable<ulong> WalltimeMs { get; set; }
+    }
+
+    /// <summary>Schedule to insert cuepoints into a broadcast by ads automator.</summary>
+    public class CuepointSchedule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// This field is semantically required. If it is set false or not set, other fields in this message will be
+        /// ignored.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enabled")]
+        public virtual System.Nullable<bool> Enabled { get; set; }
+
+        /// <summary>
+        /// If set, automatic cuepoint insertion is paused until this timestamp ("No Ad Zone"). The value is specified
+        /// in ISO 8601 format.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pauseAdsUntil")]
+        public virtual string PauseAdsUntil { get; set; }
+
+        /// <summary>Interval frequency in seconds that api uses to insert cuepoints automatically.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repeatIntervalSecs")]
+        public virtual System.Nullable<int> RepeatIntervalSecs { get; set; }
+
+        /// <summary>The strategy to use when scheduling cuepoints.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scheduleStrategy")]
+        public virtual string ScheduleStrategy { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     public class Entity : Google.Apis.Requests.IDirectResponseSchema
     {
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
@@ -12068,7 +13282,7 @@ namespace Google.Apis.YouTube.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Describes information necessary for ingesting an RTMP or an HTTP stream.</summary>
+    /// <summary>Describes information necessary for ingesting an RTMP, HTTP, or SRT stream.</summary>
     public class IngestionInfo : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -12101,7 +13315,7 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("rtmpsIngestionAddress")]
         public virtual string RtmpsIngestionAddress { get; set; }
 
-        /// <summary>The HTTP or RTMP stream name that YouTube assigns to the video stream.</summary>
+        /// <summary>The stream name that YouTube assigns to the video stream.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("streamName")]
         public virtual string StreamName { get; set; }
 
@@ -12109,7 +13323,7 @@ namespace Google.Apis.YouTube.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>LINT.IfChange Describes an invideo branding.</summary>
+    /// <summary>Describes an invideo branding.</summary>
     public class InvideoBranding : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The bytes the uploaded image. Only used in api to youtube communication.</summary>
@@ -12233,6 +13447,12 @@ namespace Google.Apis.YouTube.v3.Data
         public virtual string Kind { get; set; }
 
         /// <summary>
+        /// The monetizationDetails object contains information about the event's monetization details.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("monetizationDetails")]
+        public virtual LiveBroadcastMonetizationDetails MonetizationDetails { get; set; }
+
+        /// <summary>
         /// The snippet object contains basic details about the event, including its title, description, start time, and
         /// end time.
         /// </summary>
@@ -12264,10 +13484,21 @@ namespace Google.Apis.YouTube.v3.Data
         public virtual string BoundStreamLastUpdateTimeMsRaw { get; set; }
 
         /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="BoundStreamLastUpdateTimeMsRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? BoundStreamLastUpdateTimeMsDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(BoundStreamLastUpdateTimeMsRaw);
+            set => BoundStreamLastUpdateTimeMsRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
+        /// <summary>
         /// <seealso cref="System.DateTime"/> representation of <see cref="BoundStreamLastUpdateTimeMsRaw"/>.
         /// </summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> BoundStreamLastUpdateTimeMs
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use BoundStreamLastUpdateTimeMsDateTimeOffset instead.")]
+        public virtual System.DateTime? BoundStreamLastUpdateTimeMs
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(BoundStreamLastUpdateTimeMsRaw);
             set => BoundStreamLastUpdateTimeMsRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -12427,6 +13658,16 @@ namespace Google.Apis.YouTube.v3.Data
         public virtual string VisitorId { get; set; }
     }
 
+    /// <summary>Monetization settings of a broadcast.</summary>
+    public class LiveBroadcastMonetizationDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("cuepointSchedule")]
+        public virtual CuepointSchedule CuepointSchedule { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Basic broadcast information.</summary>
     public class LiveBroadcastSnippet : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -12437,9 +13678,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("actualEndTime")]
         public virtual string ActualEndTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ActualEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ActualEndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ActualEndTimeRaw);
+            set => ActualEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ActualEndTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ActualEndTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ActualEndTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ActualEndTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ActualEndTimeRaw);
             set => ActualEndTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -12452,9 +13702,20 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("actualStartTime")]
         public virtual string ActualStartTimeRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ActualStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ActualStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ActualStartTimeRaw);
+            set => ActualStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ActualStartTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ActualStartTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ActualStartTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ActualStartTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ActualStartTimeRaw);
             set => ActualStartTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -12485,9 +13746,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("publishedAt")]
         public virtual string PublishedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(PublishedAtRaw);
+            set => PublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="PublishedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> PublishedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? PublishedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(PublishedAtRaw);
             set => PublishedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -12497,9 +13767,20 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("scheduledEndTime")]
         public virtual string ScheduledEndTimeRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduledEndTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduledEndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ScheduledEndTimeRaw);
+            set => ScheduledEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ScheduledEndTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ScheduledEndTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduledEndTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ScheduledEndTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ScheduledEndTimeRaw);
             set => ScheduledEndTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -12509,9 +13790,20 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("scheduledStartTime")]
         public virtual string ScheduledStartTimeRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduledStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduledStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ScheduledStartTimeRaw);
+            set => ScheduledStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ScheduledStartTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ScheduledStartTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduledStartTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ScheduledStartTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ScheduledStartTimeRaw);
             set => ScheduledStartTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -12543,13 +13835,14 @@ namespace Google.Apis.YouTube.v3.Data
     public class LiveBroadcastStatistics : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The total number of live chat messages currently on the broadcast. The property and its value will be
-        /// present if the broadcast is public, has the live chat feature enabled, and has at least one message. Note
-        /// that this field will not be filled after the broadcast ends. So this property would not identify the number
-        /// of chat messages for an archived video of a completed live broadcast.
+        /// The number of viewers currently watching the broadcast. The property and its value will be present if the
+        /// broadcast has current viewers and the broadcast owner has not hidden the viewcount for the video. Note that
+        /// YouTube stops tracking the number of concurrent viewers for a broadcast when the broadcast ends. So, this
+        /// property would not identify the number of viewers watching an archived video of a live broadcast that
+        /// already ended.
         /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("totalChatCount")]
-        public virtual System.Nullable<ulong> TotalChatCount { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("concurrentViewers")]
+        public virtual System.Nullable<ulong> ConcurrentViewers { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -12662,6 +13955,35 @@ namespace Google.Apis.YouTube.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    public class LiveChatGiftMembershipReceivedDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The ID of the membership gifting message that is related to this gift membership. This ID will always refer
+        /// to a message whose type is 'membershipGiftingEvent'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("associatedMembershipGiftingMessageId")]
+        public virtual string AssociatedMembershipGiftingMessageId { get; set; }
+
+        /// <summary>
+        /// The ID of the user that made the membership gifting purchase. This matches the `snippet.authorChannelId` of
+        /// the associated membership gifting message.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gifterChannelId")]
+        public virtual string GifterChannelId { get; set; }
+
+        /// <summary>
+        /// The name of the Level at which the viewer is a member. This matches the
+        /// `snippet.membershipGiftingDetails.giftMembershipsLevelName` of the associated membership gifting message.
+        /// The Level names are defined by the YouTube channel offering the Membership. In some situations this field
+        /// isn't filled.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("memberLevelName")]
+        public virtual string MemberLevelName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     public class LiveChatMemberMilestoneChatDetails : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -12684,6 +14006,23 @@ namespace Google.Apis.YouTube.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userComment")]
         public virtual string UserComment { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class LiveChatMembershipGiftingDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The number of gift memberships purchased by the user.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("giftMembershipsCount")]
+        public virtual System.Nullable<int> GiftMembershipsCount { get; set; }
+
+        /// <summary>
+        /// The name of the level of the gift memberships purchased by the user. The Level names are defined by the
+        /// YouTube channel offering the Membership. In some situations this field isn't filled.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("giftMembershipsLevelName")]
+        public virtual string GiftMembershipsLevelName { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -12764,6 +14103,10 @@ namespace Google.Apis.YouTube.v3.Data
 
     public class LiveChatMessageListResponse : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Set when there is an active poll.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("activePollItem")]
+        public virtual LiveChatMessage ActivePollItem { get; set; }
+
         /// <summary>Etag of this resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("etag")]
         public virtual string ETag { get; set; }
@@ -12788,9 +14131,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("offlineAt")]
         public virtual string OfflineAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="OfflineAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? OfflineAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(OfflineAtRaw);
+            set => OfflineAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="OfflineAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> OfflineAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use OfflineAtDateTimeOffset instead.")]
+        public virtual System.DateTime? OfflineAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(OfflineAtRaw);
             set => OfflineAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -12821,16 +14173,17 @@ namespace Google.Apis.YouTube.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Next ID: 31</summary>
+    /// <summary>Next ID: 34</summary>
     public class LiveChatMessageSnippet : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// The ID of the user that authored this message, this field is not always filled. textMessageEvent - the user
         /// that wrote the message fanFundingEvent - the user that funded the broadcast newSponsorEvent - the user that
-        /// just became a sponsor memberMilestoneChatEvent - the member that sent the message messageDeletedEvent - the
-        /// moderator that took the action messageRetractedEvent - the author that retracted their message
-        /// userBannedEvent - the moderator that took the action superChatEvent - the user that made the purchase
-        /// superStickerEvent - the user that made the purchase
+        /// just became a sponsor memberMilestoneChatEvent - the member that sent the message membershipGiftingEvent -
+        /// the user that made the purchase giftMembershipReceivedEvent - the user that received the gift membership
+        /// messageDeletedEvent - the moderator that took the action messageRetractedEvent - the author that retracted
+        /// their message userBannedEvent - the moderator that took the action superChatEvent - the user that made the
+        /// purchase superStickerEvent - the user that made the purchase pollEvent - the user that created the poll
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("authorChannelId")]
         public virtual string AuthorChannelId { get; set; }
@@ -12846,6 +14199,13 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("fanFundingEventDetails")]
         public virtual LiveChatFanFundingEventDetails FanFundingEventDetails { get; set; }
 
+        /// <summary>
+        /// Details about the Gift Membership Received event, this is only set if the type is
+        /// 'giftMembershipReceivedEvent'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("giftMembershipReceivedDetails")]
+        public virtual LiveChatGiftMembershipReceivedDetails GiftMembershipReceivedDetails { get; set; }
+
         /// <summary>Whether the message has display content that should be displayed to users.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hasDisplayContent")]
         public virtual System.Nullable<bool> HasDisplayContent { get; set; }
@@ -12858,6 +14218,12 @@ namespace Google.Apis.YouTube.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("memberMilestoneChatDetails")]
         public virtual LiveChatMemberMilestoneChatDetails MemberMilestoneChatDetails { get; set; }
+
+        /// <summary>
+        /// Details about the Membership Gifting event, this is only set if the type is 'membershipGiftingEvent'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("membershipGiftingDetails")]
+        public virtual LiveChatMembershipGiftingDetails MembershipGiftingDetails { get; set; }
 
         [Newtonsoft.Json.JsonPropertyAttribute("messageDeletedDetails")]
         public virtual LiveChatMessageDeletedDetails MessageDeletedDetails { get; set; }
@@ -12872,13 +14238,26 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("newSponsorDetails")]
         public virtual LiveChatNewSponsorDetails NewSponsorDetails { get; set; }
 
+        /// <summary>Details about the poll event, this is only set if the type is 'pollEvent'.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pollDetails")]
+        public virtual LiveChatPollDetails PollDetails { get; set; }
+
         /// <summary>The date and time when the message was orignally published.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("publishedAt")]
         public virtual string PublishedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(PublishedAtRaw);
+            set => PublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="PublishedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> PublishedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? PublishedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(PublishedAtRaw);
             set => PublishedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -13012,6 +14391,43 @@ namespace Google.Apis.YouTube.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("memberLevelName")]
         public virtual string MemberLevelName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class LiveChatPollDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
+        public virtual LiveChatPollDetailsPollMetadata Metadata { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual string Status { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class LiveChatPollDetailsPollMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The options will be returned in the order that is displayed in 1P</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("options")]
+        public virtual System.Collections.Generic.IList<LiveChatPollDetailsPollMetadataPollOption> Options { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("questionText")]
+        public virtual string QuestionText { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class LiveChatPollDetailsPollMetadataPollOption : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("optionText")]
+        public virtual string OptionText { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("tally")]
+        public virtual System.Nullable<long> Tally { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -13269,9 +14685,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("publishedAt")]
         public virtual string PublishedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(PublishedAtRaw);
+            set => PublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="PublishedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> PublishedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? PublishedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(PublishedAtRaw);
             set => PublishedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -13642,6 +15067,91 @@ namespace Google.Apis.YouTube.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    public class PlaylistImage : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Identifies this resource (playlist id and image type).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>
+        /// Identifies what kind of resource this is. Value: the fixed string "youtube#playlistImages".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("snippet")]
+        public virtual PlaylistImageSnippet Snippet { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class PlaylistImageListResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("items")]
+        public virtual System.Collections.Generic.IList<PlaylistImage> Items { get; set; }
+
+        /// <summary>
+        /// Identifies what kind of resource this is. Value: the fixed string "youtube#playlistImageListResponse".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>
+        /// The token that can be used as the value of the pageToken parameter to retrieve the next page in the result
+        /// set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>General pagination information.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pageInfo")]
+        public virtual PageInfo PageInfo { get; set; }
+
+        /// <summary>
+        /// The token that can be used as the value of the pageToken parameter to retrieve the previous page in the
+        /// result set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("prevPageToken")]
+        public virtual string PrevPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A *playlistImage* resource identifies another resource, such as a image, that is associated with a playlist. In
+    /// addition, the playlistImage resource contains details about the included resource that pertain specifically to
+    /// how that resource is used in that playlist. YouTube uses playlists to identify special collections of videos for
+    /// a channel, such as: - uploaded videos - favorite videos - positively rated (liked) videos - watch history To be
+    /// more specific, these lists are associated with a channel, which is a collection of a person, group, or company's
+    /// videos, playlists, and other YouTube information. You can retrieve the playlist IDs for each of these lists from
+    /// the channel resource for a given channel. You can then use the playlistImages.list method to retrieve image data
+    /// for any of those playlists. You can also add or remove images from those lists by calling the
+    /// playlistImages.insert and playlistImages.delete methods.
+    /// </summary>
+    public class PlaylistImageSnippet : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The image height.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("height")]
+        public virtual System.Nullable<int> Height { get; set; }
+
+        /// <summary>The Playlist ID of the playlist this image is associated with.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("playlistId")]
+        public virtual string PlaylistId { get; set; }
+
+        /// <summary>The image type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The image width.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("width")]
+        public virtual System.Nullable<int> Width { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A *playlistItem* resource identifies another resource, such as a video, that is included in a playlist. In
     /// addition, the playlistItem resource contains details about the included resource that pertain specifically to
@@ -13720,9 +15230,20 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("videoPublishedAt")]
         public virtual string VideoPublishedAtRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="VideoPublishedAtRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? VideoPublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(VideoPublishedAtRaw);
+            set => VideoPublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="VideoPublishedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> VideoPublishedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use VideoPublishedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? VideoPublishedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(VideoPublishedAtRaw);
             set => VideoPublishedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -13746,8 +15267,7 @@ namespace Google.Apis.YouTube.v3.Data
         public virtual System.Collections.Generic.IList<PlaylistItem> Items { get; set; }
 
         /// <summary>
-        /// Identifies what kind of resource this is. Value: the fixed string "youtube#playlistItemListResponse". Etag
-        /// of this resource.
+        /// Identifies what kind of resource this is. Value: the fixed string "youtube#playlistItemListResponse".
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
@@ -13813,9 +15333,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("publishedAt")]
         public virtual string PublishedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(PublishedAtRaw);
+            set => PublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="PublishedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> PublishedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? PublishedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(PublishedAtRaw);
             set => PublishedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -13960,9 +15489,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("publishedAt")]
         public virtual string PublishedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(PublishedAtRaw);
+            set => PublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="PublishedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> PublishedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? PublishedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(PublishedAtRaw);
             set => PublishedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -13999,6 +15537,10 @@ namespace Google.Apis.YouTube.v3.Data
 
     public class PlaylistStatus : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The playlist's podcast status.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("podcastStatus")]
+        public virtual string PodcastStatus { get; set; }
+
         /// <summary>The playlist's privacy status.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("privacyStatus")]
         public virtual string PrivacyStatus { get; set; }
@@ -14175,9 +15717,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("publishedAt")]
         public virtual string PublishedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(PublishedAtRaw);
+            set => PublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="PublishedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> PublishedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? PublishedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(PublishedAtRaw);
             set => PublishedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -14306,10 +15857,6 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("channelId")]
         public virtual string ChannelId { get; set; }
 
-        /// <summary>Channel title for the channel that the subscription belongs to.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("channelTitle")]
-        public virtual string ChannelTitle { get; set; }
-
         /// <summary>The subscription's details.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual string Description { get; set; }
@@ -14318,9 +15865,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("publishedAt")]
         public virtual string PublishedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(PublishedAtRaw);
+            set => PublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="PublishedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> PublishedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? PublishedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(PublishedAtRaw);
             set => PublishedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -14450,9 +16006,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("createdAt")]
         public virtual string CreatedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreatedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreatedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(CreatedAtRaw);
+            set => CreatedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="CreatedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> CreatedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreatedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? CreatedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(CreatedAtRaw);
             set => CreatedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -14518,6 +16083,10 @@ namespace Google.Apis.YouTube.v3.Data
 
     public class TestItem : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Etag for the resource. See https://en.wikipedia.org/wiki/HTTP_ETag.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
         [Newtonsoft.Json.JsonPropertyAttribute("featuredPart")]
         public virtual System.Nullable<bool> FeaturedPart { get; set; }
 
@@ -14529,9 +16098,6 @@ namespace Google.Apis.YouTube.v3.Data
 
         [Newtonsoft.Json.JsonPropertyAttribute("snippet")]
         public virtual TestItemTestItemSnippet Snippet { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
     }
 
     public class TestItemTestItemSnippet : Google.Apis.Requests.IDirectResponseSchema
@@ -14569,6 +16135,22 @@ namespace Google.Apis.YouTube.v3.Data
         /// <summary>The status object contains information about the status of the link.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
         public virtual ThirdPartyLinkStatus Status { get; set; }
+    }
+
+    public class ThirdPartyLinkListResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Etag of this resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("items")]
+        public virtual System.Collections.Generic.IList<ThirdPartyLink> Items { get; set; }
+
+        /// <summary>
+        /// Identifies what kind of resource this is. Value: the fixed string "youtube#thirdPartyLinkListResponse".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
     }
 
     /// <summary>
@@ -14731,6 +16313,9 @@ namespace Google.Apis.YouTube.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("monetizationDetails")]
         public virtual VideoMonetizationDetails MonetizationDetails { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("paidProductPlacementDetails")]
+        public virtual VideoPaidProductPlacementDetails PaidProductPlacementDetails { get; set; }
 
         /// <summary>
         /// The player object contains information that you would use to play the video in an embedded player.
@@ -15341,9 +16926,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("actualEndTime")]
         public virtual string ActualEndTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ActualEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ActualEndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ActualEndTimeRaw);
+            set => ActualEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ActualEndTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ActualEndTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ActualEndTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ActualEndTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ActualEndTimeRaw);
             set => ActualEndTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -15355,9 +16949,20 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("actualStartTime")]
         public virtual string ActualStartTimeRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ActualStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ActualStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ActualStartTimeRaw);
+            set => ActualStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ActualStartTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ActualStartTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ActualStartTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ActualStartTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ActualStartTimeRaw);
             set => ActualStartTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -15375,14 +16980,25 @@ namespace Google.Apis.YouTube.v3.Data
 
         /// <summary>
         /// The time that the broadcast is scheduled to end. If the value is empty or the property is not present, then
-        /// the broadcast is scheduled to contiue indefinitely.
+        /// the broadcast is scheduled to continue indefinitely.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduledEndTime")]
         public virtual string ScheduledEndTimeRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduledEndTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduledEndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ScheduledEndTimeRaw);
+            set => ScheduledEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ScheduledEndTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ScheduledEndTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduledEndTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ScheduledEndTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ScheduledEndTimeRaw);
             set => ScheduledEndTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -15392,9 +17008,20 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("scheduledStartTime")]
         public virtual string ScheduledStartTimeRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduledStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduledStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ScheduledStartTimeRaw);
+            set => ScheduledStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ScheduledStartTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ScheduledStartTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduledStartTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ScheduledStartTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ScheduledStartTimeRaw);
             set => ScheduledStartTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -15425,6 +17052,23 @@ namespace Google.Apis.YouTube.v3.Data
         /// <summary>The value of access indicates whether the video can be monetized or not.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("access")]
         public virtual AccessPolicy Access { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Details about paid content, such as paid product placement, sponsorships or endorsement, contained in a YouTube
+    /// video and a method to inform viewers of paid promotion. This data can only be retrieved by the video owner.
+    /// </summary>
+    public class VideoPaidProductPlacementDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// This boolean represents whether the video contains Paid Product Placement, Studio equivalent:
+        /// https://screenshot.googleplex.com/4Me79DE6AfT2ktp.png
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hasPaidProductPlacement")]
+        public virtual System.Nullable<bool> HasPaidProductPlacement { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -15585,9 +17229,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("recordingDate")]
         public virtual string RecordingDateRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RecordingDateRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RecordingDateDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(RecordingDateRaw);
+            set => RecordingDateRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="RecordingDateRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> RecordingDate
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RecordingDateDateTimeOffset instead.")]
+        public virtual System.DateTime? RecordingDate
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(RecordingDateRaw);
             set => RecordingDateRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -15644,9 +17297,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("publishedAt")]
         public virtual string PublishedAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(PublishedAtRaw);
+            set => PublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="PublishedAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> PublishedAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAtDateTimeOffset instead.")]
+        public virtual System.DateTime? PublishedAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(PublishedAtRaw);
             set => PublishedAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -15702,9 +17364,13 @@ namespace Google.Apis.YouTube.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Basic details about a video category, such as its localized title. Next Id: 17</summary>
+    /// <summary>Basic details about a video category, such as its localized title. Next Id: 19</summary>
     public class VideoStatus : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Indicates if the video contains altered or synthetic media.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("containsSyntheticMedia")]
+        public virtual System.Nullable<bool> ContainsSyntheticMedia { get; set; }
+
         /// <summary>
         /// This value indicates if the video can be embedded on another website. @mutable youtube.videos.insert
         /// youtube.videos.update
@@ -15745,9 +17411,18 @@ namespace Google.Apis.YouTube.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("publishAt")]
         public virtual string PublishAtRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(PublishAtRaw);
+            set => PublishAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="PublishAtRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> PublishAt
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishAtDateTimeOffset instead.")]
+        public virtual System.DateTime? PublishAt
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(PublishAtRaw);
             set => PublishAtRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -15816,7 +17491,7 @@ namespace Google.Apis.YouTube.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A single tag suggestion with it's relevance information.</summary>
+    /// <summary>A single tag suggestion with its relevance information.</summary>
     public class VideoSuggestionsTagSuggestion : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -15861,6 +17536,31 @@ namespace Google.Apis.YouTube.v3.Data
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Specifies who is allowed to train on the video.</summary>
+    public class VideoTrainability : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Etag of this resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Identifies what kind of resource this is. Value: the fixed string "youtube#videoTrainability".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>
+        /// Specifies who is allowed to train on the video. Valid values are: - a single string "all" - a single string
+        /// "none" - a list of allowed parties
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("permitted")]
+        public virtual System.Collections.Generic.IList<string> Permitted { get; set; }
+
+        /// <summary>The ID of the video.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("videoId")]
+        public virtual string VideoId { get; set; }
     }
 
     /// <summary>Branding properties for the watch. All deprecated.</summary>

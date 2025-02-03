@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.AdExperienceReport.v1
         {
             Sites = new SitesResource(this);
             ViolatingSites = new ViolatingSitesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://adexperiencereport.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://adexperiencereport.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.AdExperienceReport.v1
         public override string Name => "adexperiencereport";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://adexperiencereport.googleapis.com/";
-        #else
-            "https://adexperiencereport.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://adexperiencereport.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Gets the Sites resource.</summary>
         public virtual SitesResource Sites { get; }
@@ -272,7 +267,7 @@ namespace Google.Apis.AdExperienceReport.v1
         /// </param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Gets a site's Ad Experience Report summary.</summary>
@@ -334,7 +329,7 @@ namespace Google.Apis.AdExperienceReport.v1
         /// <summary>Lists sites that are failing in the Ad Experience Report on at least one platform.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists sites that are failing in the Ad Experience Report on at least one platform.</summary>
@@ -372,12 +367,47 @@ namespace Google.Apis.AdExperienceReport.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("betterAdsStatus")]
         public virtual string BetterAdsStatus { get; set; }
 
+        private string _enforcementTimeRaw;
+
+        private object _enforcementTime;
+
         /// <summary>
         /// The time at which [enforcement](https://support.google.com/webtools/answer/7308033) against the site began
         /// or will begin on this platform. Not set when the filter_status is OFF.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("enforcementTime")]
-        public virtual object EnforcementTime { get; set; }
+        public virtual string EnforcementTimeRaw
+        {
+            get => _enforcementTimeRaw;
+            set
+            {
+                _enforcementTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _enforcementTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EnforcementTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EnforcementTimeDateTimeOffset instead.")]
+        public virtual object EnforcementTime
+        {
+            get => _enforcementTime;
+            set
+            {
+                _enforcementTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _enforcementTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="EnforcementTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EnforcementTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EnforcementTimeRaw);
+            set => EnforcementTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The site's [enforcement status](https://support.google.com/webtools/answer/7308033) on this platform.
@@ -385,9 +415,44 @@ namespace Google.Apis.AdExperienceReport.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("filterStatus")]
         public virtual string FilterStatus { get; set; }
 
+        private string _lastChangeTimeRaw;
+
+        private object _lastChangeTime;
+
         /// <summary>The time at which the site's status last changed on this platform.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastChangeTime")]
-        public virtual object LastChangeTime { get; set; }
+        public virtual string LastChangeTimeRaw
+        {
+            get => _lastChangeTimeRaw;
+            set
+            {
+                _lastChangeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastChangeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastChangeTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastChangeTimeDateTimeOffset instead.")]
+        public virtual object LastChangeTime
+        {
+            get => _lastChangeTime;
+            set
+            {
+                _lastChangeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastChangeTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastChangeTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastChangeTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastChangeTimeRaw);
+            set => LastChangeTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The site's regions on this platform. No longer populated, because there is no longer any semantic difference

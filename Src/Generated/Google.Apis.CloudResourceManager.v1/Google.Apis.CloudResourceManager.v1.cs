@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ namespace Google.Apis.CloudResourceManager.v1
             Operations = new OperationsResource(this);
             Organizations = new OrganizationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudresourcemanager.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudresourcemanager.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -48,23 +50,16 @@ namespace Google.Apis.CloudResourceManager.v1
         public override string Name => "cloudresourcemanager";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudresourcemanager.googleapis.com/";
-        #else
-            "https://cloudresourcemanager.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudresourcemanager.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Resource Manager API.</summary>
         public class Scope
@@ -312,7 +307,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Name of the resource for the `Policy` to clear.</param>
         public virtual ClearOrgPolicyRequest ClearOrgPolicy(Google.Apis.CloudResourceManager.v1.Data.ClearOrgPolicyRequest body, string resource)
         {
-            return new ClearOrgPolicyRequest(service, body, resource);
+            return new ClearOrgPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>Clears a `Policy` from a resource.</summary>
@@ -370,7 +365,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">The name of the resource to start computing the effective `Policy`.</param>
         public virtual GetEffectiveOrgPolicyRequest GetEffectiveOrgPolicy(Google.Apis.CloudResourceManager.v1.Data.GetEffectiveOrgPolicyRequest body, string resource)
         {
-            return new GetEffectiveOrgPolicyRequest(service, body, resource);
+            return new GetEffectiveOrgPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -432,7 +427,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Name of the resource the `Policy` is set on.</param>
         public virtual GetOrgPolicyRequest GetOrgPolicy(Google.Apis.CloudResourceManager.v1.Data.GetOrgPolicyRequest body, string resource)
         {
-            return new GetOrgPolicyRequest(service, body, resource);
+            return new GetOrgPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -489,7 +484,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Name of the resource to list `Constraints` for.</param>
         public virtual ListAvailableOrgPolicyConstraintsRequest ListAvailableOrgPolicyConstraints(Google.Apis.CloudResourceManager.v1.Data.ListAvailableOrgPolicyConstraintsRequest body, string resource)
         {
-            return new ListAvailableOrgPolicyConstraintsRequest(service, body, resource);
+            return new ListAvailableOrgPolicyConstraintsRequest(this.service, body, resource);
         }
 
         /// <summary>Lists `Constraints` that could be applied on the specified resource.</summary>
@@ -542,7 +537,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Name of the resource to list Policies for.</param>
         public virtual ListOrgPoliciesRequest ListOrgPolicies(Google.Apis.CloudResourceManager.v1.Data.ListOrgPoliciesRequest body, string resource)
         {
-            return new ListOrgPoliciesRequest(service, body, resource);
+            return new ListOrgPoliciesRequest(this.service, body, resource);
         }
 
         /// <summary>Lists all the `Policies` set for a particular resource.</summary>
@@ -599,7 +594,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Resource name of the resource to attach the `Policy`.</param>
         public virtual SetOrgPolicyRequest SetOrgPolicy(Google.Apis.CloudResourceManager.v1.Data.SetOrgPolicyRequest body, string resource)
         {
-            return new SetOrgPolicyRequest(service, body, resource);
+            return new SetOrgPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -675,7 +670,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.CloudResourceManager.v1.Data.Lien body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -723,7 +718,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="name">Required. The name/identifier of the Lien to delete.</param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>
@@ -775,7 +770,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="name">Required. The name/identifier of the Lien.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -826,7 +821,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -923,7 +918,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -987,7 +982,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Name of the resource for the `Policy` to clear.</param>
         public virtual ClearOrgPolicyRequest ClearOrgPolicy(Google.Apis.CloudResourceManager.v1.Data.ClearOrgPolicyRequest body, string resource)
         {
-            return new ClearOrgPolicyRequest(service, body, resource);
+            return new ClearOrgPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>Clears a `Policy` from a resource.</summary>
@@ -1042,7 +1037,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// </param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Fetches an Organization resource identified by the specified resource name.</summary>
@@ -1096,7 +1091,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">The name of the resource to start computing the effective `Policy`.</param>
         public virtual GetEffectiveOrgPolicyRequest GetEffectiveOrgPolicy(Google.Apis.CloudResourceManager.v1.Data.GetEffectiveOrgPolicyRequest body, string resource)
         {
-            return new GetEffectiveOrgPolicyRequest(service, body, resource);
+            return new GetEffectiveOrgPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -1157,12 +1152,12 @@ namespace Google.Apis.CloudResourceManager.v1
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.CloudResourceManager.v1.Data.GetIamPolicyRequest body, string resource)
         {
-            return new GetIamPolicyRequest(service, body, resource);
+            return new GetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -1182,8 +1177,8 @@ namespace Google.Apis.CloudResourceManager.v1
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -1227,7 +1222,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Name of the resource the `Policy` is set on.</param>
         public virtual GetOrgPolicyRequest GetOrgPolicy(Google.Apis.CloudResourceManager.v1.Data.GetOrgPolicyRequest body, string resource)
         {
-            return new GetOrgPolicyRequest(service, body, resource);
+            return new GetOrgPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -1284,7 +1279,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Name of the resource to list `Constraints` for.</param>
         public virtual ListAvailableOrgPolicyConstraintsRequest ListAvailableOrgPolicyConstraints(Google.Apis.CloudResourceManager.v1.Data.ListAvailableOrgPolicyConstraintsRequest body, string resource)
         {
-            return new ListAvailableOrgPolicyConstraintsRequest(service, body, resource);
+            return new ListAvailableOrgPolicyConstraintsRequest(this.service, body, resource);
         }
 
         /// <summary>Lists `Constraints` that could be applied on the specified resource.</summary>
@@ -1337,7 +1332,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Name of the resource to list Policies for.</param>
         public virtual ListOrgPoliciesRequest ListOrgPolicies(Google.Apis.CloudResourceManager.v1.Data.ListOrgPoliciesRequest body, string resource)
         {
-            return new ListOrgPoliciesRequest(service, body, resource);
+            return new ListOrgPoliciesRequest(this.service, body, resource);
         }
 
         /// <summary>Lists all the `Policies` set for a particular resource.</summary>
@@ -1389,19 +1384,19 @@ namespace Google.Apis.CloudResourceManager.v1
         /// Searches Organization resources that are visible to the user and satisfy the specified filter. This method
         /// returns Organizations in an unspecified order. New Organizations do not necessarily appear at the end of the
         /// results. Search will only return organizations on which the user has the permission
-        /// `resourcemanager.organizations.get`
+        /// `resourcemanager.organizations.get` or has super admin privileges.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual SearchRequest Search(Google.Apis.CloudResourceManager.v1.Data.SearchOrganizationsRequest body)
         {
-            return new SearchRequest(service, body);
+            return new SearchRequest(this.service, body);
         }
 
         /// <summary>
         /// Searches Organization resources that are visible to the user and satisfy the specified filter. This method
         /// returns Organizations in an unspecified order. New Organizations do not necessarily appear at the end of the
         /// results. Search will only return organizations on which the user has the permission
-        /// `resourcemanager.organizations.get`
+        /// `resourcemanager.organizations.get` or has super admin privileges.
         /// </summary>
         public class SearchRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v1.Data.SearchOrganizationsResponse>
         {
@@ -1441,12 +1436,12 @@ namespace Google.Apis.CloudResourceManager.v1
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudResourceManager.v1.Data.SetIamPolicyRequest body, string resource)
         {
-            return new SetIamPolicyRequest(service, body, resource);
+            return new SetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -1465,8 +1460,8 @@ namespace Google.Apis.CloudResourceManager.v1
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -1510,7 +1505,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Resource name of the resource to attach the `Policy`.</param>
         public virtual SetOrgPolicyRequest SetOrgPolicy(Google.Apis.CloudResourceManager.v1.Data.SetOrgPolicyRequest body, string resource)
         {
-            return new SetOrgPolicyRequest(service, body, resource);
+            return new SetOrgPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -1569,12 +1564,12 @@ namespace Google.Apis.CloudResourceManager.v1
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation for
-        /// the appropriate value for this field.
+        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudResourceManager.v1.Data.TestIamPermissionsRequest body, string resource)
         {
-            return new TestIamPermissionsRequest(service, body, resource);
+            return new TestIamPermissionsRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -1593,8 +1588,8 @@ namespace Google.Apis.CloudResourceManager.v1
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -1649,7 +1644,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Name of the resource for the `Policy` to clear.</param>
         public virtual ClearOrgPolicyRequest ClearOrgPolicy(Google.Apis.CloudResourceManager.v1.Data.ClearOrgPolicyRequest body, string resource)
         {
-            return new ClearOrgPolicyRequest(service, body, resource);
+            return new ClearOrgPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>Clears a `Policy` from a resource.</summary>
@@ -1710,7 +1705,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.CloudResourceManager.v1.Data.Project body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -1766,7 +1761,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="projectId">The Project ID (for example, `foo-bar-123`). Required.</param>
         public virtual DeleteRequest Delete(string projectId)
         {
-            return new DeleteRequest(service, projectId);
+            return new DeleteRequest(this.service, projectId);
         }
 
         /// <summary>
@@ -1822,7 +1817,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="projectId">Required. The Project ID (for example, `my-project-123`).</param>
         public virtual GetRequest Get(string projectId)
         {
-            return new GetRequest(service, projectId);
+            return new GetRequest(this.service, projectId);
         }
 
         /// <summary>
@@ -1874,7 +1869,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="projectId">Required. The Project ID (for example, `my-project-123`).</param>
         public virtual GetAncestryRequest GetAncestry(Google.Apis.CloudResourceManager.v1.Data.GetAncestryRequest body, string projectId)
         {
-            return new GetAncestryRequest(service, body, projectId);
+            return new GetAncestryRequest(this.service, body, projectId);
         }
 
         /// <summary>
@@ -1935,7 +1930,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">The name of the resource to start computing the effective `Policy`.</param>
         public virtual GetEffectiveOrgPolicyRequest GetEffectiveOrgPolicy(Google.Apis.CloudResourceManager.v1.Data.GetEffectiveOrgPolicyRequest body, string resource)
         {
-            return new GetEffectiveOrgPolicyRequest(service, body, resource);
+            return new GetEffectiveOrgPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -1997,12 +1992,12 @@ namespace Google.Apis.CloudResourceManager.v1
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.CloudResourceManager.v1.Data.GetIamPolicyRequest body, string resource)
         {
-            return new GetIamPolicyRequest(service, body, resource);
+            return new GetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -2023,8 +2018,8 @@ namespace Google.Apis.CloudResourceManager.v1
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -2068,7 +2063,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Name of the resource the `Policy` is set on.</param>
         public virtual GetOrgPolicyRequest GetOrgPolicy(Google.Apis.CloudResourceManager.v1.Data.GetOrgPolicyRequest body, string resource)
         {
-            return new GetOrgPolicyRequest(service, body, resource);
+            return new GetOrgPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -2132,7 +2127,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -2162,9 +2157,9 @@ namespace Google.Apis.CloudResourceManager.v1
             /// The project's name starts with "how". | | name:Howl | The project's name is `Howl` or `howl`. | |
             /// name:HOWL | Equivalent to above. | | NAME:howl | Equivalent to above. | | labels.color:* | The project
             /// has the label `color`. | | labels.color:red | The project's label `color` has the value `red`. | |
-            /// labels.color:red labels.size:big | The project's label `color` has the value `red` and its label `size`
-            /// has the value `big`.| | lifecycleState:DELETE_REQUESTED | Only show projects that are pending deletion.|
-            /// If no filter is specified, the call will return projects for which the user has the
+            /// labels.color:red labels.size:big | The project's label `color` has the value `red` or its label `size`
+            /// has the value `big`. | | lifecycleState:DELETE_REQUESTED | Only show projects that are pending
+            /// deletion.| If no filter is specified, the call will return projects for which the user has the
             /// `resourcemanager.projects.get` permission. NOTE: To perform a by-parent query (eg., what projects are
             /// directly in a Folder), the caller must have the `resourcemanager.projects.list` permission on the parent
             /// and the filter must contain both a `parent.type` and a `parent.id` restriction (example:
@@ -2233,7 +2228,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Name of the resource to list `Constraints` for.</param>
         public virtual ListAvailableOrgPolicyConstraintsRequest ListAvailableOrgPolicyConstraints(Google.Apis.CloudResourceManager.v1.Data.ListAvailableOrgPolicyConstraintsRequest body, string resource)
         {
-            return new ListAvailableOrgPolicyConstraintsRequest(service, body, resource);
+            return new ListAvailableOrgPolicyConstraintsRequest(this.service, body, resource);
         }
 
         /// <summary>Lists `Constraints` that could be applied on the specified resource.</summary>
@@ -2286,7 +2281,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Name of the resource to list Policies for.</param>
         public virtual ListOrgPoliciesRequest ListOrgPolicies(Google.Apis.CloudResourceManager.v1.Data.ListOrgPoliciesRequest body, string resource)
         {
-            return new ListOrgPoliciesRequest(service, body, resource);
+            return new ListOrgPoliciesRequest(this.service, body, resource);
         }
 
         /// <summary>Lists all the `Policies` set for a particular resource.</summary>
@@ -2349,24 +2344,24 @@ namespace Google.Apis.CloudResourceManager.v1
         /// owner, a user must be invited via Cloud Platform console and must accept the invitation. + A user cannot be
         /// granted the owner role using `setIamPolicy()`. The user must be granted the owner role using the Cloud
         /// Platform Console and must explicitly accept the invitation. + You can only grant ownership of a project to a
-        /// member by using the GCP Console. Inviting a member will deliver an invitation email that they must accept.
-        /// An invitation email is not generated if you are granting a role other than owner, or if both the member you
-        /// are inviting and the project are part of your organization. + Membership changes that leave the project
-        /// without any owners that have accepted the Terms of Service (ToS) will be rejected. + If the project is not
-        /// part of an organization, there must be at least one owner who has accepted the Terms of Service (ToS)
-        /// agreement in the policy. Calling `setIamPolicy()` to remove the last ToS-accepted owner from the policy will
-        /// fail. This restriction also applies to legacy projects that no longer have owners who have accepted the ToS.
-        /// Edits to IAM policies will be rejected until the lack of a ToS-accepting owner is rectified. Authorization
-        /// requires the Google IAM permission `resourcemanager.projects.setIamPolicy` on the project
+        /// member by using the Google Cloud console. Inviting a member will deliver an invitation email that they must
+        /// accept. An invitation email is not generated if you are granting a role other than owner, or if both the
+        /// member you are inviting and the project are part of your organization. + If the project is not part of an
+        /// organization, there must be at least one owner who has accepted the Terms of Service (ToS) agreement in the
+        /// policy. Calling `setIamPolicy()` to remove the last ToS-accepted owner from the policy will fail. This
+        /// restriction also applies to legacy projects that no longer have owners who have accepted the ToS. Edits to
+        /// IAM policies will be rejected until the lack of a ToS-accepting owner is rectified. If the project is part
+        /// of an organization, you can remove all owners, potentially making the organization inaccessible.
+        /// Authorization requires the Google IAM permission `resourcemanager.projects.setIamPolicy` on the project
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudResourceManager.v1.Data.SetIamPolicyRequest body, string resource)
         {
-            return new SetIamPolicyRequest(service, body, resource);
+            return new SetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -2384,15 +2379,15 @@ namespace Google.Apis.CloudResourceManager.v1
         /// owner, a user must be invited via Cloud Platform console and must accept the invitation. + A user cannot be
         /// granted the owner role using `setIamPolicy()`. The user must be granted the owner role using the Cloud
         /// Platform Console and must explicitly accept the invitation. + You can only grant ownership of a project to a
-        /// member by using the GCP Console. Inviting a member will deliver an invitation email that they must accept.
-        /// An invitation email is not generated if you are granting a role other than owner, or if both the member you
-        /// are inviting and the project are part of your organization. + Membership changes that leave the project
-        /// without any owners that have accepted the Terms of Service (ToS) will be rejected. + If the project is not
-        /// part of an organization, there must be at least one owner who has accepted the Terms of Service (ToS)
-        /// agreement in the policy. Calling `setIamPolicy()` to remove the last ToS-accepted owner from the policy will
-        /// fail. This restriction also applies to legacy projects that no longer have owners who have accepted the ToS.
-        /// Edits to IAM policies will be rejected until the lack of a ToS-accepting owner is rectified. Authorization
-        /// requires the Google IAM permission `resourcemanager.projects.setIamPolicy` on the project
+        /// member by using the Google Cloud console. Inviting a member will deliver an invitation email that they must
+        /// accept. An invitation email is not generated if you are granting a role other than owner, or if both the
+        /// member you are inviting and the project are part of your organization. + If the project is not part of an
+        /// organization, there must be at least one owner who has accepted the Terms of Service (ToS) agreement in the
+        /// policy. Calling `setIamPolicy()` to remove the last ToS-accepted owner from the policy will fail. This
+        /// restriction also applies to legacy projects that no longer have owners who have accepted the ToS. Edits to
+        /// IAM policies will be rejected until the lack of a ToS-accepting owner is rectified. If the project is part
+        /// of an organization, you can remove all owners, potentially making the organization inaccessible.
+        /// Authorization requires the Google IAM permission `resourcemanager.projects.setIamPolicy` on the project
         /// </summary>
         public class SetIamPolicyRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v1.Data.Policy>
         {
@@ -2405,8 +2400,8 @@ namespace Google.Apis.CloudResourceManager.v1
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -2450,7 +2445,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="resource">Resource name of the resource to attach the `Policy`.</param>
         public virtual SetOrgPolicyRequest SetOrgPolicy(Google.Apis.CloudResourceManager.v1.Data.SetOrgPolicyRequest body, string resource)
         {
-            return new SetOrgPolicyRequest(service, body, resource);
+            return new SetOrgPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -2510,12 +2505,12 @@ namespace Google.Apis.CloudResourceManager.v1
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation for
-        /// the appropriate value for this field.
+        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudResourceManager.v1.Data.TestIamPermissionsRequest body, string resource)
         {
-            return new TestIamPermissionsRequest(service, body, resource);
+            return new TestIamPermissionsRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -2535,8 +2530,8 @@ namespace Google.Apis.CloudResourceManager.v1
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -2580,7 +2575,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="projectId">Required. The project ID (for example, `foo-bar-123`).</param>
         public virtual UndeleteRequest Undelete(Google.Apis.CloudResourceManager.v1.Data.UndeleteProjectRequest body, string projectId)
         {
-            return new UndeleteRequest(service, body, projectId);
+            return new UndeleteRequest(this.service, body, projectId);
         }
 
         /// <summary>
@@ -2640,7 +2635,7 @@ namespace Google.Apis.CloudResourceManager.v1
         /// <param name="projectId">The project ID (for example, `my-project-123`). Required.</param>
         public virtual UpdateRequest Update(Google.Apis.CloudResourceManager.v1.Data.Project body, string projectId)
         {
-            return new UpdateRequest(service, body, projectId);
+            return new UpdateRequest(this.service, body, projectId);
         }
 
         /// <summary>
@@ -2715,7 +2710,8 @@ namespace Google.Apis.CloudResourceManager.v1.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2770,16 +2766,37 @@ namespace Google.Apis.CloudResourceManager.v1.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -2787,15 +2804,19 @@ namespace Google.Apis.CloudResourceManager.v1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -2985,9 +3006,42 @@ namespace Google.Apis.CloudResourceManager.v1.Data
     /// </summary>
     public class CreateProjectMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Creation time of the project creation workflow.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// True if the project can be retrieved using `GetProject`. No other operations on the project are guaranteed
@@ -3076,8 +3130,7 @@ namespace Google.Apis.CloudResourceManager.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3244,9 +3297,42 @@ namespace Google.Apis.CloudResourceManager.v1.Data
     /// <summary>A Lien represents an encumbrance on the actions that can be performed on a resource.</summary>
     public class Lien : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The creation time of this Lien.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>A system-generated unique identifier for this Lien. Example: `liens/1234abcd`</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -3583,8 +3669,8 @@ namespace Google.Apis.CloudResourceManager.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -3634,13 +3720,46 @@ namespace Google.Apis.CloudResourceManager.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("restoreDefault")]
         public virtual RestoreDefault RestoreDefault { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
         /// The time stamp the `Policy` was previously updated. This is set by the server, not specified by the caller,
         /// and represents the last time a call to `SetOrgPolicy` was made for that `Policy`. Any value set by the
         /// client will be ignored.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Version of the `Policy`. Default version is 0;</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
@@ -3652,14 +3771,47 @@ namespace Google.Apis.CloudResourceManager.v1.Data
     /// </summary>
     public class Organization : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _creationTimeRaw;
+
+        private object _creationTime;
+
         /// <summary>Timestamp when the Organization was created. Assigned by the server.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
-        public virtual object CreationTime { get; set; }
+        public virtual string CreationTimeRaw
+        {
+            get => _creationTimeRaw;
+            set
+            {
+                _creationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _creationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreationTimeDateTimeOffset instead.")]
+        public virtual object CreationTime
+        {
+            get => _creationTime;
+            set
+            {
+                _creationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _creationTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreationTimeRaw);
+            set => CreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
-        /// A human-readable string that refers to the Organization in the GCP Console UI. This string is set by the
-        /// server and cannot be changed. The string will be set to the primary domain (for example, "google.com") of
-        /// the G Suite customer that owns the organization.
+        /// A human-readable string that refers to the Organization in the Google Cloud console. This string is set by
+        /// the server and cannot be changed. The string will be set to the primary domain (for example, "google.com")
+        /// of the G Suite customer that owns the organization.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
@@ -3710,18 +3862,26 @@ namespace Google.Apis.CloudResourceManager.v1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3776,9 +3936,42 @@ namespace Google.Apis.CloudResourceManager.v1.Data
     /// </summary>
     public class Project : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Creation time. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The labels associated with this Project. Label keys must be between 1 and 63 characters long and must
@@ -3823,6 +4016,14 @@ namespace Google.Apis.CloudResourceManager.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("projectNumber")]
         public virtual System.Nullable<long> ProjectNumber { get; set; }
 
+        /// <summary>
+        /// Optional. Input only. Immutable. Tag keys/values directly bound to this project. Each item in the map must
+        /// be expressed as " : ". For example: "123/environment" : "production", "123/costCenter" : "marketing" Note:
+        /// Currently this field is in Preview.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tags")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Tags { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3833,9 +4034,42 @@ namespace Google.Apis.CloudResourceManager.v1.Data
     /// </summary>
     public class ProjectCreationStatus : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Creation time of the project creation workflow.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// True if the project can be retrieved using GetProject. No other operations on the project are guaranteed to
@@ -3944,7 +4178,7 @@ namespace Google.Apis.CloudResourceManager.v1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -4005,7 +4239,7 @@ namespace Google.Apis.CloudResourceManager.v1.Data
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>

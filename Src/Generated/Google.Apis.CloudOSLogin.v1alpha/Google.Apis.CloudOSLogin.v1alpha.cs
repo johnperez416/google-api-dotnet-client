@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CloudOSLogin.v1alpha
         public CloudOSLoginService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Users = new UsersResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://oslogin.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://oslogin.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CloudOSLogin.v1alpha
         public override string Name => "oslogin";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://oslogin.googleapis.com/";
-        #else
-            "https://oslogin.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://oslogin.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud OS Login API.</summary>
         public class Scope
@@ -302,7 +297,6 @@ namespace Google.Apis.CloudOSLogin.v1alpha
         {
             this.service = service;
             Projects = new ProjectsResource(service);
-            SshPublicKey = new SshPublicKeyResource(service);
             SshPublicKeys = new SshPublicKeysResource(service);
         }
 
@@ -321,6 +315,158 @@ namespace Google.Apis.CloudOSLogin.v1alpha
             public ProjectsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                Locations = new LocationsResource(service);
+                Zones = new ZonesResource(service);
+            }
+
+            /// <summary>Gets the Locations resource.</summary>
+            public virtual LocationsResource Locations { get; }
+
+            /// <summary>The "locations" collection of methods.</summary>
+            public class LocationsResource
+            {
+                private const string Resource = "locations";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public LocationsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Signs an SSH public key for a user to authenticate to a virtual machine on Google Compute Engine.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">The parent project and region for the signing request.</param>
+                public virtual SignSshPublicKeyRequest SignSshPublicKey(Google.Apis.CloudOSLogin.v1alpha.Data.SignSshPublicKeyRequest body, string parent)
+                {
+                    return new SignSshPublicKeyRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Signs an SSH public key for a user to authenticate to a virtual machine on Google Compute Engine.
+                /// </summary>
+                public class SignSshPublicKeyRequest : CloudOSLoginBaseServiceRequest<Google.Apis.CloudOSLogin.v1alpha.Data.SignSshPublicKeyResponse>
+                {
+                    /// <summary>Constructs a new SignSshPublicKey request.</summary>
+                    public SignSshPublicKeyRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudOSLogin.v1alpha.Data.SignSshPublicKeyRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>The parent project and region for the signing request.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudOSLogin.v1alpha.Data.SignSshPublicKeyRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "signSshPublicKey";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1alpha/{+parent}:signSshPublicKey";
+
+                    /// <summary>Initializes SignSshPublicKey parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^users/[^/]+/projects/[^/]+/locations/[^/]+$",
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the Zones resource.</summary>
+            public virtual ZonesResource Zones { get; }
+
+            /// <summary>The "zones" collection of methods.</summary>
+            public class ZonesResource
+            {
+                private const string Resource = "zones";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public ZonesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Signs an SSH public key for a user to authenticate to a virtual machine on Google Compute Engine.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">The parent project and region for the signing request.</param>
+                public virtual SignSshPublicKeyRequest SignSshPublicKey(Google.Apis.CloudOSLogin.v1alpha.Data.SignSshPublicKeyRequest body, string parent)
+                {
+                    return new SignSshPublicKeyRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Signs an SSH public key for a user to authenticate to a virtual machine on Google Compute Engine.
+                /// </summary>
+                public class SignSshPublicKeyRequest : CloudOSLoginBaseServiceRequest<Google.Apis.CloudOSLogin.v1alpha.Data.SignSshPublicKeyResponse>
+                {
+                    /// <summary>Constructs a new SignSshPublicKey request.</summary>
+                    public SignSshPublicKeyRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudOSLogin.v1alpha.Data.SignSshPublicKeyRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>The parent project and region for the signing request.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudOSLogin.v1alpha.Data.SignSshPublicKeyRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "signSshPublicKey";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1alpha/{+parent}:signSshPublicKey";
+
+                    /// <summary>Initializes SignSshPublicKey parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^users/[^/]+/projects/[^/]+/zones/[^/]+$",
+                        });
+                    }
+                }
             }
 
             /// <summary>Deletes a POSIX account.</summary>
@@ -331,7 +477,7 @@ namespace Google.Apis.CloudOSLogin.v1alpha
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a POSIX account.</summary>
@@ -407,19 +553,19 @@ namespace Google.Apis.CloudOSLogin.v1alpha
             }
         }
 
-        /// <summary>Gets the SshPublicKey resource.</summary>
-        public virtual SshPublicKeyResource SshPublicKey { get; }
+        /// <summary>Gets the SshPublicKeys resource.</summary>
+        public virtual SshPublicKeysResource SshPublicKeys { get; }
 
-        /// <summary>The "sshPublicKey" collection of methods.</summary>
-        public class SshPublicKeyResource
+        /// <summary>The "sshPublicKeys" collection of methods.</summary>
+        public class SshPublicKeysResource
         {
-            private const string Resource = "sshPublicKey";
+            private const string Resource = "sshPublicKeys";
 
             /// <summary>The service which this resource belongs to.</summary>
             private readonly Google.Apis.Services.IClientService service;
 
             /// <summary>Constructs a new resource.</summary>
-            public SshPublicKeyResource(Google.Apis.Services.IClientService service)
+            public SshPublicKeysResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
             }
@@ -429,7 +575,7 @@ namespace Google.Apis.CloudOSLogin.v1alpha
             /// <param name="parent">Required. The unique ID for the user in format `users/{user}`.</param>
             public virtual CreateRequest Create(Google.Apis.CloudOSLogin.v1alpha.Data.SshPublicKey body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Create an SSH public key</summary>
@@ -460,7 +606,7 @@ namespace Google.Apis.CloudOSLogin.v1alpha
                 public override string HttpMethod => "POST";
 
                 /// <summary>Gets the REST path.</summary>
-                public override string RestPath => "v1alpha/{+parent}/sshPublicKey";
+                public override string RestPath => "v1alpha/{+parent}/sshPublicKeys";
 
                 /// <summary>Initializes Create parameter list.</summary>
                 protected override void InitParameters()
@@ -476,24 +622,6 @@ namespace Google.Apis.CloudOSLogin.v1alpha
                     });
                 }
             }
-        }
-
-        /// <summary>Gets the SshPublicKeys resource.</summary>
-        public virtual SshPublicKeysResource SshPublicKeys { get; }
-
-        /// <summary>The "sshPublicKeys" collection of methods.</summary>
-        public class SshPublicKeysResource
-        {
-            private const string Resource = "sshPublicKeys";
-
-            /// <summary>The service which this resource belongs to.</summary>
-            private readonly Google.Apis.Services.IClientService service;
-
-            /// <summary>Constructs a new resource.</summary>
-            public SshPublicKeysResource(Google.Apis.Services.IClientService service)
-            {
-                this.service = service;
-            }
 
             /// <summary>Deletes an SSH public key.</summary>
             /// <param name="name">
@@ -502,7 +630,7 @@ namespace Google.Apis.CloudOSLogin.v1alpha
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes an SSH public key.</summary>
@@ -554,7 +682,7 @@ namespace Google.Apis.CloudOSLogin.v1alpha
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Retrieves an SSH public key.</summary>
@@ -609,7 +737,7 @@ namespace Google.Apis.CloudOSLogin.v1alpha
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.CloudOSLogin.v1alpha.Data.SshPublicKey body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -682,7 +810,7 @@ namespace Google.Apis.CloudOSLogin.v1alpha
         /// <param name="name">Required. The unique ID for the user in format `users/{user}`.</param>
         public virtual GetLoginProfileRequest GetLoginProfile(string name)
         {
-            return new GetLoginProfileRequest(service, name);
+            return new GetLoginProfileRequest(this.service, name);
         }
 
         /// <summary>
@@ -815,7 +943,7 @@ namespace Google.Apis.CloudOSLogin.v1alpha
         /// <param name="parent">The unique ID for the user in format `users/{user}`.</param>
         public virtual ImportSshPublicKeyRequest ImportSshPublicKey(Google.Apis.CloudOSLogin.v1alpha.Data.SshPublicKey body, string parent)
         {
-            return new ImportSshPublicKeyRequest(service, body, parent);
+            return new ImportSshPublicKeyRequest(this.service, body, parent);
         }
 
         /// <summary>
@@ -839,6 +967,14 @@ namespace Google.Apis.CloudOSLogin.v1alpha
             /// <summary>The project ID of the Google Cloud Platform project.</summary>
             [Google.Apis.Util.RequestParameterAttribute("projectId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string ProjectId { get; set; }
+
+            /// <summary>
+            /// Optional. The regions to wait for a POSIX account to be written to before returning a response. If
+            /// unspecified, defaults to all regions. Regions are listed at
+            /// https://cloud.google.com/about/locations#region.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("regions", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<string> Regions { get; set; }
 
             /// <summary>The view configures whether to retrieve security keys information.</summary>
             [Google.Apis.Util.RequestParameterAttribute("view", Google.Apis.Util.RequestParameterType.Query)]
@@ -895,6 +1031,14 @@ namespace Google.Apis.CloudOSLogin.v1alpha
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("regions", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "regions",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("view", new Google.Apis.Discovery.Parameter
                 {
                     Name = "view",
@@ -912,8 +1056,7 @@ namespace Google.Apis.CloudOSLogin.v1alpha.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1017,6 +1160,10 @@ namespace Google.Apis.CloudOSLogin.v1alpha.Data
     /// <summary>The credential information for a Google registered security key.</summary>
     public class SecurityKey : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The security key nickname explicitly set by the user.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceNickname")]
+        public virtual string DeviceNickname { get; set; }
+
         /// <summary>Hardware-backed private key text in SSH format.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("privateKey")]
         public virtual string PrivateKey { get; set; }
@@ -1034,6 +1181,26 @@ namespace Google.Apis.CloudOSLogin.v1alpha.Data
         /// <summary>The Web Authentication protocol type.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("webAuthn")]
         public virtual WebAuthn WebAuthn { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class SignSshPublicKeyRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The SSH public key to sign.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sshPublicKey")]
+        public virtual string SshPublicKey { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class SignSshPublicKeyResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The signed SSH public key to use in the SSH handshake.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("signedSshPublicKey")]
+        public virtual string SignedSshPublicKey { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
         public ContainerAnalysisService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://containeranalysis.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://containeranalysis.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
         public override string Name => "containeranalysis";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://containeranalysis.googleapis.com/";
-        #else
-            "https://containeranalysis.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://containeranalysis.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Container Analysis API.</summary>
         public class Scope
@@ -279,9 +274,1639 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
         public ProjectsResource(Google.Apis.Services.IClientService service)
         {
             this.service = service;
+            Locations = new LocationsResource(service);
             Notes = new NotesResource(service);
             Occurrences = new OccurrencesResource(service);
-            ScanConfigs = new ScanConfigsResource(service);
+            Resources = new ResourcesResource(service);
+        }
+
+        /// <summary>Gets the Locations resource.</summary>
+        public virtual LocationsResource Locations { get; }
+
+        /// <summary>The "locations" collection of methods.</summary>
+        public class LocationsResource
+        {
+            private const string Resource = "locations";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public LocationsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+                Notes = new NotesResource(service);
+                Occurrences = new OccurrencesResource(service);
+                Resources = new ResourcesResource(service);
+            }
+
+            /// <summary>Gets the Notes resource.</summary>
+            public virtual NotesResource Notes { get; }
+
+            /// <summary>The "notes" collection of methods.</summary>
+            public class NotesResource
+            {
+                private const string Resource = "notes";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public NotesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    Occurrences = new OccurrencesResource(service);
+                }
+
+                /// <summary>Gets the Occurrences resource.</summary>
+                public virtual OccurrencesResource Occurrences { get; }
+
+                /// <summary>The "occurrences" collection of methods.</summary>
+                public class OccurrencesResource
+                {
+                    private const string Resource = "occurrences";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public OccurrencesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Lists occurrences referencing the specified note. Provider projects can use this method to get
+                    /// all occurrences across consumer projects referencing the specified note.
+                    /// </summary>
+                    /// <param name="name">
+                    /// Required. The name of the note to list occurrences for in the form of
+                    /// `projects/[PROVIDER_ID]/notes/[NOTE_ID]`.
+                    /// </param>
+                    public virtual ListRequest List(string name)
+                    {
+                        return new ListRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Lists occurrences referencing the specified note. Provider projects can use this method to get
+                    /// all occurrences across consumer projects referencing the specified note.
+                    /// </summary>
+                    public class ListRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.ListNoteOccurrencesResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The name of the note to list occurrences for in the form of
+                        /// `projects/[PROVIDER_ID]/notes/[NOTE_ID]`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>The filter expression.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string Filter { get; set; }
+
+                        /// <summary>Number of occurrences to return in the list.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>Token to provide to skip to a particular spot in the list.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+name}/occurrences";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/notes/[^/]+$",
+                            });
+                            RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "filter",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>Creates new notes in batch.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The name of the project in the form of `projects/[PROJECT_ID]`, under which the notes are
+                /// to be created.
+                /// </param>
+                public virtual BatchCreateRequest BatchCreate(Google.Apis.ContainerAnalysis.v1beta1.Data.BatchCreateNotesRequest body, string parent)
+                {
+                    return new BatchCreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates new notes in batch.</summary>
+                public class BatchCreateRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.BatchCreateNotesResponse>
+                {
+                    /// <summary>Constructs a new BatchCreate request.</summary>
+                    public BatchCreateRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.BatchCreateNotesRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the project in the form of `projects/[PROJECT_ID]`, under which the notes
+                    /// are to be created.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.BatchCreateNotesRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "batchCreate";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+parent}/notes:batchCreate";
+
+                    /// <summary>Initializes BatchCreate parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Creates a new note.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The name of the project in the form of `projects/[PROJECT_ID]`, under which the note is to
+                /// be created.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.ContainerAnalysis.v1beta1.Data.Note body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new note.</summary>
+                public class CreateRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Note>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.Note body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the project in the form of `projects/[PROJECT_ID]`, under which the note
+                    /// is to be created.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Required. The ID to use for this note.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("noteId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string NoteId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.Note Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+parent}/notes";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("noteId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "noteId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes the specified note.</summary>
+                /// <param name="name">
+                /// Required. The name of the note in the form of `projects/[PROVIDER_ID]/notes/[NOTE_ID]`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes the specified note.</summary>
+                public class DeleteRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the note in the form of `projects/[PROVIDER_ID]/notes/[NOTE_ID]`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/notes/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets the specified note.</summary>
+                /// <param name="name">
+                /// Required. The name of the note in the form of `projects/[PROVIDER_ID]/notes/[NOTE_ID]`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets the specified note.</summary>
+                public class GetRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Note>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the note in the form of `projects/[PROVIDER_ID]/notes/[NOTE_ID]`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/notes/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Gets the access control policy for a note or an occurrence resource. Requires
+                /// `containeranalysis.notes.setIamPolicy` or `containeranalysis.occurrences.setIamPolicy` permission if
+                /// the resource is a note or occurrence, respectively. The resource takes the format
+                /// `projects/[PROJECT_ID]/notes/[NOTE_ID]` for notes and
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]` for occurrences.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.ContainerAnalysis.v1beta1.Data.GetIamPolicyRequest body, string resource)
+                {
+                    return new GetIamPolicyRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Gets the access control policy for a note or an occurrence resource. Requires
+                /// `containeranalysis.notes.setIamPolicy` or `containeranalysis.occurrences.setIamPolicy` permission if
+                /// the resource is a note or occurrence, respectively. The resource takes the format
+                /// `projects/[PROJECT_ID]/notes/[NOTE_ID]` for notes and
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]` for occurrences.
+                /// </summary>
+                public class GetIamPolicyRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Policy>
+                {
+                    /// <summary>Constructs a new GetIamPolicy request.</summary>
+                    public GetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.GetIamPolicyRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.GetIamPolicyRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getIamPolicy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+resource}:getIamPolicy";
+
+                    /// <summary>Initializes GetIamPolicy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/notes/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists notes for the specified project.</summary>
+                /// <param name="parent">
+                /// Required. The name of the project to list notes for in the form of `projects/[PROJECT_ID]`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists notes for the specified project.</summary>
+                public class ListRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.ListNotesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the project to list notes for in the form of `projects/[PROJECT_ID]`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>The filter expression.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Number of notes to return in the list. Must be positive. Max allowed page size is 1000. If not
+                    /// specified, page size defaults to 20.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>Token to provide to skip to a particular spot in the list.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+parent}/notes";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates the specified note.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. The name of the note in the form of `projects/[PROVIDER_ID]/notes/[NOTE_ID]`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.ContainerAnalysis.v1beta1.Data.Note body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates the specified note.</summary>
+                public class PatchRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Note>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.Note body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the note in the form of `projects/[PROVIDER_ID]/notes/[NOTE_ID]`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>The fields to update.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.Note Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/notes/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Sets the access control policy on the specified note or occurrence. Requires
+                /// `containeranalysis.notes.setIamPolicy` or `containeranalysis.occurrences.setIamPolicy` permission if
+                /// the resource is a note or an occurrence, respectively. The resource takes the format
+                /// `projects/[PROJECT_ID]/notes/[NOTE_ID]` for notes and
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]` for occurrences.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.ContainerAnalysis.v1beta1.Data.SetIamPolicyRequest body, string resource)
+                {
+                    return new SetIamPolicyRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Sets the access control policy on the specified note or occurrence. Requires
+                /// `containeranalysis.notes.setIamPolicy` or `containeranalysis.occurrences.setIamPolicy` permission if
+                /// the resource is a note or an occurrence, respectively. The resource takes the format
+                /// `projects/[PROJECT_ID]/notes/[NOTE_ID]` for notes and
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]` for occurrences.
+                /// </summary>
+                public class SetIamPolicyRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Policy>
+                {
+                    /// <summary>Constructs a new SetIamPolicy request.</summary>
+                    public SetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.SetIamPolicyRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.SetIamPolicyRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "setIamPolicy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+resource}:setIamPolicy";
+
+                    /// <summary>Initializes SetIamPolicy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/notes/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns the permissions that a caller has on the specified note or occurrence. Requires list
+                /// permission on the project (for example, `containeranalysis.notes.list`). The resource takes the
+                /// format `projects/[PROJECT_ID]/notes/[NOTE_ID]` for notes and
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]` for occurrences.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.ContainerAnalysis.v1beta1.Data.TestIamPermissionsRequest body, string resource)
+                {
+                    return new TestIamPermissionsRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Returns the permissions that a caller has on the specified note or occurrence. Requires list
+                /// permission on the project (for example, `containeranalysis.notes.list`). The resource takes the
+                /// format `projects/[PROJECT_ID]/notes/[NOTE_ID]` for notes and
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]` for occurrences.
+                /// </summary>
+                public class TestIamPermissionsRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.TestIamPermissionsResponse>
+                {
+                    /// <summary>Constructs a new TestIamPermissions request.</summary>
+                    public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.TestIamPermissionsRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.TestIamPermissionsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "testIamPermissions";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+resource}:testIamPermissions";
+
+                    /// <summary>Initializes TestIamPermissions parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/notes/[^/]+$",
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the Occurrences resource.</summary>
+            public virtual OccurrencesResource Occurrences { get; }
+
+            /// <summary>The "occurrences" collection of methods.</summary>
+            public class OccurrencesResource
+            {
+                private const string Resource = "occurrences";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public OccurrencesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates new occurrences in batch.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The name of the project in the form of `projects/[PROJECT_ID]`, under which the
+                /// occurrences are to be created.
+                /// </param>
+                public virtual BatchCreateRequest BatchCreate(Google.Apis.ContainerAnalysis.v1beta1.Data.BatchCreateOccurrencesRequest body, string parent)
+                {
+                    return new BatchCreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates new occurrences in batch.</summary>
+                public class BatchCreateRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.BatchCreateOccurrencesResponse>
+                {
+                    /// <summary>Constructs a new BatchCreate request.</summary>
+                    public BatchCreateRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.BatchCreateOccurrencesRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the project in the form of `projects/[PROJECT_ID]`, under which the
+                    /// occurrences are to be created.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.BatchCreateOccurrencesRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "batchCreate";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+parent}/occurrences:batchCreate";
+
+                    /// <summary>Initializes BatchCreate parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Creates a new occurrence.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The name of the project in the form of `projects/[PROJECT_ID]`, under which the occurrence
+                /// is to be created.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.ContainerAnalysis.v1beta1.Data.Occurrence body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new occurrence.</summary>
+                public class CreateRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Occurrence>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.Occurrence body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the project in the form of `projects/[PROJECT_ID]`, under which the
+                    /// occurrence is to be created.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.Occurrence Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+parent}/occurrences";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Deletes the specified occurrence. For example, use this method to delete an occurrence when the
+                /// occurrence is no longer applicable for the given resource.
+                /// </summary>
+                /// <param name="name">
+                /// Required. The name of the occurrence in the form of
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]`.
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Deletes the specified occurrence. For example, use this method to delete an occurrence when the
+                /// occurrence is no longer applicable for the given resource.
+                /// </summary>
+                public class DeleteRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the occurrence in the form of
+                    /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/occurrences/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets the specified occurrence.</summary>
+                /// <param name="name">
+                /// Required. The name of the occurrence in the form of
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets the specified occurrence.</summary>
+                public class GetRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Occurrence>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the occurrence in the form of
+                    /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/occurrences/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Gets the access control policy for a note or an occurrence resource. Requires
+                /// `containeranalysis.notes.setIamPolicy` or `containeranalysis.occurrences.setIamPolicy` permission if
+                /// the resource is a note or occurrence, respectively. The resource takes the format
+                /// `projects/[PROJECT_ID]/notes/[NOTE_ID]` for notes and
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]` for occurrences.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.ContainerAnalysis.v1beta1.Data.GetIamPolicyRequest body, string resource)
+                {
+                    return new GetIamPolicyRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Gets the access control policy for a note or an occurrence resource. Requires
+                /// `containeranalysis.notes.setIamPolicy` or `containeranalysis.occurrences.setIamPolicy` permission if
+                /// the resource is a note or occurrence, respectively. The resource takes the format
+                /// `projects/[PROJECT_ID]/notes/[NOTE_ID]` for notes and
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]` for occurrences.
+                /// </summary>
+                public class GetIamPolicyRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Policy>
+                {
+                    /// <summary>Constructs a new GetIamPolicy request.</summary>
+                    public GetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.GetIamPolicyRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.GetIamPolicyRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getIamPolicy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+resource}:getIamPolicy";
+
+                    /// <summary>Initializes GetIamPolicy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/occurrences/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Gets the note attached to the specified occurrence. Consumer projects can use this method to get a
+                /// note that belongs to a provider project.
+                /// </summary>
+                /// <param name="name">
+                /// Required. The name of the occurrence in the form of
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]`.
+                /// </param>
+                public virtual GetNotesRequest GetNotes(string name)
+                {
+                    return new GetNotesRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the note attached to the specified occurrence. Consumer projects can use this method to get a
+                /// note that belongs to a provider project.
+                /// </summary>
+                public class GetNotesRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Note>
+                {
+                    /// <summary>Constructs a new GetNotes request.</summary>
+                    public GetNotesRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the occurrence in the form of
+                    /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getNotes";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}/notes";
+
+                    /// <summary>Initializes GetNotes parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/occurrences/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a summary of the number and severity of occurrences.</summary>
+                /// <param name="parent">
+                /// Required. The name of the project to get a vulnerability summary for in the form of
+                /// `projects/[PROJECT_ID]`.
+                /// </param>
+                public virtual GetVulnerabilitySummaryRequest GetVulnerabilitySummary(string parent)
+                {
+                    return new GetVulnerabilitySummaryRequest(this.service, parent);
+                }
+
+                /// <summary>Gets a summary of the number and severity of occurrences.</summary>
+                public class GetVulnerabilitySummaryRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.VulnerabilityOccurrencesSummary>
+                {
+                    /// <summary>Constructs a new GetVulnerabilitySummary request.</summary>
+                    public GetVulnerabilitySummaryRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the project to get a vulnerability summary for in the form of
+                    /// `projects/[PROJECT_ID]`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>The filter expression.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getVulnerabilitySummary";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+parent}/occurrences:vulnerabilitySummary";
+
+                    /// <summary>Initializes GetVulnerabilitySummary parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Lists occurrences for the specified project.</summary>
+                /// <param name="parent">
+                /// Required. The name of the project to list occurrences for in the form of `projects/[PROJECT_ID]`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists occurrences for the specified project.</summary>
+                public class ListRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.ListOccurrencesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the project to list occurrences for in the form of
+                    /// `projects/[PROJECT_ID]`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>The filter expression.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Number of occurrences to return in the list. Must be positive. Max allowed page size is 1000. If
+                    /// not specified, page size defaults to 20.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>Token to provide to skip to a particular spot in the list.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+parent}/occurrences";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates the specified occurrence.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. The name of the occurrence in the form of
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.ContainerAnalysis.v1beta1.Data.Occurrence body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates the specified occurrence.</summary>
+                public class PatchRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Occurrence>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.Occurrence body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the occurrence in the form of
+                    /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>The fields to update.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.Occurrence Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/occurrences/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Sets the access control policy on the specified note or occurrence. Requires
+                /// `containeranalysis.notes.setIamPolicy` or `containeranalysis.occurrences.setIamPolicy` permission if
+                /// the resource is a note or an occurrence, respectively. The resource takes the format
+                /// `projects/[PROJECT_ID]/notes/[NOTE_ID]` for notes and
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]` for occurrences.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.ContainerAnalysis.v1beta1.Data.SetIamPolicyRequest body, string resource)
+                {
+                    return new SetIamPolicyRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Sets the access control policy on the specified note or occurrence. Requires
+                /// `containeranalysis.notes.setIamPolicy` or `containeranalysis.occurrences.setIamPolicy` permission if
+                /// the resource is a note or an occurrence, respectively. The resource takes the format
+                /// `projects/[PROJECT_ID]/notes/[NOTE_ID]` for notes and
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]` for occurrences.
+                /// </summary>
+                public class SetIamPolicyRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.Policy>
+                {
+                    /// <summary>Constructs a new SetIamPolicy request.</summary>
+                    public SetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.SetIamPolicyRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.SetIamPolicyRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "setIamPolicy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+resource}:setIamPolicy";
+
+                    /// <summary>Initializes SetIamPolicy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/occurrences/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns the permissions that a caller has on the specified note or occurrence. Requires list
+                /// permission on the project (for example, `containeranalysis.notes.list`). The resource takes the
+                /// format `projects/[PROJECT_ID]/notes/[NOTE_ID]` for notes and
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]` for occurrences.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.ContainerAnalysis.v1beta1.Data.TestIamPermissionsRequest body, string resource)
+                {
+                    return new TestIamPermissionsRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Returns the permissions that a caller has on the specified note or occurrence. Requires list
+                /// permission on the project (for example, `containeranalysis.notes.list`). The resource takes the
+                /// format `projects/[PROJECT_ID]/notes/[NOTE_ID]` for notes and
+                /// `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]` for occurrences.
+                /// </summary>
+                public class TestIamPermissionsRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.TestIamPermissionsResponse>
+                {
+                    /// <summary>Constructs a new TestIamPermissions request.</summary>
+                    public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.TestIamPermissionsRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.TestIamPermissionsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "testIamPermissions";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+resource}:testIamPermissions";
+
+                    /// <summary>Initializes TestIamPermissions parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/occurrences/[^/]+$",
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the Resources resource.</summary>
+            public virtual ResourcesResource Resources { get; }
+
+            /// <summary>The "resources" collection of methods.</summary>
+            public class ResourcesResource
+            {
+                private const string Resource = "resources";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public ResourcesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Generates an SBOM and other dependency information for the given resource.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. The name of the resource in the form of `projects/[PROJECT_ID]/resources/[RESOURCE_URL]`.
+                /// </param>
+                public virtual ExportSBOMRequest ExportSBOM(Google.Apis.ContainerAnalysis.v1beta1.Data.ExportSBOMRequest body, string name)
+                {
+                    return new ExportSBOMRequest(this.service, body, name);
+                }
+
+                /// <summary>Generates an SBOM and other dependency information for the given resource.</summary>
+                public class ExportSBOMRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.ExportSBOMResponse>
+                {
+                    /// <summary>Constructs a new ExportSBOM request.</summary>
+                    public ExportSBOMRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.ExportSBOMRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the resource in the form of
+                    /// `projects/[PROJECT_ID]/resources/[RESOURCE_URL]`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.ExportSBOMRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "exportSBOM";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}:exportSBOM";
+
+                    /// <summary>Initializes ExportSBOM parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/resources/.*$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a summary of the packages within a given resource.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. The name of the resource to get a packages summary for in the form of
+                /// `projects/[PROJECT_ID]/resources/[RESOURCE_URL]`.
+                /// </param>
+                public virtual GeneratePackagesSummaryRequest GeneratePackagesSummary(Google.Apis.ContainerAnalysis.v1beta1.Data.GeneratePackagesSummaryRequest body, string name)
+                {
+                    return new GeneratePackagesSummaryRequest(this.service, body, name);
+                }
+
+                /// <summary>Gets a summary of the packages within a given resource.</summary>
+                public class GeneratePackagesSummaryRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.PackagesSummaryResponse>
+                {
+                    /// <summary>Constructs a new GeneratePackagesSummary request.</summary>
+                    public GeneratePackagesSummaryRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.GeneratePackagesSummaryRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the resource to get a packages summary for in the form of
+                    /// `projects/[PROJECT_ID]/resources/[RESOURCE_URL]`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.ContainerAnalysis.v1beta1.Data.GeneratePackagesSummaryRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "generatePackagesSummary";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}:generatePackagesSummary";
+
+                    /// <summary>Initializes GeneratePackagesSummary parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/resources/.*$",
+                        });
+                    }
+                }
+            }
         }
 
         /// <summary>Gets the Notes resource.</summary>
@@ -329,7 +1954,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
                 /// </param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -421,7 +2046,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual BatchCreateRequest BatchCreate(Google.Apis.ContainerAnalysis.v1beta1.Data.BatchCreateNotesRequest body, string parent)
             {
-                return new BatchCreateRequest(service, body, parent);
+                return new BatchCreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates new notes in batch.</summary>
@@ -480,7 +2105,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.ContainerAnalysis.v1beta1.Data.Note body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a new note.</summary>
@@ -549,7 +2174,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes the specified note.</summary>
@@ -598,7 +2223,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the specified note.</summary>
@@ -650,12 +2275,12 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.ContainerAnalysis.v1beta1.Data.GetIamPolicyRequest body, string resource)
             {
-                return new GetIamPolicyRequest(service, body, resource);
+                return new GetIamPolicyRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -676,8 +2301,9 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -718,7 +2344,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists notes for the specified project.</summary>
@@ -807,7 +2433,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.ContainerAnalysis.v1beta1.Data.Note body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates the specified note.</summary>
@@ -878,12 +2504,12 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.ContainerAnalysis.v1beta1.Data.SetIamPolicyRequest body, string resource)
             {
-                return new SetIamPolicyRequest(service, body, resource);
+                return new SetIamPolicyRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -904,8 +2530,9 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -948,12 +2575,12 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.ContainerAnalysis.v1beta1.Data.TestIamPermissionsRequest body, string resource)
             {
-                return new TestIamPermissionsRequest(service, body, resource);
+                return new TestIamPermissionsRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -973,8 +2600,9 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -1035,7 +2663,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual BatchCreateRequest BatchCreate(Google.Apis.ContainerAnalysis.v1beta1.Data.BatchCreateOccurrencesRequest body, string parent)
             {
-                return new BatchCreateRequest(service, body, parent);
+                return new BatchCreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates new occurrences in batch.</summary>
@@ -1094,7 +2722,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.ContainerAnalysis.v1beta1.Data.Occurrence body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a new occurrence.</summary>
@@ -1154,7 +2782,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -1207,7 +2835,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the specified occurrence.</summary>
@@ -1260,12 +2888,12 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.ContainerAnalysis.v1beta1.Data.GetIamPolicyRequest body, string resource)
             {
-                return new GetIamPolicyRequest(service, body, resource);
+                return new GetIamPolicyRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -1286,8 +2914,9 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -1331,7 +2960,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual GetNotesRequest GetNotes(string name)
             {
-                return new GetNotesRequest(service, name);
+                return new GetNotesRequest(this.service, name);
             }
 
             /// <summary>
@@ -1385,7 +3014,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual GetVulnerabilitySummaryRequest GetVulnerabilitySummary(string parent)
             {
-                return new GetVulnerabilitySummaryRequest(service, parent);
+                return new GetVulnerabilitySummaryRequest(this.service, parent);
             }
 
             /// <summary>Gets a summary of the number and severity of occurrences.</summary>
@@ -1447,7 +3076,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists occurrences for the specified project.</summary>
@@ -1536,7 +3165,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.ContainerAnalysis.v1beta1.Data.Occurrence body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates the specified occurrence.</summary>
@@ -1608,12 +3237,12 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.ContainerAnalysis.v1beta1.Data.SetIamPolicyRequest body, string resource)
             {
-                return new SetIamPolicyRequest(service, body, resource);
+                return new SetIamPolicyRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -1634,8 +3263,9 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -1678,12 +3308,12 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.ContainerAnalysis.v1beta1.Data.TestIamPermissionsRequest body, string resource)
             {
-                return new TestIamPermissionsRequest(service, body, resource);
+                return new TestIamPermissionsRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -1703,8 +3333,9 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -1740,177 +3371,38 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
             }
         }
 
-        /// <summary>Gets the ScanConfigs resource.</summary>
-        public virtual ScanConfigsResource ScanConfigs { get; }
+        /// <summary>Gets the Resources resource.</summary>
+        public virtual ResourcesResource Resources { get; }
 
-        /// <summary>The "scanConfigs" collection of methods.</summary>
-        public class ScanConfigsResource
+        /// <summary>The "resources" collection of methods.</summary>
+        public class ResourcesResource
         {
-            private const string Resource = "scanConfigs";
+            private const string Resource = "resources";
 
             /// <summary>The service which this resource belongs to.</summary>
             private readonly Google.Apis.Services.IClientService service;
 
             /// <summary>Constructs a new resource.</summary>
-            public ScanConfigsResource(Google.Apis.Services.IClientService service)
+            public ResourcesResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
             }
 
-            /// <summary>Gets the specified scan configuration.</summary>
-            /// <param name="name">
-            /// Required. The name of the scan configuration in the form of
-            /// `projects/[PROJECT_ID]/scanConfigs/[SCAN_CONFIG_ID]`.
-            /// </param>
-            public virtual GetRequest Get(string name)
-            {
-                return new GetRequest(service, name);
-            }
-
-            /// <summary>Gets the specified scan configuration.</summary>
-            public class GetRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.ScanConfig>
-            {
-                /// <summary>Constructs a new Get request.</summary>
-                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
-                {
-                    Name = name;
-                    InitParameters();
-                }
-
-                /// <summary>
-                /// Required. The name of the scan configuration in the form of
-                /// `projects/[PROJECT_ID]/scanConfigs/[SCAN_CONFIG_ID]`.
-                /// </summary>
-                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
-                public virtual string Name { get; private set; }
-
-                /// <summary>Gets the method name.</summary>
-                public override string MethodName => "get";
-
-                /// <summary>Gets the HTTP method.</summary>
-                public override string HttpMethod => "GET";
-
-                /// <summary>Gets the REST path.</summary>
-                public override string RestPath => "v1beta1/{+name}";
-
-                /// <summary>Initializes Get parameter list.</summary>
-                protected override void InitParameters()
-                {
-                    base.InitParameters();
-                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "name",
-                        IsRequired = true,
-                        ParameterType = "path",
-                        DefaultValue = null,
-                        Pattern = @"^projects/[^/]+/scanConfigs/[^/]+$",
-                    });
-                }
-            }
-
-            /// <summary>Lists scan configurations for the specified project.</summary>
-            /// <param name="parent">
-            /// Required. The name of the project to list scan configurations for in the form of
-            /// `projects/[PROJECT_ID]`.
-            /// </param>
-            public virtual ListRequest List(string parent)
-            {
-                return new ListRequest(service, parent);
-            }
-
-            /// <summary>Lists scan configurations for the specified project.</summary>
-            public class ListRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.ListScanConfigsResponse>
-            {
-                /// <summary>Constructs a new List request.</summary>
-                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
-                {
-                    Parent = parent;
-                    InitParameters();
-                }
-
-                /// <summary>
-                /// Required. The name of the project to list scan configurations for in the form of
-                /// `projects/[PROJECT_ID]`.
-                /// </summary>
-                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
-                public virtual string Parent { get; private set; }
-
-                /// <summary>Required. The filter expression.</summary>
-                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual string Filter { get; set; }
-
-                /// <summary>The number of scan configs to return in the list.</summary>
-                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual System.Nullable<int> PageSize { get; set; }
-
-                /// <summary>Token to provide to skip to a particular spot in the list.</summary>
-                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual string PageToken { get; set; }
-
-                /// <summary>Gets the method name.</summary>
-                public override string MethodName => "list";
-
-                /// <summary>Gets the HTTP method.</summary>
-                public override string HttpMethod => "GET";
-
-                /// <summary>Gets the REST path.</summary>
-                public override string RestPath => "v1beta1/{+parent}/scanConfigs";
-
-                /// <summary>Initializes List parameter list.</summary>
-                protected override void InitParameters()
-                {
-                    base.InitParameters();
-                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "parent",
-                        IsRequired = true,
-                        ParameterType = "path",
-                        DefaultValue = null,
-                        Pattern = @"^projects/[^/]+$",
-                    });
-                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "filter",
-                        IsRequired = false,
-                        ParameterType = "query",
-                        DefaultValue = null,
-                        Pattern = null,
-                    });
-                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "pageSize",
-                        IsRequired = false,
-                        ParameterType = "query",
-                        DefaultValue = null,
-                        Pattern = null,
-                    });
-                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "pageToken",
-                        IsRequired = false,
-                        ParameterType = "query",
-                        DefaultValue = null,
-                        Pattern = null,
-                    });
-                }
-            }
-
-            /// <summary>Updates the specified scan configuration.</summary>
+            /// <summary>Generates an SBOM and other dependency information for the given resource.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
-            /// Required. The name of the scan configuration in the form of
-            /// `projects/[PROJECT_ID]/scanConfigs/[SCAN_CONFIG_ID]`.
+            /// Required. The name of the resource in the form of `projects/[PROJECT_ID]/resources/[RESOURCE_URL]`.
             /// </param>
-            public virtual UpdateRequest Update(Google.Apis.ContainerAnalysis.v1beta1.Data.ScanConfig body, string name)
+            public virtual ExportSBOMRequest ExportSBOM(Google.Apis.ContainerAnalysis.v1beta1.Data.ExportSBOMRequest body, string name)
             {
-                return new UpdateRequest(service, body, name);
+                return new ExportSBOMRequest(this.service, body, name);
             }
 
-            /// <summary>Updates the specified scan configuration.</summary>
-            public class UpdateRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.ScanConfig>
+            /// <summary>Generates an SBOM and other dependency information for the given resource.</summary>
+            public class ExportSBOMRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.ExportSBOMResponse>
             {
-                /// <summary>Constructs a new Update request.</summary>
-                public UpdateRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.ScanConfig body, string name) : base(service)
+                /// <summary>Constructs a new ExportSBOM request.</summary>
+                public ExportSBOMRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.ExportSBOMRequest body, string name) : base(service)
                 {
                     Name = name;
                     Body = body;
@@ -1918,28 +3410,27 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
                 }
 
                 /// <summary>
-                /// Required. The name of the scan configuration in the form of
-                /// `projects/[PROJECT_ID]/scanConfigs/[SCAN_CONFIG_ID]`.
+                /// Required. The name of the resource in the form of `projects/[PROJECT_ID]/resources/[RESOURCE_URL]`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
 
                 /// <summary>Gets or sets the body of this request.</summary>
-                Google.Apis.ContainerAnalysis.v1beta1.Data.ScanConfig Body { get; set; }
+                Google.Apis.ContainerAnalysis.v1beta1.Data.ExportSBOMRequest Body { get; set; }
 
                 /// <summary>Returns the body of the request.</summary>
                 protected override object GetBody() => Body;
 
                 /// <summary>Gets the method name.</summary>
-                public override string MethodName => "update";
+                public override string MethodName => "exportSBOM";
 
                 /// <summary>Gets the HTTP method.</summary>
-                public override string HttpMethod => "PUT";
+                public override string HttpMethod => "POST";
 
                 /// <summary>Gets the REST path.</summary>
-                public override string RestPath => "v1beta1/{+name}";
+                public override string RestPath => "v1beta1/{+name}:exportSBOM";
 
-                /// <summary>Initializes Update parameter list.</summary>
+                /// <summary>Initializes ExportSBOM parameter list.</summary>
                 protected override void InitParameters()
                 {
                     base.InitParameters();
@@ -1949,7 +3440,66 @@ namespace Google.Apis.ContainerAnalysis.v1beta1
                         IsRequired = true,
                         ParameterType = "path",
                         DefaultValue = null,
-                        Pattern = @"^projects/[^/]+/scanConfigs/[^/]+$",
+                        Pattern = @"^projects/[^/]+/resources/.*$",
+                    });
+                }
+            }
+
+            /// <summary>Gets a summary of the packages within a given resource.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The name of the resource to get a packages summary for in the form of
+            /// `projects/[PROJECT_ID]/resources/[RESOURCE_URL]`.
+            /// </param>
+            public virtual GeneratePackagesSummaryRequest GeneratePackagesSummary(Google.Apis.ContainerAnalysis.v1beta1.Data.GeneratePackagesSummaryRequest body, string name)
+            {
+                return new GeneratePackagesSummaryRequest(this.service, body, name);
+            }
+
+            /// <summary>Gets a summary of the packages within a given resource.</summary>
+            public class GeneratePackagesSummaryRequest : ContainerAnalysisBaseServiceRequest<Google.Apis.ContainerAnalysis.v1beta1.Data.PackagesSummaryResponse>
+            {
+                /// <summary>Constructs a new GeneratePackagesSummary request.</summary>
+                public GeneratePackagesSummaryRequest(Google.Apis.Services.IClientService service, Google.Apis.ContainerAnalysis.v1beta1.Data.GeneratePackagesSummaryRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The name of the resource to get a packages summary for in the form of
+                /// `projects/[PROJECT_ID]/resources/[RESOURCE_URL]`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.ContainerAnalysis.v1beta1.Data.GeneratePackagesSummaryRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "generatePackagesSummary";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta1/{+name}:generatePackagesSummary";
+
+                /// <summary>Initializes GeneratePackagesSummary parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/resources/.*$",
                     });
                 }
             }
@@ -1968,6 +3518,19 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// <summary>The alias name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Indicates which analysis completed successfully. Multiple types of analysis can be performed on a single
+    /// resource.
+    /// </summary>
+    public class AnalysisCompleted : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("analysisType")]
+        public virtual System.Collections.Generic.IList<string> AnalysisType { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2014,6 +3577,62 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     {
         [Newtonsoft.Json.JsonPropertyAttribute("artifactRule")]
         public virtual System.Collections.Generic.IList<string> ArtifactRuleValue { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Assessment provides all information that is related to a single vulnerability for this product.
+    /// </summary>
+    public class Assessment : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Holds the MITRE standard Common Vulnerabilities and Exposures (CVE) tracking number for the vulnerability.
+        /// Deprecated: Use vulnerability_id instead to denote CVEs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cve")]
+        public virtual string Cve { get; set; }
+
+        /// <summary>Contains information about the impact of this vulnerability, this will change with time.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("impacts")]
+        public virtual System.Collections.Generic.IList<string> Impacts { get; set; }
+
+        /// <summary>
+        /// Justification provides the justification when the state of the assessment if NOT_AFFECTED.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("justification")]
+        public virtual Justification Justification { get; set; }
+
+        /// <summary>A detailed description of this Vex.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("longDescription")]
+        public virtual string LongDescription { get; set; }
+
+        /// <summary>
+        /// Holds a list of references associated with this vulnerability item and assessment. These uris have
+        /// additional information about the vulnerability and the assessment itself. E.g. Link to a document which
+        /// details how this assessment concluded the state of this vulnerability.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("relatedUris")]
+        public virtual System.Collections.Generic.IList<RelatedUrl> RelatedUris { get; set; }
+
+        /// <summary>Specifies details on how to handle (and presumably, fix) a vulnerability.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("remediations")]
+        public virtual System.Collections.Generic.IList<Remediation> Remediations { get; set; }
+
+        /// <summary>A one sentence description of this Vex.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("shortDescription")]
+        public virtual string ShortDescription { get; set; }
+
+        /// <summary>Provides the state of this Vulnerability assessment.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>
+        /// The vulnerability identifier for this Assessment. Will hold one of common identifiers e.g. CVE, GHSA etc.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vulnerabilityId")]
+        public virtual string VulnerabilityId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2137,16 +3756,37 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -2154,15 +3794,19 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -2186,6 +3830,105 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("signature")]
         public virtual BuildSignature Signature { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class BuildDefinition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("buildType")]
+        public virtual string BuildType { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("externalParameters")]
+        public virtual System.Collections.Generic.IDictionary<string, object> ExternalParameters { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("internalParameters")]
+        public virtual System.Collections.Generic.IDictionary<string, object> InternalParameters { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("resolvedDependencies")]
+        public virtual System.Collections.Generic.IList<ResourceDescriptor> ResolvedDependencies { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class BuildMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _finishedOnRaw;
+
+        private object _finishedOn;
+
+        [Newtonsoft.Json.JsonPropertyAttribute("finishedOn")]
+        public virtual string FinishedOnRaw
+        {
+            get => _finishedOnRaw;
+            set
+            {
+                _finishedOn = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _finishedOnRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FinishedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FinishedOnDateTimeOffset instead.")]
+        public virtual object FinishedOn
+        {
+            get => _finishedOn;
+            set
+            {
+                _finishedOnRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _finishedOn = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FinishedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FinishedOnDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FinishedOnRaw);
+            set => FinishedOnRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("invocationId")]
+        public virtual string InvocationId { get; set; }
+
+        private string _startedOnRaw;
+
+        private object _startedOn;
+
+        [Newtonsoft.Json.JsonPropertyAttribute("startedOn")]
+        public virtual string StartedOnRaw
+        {
+            get => _startedOnRaw;
+            set
+            {
+                _startedOn = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startedOnRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartedOnDateTimeOffset instead.")]
+        public virtual object StartedOn
+        {
+            get => _startedOn;
+            set
+            {
+                _startedOnRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startedOn = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartedOnDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartedOnRaw);
+            set => StartedOnRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2216,9 +3959,42 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("commands")]
         public virtual System.Collections.Generic.IList<Command> Commands { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Time at which the build was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// E-mail address of the user who initiated this build. Note that this was the user's e-mail address at the
@@ -2227,9 +4003,42 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("creator")]
         public virtual string Creator { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Time at which execution of the build was finished.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required. Unique identifier of the build.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
@@ -2247,9 +4056,42 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sourceProvenance")]
         public virtual Source SourceProvenance { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Time at which execution of the build was started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Trigger identifier if the build was triggered automatically; empty if not.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("triggerId")]
@@ -2294,6 +4136,144 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A step in the build pipeline. Next ID: 21</summary>
+    public class BuildStep : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Allow this build step to fail without failing the entire build if and only if the exit code is one of the
+        /// specified codes. If allow_failure is also specified, this field will take precedence.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowExitCodes")]
+        public virtual System.Collections.Generic.IList<System.Nullable<int>> AllowExitCodes { get; set; }
+
+        /// <summary>
+        /// Allow this build step to fail without failing the entire build. If false, the entire build will fail if this
+        /// step fails. Otherwise, the build will succeed, but this step will still have a failure status. Error
+        /// information will be reported in the failure_detail field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowFailure")]
+        public virtual System.Nullable<bool> AllowFailure { get; set; }
+
+        /// <summary>
+        /// A list of arguments that will be presented to the step when it is started. If the image used to run the
+        /// step's container has an entrypoint, the `args` are used as arguments to that entrypoint. If the image does
+        /// not define an entrypoint, the first element in args is used as the entrypoint, and the remainder will be
+        /// used as arguments.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("args")]
+        public virtual System.Collections.Generic.IList<string> Args { get; set; }
+
+        /// <summary>
+        /// Option to include built-in and custom substitutions as env variables for this build step. This option will
+        /// override the global option in BuildOption.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("automapSubstitutions")]
+        public virtual System.Nullable<bool> AutomapSubstitutions { get; set; }
+
+        /// <summary>
+        /// Working directory to use when running this step's container. If this value is a relative path, it is
+        /// relative to the build's working directory. If this value is absolute, it may be outside the build's working
+        /// directory, in which case the contents of the path may not be persisted across build step executions, unless
+        /// a `volume` for that path is specified. If the build specifies a `RepoSource` with `dir` and a step with a
+        /// `dir`, which specifies an absolute path, the `RepoSource` `dir` is ignored for the step's execution.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dir")]
+        public virtual string Dir { get; set; }
+
+        /// <summary>
+        /// Entrypoint to be used instead of the build step image's default entrypoint. If unset, the image's default
+        /// entrypoint is used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entrypoint")]
+        public virtual string Entrypoint { get; set; }
+
+        /// <summary>
+        /// A list of environment variable definitions to be used when running a step. The elements are of the form
+        /// "KEY=VALUE" for the environment variable "KEY" being given the value "VALUE".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("env")]
+        public virtual System.Collections.Generic.IList<string> Env { get; set; }
+
+        /// <summary>Output only. Return code from running the step.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exitCode")]
+        public virtual System.Nullable<int> ExitCode { get; set; }
+
+        /// <summary>
+        /// Unique identifier for this build step, used in `wait_for` to reference this build step as a dependency.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>
+        /// Required. The name of the container image that will run this particular build step. If the image is
+        /// available in the host's Docker daemon's cache, it will be run directly. If not, the host will attempt to
+        /// pull the image first, using the builder service account's credentials if necessary. The Docker daemon's
+        /// cache will already have the latest versions of all of the officially supported build steps
+        /// ([https://github.com/GoogleCloudPlatform/cloud-builders](https://github.com/GoogleCloudPlatform/cloud-builders)).
+        /// The Docker daemon will also have cached many of the layers for some popular images, like "ubuntu", "debian",
+        /// but they will be refreshed at the time you attempt to use them. If you built an image in a previous build
+        /// step, it will be stored in the host's Docker daemon's cache and is available to use as the name for a later
+        /// build step.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Output only. Stores timing information for pulling this build step's builder image only.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pullTiming")]
+        public virtual TimeSpan PullTiming { get; set; }
+
+        /// <summary>
+        /// A shell script to be executed in the step. When script is provided, the user cannot specify the entrypoint
+        /// or args.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("script")]
+        public virtual string Script { get; set; }
+
+        /// <summary>
+        /// A list of environment variables which are encrypted using a Cloud Key Management Service crypto key. These
+        /// values must be specified in the build's `Secret`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("secretEnv")]
+        public virtual System.Collections.Generic.IList<string> SecretEnv { get; set; }
+
+        /// <summary>
+        /// Output only. Status of the build step. At this time, build step status is only updated on build completion;
+        /// step status is not updated in real-time as the build progresses.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual string Status { get; set; }
+
+        /// <summary>
+        /// Time limit for executing this build step. If not defined, the step has no time limit and will be allowed to
+        /// continue to run until either it completes or the build itself times out.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeout")]
+        public virtual object Timeout { get; set; }
+
+        /// <summary>Output only. Stores timing information for executing this build step.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timing")]
+        public virtual TimeSpan Timing { get; set; }
+
+        /// <summary>
+        /// List of volumes to mount into the build step. Each volume is created as an empty volume prior to execution
+        /// of the build step. Upon completion of the build, volumes and their contents are discarded. Using a named
+        /// volume in only one step is not valid as it is indicative of a build request with an incorrect configuration.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("volumes")]
+        public virtual System.Collections.Generic.IList<Volume> Volumes { get; set; }
+
+        /// <summary>
+        /// The ID(s) of the step(s) that this build step depends on. This build step will not start until all the build
+        /// steps in `wait_for` have completed successfully. If `wait_for` is empty, this build step will start when all
+        /// previous build steps in the `Build.Steps` list have completed successfully.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("waitFor")]
+        public virtual System.Collections.Generic.IList<string> WaitFor { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Defines an object for the byproducts field in in-toto links. The suggested fields are "stderr", "stdout", and
     /// "return-value".
@@ -2308,7 +4288,68 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     }
 
     /// <summary>
-    /// Common Vulnerability Scoring System version 3. For details, see
+    /// Common Vulnerability Scoring System. This message is compatible with CVSS v2 and v3. For CVSS v2 details, see
+    /// https://www.first.org/cvss/v2/guide CVSS v2 calculator: https://nvd.nist.gov/vuln-metrics/cvss/v2-calculator For
+    /// CVSS v3 details, see https://www.first.org/cvss/specification-document CVSS v3 calculator:
+    /// https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator
+    /// </summary>
+    public class CVSS : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Defined in CVSS v3, CVSS v2</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("attackComplexity")]
+        public virtual string AttackComplexity { get; set; }
+
+        /// <summary>
+        /// Base Metrics Represents the intrinsic characteristics of a vulnerability that are constant over time and
+        /// across user environments. Defined in CVSS v3, CVSS v2
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("attackVector")]
+        public virtual string AttackVector { get; set; }
+
+        /// <summary>Defined in CVSS v2</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("authentication")]
+        public virtual string Authentication { get; set; }
+
+        /// <summary>Defined in CVSS v3, CVSS v2</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("availabilityImpact")]
+        public virtual string AvailabilityImpact { get; set; }
+
+        /// <summary>The base score is a function of the base metric scores.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("baseScore")]
+        public virtual System.Nullable<float> BaseScore { get; set; }
+
+        /// <summary>Defined in CVSS v3, CVSS v2</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("confidentialityImpact")]
+        public virtual string ConfidentialityImpact { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("exploitabilityScore")]
+        public virtual System.Nullable<float> ExploitabilityScore { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("impactScore")]
+        public virtual System.Nullable<float> ImpactScore { get; set; }
+
+        /// <summary>Defined in CVSS v3, CVSS v2</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("integrityImpact")]
+        public virtual string IntegrityImpact { get; set; }
+
+        /// <summary>Defined in CVSS v3</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("privilegesRequired")]
+        public virtual string PrivilegesRequired { get; set; }
+
+        /// <summary>Defined in CVSS v3</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scope")]
+        public virtual string Scope { get; set; }
+
+        /// <summary>Defined in CVSS v3</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userInteraction")]
+        public virtual string UserInteraction { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Deprecated. Common Vulnerability Scoring System version 3. For details, see
     /// https://www.first.org/cvss/specification-document
     /// </summary>
     public class CVSSv3 : Google.Apis.Requests.IDirectResponseSchema
@@ -2429,9 +4470,42 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     /// </summary>
     public class ContaineranalysisGoogleDevtoolsCloudbuildV1ApprovalResult : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _approvalTimeRaw;
+
+        private object _approvalTime;
+
         /// <summary>Output only. The time when the approval decision was made.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("approvalTime")]
-        public virtual object ApprovalTime { get; set; }
+        public virtual string ApprovalTimeRaw
+        {
+            get => _approvalTimeRaw;
+            set
+            {
+                _approvalTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _approvalTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ApprovalTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ApprovalTimeDateTimeOffset instead.")]
+        public virtual object ApprovalTime
+        {
+            get => _approvalTime;
+            set
+            {
+                _approvalTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _approvalTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ApprovalTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ApprovalTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ApprovalTimeRaw);
+            set => ApprovalTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. Email of the user that called the ApproveBuild API to approve or reject a build at the time
@@ -2466,12 +4540,36 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     public class ContaineranalysisGoogleDevtoolsCloudbuildV1Artifacts : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Optional. A list of Go modules to be uploaded to Artifact Registry upon successful completion of all build
+        /// steps. If any objects fail to be pushed, the build is marked FAILURE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("goModules")]
+        public virtual System.Collections.Generic.IList<ContaineranalysisGoogleDevtoolsCloudbuildV1ArtifactsGoModule> GoModules { get; set; }
+
+        /// <summary>
         /// A list of images to be pushed upon the successful completion of all build steps. The images will be pushed
         /// using the builder service account's credentials. The digests of the pushed images will be stored in the
         /// Build resource's results field. If any of the images fail to be pushed, the build is marked FAILURE.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("images")]
         public virtual System.Collections.Generic.IList<string> Images { get; set; }
+
+        /// <summary>
+        /// A list of Maven artifacts to be uploaded to Artifact Registry upon successful completion of all build steps.
+        /// Artifacts in the workspace matching specified paths globs will be uploaded to the specified Artifact
+        /// Registry repository using the builder service account's credentials. If any artifacts fail to be pushed, the
+        /// build is marked FAILURE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mavenArtifacts")]
+        public virtual System.Collections.Generic.IList<ContaineranalysisGoogleDevtoolsCloudbuildV1ArtifactsMavenArtifact> MavenArtifacts { get; set; }
+
+        /// <summary>
+        /// A list of npm packages to be uploaded to Artifact Registry upon successful completion of all build steps.
+        /// Npm packages in the specified paths will be uploaded to the specified Artifact Registry repository using the
+        /// builder service account's credentials. If any packages fail to be pushed, the build is marked FAILURE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("npmPackages")]
+        public virtual System.Collections.Generic.IList<ContaineranalysisGoogleDevtoolsCloudbuildV1ArtifactsNpmPackage> NpmPackages { get; set; }
 
         /// <summary>
         /// A list of objects to be uploaded to Cloud Storage upon successful completion of all build steps. Files in
@@ -2481,6 +4579,14 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("objects")]
         public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1ArtifactsArtifactObjects Objects { get; set; }
+
+        /// <summary>
+        /// A list of Python packages to be uploaded to Artifact Registry upon successful completion of all build steps.
+        /// The build service account credentials will be used to perform the upload. If any objects fail to be pushed,
+        /// the build is marked FAILURE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pythonPackages")]
+        public virtual System.Collections.Generic.IList<ContaineranalysisGoogleDevtoolsCloudbuildV1ArtifactsPythonPackage> PythonPackages { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2506,6 +4612,131 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// <summary>Output only. Stores timing information for pushing all artifact objects.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timing")]
         public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1TimeSpan Timing { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Go module to upload to Artifact Registry upon successful completion of all build steps. A module refers to all
+    /// dependencies in a go.mod file.
+    /// </summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1ArtifactsGoModule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. The Go module's "module path". e.g. example.com/foo/v2</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("modulePath")]
+        public virtual string ModulePath { get; set; }
+
+        /// <summary>
+        /// Optional. The Go module's semantic version in the form vX.Y.Z. e.g. v0.1.1 Pre-release identifiers can also
+        /// be added by appending a dash and dot separated ASCII alphanumeric characters and hyphens. e.g.
+        /// v0.2.3-alpha.x.12m.5
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("moduleVersion")]
+        public virtual string ModuleVersion { get; set; }
+
+        /// <summary>
+        /// Optional. Location of the Artifact Registry repository. i.e. us-east1 Defaults to the build’s location.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repositoryLocation")]
+        public virtual string RepositoryLocation { get; set; }
+
+        /// <summary>
+        /// Optional. Artifact Registry repository name. Specified Go modules will be zipped and uploaded to Artifact
+        /// Registry with this location as a prefix. e.g. my-go-repo
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repositoryName")]
+        public virtual string RepositoryName { get; set; }
+
+        /// <summary>Optional. Project ID of the Artifact Registry repository. Defaults to the build project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repositoryProjectId")]
+        public virtual string RepositoryProjectId { get; set; }
+
+        /// <summary>
+        /// Optional. Source path of the go.mod file in the build's workspace. If not specified, this will default to
+        /// the current directory. e.g. ~/code/go/mypackage
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourcePath")]
+        public virtual string SourcePath { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A Maven artifact to upload to Artifact Registry upon successful completion of all build steps.
+    /// </summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1ArtifactsMavenArtifact : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Maven `artifactId` value used when uploading the artifact to Artifact Registry.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("artifactId")]
+        public virtual string ArtifactId { get; set; }
+
+        /// <summary>Maven `groupId` value used when uploading the artifact to Artifact Registry.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("groupId")]
+        public virtual string GroupId { get; set; }
+
+        /// <summary>
+        /// Path to an artifact in the build's workspace to be uploaded to Artifact Registry. This can be either an
+        /// absolute path, e.g. /workspace/my-app/target/my-app-1.0.SNAPSHOT.jar or a relative path from /workspace,
+        /// e.g. my-app/target/my-app-1.0.SNAPSHOT.jar.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("path")]
+        public virtual string Path { get; set; }
+
+        /// <summary>
+        /// Artifact Registry repository, in the form "https://$REGION-maven.pkg.dev/$PROJECT/$REPOSITORY" Artifact in
+        /// the workspace specified by path will be uploaded to Artifact Registry with this location as a prefix.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repository")]
+        public virtual string Repository { get; set; }
+
+        /// <summary>Maven `version` value used when uploading the artifact to Artifact Registry.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual string Version { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Npm package to upload to Artifact Registry upon successful completion of all build steps.</summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1ArtifactsNpmPackage : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Path to the package.json. e.g. workspace/path/to/package</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("packagePath")]
+        public virtual string PackagePath { get; set; }
+
+        /// <summary>
+        /// Artifact Registry repository, in the form "https://$REGION-npm.pkg.dev/$PROJECT/$REPOSITORY" Npm package in
+        /// the workspace specified by path will be zipped and uploaded to Artifact Registry with this location as a
+        /// prefix.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repository")]
+        public virtual string Repository { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Python package to upload to Artifact Registry upon successful completion of all build steps. A package can
+    /// encapsulate multiple objects to be uploaded to a single repository.
+    /// </summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1ArtifactsPythonPackage : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Path globs used to match files in the build's workspace. For Python/ Twine, this is usually `dist/*`, and
+        /// sometimes additionally an `.asc` file.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("paths")]
+        public virtual System.Collections.Generic.IList<string> Paths { get; set; }
+
+        /// <summary>
+        /// Artifact Registry repository, in the form "https://$REGION-python.pkg.dev/$PROJECT/$REPOSITORY" Files in the
+        /// workspace matching any path pattern will be uploaded to Artifact Registry with this location as a prefix.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repository")]
+        public virtual string Repository { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2543,20 +4774,90 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("buildTriggerId")]
         public virtual string BuildTriggerId { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time at which the request to create the build was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Contains information about the build when status=FAILURE.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("failureInfo")]
         public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1BuildFailureInfo FailureInfo { get; set; }
+
+        private string _finishTimeRaw;
+
+        private object _finishTime;
 
         /// <summary>
         /// Output only. Time at which execution of the build was finished. The difference between finish_time and
         /// start_time is the duration of the build's execution.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finishTime")]
-        public virtual object FinishTime { get; set; }
+        public virtual string FinishTimeRaw
+        {
+            get => _finishTimeRaw;
+            set
+            {
+                _finishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _finishTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FinishTimeDateTimeOffset instead.")]
+        public virtual object FinishTime
+        {
+            get => _finishTime;
+            set
+            {
+                _finishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _finishTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FinishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FinishTimeRaw);
+            set => FinishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. Configuration for git operations.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitConfig")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1GitConfig GitConfig { get; set; }
 
         /// <summary>Output only. Unique identifier of the build.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
@@ -2575,7 +4876,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string LogUrl { get; set; }
 
         /// <summary>
-        /// Google Cloud Storage bucket where logs should be written (see [Bucket Name
+        /// Cloud Storage bucket where logs should be written (see [Bucket Name
         /// Requirements](https://cloud.google.com/storage/docs/bucket-naming#requirements)). Logs file names will be of
         /// the format `${logs_bucket}/log-${build_id}.txt`.
         /// </summary>
@@ -2624,7 +4925,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("serviceAccount")]
         public virtual string ServiceAccount { get; set; }
 
-        /// <summary>The location of the source files to build.</summary>
+        /// <summary>Optional. The location of the source files to build.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("source")]
         public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1Source Source { get; set; }
 
@@ -2632,9 +4933,42 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sourceProvenance")]
         public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1SourceProvenance SourceProvenance { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Output only. Time at which execution of the build was started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Status of the build.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
@@ -2659,15 +4993,16 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// <summary>
         /// Amount of time that this build should be allowed to run, to second granularity. If this amount of time
         /// elapses, work on the build will cease and the build status will be `TIMEOUT`. `timeout` starts ticking from
-        /// `startTime`. Default time is ten minutes.
+        /// `startTime`. Default time is 60 minutes.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timeout")]
         public virtual object Timeout { get; set; }
 
         /// <summary>
         /// Output only. Stores timing information for phases of the build. Valid keys are: * BUILD: time to execute all
-        /// build steps. * PUSH: time to push all specified images. * FETCHSOURCE: time to fetch source. * SETUPBUILD:
-        /// time to set up build. If the build does not specify source or images, these keys will not be included.
+        /// build steps. * PUSH: time to push all artifacts including docker images and non docker artifacts. *
+        /// FETCHSOURCE: time to fetch source. * SETUPBUILD: time to set up build. If the build does not specify source
+        /// or images, these keys will not be included.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timing")]
         public virtual System.Collections.Generic.IDictionary<string, ContaineranalysisGoogleDevtoolsCloudbuildV1TimeSpan> Timing { get; set; }
@@ -2717,11 +5052,19 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     /// <summary>Optional arguments to enable specific features of builds.</summary>
     public class ContaineranalysisGoogleDevtoolsCloudbuildV1BuildOptions : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Option to include built-in and custom substitutions as env variables for all build steps.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("automapSubstitutions")]
+        public virtual System.Nullable<bool> AutomapSubstitutions { get; set; }
+
+        /// <summary>Optional. Option to specify how default logs buckets are setup.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("defaultLogsBucketBehavior")]
+        public virtual string DefaultLogsBucketBehavior { get; set; }
+
         /// <summary>
         /// Requested disk size for the VM that runs the build. Note that this is *NOT* "disk free"; some of the space
         /// will be used by the operating system and build utilities. Also note that this is the minimum disk size that
         /// will be allocated for the build -- the build may run with a larger disk than requested. At present, the
-        /// maximum disk size is 1000GB; builds that request more than the maximum are rejected with an error.
+        /// maximum disk size is 4000GB; builds that request more than the maximum are rejected with an error.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("diskSizeGb")]
         public virtual System.Nullable<long> DiskSizeGb { get; set; }
@@ -2734,6 +5077,13 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual System.Nullable<bool> DynamicSubstitutions { get; set; }
 
         /// <summary>
+        /// Optional. Option to specify whether structured logging is enabled. If true, JSON-formatted logs are parsed
+        /// as structured logs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableStructuredLogging")]
+        public virtual System.Nullable<bool> EnableStructuredLogging { get; set; }
+
+        /// <summary>
         /// A list of global environment variable definitions that will exist for all build steps in this build. If a
         /// variable is defined in both globally and in a build step, the variable will use the build step value. The
         /// elements are of the form "KEY=VALUE" for the environment variable "KEY" being given the value "VALUE".
@@ -2741,7 +5091,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("env")]
         public virtual System.Collections.Generic.IList<string> Env { get; set; }
 
-        /// <summary>Option to define build log streaming behavior to Google Cloud Storage.</summary>
+        /// <summary>Option to define build log streaming behavior to Cloud Storage.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("logStreamingOption")]
         public virtual string LogStreamingOption { get; set; }
 
@@ -2822,6 +5172,21 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     public class ContaineranalysisGoogleDevtoolsCloudbuildV1BuildStep : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Allow this build step to fail without failing the entire build if and only if the exit code is one of the
+        /// specified codes. If allow_failure is also specified, this field will take precedence.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowExitCodes")]
+        public virtual System.Collections.Generic.IList<System.Nullable<int>> AllowExitCodes { get; set; }
+
+        /// <summary>
+        /// Allow this build step to fail without failing the entire build. If false, the entire build will fail if this
+        /// step fails. Otherwise, the build will succeed, but this step will still have a failure status. Error
+        /// information will be reported in the failure_detail field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowFailure")]
+        public virtual System.Nullable<bool> AllowFailure { get; set; }
+
+        /// <summary>
         /// A list of arguments that will be presented to the step when it is started. If the image used to run the
         /// step's container has an entrypoint, the `args` are used as arguments to that entrypoint. If the image does
         /// not define an entrypoint, the first element in args is used as the entrypoint, and the remainder will be
@@ -2829,6 +5194,13 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("args")]
         public virtual System.Collections.Generic.IList<string> Args { get; set; }
+
+        /// <summary>
+        /// Option to include built-in and custom substitutions as env variables for this build step. This option will
+        /// override the global option in BuildOption.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("automapSubstitutions")]
+        public virtual System.Nullable<bool> AutomapSubstitutions { get; set; }
 
         /// <summary>
         /// Working directory to use when running this step's container. If this value is a relative path, it is
@@ -2853,6 +5225,10 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("env")]
         public virtual System.Collections.Generic.IList<string> Env { get; set; }
+
+        /// <summary>Output only. Return code from running the step.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exitCode")]
+        public virtual System.Nullable<int> ExitCode { get; set; }
 
         /// <summary>
         /// Unique identifier for this build step, used in `wait_for` to reference this build step as a dependency.
@@ -2966,6 +5342,56 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Location of the source in a 2nd-gen Google Cloud Build repository resource.</summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1ConnectedRepository : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Directory, relative to the source root, in which to run the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dir")]
+        public virtual string Dir { get; set; }
+
+        /// <summary>
+        /// Required. Name of the Google Cloud Build repository, formatted as
+        /// `projects/*/locations/*/connections/*/repositories/*`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repository")]
+        public virtual string Repository { get; set; }
+
+        /// <summary>
+        /// Required. The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git
+        /// ref.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("revision")]
+        public virtual string Revision { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>This config defines the location of a source through Developer Connect.</summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1DeveloperConnectConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Directory, relative to the source root, in which to run the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dir")]
+        public virtual string Dir { get; set; }
+
+        /// <summary>
+        /// Required. The Developer Connect Git repository link, formatted as
+        /// `projects/*/locations/*/connections/*/gitRepositoryLink/*`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitRepositoryLink")]
+        public virtual string GitRepositoryLink { get; set; }
+
+        /// <summary>
+        /// Required. The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git
+        /// ref.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("revision")]
+        public virtual string Revision { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Container message for hashes of byte content of files, used in SourceProvenance messages to verify integrity of
     /// source input to the build.
@@ -2975,6 +5401,63 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// <summary>Collection of file hashes.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fileHash")]
         public virtual System.Collections.Generic.IList<ContaineranalysisGoogleDevtoolsCloudbuildV1Hash> FileHash { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>GitConfig is a configuration for git operations.</summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1GitConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Configuration for HTTP related git operations.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("http")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1GitConfigHttpConfig Http { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>HttpConfig is a configuration for HTTP related git operations.</summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1GitConfigHttpConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// SecretVersion resource of the HTTP proxy URL. The Service Account used in the build (either the default
+        /// Service Account or user-specified Service Account) should have `secretmanager.versions.access` permissions
+        /// on this secret. The proxy URL should be in format `protocol://@]proxyhost[:port]`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("proxySecretVersionName")]
+        public virtual string ProxySecretVersionName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Location of the source in any accessible Git repository.</summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1GitSource : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Directory, relative to the source root, in which to run the build. This must be a relative path.
+        /// If a step's `dir` is specified and is an absolute path, this value is ignored for that step's execution.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dir")]
+        public virtual string Dir { get; set; }
+
+        /// <summary>
+        /// Optional. The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git
+        /// ref. Cloud Build uses `git fetch` to fetch the revision from the Git repository; therefore make sure that
+        /// the string you provide for `revision` is parsable by the command. For information on string values accepted
+        /// by `git fetch`, see https://git-scm.com/docs/gitrevisions#_specifying_revisions. For information on `git
+        /// fetch`, see https://git-scm.com/docs/git-fetch.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("revision")]
+        public virtual string Revision { get; set; }
+
+        /// <summary>
+        /// Required. Location of the Git repo to build. This will be used as a `git remote`, see
+        /// https://git-scm.com/docs/git-remote.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("url")]
+        public virtual string Url { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3035,28 +5518,30 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string CommitSha { get; set; }
 
         /// <summary>
-        /// Directory, relative to the source root, in which to run the build. This must be a relative path. If a step's
-        /// `dir` is specified and is an absolute path, this value is ignored for that step's execution.
+        /// Optional. Directory, relative to the source root, in which to run the build. This must be a relative path.
+        /// If a step's `dir` is specified and is an absolute path, this value is ignored for that step's execution.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dir")]
         public virtual string Dir { get; set; }
 
-        /// <summary>Only trigger a build if the revision regex does NOT match the revision regex.</summary>
+        /// <summary>Optional. Only trigger a build if the revision regex does NOT match the revision regex.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("invertRegex")]
         public virtual System.Nullable<bool> InvertRegex { get; set; }
 
         /// <summary>
-        /// ID of the project that owns the Cloud Source Repository. If omitted, the project ID requesting the build is
-        /// assumed.
+        /// Optional. ID of the project that owns the Cloud Source Repository. If omitted, the project ID requesting the
+        /// build is assumed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
 
-        /// <summary>Name of the Cloud Source Repository.</summary>
+        /// <summary>Required. Name of the Cloud Source Repository.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("repoName")]
         public virtual string RepoName { get; set; }
 
-        /// <summary>Substitutions to use in a triggered build. Should only be used with RunBuildTrigger</summary>
+        /// <summary>
+        /// Optional. Substitutions to use in a triggered build. Should only be used with RunBuildTrigger
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("substitutions")]
         public virtual System.Collections.Generic.IDictionary<string, string> Substitutions { get; set; }
 
@@ -3074,11 +5559,14 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     /// <summary>Artifacts created by the build pipeline.</summary>
     public class ContaineranalysisGoogleDevtoolsCloudbuildV1Results : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Path to the artifact manifest. Only populated when artifacts are uploaded.</summary>
+        /// <summary>
+        /// Path to the artifact manifest for non-container artifacts uploaded to Cloud Storage. Only populated when
+        /// artifacts are uploaded to Cloud Storage.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("artifactManifest")]
         public virtual string ArtifactManifest { get; set; }
 
-        /// <summary>Time to push all non-container artifacts.</summary>
+        /// <summary>Time to push all non-container artifacts to Cloud Storage.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("artifactTiming")]
         public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1TimeSpan ArtifactTiming { get; set; }
 
@@ -3089,18 +5577,38 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// <summary>
         /// List of build step outputs, produced by builder images, in the order corresponding to build step indices.
         /// [Cloud Builders](https://cloud.google.com/cloud-build/docs/cloud-builders) can produce this output by
-        /// writing to `$BUILDER_OUTPUT/output`. Only the first 4KB of data is stored.
+        /// writing to `$BUILDER_OUTPUT/output`. Only the first 50KB of data is stored. Note that the `$BUILDER_OUTPUT`
+        /// variable is read-only and can't be substituted.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("buildStepOutputs")]
         public virtual System.Collections.Generic.IList<string> BuildStepOutputs { get; set; }
+
+        /// <summary>Optional. Go module artifacts uploaded to Artifact Registry at the end of the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("goModules")]
+        public virtual System.Collections.Generic.IList<ContaineranalysisGoogleDevtoolsCloudbuildV1UploadedGoModule> GoModules { get; set; }
 
         /// <summary>Container images that were built as a part of the build.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("images")]
         public virtual System.Collections.Generic.IList<ContaineranalysisGoogleDevtoolsCloudbuildV1BuiltImage> Images { get; set; }
 
-        /// <summary>Number of artifacts uploaded. Only populated when artifacts are uploaded.</summary>
+        /// <summary>Maven artifacts uploaded to Artifact Registry at the end of the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mavenArtifacts")]
+        public virtual System.Collections.Generic.IList<ContaineranalysisGoogleDevtoolsCloudbuildV1UploadedMavenArtifact> MavenArtifacts { get; set; }
+
+        /// <summary>Npm packages uploaded to Artifact Registry at the end of the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("npmPackages")]
+        public virtual System.Collections.Generic.IList<ContaineranalysisGoogleDevtoolsCloudbuildV1UploadedNpmPackage> NpmPackages { get; set; }
+
+        /// <summary>
+        /// Number of non-container artifacts uploaded to Cloud Storage. Only populated when artifacts are uploaded to
+        /// Cloud Storage.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("numArtifacts")]
         public virtual System.Nullable<long> NumArtifacts { get; set; }
+
+        /// <summary>Python artifacts uploaded to Artifact Registry at the end of the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pythonPackages")]
+        public virtual System.Collections.Generic.IList<ContaineranalysisGoogleDevtoolsCloudbuildV1UploadedPythonPackage> PythonPackages { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3165,17 +5673,31 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     /// <summary>Location of the source in a supported storage service.</summary>
     public class ContaineranalysisGoogleDevtoolsCloudbuildV1Source : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional. If provided, get the source from this 2nd-gen Google Cloud Build repository resource.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connectedRepository")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1ConnectedRepository ConnectedRepository { get; set; }
+
+        /// <summary>If provided, get the source from this Developer Connect config.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("developerConnectConfig")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1DeveloperConnectConfig DeveloperConnectConfig { get; set; }
+
+        /// <summary>If provided, get the source from this Git repository.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitSource")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1GitSource GitSource { get; set; }
+
         /// <summary>If provided, get the source from this location in a Cloud Source Repository.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("repoSource")]
         public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1RepoSource RepoSource { get; set; }
 
-        /// <summary>If provided, get the source from this location in Google Cloud Storage.</summary>
+        /// <summary>If provided, get the source from this location in Cloud Storage.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storageSource")]
         public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1StorageSource StorageSource { get; set; }
 
         /// <summary>
-        /// If provided, get the source from this manifest in Google Cloud Storage. This feature is in Preview; see
-        /// description [here](https://github.com/GoogleCloudPlatform/cloud-builders/tree/master/gcs-fetcher).
+        /// If provided, get the source from this manifest in Cloud Storage. This feature is in Preview; see description
+        /// [here](https://github.com/GoogleCloudPlatform/cloud-builders/tree/master/gcs-fetcher).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storageSourceManifest")]
         public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1StorageSourceManifest StorageSourceManifest { get; set; }
@@ -3199,6 +5721,18 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("fileHashes")]
         public virtual System.Collections.Generic.IDictionary<string, ContaineranalysisGoogleDevtoolsCloudbuildV1FileHashes> FileHashes { get; set; }
 
+        /// <summary>
+        /// Output only. A copy of the build's `source.connected_repository`, if exists, with any revisions resolved.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resolvedConnectedRepository")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1ConnectedRepository ResolvedConnectedRepository { get; set; }
+
+        /// <summary>
+        /// Output only. A copy of the build's `source.git_source`, if exists, with any revisions resolved.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resolvedGitSource")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1GitSource ResolvedGitSource { get; set; }
+
         /// <summary>A copy of the build's `source.repo_source`, if exists, with any revisions resolved.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resolvedRepoSource")]
         public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1RepoSource ResolvedRepoSource { get; set; }
@@ -3218,56 +5752,59 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Location of the source in an archive file in Google Cloud Storage.</summary>
+    /// <summary>Location of the source in an archive file in Cloud Storage.</summary>
     public class ContaineranalysisGoogleDevtoolsCloudbuildV1StorageSource : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Google Cloud Storage bucket containing the source (see [Bucket Name
+        /// Cloud Storage bucket containing the source (see [Bucket Name
         /// Requirements](https://cloud.google.com/storage/docs/bucket-naming#requirements)).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bucket")]
         public virtual string Bucket { get; set; }
 
         /// <summary>
-        /// Google Cloud Storage generation for the object. If the generation is omitted, the latest generation will be
-        /// used.
+        /// Optional. Cloud Storage generation for the object. If the generation is omitted, the latest generation will
+        /// be used.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("generation")]
         public virtual System.Nullable<long> Generation { get; set; }
 
         /// <summary>
-        /// Google Cloud Storage object containing the source. This object must be a zipped (`.zip`) or gzipped archive
-        /// file (`.tar.gz`) containing source to build.
+        /// Required. Cloud Storage object containing the source. This object must be a zipped (`.zip`) or gzipped
+        /// archive file (`.tar.gz`) containing source to build.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("object")]
         public virtual string Object__ { get; set; }
+
+        /// <summary>Optional. Option to specify the tool to fetch the source file for the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceFetcher")]
+        public virtual string SourceFetcher { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
     /// <summary>
-    /// Location of the source manifest in Google Cloud Storage. This feature is in Preview; see description
+    /// Location of the source manifest in Cloud Storage. This feature is in Preview; see description
     /// [here](https://github.com/GoogleCloudPlatform/cloud-builders/tree/master/gcs-fetcher).
     /// </summary>
     public class ContaineranalysisGoogleDevtoolsCloudbuildV1StorageSourceManifest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Google Cloud Storage bucket containing the source manifest (see [Bucket Name
+        /// Required. Cloud Storage bucket containing the source manifest (see [Bucket Name
         /// Requirements](https://cloud.google.com/storage/docs/bucket-naming#requirements)).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bucket")]
         public virtual string Bucket { get; set; }
 
         /// <summary>
-        /// Google Cloud Storage generation for the object. If the generation is omitted, the latest generation will be
-        /// used.
+        /// Cloud Storage generation for the object. If the generation is omitted, the latest generation will be used.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("generation")]
         public virtual System.Nullable<long> Generation { get; set; }
 
         /// <summary>
-        /// Google Cloud Storage object containing the source manifest. This object must be a JSON file.
+        /// Required. Cloud Storage object containing the source manifest. This object must be a JSON file.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("object")]
         public virtual string Object__ { get; set; }
@@ -3279,13 +5816,155 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     /// <summary>Start and end times for a build execution phase.</summary>
     public class ContaineranalysisGoogleDevtoolsCloudbuildV1TimeSpan : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>End of time span.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>Start of time span.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A Go module artifact uploaded to Artifact Registry using the GoModule directive.</summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1UploadedGoModule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Hash types and values of the Go Module Artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileHashes")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1FileHashes FileHashes { get; set; }
+
+        /// <summary>Output only. Stores timing information for pushing the specified artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pushTiming")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1TimeSpan PushTiming { get; set; }
+
+        /// <summary>URI of the uploaded artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A Maven artifact uploaded using the MavenArtifact directive.</summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1UploadedMavenArtifact : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Hash types and values of the Maven Artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileHashes")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1FileHashes FileHashes { get; set; }
+
+        /// <summary>Output only. Stores timing information for pushing the specified artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pushTiming")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1TimeSpan PushTiming { get; set; }
+
+        /// <summary>URI of the uploaded artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An npm package uploaded to Artifact Registry using the NpmPackage directive.</summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1UploadedNpmPackage : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Hash types and values of the npm package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileHashes")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1FileHashes FileHashes { get; set; }
+
+        /// <summary>Output only. Stores timing information for pushing the specified artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pushTiming")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1TimeSpan PushTiming { get; set; }
+
+        /// <summary>URI of the uploaded npm package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Artifact uploaded using the PythonPackage directive.</summary>
+    public class ContaineranalysisGoogleDevtoolsCloudbuildV1UploadedPythonPackage : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Hash types and values of the Python Artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileHashes")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1FileHashes FileHashes { get; set; }
+
+        /// <summary>Output only. Stores timing information for pushing the specified artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pushTiming")]
+        public virtual ContaineranalysisGoogleDevtoolsCloudbuildV1TimeSpan PushTiming { get; set; }
+
+        /// <summary>URI of the uploaded artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3337,9 +6016,42 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("config")]
         public virtual string Config { get; set; }
 
+        private string _deployTimeRaw;
+
+        private object _deployTime;
+
         /// <summary>Required. Beginning of the lifetime of this deployment.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deployTime")]
-        public virtual object DeployTime { get; set; }
+        public virtual string DeployTimeRaw
+        {
+            get => _deployTimeRaw;
+            set
+            {
+                _deployTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deployTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeployTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeployTimeDateTimeOffset instead.")]
+        public virtual object DeployTime
+        {
+            get => _deployTime;
+            set
+            {
+                _deployTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deployTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeployTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeployTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeployTimeRaw);
+            set => DeployTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Platform hosting this deployment.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("platform")]
@@ -3352,9 +6064,42 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("resourceUri")]
         public virtual System.Collections.Generic.IList<string> ResourceUri { get; set; }
 
+        private string _undeployTimeRaw;
+
+        private object _undeployTime;
+
         /// <summary>End of the lifetime of this deployment.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("undeployTime")]
-        public virtual object UndeployTime { get; set; }
+        public virtual string UndeployTimeRaw
+        {
+            get => _undeployTimeRaw;
+            set
+            {
+                _undeployTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _undeployTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UndeployTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UndeployTimeDateTimeOffset instead.")]
+        public virtual object UndeployTime
+        {
+            get => _undeployTime;
+            set
+            {
+                _undeployTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _undeployTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UndeployTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UndeployTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UndeployTimeRaw);
+            set => UndeployTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Identity of the user that triggered this deployment.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userEmail")]
@@ -3446,12 +6191,47 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("source")]
         public virtual string Source { get; set; }
 
+        private string _sourceUpdateTimeRaw;
+
+        private object _sourceUpdateTime;
+
         /// <summary>
         /// The time this information was last changed at the source. This is an upstream timestamp from the underlying
         /// information source - e.g. Ubuntu security tracker.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceUpdateTime")]
-        public virtual object SourceUpdateTime { get; set; }
+        public virtual string SourceUpdateTimeRaw
+        {
+            get => _sourceUpdateTimeRaw;
+            set
+            {
+                _sourceUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _sourceUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="SourceUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SourceUpdateTimeDateTimeOffset instead.")]
+        public virtual object SourceUpdateTime
+        {
+            get => _sourceUpdateTime;
+            set
+            {
+                _sourceUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _sourceUpdateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="SourceUpdateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SourceUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(SourceUpdateTimeRaw);
+            set => SourceUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The name of the vendor of the product.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("vendor")]
@@ -3472,9 +6252,33 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Digest information.</summary>
+    public class Digest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>`SHA1`, `SHA512` etc.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("algo")]
+        public virtual string Algo { get; set; }
+
+        /// <summary>Value of the digest.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("digestBytes")]
+        public virtual string DigestBytes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Provides information about the analysis status of a discovered resource.</summary>
     public class Discovered : Google.Apis.Requests.IDirectResponseSchema
     {
+        [Newtonsoft.Json.JsonPropertyAttribute("analysisCompleted")]
+        public virtual AnalysisCompleted AnalysisCompleted { get; set; }
+
+        /// <summary>
+        /// Indicates any errors encountered during analysis of a resource. There could be 0 or more of these errors.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("analysisError")]
+        public virtual System.Collections.Generic.IList<Status> AnalysisError { get; set; }
+
         /// <summary>The status of discovery for the resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("analysisStatus")]
         public virtual string AnalysisStatus { get; set; }
@@ -3490,9 +6294,85 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("continuousAnalysis")]
         public virtual string ContinuousAnalysis { get; set; }
 
+        private string _lastAnalysisTimeRaw;
+
+        private object _lastAnalysisTime;
+
         /// <summary>The last time continuous analysis was done for this resource. Deprecated, do not use.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastAnalysisTime")]
-        public virtual object LastAnalysisTime { get; set; }
+        public virtual string LastAnalysisTimeRaw
+        {
+            get => _lastAnalysisTimeRaw;
+            set
+            {
+                _lastAnalysisTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastAnalysisTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastAnalysisTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastAnalysisTimeDateTimeOffset instead.")]
+        public virtual object LastAnalysisTime
+        {
+            get => _lastAnalysisTime;
+            set
+            {
+                _lastAnalysisTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastAnalysisTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastAnalysisTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastAnalysisTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastAnalysisTimeRaw);
+            set => LastAnalysisTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _lastScanTimeRaw;
+
+        private object _lastScanTime;
+
+        /// <summary>The last time this resource was scanned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastScanTime")]
+        public virtual string LastScanTimeRaw
+        {
+            get => _lastScanTimeRaw;
+            set
+            {
+                _lastScanTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastScanTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastScanTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastScanTimeDateTimeOffset instead.")]
+        public virtual object LastScanTime
+        {
+            get => _lastScanTime;
+            set
+            {
+                _lastScanTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastScanTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastScanTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastScanTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastScanTimeRaw);
+            set => LastScanTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The status of an SBOM generation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sbomStatus")]
+        public virtual SBOMStatus SbomStatus { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3550,7 +6430,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     }
 
     /// <summary>
-    /// DocumentNote represents an SPDX Document Creation Infromation section:
+    /// DocumentNote represents an SPDX Document Creation Information section:
     /// https://spdx.github.io/spdx-spec/2-document-creation-information/
     /// </summary>
     public class DocumentNote : Google.Apis.Requests.IDirectResponseSchema
@@ -3578,12 +6458,45 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     /// </summary>
     public class DocumentOccurrence : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Identify when the SPDX file was originally created. The date is to be specified according to combined date
         /// and time in UTC format as specified in ISO 8601 standard
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// A field for creators of the SPDX file to provide general comments about the creation of the SPDX file or any
@@ -3641,11 +6554,41 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// MUST match https://github.com/secure-systems-lab/dsse/blob/master/envelope.proto. An authenticated message of
+    /// arbitrary type.
+    /// </summary>
+    public class Envelope : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("payload")]
+        public virtual string Payload { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("payloadType")]
+        public virtual string PayloadType { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("signatures")]
+        public virtual System.Collections.Generic.IList<EnvelopeSignature> Signatures { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnvelopeSignature : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("keyid")]
+        public virtual string Keyid { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("sig")]
+        public virtual string Sig { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3658,6 +6601,27 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     {
         [Newtonsoft.Json.JsonPropertyAttribute("customValues")]
         public virtual System.Collections.Generic.IDictionary<string, string> CustomValues { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request to a call of ExportSBOM</summary>
+    public class ExportSBOMRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response from a call to ExportSBOM</summary>
+    public class ExportSBOMResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The name of the discovery occurrence in the form "projects/{project_id}/occurrences/{OCCURRENCE_ID} It can
+        /// be used to track the progression of the SBOM export.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("discoveryOccurrenceId")]
+        public virtual string DiscoveryOccurrenceId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3878,6 +6842,16 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     }
 
     /// <summary>
+    /// GeneratePackagesSummaryRequest is the request body for the GeneratePackagesSummary API method. It just takes a
+    /// single name argument, referring to the resource.
+    /// </summary>
+    public class GeneratePackagesSummaryRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// An attestation wrapper that uses the Grafeas `Signature` message. This attestation must define the
     /// `serialized_payload` that the `signatures` verify and any metadata necessary to interpret that plaintext. The
     /// signatures should always be over the `serialized_payload` bytestring.
@@ -3989,13 +6963,79 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     /// </summary>
     public class GoogleDevtoolsContaineranalysisV1alpha1OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time this operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. The time that this operation was marked completed or failed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4004,6 +7044,9 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     /// <summary>Details of a build occurrence.</summary>
     public class GrafeasV1beta1BuildDetails : Google.Apis.Requests.IDirectResponseSchema
     {
+        [Newtonsoft.Json.JsonPropertyAttribute("inTotoSlsaProvenanceV1")]
+        public virtual InTotoSlsaProvenanceV1 InTotoSlsaProvenanceV1 { get; set; }
+
         /// <summary>Required. The actual provenance for the build.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("provenance")]
         public virtual BuildProvenance Provenance { get; set; }
@@ -4118,6 +7161,18 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cvssScore")]
         public virtual System.Nullable<float> CvssScore { get; set; }
 
+        /// <summary>The cvss v2 score for the vulnerability.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cvssV2")]
+        public virtual CVSS CvssV2 { get; set; }
+
+        /// <summary>The cvss v3 score for the vulnerability.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cvssV3")]
+        public virtual CVSS CvssV3 { get; set; }
+
+        /// <summary>Output only. CVSS version used to populate cvss_score and severity.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cvssVersion")]
+        public virtual string CvssVersion { get; set; }
+
         /// <summary>
         /// The distro assigned severity for this vulnerability when it is available, and note provider assigned
         /// severity when distro has not yet assigned a severity for this vulnerability. When there are multiple
@@ -4129,6 +7184,10 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("effectiveSeverity")]
         public virtual string EffectiveSeverity { get; set; }
+
+        /// <summary>Occurrence-specific extra details about the vulnerability.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("extraDetails")]
+        public virtual string ExtraDetails { get; set; }
 
         /// <summary>Output only. A detailed description of this vulnerability.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("longDescription")]
@@ -4155,6 +7214,9 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// <summary>The type of package; whether native or non native(ruby gems, node.js packages etc)</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("vexAssessment")]
+        public virtual VexAssessment VexAssessment { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4233,18 +7295,78 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    public class InTotoSlsaProvenanceV1 : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>InToto spec defined at https://github.com/in-toto/attestation/tree/main/spec#statement</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("_type")]
+        public virtual string Type { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("predicate")]
+        public virtual SlsaProvenanceV1 Predicate { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("predicateType")]
+        public virtual string PredicateType { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("subject")]
+        public virtual System.Collections.Generic.IList<Subject> Subject { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>This represents how a particular software package may be installed on a system.</summary>
     public class Installation : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. All of the places within the filesystem versions of this package have been found.
+        /// Output only. The CPU architecture for which packages in this distribution channel were built. Architecture
+        /// will be blank for language packages.
         /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("architecture")]
+        public virtual string Architecture { get; set; }
+
+        /// <summary>
+        /// Output only. The cpe_uri in [CPE format](https://cpe.mitre.org/specification/) denoting the package manager
+        /// version distributing a package. The cpe_uri will be blank for language packages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cpeUri")]
+        public virtual string CpeUri { get; set; }
+
+        /// <summary>Licenses that have been declared by the authors of the package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("license")]
+        public virtual License License { get; set; }
+
+        /// <summary>All of the places within the filesystem versions of this package have been found.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("location")]
         public virtual System.Collections.Generic.IList<Location> Location { get; set; }
 
-        /// <summary>Output only. The name of the installed package.</summary>
+        /// <summary>Required. Output only. The name of the installed package.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Output only. The type of package; whether native or non native (e.g., ruby gems, node.js packages, etc.).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("packageType")]
+        public virtual string PackageType { get; set; }
+
+        /// <summary>Output only. The version of the package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual Version Version { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Justification provides the justification when the state of the assessment if NOT_AFFECTED.</summary>
+    public class Justification : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Additional details on why this justification was chosen.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual string Details { get; set; }
+
+        /// <summary>The justification type for this vulnerability.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("justificationType")]
+        public virtual string JustificationType { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4281,18 +7403,38 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>
-    /// License information: https://spdx.github.io/spdx-spec/3-package-information/#315-declared-license
-    /// </summary>
+    /// <summary>License information.</summary>
     public class License : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Comments</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("comments")]
         public virtual string Comments { get; set; }
 
-        /// <summary>Expression: https://spdx.github.io/spdx-spec/appendix-IV-SPDX-license-expressions/</summary>
+        /// <summary>
+        /// Often a single license can be used to represent the licensing terms. Sometimes it is necessary to include a
+        /// choice of one or more licenses or some combination of license identifiers. Examples: "LGPL-2.1-only OR MIT",
+        /// "LGPL-2.1-only AND MIT", "GPL-2.0-or-later WITH Bison-exception-2.2".
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expression")]
         public virtual string Expression { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Per license count</summary>
+    public class LicensesSummary : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The number of fixable vulnerabilities associated with this resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("count")]
+        public virtual System.Nullable<long> Count { get; set; }
+
+        /// <summary>
+        /// The license of the package. Note that the format of this value is not guaranteed. It may be nil, an empty
+        /// string, a boolean value (A | B), a differently formed boolean value (A OR B), etc...
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("license")]
+        public virtual string License { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4396,24 +7538,6 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Response for listing scan configurations.</summary>
-    public class ListScanConfigsResponse : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>
-        /// The next pagination token in the list response. It should be used as `page_token` for the following request.
-        /// An empty value means no more results.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
-        public virtual string NextPageToken { get; set; }
-
-        /// <summary>The scan configurations requested.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("scanConfigs")]
-        public virtual System.Collections.Generic.IList<ScanConfig> ScanConfigs { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
     /// <summary>
     /// An occurrence of a particular package installation found within a system's filesystem. E.g., glibc was found in
     /// `/var/lib/dpkg/status`.
@@ -4421,7 +7545,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. The CPE URI in [CPE format](https://cpe.mitre.org/specification/) denoting the package manager
+        /// Deprecated. The CPE URI in [CPE format](https://cpe.mitre.org/specification/) denoting the package manager
         /// version distributing a package.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cpeUri")]
@@ -4431,7 +7555,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("path")]
         public virtual string Path { get; set; }
 
-        /// <summary>The version installed at this location.</summary>
+        /// <summary>Deprecated. The version installed at this location.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
         public virtual Version Version { get; set; }
 
@@ -4454,11 +7578,44 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("build")]
         public virtual Build Build { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Output only. The time this note was created. This field can be used as a filter in list requests.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>A note describing something that can be deployed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deployable")]
@@ -4468,9 +7625,44 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("discovery")]
         public virtual Discovery Discovery { get; set; }
 
+        private string _expirationTimeRaw;
+
+        private object _expirationTime;
+
         /// <summary>Time of expiration for this note. Empty if note does not expire.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expirationTime")]
-        public virtual object ExpirationTime { get; set; }
+        public virtual string ExpirationTimeRaw
+        {
+            get => _expirationTimeRaw;
+            set
+            {
+                _expirationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expirationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpirationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpirationTimeDateTimeOffset instead.")]
+        public virtual object ExpirationTime
+        {
+            get => _expirationTime;
+            set
+            {
+                _expirationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expirationTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpirationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpirationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpirationTimeRaw);
+            set => ExpirationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>A note describing an in-toto link.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("intoto")]
@@ -4506,6 +7698,10 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sbom")]
         public virtual DocumentNote Sbom { get; set; }
 
+        /// <summary>A note describing an SBOM reference.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sbomReference")]
+        public virtual SBOMReferenceNote SbomReference { get; set; }
+
         /// <summary>A one sentence description of this note.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("shortDescription")]
         public virtual string ShortDescription { get; set; }
@@ -4522,15 +7718,52 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("spdxRelationship")]
         public virtual RelationshipNote SpdxRelationship { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
         /// Output only. The time this note was last updated. This field can be used as a filter in list requests.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>A note describing a package vulnerability.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("vulnerability")]
         public virtual Vulnerability Vulnerability { get; set; }
+
+        /// <summary>A note describing a vulnerability assessment.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vulnerabilityAssessment")]
+        public virtual VulnerabilityAssessmentNote VulnerabilityAssessment { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4547,9 +7780,42 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("build")]
         public virtual GrafeasV1beta1BuildDetails Build { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time this occurrence was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Describes the deployment of an artifact on a runtime.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deployment")]
@@ -4562,6 +7828,10 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// <summary>Describes when a resource was discovered.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("discovered")]
         public virtual GrafeasV1beta1DiscoveryDetails Discovered { get; set; }
+
+        /// <summary>https://github.com/secure-systems-lab/dsse</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("envelope")]
+        public virtual Envelope Envelope { get; set; }
 
         /// <summary>Describes the installation of a package on the linked resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("installation")]
@@ -4603,6 +7873,10 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sbom")]
         public virtual DocumentOccurrence Sbom { get; set; }
 
+        /// <summary>Describes a specific SBOM reference occurrences.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sbomReference")]
+        public virtual SBOMReferenceOccurrence SbomReference { get; set; }
+
         /// <summary>Describes a specific SPDX File.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("spdxFile")]
         public virtual FileOccurrence SpdxFile { get; set; }
@@ -4615,9 +7889,42 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("spdxRelationship")]
         public virtual RelationshipOccurrence SpdxRelationship { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time this occurrence was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Describes a security vulnerability.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("vulnerability")]
@@ -4627,19 +7934,62 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>
-    /// This represents a particular package that is distributed over various channels. E.g., glibc (aka libc6) is
-    /// distributed by many, at various versions.
-    /// </summary>
+    /// <summary>Package represents a particular package version.</summary>
     public class Package : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The CPU architecture for which packages in this distribution channel were built. Architecture will be blank
+        /// for language packages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("architecture")]
+        public virtual string Architecture { get; set; }
+
+        /// <summary>
+        /// The cpe_uri in [CPE format](https://cpe.mitre.org/specification/) denoting the package manager version
+        /// distributing a package. The cpe_uri will be blank for language packages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cpeUri")]
+        public virtual string CpeUri { get; set; }
+
+        /// <summary>The description of this package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>
+        /// Hash value, typically a file digest, that allows unique identification a specific package.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("digest")]
+        public virtual System.Collections.Generic.IList<Digest> Digest { get; set; }
+
         /// <summary>The various channels by which a package is distributed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("distribution")]
         public virtual System.Collections.Generic.IList<Distribution> Distribution { get; set; }
 
+        /// <summary>Licenses that have been declared by the authors of the package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("license")]
+        public virtual License License { get; set; }
+
+        /// <summary>A freeform text denoting the maintainer of this package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maintainer")]
+        public virtual string Maintainer { get; set; }
+
         /// <summary>Required. Immutable. The name of the package.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>
+        /// The type of package; whether native or non native (e.g., ruby gems, node.js packages, etc.).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("packageType")]
+        public virtual string PackageType { get; set; }
+
+        /// <summary>The homepage for this package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("url")]
+        public virtual string Url { get; set; }
+
+        /// <summary>The version of the package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual Version Version { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4847,6 +8197,21 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A summary of the packages found within the given resource.</summary>
+    public class PackagesSummaryResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A listing by license name of each of the licenses and their counts.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("licensesSummary")]
+        public virtual System.Collections.Generic.IList<LicensesSummary> LicensesSummary { get; set; }
+
+        /// <summary>The unique URL of the image or the container for which this summary applies.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceUrl")]
+        public virtual string ResourceUrl { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// An attestation wrapper with a PGP-compatible signature. This message only supports `ATTACHED` signatures, where
     /// the payload that is signed is included alongside the signature itself in the same file.
@@ -4864,12 +8229,16 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// <summary>
         /// The cryptographic fingerprint of the key used to generate the signature, as output by, e.g. `gpg
         /// --list-keys`. This should be the version 4, full 160-bit fingerprint, expressed as a 40 character
-        /// hexidecimal string. See https://tools.ietf.org/html/rfc4880#section-12.2 for details. Implementations may
+        /// hexadecimal string. See https://tools.ietf.org/html/rfc4880#section-12.2 for details. Implementations may
         /// choose to acknowledge "LONG", "SHORT", or other abbreviated key IDs, but only the full fingerprint is
         /// guaranteed to work. In gpg, the full fingerprint can be retrieved from the `fpr` field returned when calling
-        /// --list-keys with --with-colons. For example: ``` gpg --with-colons --with-fingerprint --force-v4-certs \
+        /// --list-keys with --with-colons. For example:
+        /// ```
+        /// gpg --with-colons --with-fingerprint --force-v4-certs \
         /// --list-keys attester@example.com tru::1:1513631572:0:3:1:5 pub:......
-        /// fpr:::::::::24FF6481B76AC91E66A00AC657A93A81EF3AE6FB: ``` Above, the fingerprint is
+        /// fpr:::::::::24FF6481B76AC91E66A00AC657A93A81EF3AE6FB:
+        /// ```
+        /// Above, the fingerprint is
         /// `24FF6481B76AC91E66A00AC657A93A81EF3AE6FB`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pgpKeyId")]
@@ -4899,18 +8268,26 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4955,6 +8332,30 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual System.Nullable<int> Version { get; set; }
     }
 
+    /// <summary>Product contains information about a product and how to uniquely identify it.</summary>
+    public class Product : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Contains a URI which is vendor-specific. Example: The artifact repository URL of an image.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("genericUri")]
+        public virtual string GenericUri { get; set; }
+
+        /// <summary>
+        /// Token that identifies a product so that it can be referred to from other parts in the document. There is no
+        /// predefined format as long as it uniquely identifies a group in the context of the current document.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>Name of the product.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Selects a repo using a Google Cloud Platform project ID (e.g., winged-cargo-31) and a repo name within that
     /// project.
@@ -4968,6 +8369,46 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// <summary>The name of the repo. Leave empty for the default repo.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("repoName")]
         public virtual string RepoName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class ProvenanceBuilder : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("builderDependencies")]
+        public virtual System.Collections.Generic.IList<ResourceDescriptor> BuilderDependencies { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Version { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Publisher contains information about the publisher of this Note.</summary>
+    public class Publisher : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Provides information about the authority of the issuing party to release the document, in particular, the
+        /// party's constituency and responsibilities or other obligations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("issuingAuthority")]
+        public virtual string IssuingAuthority { get; set; }
+
+        /// <summary>Name of the publisher. Examples: 'Google', 'Google Cloud Platform'.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// The context or namespace. Contains a URL which is under control of the issuing party and can be used as a
+        /// globally unique identifier for that issuing party. Example: https://csaf.io
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("publisherNamespace")]
+        public virtual string PublisherNamespace { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5032,6 +8473,25 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Specifies details on how to handle (and presumably, fix) a vulnerability.</summary>
+    public class Remediation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Contains a comprehensive human-readable discussion of the remediation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual string Details { get; set; }
+
+        /// <summary>The type of remediation that can be applied.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("remediationType")]
+        public virtual string RemediationType { get; set; }
+
+        /// <summary>Contains the URL where to obtain the remediation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("remediationUri")]
+        public virtual RelatedUrl RemediationUri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A unique identifier for a Cloud Repo.</summary>
     public class RepoId : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5074,34 +8534,152 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>
-    /// A scan configuration specifies whether Cloud components in a project have a particular type of analysis being
-    /// run. For example, it can configure whether vulnerability scanning is being done on Docker images or not.
-    /// </summary>
-    public class ScanConfig : Google.Apis.Requests.IDirectResponseSchema
+    public class ResourceDescriptor : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Output only. The time this scan config was created.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("annotations")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Annotations { get; set; }
 
-        /// <summary>Output only. A human-readable description of what the scan configuration does.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("description")]
-        public virtual string Description { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("content")]
+        public virtual string Content { get; set; }
 
-        /// <summary>Whether the scan is enabled.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("enabled")]
-        public virtual System.Nullable<bool> Enabled { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("digest")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Digest { get; set; }
 
-        /// <summary>
-        /// Output only. The name of the scan configuration in the form of
-        /// `projects/[PROJECT_ID]/scanConfigs/[SCAN_CONFIG_ID]`.
-        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("downloadLocation")]
+        public virtual string DownloadLocation { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("mediaType")]
+        public virtual string MediaType { get; set; }
+
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
-        /// <summary>Output only. The time this scan config was last updated.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class RunDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("builder")]
+        public virtual ProvenanceBuilder Builder { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("byproducts")]
+        public virtual System.Collections.Generic.IList<ResourceDescriptor> Byproducts { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
+        public virtual BuildMetadata Metadata { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The note representing an SBOM reference.</summary>
+    public class SBOMReferenceNote : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The format that SBOM takes. E.g. may be spdx, cyclonedx, etc...</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("format")]
+        public virtual string Format { get; set; }
+
+        /// <summary>
+        /// The version of the format that the SBOM takes. E.g. if the format is spdx, the version may be 2.3.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual string Version { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The occurrence representing an SBOM reference as applied to a specific resource. The occurrence follows the DSSE
+    /// specification. See https://github.com/secure-systems-lab/dsse/blob/master/envelope.md for more details.
+    /// </summary>
+    public class SBOMReferenceOccurrence : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The actual payload that contains the SBOM reference data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("payload")]
+        public virtual SbomReferenceIntotoPayload Payload { get; set; }
+
+        /// <summary>
+        /// The kind of payload that SbomReferenceIntotoPayload takes. Since it's in the intoto format, this value is
+        /// expected to be 'application/vnd.in-toto+json'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("payloadType")]
+        public virtual string PayloadType { get; set; }
+
+        /// <summary>The signatures over the payload.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("signatures")]
+        public virtual System.Collections.Generic.IList<EnvelopeSignature> Signatures { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The status of an SBOM generation.</summary>
+    public class SBOMStatus : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>If there was an error generating an SBOM, this will indicate what that error was.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("error")]
+        public virtual string Error { get; set; }
+
+        /// <summary>The progress of the SBOM generation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sbomState")]
+        public virtual string SbomState { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The actual payload that contains the SBOM Reference data. The payload follows the intoto statement
+    /// specification. See https://github.com/in-toto/attestation/blob/main/spec/v1.0/statement.md for more details.
+    /// </summary>
+    public class SbomReferenceIntotoPayload : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Identifier for the schema of the Statement.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("_type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>Additional parameters of the Predicate. Includes the actual data about the SBOM.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("predicate")]
+        public virtual SbomReferenceIntotoPredicate Predicate { get; set; }
+
+        /// <summary>URI identifying the type of the Predicate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("predicateType")]
+        public virtual string PredicateType { get; set; }
+
+        /// <summary>
+        /// Set of software artifacts that the attestation applies to. Each element represents a single software
+        /// artifact.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subject")]
+        public virtual System.Collections.Generic.IList<Subject> Subject { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A predicate which describes the SBOM being referenced.</summary>
+    public class SbomReferenceIntotoPredicate : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A map of algorithm to digest of the contents of the SBOM.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("digest")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Digest { get; set; }
+
+        /// <summary>The location of the SBOM.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>The mime type of the SBOM.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mimeType")]
+        public virtual string MimeType { get; set; }
+
+        /// <summary>The person or system referring this predicate to the consumer.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("referrerId")]
+        public virtual string ReferrerId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5112,7 +8690,7 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -5188,6 +8766,23 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// <summary>This field contains the actual public key.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("publicKeyValue")]
         public virtual string PublicKeyValue { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Keep in sync with schema at
+    /// https://github.com/slsa-framework/slsa/blob/main/docs/provenance/schema/v1/provenance.proto Builder renamed to
+    /// ProvenanceBuilder because of Java conflicts.
+    /// </summary>
+    public class SlsaProvenanceV1 : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("buildDefinition")]
+        public virtual BuildDefinition BuildDefinition { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("runDetails")]
+        public virtual RunDetails RunDetails { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5280,11 +8875,31 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Set of software artifacts that the attestation applies to. Each element represents a single software artifact.
+    /// </summary>
+    public class Subject : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// `"": ""` Algorithms can be e.g. sha256, sha512 See
+        /// https://github.com/in-toto/attestation/blob/main/spec/field_types.md#DigestSet
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("digest")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Digest { get; set; }
+
+        /// <summary>Identifier to distinguish this artifact from others within the subject.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for `TestIamPermissions` method.</summary>
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>
@@ -5301,6 +8916,87 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// <summary>A subset of `TestPermissionsRequest.permissions` that the caller is allowed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("permissions")]
         public virtual System.Collections.Generic.IList<string> Permissions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Start and end times for a build execution phase. Next ID: 3</summary>
+    public class TimeSpan : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>End of time span.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>Start of time span.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5338,6 +9034,81 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// VexAssessment provides all publisher provided Vex information that is related to this vulnerability.
+    /// </summary>
+    public class VexAssessment : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Holds the MITRE standard Common Vulnerabilities and Exposures (CVE) tracking number for the vulnerability.
+        /// Deprecated: Use vulnerability_id instead to denote CVEs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cve")]
+        public virtual string Cve { get; set; }
+
+        /// <summary>Contains information about the impact of this vulnerability, this will change with time.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("impacts")]
+        public virtual System.Collections.Generic.IList<string> Impacts { get; set; }
+
+        /// <summary>
+        /// Justification provides the justification when the state of the assessment if NOT_AFFECTED.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("justification")]
+        public virtual Justification Justification { get; set; }
+
+        /// <summary>
+        /// The VulnerabilityAssessment note from which this VexAssessment was generated. This will be of the form:
+        /// `projects/[PROJECT_ID]/notes/[NOTE_ID]`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("noteName")]
+        public virtual string NoteName { get; set; }
+
+        /// <summary>Holds a list of references associated with this vulnerability item and assessment.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("relatedUris")]
+        public virtual System.Collections.Generic.IList<RelatedUrl> RelatedUris { get; set; }
+
+        /// <summary>Specifies details on how to handle (and presumably, fix) a vulnerability.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("remediations")]
+        public virtual System.Collections.Generic.IList<Remediation> Remediations { get; set; }
+
+        /// <summary>Provides the state of this Vulnerability assessment.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>
+        /// The vulnerability identifier for this Assessment. Will hold one of common identifiers e.g. CVE, GHSA etc.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vulnerabilityId")]
+        public virtual string VulnerabilityId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Volume describes a Docker container volume which is mounted into build steps in order to persist files across
+    /// build step execution. Next ID: 3
+    /// </summary>
+    public class Volume : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Name of the volume to mount. Volume names must be unique per build step and must be valid names for Docker
+        /// volumes. Each named volume must be used by at least two build steps.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Path at which to mount the volume. Paths must be absolute and cannot conflict with other volume paths on the
+        /// same build step or with certain reserved volume paths.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("path")]
+        public virtual string Path { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Vulnerability provides metadata about a security vulnerability in a Note.</summary>
     public class Vulnerability : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5345,9 +9116,21 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cvssScore")]
         public virtual System.Nullable<float> CvssScore { get; set; }
 
-        /// <summary>The full description of the CVSSv3.</summary>
+        /// <summary>The full description of the CVSS for version 2.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cvssV2")]
+        public virtual CVSS CvssV2 { get; set; }
+
+        /// <summary>The full description of the CVSS for version 3.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cvssV3")]
         public virtual CVSSv3 CvssV3 { get; set; }
+
+        /// <summary>CVSS version used to populate cvss_score and severity.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cvssVersion")]
+        public virtual string CvssVersion { get; set; }
+
+        /// <summary>A list of CWE for this vulnerability. For details, see: https://cwe.mitre.org/index.html</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cwe")]
+        public virtual System.Collections.Generic.IList<string> Cwe { get; set; }
 
         /// <summary>
         /// All information about the package to specifically identify this vulnerability. One entry per (version range
@@ -5360,12 +9143,47 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("severity")]
         public virtual string Severity { get; set; }
 
+        private string _sourceUpdateTimeRaw;
+
+        private object _sourceUpdateTime;
+
         /// <summary>
         /// The time this information was last changed at the source. This is an upstream timestamp from the underlying
         /// information source - e.g. Ubuntu security tracker.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceUpdateTime")]
-        public virtual object SourceUpdateTime { get; set; }
+        public virtual string SourceUpdateTimeRaw
+        {
+            get => _sourceUpdateTimeRaw;
+            set
+            {
+                _sourceUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _sourceUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="SourceUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SourceUpdateTimeDateTimeOffset instead.")]
+        public virtual object SourceUpdateTime
+        {
+            get => _sourceUpdateTime;
+            set
+            {
+                _sourceUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _sourceUpdateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="SourceUpdateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SourceUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(SourceUpdateTimeRaw);
+            set => SourceUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Windows details get their own format because the information format and model don't match a normal detail.
@@ -5374,6 +9192,43 @@ namespace Google.Apis.ContainerAnalysis.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("windowsDetails")]
         public virtual System.Collections.Generic.IList<WindowsDetail> WindowsDetails { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A single VulnerabilityAssessmentNote represents one particular product's vulnerability assessment for one CVE.
+    /// </summary>
+    public class VulnerabilityAssessmentNote : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Represents a vulnerability assessment for the product.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("assessment")]
+        public virtual Assessment Assessment { get; set; }
+
+        /// <summary>Identifies the language used by this document, corresponding to IETF BCP 47 / RFC 5646.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("languageCode")]
+        public virtual string LanguageCode { get; set; }
+
+        /// <summary>A detailed description of this Vex.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("longDescription")]
+        public virtual string LongDescription { get; set; }
+
+        /// <summary>The product affected by this vex.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("product")]
+        public virtual Product Product { get; set; }
+
+        /// <summary>Publisher details of this Note.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("publisher")]
+        public virtual Publisher Publisher { get; set; }
+
+        /// <summary>A one sentence description of this Vex.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("shortDescription")]
+        public virtual string ShortDescription { get; set; }
+
+        /// <summary>The title of the note. E.g. `Vex-Debian-11.4`</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

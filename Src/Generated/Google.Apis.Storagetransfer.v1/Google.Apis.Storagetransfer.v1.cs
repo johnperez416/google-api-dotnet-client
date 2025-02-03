@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ namespace Google.Apis.Storagetransfer.v1
             Projects = new ProjectsResource(this);
             TransferJobs = new TransferJobsResource(this);
             TransferOperations = new TransferOperationsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://storagetransfer.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://storagetransfer.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -47,23 +49,16 @@ namespace Google.Apis.Storagetransfer.v1
         public override string Name => "storagetransfer";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://storagetransfer.googleapis.com/";
-        #else
-            "https://storagetransfer.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://storagetransfer.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Storage Transfer API.</summary>
         public class Scope
@@ -305,7 +300,7 @@ namespace Google.Apis.Storagetransfer.v1
         /// </param>
         public virtual GetRequest Get(string projectId)
         {
-            return new GetRequest(service, projectId);
+            return new GetRequest(this.service, projectId);
         }
 
         /// <summary>
@@ -392,7 +387,7 @@ namespace Google.Apis.Storagetransfer.v1
             /// <param name="projectId">Required. The ID of the Google Cloud project that owns the agent pool.</param>
             public virtual CreateRequest Create(Google.Apis.Storagetransfer.v1.Data.AgentPool body, string projectId)
             {
-                return new CreateRequest(service, body, projectId);
+                return new CreateRequest(this.service, body, projectId);
             }
 
             /// <summary>Creates an agent pool resource.</summary>
@@ -463,7 +458,7 @@ namespace Google.Apis.Storagetransfer.v1
             /// <param name="name">Required. The name of the agent pool to delete.</param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes an agent pool.</summary>
@@ -508,7 +503,7 @@ namespace Google.Apis.Storagetransfer.v1
             /// <param name="name">Required. The name of the agent pool to get.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets an agent pool.</summary>
@@ -553,7 +548,7 @@ namespace Google.Apis.Storagetransfer.v1
             /// <param name="projectId">Required. The ID of the Google Cloud project that owns the job.</param>
             public virtual ListRequest List(string projectId)
             {
-                return new ListRequest(service, projectId);
+                return new ListRequest(this.service, projectId);
             }
 
             /// <summary>Lists agent pools.</summary>
@@ -643,7 +638,7 @@ namespace Google.Apis.Storagetransfer.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Storagetransfer.v1.Data.AgentPool body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates an existing agent pool resource.</summary>
@@ -730,7 +725,7 @@ namespace Google.Apis.Storagetransfer.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.Storagetransfer.v1.Data.TransferJob body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>Creates a transfer job that runs periodically.</summary>
@@ -765,12 +760,71 @@ namespace Google.Apis.Storagetransfer.v1
             }
         }
 
+        /// <summary>Deletes a transfer job. Deleting a transfer job sets its status to DELETED.</summary>
+        /// <param name="jobName">Required. The job to delete.</param>
+        /// <param name="projectId">Required. The ID of the Google Cloud project that owns the job.</param>
+        public virtual DeleteRequest Delete(string jobName, string projectId)
+        {
+            return new DeleteRequest(this.service, jobName, projectId);
+        }
+
+        /// <summary>Deletes a transfer job. Deleting a transfer job sets its status to DELETED.</summary>
+        public class DeleteRequest : StoragetransferBaseServiceRequest<Google.Apis.Storagetransfer.v1.Data.Empty>
+        {
+            /// <summary>Constructs a new Delete request.</summary>
+            public DeleteRequest(Google.Apis.Services.IClientService service, string jobName, string projectId) : base(service)
+            {
+                JobName = jobName;
+                ProjectId = projectId;
+                InitParameters();
+            }
+
+            /// <summary>Required. The job to delete.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("jobName", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string JobName { get; private set; }
+
+            /// <summary>Required. The ID of the Google Cloud project that owns the job.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("projectId", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string ProjectId { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "delete";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "DELETE";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+jobName}";
+
+            /// <summary>Initializes Delete parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("jobName", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "jobName",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^transferJobs/.*$",
+                });
+                RequestParameters.Add("projectId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "projectId",
+                    IsRequired = true,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
         /// <summary>Gets a transfer job.</summary>
         /// <param name="jobName">Required. The job to get.</param>
         /// <param name="projectId">Required. The ID of the Google Cloud project that owns the job.</param>
         public virtual GetRequest Get(string jobName, string projectId)
         {
-            return new GetRequest(service, jobName, projectId);
+            return new GetRequest(this.service, jobName, projectId);
         }
 
         /// <summary>Gets a transfer job.</summary>
@@ -826,15 +880,24 @@ namespace Google.Apis.Storagetransfer.v1
 
         /// <summary>Lists transfer jobs.</summary>
         /// <param name="filter">
-        /// Required. A list of query parameters specified as JSON text in the form of: `{"projectId":"my_project_id",
-        /// "jobNames":["jobid1","jobid2",...], "jobStatuses":["status1","status2",...]}` Since `jobNames` and
-        /// `jobStatuses` support multiple values, their values must be specified with array notation. `projectId` is
-        /// required. `jobNames` and `jobStatuses` are optional. The valid values for `jobStatuses` are
-        /// case-insensitive: ENABLED, DISABLED, and DELETED.
+        /// Required. A list of query parameters specified as JSON text in the form of:
+        /// ```
+        /// {
+        /// "projectId":"my_project_id", "jobNames":["jobid1","jobid2",...], "jobStatuses":["status1","status2",...],
+        /// "dataBackend":"QUERY_REPLICATION_CONFIGS", "sourceBucket":"source-bucket-name",
+        /// "sinkBucket":"sink-bucket-name", }
+        /// ```
+        /// The JSON formatting in the example is for display only; provide the
+        /// query parameters without spaces or line breaks. * `projectId` is required. * Since `jobNames` and
+        /// `jobStatuses` support multiple values, their values must be specified with array notation. `jobNames` and
+        /// `jobStatuses` are optional. Valid values are case-insensitive: * ENABLED * DISABLED * DELETED * Specify
+        /// `"dataBackend":"QUERY_REPLICATION_CONFIGS"` to return a list of cross-bucket replication jobs. * Limit the
+        /// results to jobs from a particular bucket with `sourceBucket` and/or to a particular bucket with
+        /// `sinkBucket`.
         /// </param>
         public virtual ListRequest List(string filter)
         {
-            return new ListRequest(service, filter);
+            return new ListRequest(this.service, filter);
         }
 
         /// <summary>Lists transfer jobs.</summary>
@@ -849,11 +912,19 @@ namespace Google.Apis.Storagetransfer.v1
 
             /// <summary>
             /// Required. A list of query parameters specified as JSON text in the form of:
-            /// `{"projectId":"my_project_id", "jobNames":["jobid1","jobid2",...],
-            /// "jobStatuses":["status1","status2",...]}` Since `jobNames` and `jobStatuses` support multiple values,
-            /// their values must be specified with array notation. `projectId` is required. `jobNames` and
-            /// `jobStatuses` are optional. The valid values for `jobStatuses` are case-insensitive: ENABLED, DISABLED,
-            /// and DELETED.
+            /// ```
+            /// {
+            /// "projectId":"my_project_id", "jobNames":["jobid1","jobid2",...],
+            /// "jobStatuses":["status1","status2",...], "dataBackend":"QUERY_REPLICATION_CONFIGS",
+            /// "sourceBucket":"source-bucket-name", "sinkBucket":"sink-bucket-name", }
+            /// ```
+            /// The JSON formatting in the
+            /// example is for display only; provide the query parameters without spaces or line breaks. * `projectId`
+            /// is required. * Since `jobNames` and `jobStatuses` support multiple values, their values must be
+            /// specified with array notation. `jobNames` and `jobStatuses` are optional. Valid values are
+            /// case-insensitive: * ENABLED * DISABLED * DELETED * Specify `"dataBackend":"QUERY_REPLICATION_CONFIGS"`
+            /// to return a list of cross-bucket replication jobs. * Limit the results to jobs from a particular bucket
+            /// with `sourceBucket` and/or to a particular bucket with `sinkBucket`.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; private set; }
@@ -915,7 +986,7 @@ namespace Google.Apis.Storagetransfer.v1
         /// <param name="jobName">Required. The name of job to update.</param>
         public virtual PatchRequest Patch(Google.Apis.Storagetransfer.v1.Data.UpdateTransferJobRequest body, string jobName)
         {
-            return new PatchRequest(service, body, jobName);
+            return new PatchRequest(this.service, body, jobName);
         }
 
         /// <summary>
@@ -968,21 +1039,19 @@ namespace Google.Apis.Storagetransfer.v1
         }
 
         /// <summary>
-        /// Attempts to start a new TransferOperation for the current TransferJob. A TransferJob has a maximum of one
-        /// active TransferOperation. If this method is called while a TransferOperation is active, an error wil be
-        /// returned.
+        /// Starts a new operation for the specified transfer job. A `TransferJob` has a maximum of one active
+        /// `TransferOperation`. If this method is called while a `TransferOperation` is active, an error is returned.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="jobName">Required. The name of the transfer job.</param>
         public virtual RunRequest Run(Google.Apis.Storagetransfer.v1.Data.RunTransferJobRequest body, string jobName)
         {
-            return new RunRequest(service, body, jobName);
+            return new RunRequest(this.service, body, jobName);
         }
 
         /// <summary>
-        /// Attempts to start a new TransferOperation for the current TransferJob. A TransferJob has a maximum of one
-        /// active TransferOperation. If this method is called while a TransferOperation is active, an error wil be
-        /// returned.
+        /// Starts a new operation for the specified transfer job. A `TransferJob` has a maximum of one active
+        /// `TransferOperation`. If this method is called while a `TransferOperation` is active, an error is returned.
         /// </summary>
         public class RunRequest : StoragetransferBaseServiceRequest<Google.Apis.Storagetransfer.v1.Data.Operation>
         {
@@ -1061,7 +1130,7 @@ namespace Google.Apis.Storagetransfer.v1
         /// <param name="name">The name of the operation resource to be cancelled.</param>
         public virtual CancelRequest Cancel(Google.Apis.Storagetransfer.v1.Data.CancelOperationRequest body, string name)
         {
-            return new CancelRequest(service, body, name);
+            return new CancelRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -1129,7 +1198,7 @@ namespace Google.Apis.Storagetransfer.v1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -1176,18 +1245,22 @@ namespace Google.Apis.Storagetransfer.v1
         /// <summary>
         /// Lists transfer operations. Operations are ordered by their creation time in reverse chronological order.
         /// </summary>
-        /// <param name="name">Not used.</param>
+        /// <param name="name">Required. The name of the type being listed; must be `transferOperations`.</param>
         /// <param name="filter">
         /// Required. A list of query parameters specified as JSON text in the form of: `{"projectId":"my_project_id",
-        /// "jobNames":["jobid1","jobid2",...], "operationNames":["opid1","opid2",...],
-        /// "transferStatuses":["status1","status2",...]}` Since `jobNames`, `operationNames`, and `transferStatuses`
-        /// support multiple values, they must be specified with array notation. `projectId` is required. `jobNames`,
-        /// `operationNames`, and `transferStatuses` are optional. The valid values for `transferStatuses` are
+        /// "jobNames":["jobid1","jobid2",...], "jobNamePattern": "job_name_pattern",
+        /// "operationNames":["opid1","opid2",...], "operationNamePattern": "operation_name_pattern", "minCreationTime":
+        /// "min_creation_time", "maxCreationTime": "max_creation_time", "transferStatuses":["status1","status2",...]}`
+        /// Since `jobNames`, `operationNames`, and `transferStatuses` support multiple values, they must be specified
+        /// with array notation. `projectId` is the only argument that is required. If specified, `jobNamePattern` and
+        /// `operationNamePattern` must match the full job or operation name respectively. '*' is a wildcard matching 0
+        /// or more characters. `minCreationTime` and `maxCreationTime` should be timestamps encoded as a string in the
+        /// [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) format. The valid values for `transferStatuses` are
         /// case-insensitive: IN_PROGRESS, PAUSED, SUCCESS, FAILED, and ABORTED.
         /// </param>
         public virtual ListRequest List(string name, string filter)
         {
-            return new ListRequest(service, name, filter);
+            return new ListRequest(this.service, name, filter);
         }
 
         /// <summary>
@@ -1203,18 +1276,22 @@ namespace Google.Apis.Storagetransfer.v1
                 InitParameters();
             }
 
-            /// <summary>Not used.</summary>
+            /// <summary>Required. The name of the type being listed; must be `transferOperations`.</summary>
             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Name { get; private set; }
 
             /// <summary>
             /// Required. A list of query parameters specified as JSON text in the form of:
-            /// `{"projectId":"my_project_id", "jobNames":["jobid1","jobid2",...],
-            /// "operationNames":["opid1","opid2",...], "transferStatuses":["status1","status2",...]}` Since `jobNames`,
-            /// `operationNames`, and `transferStatuses` support multiple values, they must be specified with array
-            /// notation. `projectId` is required. `jobNames`, `operationNames`, and `transferStatuses` are optional.
-            /// The valid values for `transferStatuses` are case-insensitive: IN_PROGRESS, PAUSED, SUCCESS, FAILED, and
-            /// ABORTED.
+            /// `{"projectId":"my_project_id", "jobNames":["jobid1","jobid2",...], "jobNamePattern": "job_name_pattern",
+            /// "operationNames":["opid1","opid2",...], "operationNamePattern": "operation_name_pattern",
+            /// "minCreationTime": "min_creation_time", "maxCreationTime": "max_creation_time",
+            /// "transferStatuses":["status1","status2",...]}` Since `jobNames`, `operationNames`, and
+            /// `transferStatuses` support multiple values, they must be specified with array notation. `projectId` is
+            /// the only argument that is required. If specified, `jobNamePattern` and `operationNamePattern` must match
+            /// the full job or operation name respectively. '*' is a wildcard matching 0 or more characters.
+            /// `minCreationTime` and `maxCreationTime` should be timestamps encoded as a string in the [RFC
+            /// 3339](https://www.ietf.org/rfc/rfc3339.txt) format. The valid values for `transferStatuses` are
+            /// case-insensitive: IN_PROGRESS, PAUSED, SUCCESS, FAILED, and ABORTED.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; private set; }
@@ -1280,7 +1357,7 @@ namespace Google.Apis.Storagetransfer.v1
         /// <param name="name">Required. The name of the transfer operation.</param>
         public virtual PauseRequest Pause(Google.Apis.Storagetransfer.v1.Data.PauseTransferOperationRequest body, string name)
         {
-            return new PauseRequest(service, body, name);
+            return new PauseRequest(this.service, body, name);
         }
 
         /// <summary>Pauses a transfer operation.</summary>
@@ -1333,7 +1410,7 @@ namespace Google.Apis.Storagetransfer.v1
         /// <param name="name">Required. The name of the transfer operation.</param>
         public virtual ResumeRequest Resume(Google.Apis.Storagetransfer.v1.Data.ResumeTransferOperationRequest body, string name)
         {
-            return new ResumeRequest(service, body, name);
+            return new ResumeRequest(this.service, body, name);
         }
 
         /// <summary>Resumes a transfer operation that is paused.</summary>
@@ -1384,7 +1461,7 @@ namespace Google.Apis.Storagetransfer.v1
 }
 namespace Google.Apis.Storagetransfer.v1.Data
 {
-    /// <summary>Represents an On-Premises Agent pool.</summary>
+    /// <summary>Represents an agent pool.</summary>
     public class AgentPool : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -1432,6 +1509,39 @@ namespace Google.Apis.Storagetransfer.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>An AwsS3CompatibleData resource.</summary>
+    public class AwsS3CompatibleData : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Specifies the name of the bucket.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bucketName")]
+        public virtual string BucketName { get; set; }
+
+        /// <summary>Required. Specifies the endpoint of the storage service.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endpoint")]
+        public virtual string Endpoint { get; set; }
+
+        /// <summary>
+        /// Specifies the root path to transfer objects. Must be an empty string or full path name that ends with a '/'.
+        /// This field is treated as an object prefix. As such, it should generally not begin with a '/'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("path")]
+        public virtual string Path { get; set; }
+
+        /// <summary>
+        /// Specifies the region to sign requests with. This can be left blank if requests should be signed with an
+        /// empty region.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("region")]
+        public virtual string Region { get; set; }
+
+        /// <summary>A S3 compatible metadata.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("s3Metadata")]
+        public virtual S3CompatibleMetadata S3Metadata { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// An AwsS3Data resource can be a data source, but not a data sink. In an AwsS3Data resource, an object's name is
     /// the S3 object's key name.
@@ -1440,9 +1550,8 @@ namespace Google.Apis.Storagetransfer.v1.Data
     {
         /// <summary>
         /// Input only. AWS access key used to sign the API requests to the AWS S3 bucket. Permissions on the bucket
-        /// must be granted to the access ID of the AWS access key. This field is required. For information on our data
-        /// retention policy for user credentials, see [User
-        /// credentials](/storage-transfer/docs/data-retention#user-credentials).
+        /// must be granted to the access ID of the AWS access key. For information on our data retention policy for
+        /// user credentials, see [User credentials](/storage-transfer/docs/data-retention#user-credentials).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("awsAccessKey")]
         public virtual AwsAccessKey AwsAccessKey { get; set; }
@@ -1453,6 +1562,33 @@ namespace Google.Apis.Storagetransfer.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bucketName")]
         public virtual string BucketName { get; set; }
+
+        /// <summary>
+        /// Optional. The CloudFront distribution domain name pointing to this bucket, to use when fetching. See
+        /// [Transfer from S3 via CloudFront](https://cloud.google.com/storage-transfer/docs/s3-cloudfront) for more
+        /// information. Format: `https://{id}.cloudfront.net` or any valid custom domain. Must begin with `https://`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudfrontDomain")]
+        public virtual string CloudfrontDomain { get; set; }
+
+        /// <summary>
+        /// Optional. The Resource name of a secret in Secret Manager. AWS credentials must be stored in Secret Manager
+        /// in JSON format: { "access_key_id": "ACCESS_KEY_ID", "secret_access_key": "SECRET_ACCESS_KEY" }
+        /// GoogleServiceAccount must be granted `roles/secretmanager.secretAccessor` for the resource. See [Configure
+        /// access to a source: Amazon S3]
+        /// (https://cloud.google.com/storage-transfer/docs/source-amazon-s3#secret_manager) for more information. If
+        /// `credentials_secret` is specified, do not specify role_arn or aws_access_key. Format:
+        /// `projects/{project_number}/secrets/{secret_name}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("credentialsSecret")]
+        public virtual string CredentialsSecret { get; set; }
+
+        /// <summary>
+        /// Egress bytes over a Google-managed private network. This network is shared between other users of Storage
+        /// Transfer Service.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("managedPrivateNetwork")]
+        public virtual System.Nullable<bool> ManagedPrivateNetwork { get; set; }
 
         /// <summary>
         /// Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is
@@ -1497,6 +1633,17 @@ namespace Google.Apis.Storagetransfer.v1.Data
         public virtual string Container { get; set; }
 
         /// <summary>
+        /// Optional. The Resource name of a secret in Secret Manager. The Azure SAS token must be stored in Secret
+        /// Manager in JSON format: { "sas_token" : "SAS_TOKEN" } GoogleServiceAccount must be granted
+        /// `roles/secretmanager.secretAccessor` for the resource. See [Configure access to a source: Microsoft Azure
+        /// Blob Storage] (https://cloud.google.com/storage-transfer/docs/source-microsoft-azure#secret_manager) for
+        /// more information. If `credentials_secret` is specified, do not specify azure_credentials. Format:
+        /// `projects/{project_number}/secrets/{secret_name}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("credentialsSecret")]
+        public virtual string CredentialsSecret { get; set; }
+
+        /// <summary>
         /// Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is
         /// treated as an object prefix. As such, it should generally not begin with a '/'.
         /// </summary>
@@ -1518,10 +1665,8 @@ namespace Google.Apis.Storagetransfer.v1.Data
     public class AzureCredentials : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. Azure shared access signature (SAS). *Note:*Copying data from Azure Data Lake Storage (ADLS) Gen 2
-        /// is in [Preview](/products/#product-launch-stages). During Preview, if you are copying data from ADLS Gen 2,
-        /// you must use an account SAS. For more information about SAS, see [Grant limited access to Azure Storage
-        /// resources using shared access signatures
+        /// Required. Azure shared access signature (SAS). For more information about SAS, see [Grant limited access to
+        /// Azure Storage resources using shared access signatures
         /// (SAS)](https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sasToken")]
@@ -1552,10 +1697,10 @@ namespace Google.Apis.Storagetransfer.v1.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class Date : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1581,8 +1726,7 @@ namespace Google.Apis.Storagetransfer.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1631,6 +1775,109 @@ namespace Google.Apis.Storagetransfer.v1.Data
     }
 
     /// <summary>
+    /// Specifies the Event-driven transfer options. Event-driven transfers listen to an event stream to transfer
+    /// updated files.
+    /// </summary>
+    public class EventStream : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _eventStreamExpirationTimeRaw;
+
+        private object _eventStreamExpirationTime;
+
+        /// <summary>
+        /// Specifies the data and time at which Storage Transfer Service stops listening for events from this stream.
+        /// After this time, any transfers in progress will complete, but no new transfers are initiated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventStreamExpirationTime")]
+        public virtual string EventStreamExpirationTimeRaw
+        {
+            get => _eventStreamExpirationTimeRaw;
+            set
+            {
+                _eventStreamExpirationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _eventStreamExpirationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EventStreamExpirationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EventStreamExpirationTimeDateTimeOffset instead.")]
+        public virtual object EventStreamExpirationTime
+        {
+            get => _eventStreamExpirationTime;
+            set
+            {
+                _eventStreamExpirationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _eventStreamExpirationTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="EventStreamExpirationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EventStreamExpirationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EventStreamExpirationTimeRaw);
+            set => EventStreamExpirationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _eventStreamStartTimeRaw;
+
+        private object _eventStreamStartTime;
+
+        /// <summary>
+        /// Specifies the date and time that Storage Transfer Service starts listening for events from this stream. If
+        /// no start time is specified or start time is in the past, Storage Transfer Service starts listening
+        /// immediately.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventStreamStartTime")]
+        public virtual string EventStreamStartTimeRaw
+        {
+            get => _eventStreamStartTimeRaw;
+            set
+            {
+                _eventStreamStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _eventStreamStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EventStreamStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EventStreamStartTimeDateTimeOffset instead.")]
+        public virtual object EventStreamStartTime
+        {
+            get => _eventStreamStartTime;
+            set
+            {
+                _eventStreamStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _eventStreamStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="EventStreamStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EventStreamStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EventStreamStartTimeRaw);
+            set => EventStreamStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Required. Specifies a unique name of the resource such as AWS SQS ARN in the form
+        /// 'arn:aws:sqs:region:account_id:queue_name', or Pub/Sub subscription resource name in the form
+        /// 'projects/{project}/subscriptions/{sub}'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// In a GcsData resource, an object's name is the Cloud Storage object's name and its "last modification time"
     /// refers to the object's `updated` property of Cloud Storage objects, which changes when the content or the
     /// metadata of the object is updated.
@@ -1643,6 +1890,15 @@ namespace Google.Apis.Storagetransfer.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bucketName")]
         public virtual string BucketName { get; set; }
+
+        /// <summary>
+        /// Preview. Enables the transfer of managed folders between Cloud Storage buckets. Set this option on the
+        /// gcs_data_source. If set to true: - Managed folders in the source bucket are transferred to the destination
+        /// bucket. - Managed folders in the destination bucket are overwritten. Other OVERWRITE options are not
+        /// supported. See [Transfer Cloud Storage managed folders](/storage-transfer/docs/managed-folders).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("managedFolderTransferEnabled")]
+        public virtual System.Nullable<bool> ManagedFolderTransferEnabled { get; set; }
 
         /// <summary>
         /// Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is
@@ -1666,6 +1922,21 @@ namespace Google.Apis.Storagetransfer.v1.Data
         /// <summary>Unique identifier for the service account.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("subjectId")]
         public virtual string SubjectId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An HdfsData resource specifies a path within an HDFS entity (e.g. a cluster). All cluster-specific settings,
+    /// such as namenodes and ports, are configured on the transfer agents servicing requests, so HdfsData only contains
+    /// the root path to the data in our transfer.
+    /// </summary>
+    public class HdfsData : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Root path to transfer files.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("path")]
+        public virtual string Path { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1746,29 +2017,102 @@ namespace Google.Apis.Storagetransfer.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Logging configuration.</summary>
+    /// <summary>
+    /// Specifies the logging behavior for transfer operations. Logs can be sent to Cloud Logging for all transfer
+    /// types. See [Read transfer logs](https://cloud.google.com/storage-transfer/docs/read-transfer-logs) for details.
+    /// </summary>
     public class LoggingConfig : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Enables the Cloud Storage transfer logs for this transfer. This is only supported for transfer jobs with
-        /// PosixFilesystem sources. The default is that logs are not generated for this transfer.
+        /// For PosixFilesystem transfers, enables [file system transfer
+        /// logs](https://cloud.google.com/storage-transfer/docs/on-prem-transfer-log-format) instead of, or in addition
+        /// to, Cloud Logging. This option ignores [LoggableAction] and [LoggableActionState]. If these are set, Cloud
+        /// Logging will also be enabled for this transfer.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("enableOnpremGcsTransferLogs")]
         public virtual System.Nullable<bool> EnableOnpremGcsTransferLogs { get; set; }
 
-        /// <summary>
-        /// States in which `log_actions` are logged. If empty, no logs are generated. This is not yet supported for
-        /// transfers with PosixFilesystem data sources.
-        /// </summary>
+        /// <summary>States in which `log_actions` are logged. If empty, no logs are generated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("logActionStates")]
         public virtual System.Collections.Generic.IList<string> LogActionStates { get; set; }
 
-        /// <summary>
-        /// Actions to be logged. If empty, no logs are generated. This is not yet supported for transfers with
-        /// PosixFilesystem data sources.
-        /// </summary>
+        /// <summary>Specifies the actions to be logged. If empty, no logs are generated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("logActions")]
         public virtual System.Collections.Generic.IList<string> LogActions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Specifies the metadata options for running a transfer.</summary>
+    public class MetadataOptions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Specifies how each object's ACLs should be preserved for transfers between Google Cloud Storage buckets. If
+        /// unspecified, the default behavior is the same as ACL_DESTINATION_BUCKET_DEFAULT.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("acl")]
+        public virtual string Acl { get; set; }
+
+        /// <summary>
+        /// Specifies how each file's POSIX group ID (GID) attribute should be handled by the transfer. By default, GID
+        /// is not preserved. Only applicable to transfers involving POSIX file systems, and ignored for other
+        /// transfers.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gid")]
+        public virtual string Gid { get; set; }
+
+        /// <summary>
+        /// Specifies how each object's Cloud KMS customer-managed encryption key (CMEK) is preserved for transfers
+        /// between Google Cloud Storage buckets. If unspecified, the default behavior is the same as
+        /// KMS_KEY_DESTINATION_BUCKET_DEFAULT.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKey")]
+        public virtual string KmsKey { get; set; }
+
+        /// <summary>
+        /// Specifies how each file's mode attribute should be handled by the transfer. By default, mode is not
+        /// preserved. Only applicable to transfers involving POSIX file systems, and ignored for other transfers.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mode")]
+        public virtual string Mode { get; set; }
+
+        /// <summary>
+        /// Specifies the storage class to set on objects being transferred to Google Cloud Storage buckets. If
+        /// unspecified, the default behavior is the same as STORAGE_CLASS_DESTINATION_BUCKET_DEFAULT.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("storageClass")]
+        public virtual string StorageClass { get; set; }
+
+        /// <summary>
+        /// Specifies how symlinks should be handled by the transfer. By default, symlinks are not preserved. Only
+        /// applicable to transfers involving POSIX file systems, and ignored for other transfers.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("symlink")]
+        public virtual string Symlink { get; set; }
+
+        /// <summary>
+        /// Specifies how each object's temporary hold status should be preserved for transfers between Google Cloud
+        /// Storage buckets. If unspecified, the default behavior is the same as TEMPORARY_HOLD_PRESERVE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("temporaryHold")]
+        public virtual string TemporaryHold { get; set; }
+
+        /// <summary>
+        /// Specifies how each object's `timeCreated` metadata is preserved for transfers. If unspecified, the default
+        /// behavior is the same as TIME_CREATED_SKIP. This behavior is supported for transfers to Cloud Storage buckets
+        /// from Cloud Storage, Amazon S3, S3-compatible storage, and Azure sources.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeCreated")]
+        public virtual string TimeCreated { get; set; }
+
+        /// <summary>
+        /// Specifies how each file's POSIX user ID (UID) attribute should be handled by the transfer. By default, UID
+        /// is not preserved. Only applicable to transfers involving POSIX file systems, and ignored for other
+        /// transfers.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uid")]
+        public virtual string Uid { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1849,12 +2193,51 @@ namespace Google.Apis.Storagetransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("includePrefixes")]
         public virtual System.Collections.Generic.IList<string> IncludePrefixes { get; set; }
 
+        private string _lastModifiedBeforeRaw;
+
+        private object _lastModifiedBefore;
+
         /// <summary>
         /// If specified, only objects with a "last modification time" before this timestamp and objects that don't have
         /// a "last modification time" are transferred.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastModifiedBefore")]
-        public virtual object LastModifiedBefore { get; set; }
+        public virtual string LastModifiedBeforeRaw
+        {
+            get => _lastModifiedBeforeRaw;
+            set
+            {
+                _lastModifiedBefore = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastModifiedBeforeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastModifiedBeforeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastModifiedBeforeDateTimeOffset instead.")]
+        public virtual object LastModifiedBefore
+        {
+            get => _lastModifiedBefore;
+            set
+            {
+                _lastModifiedBeforeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastModifiedBefore = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastModifiedBeforeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastModifiedBeforeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastModifiedBeforeRaw);
+            set => LastModifiedBeforeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _lastModifiedSinceRaw;
+
+        private object _lastModifiedSince;
 
         /// <summary>
         /// If specified, only objects with a "last modification time" on or after this timestamp and objects that don't
@@ -1864,7 +2247,38 @@ namespace Google.Apis.Storagetransfer.v1.Data
         /// start of the day * `last_modified_before` to the end of the day
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastModifiedSince")]
-        public virtual object LastModifiedSince { get; set; }
+        public virtual string LastModifiedSinceRaw
+        {
+            get => _lastModifiedSinceRaw;
+            set
+            {
+                _lastModifiedSince = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastModifiedSinceRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastModifiedSinceRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastModifiedSinceDateTimeOffset instead.")]
+        public virtual object LastModifiedSince
+        {
+            get => _lastModifiedSince;
+            set
+            {
+                _lastModifiedSinceRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastModifiedSince = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastModifiedSinceRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastModifiedSinceDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastModifiedSinceRaw);
+            set => LastModifiedSinceRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Ensures that objects are not transferred if a specific maximum time has elapsed since the "last modification
@@ -1917,8 +2331,8 @@ namespace Google.Apis.Storagetransfer.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -1948,6 +2362,39 @@ namespace Google.Apis.Storagetransfer.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Specifies the configuration for a cross-bucket replication job. Cross-bucket replication copies new or updated
+    /// objects from a source Cloud Storage bucket to a destination Cloud Storage bucket. Existing objects in the source
+    /// bucket are not copied by a new cross-bucket replication job.
+    /// </summary>
+    public class ReplicationSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The Cloud Storage bucket to which to replicate objects.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gcsDataSink")]
+        public virtual GcsData GcsDataSink { get; set; }
+
+        /// <summary>The Cloud Storage bucket from which to replicate objects.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gcsDataSource")]
+        public virtual GcsData GcsDataSource { get; set; }
+
+        /// <summary>
+        /// Object conditions that determine which objects are transferred. For replication jobs, only
+        /// `include_prefixes` and `exclude_prefixes` are supported.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("objectConditions")]
+        public virtual ObjectConditions ObjectConditions { get; set; }
+
+        /// <summary>
+        /// Specifies the metadata options to be applied during replication. Delete options are not supported. If a
+        /// delete option is specified, the request fails with an INVALID_ARGUMENT error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transferOptions")]
+        public virtual TransferOptions TransferOptions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request passed to ResumeTransferOperation.</summary>
     public class ResumeTransferOperationRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1961,6 +2408,43 @@ namespace Google.Apis.Storagetransfer.v1.Data
         /// <summary>Required. The ID of the Google Cloud project that owns the transfer job.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// S3CompatibleMetadata contains the metadata fields that apply to the basic types of S3-compatible data providers.
+    /// </summary>
+    public class S3CompatibleMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Specifies the authentication and authorization method used by the storage service. When not specified,
+        /// Transfer Service will attempt to determine right auth method to use.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("authMethod")]
+        public virtual string AuthMethod { get; set; }
+
+        /// <summary>
+        /// The Listing API to use for discovering objects. When not specified, Transfer Service will attempt to
+        /// determine the right API to use.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("listApi")]
+        public virtual string ListApi { get; set; }
+
+        /// <summary>
+        /// Specifies the network protocol of the agent. When not specified, the default value of NetworkProtocol
+        /// NETWORK_PROTOCOL_HTTPS is used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protocol")]
+        public virtual string Protocol { get; set; }
+
+        /// <summary>
+        /// Specifies the API request model used to call the storage service. When not specified, the default value of
+        /// RequestModel REQUEST_MODEL_VIRTUAL_HOSTED_STYLE is used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestModel")]
+        public virtual string RequestModel { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2060,23 +2544,26 @@ namespace Google.Apis.Storagetransfer.v1.Data
     public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }
@@ -2205,13 +2692,79 @@ namespace Google.Apis.Storagetransfer.v1.Data
     /// <summary>This resource represents the configuration of a transfer job that runs periodically.</summary>
     public class TransferJob : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _creationTimeRaw;
+
+        private object _creationTime;
+
         /// <summary>Output only. The time that the transfer job was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
-        public virtual object CreationTime { get; set; }
+        public virtual string CreationTimeRaw
+        {
+            get => _creationTimeRaw;
+            set
+            {
+                _creationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _creationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreationTimeDateTimeOffset instead.")]
+        public virtual object CreationTime
+        {
+            get => _creationTime;
+            set
+            {
+                _creationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _creationTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreationTimeRaw);
+            set => CreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _deletionTimeRaw;
+
+        private object _deletionTime;
 
         /// <summary>Output only. The time that the transfer job was deleted.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deletionTime")]
-        public virtual object DeletionTime { get; set; }
+        public virtual string DeletionTimeRaw
+        {
+            get => _deletionTimeRaw;
+            set
+            {
+                _deletionTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deletionTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeletionTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeletionTimeDateTimeOffset instead.")]
+        public virtual object DeletionTime
+        {
+            get => _deletionTime;
+            set
+            {
+                _deletionTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deletionTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeletionTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeletionTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeletionTimeRaw);
+            set => DeletionTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// A description provided by the user for the job. Its max length is 1024 bytes when Unicode-encoded.
@@ -2219,9 +2772,51 @@ namespace Google.Apis.Storagetransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual string Description { get; set; }
 
+        /// <summary>
+        /// Specifies the event stream for the transfer job for event-driven transfers. When EventStream is specified,
+        /// the Schedule fields are ignored.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventStream")]
+        public virtual EventStream EventStream { get; set; }
+
+        private string _lastModificationTimeRaw;
+
+        private object _lastModificationTime;
+
         /// <summary>Output only. The time that the transfer job was last modified.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastModificationTime")]
-        public virtual object LastModificationTime { get; set; }
+        public virtual string LastModificationTimeRaw
+        {
+            get => _lastModificationTimeRaw;
+            set
+            {
+                _lastModificationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastModificationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastModificationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastModificationTimeDateTimeOffset instead.")]
+        public virtual object LastModificationTime
+        {
+            get => _lastModificationTime;
+            set
+            {
+                _lastModificationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastModificationTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastModificationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastModificationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastModificationTimeRaw);
+            set => LastModificationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The name of the most recently started TransferOperation of this JobConfig. Present if a TransferOperation
@@ -2248,15 +2843,17 @@ namespace Google.Apis.Storagetransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
-        /// <summary>
-        /// Notification configuration. This is not supported for transfers involving PosixFilesystem.
-        /// </summary>
+        /// <summary>Notification configuration.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("notificationConfig")]
         public virtual NotificationConfig NotificationConfig { get; set; }
 
         /// <summary>The ID of the Google Cloud project that owns the job.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
+
+        /// <summary>Replication specification.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("replicationSpec")]
+        public virtual ReplicationSpec ReplicationSpec { get; set; }
 
         /// <summary>
         /// Specifies schedule for the transfer job. This is an optional field. When the field is not set, the job never
@@ -2304,13 +2901,50 @@ namespace Google.Apis.Storagetransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("counters")]
         public virtual TransferCounters Counters { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>End time of this transfer execution.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Summarizes errors encountered with sample error log entries.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("errorBreakdowns")]
         public virtual System.Collections.Generic.IList<ErrorSummary> ErrorBreakdowns { get; set; }
+
+        /// <summary>Cloud Logging configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loggingConfig")]
+        public virtual LoggingConfig LoggingConfig { get; set; }
 
         /// <summary>A globally unique ID assigned by the system.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -2324,9 +2958,42 @@ namespace Google.Apis.Storagetransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Start time of this transfer execution.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Status of the transfer operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
@@ -2361,6 +3028,10 @@ namespace Google.Apis.Storagetransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("deleteObjectsUniqueInSink")]
         public virtual System.Nullable<bool> DeleteObjectsUniqueInSink { get; set; }
 
+        /// <summary>Represents the selected metadata options for a transfer job.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metadataOptions")]
+        public virtual MetadataOptions MetadataOptions { get; set; }
+
         /// <summary>
         /// When to overwrite objects that already exist in the sink. The default is that only objects that are
         /// different from the source are ovewritten. If true, all objects in the sink whose name matches an object in
@@ -2369,6 +3040,13 @@ namespace Google.Apis.Storagetransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("overwriteObjectsAlreadyExistingInSink")]
         public virtual System.Nullable<bool> OverwriteObjectsAlreadyExistingInSink { get; set; }
 
+        /// <summary>
+        /// When to overwrite objects that already exist in the sink. If not set, overwrite behavior is determined by
+        /// overwrite_objects_already_existing_in_sink.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("overwriteWhen")]
+        public virtual string OverwriteWhen { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2376,6 +3054,10 @@ namespace Google.Apis.Storagetransfer.v1.Data
     /// <summary>Configuration for running a transfer.</summary>
     public class TransferSpec : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>An AWS S3 compatible data source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("awsS3CompatibleDataSource")]
+        public virtual AwsS3CompatibleData AwsS3CompatibleDataSource { get; set; }
+
         /// <summary>An AWS S3 data source.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("awsS3DataSource")]
         public virtual AwsS3Data AwsS3DataSource { get; set; }
@@ -2391,6 +3073,18 @@ namespace Google.Apis.Storagetransfer.v1.Data
         /// <summary>A Cloud Storage data source.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gcsDataSource")]
         public virtual GcsData GcsDataSource { get; set; }
+
+        /// <summary>
+        /// For transfers between file systems, specifies a Cloud Storage bucket to be used as an intermediate location
+        /// through which to transfer data. See [Transfer data between file
+        /// systems](https://cloud.google.com/storage-transfer/docs/file-to-file) for more information.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gcsIntermediateDataLocation")]
+        public virtual GcsData GcsIntermediateDataLocation { get; set; }
+
+        /// <summary>An HDFS cluster data source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hdfsDataSource")]
+        public virtual HdfsData HdfsDataSource { get; set; }
 
         /// <summary>An HTTP URL data source.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("httpDataSource")]
@@ -2451,19 +3145,19 @@ namespace Google.Apis.Storagetransfer.v1.Data
         public virtual string ProjectId { get; set; }
 
         /// <summary>
-        /// Required. The job to update. `transferJob` is expected to specify only four fields: description,
-        /// transfer_spec, notification_config, and status. An `UpdateTransferJobRequest` that specifies other fields
-        /// are rejected with the error INVALID_ARGUMENT. Updating a job status to DELETED requires
-        /// `storagetransfer.jobs.delete` permissions.
+        /// Required. The job to update. `transferJob` is expected to specify one or more of five fields: description,
+        /// transfer_spec, notification_config, logging_config, and status. An `UpdateTransferJobRequest` that specifies
+        /// other fields are rejected with the error INVALID_ARGUMENT. Updating a job status to DELETED requires
+        /// `storagetransfer.jobs.delete` permission.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("transferJob")]
         public virtual TransferJob TransferJob { get; set; }
 
         /// <summary>
         /// The field mask of the fields in `transferJob` that are to be updated in this request. Fields in
-        /// `transferJob` that can be updated are: description, transfer_spec, notification_config, and status. To
-        /// update the `transfer_spec` of the job, a complete transfer specification must be provided. An incomplete
-        /// specification missing any required fields is rejected with the error INVALID_ARGUMENT.
+        /// `transferJob` that can be updated are: description, transfer_spec, notification_config, logging_config, and
+        /// status. To update the `transfer_spec` of the job, a complete transfer specification must be provided. An
+        /// incomplete specification missing any required fields is rejected with the error INVALID_ARGUMENT.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTransferJobFieldMask")]
         public virtual object UpdateTransferJobFieldMask { get; set; }

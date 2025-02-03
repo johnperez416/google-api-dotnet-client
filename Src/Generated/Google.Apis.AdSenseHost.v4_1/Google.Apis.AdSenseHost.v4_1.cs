@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ namespace Google.Apis.AdSenseHost.v4_1
             Customchannels = new CustomchannelsResource(this);
             Reports = new ReportsResource(this);
             Urlchannels = new UrlchannelsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://www.googleapis.com/adsensehost/v4.1/");
+            BatchUri = GetEffectiveUri(null, "https://www.googleapis.com/batch/adsensehost/v4.1");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -49,23 +51,16 @@ namespace Google.Apis.AdSenseHost.v4_1
         public override string Name => "adsensehost";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://www.googleapis.com/adsensehost/v4.1/";
-        #else
-            "https://www.googleapis.com/adsensehost/v4.1/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "adsensehost/v4.1/";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://www.googleapis.com/batch/adsensehost/v4.1";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch/adsensehost/v4.1";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the AdSense Host API.</summary>
         public class Scope
@@ -257,7 +252,7 @@ namespace Google.Apis.AdSenseHost.v4_1
             /// <param name="adClientId">Ad client to get.</param>
             public virtual GetRequest Get(string accountId, string adClientId)
             {
-                return new GetRequest(service, accountId, adClientId);
+                return new GetRequest(this.service, accountId, adClientId);
             }
 
             /// <summary>
@@ -317,7 +312,7 @@ namespace Google.Apis.AdSenseHost.v4_1
             /// <param name="accountId">Account for which to list ad clients.</param>
             public virtual ListRequest List(string accountId)
             {
-                return new ListRequest(service, accountId);
+                return new ListRequest(this.service, accountId);
             }
 
             /// <summary>List all hosted ad clients in the specified hosted account.</summary>
@@ -409,7 +404,7 @@ namespace Google.Apis.AdSenseHost.v4_1
             /// <param name="adUnitId">Ad unit to delete.</param>
             public virtual DeleteRequest Delete(string accountId, string adClientId, string adUnitId)
             {
-                return new DeleteRequest(service, accountId, adClientId, adUnitId);
+                return new DeleteRequest(this.service, accountId, adClientId, adUnitId);
             }
 
             /// <summary>Delete the specified ad unit from the specified publisher AdSense account.</summary>
@@ -482,7 +477,7 @@ namespace Google.Apis.AdSenseHost.v4_1
             /// <param name="adUnitId">Ad unit to get.</param>
             public virtual GetRequest Get(string accountId, string adClientId, string adUnitId)
             {
-                return new GetRequest(service, accountId, adClientId, adUnitId);
+                return new GetRequest(this.service, accountId, adClientId, adUnitId);
             }
 
             /// <summary>Get the specified host ad unit in this AdSense account.</summary>
@@ -555,7 +550,7 @@ namespace Google.Apis.AdSenseHost.v4_1
             /// <param name="adUnitId">Ad unit to get the code for.</param>
             public virtual GetAdCodeRequest GetAdCode(string accountId, string adClientId, string adUnitId)
             {
-                return new GetAdCodeRequest(service, accountId, adClientId, adUnitId);
+                return new GetAdCodeRequest(this.service, accountId, adClientId, adUnitId);
             }
 
             /// <summary>Get ad code for the specified ad unit, attaching the specified host custom channels.</summary>
@@ -640,7 +635,7 @@ namespace Google.Apis.AdSenseHost.v4_1
             /// <param name="adClientId">Ad client into which to insert the ad unit.</param>
             public virtual InsertRequest Insert(Google.Apis.AdSenseHost.v4_1.Data.AdUnit body, string accountId, string adClientId)
             {
-                return new InsertRequest(service, body, accountId, adClientId);
+                return new InsertRequest(this.service, body, accountId, adClientId);
             }
 
             /// <summary>Insert the supplied ad unit into the specified publisher AdSense account.</summary>
@@ -706,7 +701,7 @@ namespace Google.Apis.AdSenseHost.v4_1
             /// <param name="adClientId">Ad client for which to list ad units.</param>
             public virtual ListRequest List(string accountId, string adClientId)
             {
-                return new ListRequest(service, accountId, adClientId);
+                return new ListRequest(this.service, accountId, adClientId);
             }
 
             /// <summary>List all ad units in the specified publisher's AdSense account.</summary>
@@ -809,7 +804,7 @@ namespace Google.Apis.AdSenseHost.v4_1
             /// <param name="adUnitId">Ad unit to get.</param>
             public virtual PatchRequest Patch(Google.Apis.AdSenseHost.v4_1.Data.AdUnit body, string accountId, string adClientId, string adUnitId)
             {
-                return new PatchRequest(service, body, accountId, adClientId, adUnitId);
+                return new PatchRequest(this.service, body, accountId, adClientId, adUnitId);
             }
 
             /// <summary>
@@ -892,7 +887,7 @@ namespace Google.Apis.AdSenseHost.v4_1
             /// <param name="adClientId">Ad client which contains the ad unit.</param>
             public virtual UpdateRequest Update(Google.Apis.AdSenseHost.v4_1.Data.AdUnit body, string accountId, string adClientId)
             {
-                return new UpdateRequest(service, body, accountId, adClientId);
+                return new UpdateRequest(this.service, body, accountId, adClientId);
             }
 
             /// <summary>Update the supplied ad unit in the specified publisher AdSense account.</summary>
@@ -980,7 +975,7 @@ namespace Google.Apis.AdSenseHost.v4_1
             /// <param name="endDate">End of the date range to report on in "YYYY-MM-DD" format, inclusive.</param>
             public virtual GenerateRequest Generate(string accountId, string startDate, string endDate)
             {
-                return new GenerateRequest(service, accountId, startDate, endDate);
+                return new GenerateRequest(this.service, accountId, startDate, endDate);
             }
 
             /// <summary>
@@ -1145,7 +1140,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="accountId">Account to get information about.</param>
         public virtual GetRequest Get(string accountId)
         {
-            return new GetRequest(service, accountId);
+            return new GetRequest(this.service, accountId);
         }
 
         /// <summary>Get information about the selected associated AdSense account.</summary>
@@ -1190,7 +1185,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="filterAdClientId">Ad clients to list accounts for.</param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> filterAdClientId)
         {
-            return new ListRequest(service, filterAdClientId);
+            return new ListRequest(this.service, filterAdClientId);
         }
 
         /// <summary>List hosted accounts associated with this AdSense account by ad client id.</summary>
@@ -1250,7 +1245,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="adClientId">Ad client to get.</param>
         public virtual GetRequest Get(string adClientId)
         {
-            return new GetRequest(service, adClientId);
+            return new GetRequest(this.service, adClientId);
         }
 
         /// <summary>Get information about one of the ad clients in the Host AdSense account.</summary>
@@ -1294,7 +1289,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <summary>List all host ad clients in this AdSense account.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>List all host ad clients in this AdSense account.</summary>
@@ -1369,7 +1364,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="websiteUrl">The URL of the user's hosted website.</param>
         public virtual StartRequest Start(StartRequest.ProductCodeEnum productCode, string websiteUrl)
         {
-            return new StartRequest(service, productCode, websiteUrl);
+            return new StartRequest(this.service, productCode, websiteUrl);
         }
 
         /// <summary>Create an association session for initiating an association with an AdSense user.</summary>
@@ -1490,7 +1485,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="token">The token returned to the association callback URL.</param>
         public virtual VerifyRequest Verify(string token)
         {
-            return new VerifyRequest(service, token);
+            return new VerifyRequest(this.service, token);
         }
 
         /// <summary>Verify an association session after the association callback returns from AdSense signup.</summary>
@@ -1551,7 +1546,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="customChannelId">Custom channel to delete.</param>
         public virtual DeleteRequest Delete(string adClientId, string customChannelId)
         {
-            return new DeleteRequest(service, adClientId, customChannelId);
+            return new DeleteRequest(this.service, adClientId, customChannelId);
         }
 
         /// <summary>Delete a specific custom channel from the host AdSense account.</summary>
@@ -1610,7 +1605,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="customChannelId">Custom channel to get.</param>
         public virtual GetRequest Get(string adClientId, string customChannelId)
         {
-            return new GetRequest(service, adClientId, customChannelId);
+            return new GetRequest(this.service, adClientId, customChannelId);
         }
 
         /// <summary>Get a specific custom channel from the host AdSense account.</summary>
@@ -1669,7 +1664,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="adClientId">Ad client to which the new custom channel will be added.</param>
         public virtual InsertRequest Insert(Google.Apis.AdSenseHost.v4_1.Data.CustomChannel body, string adClientId)
         {
-            return new InsertRequest(service, body, adClientId);
+            return new InsertRequest(this.service, body, adClientId);
         }
 
         /// <summary>Add a new custom channel to the host AdSense account.</summary>
@@ -1721,7 +1716,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="adClientId">Ad client for which to list custom channels.</param>
         public virtual ListRequest List(string adClientId)
         {
-            return new ListRequest(service, adClientId);
+            return new ListRequest(this.service, adClientId);
         }
 
         /// <summary>List all host custom channels in this AdSense account.</summary>
@@ -1797,7 +1792,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="customChannelId">Custom channel to get.</param>
         public virtual PatchRequest Patch(Google.Apis.AdSenseHost.v4_1.Data.CustomChannel body, string adClientId, string customChannelId)
         {
-            return new PatchRequest(service, body, adClientId, customChannelId);
+            return new PatchRequest(this.service, body, adClientId, customChannelId);
         }
 
         /// <summary>
@@ -1865,7 +1860,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="adClientId">Ad client in which the custom channel will be updated.</param>
         public virtual UpdateRequest Update(Google.Apis.AdSenseHost.v4_1.Data.CustomChannel body, string adClientId)
         {
-            return new UpdateRequest(service, body, adClientId);
+            return new UpdateRequest(this.service, body, adClientId);
         }
 
         /// <summary>Update a custom channel in the host AdSense account.</summary>
@@ -1936,7 +1931,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="endDate">End of the date range to report on in "YYYY-MM-DD" format, inclusive.</param>
         public virtual GenerateRequest Generate(string startDate, string endDate)
         {
-            return new GenerateRequest(service, startDate, endDate);
+            return new GenerateRequest(this.service, startDate, endDate);
         }
 
         /// <summary>
@@ -2103,7 +2098,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="urlChannelId">URL channel to delete.</param>
         public virtual DeleteRequest Delete(string adClientId, string urlChannelId)
         {
-            return new DeleteRequest(service, adClientId, urlChannelId);
+            return new DeleteRequest(this.service, adClientId, urlChannelId);
         }
 
         /// <summary>Delete a URL channel from the host AdSense account.</summary>
@@ -2162,7 +2157,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="adClientId">Ad client to which the new URL channel will be added.</param>
         public virtual InsertRequest Insert(Google.Apis.AdSenseHost.v4_1.Data.UrlChannel body, string adClientId)
         {
-            return new InsertRequest(service, body, adClientId);
+            return new InsertRequest(this.service, body, adClientId);
         }
 
         /// <summary>Add a new URL channel to the host AdSense account.</summary>
@@ -2214,7 +2209,7 @@ namespace Google.Apis.AdSenseHost.v4_1
         /// <param name="adClientId">Ad client for which to list URL channels.</param>
         public virtual ListRequest List(string adClientId)
         {
-            return new ListRequest(service, adClientId);
+            return new ListRequest(this.service, adClientId);
         }
 
         /// <summary>List all host URL channels in the host AdSense account.</summary>

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.CloudAsset.v1p7beta1
         {
             Operations = new OperationsResource(this);
             V1p7beta1 = new V1p7beta1Resource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudasset.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudasset.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.CloudAsset.v1p7beta1
         public override string Name => "cloudasset";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudasset.googleapis.com/";
-        #else
-            "https://cloudasset.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudasset.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Asset API.</summary>
         public class Scope
@@ -292,7 +287,7 @@ namespace Google.Apis.CloudAsset.v1p7beta1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -368,7 +363,7 @@ namespace Google.Apis.CloudAsset.v1p7beta1
         /// </param>
         public virtual ExportAssetsRequest ExportAssets(Google.Apis.CloudAsset.v1p7beta1.Data.GoogleCloudAssetV1p7beta1ExportAssetsRequest body, string parent)
         {
-            return new ExportAssetsRequest(service, body, parent);
+            return new ExportAssetsRequest(this.service, body, parent);
         }
 
         /// <summary>
@@ -431,12 +426,45 @@ namespace Google.Apis.CloudAsset.v1p7beta1
 }
 namespace Google.Apis.CloudAsset.v1p7beta1.Data
 {
-    /// <summary>Represents the metadata of the longrunning operation for the AnalyzeIamPolicyLongrunning rpc.</summary>
+    /// <summary>Represents the metadata of the longrunning operation for the AnalyzeIamPolicyLongrunning RPC.</summary>
     public class AnalyzeIamPolicyLongrunningMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -459,7 +487,8 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -514,16 +543,37 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -531,15 +581,19 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -596,8 +650,8 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
     /// An asset in Google Cloud. An asset can be any resource in the Google Cloud [resource
     /// hierarchy](https://cloud.google.com/resource-manager/docs/cloud-platform-resource-hierarchy), a resource outside
     /// the Google Cloud resource hierarchy (such as Google Kubernetes Engine clusters and objects), or a policy (e.g.
-    /// Cloud IAM policy). See [Supported asset
-    /// types](https://cloud.google.com/asset-inventory/docs/supported-asset-types) for more information.
+    /// IAM policy). See [Supported asset types](https://cloud.google.com/asset-inventory/docs/supported-asset-types)
+    /// for more information.
     /// </summary>
     public class GoogleCloudAssetV1p7beta1Asset : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -633,12 +687,12 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         public virtual string AssetType { get; set; }
 
         /// <summary>
-        /// A representation of the Cloud IAM policy set on a Google Cloud resource. There can be a maximum of one Cloud
-        /// IAM policy set on any given resource. In addition, Cloud IAM policies inherit their granted access scope
-        /// from any policies set on parent resources in the resource hierarchy. Therefore, the effectively policy is
-        /// the union of both the policy set on this resource and each policy set on all of the resource's ancestry
-        /// resource levels in the hierarchy. See [this topic](https://cloud.google.com/iam/docs/policies#inheritance)
-        /// for more information.
+        /// A representation of the IAM policy set on a Google Cloud resource. There can be a maximum of one IAM policy
+        /// set on any given resource. In addition, IAM policies inherit their granted access scope from any policies
+        /// set on parent resources in the resource hierarchy. Therefore, the effectively policy is the union of both
+        /// the policy set on this resource and each policy set on all of the resource's ancestry resource levels in the
+        /// hierarchy. See [this topic](https://cloud.google.com/iam/help/allow-policies/inheritance) for more
+        /// information.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("iamPolicy")]
         public virtual Policy IamPolicy { get; set; }
@@ -677,12 +731,45 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("servicePerimeter")]
         public virtual GoogleIdentityAccesscontextmanagerV1ServicePerimeter ServicePerimeter { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
         /// The last update timestamp of an asset. update_time is updated when create/update/delete operation is
         /// performed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -779,6 +866,10 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("outputConfig")]
         public virtual GoogleCloudAssetV1p7beta1OutputConfig OutputConfig { get; set; }
 
+        private string _readTimeRaw;
+
+        private object _readTime;
+
         /// <summary>
         /// Timestamp to take an asset snapshot. This can only be set to a timestamp between the current time and the
         /// current time minus 35 days (inclusive). If not specified, the current time will be used. Due to delays in
@@ -786,7 +877,36 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         /// get different results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("readTime")]
-        public virtual object ReadTime { get; set; }
+        public virtual string ReadTimeRaw
+        {
+            get => _readTimeRaw;
+            set
+            {
+                _readTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _readTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReadTimeDateTimeOffset instead.")]
+        public virtual object ReadTime
+        {
+            get => _readTime;
+            set
+            {
+                _readTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _readTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ReadTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReadTimeRaw);
+            set => ReadTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// A list of relationship types to export, for example: `INSTANCE_TO_INSTANCEGROUP`. This field should only be
@@ -808,7 +928,7 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
     public class GoogleCloudAssetV1p7beta1GcsDestination : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The uri of the Cloud Storage object. It's the same uri that is used by gsutil. Example:
+        /// The URI of the Cloud Storage object. It's the same URI that is used by gsutil. Example:
         /// "gs://bucket_name/object_name". See [Viewing and Editing Object
         /// Metadata](https://cloud.google.com/storage/docs/viewing-editing-metadata) for more information.
         /// </summary>
@@ -816,8 +936,8 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         public virtual string Uri { get; set; }
 
         /// <summary>
-        /// The uri prefix of all generated Cloud Storage objects. Example: "gs://bucket_name/object_name_prefix". Each
-        /// object uri is in format: "gs://bucket_name/object_name_prefix/{ASSET_TYPE}/{SHARD_NUMBER} and only contains
+        /// The URI prefix of all generated Cloud Storage objects. Example: "gs://bucket_name/object_name_prefix". Each
+        /// object URI is in format: "gs://bucket_name/object_name_prefix/{ASSET_TYPE}/{SHARD_NUMBER} and only contains
         /// assets for that type. starts from 0. Example:
         /// "gs://bucket_name/object_name_prefix/compute.googleapis.com/Disk/0" is the first shard of output objects
         /// containing all compute.googleapis.com/Disk assets. An INVALID_ARGUMENT error will be returned if file with
@@ -863,8 +983,8 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
     /// the Google Cloud [resource
     /// hierarchy](https://cloud.google.com/resource-manager/docs/cloud-platform-resource-hierarchy), a resource outside
     /// the Google Cloud resource hierarchy (such as Google Kubernetes Engine clusters and objects), or a policy (e.g.
-    /// Cloud IAM policy). See [Supported asset
-    /// types](https://cloud.google.com/asset-inventory/docs/supported-asset-types) for more information.
+    /// IAM policy). See [Supported asset types](https://cloud.google.com/asset-inventory/docs/supported-asset-types)
+    /// for more information.
     /// </summary>
     public class GoogleCloudAssetV1p7beta1RelatedAsset : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -970,7 +1090,7 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         /// <summary>
         /// The full name of the immediate parent of this resource. See [Resource
         /// Names](https://cloud.google.com/apis/design/resource_names#full_resource_name) for more information. For
-        /// Google Cloud assets, this value is the parent resource defined in the [Cloud IAM policy
+        /// Google Cloud assets, this value is the parent resource defined in the [IAM policy
         /// hierarchy](https://cloud.google.com/iam/docs/overview#policy_hierarchy). Example:
         /// `//cloudresourcemanager.googleapis.com/projects/my_project_123` For third-party assets, this field may be
         /// set differently.
@@ -1150,13 +1270,46 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("restoreDefault")]
         public virtual GoogleCloudOrgpolicyV1RestoreDefault RestoreDefault { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
         /// The time stamp the `Policy` was previously updated. This is set by the server, not specified by the caller,
         /// and represents the last time a call to `SetOrgPolicy` was made for that `Policy`. Any value set by the
         /// client will be ignored.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Version of the `Policy`. Default version is 0;</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
@@ -1197,9 +1350,10 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         public virtual string Description { get; set; }
 
         /// <summary>
-        /// Required. Resource name for the Access Level. The `short_name` component must begin with a letter and only
-        /// include alphanumeric and '_'. Format: `accessPolicies/{access_policy}/accessLevels/{access_level}`. The
-        /// maximum length of the `access_level` component is 50 characters.
+        /// Identifier. Resource name for the `AccessLevel`. Format:
+        /// `accessPolicies/{access_policy}/accessLevels/{access_level}`. The `access_level` component must begin with a
+        /// letter, followed by alphanumeric characters or `_`. Its maximum length is 50 characters. After you create an
+        /// `AccessLevel`, you cannot change its `name`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -1222,14 +1376,14 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
     {
         /// <summary>
         /// Output only. An opaque identifier for the current version of the `AccessPolicy`. This will always be a
-        /// strongly validated etag, meaning that two Access Polices will be identical if and only if their etags are
+        /// strongly validated etag, meaning that two Access Policies will be identical if and only if their etags are
         /// identical. Clients should not expect this to be in any specific format.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("etag")]
         public virtual string ETag { get; set; }
 
         /// <summary>
-        /// Output only. Resource name of the `AccessPolicy`. Format: `accessPolicies/{access_policy}`
+        /// Output only. Identifier. Resource name of the `AccessPolicy`. Format: `accessPolicies/{access_policy}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -1242,14 +1396,14 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         public virtual string Parent { get; set; }
 
         /// <summary>
-        /// The scopes of a policy define which resources an ACM policy can restrict, and where ACM resources can be
-        /// referenced. For example, a policy with scopes=["folders/123"] has the following behavior: - vpcsc perimeters
-        /// can only restrict projects within folders/123 - access levels can only be referenced by resources within
-        /// folders/123. If empty, there are no limitations on which resources can be restricted by an ACM policy, and
-        /// there are no limitations on where ACM resources can be referenced. Only one policy can include a given scope
-        /// (attempting to create a second policy which includes "folders/123" will result in an error). Currently,
-        /// scopes cannot be modified after a policy is created. Currently, policies can only have a single scope.
-        /// Format: list of `folders/{folder_number}` or `projects/{project_number}`
+        /// The scopes of the AccessPolicy. Scopes define which resources a policy can restrict and where its resources
+        /// can be referenced. For example, policy A with `scopes=["folders/123"]` has the following behavior: -
+        /// ServicePerimeter can only restrict projects within `folders/123`. - ServicePerimeter within policy A can
+        /// only reference access levels defined within policy A. - Only one policy can include a given scope; thus,
+        /// attempting to create a second policy which includes `folders/123` will result in an error. If no scopes are
+        /// provided, then any resource within the organization can be restricted. Scopes cannot be modified after a
+        /// policy is created. Policies can only have a single scope. Format: list of `folders/{folder_number}` or
+        /// `projects/{project_number}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scopes")]
         public virtual System.Collections.Generic.IList<string> Scopes { get; set; }
@@ -1334,8 +1488,9 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
-        /// Whether to negate the Condition. If true, the Condition becomes a NAND over its non-empty fields, each field
-        /// must be false for the Condition overall to be satisfied. Defaults to false.
+        /// Whether to negate the Condition. If true, the Condition becomes a NAND over its non-empty fields. Any
+        /// non-empty field criteria evaluating to false will result in the Condition to be satisfied. Defaults to
+        /// false.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("negate")]
         public virtual System.Nullable<bool> Negate { get; set; }
@@ -1354,6 +1509,13 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requiredAccessLevels")]
         public virtual System.Collections.Generic.IList<string> RequiredAccessLevels { get; set; }
+
+        /// <summary>
+        /// The request must originate from one of the provided VPC networks in Google Cloud. Cannot specify this field
+        /// together with `ip_subnetworks`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vpcNetworkSources")]
+        public virtual System.Collections.Generic.IList<GoogleIdentityAccesscontextmanagerV1VpcNetworkSource> VpcNetworkSources { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1421,8 +1583,11 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
     public class GoogleIdentityAccesscontextmanagerV1EgressFrom : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// A list of identities that are allowed access through this [EgressPolicy]. Should be in the format of email
-        /// address. The email address should represent individual user or service account only.
+        /// A list of identities that are allowed access through [EgressPolicy]. Identities can be an individual user,
+        /// service account, Google group, or third-party identity. For third-party identity, only single identities are
+        /// supported and other identity types are not supported. The `v1` identities that have the prefix `user`,
+        /// `group`, `serviceAccount`, and `principal` in https://cloud.google.com/iam/docs/principal-identifiers#v1 are
+        /// supported.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("identities")]
         public virtual System.Collections.Generic.IList<string> Identities { get; set; }
@@ -1433,6 +1598,20 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("identityType")]
         public virtual string IdentityType { get; set; }
+
+        /// <summary>
+        /// Whether to enforce traffic restrictions based on `sources` field. If the `sources` fields is non-empty, then
+        /// this field must be set to `SOURCE_RESTRICTION_ENABLED`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceRestriction")]
+        public virtual string SourceRestriction { get; set; }
+
+        /// <summary>
+        /// Sources that this EgressPolicy authorizes access from. If this field is not empty, then `source_restriction`
+        /// must be set to `SOURCE_RESTRICTION_ENABLED`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sources")]
+        public virtual System.Collections.Generic.IList<GoogleIdentityAccesscontextmanagerV1EgressSource> Sources { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1460,6 +1639,44 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("egressTo")]
         public virtual GoogleIdentityAccesscontextmanagerV1EgressTo EgressTo { get; set; }
 
+        /// <summary>
+        /// Optional. Human-readable title for the egress rule. The title must be unique within the perimeter and can
+        /// not exceed 100 characters. Within the access policy, the combined length of all rule titles must not exceed
+        /// 240,000 characters.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The source that EgressPolicy authorizes access from inside the ServicePerimeter to somewhere outside the
+    /// ServicePerimeter boundaries.
+    /// </summary>
+    public class GoogleIdentityAccesscontextmanagerV1EgressSource : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// An AccessLevel resource name that allows protected resources inside the ServicePerimeters to access outside
+        /// the ServicePerimeter boundaries. AccessLevels listed must be in the same policy as this ServicePerimeter.
+        /// Referencing a nonexistent AccessLevel will cause an error. If an AccessLevel name is not specified, only
+        /// resources within the perimeter can be accessed through Google Cloud calls with request origins within the
+        /// perimeter. Example: `accessPolicies/MY_POLICY/accessLevels/MY_LEVEL`. If a single `*` is specified for
+        /// `access_level`, then all EgressSources will be allowed.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("accessLevel")]
+        public virtual string AccessLevel { get; set; }
+
+        /// <summary>
+        /// A Google Cloud resource that you want to allow to egress the perimeter. These resources can access data
+        /// outside the perimeter. This field only supports projects. The project format is `projects/{project_number}`.
+        /// The resource can be in any Google Cloud organization, not just the organization where the perimeter is
+        /// defined. You can't use `*` in this field to allow all Google Cloud resources.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resource")]
+        public virtual string Resource { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1473,6 +1690,16 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
     /// </summary>
     public class GoogleIdentityAccesscontextmanagerV1EgressTo : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// A list of external resources that are allowed to be accessed. Only AWS and Azure resources are supported.
+        /// For Amazon S3, the supported formats are s3://BUCKET_NAME, s3a://BUCKET_NAME, and s3n://BUCKET_NAME. For
+        /// Azure Storage, the supported format is azure://myaccount.blob.core.windows.net/CONTAINER_NAME. A request
+        /// matches if it contains an external resource in this list (Example: s3://bucket/path). Currently '*' is not
+        /// allowed.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("externalResources")]
+        public virtual System.Collections.Generic.IList<string> ExternalResources { get; set; }
+
         /// <summary>
         /// A list of ApiOperations allowed to be performed by the sources specified in the corresponding EgressFrom. A
         /// request matches if it uses an operation/service in this list.
@@ -1501,8 +1728,11 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
     public class GoogleIdentityAccesscontextmanagerV1IngressFrom : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// A list of identities that are allowed access through this ingress policy. Should be in the format of email
-        /// address. The email address should represent individual user or service account only.
+        /// A list of identities that are allowed access through [IngressPolicy]. Identities can be an individual user,
+        /// service account, Google group, or third-party identity. For third-party identity, only single identities are
+        /// supported and other identity types are not supported. The `v1` identities that have the prefix `user`,
+        /// `group`, `serviceAccount`, and `principal` in https://cloud.google.com/iam/docs/principal-identifiers#v1 are
+        /// supported.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("identities")]
         public virtual System.Collections.Generic.IList<string> Identities { get; set; }
@@ -1543,6 +1773,14 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("ingressTo")]
         public virtual GoogleIdentityAccesscontextmanagerV1IngressTo IngressTo { get; set; }
 
+        /// <summary>
+        /// Optional. Human-readable title for the ingress rule. The title must be unique within the perimeter and can
+        /// not exceed 100 characters. Within the access policy, the combined length of all rule titles must not exceed
+        /// 240,000 characters.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1563,9 +1801,11 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
 
         /// <summary>
         /// A Google Cloud resource that is allowed to ingress the perimeter. Requests from these resources will be
-        /// allowed to access perimeter data. Currently only projects are allowed. Format: `projects/{project_number}`
-        /// The project may be in any Google Cloud organization, not just the organization that the perimeter is defined
-        /// in. `*` is not allowed, the case of allowing all Google Cloud resources only is not supported.
+        /// allowed to access perimeter data. Currently only projects and VPCs are allowed. Project format:
+        /// `projects/{project_number}` VPC network format:
+        /// `//compute.googleapis.com/projects/{PROJECT_ID}/global/networks/{NAME}`. The project may be in any Google
+        /// Cloud organization, not just the organization that the perimeter is defined in. `*` is not allowed, the case
+        /// of allowing all Google Cloud resources only is not supported.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resource")]
         public virtual string Resource { get; set; }
@@ -1604,16 +1844,13 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
     public class GoogleIdentityAccesscontextmanagerV1MethodSelector : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Value for `method` should be a valid method name for the corresponding `service_name` in ApiOperation. If
-        /// `*` used as value for `method`, then ALL methods and permissions are allowed.
+        /// A valid method name for the corresponding `service_name` in ApiOperation. If `*` is used as the value for
+        /// the `method`, then ALL methods and permissions are allowed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("method")]
         public virtual string Method { get; set; }
 
-        /// <summary>
-        /// Value for `permission` should be a valid Cloud IAM permission for the corresponding `service_name` in
-        /// ApiOperation.
-        /// </summary>
+        /// <summary>A valid Cloud IAM permission for the corresponding `service_name` in ApiOperation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("permission")]
         public virtual string Permission { get; set; }
 
@@ -1652,9 +1889,9 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
     /// themselves, but not export outside of the `ServicePerimeter`. If a request with a source within this
     /// `ServicePerimeter` has a target outside of the `ServicePerimeter`, the request will be blocked. Otherwise the
     /// request is allowed. There are two types of Service Perimeter - Regular and Bridge. Regular Service Perimeters
-    /// cannot overlap, a single Google Cloud project can only belong to a single regular Service Perimeter. Service
-    /// Perimeter Bridges can contain only Google Cloud projects as members, a single Google Cloud project may belong to
-    /// multiple Service Perimeter Bridges.
+    /// cannot overlap, a single Google Cloud project or VPC network can only belong to a single regular Service
+    /// Perimeter. Service Perimeter Bridges can contain only Google Cloud projects as members, a single Google Cloud
+    /// project may belong to multiple Service Perimeter Bridges.
     /// </summary>
     public class GoogleIdentityAccesscontextmanagerV1ServicePerimeter : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1663,18 +1900,27 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         public virtual string Description { get; set; }
 
         /// <summary>
-        /// Required. Resource name for the ServicePerimeter. The `short_name` component must begin with a letter and
-        /// only include alphanumeric and '_'. Format:
-        /// `accessPolicies/{access_policy}/servicePerimeters/{service_perimeter}`
+        /// Optional. An opaque identifier for the current version of the `ServicePerimeter`. This identifier does not
+        /// follow any specific format. If an etag is not provided, the operation will be performed as if a valid etag
+        /// is provided.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Identifier. Resource name for the `ServicePerimeter`. Format:
+        /// `accessPolicies/{access_policy}/servicePerimeters/{service_perimeter}`. The `service_perimeter` component
+        /// must begin with a letter, followed by alphanumeric characters or `_`. After you create a `ServicePerimeter`,
+        /// you cannot change its `name`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Perimeter type indicator. A single project is allowed to be a member of single regular perimeter, but
-        /// multiple service perimeter bridges. A project cannot be a included in a perimeter bridge without being
-        /// included in regular perimeter. For perimeter bridges, the restricted service list as well as access level
-        /// lists must be empty.
+        /// Perimeter type indicator. A single project or VPC network is allowed to be a member of single regular
+        /// perimeter, but multiple service perimeter bridges. A project cannot be a included in a perimeter bridge
+        /// without being included in regular perimeter. For perimeter bridges, the restricted service list as well as
+        /// access level lists must be empty.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("perimeterType")]
         public virtual string PerimeterType { get; set; }
@@ -1709,9 +1955,6 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("useExplicitDryRunSpec")]
         public virtual System.Nullable<bool> UseExplicitDryRunSpec { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
     }
 
     /// <summary>
@@ -1747,8 +1990,9 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         public virtual System.Collections.Generic.IList<GoogleIdentityAccesscontextmanagerV1IngressPolicy> IngressPolicies { get; set; }
 
         /// <summary>
-        /// A list of Google Cloud resources that are inside of the service perimeter. Currently only projects are
-        /// allowed. Format: `projects/{project_number}`
+        /// A list of Google Cloud resources that are inside of the service perimeter. Currently only projects and VPCs
+        /// are allowed. Project format: `projects/{project_number}` VPC network format:
+        /// `//compute.googleapis.com/projects/{PROJECT_ID}/global/networks/{NAME}`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resources")]
         public virtual System.Collections.Generic.IList<string> Resources { get; set; }
@@ -1791,6 +2035,42 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The originating network source in Google Cloud.</summary>
+    public class GoogleIdentityAccesscontextmanagerV1VpcNetworkSource : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Sub-segment ranges of a VPC network.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vpcSubnetwork")]
+        public virtual GoogleIdentityAccesscontextmanagerV1VpcSubNetwork VpcSubnetwork { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Sub-segment ranges inside of a VPC Network.</summary>
+    public class GoogleIdentityAccesscontextmanagerV1VpcSubNetwork : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Network name. If the network is not part of the organization, the `compute.network.get` permission
+        /// must be granted to the caller. Format:
+        /// `//compute.googleapis.com/projects/{PROJECT_ID}/global/networks/{NETWORK_NAME}` Example:
+        /// `//compute.googleapis.com/projects/my-project/global/networks/network-1`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("network")]
+        public virtual string Network { get; set; }
+
+        /// <summary>
+        /// CIDR block IP subnetwork specification. The IP address must be an IPv4 address and can be a public or
+        /// private IP address. Note that for a CIDR IP address block, the specified IP address portion must be properly
+        /// truncated (i.e. all the host bits must be zero) or the input is considered malformed. For example,
+        /// "192.0.2.0/24" is accepted but "192.0.2.1/24" is not. If empty, all IP addresses are allowed.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vpcIpSubnetworks")]
+        public virtual System.Collections.Generic.IList<string> VpcIpSubnetworks { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>This resource represents a long-running operation that is the result of a network API call.</summary>
     public class Operation : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1821,8 +2101,8 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -1843,18 +2123,26 @@ namespace Google.Apis.CloudAsset.v1p7beta1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {

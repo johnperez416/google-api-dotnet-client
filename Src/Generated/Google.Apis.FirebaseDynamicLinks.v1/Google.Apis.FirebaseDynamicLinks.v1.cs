@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.FirebaseDynamicLinks.v1
             ManagedShortLinks = new ManagedShortLinksResource(this);
             ShortLinks = new ShortLinksResource(this);
             V1 = new V1Resource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://firebasedynamiclinks.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://firebasedynamiclinks.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.FirebaseDynamicLinks.v1
         public override string Name => "firebasedynamiclinks";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://firebasedynamiclinks.googleapis.com/";
-        #else
-            "https://firebasedynamiclinks.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://firebasedynamiclinks.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Firebase Dynamic Links API.</summary>
         public class Scope
@@ -294,7 +289,7 @@ namespace Google.Apis.FirebaseDynamicLinks.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.FirebaseDynamicLinks.v1.Data.CreateManagedShortLinkRequest body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -360,7 +355,7 @@ namespace Google.Apis.FirebaseDynamicLinks.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.FirebaseDynamicLinks.v1.Data.CreateShortDynamicLinkRequest body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -422,7 +417,7 @@ namespace Google.Apis.FirebaseDynamicLinks.v1
         /// <param name="dynamicLink">Dynamic Link URL. e.g. https://abcd.app.goo.gl/wxyz</param>
         public virtual GetLinkStatsRequest GetLinkStats(string dynamicLink)
         {
-            return new GetLinkStatsRequest(service, dynamicLink);
+            return new GetLinkStatsRequest(this.service, dynamicLink);
         }
 
         /// <summary>
@@ -494,7 +489,7 @@ namespace Google.Apis.FirebaseDynamicLinks.v1
         /// <param name="body">The body of the request.</param>
         public virtual InstallAttributionRequest InstallAttribution(Google.Apis.FirebaseDynamicLinks.v1.Data.GetIosPostInstallAttributionRequest body)
         {
-            return new InstallAttributionRequest(service, body);
+            return new InstallAttributionRequest(this.service, body);
         }
 
         /// <summary>Get iOS strong/weak-match info for post-install attribution.</summary>
@@ -533,7 +528,7 @@ namespace Google.Apis.FirebaseDynamicLinks.v1
         /// <param name="body">The body of the request.</param>
         public virtual ReopenAttributionRequest ReopenAttribution(Google.Apis.FirebaseDynamicLinks.v1.Data.GetIosReopenAttributionRequest body)
         {
-            return new ReopenAttributionRequest(service, body);
+            return new ReopenAttributionRequest(this.service, body);
         }
 
         /// <summary>Get iOS reopen attribution for app universal link open deeplinking.</summary>
@@ -861,6 +856,10 @@ namespace Google.Apis.FirebaseDynamicLinks.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("linkEventStats")]
         public virtual System.Collections.Generic.IList<DynamicLinkEventStat> LinkEventStats { get; set; }
 
+        /// <summary>Optional warnings associated this API request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("warnings")]
+        public virtual System.Collections.Generic.IList<DynamicLinkWarning> Warnings { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -921,8 +920,8 @@ namespace Google.Apis.FirebaseDynamicLinks.v1.Data
         public virtual string SdkVersion { get; set; }
 
         /// <summary>
-        /// Possible unique matched link that server need to check before performing fingerprint match. If passed link
-        /// is short server need to expand the link. If link is long server need to vslidate the link.
+        /// Possible unique matched link that server need to check before performing device heuristics match. If passed
+        /// link is short server need to expand the link. If link is long server need to vslidate the link.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uniqueMatchLinkToCheck")]
         public virtual string UniqueMatchLinkToCheck { get; set; }
@@ -938,7 +937,10 @@ namespace Google.Apis.FirebaseDynamicLinks.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Response for iSDK to execute strong match flow for post-install attribution.</summary>
+    /// <summary>
+    /// Response for iSDK to execute strong match flow for post-install attribution. Information of the resolved FDL
+    /// link.
+    /// </summary>
     public class GetIosPostInstallAttributionResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -953,7 +955,7 @@ namespace Google.Apis.FirebaseDynamicLinks.v1.Data
         public virtual string AttributionConfidence { get; set; }
 
         /// <summary>
-        /// The deep-link attributed post-install via one of several techniques (fingerprint, copy unique).
+        /// The deep-link attributed post-install via one of several techniques (device heuristics, copy unique).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deepLink")]
         public virtual string DeepLink { get; set; }
@@ -976,7 +978,7 @@ namespace Google.Apis.FirebaseDynamicLinks.v1.Data
         public virtual string FallbackLink { get; set; }
 
         /// <summary>
-        /// Invitation ID attributed post-install via one of several techniques (fingerprint, copy unique).
+        /// Invitation ID attributed post-install via one of several techniques (device heuristics, copy unique).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("invitationId")]
         public virtual string InvitationId { get; set; }
@@ -999,7 +1001,8 @@ namespace Google.Apis.FirebaseDynamicLinks.v1.Data
         public virtual string RequestIpVersion { get; set; }
 
         /// <summary>
-        /// Entire FDL (short or long) attributed post-install via one of several techniques (fingerprint, copy unique).
+        /// Entire FDL (short or long) attributed post-install via one of several techniques (device heuristics, copy
+        /// unique).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestedLink")]
         public virtual string RequestedLink { get; set; }
@@ -1111,6 +1114,10 @@ namespace Google.Apis.FirebaseDynamicLinks.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("utmTerm")]
         public virtual string UtmTerm { get; set; }
 
+        /// <summary>Optional warnings associated this API request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("warning")]
+        public virtual System.Collections.Generic.IList<DynamicLinkWarning> Warning { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1221,9 +1228,42 @@ namespace Google.Apis.FirebaseDynamicLinks.v1.Data
     /// <summary>Managed Short Link.</summary>
     public class ManagedShortLink : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _creationTimeRaw;
+
+        private object _creationTime;
+
         /// <summary>Creation timestamp of the short link.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
-        public virtual object CreationTime { get; set; }
+        public virtual string CreationTimeRaw
+        {
+            get => _creationTimeRaw;
+            set
+            {
+                _creationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _creationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreationTimeDateTimeOffset instead.")]
+        public virtual object CreationTime
+        {
+            get => _creationTime;
+            set
+            {
+                _creationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _creationTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreationTimeRaw);
+            set => CreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Attributes that have been flagged about this short url.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("flaggedAttribute")]

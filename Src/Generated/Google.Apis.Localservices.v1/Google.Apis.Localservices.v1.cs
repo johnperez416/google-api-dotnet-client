@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.Localservices.v1
         {
             AccountReports = new AccountReportsResource(this);
             DetailedLeadReports = new DetailedLeadReportsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://localservices.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://localservices.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,35 +47,28 @@ namespace Google.Apis.Localservices.v1
         public override string Name => "localservices";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://localservices.googleapis.com/";
-        #else
-            "https://localservices.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://localservices.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Local Services API.</summary>
         public class Scope
         {
-            /// <summary>Manage your AdWords campaigns</summary>
+            /// <summary>See, edit, create, and delete your Google Ads accounts and data.</summary>
             public static string Adwords = "https://www.googleapis.com/auth/adwords";
         }
 
         /// <summary>Available OAuth 2.0 scope constants for use with the Local Services API.</summary>
         public static class ScopeConstants
         {
-            /// <summary>Manage your AdWords campaigns</summary>
+            /// <summary>See, edit, create, and delete your Google Ads accounts and data.</summary>
             public const string Adwords = "https://www.googleapis.com/auth/adwords";
         }
 
@@ -286,7 +281,7 @@ namespace Google.Apis.Localservices.v1
         /// </summary>
         public virtual SearchRequest Search()
         {
-            return new SearchRequest(service);
+            return new SearchRequest(this.service);
         }
 
         /// <summary>
@@ -470,7 +465,7 @@ namespace Google.Apis.Localservices.v1
         /// </summary>
         public virtual SearchRequest Search()
         {
-            return new SearchRequest(service);
+            return new SearchRequest(this.service);
         }
 
         /// <summary>
@@ -739,9 +734,44 @@ namespace Google.Apis.Localservices.v1.Data
     /// <summary>Container for booking lead specific information.</summary>
     public class GoogleAdsHomeservicesLocalservicesV1BookingLead : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _bookingAppointmentTimestampRaw;
+
+        private object _bookingAppointmentTimestamp;
+
         /// <summary>Timestamp of when service is provided by advertiser.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bookingAppointmentTimestamp")]
-        public virtual object BookingAppointmentTimestamp { get; set; }
+        public virtual string BookingAppointmentTimestampRaw
+        {
+            get => _bookingAppointmentTimestampRaw;
+            set
+            {
+                _bookingAppointmentTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _bookingAppointmentTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="BookingAppointmentTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use BookingAppointmentTimestampDateTimeOffset instead.")]
+        public virtual object BookingAppointmentTimestamp
+        {
+            get => _bookingAppointmentTimestamp;
+            set
+            {
+                _bookingAppointmentTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _bookingAppointmentTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="BookingAppointmentTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? BookingAppointmentTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(BookingAppointmentTimestampRaw);
+            set => BookingAppointmentTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Consumer email associated with the booking lead.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("consumerEmail")]
@@ -801,15 +831,54 @@ namespace Google.Apis.Localservices.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("geo")]
         public virtual string Geo { get; set; }
 
+        /// <summary>Unique identifier of a Detailed Lead Report.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleAdsLeadId")]
+        public virtual System.Nullable<long> GoogleAdsLeadId { get; set; }
+
         /// <summary>Lead category (e.g. hvac, plumber)</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("leadCategory")]
         public virtual string LeadCategory { get; set; }
 
+        private string _leadCreationTimestampRaw;
+
+        private object _leadCreationTimestamp;
+
         /// <summary>Timestamp of when the lead was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("leadCreationTimestamp")]
-        public virtual object LeadCreationTimestamp { get; set; }
+        public virtual string LeadCreationTimestampRaw
+        {
+            get => _leadCreationTimestampRaw;
+            set
+            {
+                _leadCreationTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _leadCreationTimestampRaw = value;
+            }
+        }
 
-        /// <summary>Unique identifier of a Detailed Lead Report.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="LeadCreationTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LeadCreationTimestampDateTimeOffset instead.")]
+        public virtual object LeadCreationTimestamp
+        {
+            get => _leadCreationTimestamp;
+            set
+            {
+                _leadCreationTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _leadCreationTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LeadCreationTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LeadCreationTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LeadCreationTimestampRaw);
+            set => LeadCreationTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Deprecated in favor of google_ads_lead_id. Unique identifier of a Detailed Lead Report.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("leadId")]
         public virtual System.Nullable<long> LeadId { get; set; }
 
@@ -863,9 +932,44 @@ namespace Google.Apis.Localservices.v1.Data
     /// <summary>Container for phone lead specific information.</summary>
     public class GoogleAdsHomeservicesLocalservicesV1PhoneLead : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _chargedCallTimestampRaw;
+
+        private object _chargedCallTimestamp;
+
         /// <summary>Timestamp of the phone call which resulted in a charged phone lead.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("chargedCallTimestamp")]
-        public virtual object ChargedCallTimestamp { get; set; }
+        public virtual string ChargedCallTimestampRaw
+        {
+            get => _chargedCallTimestampRaw;
+            set
+            {
+                _chargedCallTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _chargedCallTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ChargedCallTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ChargedCallTimestampDateTimeOffset instead.")]
+        public virtual object ChargedCallTimestamp
+        {
+            get => _chargedCallTimestamp;
+            set
+            {
+                _chargedCallTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _chargedCallTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ChargedCallTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ChargedCallTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ChargedCallTimestampRaw);
+            set => ChargedCallTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Duration of the charged phone call in seconds.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("chargedConnectedCallDurationSeconds")]
@@ -926,11 +1030,11 @@ namespace Google.Apis.Localservices.v1.Data
     /// <summary>Represents a time zone from the [IANA Time Zone Database](https://www.iana.org/time-zones).</summary>
     public class GoogleTypeTimeZone : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>IANA Time Zone Database time zone, e.g. "America/New_York".</summary>
+        /// <summary>IANA Time Zone Database time zone. For example "America/New_York".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
 
-        /// <summary>Optional. IANA Time Zone Database version number, e.g. "2019a".</summary>
+        /// <summary>Optional. IANA Time Zone Database version number. For example "2019a".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
         public virtual string Version { get; set; }
 

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,7 +36,10 @@ namespace Google.Apis.DataCatalog.v1
         {
             Catalog = new CatalogResource(this);
             Entries = new EntriesResource(this);
+            Organizations = new OrganizationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://datacatalog.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://datacatalog.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +49,16 @@ namespace Google.Apis.DataCatalog.v1
         public override string Name => "datacatalog";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://datacatalog.googleapis.com/";
-        #else
-            "https://datacatalog.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://datacatalog.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Cloud Data Catalog API.</summary>
         public class Scope
@@ -89,6 +85,9 @@ namespace Google.Apis.DataCatalog.v1
 
         /// <summary>Gets the Entries resource.</summary>
         public virtual EntriesResource Entries { get; }
+
+        /// <summary>Gets the Organizations resource.</summary>
+        public virtual OrganizationsResource Organizations { get; }
 
         /// <summary>Gets the Projects resource.</summary>
         public virtual ProjectsResource Projects { get; }
@@ -301,7 +300,7 @@ namespace Google.Apis.DataCatalog.v1
         /// <param name="body">The body of the request.</param>
         public virtual SearchRequest Search(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1SearchCatalogRequest body)
         {
-            return new SearchRequest(service, body);
+            return new SearchRequest(this.service, body);
         }
 
         /// <summary>
@@ -365,7 +364,7 @@ namespace Google.Apis.DataCatalog.v1
         /// </summary>
         public virtual LookupRequest Lookup()
         {
-            return new LookupRequest(service);
+            return new LookupRequest(this.service);
         }
 
         /// <summary>
@@ -381,7 +380,8 @@ namespace Google.Apis.DataCatalog.v1
             }
 
             /// <summary>
-            /// Fully qualified name (FQN) of the resource. FQNs take two forms: * For non-regionalized resources:
+            /// [Fully Qualified Name (FQN)](https://cloud.google.com//data-catalog/docs/fully-qualified-names) of the
+            /// resource. FQNs take two forms: * For non-regionalized resources:
             /// `{SYSTEM}:{PROJECT}.{PATH_TO_RESOURCE_SEPARATED_WITH_DOTS}` * For regionalized resources:
             /// `{SYSTEM}:{PROJECT}.{LOCATION_ID}.{PATH_TO_RESOURCE_SEPARATED_WITH_DOTS}` Example for a DPMS table:
             /// `dataproc_metastore:{PROJECT_ID}.{LOCATION_ID}.{INSTANCE_ID}.{DATABASE_ID}.{TABLE_ID}`
@@ -398,6 +398,20 @@ namespace Google.Apis.DataCatalog.v1
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("linkedResource", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string LinkedResource { get; set; }
+
+            /// <summary>
+            /// Location where the lookup should be performed. Required to lookup entry that is not a part of `DPMS` or
+            /// `DATAPLEX` `integrated_system` using its `fully_qualified_name`. Ignored in other cases.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("location", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Location { get; set; }
+
+            /// <summary>
+            /// Project where the lookup should be performed. Required to lookup entry that is not a part of `DPMS` or
+            /// `DATAPLEX` `integrated_system` using its `fully_qualified_name`. Ignored in other cases.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Project { get; set; }
 
             /// <summary>
             /// The SQL name of the entry. SQL names are case-sensitive. Examples: *
@@ -440,6 +454,22 @@ namespace Google.Apis.DataCatalog.v1
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("location", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "location",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("project", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "project",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("sqlResource", new Google.Apis.Discovery.Parameter
                 {
                     Name = "sqlResource",
@@ -448,6 +478,203 @@ namespace Google.Apis.DataCatalog.v1
                     DefaultValue = null,
                     Pattern = null,
                 });
+            }
+        }
+    }
+
+    /// <summary>The "organizations" collection of methods.</summary>
+    public class OrganizationsResource
+    {
+        private const string Resource = "organizations";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public OrganizationsResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+            Locations = new LocationsResource(service);
+        }
+
+        /// <summary>Gets the Locations resource.</summary>
+        public virtual LocationsResource Locations { get; }
+
+        /// <summary>The "locations" collection of methods.</summary>
+        public class LocationsResource
+        {
+            private const string Resource = "locations";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public LocationsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// Retrieves the configuration related to the migration from Data Catalog to Dataplex for a specific
+            /// organization, including all the projects under it which have a separate configuration set.
+            /// </summary>
+            /// <param name="name">Required. The organization whose config is being retrieved.</param>
+            public virtual RetrieveConfigRequest RetrieveConfig(string name)
+            {
+                return new RetrieveConfigRequest(this.service, name);
+            }
+
+            /// <summary>
+            /// Retrieves the configuration related to the migration from Data Catalog to Dataplex for a specific
+            /// organization, including all the projects under it which have a separate configuration set.
+            /// </summary>
+            public class RetrieveConfigRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1OrganizationConfig>
+            {
+                /// <summary>Constructs a new RetrieveConfig request.</summary>
+                public RetrieveConfigRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>Required. The organization whose config is being retrieved.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "retrieveConfig";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:retrieveConfig";
+
+                /// <summary>Initializes RetrieveConfig parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Retrieves the effective configuration related to the migration from Data Catalog to Dataplex for a
+            /// specific organization or project. If there is no specific configuration set for the resource, the
+            /// setting is checked hierarchicahlly through the ancestors of the resource, starting from the resource
+            /// itself.
+            /// </summary>
+            /// <param name="name">Required. The resource whose effective config is being retrieved.</param>
+            public virtual RetrieveEffectiveConfigRequest RetrieveEffectiveConfig(string name)
+            {
+                return new RetrieveEffectiveConfigRequest(this.service, name);
+            }
+
+            /// <summary>
+            /// Retrieves the effective configuration related to the migration from Data Catalog to Dataplex for a
+            /// specific organization or project. If there is no specific configuration set for the resource, the
+            /// setting is checked hierarchicahlly through the ancestors of the resource, starting from the resource
+            /// itself.
+            /// </summary>
+            public class RetrieveEffectiveConfigRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1MigrationConfig>
+            {
+                /// <summary>Constructs a new RetrieveEffectiveConfig request.</summary>
+                public RetrieveEffectiveConfigRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>Required. The resource whose effective config is being retrieved.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "retrieveEffectiveConfig";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:retrieveEffectiveConfig";
+
+                /// <summary>Initializes RetrieveEffectiveConfig parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Sets the configuration related to the migration to Dataplex for an organization or project.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">Required. The organization or project whose config is being specified.</param>
+            public virtual SetConfigRequest SetConfig(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1SetConfigRequest body, string name)
+            {
+                return new SetConfigRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Sets the configuration related to the migration to Dataplex for an organization or project.
+            /// </summary>
+            public class SetConfigRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1MigrationConfig>
+            {
+                /// <summary>Constructs a new SetConfig request.</summary>
+                public SetConfigRequest(Google.Apis.Services.IClientService service, Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1SetConfigRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>Required. The organization or project whose config is being specified.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1SetConfigRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "setConfig";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:setConfig";
+
+                /// <summary>Initializes SetConfig parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                    });
+                }
             }
         }
     }
@@ -483,6 +710,7 @@ namespace Google.Apis.DataCatalog.v1
             {
                 this.service = service;
                 EntryGroups = new EntryGroupsResource(service);
+                Operations = new OperationsResource(service);
                 TagTemplates = new TagTemplatesResource(service);
                 Taxonomies = new TaxonomiesResource(service);
             }
@@ -559,7 +787,7 @@ namespace Google.Apis.DataCatalog.v1
                         /// </param>
                         public virtual CreateRequest Create(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1Tag body, string parent)
                         {
-                            return new CreateRequest(service, body, parent);
+                            return new CreateRequest(this.service, body, parent);
                         }
 
                         /// <summary>
@@ -624,7 +852,7 @@ namespace Google.Apis.DataCatalog.v1
                         /// <param name="name">Required. The name of the tag to delete.</param>
                         public virtual DeleteRequest Delete(string name)
                         {
-                            return new DeleteRequest(service, name);
+                            return new DeleteRequest(this.service, name);
                         }
 
                         /// <summary>Deletes a tag.</summary>
@@ -665,17 +893,21 @@ namespace Google.Apis.DataCatalog.v1
                             }
                         }
 
-                        /// <summary>Lists tags assigned to an Entry.</summary>
+                        /// <summary>
+                        /// Lists tags assigned to an Entry. The columns in the response are lowercased.
+                        /// </summary>
                         /// <param name="parent">
                         /// Required. The name of the Data Catalog resource to list the tags of. The resource can be an
                         /// Entry or an EntryGroup (without `/entries/{entries}` at the end).
                         /// </param>
                         public virtual ListRequest List(string parent)
                         {
-                            return new ListRequest(service, parent);
+                            return new ListRequest(this.service, parent);
                         }
 
-                        /// <summary>Lists tags assigned to an Entry.</summary>
+                        /// <summary>
+                        /// Lists tags assigned to an Entry. The columns in the response are lowercased.
+                        /// </summary>
                         public class ListRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ListTagsResponse>
                         {
                             /// <summary>Constructs a new List request.</summary>
@@ -748,12 +980,12 @@ namespace Google.Apis.DataCatalog.v1
                         /// <summary>Updates an existing tag.</summary>
                         /// <param name="body">The body of the request.</param>
                         /// <param name="name">
-                        /// The resource name of the tag in URL format where tag ID is a system-generated identifier.
-                        /// Note: The tag itself might not be stored in the location specified in its name.
+                        /// Identifier. The resource name of the tag in URL format where tag ID is a system-generated
+                        /// identifier. Note: The tag itself might not be stored in the location specified in its name.
                         /// </param>
                         public virtual PatchRequest Patch(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1Tag body, string name)
                         {
-                            return new PatchRequest(service, body, name);
+                            return new PatchRequest(this.service, body, name);
                         }
 
                         /// <summary>Updates an existing tag.</summary>
@@ -768,9 +1000,9 @@ namespace Google.Apis.DataCatalog.v1
                             }
 
                             /// <summary>
-                            /// The resource name of the tag in URL format where tag ID is a system-generated
-                            /// identifier. Note: The tag itself might not be stored in the location specified in its
-                            /// name.
+                            /// Identifier. The resource name of the tag in URL format where tag ID is a
+                            /// system-generated identifier. Note: The tag itself might not be stored in the location
+                            /// specified in its name.
                             /// </summary>
                             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                             public virtual string Name { get; private set; }
@@ -821,6 +1053,71 @@ namespace Google.Apis.DataCatalog.v1
                                 });
                             }
                         }
+
+                        /// <summary>
+                        /// `ReconcileTags` creates or updates a list of tags on the entry. If the
+                        /// ReconcileTagsRequest.force_delete_missing parameter is set, the operation deletes tags not
+                        /// included in the input tag list. `ReconcileTags` returns a long-running operation resource
+                        /// that can be queried with Operations.GetOperation to return ReconcileTagsMetadata and a
+                        /// ReconcileTagsResponse message.
+                        /// </summary>
+                        /// <param name="body">The body of the request.</param>
+                        /// <param name="parent">Required. Name of Entry to be tagged.</param>
+                        public virtual ReconcileRequest Reconcile(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ReconcileTagsRequest body, string parent)
+                        {
+                            return new ReconcileRequest(this.service, body, parent);
+                        }
+
+                        /// <summary>
+                        /// `ReconcileTags` creates or updates a list of tags on the entry. If the
+                        /// ReconcileTagsRequest.force_delete_missing parameter is set, the operation deletes tags not
+                        /// included in the input tag list. `ReconcileTags` returns a long-running operation resource
+                        /// that can be queried with Operations.GetOperation to return ReconcileTagsMetadata and a
+                        /// ReconcileTagsResponse message.
+                        /// </summary>
+                        public class ReconcileRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.Operation>
+                        {
+                            /// <summary>Constructs a new Reconcile request.</summary>
+                            public ReconcileRequest(Google.Apis.Services.IClientService service, Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ReconcileTagsRequest body, string parent) : base(service)
+                            {
+                                Parent = parent;
+                                Body = body;
+                                InitParameters();
+                            }
+
+                            /// <summary>Required. Name of Entry to be tagged.</summary>
+                            [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                            public virtual string Parent { get; private set; }
+
+                            /// <summary>Gets or sets the body of this request.</summary>
+                            Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ReconcileTagsRequest Body { get; set; }
+
+                            /// <summary>Returns the body of the request.</summary>
+                            protected override object GetBody() => Body;
+
+                            /// <summary>Gets the method name.</summary>
+                            public override string MethodName => "reconcile";
+
+                            /// <summary>Gets the HTTP method.</summary>
+                            public override string HttpMethod => "POST";
+
+                            /// <summary>Gets the REST path.</summary>
+                            public override string RestPath => "v1/{+parent}/tags:reconcile";
+
+                            /// <summary>Initializes Reconcile parameter list.</summary>
+                            protected override void InitParameters()
+                            {
+                                base.InitParameters();
+                                RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "parent",
+                                    IsRequired = true,
+                                    ParameterType = "path",
+                                    DefaultValue = null,
+                                    Pattern = @"^projects/[^/]+/locations/[^/]+/entryGroups/[^/]+/entries/[^/]+$",
+                                });
+                            }
+                        }
                     }
 
                     /// <summary>
@@ -838,7 +1135,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1Entry body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -920,7 +1217,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// <param name="name">Required. The name of the entry to delete.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -970,7 +1267,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// <param name="name">Required. The name of the entry to get.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets an entry.</summary>
@@ -1022,12 +1319,13 @@ namespace Google.Apis.DataCatalog.v1
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.DataCatalog.v1.Data.GetIamPolicyRequest body, string resource)
                     {
-                        return new GetIamPolicyRequest(service, body, resource);
+                        return new GetIamPolicyRequest(this.service, body, resource);
                     }
 
                     /// <summary>
@@ -1050,8 +1348,9 @@ namespace Google.Apis.DataCatalog.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -1087,6 +1386,75 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
+                    /// Imports entries from a source, such as data previously dumped into a Cloud Storage bucket, into
+                    /// Data Catalog. Import of entries is a sync operation that reconciles the state of the third-party
+                    /// system with the Data Catalog. `ImportEntries` accepts source data snapshots of a third-party
+                    /// system. Snapshot should be delivered as a .wire or base65-encoded .txt file containing a
+                    /// sequence of Protocol Buffer messages of DumpItem type. `ImportEntries` returns a long-running
+                    /// operation resource that can be queried with Operations.GetOperation to return
+                    /// ImportEntriesMetadata and an ImportEntriesResponse message.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">Required. Target entry group for ingested entries.</param>
+                    public virtual ImportRequest Import(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ImportEntriesRequest body, string parent)
+                    {
+                        return new ImportRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>
+                    /// Imports entries from a source, such as data previously dumped into a Cloud Storage bucket, into
+                    /// Data Catalog. Import of entries is a sync operation that reconciles the state of the third-party
+                    /// system with the Data Catalog. `ImportEntries` accepts source data snapshots of a third-party
+                    /// system. Snapshot should be delivered as a .wire or base65-encoded .txt file containing a
+                    /// sequence of Protocol Buffer messages of DumpItem type. `ImportEntries` returns a long-running
+                    /// operation resource that can be queried with Operations.GetOperation to return
+                    /// ImportEntriesMetadata and an ImportEntriesResponse message.
+                    /// </summary>
+                    public class ImportRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Import request.</summary>
+                        public ImportRequest(Google.Apis.Services.IClientService service, Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ImportEntriesRequest body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. Target entry group for ingested entries.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ImportEntriesRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "import";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+parent}/entries:import";
+
+                        /// <summary>Initializes Import parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/entryGroups/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
                     /// Lists entries. Note: Currently, this method can list only custom entries. To get a list of both
                     /// custom and automatically created entries, use SearchCatalog.
                     /// </summary>
@@ -1096,7 +1464,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -1190,18 +1558,136 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
+                    /// Modifies contacts, part of the business context of an Entry. To call this method, you must have
+                    /// the `datacatalog.entries.updateContacts` IAM permission on the corresponding project.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">Required. The full resource name of the entry.</param>
+                    public virtual ModifyEntryContactsRequest ModifyEntryContacts(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ModifyEntryContactsRequest body, string name)
+                    {
+                        return new ModifyEntryContactsRequest(this.service, body, name);
+                    }
+
+                    /// <summary>
+                    /// Modifies contacts, part of the business context of an Entry. To call this method, you must have
+                    /// the `datacatalog.entries.updateContacts` IAM permission on the corresponding project.
+                    /// </summary>
+                    public class ModifyEntryContactsRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1Contacts>
+                    {
+                        /// <summary>Constructs a new ModifyEntryContacts request.</summary>
+                        public ModifyEntryContactsRequest(Google.Apis.Services.IClientService service, Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ModifyEntryContactsRequest body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. The full resource name of the entry.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ModifyEntryContactsRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "modifyEntryContacts";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}:modifyEntryContacts";
+
+                        /// <summary>Initializes ModifyEntryContacts parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/entryGroups/[^/]+/entries/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Modifies entry overview, part of the business context of an Entry. To call this method, you must
+                    /// have the `datacatalog.entries.updateOverview` IAM permission on the corresponding project.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">Required. The full resource name of the entry.</param>
+                    public virtual ModifyEntryOverviewRequest ModifyEntryOverview(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ModifyEntryOverviewRequest body, string name)
+                    {
+                        return new ModifyEntryOverviewRequest(this.service, body, name);
+                    }
+
+                    /// <summary>
+                    /// Modifies entry overview, part of the business context of an Entry. To call this method, you must
+                    /// have the `datacatalog.entries.updateOverview` IAM permission on the corresponding project.
+                    /// </summary>
+                    public class ModifyEntryOverviewRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1EntryOverview>
+                    {
+                        /// <summary>Constructs a new ModifyEntryOverview request.</summary>
+                        public ModifyEntryOverviewRequest(Google.Apis.Services.IClientService service, Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ModifyEntryOverviewRequest body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. The full resource name of the entry.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ModifyEntryOverviewRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "modifyEntryOverview";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}:modifyEntryOverview";
+
+                        /// <summary>Initializes ModifyEntryOverview parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/entryGroups/[^/]+/entries/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
                     /// Updates an existing entry. You must enable the Data Catalog API in the project identified by the
                     /// `entry.name` parameter. For more information, see [Data Catalog resource
                     /// project](https://cloud.google.com/data-catalog/docs/concepts/resource-project).
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">
-                    /// Output only. The resource name of an entry in URL format. Note: The entry itself and its child
-                    /// resources might not be stored in the location specified in its name.
+                    /// Output only. Identifier. The resource name of an entry in URL format. Note: The entry itself and
+                    /// its child resources might not be stored in the location specified in its name.
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1Entry body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1220,8 +1706,8 @@ namespace Google.Apis.DataCatalog.v1
                         }
 
                         /// <summary>
-                        /// Output only. The resource name of an entry in URL format. Note: The entry itself and its
-                        /// child resources might not be stored in the location specified in its name.
+                        /// Output only. Identifier. The resource name of an entry in URL format. Note: The entry itself
+                        /// and its child resources might not be stored in the location specified in its name.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Name { get; private set; }
@@ -1284,7 +1770,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// <param name="name">Required. The name of the entry to mark as starred.</param>
                     public virtual StarRequest Star(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1StarEntryRequest body, string name)
                     {
-                        return new StarRequest(service, body, name);
+                        return new StarRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1343,12 +1829,13 @@ namespace Google.Apis.DataCatalog.v1
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.DataCatalog.v1.Data.TestIamPermissionsRequest body, string resource)
                     {
-                        return new TestIamPermissionsRequest(service, body, resource);
+                        return new TestIamPermissionsRequest(this.service, body, resource);
                     }
 
                     /// <summary>
@@ -1369,8 +1856,9 @@ namespace Google.Apis.DataCatalog.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -1412,7 +1900,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// <param name="name">Required. The name of the entry to mark as **not** starred.</param>
                     public virtual UnstarRequest Unstar(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1UnstarEntryRequest body, string name)
                     {
-                        return new UnstarRequest(service, body, name);
+                        return new UnstarRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1498,7 +1986,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1Tag body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -1563,7 +2051,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// <param name="name">Required. The name of the tag to delete.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes a tag.</summary>
@@ -1604,17 +2092,17 @@ namespace Google.Apis.DataCatalog.v1
                         }
                     }
 
-                    /// <summary>Lists tags assigned to an Entry.</summary>
+                    /// <summary>Lists tags assigned to an Entry. The columns in the response are lowercased.</summary>
                     /// <param name="parent">
                     /// Required. The name of the Data Catalog resource to list the tags of. The resource can be an
                     /// Entry or an EntryGroup (without `/entries/{entries}` at the end).
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
-                    /// <summary>Lists tags assigned to an Entry.</summary>
+                    /// <summary>Lists tags assigned to an Entry. The columns in the response are lowercased.</summary>
                     public class ListRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ListTagsResponse>
                     {
                         /// <summary>Constructs a new List request.</summary>
@@ -1687,12 +2175,12 @@ namespace Google.Apis.DataCatalog.v1
                     /// <summary>Updates an existing tag.</summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">
-                    /// The resource name of the tag in URL format where tag ID is a system-generated identifier. Note:
-                    /// The tag itself might not be stored in the location specified in its name.
+                    /// Identifier. The resource name of the tag in URL format where tag ID is a system-generated
+                    /// identifier. Note: The tag itself might not be stored in the location specified in its name.
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1Tag body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>Updates an existing tag.</summary>
@@ -1707,8 +2195,8 @@ namespace Google.Apis.DataCatalog.v1
                         }
 
                         /// <summary>
-                        /// The resource name of the tag in URL format where tag ID is a system-generated identifier.
-                        /// Note: The tag itself might not be stored in the location specified in its name.
+                        /// Identifier. The resource name of the tag in URL format where tag ID is a system-generated
+                        /// identifier. Note: The tag itself might not be stored in the location specified in its name.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Name { get; private set; }
@@ -1782,7 +2270,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1EntryGroup body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1871,7 +2359,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// <param name="name">Required. The name of the entry group to delete.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1932,7 +2420,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// <param name="name">Required. The name of the entry group to get.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets an entry group.</summary>
@@ -1996,12 +2484,13 @@ namespace Google.Apis.DataCatalog.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.DataCatalog.v1.Data.GetIamPolicyRequest body, string resource)
                 {
-                    return new GetIamPolicyRequest(service, body, resource);
+                    return new GetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -2024,8 +2513,9 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -2066,7 +2556,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists entry groups.</summary>
@@ -2147,12 +2637,12 @@ namespace Google.Apis.DataCatalog.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// The resource name of the entry group in URL format. Note: The entry group itself and its child
-                /// resources might not be stored in the location specified in its name.
+                /// Identifier. The resource name of the entry group in URL format. Note: The entry group itself and its
+                /// child resources might not be stored in the location specified in its name.
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1EntryGroup body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -2171,8 +2661,8 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
-                    /// The resource name of the entry group in URL format. Note: The entry group itself and its child
-                    /// resources might not be stored in the location specified in its name.
+                    /// Identifier. The resource name of the entry group in URL format. Note: The entry group itself and
+                    /// its child resources might not be stored in the location specified in its name.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -2233,12 +2723,13 @@ namespace Google.Apis.DataCatalog.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.DataCatalog.v1.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -2260,8 +2751,9 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -2305,12 +2797,13 @@ namespace Google.Apis.DataCatalog.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.DataCatalog.v1.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -2331,8 +2824,9 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -2363,6 +2857,274 @@ namespace Google.Apis.DataCatalog.v1
                             ParameterType = "path",
                             DefaultValue = null,
                             Pattern = @"^projects/[^/]+/locations/[^/]+/entryGroups/[^/]+$",
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the Operations resource.</summary>
+            public virtual OperationsResource Operations { get; }
+
+            /// <summary>The "operations" collection of methods.</summary>
+            public class OperationsResource
+            {
+                private const string Resource = "operations";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public OperationsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to
+                /// cancel the operation, but success is not guaranteed. If the server doesn't support this method, it
+                /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
+                /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
+                /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
+                /// </summary>
+                /// <param name="name">The name of the operation resource to be cancelled.</param>
+                public virtual CancelRequest Cancel(string name)
+                {
+                    return new CancelRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to
+                /// cancel the operation, but success is not guaranteed. If the server doesn't support this method, it
+                /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
+                /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
+                /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
+                /// </summary>
+                public class CancelRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Cancel request.</summary>
+                    public CancelRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation resource to be cancelled.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "cancel";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}:cancel";
+
+                    /// <summary>Initializes Cancel parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Deletes a long-running operation. This method indicates that the client is no longer interested in
+                /// the operation result. It does not cancel the operation. If the server doesn't support this method,
+                /// it returns `google.rpc.Code.UNIMPLEMENTED`.
+                /// </summary>
+                /// <param name="name">The name of the operation resource to be deleted.</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Deletes a long-running operation. This method indicates that the client is no longer interested in
+                /// the operation result. It does not cancel the operation. If the server doesn't support this method,
+                /// it returns `google.rpc.Code.UNIMPLEMENTED`.
+                /// </summary>
+                public class DeleteRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation resource to be deleted.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
+                /// result at intervals as recommended by the API service.
+                /// </summary>
+                /// <param name="name">The name of the operation resource.</param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
+                /// result at intervals as recommended by the API service.
+                /// </summary>
+                public class GetRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation resource.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Lists operations that match the specified filter in the request. If the server doesn't support this
+                /// method, it returns `UNIMPLEMENTED`.
+                /// </summary>
+                /// <param name="name">The name of the operation's parent resource.</param>
+                public virtual ListRequest List(string name)
+                {
+                    return new ListRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Lists operations that match the specified filter in the request. If the server doesn't support this
+                /// method, it returns `UNIMPLEMENTED`.
+                /// </summary>
+                public class ListRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.ListOperationsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation's parent resource.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>The standard list filter.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>The standard list page size.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>The standard list page token.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}/operations";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
                         });
                     }
                 }
@@ -2429,7 +3191,7 @@ namespace Google.Apis.DataCatalog.v1
                         /// <param name="name">Required. The name of the enum field value.</param>
                         public virtual RenameRequest Rename(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1RenameTagTemplateFieldEnumValueRequest body, string name)
                         {
-                            return new RenameRequest(service, body, name);
+                            return new RenameRequest(this.service, body, name);
                         }
 
                         /// <summary>
@@ -2493,7 +3255,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1TagTemplateField body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -2575,7 +3337,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// <param name="name">Required. The name of the tag template field to delete.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -2646,7 +3408,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// <param name="name">Required. The name of the tag template field.</param>
                     public virtual PatchRequest Patch(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1TagTemplateField body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -2729,7 +3491,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// <param name="name">Required. The name of the tag template field.</param>
                     public virtual RenameRequest Rename(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1RenameTagTemplateFieldRequest body, string name)
                     {
-                        return new RenameRequest(service, body, name);
+                        return new RenameRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -2794,7 +3556,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1TagTemplate body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -2873,7 +3635,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// <param name="name">Required. The name of the tag template to delete.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -2937,7 +3699,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// <param name="name">Required. The name of the tag template to get.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a tag template.</summary>
@@ -2989,12 +3751,13 @@ namespace Google.Apis.DataCatalog.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.DataCatalog.v1.Data.GetIamPolicyRequest body, string resource)
                 {
-                    return new GetIamPolicyRequest(service, body, resource);
+                    return new GetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -3017,8 +3780,9 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -3061,12 +3825,12 @@ namespace Google.Apis.DataCatalog.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// The resource name of the tag template in URL format. Note: The tag template itself and its child
-                /// resources might not be stored in the location specified in its name.
+                /// Identifier. The resource name of the tag template in URL format. Note: The tag template itself and
+                /// its child resources might not be stored in the location specified in its name.
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1TagTemplate body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -3086,8 +3850,8 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
-                    /// The resource name of the tag template in URL format. Note: The tag template itself and its child
-                    /// resources might not be stored in the location specified in its name.
+                    /// Identifier. The resource name of the tag template in URL format. Note: The tag template itself
+                    /// and its child resources might not be stored in the location specified in its name.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -3097,8 +3861,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// `is_publicly_readable` can be overwritten. If this parameter is absent or empty, all modifiable
                     /// fields are overwritten. If such fields are non-required and omitted in the request body, their
                     /// values are emptied. Note: Updating the `is_publicly_readable` field may require up to 12 hours
-                    /// to take effect in search results. Additionally, it also requires the `tagTemplates.getIamPolicy`
-                    /// and `tagTemplates.setIamPolicy` permissions.
+                    /// to take effect in search results.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual object UpdateMask { get; set; }
@@ -3151,12 +3914,13 @@ namespace Google.Apis.DataCatalog.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.DataCatalog.v1.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -3178,8 +3942,9 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -3223,12 +3988,13 @@ namespace Google.Apis.DataCatalog.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.DataCatalog.v1.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -3249,8 +4015,9 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -3328,7 +4095,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1PolicyTag body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>Creates a policy tag in a taxonomy.</summary>
@@ -3389,7 +4156,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -3441,7 +4208,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// <param name="name">Required. Resource name of the policy tag.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets a policy tag.</summary>
@@ -3485,12 +4252,13 @@ namespace Google.Apis.DataCatalog.v1
                     /// <summary>Gets the IAM policy for a policy tag or a taxonomy.</summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.DataCatalog.v1.Data.GetIamPolicyRequest body, string resource)
                     {
-                        return new GetIamPolicyRequest(service, body, resource);
+                        return new GetIamPolicyRequest(this.service, body, resource);
                     }
 
                     /// <summary>Gets the IAM policy for a policy tag or a taxonomy.</summary>
@@ -3505,8 +4273,9 @@ namespace Google.Apis.DataCatalog.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -3545,7 +4314,7 @@ namespace Google.Apis.DataCatalog.v1
                     /// <param name="parent">Required. Resource name of the taxonomy to list the policy tags of.</param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists all policy tags in a taxonomy.</summary>
@@ -3621,12 +4390,12 @@ namespace Google.Apis.DataCatalog.v1
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">
-                    /// Output only. Resource name of this policy tag in the URL format. The policy tag manager
-                    /// generates unique taxonomy IDs and policy tag IDs.
+                    /// Identifier. Resource name of this policy tag in the URL format. The policy tag manager generates
+                    /// unique taxonomy IDs and policy tag IDs.
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1PolicyTag body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -3643,7 +4412,7 @@ namespace Google.Apis.DataCatalog.v1
                         }
 
                         /// <summary>
-                        /// Output only. Resource name of this policy tag in the URL format. The policy tag manager
+                        /// Identifier. Resource name of this policy tag in the URL format. The policy tag manager
                         /// generates unique taxonomy IDs and policy tag IDs.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -3699,12 +4468,13 @@ namespace Google.Apis.DataCatalog.v1
                     /// <summary>Sets the IAM policy for a policy tag or a taxonomy.</summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.DataCatalog.v1.Data.SetIamPolicyRequest body, string resource)
                     {
-                        return new SetIamPolicyRequest(service, body, resource);
+                        return new SetIamPolicyRequest(this.service, body, resource);
                     }
 
                     /// <summary>Sets the IAM policy for a policy tag or a taxonomy.</summary>
@@ -3719,8 +4489,9 @@ namespace Google.Apis.DataCatalog.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being specified. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -3758,12 +4529,13 @@ namespace Google.Apis.DataCatalog.v1
                     /// <summary>Returns your permissions on a specified policy tag or taxonomy.</summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.DataCatalog.v1.Data.TestIamPermissionsRequest body, string resource)
                     {
-                        return new TestIamPermissionsRequest(service, body, resource);
+                        return new TestIamPermissionsRequest(this.service, body, resource);
                     }
 
                     /// <summary>Returns your permissions on a specified policy tag or taxonomy.</summary>
@@ -3778,8 +4550,9 @@ namespace Google.Apis.DataCatalog.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -3825,7 +4598,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1Taxonomy body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -3886,7 +4659,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -3943,7 +4716,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// </param>
                 public virtual ExportRequest Export(string parent)
                 {
-                    return new ExportRequest(service, parent);
+                    return new ExportRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -4020,7 +4793,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// <param name="name">Required. Resource name of the taxonomy to get.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a taxonomy.</summary>
@@ -4064,12 +4837,13 @@ namespace Google.Apis.DataCatalog.v1
                 /// <summary>Gets the IAM policy for a policy tag or a taxonomy.</summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.DataCatalog.v1.Data.GetIamPolicyRequest body, string resource)
                 {
-                    return new GetIamPolicyRequest(service, body, resource);
+                    return new GetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>Gets the IAM policy for a policy tag or a taxonomy.</summary>
@@ -4084,8 +4858,9 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -4132,7 +4907,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// </param>
                 public virtual ImportRequest Import(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ImportTaxonomiesRequest body, string parent)
                 {
-                    return new ImportRequest(service, body, parent);
+                    return new ImportRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -4193,7 +4968,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// <param name="parent">Required. Resource name of the project to list the taxonomies of.</param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -4211,6 +4986,12 @@ namespace Google.Apis.DataCatalog.v1
                     /// <summary>Required. Resource name of the project to list the taxonomies of.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Supported field for filter is 'service' and value is 'dataplex'. Eg: service=dataplex.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
 
                     /// <summary>
                     /// The maximum number of items to return. Must be a value between 1 and 1000 inclusively. If not
@@ -4247,6 +5028,14 @@ namespace Google.Apis.DataCatalog.v1
                             DefaultValue = null,
                             Pattern = @"^projects/[^/]+/locations/[^/]+$",
                         });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
                         RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
                         {
                             Name = "pageSize",
@@ -4271,12 +5060,12 @@ namespace Google.Apis.DataCatalog.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// Output only. Resource name of this taxonomy in URL format. Note: Policy tag manager generates unique
+                /// Identifier. Resource name of this taxonomy in URL format. Note: Policy tag manager generates unique
                 /// taxonomy IDs.
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1Taxonomy body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -4293,7 +5082,7 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
-                    /// Output only. Resource name of this taxonomy in URL format. Note: Policy tag manager generates
+                    /// Identifier. Resource name of this taxonomy in URL format. Note: Policy tag manager generates
                     /// unique taxonomy IDs.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -4357,7 +5146,7 @@ namespace Google.Apis.DataCatalog.v1
                 /// <param name="name">Required. Resource name of the taxonomy to update.</param>
                 public virtual ReplaceRequest Replace(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1ReplaceTaxonomyRequest body, string name)
                 {
-                    return new ReplaceRequest(service, body, name);
+                    return new ReplaceRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -4415,12 +5204,13 @@ namespace Google.Apis.DataCatalog.v1
                 /// <summary>Sets the IAM policy for a policy tag or a taxonomy.</summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.DataCatalog.v1.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>Sets the IAM policy for a policy tag or a taxonomy.</summary>
@@ -4435,8 +5225,9 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -4474,12 +5265,13 @@ namespace Google.Apis.DataCatalog.v1
                 /// <summary>Returns your permissions on a specified policy tag or taxonomy.</summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.DataCatalog.v1.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>Returns your permissions on a specified policy tag or taxonomy.</summary>
@@ -4494,8 +5286,9 @@ namespace Google.Apis.DataCatalog.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -4530,6 +5323,118 @@ namespace Google.Apis.DataCatalog.v1
                     }
                 }
             }
+
+            /// <summary>
+            /// Retrieves the effective configuration related to the migration from Data Catalog to Dataplex for a
+            /// specific organization or project. If there is no specific configuration set for the resource, the
+            /// setting is checked hierarchicahlly through the ancestors of the resource, starting from the resource
+            /// itself.
+            /// </summary>
+            /// <param name="name">Required. The resource whose effective config is being retrieved.</param>
+            public virtual RetrieveEffectiveConfigRequest RetrieveEffectiveConfig(string name)
+            {
+                return new RetrieveEffectiveConfigRequest(this.service, name);
+            }
+
+            /// <summary>
+            /// Retrieves the effective configuration related to the migration from Data Catalog to Dataplex for a
+            /// specific organization or project. If there is no specific configuration set for the resource, the
+            /// setting is checked hierarchicahlly through the ancestors of the resource, starting from the resource
+            /// itself.
+            /// </summary>
+            public class RetrieveEffectiveConfigRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1MigrationConfig>
+            {
+                /// <summary>Constructs a new RetrieveEffectiveConfig request.</summary>
+                public RetrieveEffectiveConfigRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>Required. The resource whose effective config is being retrieved.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "retrieveEffectiveConfig";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:retrieveEffectiveConfig";
+
+                /// <summary>Initializes RetrieveEffectiveConfig parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Sets the configuration related to the migration to Dataplex for an organization or project.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">Required. The organization or project whose config is being specified.</param>
+            public virtual SetConfigRequest SetConfig(Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1SetConfigRequest body, string name)
+            {
+                return new SetConfigRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Sets the configuration related to the migration to Dataplex for an organization or project.
+            /// </summary>
+            public class SetConfigRequest : DataCatalogBaseServiceRequest<Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1MigrationConfig>
+            {
+                /// <summary>Constructs a new SetConfig request.</summary>
+                public SetConfigRequest(Google.Apis.Services.IClientService service, Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1SetConfigRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>Required. The organization or project whose config is being specified.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.DataCatalog.v1.Data.GoogleCloudDatacatalogV1SetConfigRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "setConfig";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:setConfig";
+
+                /// <summary>Initializes SetConfig parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                    });
+                }
+            }
         }
     }
 }
@@ -4549,16 +5454,37 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -4566,15 +5492,19 @@ namespace Google.Apis.DataCatalog.v1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -4586,8 +5516,7 @@ namespace Google.Apis.DataCatalog.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4753,6 +5682,72 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Business Context of the entry.</summary>
+    public class GoogleCloudDatacatalogV1BusinessContext : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Contact people for the entry.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("contacts")]
+        public virtual GoogleCloudDatacatalogV1Contacts Contacts { get; set; }
+
+        /// <summary>Entry overview fields for rich text descriptions of entries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entryOverview")]
+        public virtual GoogleCloudDatacatalogV1EntryOverview EntryOverview { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Specification that applies to Instance entries that are part of `CLOUD_BIGTABLE` system. (user_specified_type)
+    /// </summary>
+    public class GoogleCloudDatacatalogV1CloudBigtableInstanceSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of clusters for the Instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudBigtableClusterSpecs")]
+        public virtual System.Collections.Generic.IList<GoogleCloudDatacatalogV1CloudBigtableInstanceSpecCloudBigtableClusterSpec> CloudBigtableClusterSpecs { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Spec that applies to clusters of an Instance of Cloud Bigtable.</summary>
+    public class GoogleCloudDatacatalogV1CloudBigtableInstanceSpecCloudBigtableClusterSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of the cluster.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>A link back to the parent resource, in this case Instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("linkedResource")]
+        public virtual string LinkedResource { get; set; }
+
+        /// <summary>Location of the cluster, typically a Cloud zone.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>Type of the resource. For a cluster this would be "CLUSTER".</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Specification that applies to all entries that are part of `CLOUD_BIGTABLE` system (user_specified_type)
+    /// </summary>
+    public class GoogleCloudDatacatalogV1CloudBigtableSystemSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Display name of the Instance. This is user specified and different from the resource name.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceDisplayName")]
+        public virtual string InstanceDisplayName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Specification for the BigQuery connection to a Cloud SQL instance.</summary>
     public class GoogleCloudDatacatalogV1CloudSqlBigQueryConnectionSpec : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4781,6 +5776,10 @@ namespace Google.Apis.DataCatalog.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("column")]
         public virtual string Column { get; set; }
 
+        /// <summary>Optional. Default value for the column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("defaultValue")]
+        public virtual string DefaultValue { get; set; }
+
         /// <summary>
         /// Optional. Description of the column. Default value is an empty string. The description must be a UTF-8
         /// string with the maximum size of 2000 bytes.
@@ -4789,11 +5788,36 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual string Description { get; set; }
 
         /// <summary>
+        /// Optional. Garbage collection policy for the column or column family. Applies to systems like Cloud Bigtable.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gcRule")]
+        public virtual string GcRule { get; set; }
+
+        /// <summary>Optional. Most important inclusion of this column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("highestIndexingType")]
+        public virtual string HighestIndexingType { get; set; }
+
+        /// <summary>Looker specific column info of this column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lookerColumnSpec")]
+        public virtual GoogleCloudDatacatalogV1ColumnSchemaLookerColumnSpec LookerColumnSpec { get; set; }
+
+        /// <summary>
         /// Optional. A column's mode indicates whether values in this column are required, nullable, or repeated. Only
         /// `NULLABLE`, `REQUIRED`, and `REPEATED` values are supported. Default mode is `NULLABLE`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mode")]
         public virtual string Mode { get; set; }
+
+        /// <summary>Optional. Ordinal position</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ordinalPosition")]
+        public virtual System.Nullable<int> OrdinalPosition { get; set; }
+
+        /// <summary>
+        /// Optional. The subtype of the RANGE, if the type of this field is RANGE. If the type is RANGE, this field is
+        /// required. Possible values for the field element type of a RANGE include: * DATE * DATETIME * TIMESTAMP
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rangeElementType")]
+        public virtual GoogleCloudDatacatalogV1ColumnSchemaFieldElementType RangeElementType { get; set; }
 
         /// <summary>Optional. Schema of sub-columns. A column can have zero or more sub-columns.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("subcolumns")]
@@ -4802,6 +5826,65 @@ namespace Google.Apis.DataCatalog.v1.Data
         /// <summary>Required. Type of the column. Must be a UTF-8 string with the maximum size of 128 bytes.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Represents the type of a field element.</summary>
+    public class GoogleCloudDatacatalogV1ColumnSchemaFieldElementType : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The type of a field element. See ColumnSchema.type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Column info specific to Looker System.</summary>
+    public class GoogleCloudDatacatalogV1ColumnSchemaLookerColumnSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Looker specific column type of this column.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Common statistics on the entry's usage. They can be set on any system.</summary>
+    public class GoogleCloudDatacatalogV1CommonUsageStats : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>View count in source system.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("viewCount")]
+        public virtual System.Nullable<long> ViewCount { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Contact people for the entry.</summary>
+    public class GoogleCloudDatacatalogV1Contacts : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of contact people for the entry.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("people")]
+        public virtual System.Collections.Generic.IList<GoogleCloudDatacatalogV1ContactsPerson> People { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A contact person for the entry.</summary>
+    public class GoogleCloudDatacatalogV1ContactsPerson : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Designation of the person, for example, Data Steward.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("designation")]
+        public virtual string Designation { get; set; }
+
+        /// <summary>Email of the person in the format of `john.doe@xyz`, ``, or `John Doe`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("email")]
+        public virtual string Email { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4832,17 +5915,25 @@ namespace Google.Apis.DataCatalog.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("service")]
         public virtual string Service { get; set; }
 
+        /// <summary>Output only. Data Catalog entry name, if applicable.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceEntry")]
+        public virtual string SourceEntry { get; set; }
+
+        /// <summary>Detailed properties of the underlying storage.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("storageProperties")]
+        public virtual GoogleCloudDatacatalogV1StorageProperties StorageProperties { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
     /// <summary>
     /// Specification that applies to a data source connection. Valid only for entries with the `DATA_SOURCE_CONNECTION`
-    /// type.
+    /// type. Only one of internal specs can be set at the time, and cannot be changed later.
     /// </summary>
     public class GoogleCloudDatacatalogV1DataSourceConnectionSpec : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Fields specific to BigQuery connections.</summary>
+        /// <summary>Output only. Fields specific to BigQuery connections.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bigqueryConnectionSpec")]
         public virtual GoogleCloudDatacatalogV1BigQueryConnectionSpec BigqueryConnectionSpec { get; set; }
 
@@ -4853,9 +5944,150 @@ namespace Google.Apis.DataCatalog.v1.Data
     /// <summary>Specification that applies to a table resource. Valid only for entries with the `TABLE` type.</summary>
     public class GoogleCloudDatacatalogV1DatabaseTableSpec : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Spec what aplies to tables that are actually views. Not set for "real" tables.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseViewSpec")]
+        public virtual GoogleCloudDatacatalogV1DatabaseTableSpecDatabaseViewSpec DatabaseViewSpec { get; set; }
+
+        /// <summary>
+        /// Output only. Fields specific to a Dataplex table and present only in the Dataplex table entries.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataplexTable")]
+        public virtual GoogleCloudDatacatalogV1DataplexTableSpec DataplexTable { get; set; }
+
         /// <summary>Type of this table.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Specification that applies to database view.</summary>
+    public class GoogleCloudDatacatalogV1DatabaseTableSpecDatabaseViewSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of a singular table this view reflects one to one.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("baseTable")]
+        public virtual string BaseTable { get; set; }
+
+        /// <summary>SQL query used to generate this view.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlQuery")]
+        public virtual string SqlQuery { get; set; }
+
+        /// <summary>Type of this view.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("viewType")]
+        public virtual string ViewType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// External table registered by Dataplex. Dataplex publishes data discovered from an asset into multiple other
+    /// systems (BigQuery, DPMS) in form of tables. We call them "external tables". External tables are also synced into
+    /// the Data Catalog. This message contains pointers to those external tables (fully qualified name, resource name
+    /// et cetera) within the Data Catalog.
+    /// </summary>
+    public class GoogleCloudDatacatalogV1DataplexExternalTable : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of the Data Catalog entry representing the external table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataCatalogEntry")]
+        public virtual string DataCatalogEntry { get; set; }
+
+        /// <summary>Fully qualified name (FQN) of the external table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fullyQualifiedName")]
+        public virtual string FullyQualifiedName { get; set; }
+
+        /// <summary>Google Cloud resource name of the external table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleCloudResource")]
+        public virtual string GoogleCloudResource { get; set; }
+
+        /// <summary>Service in which the external table is registered.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("system")]
+        public virtual string System { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Entry specyfication for a Dataplex fileset.</summary>
+    public class GoogleCloudDatacatalogV1DataplexFilesetSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Common Dataplex fields.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataplexSpec")]
+        public virtual GoogleCloudDatacatalogV1DataplexSpec DataplexSpec { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Common Dataplex fields.</summary>
+    public class GoogleCloudDatacatalogV1DataplexSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Fully qualified resource name of an asset in Dataplex, to which the underlying data source (Cloud Storage
+        /// bucket or BigQuery dataset) of the entity is attached.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("asset")]
+        public virtual string Asset { get; set; }
+
+        /// <summary>Compression format of the data, e.g., zip, gzip etc.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("compressionFormat")]
+        public virtual string CompressionFormat { get; set; }
+
+        /// <summary>Format of the data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataFormat")]
+        public virtual GoogleCloudDatacatalogV1PhysicalSchema DataFormat { get; set; }
+
+        /// <summary>
+        /// Project ID of the underlying Cloud Storage or BigQuery data. Note that this may not be the same project as
+        /// the correspondingly Dataplex lake / zone / asset.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
+        public virtual string ProjectId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Entry specification for a Dataplex table.</summary>
+    public class GoogleCloudDatacatalogV1DataplexTableSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Common Dataplex fields.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataplexSpec")]
+        public virtual GoogleCloudDatacatalogV1DataplexSpec DataplexSpec { get; set; }
+
+        /// <summary>
+        /// List of external tables registered by Dataplex in other systems based on the same underlying data. External
+        /// tables allow to query this data in those systems.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("externalTables")]
+        public virtual System.Collections.Generic.IList<GoogleCloudDatacatalogV1DataplexExternalTable> ExternalTables { get; set; }
+
+        /// <summary>Indicates if the table schema is managed by the user or not.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userManaged")]
+        public virtual System.Nullable<bool> UserManaged { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Specification that applies to a dataset. Valid only for entries with the `DATASET` type.</summary>
+    public class GoogleCloudDatacatalogV1DatasetSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Vertex AI Dataset specific fields</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vertexDatasetSpec")]
+        public virtual GoogleCloudDatacatalogV1VertexDatasetSpec VertexDatasetSpec { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Wrapper for any item that can be contained in the dump.</summary>
+    public class GoogleCloudDatacatalogV1DumpItem : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Entry and its tags.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("taggedEntry")]
+        public virtual GoogleCloudDatacatalogV1TaggedEntry TaggedEntry { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4870,18 +6102,29 @@ namespace Google.Apis.DataCatalog.v1.Data
     public class GoogleCloudDatacatalogV1Entry : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Specification for a group of BigQuery tables with the `[prefix]YYYYMMDD` name pattern. For more information,
-        /// see [Introduction to partitioned tables]
+        /// Output only. Specification for a group of BigQuery tables with the `[prefix]YYYYMMDD` name pattern. For more
+        /// information, see [Introduction to partitioned tables]
         /// (https://cloud.google.com/bigquery/docs/partitioned-tables#partitioning_versus_sharding).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bigqueryDateShardedSpec")]
         public virtual GoogleCloudDatacatalogV1BigQueryDateShardedSpec BigqueryDateShardedSpec { get; set; }
 
         /// <summary>
-        /// Specification that applies to a BigQuery table. Valid only for entries with the `TABLE` type.
+        /// Output only. Specification that applies to a BigQuery table. Valid only for entries with the `TABLE` type.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bigqueryTableSpec")]
         public virtual GoogleCloudDatacatalogV1BigQueryTableSpec BigqueryTableSpec { get; set; }
+
+        /// <summary>Business Context of the entry. Not supported for BigQuery datasets</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("businessContext")]
+        public virtual GoogleCloudDatacatalogV1BusinessContext BusinessContext { get; set; }
+
+        /// <summary>
+        /// Specification that applies to Cloud Bigtable system. Only settable when `integrated_system` is equal to
+        /// `CLOUD_BIGTABLE`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudBigtableSystemSpec")]
+        public virtual GoogleCloudDatacatalogV1CloudBigtableSystemSpec CloudBigtableSystemSpec { get; set; }
 
         /// <summary>Output only. Physical location of the entry.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataSource")]
@@ -4895,10 +6138,14 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual GoogleCloudDatacatalogV1DataSourceConnectionSpec DataSourceConnectionSpec { get; set; }
 
         /// <summary>
-        /// Specification that applies to a table resource. Valid only for entries with the `TABLE` type.
+        /// Specification that applies to a table resource. Valid only for entries with the `TABLE` or `EXPLORE` type.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("databaseTableSpec")]
         public virtual GoogleCloudDatacatalogV1DatabaseTableSpec DatabaseTableSpec { get; set; }
+
+        /// <summary>Specification that applies to a dataset.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetSpec")]
+        public virtual GoogleCloudDatacatalogV1DatasetSpec DatasetSpec { get; set; }
 
         /// <summary>
         /// Entry description that can consist of several sentences or paragraphs that describe entry contents. The
@@ -4910,20 +6157,26 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual string Description { get; set; }
 
         /// <summary>
-        /// Display name of an entry. The name must contain only Unicode letters, numbers (0-9), underscores (_), dashes
-        /// (-), spaces ( ), and can't start or end with spaces. The maximum size is 200 bytes when encoded in UTF-8.
-        /// Default value is an empty string.
+        /// Display name of an entry. The maximum size is 500 bytes when encoded in UTF-8. Default value is an empty
+        /// string.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
+        /// <summary>FeatureonlineStore spec for Vertex AI Feature Store.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("featureOnlineStoreSpec")]
+        public virtual GoogleCloudDatacatalogV1FeatureOnlineStoreSpec FeatureOnlineStoreSpec { get; set; }
+
         /// <summary>
-        /// Fully qualified name (FQN) of the resource. Set automatically for entries representing resources from synced
-        /// systems. Settable only during creation and read-only afterwards. Can be used for search and lookup of the
-        /// entries. FQNs take two forms: * For non-regionalized resources:
-        /// `{SYSTEM}:{PROJECT}.{PATH_TO_RESOURCE_SEPARATED_WITH_DOTS}` * For regionalized resources:
-        /// `{SYSTEM}:{PROJECT}.{LOCATION_ID}.{PATH_TO_RESOURCE_SEPARATED_WITH_DOTS}` Example for a DPMS table:
-        /// `dataproc_metastore:{PROJECT_ID}.{LOCATION_ID}.{INSTANCE_ID}.{DATABASE_ID}.{TABLE_ID}`
+        /// Specification that applies to a fileset resource. Valid only for entries with the `FILESET` type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filesetSpec")]
+        public virtual GoogleCloudDatacatalogV1FilesetSpec FilesetSpec { get; set; }
+
+        /// <summary>
+        /// [Fully Qualified Name (FQN)](https://cloud.google.com//data-catalog/docs/fully-qualified-names) of the
+        /// resource. Set automatically for entries representing resources from synced systems. Settable only during
+        /// creation, and read-only later. Can be used for search and lookup of the entries.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fullyQualifiedName")]
         public virtual string FullyQualifiedName { get; set; }
@@ -4962,8 +6215,19 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual string LinkedResource { get; set; }
 
         /// <summary>
-        /// Output only. The resource name of an entry in URL format. Note: The entry itself and its child resources
-        /// might not be stored in the location specified in its name.
+        /// Specification that applies to Looker sysstem. Only settable when `user_specified_system` is equal to
+        /// `LOOKER`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lookerSystemSpec")]
+        public virtual GoogleCloudDatacatalogV1LookerSystemSpec LookerSystemSpec { get; set; }
+
+        /// <summary>Model specification.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("modelSpec")]
+        public virtual GoogleCloudDatacatalogV1ModelSpec ModelSpec { get; set; }
+
+        /// <summary>
+        /// Output only. Identifier. The resource name of an entry in URL format. Note: The entry itself and its child
+        /// resources might not be stored in the location specified in its name.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -4983,23 +6247,30 @@ namespace Google.Apis.DataCatalog.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("schema")]
         public virtual GoogleCloudDatacatalogV1Schema Schema { get; set; }
 
+        /// <summary>Specification that applies to a Service resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceSpec")]
+        public virtual GoogleCloudDatacatalogV1ServiceSpec ServiceSpec { get; set; }
+
         /// <summary>
         /// Timestamps from the underlying resource, not from the Data Catalog entry. Output only when the entry has a
-        /// type listed in the `EntryType` enum. For entries with `user_specified_type`, this field is optional and
-        /// defaults to an empty timestamp.
+        /// system listed in the `IntegratedSystem` enum. For entries with `user_specified_system`, this field is
+        /// optional and defaults to an empty timestamp.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceSystemTimestamps")]
         public virtual GoogleCloudDatacatalogV1SystemTimestamps SourceSystemTimestamps { get; set; }
 
         /// <summary>
-        /// The type of the entry. Only used for entries with types listed in the `EntryType` enum. Currently, only
-        /// `FILESET` enum value is allowed. All other entries created in Data Catalog must use the
-        /// `user_specified_type`.
+        /// Specification that applies to a relational database system. Only settable when `user_specified_system` is
+        /// equal to `SQL_DATABASE`
         /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlDatabaseSystemSpec")]
+        public virtual GoogleCloudDatacatalogV1SqlDatabaseSystemSpec SqlDatabaseSystemSpec { get; set; }
+
+        /// <summary>The type of the entry. For details, see [`EntryType`](#entrytype).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
-        /// <summary>Output only. Resource usage statistics.</summary>
+        /// <summary>Resource usage statistics.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("usageSignal")]
         public virtual GoogleCloudDatacatalogV1UsageSignal UsageSignal { get; set; }
 
@@ -5051,11 +6322,34 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual string DisplayName { get; set; }
 
         /// <summary>
-        /// The resource name of the entry group in URL format. Note: The entry group itself and its child resources
-        /// might not be stored in the location specified in its name.
+        /// Identifier. The resource name of the entry group in URL format. Note: The entry group itself and its child
+        /// resources might not be stored in the location specified in its name.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Optional. When set to [true], it means DataCatalog EntryGroup was transferred to Dataplex Catalog Service.
+        /// It makes EntryGroup and its Entries to be read-only in DataCatalog. However, new Tags on EntryGroup and its
+        /// Entries can be created. After setting the flag to [true] it cannot be unset.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transferredToDataplex")]
+        public virtual System.Nullable<bool> TransferredToDataplex { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Entry overview fields for rich text descriptions of entries.</summary>
+    public class GoogleCloudDatacatalogV1EntryOverview : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Entry overview with support for rich text. The overview must only contain Unicode characters, and should be
+        /// formatted using HTML. The maximum length is 10 MiB as this value holds HTML descriptions including encoded
+        /// images. The maximum length of the text without images is 100 KiB.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("overview")]
+        public virtual string Overview { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5067,6 +6361,17 @@ namespace Google.Apis.DataCatalog.v1.Data
         /// <summary>List of taxonomies and policy tags as nested protocol buffers.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("taxonomies")]
         public virtual System.Collections.Generic.IList<GoogleCloudDatacatalogV1SerializedTaxonomy> Taxonomies { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Detail description of the source information of a Vertex Feature Online Store.</summary>
+    public class GoogleCloudDatacatalogV1FeatureOnlineStoreSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. Type of underelaying storage for the FeatureOnlineStore.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("storageType")]
+        public virtual string StorageType { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5110,6 +6415,17 @@ namespace Google.Apis.DataCatalog.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Specification that applies to a fileset. Valid only for entries with the 'FILESET' type.</summary>
+    public class GoogleCloudDatacatalogV1FilesetSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Fields specific to a Dataplex fileset and present only in the Dataplex fileset entries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataplexFileset")]
+        public virtual GoogleCloudDatacatalogV1DataplexFilesetSpec DataplexFileset { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5159,6 +6475,57 @@ namespace Google.Apis.DataCatalog.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sampleGcsFileSpecs")]
         public virtual System.Collections.Generic.IList<GoogleCloudDatacatalogV1GcsFileSpec> SampleGcsFileSpecs { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata message for long-running operation returned by the ImportEntries.</summary>
+    public class GoogleCloudDatacatalogV1ImportEntriesMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Partial errors that are encountered during the ImportEntries operation. There is no guarantee that all the
+        /// encountered errors are reported. However, if no errors are reported, it means that no errors were
+        /// encountered.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errors")]
+        public virtual System.Collections.Generic.IList<Status> Errors { get; set; }
+
+        /// <summary>State of the import operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for ImportEntries method.</summary>
+    public class GoogleCloudDatacatalogV1ImportEntriesRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Path to a Cloud Storage bucket that contains a dump ready for ingestion.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gcsBucketPath")]
+        public virtual string GcsBucketPath { get; set; }
+
+        /// <summary>
+        /// Optional. (Optional) Dataplex task job id, if specified will be used as part of ImportEntries LRO ID
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("jobId")]
+        public virtual string JobId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for long-running operation returned by the ImportEntries.</summary>
+    public class GoogleCloudDatacatalogV1ImportEntriesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Number of entries deleted as a result of import operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deletedEntriesCount")]
+        public virtual System.Nullable<long> DeletedEntriesCount { get; set; }
+
+        /// <summary>Cumulative number of entries created and entries updated as a result of import operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("upsertedEntriesCount")]
+        public virtual System.Nullable<long> UpsertedEntriesCount { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5283,12 +6650,146 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Specification that applies to entries that are part `LOOKER` system (user_specified_type)</summary>
+    public class GoogleCloudDatacatalogV1LookerSystemSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of the parent Looker Instance. Empty if it does not exist.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parentInstanceDisplayName")]
+        public virtual string ParentInstanceDisplayName { get; set; }
+
+        /// <summary>
+        /// ID of the parent Looker Instance. Empty if it does not exist. Example value: `someinstance.looker.com`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parentInstanceId")]
+        public virtual string ParentInstanceId { get; set; }
+
+        /// <summary>Name of the parent Model. Empty if it does not exist.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parentModelDisplayName")]
+        public virtual string ParentModelDisplayName { get; set; }
+
+        /// <summary>ID of the parent Model. Empty if it does not exist.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parentModelId")]
+        public virtual string ParentModelId { get; set; }
+
+        /// <summary>Name of the parent View. Empty if it does not exist.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parentViewDisplayName")]
+        public virtual string ParentViewDisplayName { get; set; }
+
+        /// <summary>ID of the parent View. Empty if it does not exist.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parentViewId")]
+        public virtual string ParentViewId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The configuration related to the migration to Dataplex applied to an organization or project. It is the response
+    /// message for SetConfig and RetrieveEffectiveConfig.
+    /// </summary>
+    public class GoogleCloudDatacatalogV1MigrationConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Opt-in status for the UI switch to Dataplex.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("catalogUiExperience")]
+        public virtual string CatalogUiExperience { get; set; }
+
+        /// <summary>Opt-in status for the migration of Tag Templates to Dataplex.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagTemplateMigration")]
+        public virtual string TagTemplateMigration { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Specification that applies to a model. Valid only for entries with the `MODEL` type.</summary>
+    public class GoogleCloudDatacatalogV1ModelSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Specification for vertex model resources.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vertexModelSpec")]
+        public virtual GoogleCloudDatacatalogV1VertexModelSpec VertexModelSpec { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for ModifyEntryContacts.</summary>
+    public class GoogleCloudDatacatalogV1ModifyEntryContactsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The new value for the Contacts.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("contacts")]
+        public virtual GoogleCloudDatacatalogV1Contacts Contacts { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for ModifyEntryOverview.</summary>
+    public class GoogleCloudDatacatalogV1ModifyEntryOverviewRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The new value for the Entry Overview.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entryOverview")]
+        public virtual GoogleCloudDatacatalogV1EntryOverview EntryOverview { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The configuration related to the migration from Data Catalog to Dataplex that has been applied to an
+    /// organization and any projects under it. It is the response message for RetrieveConfig.
+    /// </summary>
+    public class GoogleCloudDatacatalogV1OrganizationConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Map of organizations and project resource names and their configuration. The format for the map keys is
+        /// `organizations/{organizationId}` or `projects/{projectId}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("config")]
+        public virtual System.Collections.Generic.IDictionary<string, GoogleCloudDatacatalogV1MigrationConfig> Config { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Entry metadata relevant only to the user and private to them.</summary>
     public class GoogleCloudDatacatalogV1PersonalDetails : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _starTimeRaw;
+
+        private object _starTime;
+
         /// <summary>Set if the entry is starred; unset otherwise.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("starTime")]
-        public virtual object StarTime { get; set; }
+        public virtual string StarTimeRaw
+        {
+            get => _starTimeRaw;
+            set
+            {
+                _starTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _starTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StarTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StarTimeDateTimeOffset instead.")]
+        public virtual object StarTime
+        {
+            get => _starTime;
+            set
+            {
+                _starTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _starTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StarTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StarTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StarTimeRaw);
+            set => StarTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>True if the entry is starred by the user; false otherwise.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("starred")]
@@ -5299,8 +6800,99 @@ namespace Google.Apis.DataCatalog.v1.Data
     }
 
     /// <summary>
+    /// Native schema used by a resource represented as an entry. Used by query engines for deserializing and parsing
+    /// source data.
+    /// </summary>
+    public class GoogleCloudDatacatalogV1PhysicalSchema : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Schema in Avro JSON format.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("avro")]
+        public virtual GoogleCloudDatacatalogV1PhysicalSchemaAvroSchema Avro { get; set; }
+
+        /// <summary>Marks a CSV-encoded data source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("csv")]
+        public virtual GoogleCloudDatacatalogV1PhysicalSchemaCsvSchema Csv { get; set; }
+
+        /// <summary>Marks an ORC-encoded data source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("orc")]
+        public virtual GoogleCloudDatacatalogV1PhysicalSchemaOrcSchema Orc { get; set; }
+
+        /// <summary>Marks a Parquet-encoded data source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parquet")]
+        public virtual GoogleCloudDatacatalogV1PhysicalSchemaParquetSchema Parquet { get; set; }
+
+        /// <summary>Schema in protocol buffer format.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protobuf")]
+        public virtual GoogleCloudDatacatalogV1PhysicalSchemaProtobufSchema Protobuf { get; set; }
+
+        /// <summary>Schema in Thrift format.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("thrift")]
+        public virtual GoogleCloudDatacatalogV1PhysicalSchemaThriftSchema Thrift { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Schema in Avro JSON format.</summary>
+    public class GoogleCloudDatacatalogV1PhysicalSchemaAvroSchema : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>JSON source of the Avro schema.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("text")]
+        public virtual string Text { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Marks a CSV-encoded data source.</summary>
+    public class GoogleCloudDatacatalogV1PhysicalSchemaCsvSchema : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Marks an ORC-encoded data source.</summary>
+    public class GoogleCloudDatacatalogV1PhysicalSchemaOrcSchema : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Marks a Parquet-encoded data source.</summary>
+    public class GoogleCloudDatacatalogV1PhysicalSchemaParquetSchema : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Schema in protocol buffer format.</summary>
+    public class GoogleCloudDatacatalogV1PhysicalSchemaProtobufSchema : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Protocol buffer source of the schema.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("text")]
+        public virtual string Text { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Schema in Thrift format.</summary>
+    public class GoogleCloudDatacatalogV1PhysicalSchemaThriftSchema : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Thrift IDL source of the schema.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("text")]
+        public virtual string Text { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// Denotes one policy tag in a taxonomy, for example, SSN. Policy tags can be defined in a hierarchy. For example:
-    /// ``` + Geolocation + LatLong + City + ZipCode ``` Where the "Geolocation" policy tag contains three children.
+    /// ```
+    /// + Geolocation + LatLong + City + ZipCode
+    /// ```
+    /// Where the "Geolocation" policy tag contains three children.
     /// </summary>
     public class GoogleCloudDatacatalogV1PolicyTag : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5325,7 +6917,7 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual string DisplayName { get; set; }
 
         /// <summary>
-        /// Output only. Resource name of this policy tag in the URL format. The policy tag manager generates unique
+        /// Identifier. Resource name of this policy tag in the URL format. The policy tag manager generates unique
         /// taxonomy IDs and policy tag IDs.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -5338,6 +6930,67 @@ namespace Google.Apis.DataCatalog.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("parentPolicyTag")]
         public virtual string ParentPolicyTag { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Long-running operation metadata message returned by the ReconcileTags.</summary>
+    public class GoogleCloudDatacatalogV1ReconcileTagsMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Maps the name of each tagged column (or empty string for a sole entry) to tagging operation status.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errors")]
+        public virtual System.Collections.Generic.IDictionary<string, Status> Errors { get; set; }
+
+        /// <summary>State of the reconciliation operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for ReconcileTags.</summary>
+    public class GoogleCloudDatacatalogV1ReconcileTagsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If set to `true`, deletes entry tags related to a tag template not listed in the tags source from an entry.
+        /// If set to `false`, unlisted tags are retained.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("forceDeleteMissing")]
+        public virtual System.Nullable<bool> ForceDeleteMissing { get; set; }
+
+        /// <summary>Required. The name of the tag template, which is used for reconciliation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagTemplate")]
+        public virtual string TagTemplate { get; set; }
+
+        /// <summary>
+        /// A list of tags to apply to an entry. A tag can specify a tag template, which must be the template specified
+        /// in the `ReconcileTagsRequest`. The sole entry and each of its columns must be mentioned at most once.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tags")]
+        public virtual System.Collections.Generic.IList<GoogleCloudDatacatalogV1Tag> Tags { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Long-running operation response message returned by ReconcileTags.</summary>
+    public class GoogleCloudDatacatalogV1ReconcileTagsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Number of tags created in the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createdTagsCount")]
+        public virtual System.Nullable<long> CreatedTagsCount { get; set; }
+
+        /// <summary>Number of tags deleted in the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deletedTagsCount")]
+        public virtual System.Nullable<long> DeletedTagsCount { get; set; }
+
+        /// <summary>Number of tags updated in the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updatedTagsCount")]
+        public virtual System.Nullable<long> UpdatedTagsCount { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5449,16 +7102,29 @@ namespace Google.Apis.DataCatalog.v1.Data
     public class GoogleCloudDatacatalogV1SearchCatalogRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Optional. If set, use searchAll permission granted on organizations from `include_org_ids` and projects from
+        /// `include_project_ids` instead of the fine grained per resource permissions when filtering the search
+        /// results. The only allowed `order_by` criteria for admin_search mode is `default`. Using this flags
+        /// guarantees a full recall of the search results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("adminSearch")]
+        public virtual System.Nullable<bool> AdminSearch { get; set; }
+
+        /// <summary>
         /// Specifies the order of results. Currently supported case-sensitive values are: * `relevance` that can only
         /// be descending * `last_modified_timestamp [asc|desc]` with descending (`desc`) as default * `default` that
-        /// can only be descending If this parameter is omitted, it defaults to the descending `relevance`.
+        /// can only be descending Search queries don't guarantee full recall. Results that match your query might not
+        /// be returned, even in subsequent result pages. Additionally, returned (and not returned) results can vary if
+        /// you repeat search queries. If you are experiencing recall issues and you don't have to fetch the results in
+        /// any specific order, consider setting this parameter to `default`. If this parameter is omitted, it defaults
+        /// to the descending `relevance`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("orderBy")]
         public virtual string OrderBy { get; set; }
 
         /// <summary>
-        /// Number of results to return in a single search page. Can't be negative or 0, defaults to 10 in this case.
-        /// The maximum number is 1000. If exceeded, throws an "invalid argument" exception.
+        /// Upper bound on the number of results you can get in a single response. Can't be negative or 0, defaults to
+        /// 10 in this case. The maximum number is 1000. If exceeded, throws an "invalid argument" exception.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pageSize")]
         public virtual System.Nullable<int> PageSize { get; set; }
@@ -5496,8 +7162,8 @@ namespace Google.Apis.DataCatalog.v1.Data
     public class GoogleCloudDatacatalogV1SearchCatalogRequestScope : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// If `true`, include Google Cloud Platform (GCP) public datasets in search results. By default, they are
-        /// excluded. See [Google Cloud Public Datasets](/public-datasets) for more information.
+        /// If `true`, include Google Cloud public datasets in search results. By default, they are excluded. See
+        /// [Google Cloud Public Datasets](/public-datasets) for more information.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("includeGcpPublicDatasets")]
         public virtual System.Nullable<bool> IncludeGcpPublicDatasets { get; set; }
@@ -5517,10 +7183,7 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual System.Collections.Generic.IList<string> IncludeProjectIds { get; set; }
 
         /// <summary>
-        /// Optional. If `true`, include public tag templates in the search results. By default, they are included only
-        /// if you have explicit permissions on them to view them. For example, if you are the owner. Other scope
-        /// fields, for example, `include_org_ids`, still restrict the returned public tag templates and at least one of
-        /// them is required.
+        /// Optional. This field is deprecated. The search mechanism for public and private tag templates is the same.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("includePublicTagTemplates")]
         public virtual System.Nullable<bool> IncludePublicTagTemplates { get; set; }
@@ -5559,6 +7222,10 @@ namespace Google.Apis.DataCatalog.v1.Data
         /// <summary>Search results.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("results")]
         public virtual System.Collections.Generic.IList<GoogleCloudDatacatalogV1SearchCatalogResult> Results { get; set; }
+
+        /// <summary>The approximate total number of entries matched by the query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("totalSize")]
+        public virtual System.Nullable<int> TotalSize { get; set; }
 
         /// <summary>
         /// Unreachable locations. Search results don't include data from those locations. To get additional information
@@ -5611,9 +7278,42 @@ namespace Google.Apis.DataCatalog.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("linkedResource")]
         public virtual string LinkedResource { get; set; }
 
+        private string _modifyTimeRaw;
+
+        private object _modifyTime;
+
         /// <summary>The last modification timestamp of the entry in the source system.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("modifyTime")]
-        public virtual object ModifyTime { get; set; }
+        public virtual string ModifyTimeRaw
+        {
+            get => _modifyTimeRaw;
+            set
+            {
+                _modifyTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _modifyTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ModifyTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ModifyTimeDateTimeOffset instead.")]
+        public virtual object ModifyTime
+        {
+            get => _modifyTime;
+            set
+            {
+                _modifyTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _modifyTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ModifyTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ModifyTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ModifyTimeRaw);
+            set => ModifyTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The relative name of the resource in URL format. Examples: *
@@ -5700,6 +7400,61 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Specification that applies to a Service resource. Valid only for entries with the `SERVICE` type.
+    /// </summary>
+    public class GoogleCloudDatacatalogV1ServiceSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Specification that applies to Instance entries of `CLOUD_BIGTABLE` system.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudBigtableInstanceSpec")]
+        public virtual GoogleCloudDatacatalogV1CloudBigtableInstanceSpec CloudBigtableInstanceSpec { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for SetConfig.</summary>
+    public class GoogleCloudDatacatalogV1SetConfigRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Opt-in status for the UI switch to Dataplex.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("catalogUiExperience")]
+        public virtual string CatalogUiExperience { get; set; }
+
+        /// <summary>Opt-in status for the migration of Tag Templates to Dataplex.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagTemplateMigration")]
+        public virtual string TagTemplateMigration { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Specification that applies to entries that are part `SQL_DATABASE` system (user_specified_type)
+    /// </summary>
+    public class GoogleCloudDatacatalogV1SqlDatabaseSystemSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Version of the database engine.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseVersion")]
+        public virtual string DatabaseVersion { get; set; }
+
+        /// <summary>
+        /// Host of the SQL database enum InstanceHost { UNDEFINED = 0; SELF_HOSTED = 1; CLOUD_SQL = 2; AMAZON_RDS = 3;
+        /// AZURE_SQL = 4; } Host of the enclousing database instance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceHost")]
+        public virtual string InstanceHost { get; set; }
+
+        /// <summary>
+        /// SQL Database Engine. enum SqlEngine { UNDEFINED = 0; MY_SQL = 1; POSTGRE_SQL = 2; SQL_SERVER = 3; } Engine
+        /// of the enclosing database instance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlEngine")]
+        public virtual string SqlEngine { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for StarEntry.</summary>
     public class GoogleCloudDatacatalogV1StarEntryRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5714,19 +7469,114 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Details the properties of the underlying storage.</summary>
+    public class GoogleCloudDatacatalogV1StorageProperties : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Patterns to identify a set of files for this fileset. Examples of a valid `file_pattern`: *
+        /// `gs://bucket_name/dir/*`: matches all files in the `bucket_name/dir` directory * `gs://bucket_name/dir/**`:
+        /// matches all files in the `bucket_name/dir` and all subdirectories recursively * `gs://bucket_name/file*`:
+        /// matches files prefixed by `file` in `bucket_name` * `gs://bucket_name/??.txt`: matches files with two
+        /// characters followed by `.txt` in `bucket_name` * `gs://bucket_name/[aeiou].txt`: matches files that contain
+        /// a single vowel character followed by `.txt` in `bucket_name` * `gs://bucket_name/[a-m].txt`: matches files
+        /// that contain `a`, `b`, ... or `m` followed by `.txt` in `bucket_name` * `gs://bucket_name/a/*/b`: matches
+        /// all files in `bucket_name` that match the `a/*/b` pattern, such as `a/c/b`, `a/d/b` *
+        /// `gs://another_bucket/a.txt`: matches `gs://another_bucket/a.txt`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filePattern")]
+        public virtual System.Collections.Generic.IList<string> FilePattern { get; set; }
+
+        /// <summary>File type in MIME format, for example, `text/plain`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileType")]
+        public virtual string FileType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Timestamps associated with this resource in a particular system.</summary>
     public class GoogleCloudDatacatalogV1SystemTimestamps : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Creation timestamp of the resource within the given system.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
 
         /// <summary>
         /// Output only. Expiration timestamp of the resource within the given system. Currently only applicable to
         /// BigQuery resources.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
 
         /// <summary>
         /// Timestamp of the last modification of the resource or its metadata within a given system. Note: Depending on
@@ -5734,7 +7584,36 @@ namespace Google.Apis.DataCatalog.v1.Data
         /// metadata modification but not data or permission changes.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5771,6 +7650,10 @@ namespace Google.Apis.DataCatalog.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("column")]
         public virtual string Column { get; set; }
 
+        /// <summary>Output only. Denotes the transfer status of the Tag Template.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataplexTransferStatus")]
+        public virtual string DataplexTransferStatus { get; set; }
+
         /// <summary>
         /// Required. Maps the ID of a tag field to its value and additional information about that field. Tag template
         /// defines valid field IDs. A tag must have at least 1 field and at most 500 fields.
@@ -5779,8 +7662,8 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual System.Collections.Generic.IDictionary<string, GoogleCloudDatacatalogV1TagField> Fields { get; set; }
 
         /// <summary>
-        /// The resource name of the tag in URL format where tag ID is a system-generated identifier. Note: The tag
-        /// itself might not be stored in the location specified in its name.
+        /// Identifier. The resource name of the tag in URL format where tag ID is a system-generated identifier. Note:
+        /// The tag itself might not be stored in the location specified in its name.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -5842,9 +7725,44 @@ namespace Google.Apis.DataCatalog.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("stringValue")]
         public virtual string StringValue { get; set; }
 
+        private string _timestampValueRaw;
+
+        private object _timestampValue;
+
         /// <summary>The value of a tag field with a timestamp type.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timestampValue")]
-        public virtual object TimestampValue { get; set; }
+        public virtual string TimestampValueRaw
+        {
+            get => _timestampValueRaw;
+            set
+            {
+                _timestampValue = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timestampValueRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimestampValueRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimestampValueDateTimeOffset instead.")]
+        public virtual object TimestampValue
+        {
+            get => _timestampValue;
+            set
+            {
+                _timestampValueRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _timestampValue = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="TimestampValueRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimestampValueDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimestampValueRaw);
+            set => TimestampValueRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5863,7 +7781,7 @@ namespace Google.Apis.DataCatalog.v1.Data
 
     /// <summary>
     /// A tag template defines a tag that can have one or more typed fields. The template is used to create tags that
-    /// are attached to GCP resources. [Tag template roles]
+    /// are attached to Google Cloud resources. [Tag template roles]
     /// (https://cloud.google.com/iam/docs/understanding-roles#data-catalog-roles) provide permissions to create, edit,
     /// and use the template. For example, see the [TagTemplate User]
     /// (https://cloud.google.com/data-catalog/docs/how-to/template-user) role that includes a permission to use the tag
@@ -5871,6 +7789,10 @@ namespace Google.Apis.DataCatalog.v1.Data
     /// </summary>
     public class GoogleCloudDatacatalogV1TagTemplate : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Optional. Transfer status of the TagTemplate</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataplexTransferStatus")]
+        public virtual string DataplexTransferStatus { get; set; }
+
         /// <summary>
         /// Display name for this template. Defaults to an empty string. The name must contain only Unicode letters,
         /// numbers (0-9), underscores (_), dashes (-), spaces ( ), and can't start or end with spaces. The maximum
@@ -5890,25 +7812,16 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual System.Collections.Generic.IDictionary<string, GoogleCloudDatacatalogV1TagTemplateField> Fields { get; set; }
 
         /// <summary>
-        /// Indicates whether this is a public tag template. Every user has view access to a *public* tag template by
-        /// default. This means that: * Every user can use this tag template to tag an entry. * If an entry is tagged
-        /// using the tag template, the tag is always shown in the response to ``ListTags`` called on the entry. * To
-        /// get the template using the GetTagTemplate method, you need view access either on the project or the
-        /// organization the tag template resides in but no other permission is needed. * Operations on the tag template
-        /// other than viewing (for example, editing IAM policies) follow standard IAM structures. Tags created with a
-        /// public tag template are referred to as public tags. You can search for a public tag by value with a simple
-        /// search query instead of using a ``tag:`` predicate. Public tag templates may not appear in search results
-        /// depending on scope, see: include_public_tag_templates Note: If an [IAM domain
-        /// restriction](https://cloud.google.com/resource-manager/docs/organization-policy/restricting-domains) is
-        /// configured in the tag template's location, the public access will not be enabled but the simple search for
-        /// tag values will still work.
+        /// Indicates whether tags created with this template are public. Public tags do not require tag template access
+        /// to appear in ListTags API response. Additionally, you can search for a public tag by value with a simple
+        /// search query in addition to using a ``tag:`` predicate.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("isPubliclyReadable")]
         public virtual System.Nullable<bool> IsPubliclyReadable { get; set; }
 
         /// <summary>
-        /// The resource name of the tag template in URL format. Note: The tag template itself and its child resources
-        /// might not be stored in the location specified in its name.
+        /// Identifier. The resource name of the tag template in URL format. Note: The tag template itself and its child
+        /// resources might not be stored in the location specified in its name.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -5937,7 +7850,7 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual System.Nullable<bool> IsRequired { get; set; }
 
         /// <summary>
-        /// Output only. The resource name of the tag template field in URL format. Example:
+        /// Identifier. The resource name of the tag template field in URL format. Example:
         /// `projects/{PROJECT_ID}/locations/{LOCATION}/tagTemplates/{TAG_TEMPLATE}/fields/{FIELD}` Note: The tag
         /// template field itself might not be stored in the location specified in its name. The name must contain only
         /// letters (a-z, A-Z), numbers (0-9), or underscores (_), and must start with a letter or underscore. The
@@ -5963,10 +7876,44 @@ namespace Google.Apis.DataCatalog.v1.Data
     }
 
     /// <summary>
+    /// Wrapper containing Entry and information about Tags that should and should not be attached to it.
+    /// </summary>
+    public class GoogleCloudDatacatalogV1TaggedEntry : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Tags that should be deleted from the Data Catalog. Caller should populate template name and column
+        /// only.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("absentTags")]
+        public virtual System.Collections.Generic.IList<GoogleCloudDatacatalogV1Tag> AbsentTags { get; set; }
+
+        /// <summary>
+        /// Optional. Tags that should be ingested into the Data Catalog. Caller should populate template name, column
+        /// and fields.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("presentTags")]
+        public virtual System.Collections.Generic.IList<GoogleCloudDatacatalogV1Tag> PresentTags { get; set; }
+
+        /// <summary>Non-encrypted Data Catalog v1 Entry.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("v1Entry")]
+        public virtual GoogleCloudDatacatalogV1Entry V1Entry { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// A taxonomy is a collection of hierarchical policy tags that classify data along a common axis. For example, a
-    /// "data sensitivity" taxonomy might contain the following policy tags: ``` + PII + Account number + Age + SSN +
-    /// Zipcode + Financials + Revenue ``` A "data origin" taxonomy might contain the following policy tags: ``` + User
-    /// data + Employee data + Partner data + Public data ```
+    /// "data sensitivity" taxonomy might contain the following policy tags:
+    /// ```
+    /// + PII + Account number + Age + SSN +
+    /// Zipcode + Financials + Revenue
+    /// ```
+    /// A "data origin" taxonomy might contain the following policy tags:
+    /// ```
+    /// + User
+    /// data + Employee data + Partner data + Public data
+    /// ```
     /// </summary>
     public class GoogleCloudDatacatalogV1Taxonomy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5988,14 +7935,14 @@ namespace Google.Apis.DataCatalog.v1.Data
         /// <summary>
         /// Required. User-defined name of this taxonomy. The name can't start or end with spaces, must contain only
         /// Unicode letters, numbers, underscores, dashes, and spaces, and be at most 200 bytes long when encoded in
-        /// UTF-8.
+        /// UTF-8. The taxonomy display name must be unique within an organization.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
         /// <summary>
-        /// Output only. Resource name of this taxonomy in URL format. Note: Policy tag manager generates unique
-        /// taxonomy IDs.
+        /// Identifier. Resource name of this taxonomy in URL format. Note: Policy tag manager generates unique taxonomy
+        /// IDs.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -6004,9 +7951,31 @@ namespace Google.Apis.DataCatalog.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("policyTagCount")]
         public virtual System.Nullable<int> PolicyTagCount { get; set; }
 
+        /// <summary>
+        /// Output only. Identity of the service which owns the Taxonomy. This field is only populated when the taxonomy
+        /// is created by a Google Cloud service. Currently only 'DATAPLEX' is supported.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("service")]
+        public virtual GoogleCloudDatacatalogV1TaxonomyService Service { get; set; }
+
         /// <summary>Output only. Creation and modification timestamps of this taxonomy.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("taxonomyTimestamps")]
         public virtual GoogleCloudDatacatalogV1SystemTimestamps TaxonomyTimestamps { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The source system of the Taxonomy.</summary>
+    public class GoogleCloudDatacatalogV1TaxonomyService : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The service agent for the service.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("identity")]
+        public virtual string Identity { get; set; }
+
+        /// <summary>The Google Cloud service name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6032,12 +8001,57 @@ namespace Google.Apis.DataCatalog.v1.Data
     /// </summary>
     public class GoogleCloudDatacatalogV1UsageSignal : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Common usage statistics over each of the predefined time ranges. Supported time ranges are `{"24H", "7D",
+        /// "30D", "Lifetime"}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("commonUsageWithinTimeRange")]
+        public virtual System.Collections.Generic.IDictionary<string, GoogleCloudDatacatalogV1CommonUsageStats> CommonUsageWithinTimeRange { get; set; }
+
+        /// <summary>Favorite count in the source system.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("favoriteCount")]
+        public virtual System.Nullable<long> FavoriteCount { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The end timestamp of the duration of usage statistics.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
-        /// Usage statistics over each of the predefined time ranges. Supported time ranges are `{"24H", "7D", "30D"}`.
+        /// Output only. BigQuery usage statistics over each of the predefined time ranges. Supported time ranges are
+        /// `{"24H", "7D", "30D"}`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("usageWithinTimeRange")]
         public virtual System.Collections.Generic.IDictionary<string, GoogleCloudDatacatalogV1UsageStats> UsageWithinTimeRange { get; set; }
@@ -6074,12 +8088,129 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Specification for vertex dataset resources.</summary>
+    public class GoogleCloudDatacatalogV1VertexDatasetSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The number of DataItems in this Dataset. Only apply for non-structured Dataset.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataItemCount")]
+        public virtual System.Nullable<long> DataItemCount { get; set; }
+
+        /// <summary>Type of the dataset.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataType")]
+        public virtual string DataType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Detail description of the source information of a Vertex model.</summary>
+    public class GoogleCloudDatacatalogV1VertexModelSourceInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If this Model is copy of another Model. If true then source_type pertains to the original.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("copy")]
+        public virtual System.Nullable<bool> Copy { get; set; }
+
+        /// <summary>Type of the model source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceType")]
+        public virtual string SourceType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Specification for vertex model resources.</summary>
+    public class GoogleCloudDatacatalogV1VertexModelSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>URI of the Docker image to be used as the custom container for serving predictions.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("containerImageUri")]
+        public virtual string ContainerImageUri { get; set; }
+
+        /// <summary>User provided version aliases so that a model version can be referenced via alias</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versionAliases")]
+        public virtual System.Collections.Generic.IList<string> VersionAliases { get; set; }
+
+        /// <summary>The description of this version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versionDescription")]
+        public virtual string VersionDescription { get; set; }
+
+        /// <summary>The version ID of the model.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versionId")]
+        public virtual string VersionId { get; set; }
+
+        /// <summary>Source of a Vertex model.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vertexModelSourceInfo")]
+        public virtual GoogleCloudDatacatalogV1VertexModelSourceInfo VertexModelSourceInfo { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Table view specification.</summary>
     public class GoogleCloudDatacatalogV1ViewSpec : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Output only. The query that defines the table view.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("viewQuery")]
         public virtual string ViewQuery { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response message for Operations.ListOperations.</summary>
+    public class ListOperationsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The standard List next-page token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>A list of operations that matches the specified filter in the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("operations")]
+        public virtual System.Collections.Generic.IList<Operation> Operations { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>This resource represents a long-running operation that is the result of a network API call.</summary>
+    public class Operation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed,
+        /// and either `error` or `response` is available.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("done")]
+        public virtual System.Nullable<bool> Done { get; set; }
+
+        /// <summary>The error result of the operation in case of failure or cancellation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("error")]
+        public virtual Status Error { get; set; }
+
+        /// <summary>
+        /// Service-specific metadata associated with the operation. It typically contains progress information and
+        /// common metadata such as create time. Some services might not provide such metadata. Any method that returns
+        /// a long-running operation should document the metadata type, if any.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Metadata { get; set; }
+
+        /// <summary>
+        /// The server-assigned name, which is only unique within the same service that originally returns it. If you
+        /// use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
+        /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
+        /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("response")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Response { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6094,18 +8225,26 @@ namespace Google.Apis.DataCatalog.v1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6155,7 +8294,7 @@ namespace Google.Apis.DataCatalog.v1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -6165,11 +8304,40 @@ namespace Google.Apis.DataCatalog.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// The `Status` type defines a logical error model that is suitable for different programming environments,
+    /// including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains
+    /// three pieces of data: error code, error message, and error details. You can find out more about this error model
+    /// and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).
+    /// </summary>
+    public class Status : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The status code, which should be an enum value of google.rpc.Code.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("code")]
+        public virtual System.Nullable<int> Code { get; set; }
+
+        /// <summary>
+        /// A list of messages that carry the error details. There is a common set of message types for APIs to use.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual System.Collections.Generic.IList<System.Collections.Generic.IDictionary<string, object>> Details { get; set; }
+
+        /// <summary>
+        /// A developer-facing error message, which should be in English. Any user-facing error message should be
+        /// localized and sent in the google.rpc.Status.details field, or localized by the client.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("message")]
+        public virtual string Message { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for `TestIamPermissions` method.</summary>
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>

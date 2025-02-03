@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.AnalyticsReporting.v4
         {
             Reports = new ReportsResource(this);
             UserActivity = new UserActivityResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://analyticsreporting.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://analyticsreporting.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.AnalyticsReporting.v4
         public override string Name => "analyticsreporting";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://analyticsreporting.googleapis.com/";
-        #else
-            "https://analyticsreporting.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://analyticsreporting.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Analytics Reporting API.</summary>
         public class Scope
@@ -289,7 +284,7 @@ namespace Google.Apis.AnalyticsReporting.v4
         /// <param name="body">The body of the request.</param>
         public virtual BatchGetRequest BatchGet(Google.Apis.AnalyticsReporting.v4.Data.GetReportsRequest body)
         {
-            return new BatchGetRequest(service, body);
+            return new BatchGetRequest(this.service, body);
         }
 
         /// <summary>Returns the Analytics data.</summary>
@@ -343,7 +338,7 @@ namespace Google.Apis.AnalyticsReporting.v4
         /// <param name="body">The body of the request.</param>
         public virtual SearchRequest Search(Google.Apis.AnalyticsReporting.v4.Data.SearchUserActivityRequest body)
         {
-            return new SearchRequest(service, body);
+            return new SearchRequest(this.service, body);
         }
 
         /// <summary>Returns User Activity data.</summary>
@@ -390,6 +385,10 @@ namespace Google.Apis.AnalyticsReporting.v4.Data
     /// </summary>
     public class Activity : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _activityTimeRaw;
+
+        private object _activityTime;
+
         /// <summary>
         /// Timestamp of the activity. If activities for a visit cross midnight and occur in two separate dates, then
         /// two sessions (one per date) share the session identifier. For example, say session ID 113472 has activity
@@ -397,7 +396,36 @@ namespace Google.Apis.AnalyticsReporting.v4.Data
         /// one session, and session ID 243742 is two sessions.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("activityTime")]
-        public virtual object ActivityTime { get; set; }
+        public virtual string ActivityTimeRaw
+        {
+            get => _activityTimeRaw;
+            set
+            {
+                _activityTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _activityTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ActivityTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ActivityTimeDateTimeOffset instead.")]
+        public virtual object ActivityTime
+        {
+            get => _activityTime;
+            set
+            {
+                _activityTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _activityTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ActivityTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ActivityTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ActivityTimeRaw);
+            set => ActivityTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Type of this activity.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("activityType")]
@@ -1189,12 +1217,47 @@ namespace Google.Apis.AnalyticsReporting.v4.Data
     /// <summary>The data part of the report.</summary>
     public class ReportData : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _dataLastRefreshedRaw;
+
+        private object _dataLastRefreshed;
+
         /// <summary>
         /// The last time the data in the report was refreshed. All the hits received before this timestamp are included
         /// in the calculation of the report.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataLastRefreshed")]
-        public virtual object DataLastRefreshed { get; set; }
+        public virtual string DataLastRefreshedRaw
+        {
+            get => _dataLastRefreshedRaw;
+            set
+            {
+                _dataLastRefreshed = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _dataLastRefreshedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DataLastRefreshedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DataLastRefreshedDateTimeOffset instead.")]
+        public virtual object DataLastRefreshed
+        {
+            get => _dataLastRefreshed;
+            set
+            {
+                _dataLastRefreshedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _dataLastRefreshed = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="DataLastRefreshedRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DataLastRefreshedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DataLastRefreshedRaw);
+            set => DataLastRefreshedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>If empty reason is specified, the report is empty for this reason.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("emptyReason")]

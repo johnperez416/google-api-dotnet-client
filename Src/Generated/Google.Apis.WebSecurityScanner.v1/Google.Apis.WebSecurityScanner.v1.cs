@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.WebSecurityScanner.v1
         public WebSecurityScannerService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://websecurityscanner.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://websecurityscanner.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.WebSecurityScanner.v1
         public override string Name => "websecurityscanner";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://websecurityscanner.googleapis.com/";
-        #else
-            "https://websecurityscanner.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://websecurityscanner.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Web Security Scanner API.</summary>
         public class Scope
@@ -344,7 +339,7 @@ namespace Google.Apis.WebSecurityScanner.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>List CrawledUrls under a given ScanRun.</summary>
@@ -444,7 +439,7 @@ namespace Google.Apis.WebSecurityScanner.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>List all FindingTypeStats under a given ScanRun.</summary>
@@ -513,7 +508,7 @@ namespace Google.Apis.WebSecurityScanner.v1
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets a Finding.</summary>
@@ -564,7 +559,7 @@ namespace Google.Apis.WebSecurityScanner.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>List Findings under a given ScanRun.</summary>
@@ -662,7 +657,7 @@ namespace Google.Apis.WebSecurityScanner.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a ScanRun.</summary>
@@ -715,7 +710,7 @@ namespace Google.Apis.WebSecurityScanner.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -799,7 +794,7 @@ namespace Google.Apis.WebSecurityScanner.v1
                 /// </param>
                 public virtual StopRequest Stop(Google.Apis.WebSecurityScanner.v1.Data.StopScanRunRequest body, string name)
                 {
-                    return new StopRequest(service, body, name);
+                    return new StopRequest(this.service, body, name);
                 }
 
                 /// <summary>Stops a ScanRun. The stopped ScanRun is returned.</summary>
@@ -859,7 +854,7 @@ namespace Google.Apis.WebSecurityScanner.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.WebSecurityScanner.v1.Data.ScanConfig body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a new ScanConfig.</summary>
@@ -917,7 +912,7 @@ namespace Google.Apis.WebSecurityScanner.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes an existing ScanConfig and its child resources.</summary>
@@ -968,7 +963,7 @@ namespace Google.Apis.WebSecurityScanner.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a ScanConfig.</summary>
@@ -1019,7 +1014,7 @@ namespace Google.Apis.WebSecurityScanner.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists ScanConfigs under a given project.</summary>
@@ -1096,12 +1091,12 @@ namespace Google.Apis.WebSecurityScanner.v1
             /// <summary>Updates a ScanConfig. This method support partial update of a ScanConfig.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
-            /// The resource name of the ScanConfig. The name follows the format of
+            /// Identifier. The resource name of the ScanConfig. The name follows the format of
             /// 'projects/{projectId}/scanConfigs/{scanConfigId}'. The ScanConfig IDs are generated by the system.
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.WebSecurityScanner.v1.Data.ScanConfig body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates a ScanConfig. This method support partial update of a ScanConfig.</summary>
@@ -1116,7 +1111,7 @@ namespace Google.Apis.WebSecurityScanner.v1
                 }
 
                 /// <summary>
-                /// The resource name of the ScanConfig. The name follows the format of
+                /// Identifier. The resource name of the ScanConfig. The name follows the format of
                 /// 'projects/{projectId}/scanConfigs/{scanConfigId}'. The ScanConfig IDs are generated by the system.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -1175,7 +1170,7 @@ namespace Google.Apis.WebSecurityScanner.v1
             /// </param>
             public virtual StartRequest Start(Google.Apis.WebSecurityScanner.v1.Data.StartScanRunRequest body, string name)
             {
-                return new StartRequest(service, body, name);
+                return new StartRequest(this.service, body, name);
             }
 
             /// <summary>Start a ScanRun according to the given ScanConfig.</summary>
@@ -1296,8 +1291,7 @@ namespace Google.Apis.WebSecurityScanner.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1633,6 +1627,9 @@ namespace Google.Apis.WebSecurityScanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("ignoreHttpStatusErrors")]
         public virtual System.Nullable<bool> IgnoreHttpStatusErrors { get; set; }
 
+        [Newtonsoft.Json.JsonPropertyAttribute("latestRun")]
+        public virtual ScanRun LatestRun { get; set; }
+
         /// <summary>Whether the scan config is managed by Web Security Scanner, output only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("managedScan")]
         public virtual System.Nullable<bool> ManagedScan { get; set; }
@@ -1646,7 +1643,7 @@ namespace Google.Apis.WebSecurityScanner.v1.Data
         public virtual System.Nullable<int> MaxQps { get; set; }
 
         /// <summary>
-        /// The resource name of the ScanConfig. The name follows the format of
+        /// Identifier. The resource name of the ScanConfig. The name follows the format of
         /// 'projects/{projectId}/scanConfigs/{scanConfigId}'. The ScanConfig IDs are generated by the system.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -1670,6 +1667,12 @@ namespace Google.Apis.WebSecurityScanner.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("staticIpScan")]
         public virtual System.Nullable<bool> StaticIpScan { get; set; }
+
+        /// <summary>
+        /// Set of Google Cloud platforms targeted by the scan. If empty, APP_ENGINE will be used as a default.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetPlatforms")]
+        public virtual System.Collections.Generic.IList<string> TargetPlatforms { get; set; }
 
         /// <summary>The user agent used during scanning.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userAgent")]
@@ -1705,12 +1708,45 @@ namespace Google.Apis.WebSecurityScanner.v1.Data
     /// <summary>A ScanRun is a output-only resource representing an actual run of the scan. Next id: 12</summary>
     public class ScanRun : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// Output only. The time at which the ScanRun reached termination state - that the ScanRun is either finished
         /// or stopped by user.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. If result_state is an ERROR, this field provides the primary reason for scan's termination and
@@ -1749,9 +1785,42 @@ namespace Google.Apis.WebSecurityScanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("resultState")]
         public virtual string ResultState { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Output only. The time at which the ScanRun started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The number of URLs crawled during this ScanRun. If the scan is in progress, the value
@@ -1823,13 +1892,46 @@ namespace Google.Apis.WebSecurityScanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("intervalDurationDays")]
         public virtual System.Nullable<int> IntervalDurationDays { get; set; }
 
+        private string _scheduleTimeRaw;
+
+        private object _scheduleTime;
+
         /// <summary>
         /// A timestamp indicates when the next run will be scheduled. The value is refreshed by the server after each
         /// run. If unspecified, it will default to current server time, which means the scan will be scheduled to start
         /// immediately.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleTime")]
-        public virtual object ScheduleTime { get; set; }
+        public virtual string ScheduleTimeRaw
+        {
+            get => _scheduleTimeRaw;
+            set
+            {
+                _scheduleTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleTimeDateTimeOffset instead.")]
+        public virtual object ScheduleTime
+        {
+            get => _scheduleTime;
+            set
+            {
+                _scheduleTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleTimeRaw);
+            set => ScheduleTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

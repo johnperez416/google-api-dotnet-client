@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.Spanner.v1
         {
             Projects = new ProjectsResource(this);
             Scans = new ScansResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://spanner.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://spanner.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.Spanner.v1
         public override string Name => "spanner";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://spanner.googleapis.com/";
-        #else
-            "https://spanner.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://spanner.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Spanner API.</summary>
         public class Scope
@@ -295,8 +290,153 @@ namespace Google.Apis.Spanner.v1
         public ProjectsResource(Google.Apis.Services.IClientService service)
         {
             this.service = service;
+            InstanceConfigOperations = new InstanceConfigOperationsResource(service);
             InstanceConfigs = new InstanceConfigsResource(service);
             Instances = new InstancesResource(service);
+        }
+
+        /// <summary>Gets the InstanceConfigOperations resource.</summary>
+        public virtual InstanceConfigOperationsResource InstanceConfigOperations { get; }
+
+        /// <summary>The "instanceConfigOperations" collection of methods.</summary>
+        public class InstanceConfigOperationsResource
+        {
+            private const string Resource = "instanceConfigOperations";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public InstanceConfigOperationsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// Lists the user-managed instance configuration long-running operations in the given project. An instance
+            /// configuration operation has a name of the form `projects//instanceConfigs//operations/`. The
+            /// long-running operation metadata field type `metadata.type_url` describes the type of the metadata.
+            /// Operations returned include those that have completed/failed/canceled within the last 7 days, and
+            /// pending operations. Operations returned are ordered by `operation.metadata.value.start_time` in
+            /// descending order starting from the most recently started operation.
+            /// </summary>
+            /// <param name="parent">
+            /// Required. The project of the instance configuration operations. Values are of the form `projects/`.
+            /// </param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>
+            /// Lists the user-managed instance configuration long-running operations in the given project. An instance
+            /// configuration operation has a name of the form `projects//instanceConfigs//operations/`. The
+            /// long-running operation metadata field type `metadata.type_url` describes the type of the metadata.
+            /// Operations returned include those that have completed/failed/canceled within the last 7 days, and
+            /// pending operations. Operations returned are ordered by `operation.metadata.value.start_time` in
+            /// descending order starting from the most recently started operation.
+            /// </summary>
+            public class ListRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ListInstanceConfigOperationsResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The project of the instance configuration operations. Values are of the form `projects/`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// An expression that filters the list of returned operations. A filter expression consists of a field
+                /// name, a comparison operator, and a value for filtering. The value must be a string, a number, or a
+                /// boolean. The comparison operator must be one of: `&amp;lt;`, `&amp;gt;`, `&amp;lt;=`, `&amp;gt;=`,
+                /// `!=`, `=`, or `:`. Colon `:` is the contains operator. Filter rules are not case sensitive. The
+                /// following fields in the Operation are eligible for filtering: * `name` - The name of the
+                /// long-running operation * `done` - False if the operation is in progress, else true. *
+                /// `metadata.@type` - the type of metadata. For example, the type string for
+                /// CreateInstanceConfigMetadata is
+                /// `type.googleapis.com/google.spanner.admin.instance.v1.CreateInstanceConfigMetadata`. * `metadata.` -
+                /// any field in metadata.value. `metadata.@type` must be specified first, if filtering on metadata
+                /// fields. * `error` - Error associated with the long-running operation. * `response.@type` - the type
+                /// of response. * `response.` - any field in response.value. You can combine multiple expressions by
+                /// enclosing each expression in parentheses. By default, expressions are combined with AND logic.
+                /// However, you can specify AND, OR, and NOT logic explicitly. Here are a few examples: * `done:true` -
+                /// The operation is complete. * `(metadata.@type=` \
+                /// `type.googleapis.com/google.spanner.admin.instance.v1.CreateInstanceConfigMetadata) AND` \
+                /// `(metadata.instance_config.name:custom-config) AND` \ `(metadata.progress.start_time &amp;lt;
+                /// \"2021-03-28T14:50:00Z\") AND` \ `(error:*)` - Return operations where: * The operation's metadata
+                /// type is CreateInstanceConfigMetadata. * The instance configuration name contains "custom-config". *
+                /// The operation started before 2021-03-28T14:50:00Z. * The operation resulted in an error.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
+
+                /// <summary>
+                /// Number of operations to be returned in the response. If 0 or less, defaults to the server's maximum
+                /// allowed page size.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>
+                /// If non-empty, `page_token` should contain a next_page_token from a previous
+                /// ListInstanceConfigOperationsResponse to the same `parent` and with the same `filter`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/instanceConfigOperations";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+$",
+                    });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
         }
 
         /// <summary>Gets the InstanceConfigs resource.</summary>
@@ -314,6 +454,747 @@ namespace Google.Apis.Spanner.v1
             public InstanceConfigsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                Operations = new OperationsResource(service);
+                SsdCaches = new SsdCachesResource(service);
+            }
+
+            /// <summary>Gets the Operations resource.</summary>
+            public virtual OperationsResource Operations { get; }
+
+            /// <summary>The "operations" collection of methods.</summary>
+            public class OperationsResource
+            {
+                private const string Resource = "operations";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public OperationsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to
+                /// cancel the operation, but success is not guaranteed. If the server doesn't support this method, it
+                /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
+                /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
+                /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
+                /// </summary>
+                /// <param name="name">The name of the operation resource to be cancelled.</param>
+                public virtual CancelRequest Cancel(string name)
+                {
+                    return new CancelRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to
+                /// cancel the operation, but success is not guaranteed. If the server doesn't support this method, it
+                /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
+                /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
+                /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
+                /// </summary>
+                public class CancelRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Cancel request.</summary>
+                    public CancelRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation resource to be cancelled.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "cancel";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}:cancel";
+
+                    /// <summary>Initializes Cancel parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instanceConfigs/[^/]+/operations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Deletes a long-running operation. This method indicates that the client is no longer interested in
+                /// the operation result. It does not cancel the operation. If the server doesn't support this method,
+                /// it returns `google.rpc.Code.UNIMPLEMENTED`.
+                /// </summary>
+                /// <param name="name">The name of the operation resource to be deleted.</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Deletes a long-running operation. This method indicates that the client is no longer interested in
+                /// the operation result. It does not cancel the operation. If the server doesn't support this method,
+                /// it returns `google.rpc.Code.UNIMPLEMENTED`.
+                /// </summary>
+                public class DeleteRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation resource to be deleted.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instanceConfigs/[^/]+/operations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
+                /// result at intervals as recommended by the API service.
+                /// </summary>
+                /// <param name="name">The name of the operation resource.</param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
+                /// result at intervals as recommended by the API service.
+                /// </summary>
+                public class GetRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation resource.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instanceConfigs/[^/]+/operations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Lists operations that match the specified filter in the request. If the server doesn't support this
+                /// method, it returns `UNIMPLEMENTED`.
+                /// </summary>
+                /// <param name="name">The name of the operation's parent resource.</param>
+                public virtual ListRequest List(string name)
+                {
+                    return new ListRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Lists operations that match the specified filter in the request. If the server doesn't support this
+                /// method, it returns `UNIMPLEMENTED`.
+                /// </summary>
+                public class ListRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ListOperationsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation's parent resource.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>The standard list filter.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>The standard list page size.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>The standard list page token.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instanceConfigs/[^/]+/operations$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the SsdCaches resource.</summary>
+            public virtual SsdCachesResource SsdCaches { get; }
+
+            /// <summary>The "ssdCaches" collection of methods.</summary>
+            public class SsdCachesResource
+            {
+                private const string Resource = "ssdCaches";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public SsdCachesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    Operations = new OperationsResource(service);
+                }
+
+                /// <summary>Gets the Operations resource.</summary>
+                public virtual OperationsResource Operations { get; }
+
+                /// <summary>The "operations" collection of methods.</summary>
+                public class OperationsResource
+                {
+                    private const string Resource = "operations";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public OperationsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to
+                    /// cancel the operation, but success is not guaranteed. If the server doesn't support this method,
+                    /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
+                    /// methods to check whether the cancellation succeeded or whether the operation completed despite
+                    /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
+                    /// `Code.CANCELLED`.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource to be cancelled.</param>
+                    public virtual CancelRequest Cancel(string name)
+                    {
+                        return new CancelRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to
+                    /// cancel the operation, but success is not guaranteed. If the server doesn't support this method,
+                    /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
+                    /// methods to check whether the cancellation succeeded or whether the operation completed despite
+                    /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
+                    /// `Code.CANCELLED`.
+                    /// </summary>
+                    public class CancelRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
+                    {
+                        /// <summary>Constructs a new Cancel request.</summary>
+                        public CancelRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource to be cancelled.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "cancel";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}:cancel";
+
+                        /// <summary>Initializes Cancel parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instanceConfigs/[^/]+/ssdCaches/[^/]+/operations/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Deletes a long-running operation. This method indicates that the client is no longer interested
+                    /// in the operation result. It does not cancel the operation. If the server doesn't support this
+                    /// method, it returns `google.rpc.Code.UNIMPLEMENTED`.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource to be deleted.</param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Deletes a long-running operation. This method indicates that the client is no longer interested
+                    /// in the operation result. It does not cancel the operation. If the server doesn't support this
+                    /// method, it returns `google.rpc.Code.UNIMPLEMENTED`.
+                    /// </summary>
+                    public class DeleteRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource to be deleted.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instanceConfigs/[^/]+/ssdCaches/[^/]+/operations/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource.</param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    public class GetRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instanceConfigs/[^/]+/ssdCaches/[^/]+/operations/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Lists operations that match the specified filter in the request. If the server doesn't support
+                    /// this method, it returns `UNIMPLEMENTED`.
+                    /// </summary>
+                    /// <param name="name">The name of the operation's parent resource.</param>
+                    public virtual ListRequest List(string name)
+                    {
+                        return new ListRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Lists operations that match the specified filter in the request. If the server doesn't support
+                    /// this method, it returns `UNIMPLEMENTED`.
+                    /// </summary>
+                    public class ListRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ListOperationsResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation's parent resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>The standard list filter.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string Filter { get; set; }
+
+                        /// <summary>The standard list page size.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>The standard list page token.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instanceConfigs/[^/]+/ssdCaches/[^/]+/operations$",
+                            });
+                            RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "filter",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Creates an instance configuration and begins preparing it to be used. The returned long-running
+            /// operation can be used to track the progress of preparing the new instance configuration. The instance
+            /// configuration name is assigned by the caller. If the named instance configuration already exists,
+            /// `CreateInstanceConfig` returns `ALREADY_EXISTS`. Immediately after the request returns: * The instance
+            /// configuration is readable via the API, with all requested attributes. The instance configuration's
+            /// reconciling field is set to true. Its state is `CREATING`. While the operation is pending: * Cancelling
+            /// the operation renders the instance configuration immediately unreadable via the API. * Except for
+            /// deleting the creating resource, all other attempts to modify the instance configuration are rejected.
+            /// Upon completion of the returned operation: * Instances can be created using the instance configuration.
+            /// * The instance configuration's reconciling field becomes false. Its state becomes `READY`. The returned
+            /// long-running operation will have a name of the format `/operations/` and can be used to track creation
+            /// of the instance configuration. The metadata field type is CreateInstanceConfigMetadata. The response
+            /// field type is InstanceConfig, if successful. Authorization requires `spanner.instanceConfigs.create`
+            /// permission on the resource parent.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. The name of the project in which to create the instance configuration. Values are of the form
+            /// `projects/`.
+            /// </param>
+            public virtual CreateRequest Create(Google.Apis.Spanner.v1.Data.CreateInstanceConfigRequest body, string parent)
+            {
+                return new CreateRequest(this.service, body, parent);
+            }
+
+            /// <summary>
+            /// Creates an instance configuration and begins preparing it to be used. The returned long-running
+            /// operation can be used to track the progress of preparing the new instance configuration. The instance
+            /// configuration name is assigned by the caller. If the named instance configuration already exists,
+            /// `CreateInstanceConfig` returns `ALREADY_EXISTS`. Immediately after the request returns: * The instance
+            /// configuration is readable via the API, with all requested attributes. The instance configuration's
+            /// reconciling field is set to true. Its state is `CREATING`. While the operation is pending: * Cancelling
+            /// the operation renders the instance configuration immediately unreadable via the API. * Except for
+            /// deleting the creating resource, all other attempts to modify the instance configuration are rejected.
+            /// Upon completion of the returned operation: * Instances can be created using the instance configuration.
+            /// * The instance configuration's reconciling field becomes false. Its state becomes `READY`. The returned
+            /// long-running operation will have a name of the format `/operations/` and can be used to track creation
+            /// of the instance configuration. The metadata field type is CreateInstanceConfigMetadata. The response
+            /// field type is InstanceConfig, if successful. Authorization requires `spanner.instanceConfigs.create`
+            /// permission on the resource parent.
+            /// </summary>
+            public class CreateRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Operation>
+            {
+                /// <summary>Constructs a new Create request.</summary>
+                public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.CreateInstanceConfigRequest body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The name of the project in which to create the instance configuration. Values are of the
+                /// form `projects/`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Spanner.v1.Data.CreateInstanceConfigRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "create";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/instanceConfigs";
+
+                /// <summary>Initializes Create parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Deletes the instance configuration. Deletion is only allowed when no instances are using the
+            /// configuration. If any instances are using the configuration, returns `FAILED_PRECONDITION`. Only
+            /// user-managed configurations can be deleted. Authorization requires `spanner.instanceConfigs.delete`
+            /// permission on the resource name.
+            /// </summary>
+            /// <param name="name">
+            /// Required. The name of the instance configuration to be deleted. Values are of the form
+            /// `projects//instanceConfigs/`
+            /// </param>
+            public virtual DeleteRequest Delete(string name)
+            {
+                return new DeleteRequest(this.service, name);
+            }
+
+            /// <summary>
+            /// Deletes the instance configuration. Deletion is only allowed when no instances are using the
+            /// configuration. If any instances are using the configuration, returns `FAILED_PRECONDITION`. Only
+            /// user-managed configurations can be deleted. Authorization requires `spanner.instanceConfigs.delete`
+            /// permission on the resource name.
+            /// </summary>
+            public class DeleteRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
+            {
+                /// <summary>Constructs a new Delete request.</summary>
+                public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The name of the instance configuration to be deleted. Values are of the form
+                /// `projects//instanceConfigs/`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>
+                /// Used for optimistic concurrency control as a way to help prevent simultaneous deletes of an instance
+                /// configuration from overwriting each other. If not empty, the API only deletes the instance
+                /// configuration when the etag provided matches the current status of the requested instance
+                /// configuration. Otherwise, deletes the instance configuration without checking the current status of
+                /// the requested instance configuration.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("etag", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Etag { get; set; }
+
+                /// <summary>
+                /// An option to validate, but not actually execute, a request, and provide the same response.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "delete";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "DELETE";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes Delete parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/instanceConfigs/[^/]+$",
+                    });
+                    RequestParameters.Add("etag", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "etag",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "validateOnly",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
             }
 
             /// <summary>Gets information about a particular instance configuration.</summary>
@@ -323,7 +1204,7 @@ namespace Google.Apis.Spanner.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a particular instance configuration.</summary>
@@ -367,17 +1248,23 @@ namespace Google.Apis.Spanner.v1
                 }
             }
 
-            /// <summary>Lists the supported instance configurations for a given project.</summary>
+            /// <summary>
+            /// Lists the supported instance configurations for a given project. Returns both Google-managed
+            /// configurations and user-managed configurations.
+            /// </summary>
             /// <param name="parent">
             /// Required. The name of the project for which a list of supported instance configurations is requested.
             /// Values are of the form `projects/`.
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
-            /// <summary>Lists the supported instance configurations for a given project.</summary>
+            /// <summary>
+            /// Lists the supported instance configurations for a given project. Returns both Google-managed
+            /// configurations and user-managed configurations.
+            /// </summary>
             public class ListRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ListInstanceConfigsResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -447,6 +1334,95 @@ namespace Google.Apis.Spanner.v1
                     });
                 }
             }
+
+            /// <summary>
+            /// Updates an instance configuration. The returned long-running operation can be used to track the progress
+            /// of updating the instance. If the named instance configuration does not exist, returns `NOT_FOUND`. Only
+            /// user-managed configurations can be updated. Immediately after the request returns: * The instance
+            /// configuration's reconciling field is set to true. While the operation is pending: * Cancelling the
+            /// operation sets its metadata's cancel_time. The operation is guaranteed to succeed at undoing all
+            /// changes, after which point it terminates with a `CANCELLED` status. * All other attempts to modify the
+            /// instance configuration are rejected. * Reading the instance configuration via the API continues to give
+            /// the pre-request values. Upon completion of the returned operation: * Creating instances using the
+            /// instance configuration uses the new values. * The new values of the instance configuration are readable
+            /// via the API. * The instance configuration's reconciling field becomes false. The returned long-running
+            /// operation will have a name of the format `/operations/` and can be used to track the instance
+            /// configuration modification. The metadata field type is UpdateInstanceConfigMetadata. The response field
+            /// type is InstanceConfig, if successful. Authorization requires `spanner.instanceConfigs.update`
+            /// permission on the resource name.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// A unique identifier for the instance configuration. Values are of the form
+            /// `projects//instanceConfigs/a-z*`. User instance configuration must start with `custom-`.
+            /// </param>
+            public virtual PatchRequest Patch(Google.Apis.Spanner.v1.Data.UpdateInstanceConfigRequest body, string name)
+            {
+                return new PatchRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Updates an instance configuration. The returned long-running operation can be used to track the progress
+            /// of updating the instance. If the named instance configuration does not exist, returns `NOT_FOUND`. Only
+            /// user-managed configurations can be updated. Immediately after the request returns: * The instance
+            /// configuration's reconciling field is set to true. While the operation is pending: * Cancelling the
+            /// operation sets its metadata's cancel_time. The operation is guaranteed to succeed at undoing all
+            /// changes, after which point it terminates with a `CANCELLED` status. * All other attempts to modify the
+            /// instance configuration are rejected. * Reading the instance configuration via the API continues to give
+            /// the pre-request values. Upon completion of the returned operation: * Creating instances using the
+            /// instance configuration uses the new values. * The new values of the instance configuration are readable
+            /// via the API. * The instance configuration's reconciling field becomes false. The returned long-running
+            /// operation will have a name of the format `/operations/` and can be used to track the instance
+            /// configuration modification. The metadata field type is UpdateInstanceConfigMetadata. The response field
+            /// type is InstanceConfig, if successful. Authorization requires `spanner.instanceConfigs.update`
+            /// permission on the resource name.
+            /// </summary>
+            public class PatchRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Operation>
+            {
+                /// <summary>Constructs a new Patch request.</summary>
+                public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.UpdateInstanceConfigRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// A unique identifier for the instance configuration. Values are of the form
+                /// `projects//instanceConfigs/a-z*`. User instance configuration must start with `custom-`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Spanner.v1.Data.UpdateInstanceConfigRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "patch";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "PATCH";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes Patch parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/instanceConfigs/[^/]+$",
+                    });
+                }
+            }
         }
 
         /// <summary>Gets the Instances resource.</summary>
@@ -468,6 +1444,8 @@ namespace Google.Apis.Spanner.v1
                 Backups = new BackupsResource(service);
                 DatabaseOperations = new DatabaseOperationsResource(service);
                 Databases = new DatabasesResource(service);
+                InstancePartitionOperations = new InstancePartitionOperationsResource(service);
+                InstancePartitions = new InstancePartitionsResource(service);
                 Operations = new OperationsResource(service);
             }
 
@@ -501,7 +1479,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -537,17 +1515,33 @@ namespace Google.Apis.Spanner.v1
                     /// progress, else true. * `metadata.@type` - the type of metadata. For example, the type string for
                     /// CreateBackupMetadata is
                     /// `type.googleapis.com/google.spanner.admin.database.v1.CreateBackupMetadata`. * `metadata.` - any
-                    /// field in metadata.value. * `error` - Error associated with the long-running operation. *
-                    /// `response.@type` - the type of response. * `response.` - any field in response.value. You can
-                    /// combine multiple expressions by enclosing each expression in parentheses. By default,
-                    /// expressions are combined with AND logic, but you can specify AND, OR, and NOT logic explicitly.
-                    /// Here are a few examples: * `done:true` - The operation is complete. * `metadata.database:prod` -
-                    /// The database the backup was taken from has a name containing the string "prod". *
+                    /// field in metadata.value. `metadata.@type` must be specified first if filtering on metadata
+                    /// fields. * `error` - Error associated with the long-running operation. * `response.@type` - the
+                    /// type of response. * `response.` - any field in response.value. You can combine multiple
+                    /// expressions by enclosing each expression in parentheses. By default, expressions are combined
+                    /// with AND logic, but you can specify AND, OR, and NOT logic explicitly. Here are a few examples:
+                    /// * `done:true` - The operation is complete. *
+                    /// `(metadata.@type=type.googleapis.com/google.spanner.admin.database.v1.CreateBackupMetadata) AND`
+                    /// \ `metadata.database:prod` - Returns operations where: * The operation's metadata type is
+                    /// CreateBackupMetadata. * The source database name of backup contains the string "prod". *
                     /// `(metadata.@type=type.googleapis.com/google.spanner.admin.database.v1.CreateBackupMetadata) AND`
                     /// \ `(metadata.name:howl) AND` \ `(metadata.progress.start_time &amp;lt; \"2018-03-28T14:50:00Z\")
                     /// AND` \ `(error:*)` - Returns operations where: * The operation's metadata type is
                     /// CreateBackupMetadata. * The backup name contains the string "howl". * The operation started
-                    /// before 2018-03-28T14:50:00Z. * The operation resulted in an error.
+                    /// before 2018-03-28T14:50:00Z. * The operation resulted in an error. *
+                    /// `(metadata.@type=type.googleapis.com/google.spanner.admin.database.v1.CopyBackupMetadata) AND` \
+                    /// `(metadata.source_backup:test) AND` \ `(metadata.progress.start_time &amp;lt;
+                    /// \"2022-01-18T14:50:00Z\") AND` \ `(error:*)` - Returns operations where: * The operation's
+                    /// metadata type is CopyBackupMetadata. * The source backup name contains the string "test". * The
+                    /// operation started before 2022-01-18T14:50:00Z. * The operation resulted in an error. *
+                    /// `((metadata.@type=type.googleapis.com/google.spanner.admin.database.v1.CreateBackupMetadata)
+                    /// AND` \ `(metadata.database:test_db)) OR` \
+                    /// `((metadata.@type=type.googleapis.com/google.spanner.admin.database.v1.CopyBackupMetadata) AND`
+                    /// \ `(metadata.source_backup:test_bkp)) AND` \ `(error:*)` - Returns operations where: * The
+                    /// operation's metadata matches either of criteria: * The operation's metadata type is
+                    /// CreateBackupMetadata AND the source database name of the backup contains the string "test_db" *
+                    /// The operation's metadata type is CopyBackupMetadata AND the source backup name contains the
+                    /// string "test_bkp" * The operation resulted in an error.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string Filter { get; set; }
@@ -656,13 +1650,13 @@ namespace Google.Apis.Spanner.v1
                     /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
                     /// methods to check whether the cancellation succeeded or whether the operation completed despite
                     /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
-                    /// operation with an Operation.error value with a google.rpc.Status.code of 1, corresponding to
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
                     /// `Code.CANCELLED`.
                     /// </summary>
                     /// <param name="name">The name of the operation resource to be cancelled.</param>
                     public virtual CancelRequest Cancel(string name)
                     {
-                        return new CancelRequest(service, name);
+                        return new CancelRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -671,7 +1665,7 @@ namespace Google.Apis.Spanner.v1
                     /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
                     /// methods to check whether the cancellation succeeded or whether the operation completed despite
                     /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
-                    /// operation with an Operation.error value with a google.rpc.Status.code of 1, corresponding to
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
                     /// `Code.CANCELLED`.
                     /// </summary>
                     public class CancelRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
@@ -719,7 +1713,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="name">The name of the operation resource to be deleted.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -771,7 +1765,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="name">The name of the operation resource.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -817,27 +1811,17 @@ namespace Google.Apis.Spanner.v1
 
                     /// <summary>
                     /// Lists operations that match the specified filter in the request. If the server doesn't support
-                    /// this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to
-                    /// override the binding to use different resource name schemes, such as `users/*/operations`. To
-                    /// override the binding, API services can add a binding such as `"/v1/{name=users/*}/operations"`
-                    /// to their service configuration. For backwards compatibility, the default name includes the
-                    /// operations collection id, however overriding users must ensure the name binding is the parent
-                    /// resource, without the operations collection id.
+                    /// this method, it returns `UNIMPLEMENTED`.
                     /// </summary>
                     /// <param name="name">The name of the operation's parent resource.</param>
                     public virtual ListRequest List(string name)
                     {
-                        return new ListRequest(service, name);
+                        return new ListRequest(this.service, name);
                     }
 
                     /// <summary>
                     /// Lists operations that match the specified filter in the request. If the server doesn't support
-                    /// this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to
-                    /// override the binding to use different resource name schemes, such as `users/*/operations`. To
-                    /// override the binding, API services can add a binding such as `"/v1/{name=users/*}/operations"`
-                    /// to their service configuration. For backwards compatibility, the default name includes the
-                    /// operations collection id, however overriding users must ensure the name binding is the parent
-                    /// resource, without the operations collection id.
+                    /// this method, it returns `UNIMPLEMENTED`.
                     /// </summary>
                     public class ListRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ListOperationsResponse>
                     {
@@ -914,6 +1898,79 @@ namespace Google.Apis.Spanner.v1
                 }
 
                 /// <summary>
+                /// Starts copying a Cloud Spanner Backup. The returned backup long-running operation will have a name
+                /// of the format `projects//instances//backups//operations/` and can be used to track copying of the
+                /// backup. The operation is associated with the destination backup. The metadata field type is
+                /// CopyBackupMetadata. The response field type is Backup, if successful. Cancelling the returned
+                /// operation will stop the copying and delete the destination backup. Concurrent CopyBackup requests
+                /// can run on the same source backup.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The name of the destination instance that will contain the backup copy. Values are of the
+                /// form: `projects//instances/`.
+                /// </param>
+                public virtual CopyRequest Copy(Google.Apis.Spanner.v1.Data.CopyBackupRequest body, string parent)
+                {
+                    return new CopyRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Starts copying a Cloud Spanner Backup. The returned backup long-running operation will have a name
+                /// of the format `projects//instances//backups//operations/` and can be used to track copying of the
+                /// backup. The operation is associated with the destination backup. The metadata field type is
+                /// CopyBackupMetadata. The response field type is Backup, if successful. Cancelling the returned
+                /// operation will stop the copying and delete the destination backup. Concurrent CopyBackup requests
+                /// can run on the same source backup.
+                /// </summary>
+                public class CopyRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Copy request.</summary>
+                    public CopyRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.CopyBackupRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the destination instance that will contain the backup copy. Values are of
+                    /// the form: `projects//instances/`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Spanner.v1.Data.CopyBackupRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "copy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/backups:copy";
+
+                    /// <summary>Initializes Copy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instances/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
                 /// Starts creating a new Cloud Spanner Backup. The returned backup long-running operation will have a
                 /// name of the format `projects//instances//backups//operations/` and can be used to track creation of
                 /// the backup. The metadata field type is CreateBackupMetadata. The response field type is Backup, if
@@ -930,7 +1987,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.Spanner.v1.Data.Backup body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1007,6 +2064,20 @@ namespace Google.Apis.Spanner.v1
                     [Google.Apis.Util.RequestParameterAttribute("encryptionConfig.kmsKeyName", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string EncryptionConfigKmsKeyName { get; set; }
 
+                    /// <summary>
+                    /// Optional. Specifies the KMS configuration for the one or more keys used to protect the backup.
+                    /// Values are of the form `projects//locations//keyRings//cryptoKeys/`. The keys referenced by
+                    /// `kms_key_names` must fully cover all regions of the backup's instance configuration. Some
+                    /// examples: * For regional (single-region) instance configurations, specify a regional location
+                    /// KMS key. * For multi-region instance configurations of type `GOOGLE_MANAGED`, either specify a
+                    /// multi-region location KMS key or multiple regional location KMS keys that cover all regions in
+                    /// the instance configuration. * For an instance configuration of type `USER_MANAGED`, specify only
+                    /// regional location KMS keys to cover each region in the instance configuration. Multi-region
+                    /// location KMS keys aren't supported for `USER_MANAGED` type instance configurations.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("encryptionConfig.kmsKeyNames", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual Google.Apis.Util.Repeatable<string> EncryptionConfigKmsKeyNames { get; set; }
+
                     /// <summary>Gets or sets the body of this request.</summary>
                     Google.Apis.Spanner.v1.Data.Backup Body { get; set; }
 
@@ -1058,6 +2129,14 @@ namespace Google.Apis.Spanner.v1
                             DefaultValue = null,
                             Pattern = null,
                         });
+                        RequestParameters.Add("encryptionConfig.kmsKeyNames", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "encryptionConfig.kmsKeyNames",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
                     }
                 }
 
@@ -1067,7 +2146,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes a pending or completed Backup.</summary>
@@ -1116,7 +2195,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets metadata on a pending or completed Backup.</summary>
@@ -1163,7 +2242,8 @@ namespace Google.Apis.Spanner.v1
                 /// Gets the access control policy for a database or backup resource. Returns an empty policy if a
                 /// database or backup exists but does not have a policy set. Authorization requires
                 /// `spanner.databases.getIamPolicy` permission on resource. For backups, authorization requires
-                /// `spanner.backups.getIamPolicy` permission on resource.
+                /// `spanner.backups.getIamPolicy` permission on resource. For backup schedules, authorization requires
+                /// `spanner.backupSchedules.getIamPolicy` permission on resource.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
@@ -1173,14 +2253,15 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.Spanner.v1.Data.GetIamPolicyRequest body, string resource)
                 {
-                    return new GetIamPolicyRequest(service, body, resource);
+                    return new GetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
                 /// Gets the access control policy for a database or backup resource. Returns an empty policy if a
                 /// database or backup exists but does not have a policy set. Authorization requires
                 /// `spanner.databases.getIamPolicy` permission on resource. For backups, authorization requires
-                /// `spanner.backups.getIamPolicy` permission on resource.
+                /// `spanner.backups.getIamPolicy` permission on resource. For backup schedules, authorization requires
+                /// `spanner.backupSchedules.getIamPolicy` permission on resource.
                 /// </summary>
                 public class GetIamPolicyRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Policy>
                 {
@@ -1239,7 +2320,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -1269,16 +2350,17 @@ namespace Google.Apis.Spanner.v1
                     /// sensitive. The following fields in the Backup are eligible for filtering: * `name` * `database`
                     /// * `state` * `create_time` (and values are of the format YYYY-MM-DDTHH:MM:SSZ) * `expire_time`
                     /// (and values are of the format YYYY-MM-DDTHH:MM:SSZ) * `version_time` (and values are of the
-                    /// format YYYY-MM-DDTHH:MM:SSZ) * `size_bytes` You can combine multiple expressions by enclosing
-                    /// each expression in parentheses. By default, expressions are combined with AND logic, but you can
-                    /// specify AND, OR, and NOT logic explicitly. Here are a few examples: * `name:Howl` - The backup's
-                    /// name contains the string "howl". * `database:prod` - The database's name contains the string
-                    /// "prod". * `state:CREATING` - The backup is pending creation. * `state:READY` - The backup is
-                    /// fully created and ready for use. * `(name:howl) AND (create_time &amp;lt;
-                    /// \"2018-03-28T14:50:00Z\")` - The backup name contains the string "howl" and `create_time` of the
-                    /// backup is before 2018-03-28T14:50:00Z. * `expire_time &amp;lt; \"2018-03-28T14:50:00Z\"` - The
-                    /// backup `expire_time` is before 2018-03-28T14:50:00Z. * `size_bytes &amp;gt; 10000000000` - The
-                    /// backup's size is greater than 10GB
+                    /// format YYYY-MM-DDTHH:MM:SSZ) * `size_bytes` * `backup_schedules` You can combine multiple
+                    /// expressions by enclosing each expression in parentheses. By default, expressions are combined
+                    /// with AND logic, but you can specify AND, OR, and NOT logic explicitly. Here are a few examples:
+                    /// * `name:Howl` - The backup's name contains the string "howl". * `database:prod` - The database's
+                    /// name contains the string "prod". * `state:CREATING` - The backup is pending creation. *
+                    /// `state:READY` - The backup is fully created and ready for use. * `(name:howl) AND (create_time
+                    /// &amp;lt; \"2018-03-28T14:50:00Z\")` - The backup name contains the string "howl" and
+                    /// `create_time` of the backup is before 2018-03-28T14:50:00Z. * `expire_time &amp;lt;
+                    /// \"2018-03-28T14:50:00Z\"` - The backup `expire_time` is before 2018-03-28T14:50:00Z. *
+                    /// `size_bytes &amp;gt; 10000000000` - The backup's size is greater than 10GB *
+                    /// `backup_schedules:daily` - The backup is created from a schedule with "daily" in its name.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string Filter { get; set; }
@@ -1357,7 +2439,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.Spanner.v1.Data.Backup body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates a pending or completed Backup.</summary>
@@ -1432,7 +2514,8 @@ namespace Google.Apis.Spanner.v1
                 /// <summary>
                 /// Sets the access control policy on a database or backup resource. Replaces any existing policy.
                 /// Authorization requires `spanner.databases.setIamPolicy` permission on resource. For backups,
-                /// authorization requires `spanner.backups.setIamPolicy` permission on resource.
+                /// authorization requires `spanner.backups.setIamPolicy` permission on resource. For backup schedules,
+                /// authorization requires `spanner.backupSchedules.setIamPolicy` permission on resource.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
@@ -1442,13 +2525,14 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.Spanner.v1.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
                 /// Sets the access control policy on a database or backup resource. Replaces any existing policy.
                 /// Authorization requires `spanner.databases.setIamPolicy` permission on resource. For backups,
-                /// authorization requires `spanner.backups.setIamPolicy` permission on resource.
+                /// authorization requires `spanner.backups.setIamPolicy` permission on resource. For backup schedules,
+                /// authorization requires `spanner.backupSchedules.setIamPolicy` permission on resource.
                 /// </summary>
                 public class SetIamPolicyRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Policy>
                 {
@@ -1504,6 +2588,8 @@ namespace Google.Apis.Spanner.v1
                 /// `spanner.databases.list` permission on the containing Cloud Spanner instance. Otherwise returns an
                 /// empty set of permissions. Calling this method on a backup that does not exist will result in a
                 /// NOT_FOUND error if the user has `spanner.backups.list` permission on the containing instance.
+                /// Calling this method on a backup schedule that does not exist will result in a NOT_FOUND error if the
+                /// user has `spanner.backupSchedules.list` permission on the containing database.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
@@ -1513,7 +2599,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.Spanner.v1.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -1522,6 +2608,8 @@ namespace Google.Apis.Spanner.v1
                 /// `spanner.databases.list` permission on the containing Cloud Spanner instance. Otherwise returns an
                 /// empty set of permissions. Calling this method on a backup that does not exist will result in a
                 /// NOT_FOUND error if the user has `spanner.backups.list` permission on the containing instance.
+                /// Calling this method on a backup schedule that does not exist will result in a NOT_FOUND error if the
+                /// user has `spanner.backupSchedules.list` permission on the containing database.
                 /// </summary>
                 public class TestIamPermissionsRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.TestIamPermissionsResponse>
                 {
@@ -1600,7 +2688,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -1630,16 +2718,17 @@ namespace Google.Apis.Spanner.v1
                     /// field name, a comparison operator, and a value for filtering. The value must be a string, a
                     /// number, or a boolean. The comparison operator must be one of: `&amp;lt;`, `&amp;gt;`,
                     /// `&amp;lt;=`, `&amp;gt;=`, `!=`, `=`, or `:`. Colon `:` is the contains operator. Filter rules
-                    /// are not case sensitive. The following fields in the Operation are eligible for filtering: *
+                    /// are not case sensitive. The following fields in the operation are eligible for filtering: *
                     /// `name` - The name of the long-running operation * `done` - False if the operation is in
                     /// progress, else true. * `metadata.@type` - the type of metadata. For example, the type string for
                     /// RestoreDatabaseMetadata is
                     /// `type.googleapis.com/google.spanner.admin.database.v1.RestoreDatabaseMetadata`. * `metadata.` -
-                    /// any field in metadata.value. * `error` - Error associated with the long-running operation. *
-                    /// `response.@type` - the type of response. * `response.` - any field in response.value. You can
-                    /// combine multiple expressions by enclosing each expression in parentheses. By default,
-                    /// expressions are combined with AND logic. However, you can specify AND, OR, and NOT logic
-                    /// explicitly. Here are a few examples: * `done:true` - The operation is complete. *
+                    /// any field in metadata.value. `metadata.@type` must be specified first, if filtering on metadata
+                    /// fields. * `error` - Error associated with the long-running operation. * `response.@type` - the
+                    /// type of response. * `response.` - any field in response.value. You can combine multiple
+                    /// expressions by enclosing each expression in parentheses. By default, expressions are combined
+                    /// with AND logic. However, you can specify AND, OR, and NOT logic explicitly. Here are a few
+                    /// examples: * `done:true` - The operation is complete. *
                     /// `(metadata.@type=type.googleapis.com/google.spanner.admin.database.v1.RestoreDatabaseMetadata)
                     /// AND` \ `(metadata.source_type:BACKUP) AND` \ `(metadata.backup_info.backup:backup_howl) AND` \
                     /// `(metadata.name:restored_howl) AND` \ `(metadata.progress.start_time &amp;lt;
@@ -1729,8 +2818,765 @@ namespace Google.Apis.Spanner.v1
                 public DatabasesResource(Google.Apis.Services.IClientService service)
                 {
                     this.service = service;
+                    BackupSchedules = new BackupSchedulesResource(service);
+                    DatabaseRoles = new DatabaseRolesResource(service);
                     Operations = new OperationsResource(service);
                     Sessions = new SessionsResource(service);
+                }
+
+                /// <summary>Gets the BackupSchedules resource.</summary>
+                public virtual BackupSchedulesResource BackupSchedules { get; }
+
+                /// <summary>The "backupSchedules" collection of methods.</summary>
+                public class BackupSchedulesResource
+                {
+                    private const string Resource = "backupSchedules";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public BackupSchedulesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>Creates a new backup schedule.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// Required. The name of the database that this backup schedule applies to.
+                    /// </param>
+                    public virtual CreateRequest Create(Google.Apis.Spanner.v1.Data.BackupSchedule body, string parent)
+                    {
+                        return new CreateRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>Creates a new backup schedule.</summary>
+                    public class CreateRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.BackupSchedule>
+                    {
+                        /// <summary>Constructs a new Create request.</summary>
+                        public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.BackupSchedule body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. The name of the database that this backup schedule applies to.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Required. The Id to use for the backup schedule. The `backup_schedule_id` appended to
+                        /// `parent` forms the full backup schedule name of the form
+                        /// `projects//instances//databases//backupSchedules/`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("backupScheduleId", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string BackupScheduleId { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Spanner.v1.Data.BackupSchedule Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "create";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+parent}/backupSchedules";
+
+                        /// <summary>Initializes Create parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+$",
+                            });
+                            RequestParameters.Add("backupScheduleId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "backupScheduleId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Deletes a backup schedule.</summary>
+                    /// <param name="name">
+                    /// Required. The name of the schedule to delete. Values are of the form
+                    /// `projects//instances//databases//backupSchedules/`.
+                    /// </param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>Deletes a backup schedule.</summary>
+                    public class DeleteRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The name of the schedule to delete. Values are of the form
+                        /// `projects//instances//databases//backupSchedules/`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+/backupSchedules/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Gets backup schedule for the input schedule name.</summary>
+                    /// <param name="name">
+                    /// Required. The name of the schedule to retrieve. Values are of the form
+                    /// `projects//instances//databases//backupSchedules/`.
+                    /// </param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>Gets backup schedule for the input schedule name.</summary>
+                    public class GetRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.BackupSchedule>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The name of the schedule to retrieve. Values are of the form
+                        /// `projects//instances//databases//backupSchedules/`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+/backupSchedules/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Gets the access control policy for a database or backup resource. Returns an empty policy if a
+                    /// database or backup exists but does not have a policy set. Authorization requires
+                    /// `spanner.databases.getIamPolicy` permission on resource. For backups, authorization requires
+                    /// `spanner.backups.getIamPolicy` permission on resource. For backup schedules, authorization
+                    /// requires `spanner.backupSchedules.getIamPolicy` permission on resource.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The Cloud Spanner resource for which the policy is being retrieved. The format is
+                    /// `projects//instances/` for instance resources and `projects//instances//databases/` for database
+                    /// resources.
+                    /// </param>
+                    public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.Spanner.v1.Data.GetIamPolicyRequest body, string resource)
+                    {
+                        return new GetIamPolicyRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Gets the access control policy for a database or backup resource. Returns an empty policy if a
+                    /// database or backup exists but does not have a policy set. Authorization requires
+                    /// `spanner.databases.getIamPolicy` permission on resource. For backups, authorization requires
+                    /// `spanner.backups.getIamPolicy` permission on resource. For backup schedules, authorization
+                    /// requires `spanner.backupSchedules.getIamPolicy` permission on resource.
+                    /// </summary>
+                    public class GetIamPolicyRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Policy>
+                    {
+                        /// <summary>Constructs a new GetIamPolicy request.</summary>
+                        public GetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.GetIamPolicyRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The Cloud Spanner resource for which the policy is being retrieved. The format is
+                        /// `projects//instances/` for instance resources and `projects//instances//databases/` for
+                        /// database resources.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Spanner.v1.Data.GetIamPolicyRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "getIamPolicy";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+resource}:getIamPolicy";
+
+                        /// <summary>Initializes GetIamPolicy parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+/backupSchedules/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Lists all the backup schedules for the database.</summary>
+                    /// <param name="parent">
+                    /// Required. Database is the parent resource whose backup schedules should be listed. Values are of
+                    /// the form projects//instances//databases/
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists all the backup schedules for the database.</summary>
+                    public class ListRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ListBackupSchedulesResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. Database is the parent resource whose backup schedules should be listed. Values
+                        /// are of the form projects//instances//databases/
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Optional. Number of backup schedules to be returned in the response. If 0 or less, defaults
+                        /// to the server's maximum allowed page size.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// Optional. If non-empty, `page_token` should contain a next_page_token from a previous
+                        /// ListBackupSchedulesResponse to the same `parent`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+parent}/backupSchedules";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Updates a backup schedule.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">
+                    /// Identifier. Output only for the CreateBackupSchedule operation. Required for the
+                    /// UpdateBackupSchedule operation. A globally unique identifier for the backup schedule which
+                    /// cannot be changed. Values are of the form
+                    /// `projects//instances//databases//backupSchedules/a-z*[a-z0-9]` The final segment of the name
+                    /// must be between 2 and 60 characters in length.
+                    /// </param>
+                    public virtual PatchRequest Patch(Google.Apis.Spanner.v1.Data.BackupSchedule body, string name)
+                    {
+                        return new PatchRequest(this.service, body, name);
+                    }
+
+                    /// <summary>Updates a backup schedule.</summary>
+                    public class PatchRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.BackupSchedule>
+                    {
+                        /// <summary>Constructs a new Patch request.</summary>
+                        public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.BackupSchedule body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Identifier. Output only for the CreateBackupSchedule operation. Required for the
+                        /// UpdateBackupSchedule operation. A globally unique identifier for the backup schedule which
+                        /// cannot be changed. Values are of the form
+                        /// `projects//instances//databases//backupSchedules/a-z*[a-z0-9]` The final segment of the name
+                        /// must be between 2 and 60 characters in length.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>
+                        /// Required. A mask specifying which fields in the BackupSchedule resource should be updated.
+                        /// This mask is relative to the BackupSchedule resource, not to the request message. The field
+                        /// mask must always be specified; this prevents any future fields from being erased
+                        /// accidentally.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual object UpdateMask { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Spanner.v1.Data.BackupSchedule Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "patch";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "PATCH";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Patch parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+/backupSchedules/[^/]+$",
+                            });
+                            RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "updateMask",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Sets the access control policy on a database or backup resource. Replaces any existing policy.
+                    /// Authorization requires `spanner.databases.setIamPolicy` permission on resource. For backups,
+                    /// authorization requires `spanner.backups.setIamPolicy` permission on resource. For backup
+                    /// schedules, authorization requires `spanner.backupSchedules.setIamPolicy` permission on resource.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The Cloud Spanner resource for which the policy is being set. The format is
+                    /// `projects//instances/` for instance resources and `projects//instances//databases/` for
+                    /// databases resources.
+                    /// </param>
+                    public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.Spanner.v1.Data.SetIamPolicyRequest body, string resource)
+                    {
+                        return new SetIamPolicyRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Sets the access control policy on a database or backup resource. Replaces any existing policy.
+                    /// Authorization requires `spanner.databases.setIamPolicy` permission on resource. For backups,
+                    /// authorization requires `spanner.backups.setIamPolicy` permission on resource. For backup
+                    /// schedules, authorization requires `spanner.backupSchedules.setIamPolicy` permission on resource.
+                    /// </summary>
+                    public class SetIamPolicyRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Policy>
+                    {
+                        /// <summary>Constructs a new SetIamPolicy request.</summary>
+                        public SetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.SetIamPolicyRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The Cloud Spanner resource for which the policy is being set. The format is
+                        /// `projects//instances/` for instance resources and `projects//instances//databases/` for
+                        /// databases resources.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Spanner.v1.Data.SetIamPolicyRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "setIamPolicy";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+resource}:setIamPolicy";
+
+                        /// <summary>Initializes SetIamPolicy parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+/backupSchedules/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Returns permissions that the caller has on the specified database or backup resource. Attempting
+                    /// this RPC on a non-existent Cloud Spanner database will result in a NOT_FOUND error if the user
+                    /// has `spanner.databases.list` permission on the containing Cloud Spanner instance. Otherwise
+                    /// returns an empty set of permissions. Calling this method on a backup that does not exist will
+                    /// result in a NOT_FOUND error if the user has `spanner.backups.list` permission on the containing
+                    /// instance. Calling this method on a backup schedule that does not exist will result in a
+                    /// NOT_FOUND error if the user has `spanner.backupSchedules.list` permission on the containing
+                    /// database.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The Cloud Spanner resource for which permissions are being tested. The format is
+                    /// `projects//instances/` for instance resources and `projects//instances//databases/` for database
+                    /// resources.
+                    /// </param>
+                    public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.Spanner.v1.Data.TestIamPermissionsRequest body, string resource)
+                    {
+                        return new TestIamPermissionsRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Returns permissions that the caller has on the specified database or backup resource. Attempting
+                    /// this RPC on a non-existent Cloud Spanner database will result in a NOT_FOUND error if the user
+                    /// has `spanner.databases.list` permission on the containing Cloud Spanner instance. Otherwise
+                    /// returns an empty set of permissions. Calling this method on a backup that does not exist will
+                    /// result in a NOT_FOUND error if the user has `spanner.backups.list` permission on the containing
+                    /// instance. Calling this method on a backup schedule that does not exist will result in a
+                    /// NOT_FOUND error if the user has `spanner.backupSchedules.list` permission on the containing
+                    /// database.
+                    /// </summary>
+                    public class TestIamPermissionsRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.TestIamPermissionsResponse>
+                    {
+                        /// <summary>Constructs a new TestIamPermissions request.</summary>
+                        public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.TestIamPermissionsRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The Cloud Spanner resource for which permissions are being tested. The format is
+                        /// `projects//instances/` for instance resources and `projects//instances//databases/` for
+                        /// database resources.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Spanner.v1.Data.TestIamPermissionsRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "testIamPermissions";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+resource}:testIamPermissions";
+
+                        /// <summary>Initializes TestIamPermissions parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+/backupSchedules/[^/]+$",
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>Gets the DatabaseRoles resource.</summary>
+                public virtual DatabaseRolesResource DatabaseRoles { get; }
+
+                /// <summary>The "databaseRoles" collection of methods.</summary>
+                public class DatabaseRolesResource
+                {
+                    private const string Resource = "databaseRoles";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public DatabaseRolesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>Lists Cloud Spanner database roles.</summary>
+                    /// <param name="parent">
+                    /// Required. The database whose roles should be listed. Values are of the form
+                    /// `projects//instances//databases/`.
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists Cloud Spanner database roles.</summary>
+                    public class ListRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ListDatabaseRolesResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The database whose roles should be listed. Values are of the form
+                        /// `projects//instances//databases/`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Number of database roles to be returned in the response. If 0 or less, defaults to the
+                        /// server's maximum allowed page size.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// If non-empty, `page_token` should contain a next_page_token from a previous
+                        /// ListDatabaseRolesResponse.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+parent}/databaseRoles";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Returns permissions that the caller has on the specified database or backup resource. Attempting
+                    /// this RPC on a non-existent Cloud Spanner database will result in a NOT_FOUND error if the user
+                    /// has `spanner.databases.list` permission on the containing Cloud Spanner instance. Otherwise
+                    /// returns an empty set of permissions. Calling this method on a backup that does not exist will
+                    /// result in a NOT_FOUND error if the user has `spanner.backups.list` permission on the containing
+                    /// instance. Calling this method on a backup schedule that does not exist will result in a
+                    /// NOT_FOUND error if the user has `spanner.backupSchedules.list` permission on the containing
+                    /// database.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The Cloud Spanner resource for which permissions are being tested. The format is
+                    /// `projects//instances/` for instance resources and `projects//instances//databases/` for database
+                    /// resources.
+                    /// </param>
+                    public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.Spanner.v1.Data.TestIamPermissionsRequest body, string resource)
+                    {
+                        return new TestIamPermissionsRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Returns permissions that the caller has on the specified database or backup resource. Attempting
+                    /// this RPC on a non-existent Cloud Spanner database will result in a NOT_FOUND error if the user
+                    /// has `spanner.databases.list` permission on the containing Cloud Spanner instance. Otherwise
+                    /// returns an empty set of permissions. Calling this method on a backup that does not exist will
+                    /// result in a NOT_FOUND error if the user has `spanner.backups.list` permission on the containing
+                    /// instance. Calling this method on a backup schedule that does not exist will result in a
+                    /// NOT_FOUND error if the user has `spanner.backupSchedules.list` permission on the containing
+                    /// database.
+                    /// </summary>
+                    public class TestIamPermissionsRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.TestIamPermissionsResponse>
+                    {
+                        /// <summary>Constructs a new TestIamPermissions request.</summary>
+                        public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.TestIamPermissionsRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The Cloud Spanner resource for which permissions are being tested. The format is
+                        /// `projects//instances/` for instance resources and `projects//instances//databases/` for
+                        /// database resources.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Spanner.v1.Data.TestIamPermissionsRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "testIamPermissions";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+resource}:testIamPermissions";
+
+                        /// <summary>Initializes TestIamPermissions parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+/databaseRoles/[^/]+$",
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>Gets the Operations resource.</summary>
@@ -1756,13 +3602,13 @@ namespace Google.Apis.Spanner.v1
                     /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
                     /// methods to check whether the cancellation succeeded or whether the operation completed despite
                     /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
-                    /// operation with an Operation.error value with a google.rpc.Status.code of 1, corresponding to
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
                     /// `Code.CANCELLED`.
                     /// </summary>
                     /// <param name="name">The name of the operation resource to be cancelled.</param>
                     public virtual CancelRequest Cancel(string name)
                     {
-                        return new CancelRequest(service, name);
+                        return new CancelRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1771,7 +3617,7 @@ namespace Google.Apis.Spanner.v1
                     /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
                     /// methods to check whether the cancellation succeeded or whether the operation completed despite
                     /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
-                    /// operation with an Operation.error value with a google.rpc.Status.code of 1, corresponding to
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
                     /// `Code.CANCELLED`.
                     /// </summary>
                     public class CancelRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
@@ -1819,7 +3665,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="name">The name of the operation resource to be deleted.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1871,7 +3717,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="name">The name of the operation resource.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1917,27 +3763,17 @@ namespace Google.Apis.Spanner.v1
 
                     /// <summary>
                     /// Lists operations that match the specified filter in the request. If the server doesn't support
-                    /// this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to
-                    /// override the binding to use different resource name schemes, such as `users/*/operations`. To
-                    /// override the binding, API services can add a binding such as `"/v1/{name=users/*}/operations"`
-                    /// to their service configuration. For backwards compatibility, the default name includes the
-                    /// operations collection id, however overriding users must ensure the name binding is the parent
-                    /// resource, without the operations collection id.
+                    /// this method, it returns `UNIMPLEMENTED`.
                     /// </summary>
                     /// <param name="name">The name of the operation's parent resource.</param>
                     public virtual ListRequest List(string name)
                     {
-                        return new ListRequest(service, name);
+                        return new ListRequest(this.service, name);
                     }
 
                     /// <summary>
                     /// Lists operations that match the specified filter in the request. If the server doesn't support
-                    /// this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to
-                    /// override the binding to use different resource name schemes, such as `users/*/operations`. To
-                    /// override the binding, API services can add a binding such as `"/v1/{name=users/*}/operations"`
-                    /// to their service configuration. For backwards compatibility, the default name includes the
-                    /// operations collection id, however overriding users must ensure the name binding is the parent
-                    /// resource, without the operations collection id.
+                    /// this method, it returns `UNIMPLEMENTED`.
                     /// </summary>
                     public class ListRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ListOperationsResponse>
                     {
@@ -2038,7 +3874,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="database">Required. The database in which the new sessions are created.</param>
                     public virtual BatchCreateRequest BatchCreate(Google.Apis.Spanner.v1.Data.BatchCreateSessionsRequest body, string database)
                     {
-                        return new BatchCreateRequest(service, body, database);
+                        return new BatchCreateRequest(this.service, body, database);
                     }
 
                     /// <summary>
@@ -2090,6 +3926,83 @@ namespace Google.Apis.Spanner.v1
                     }
 
                     /// <summary>
+                    /// Batches the supplied mutation groups in a collection of efficient transactions. All mutations in
+                    /// a group are committed atomically. However, mutations across groups can be committed
+                    /// non-atomically in an unspecified order and thus, they must be independent of each other. Partial
+                    /// failure is possible, i.e., some groups may have been committed successfully, while some may have
+                    /// failed. The results of individual batches are streamed into the response as the batches are
+                    /// applied. BatchWrite requests are not replay protected, meaning that each mutation group may be
+                    /// applied more than once. Replays of non-idempotent mutations may have undesirable effects. For
+                    /// example, replays of an insert mutation may produce an already exists error or if you use
+                    /// generated or commit timestamp-based keys, it may result in additional rows being added to the
+                    /// mutation's table. We recommend structuring your mutation groups to be idempotent to avoid this
+                    /// issue.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="session">Required. The session in which the batch request is to be run.</param>
+                    public virtual BatchWriteRequest BatchWrite(Google.Apis.Spanner.v1.Data.BatchWriteRequest body, string session)
+                    {
+                        return new BatchWriteRequest(this.service, body, session);
+                    }
+
+                    /// <summary>
+                    /// Batches the supplied mutation groups in a collection of efficient transactions. All mutations in
+                    /// a group are committed atomically. However, mutations across groups can be committed
+                    /// non-atomically in an unspecified order and thus, they must be independent of each other. Partial
+                    /// failure is possible, i.e., some groups may have been committed successfully, while some may have
+                    /// failed. The results of individual batches are streamed into the response as the batches are
+                    /// applied. BatchWrite requests are not replay protected, meaning that each mutation group may be
+                    /// applied more than once. Replays of non-idempotent mutations may have undesirable effects. For
+                    /// example, replays of an insert mutation may produce an already exists error or if you use
+                    /// generated or commit timestamp-based keys, it may result in additional rows being added to the
+                    /// mutation's table. We recommend structuring your mutation groups to be idempotent to avoid this
+                    /// issue.
+                    /// </summary>
+                    public class BatchWriteRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.BatchWriteResponse>
+                    {
+                        /// <summary>Constructs a new BatchWrite request.</summary>
+                        public BatchWriteRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.BatchWriteRequest body, string session) : base(service)
+                        {
+                            Session = session;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. The session in which the batch request is to be run.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("session", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Session { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Spanner.v1.Data.BatchWriteRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "batchWrite";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+session}:batchWrite";
+
+                        /// <summary>Initializes BatchWrite parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("session", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "session",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+/sessions/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
                     /// Begins a new transaction. This step can often be skipped: Read, ExecuteSql and Commit can begin
                     /// a new transaction as a side-effect.
                     /// </summary>
@@ -2097,7 +4010,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="session">Required. The session in which the transaction runs.</param>
                     public virtual BeginTransactionRequest BeginTransaction(Google.Apis.Spanner.v1.Data.BeginTransactionRequest body, string session)
                     {
-                        return new BeginTransactionRequest(service, body, session);
+                        return new BeginTransactionRequest(this.service, body, session);
                     }
 
                     /// <summary>
@@ -2164,7 +4077,7 @@ namespace Google.Apis.Spanner.v1
                     /// </param>
                     public virtual CommitRequest Commit(Google.Apis.Spanner.v1.Data.CommitRequest body, string session)
                     {
-                        return new CommitRequest(service, body, session);
+                        return new CommitRequest(this.service, body, session);
                     }
 
                     /// <summary>
@@ -2239,7 +4152,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="database">Required. The database in which the new session is created.</param>
                     public virtual CreateRequest Create(Google.Apis.Spanner.v1.Data.CreateSessionRequest body, string database)
                     {
-                        return new CreateRequest(service, body, database);
+                        return new CreateRequest(this.service, body, database);
                     }
 
                     /// <summary>
@@ -2305,7 +4218,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="name">Required. The name of the session to delete.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -2363,7 +4276,7 @@ namespace Google.Apis.Spanner.v1
                     /// </param>
                     public virtual ExecuteBatchDmlRequest ExecuteBatchDml(Google.Apis.Spanner.v1.Data.ExecuteBatchDmlRequest body, string session)
                     {
-                        return new ExecuteBatchDmlRequest(service, body, session);
+                        return new ExecuteBatchDmlRequest(this.service, body, session);
                     }
 
                     /// <summary>
@@ -2424,13 +4337,14 @@ namespace Google.Apis.Spanner.v1
                     /// fails with a `FAILED_PRECONDITION` error. Operations inside read-write transactions might return
                     /// `ABORTED`. If this occurs, the application should restart the transaction from the beginning.
                     /// See Transaction for more details. Larger result sets can be fetched in streaming fashion by
-                    /// calling ExecuteStreamingSql instead.
+                    /// calling ExecuteStreamingSql instead. The query string can be SQL or [Graph Query Language
+                    /// (GQL)](https://cloud.google.com/spanner/docs/reference/standard-sql/graph-intro).
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="session">Required. The session in which the SQL query should be performed.</param>
                     public virtual ExecuteSqlRequest ExecuteSql(Google.Apis.Spanner.v1.Data.ExecuteSqlRequest body, string session)
                     {
-                        return new ExecuteSqlRequest(service, body, session);
+                        return new ExecuteSqlRequest(this.service, body, session);
                     }
 
                     /// <summary>
@@ -2439,7 +4353,8 @@ namespace Google.Apis.Spanner.v1
                     /// fails with a `FAILED_PRECONDITION` error. Operations inside read-write transactions might return
                     /// `ABORTED`. If this occurs, the application should restart the transaction from the beginning.
                     /// See Transaction for more details. Larger result sets can be fetched in streaming fashion by
-                    /// calling ExecuteStreamingSql instead.
+                    /// calling ExecuteStreamingSql instead. The query string can be SQL or [Graph Query Language
+                    /// (GQL)](https://cloud.google.com/spanner/docs/reference/standard-sql/graph-intro).
                     /// </summary>
                     public class ExecuteSqlRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ResultSet>
                     {
@@ -2488,19 +4403,21 @@ namespace Google.Apis.Spanner.v1
                     /// <summary>
                     /// Like ExecuteSql, except returns the result set as a stream. Unlike ExecuteSql, there is no limit
                     /// on the size of the returned result set. However, no individual row in the result set can exceed
-                    /// 100 MiB, and no column value can exceed 10 MiB.
+                    /// 100 MiB, and no column value can exceed 10 MiB. The query string can be SQL or [Graph Query
+                    /// Language (GQL)](https://cloud.google.com/spanner/docs/reference/standard-sql/graph-intro).
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="session">Required. The session in which the SQL query should be performed.</param>
                     public virtual ExecuteStreamingSqlRequest ExecuteStreamingSql(Google.Apis.Spanner.v1.Data.ExecuteSqlRequest body, string session)
                     {
-                        return new ExecuteStreamingSqlRequest(service, body, session);
+                        return new ExecuteStreamingSqlRequest(this.service, body, session);
                     }
 
                     /// <summary>
                     /// Like ExecuteSql, except returns the result set as a stream. Unlike ExecuteSql, there is no limit
                     /// on the size of the returned result set. However, no individual row in the result set can exceed
-                    /// 100 MiB, and no column value can exceed 10 MiB.
+                    /// 100 MiB, and no column value can exceed 10 MiB. The query string can be SQL or [Graph Query
+                    /// Language (GQL)](https://cloud.google.com/spanner/docs/reference/standard-sql/graph-intro).
                     /// </summary>
                     public class ExecuteStreamingSqlRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.PartialResultSet>
                     {
@@ -2553,7 +4470,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="name">Required. The name of the session to retrieve.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -2601,7 +4518,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="database">Required. The database in which to list sessions.</param>
                     public virtual ListRequest List(string database)
                     {
-                        return new ListRequest(service, database);
+                        return new ListRequest(this.service, database);
                     }
 
                     /// <summary>Lists all sessions in a given database.</summary>
@@ -2704,7 +4621,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="session">Required. The session used to create the partitions.</param>
                     public virtual PartitionQueryRequest PartitionQuery(Google.Apis.Spanner.v1.Data.PartitionQueryRequest body, string session)
                     {
-                        return new PartitionQueryRequest(service, body, session);
+                        return new PartitionQueryRequest(this.service, body, session);
                     }
 
                     /// <summary>
@@ -2776,7 +4693,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="session">Required. The session used to create the partitions.</param>
                     public virtual PartitionReadRequest PartitionRead(Google.Apis.Spanner.v1.Data.PartitionReadRequest body, string session)
                     {
-                        return new PartitionReadRequest(service, body, session);
+                        return new PartitionReadRequest(this.service, body, session);
                     }
 
                     /// <summary>
@@ -2846,7 +4763,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="session">Required. The session in which the read should be performed.</param>
                     public virtual ReadRequest Read(Google.Apis.Spanner.v1.Data.ReadRequest body, string session)
                     {
-                        return new ReadRequest(service, body, session);
+                        return new ReadRequest(this.service, body, session);
                     }
 
                     /// <summary>
@@ -2913,7 +4830,7 @@ namespace Google.Apis.Spanner.v1
                     /// </param>
                     public virtual RollbackRequest Rollback(Google.Apis.Spanner.v1.Data.RollbackRequest body, string session)
                     {
-                        return new RollbackRequest(service, body, session);
+                        return new RollbackRequest(this.service, body, session);
                     }
 
                     /// <summary>
@@ -2975,7 +4892,7 @@ namespace Google.Apis.Spanner.v1
                     /// <param name="session">Required. The session in which the read should be performed.</param>
                     public virtual StreamingReadRequest StreamingRead(Google.Apis.Spanner.v1.Data.ReadRequest body, string session)
                     {
-                        return new StreamingReadRequest(service, body, session);
+                        return new StreamingReadRequest(this.service, body, session);
                     }
 
                     /// <summary>
@@ -3028,8 +4945,140 @@ namespace Google.Apis.Spanner.v1
                     }
                 }
 
+                /// <summary>Adds split points to specified tables, indexes of a database.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="database">
+                /// Required. The database on whose tables/indexes split points are to be added. Values are of the form
+                /// `projects//instances//databases/`.
+                /// </param>
+                public virtual AddSplitPointsRequest AddSplitPoints(Google.Apis.Spanner.v1.Data.AddSplitPointsRequest body, string database)
+                {
+                    return new AddSplitPointsRequest(this.service, body, database);
+                }
+
+                /// <summary>Adds split points to specified tables, indexes of a database.</summary>
+                public class AddSplitPointsRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.AddSplitPointsResponse>
+                {
+                    /// <summary>Constructs a new AddSplitPoints request.</summary>
+                    public AddSplitPointsRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.AddSplitPointsRequest body, string database) : base(service)
+                    {
+                        Database = database;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The database on whose tables/indexes split points are to be added. Values are of the
+                    /// form `projects//instances//databases/`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("database", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Database { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Spanner.v1.Data.AddSplitPointsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "addSplitPoints";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+database}:addSplitPoints";
+
+                    /// <summary>Initializes AddSplitPoints parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("database", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "database",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+$",
+                        });
+                    }
+                }
+
                 /// <summary>
-                /// Creates a new Cloud Spanner database and starts to prepare it for serving. The returned long-running
+                /// `ChangeQuorum` is strictly restricted to databases that use dual-region instance configurations.
+                /// Initiates a background operation to change the quorum of a database from dual-region mode to
+                /// single-region mode or vice versa. The returned long-running operation has a name of the format
+                /// `projects//instances//databases//operations/` and can be used to track execution of the
+                /// `ChangeQuorum`. The metadata field type is ChangeQuorumMetadata. Authorization requires
+                /// `spanner.databases.changequorum` permission on the resource database.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Name of the database in which to apply `ChangeQuorum`. Values are of the form
+                /// `projects//instances//databases/`.
+                /// </param>
+                public virtual ChangequorumRequest Changequorum(Google.Apis.Spanner.v1.Data.ChangeQuorumRequest body, string name)
+                {
+                    return new ChangequorumRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// `ChangeQuorum` is strictly restricted to databases that use dual-region instance configurations.
+                /// Initiates a background operation to change the quorum of a database from dual-region mode to
+                /// single-region mode or vice versa. The returned long-running operation has a name of the format
+                /// `projects//instances//databases//operations/` and can be used to track execution of the
+                /// `ChangeQuorum`. The metadata field type is ChangeQuorumMetadata. Authorization requires
+                /// `spanner.databases.changequorum` permission on the resource database.
+                /// </summary>
+                public class ChangequorumRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Changequorum request.</summary>
+                    public ChangequorumRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.ChangeQuorumRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the database in which to apply `ChangeQuorum`. Values are of the form
+                    /// `projects//instances//databases/`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Spanner.v1.Data.ChangeQuorumRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "changequorum";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}:changequorum";
+
+                    /// <summary>Initializes Changequorum parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Creates a new Spanner database and starts to prepare it for serving. The returned long-running
                 /// operation will have a name of the format `/operations/` and can be used to track preparation of the
                 /// database. The metadata field type is CreateDatabaseMetadata. The response field type is Database, if
                 /// successful.
@@ -3041,11 +5090,11 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.Spanner.v1.Data.CreateDatabaseRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
-                /// Creates a new Cloud Spanner database and starts to prepare it for serving. The returned long-running
+                /// Creates a new Spanner database and starts to prepare it for serving. The returned long-running
                 /// operation will have a name of the format `/operations/` and can be used to track preparation of the
                 /// database. The metadata field type is CreateDatabaseMetadata. The response field type is Database, if
                 /// successful.
@@ -3099,17 +5148,19 @@ namespace Google.Apis.Spanner.v1
 
                 /// <summary>
                 /// Drops (aka deletes) a Cloud Spanner database. Completed backups for the database will be retained
-                /// according to their `expire_time`.
+                /// according to their `expire_time`. Note: Cloud Spanner might continue to accept requests for a few
+                /// seconds after the database has been deleted.
                 /// </summary>
                 /// <param name="database">Required. The database to be dropped.</param>
                 public virtual DropDatabaseRequest DropDatabase(string database)
                 {
-                    return new DropDatabaseRequest(service, database);
+                    return new DropDatabaseRequest(this.service, database);
                 }
 
                 /// <summary>
                 /// Drops (aka deletes) a Cloud Spanner database. Completed backups for the database will be retained
-                /// according to their `expire_time`.
+                /// according to their `expire_time`. Note: Cloud Spanner might continue to accept requests for a few
+                /// seconds after the database has been deleted.
                 /// </summary>
                 public class DropDatabaseRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
                 {
@@ -3155,7 +5206,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets the state of a Cloud Spanner database.</summary>
@@ -3209,7 +5260,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual GetDdlRequest GetDdl(string database)
                 {
-                    return new GetDdlRequest(service, database);
+                    return new GetDdlRequest(this.service, database);
                 }
 
                 /// <summary>
@@ -3260,7 +5311,8 @@ namespace Google.Apis.Spanner.v1
                 /// Gets the access control policy for a database or backup resource. Returns an empty policy if a
                 /// database or backup exists but does not have a policy set. Authorization requires
                 /// `spanner.databases.getIamPolicy` permission on resource. For backups, authorization requires
-                /// `spanner.backups.getIamPolicy` permission on resource.
+                /// `spanner.backups.getIamPolicy` permission on resource. For backup schedules, authorization requires
+                /// `spanner.backupSchedules.getIamPolicy` permission on resource.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
@@ -3270,14 +5322,15 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.Spanner.v1.Data.GetIamPolicyRequest body, string resource)
                 {
-                    return new GetIamPolicyRequest(service, body, resource);
+                    return new GetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
                 /// Gets the access control policy for a database or backup resource. Returns an empty policy if a
                 /// database or backup exists but does not have a policy set. Authorization requires
                 /// `spanner.databases.getIamPolicy` permission on resource. For backups, authorization requires
-                /// `spanner.backups.getIamPolicy` permission on resource.
+                /// `spanner.backups.getIamPolicy` permission on resource. For backup schedules, authorization requires
+                /// `spanner.backupSchedules.getIamPolicy` permission on resource.
                 /// </summary>
                 public class GetIamPolicyRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Policy>
                 {
@@ -3334,7 +5387,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual GetScansRequest GetScans(string name)
                 {
-                    return new GetScansRequest(service, name);
+                    return new GetScansRequest(this.service, name);
                 }
 
                 /// <summary>Request a specific scan with Database-specific data for Cloud Key Visualizer.</summary>
@@ -3354,18 +5407,67 @@ namespace Google.Apis.Spanner.v1
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
 
-                    /// <summary>The upper bound for the time range to retrieve Scan data for.</summary>
-                    [Google.Apis.Util.RequestParameterAttribute("endTime", Google.Apis.Util.RequestParameterType.Query)]
-                    public virtual object EndTime { get; set; }
+                    private object _endTime;
 
                     /// <summary>
-                    /// These fields restrict the Database-specific information returned in the `Scan.data` field. If a
-                    /// `View` is provided that does not include the `Scan.data` field, these are ignored. This range of
-                    /// time must be entirely contained within the defined time range of the targeted scan. The lower
-                    /// bound for the time range to retrieve Scan data for.
+                    /// String representation of <see cref="EndTimeDateTimeOffset"/>, formatted for inclusion in the
+                    /// HTTP request.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("endTime", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string EndTimeRaw { get; private set; }
+
+                    /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+                    [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+                    public virtual object EndTime
+                    {
+                        get => _endTime;
+                        set
+                        {
+                            EndTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                            _endTime = value;
+                        }
+                    }
+
+                    public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+                    {
+                        get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+                        set
+                        {
+                            EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                            _endTime = value;
+                        }
+                    }
+
+                    private object _startTime;
+
+                    /// <summary>
+                    /// String representation of <see cref="StartTimeDateTimeOffset"/>, formatted for inclusion in the
+                    /// HTTP request.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("startTime", Google.Apis.Util.RequestParameterType.Query)]
-                    public virtual object StartTime { get; set; }
+                    public virtual string StartTimeRaw { get; private set; }
+
+                    /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+                    [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+                    public virtual object StartTime
+                    {
+                        get => _startTime;
+                        set
+                        {
+                            StartTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                            _startTime = value;
+                        }
+                    }
+
+                    public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+                    {
+                        get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+                        set
+                        {
+                            StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                            _startTime = value;
+                        }
+                    }
 
                     /// <summary>
                     /// Specifies which parts of the Scan should be returned in the response. Note, if left unspecified,
@@ -3454,7 +5556,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists Cloud Spanner databases.</summary>
@@ -3529,6 +5631,108 @@ namespace Google.Apis.Spanner.v1
                 }
 
                 /// <summary>
+                /// Updates a Cloud Spanner database. The returned long-running operation can be used to track the
+                /// progress of updating the database. If the named database does not exist, returns `NOT_FOUND`. While
+                /// the operation is pending: * The database's reconciling field is set to true. * Cancelling the
+                /// operation is best-effort. If the cancellation succeeds, the operation metadata's cancel_time is set,
+                /// the updates are reverted, and the operation terminates with a `CANCELLED` status. * New
+                /// UpdateDatabase requests will return a `FAILED_PRECONDITION` error until the pending operation is
+                /// done (returns successfully or with error). * Reading the database via the API continues to give the
+                /// pre-request values. Upon completion of the returned operation: * The new values are in effect and
+                /// readable via the API. * The database's reconciling field becomes false. The returned long-running
+                /// operation will have a name of the format `projects//instances//databases//operations/` and can be
+                /// used to track the database modification. The metadata field type is UpdateDatabaseMetadata. The
+                /// response field type is Database, if successful.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. The name of the database. Values are of the form `projects//instances//databases/`, where
+                /// `` is as specified in the `CREATE DATABASE` statement. This name can be passed to other API methods
+                /// to identify the database.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.Spanner.v1.Data.Database body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Updates a Cloud Spanner database. The returned long-running operation can be used to track the
+                /// progress of updating the database. If the named database does not exist, returns `NOT_FOUND`. While
+                /// the operation is pending: * The database's reconciling field is set to true. * Cancelling the
+                /// operation is best-effort. If the cancellation succeeds, the operation metadata's cancel_time is set,
+                /// the updates are reverted, and the operation terminates with a `CANCELLED` status. * New
+                /// UpdateDatabase requests will return a `FAILED_PRECONDITION` error until the pending operation is
+                /// done (returns successfully or with error). * Reading the database via the API continues to give the
+                /// pre-request values. Upon completion of the returned operation: * The new values are in effect and
+                /// readable via the API. * The database's reconciling field becomes false. The returned long-running
+                /// operation will have a name of the format `projects//instances//databases//operations/` and can be
+                /// used to track the database modification. The metadata field type is UpdateDatabaseMetadata. The
+                /// response field type is Database, if successful.
+                /// </summary>
+                public class PatchRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.Database body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the database. Values are of the form `projects//instances//databases/`,
+                    /// where `` is as specified in the `CREATE DATABASE` statement. This name can be passed to other
+                    /// API methods to identify the database.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. The list of fields to update. Currently, only `enable_drop_protection` field can be
+                    /// updated.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Spanner.v1.Data.Database Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instances/[^/]+/databases/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
                 /// Create a new database by restoring from a completed backup. The new database must be in the same
                 /// project and in an instance with the same instance configuration as the instance containing the
                 /// backup. The returned database long-running operation has a name of the format
@@ -3547,7 +5751,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual RestoreRequest Restore(Google.Apis.Spanner.v1.Data.RestoreDatabaseRequest body, string parent)
                 {
-                    return new RestoreRequest(service, body, parent);
+                    return new RestoreRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -3612,7 +5816,8 @@ namespace Google.Apis.Spanner.v1
                 /// <summary>
                 /// Sets the access control policy on a database or backup resource. Replaces any existing policy.
                 /// Authorization requires `spanner.databases.setIamPolicy` permission on resource. For backups,
-                /// authorization requires `spanner.backups.setIamPolicy` permission on resource.
+                /// authorization requires `spanner.backups.setIamPolicy` permission on resource. For backup schedules,
+                /// authorization requires `spanner.backupSchedules.setIamPolicy` permission on resource.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
@@ -3622,13 +5827,14 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.Spanner.v1.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
                 /// Sets the access control policy on a database or backup resource. Replaces any existing policy.
                 /// Authorization requires `spanner.databases.setIamPolicy` permission on resource. For backups,
-                /// authorization requires `spanner.backups.setIamPolicy` permission on resource.
+                /// authorization requires `spanner.backups.setIamPolicy` permission on resource. For backup schedules,
+                /// authorization requires `spanner.backupSchedules.setIamPolicy` permission on resource.
                 /// </summary>
                 public class SetIamPolicyRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Policy>
                 {
@@ -3684,6 +5890,8 @@ namespace Google.Apis.Spanner.v1
                 /// `spanner.databases.list` permission on the containing Cloud Spanner instance. Otherwise returns an
                 /// empty set of permissions. Calling this method on a backup that does not exist will result in a
                 /// NOT_FOUND error if the user has `spanner.backups.list` permission on the containing instance.
+                /// Calling this method on a backup schedule that does not exist will result in a NOT_FOUND error if the
+                /// user has `spanner.backupSchedules.list` permission on the containing database.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
@@ -3693,7 +5901,7 @@ namespace Google.Apis.Spanner.v1
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.Spanner.v1.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -3702,6 +5910,8 @@ namespace Google.Apis.Spanner.v1
                 /// `spanner.databases.list` permission on the containing Cloud Spanner instance. Otherwise returns an
                 /// empty set of permissions. Calling this method on a backup that does not exist will result in a
                 /// NOT_FOUND error if the user has `spanner.backups.list` permission on the containing instance.
+                /// Calling this method on a backup schedule that does not exist will result in a NOT_FOUND error if the
+                /// user has `spanner.backupSchedules.list` permission on the containing database.
                 /// </summary>
                 public class TestIamPermissionsRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.TestIamPermissionsResponse>
                 {
@@ -3761,7 +5971,7 @@ namespace Google.Apis.Spanner.v1
                 /// <param name="database">Required. The database to update.</param>
                 public virtual UpdateDdlRequest UpdateDdl(Google.Apis.Spanner.v1.Data.UpdateDatabaseDdlRequest body, string database)
                 {
-                    return new UpdateDdlRequest(service, body, database);
+                    return new UpdateDdlRequest(this.service, body, database);
                 }
 
                 /// <summary>
@@ -3815,6 +6025,926 @@ namespace Google.Apis.Spanner.v1
                 }
             }
 
+            /// <summary>Gets the InstancePartitionOperations resource.</summary>
+            public virtual InstancePartitionOperationsResource InstancePartitionOperations { get; }
+
+            /// <summary>The "instancePartitionOperations" collection of methods.</summary>
+            public class InstancePartitionOperationsResource
+            {
+                private const string Resource = "instancePartitionOperations";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public InstancePartitionOperationsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Lists instance partition long-running operations in the given instance. An instance partition
+                /// operation has a name of the form `projects//instances//instancePartitions//operations/`. The
+                /// long-running operation metadata field type `metadata.type_url` describes the type of the metadata.
+                /// Operations returned include those that have completed/failed/canceled within the last 7 days, and
+                /// pending operations. Operations returned are ordered by `operation.metadata.value.start_time` in
+                /// descending order starting from the most recently started operation. Authorization requires
+                /// `spanner.instancePartitionOperations.list` permission on the resource parent.
+                /// </summary>
+                /// <param name="parent">
+                /// Required. The parent instance of the instance partition operations. Values are of the form
+                /// `projects//instances/`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>
+                /// Lists instance partition long-running operations in the given instance. An instance partition
+                /// operation has a name of the form `projects//instances//instancePartitions//operations/`. The
+                /// long-running operation metadata field type `metadata.type_url` describes the type of the metadata.
+                /// Operations returned include those that have completed/failed/canceled within the last 7 days, and
+                /// pending operations. Operations returned are ordered by `operation.metadata.value.start_time` in
+                /// descending order starting from the most recently started operation. Authorization requires
+                /// `spanner.instancePartitionOperations.list` permission on the resource parent.
+                /// </summary>
+                public class ListRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ListInstancePartitionOperationsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent instance of the instance partition operations. Values are of the form
+                    /// `projects//instances/`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. An expression that filters the list of returned operations. A filter expression
+                    /// consists of a field name, a comparison operator, and a value for filtering. The value must be a
+                    /// string, a number, or a boolean. The comparison operator must be one of: `&amp;lt;`, `&amp;gt;`,
+                    /// `&amp;lt;=`, `&amp;gt;=`, `!=`, `=`, or `:`. Colon `:` is the contains operator. Filter rules
+                    /// are not case sensitive. The following fields in the Operation are eligible for filtering: *
+                    /// `name` - The name of the long-running operation * `done` - False if the operation is in
+                    /// progress, else true. * `metadata.@type` - the type of metadata. For example, the type string for
+                    /// CreateInstancePartitionMetadata is
+                    /// `type.googleapis.com/google.spanner.admin.instance.v1.CreateInstancePartitionMetadata`. *
+                    /// `metadata.` - any field in metadata.value. `metadata.@type` must be specified first, if
+                    /// filtering on metadata fields. * `error` - Error associated with the long-running operation. *
+                    /// `response.@type` - the type of response. * `response.` - any field in response.value. You can
+                    /// combine multiple expressions by enclosing each expression in parentheses. By default,
+                    /// expressions are combined with AND logic. However, you can specify AND, OR, and NOT logic
+                    /// explicitly. Here are a few examples: * `done:true` - The operation is complete. *
+                    /// `(metadata.@type=` \
+                    /// `type.googleapis.com/google.spanner.admin.instance.v1.CreateInstancePartitionMetadata) AND` \
+                    /// `(metadata.instance_partition.name:custom-instance-partition) AND` \ `(metadata.start_time
+                    /// &amp;lt; \"2021-03-28T14:50:00Z\") AND` \ `(error:*)` - Return operations where: * The
+                    /// operation's metadata type is CreateInstancePartitionMetadata. * The instance partition name
+                    /// contains "custom-instance-partition". * The operation started before 2021-03-28T14:50:00Z. * The
+                    /// operation resulted in an error.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    private object _instancePartitionDeadline;
+
+                    /// <summary>
+                    /// String representation of <see cref="InstancePartitionDeadlineDateTimeOffset"/>, formatted for
+                    /// inclusion in the HTTP request.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("instancePartitionDeadline", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string InstancePartitionDeadlineRaw { get; private set; }
+
+                    /// <summary>
+                    /// <seealso cref="object"/> representation of <see cref="InstancePartitionDeadlineRaw"/>.
+                    /// </summary>
+                    [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use InstancePartitionDeadlineDateTimeOffset instead.")]
+                    public virtual object InstancePartitionDeadline
+                    {
+                        get => _instancePartitionDeadline;
+                        set
+                        {
+                            InstancePartitionDeadlineRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                            _instancePartitionDeadline = value;
+                        }
+                    }
+
+                    public virtual System.DateTimeOffset? InstancePartitionDeadlineDateTimeOffset
+                    {
+                        get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(InstancePartitionDeadlineRaw);
+                        set
+                        {
+                            InstancePartitionDeadlineRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                            _instancePartitionDeadline = value;
+                        }
+                    }
+
+                    /// <summary>
+                    /// Optional. Number of operations to be returned in the response. If 0 or less, defaults to the
+                    /// server's maximum allowed page size.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If non-empty, `page_token` should contain a next_page_token from a previous
+                    /// ListInstancePartitionOperationsResponse to the same `parent` and with the same `filter`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/instancePartitionOperations";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instances/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("instancePartitionDeadline", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "instancePartitionDeadline",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the InstancePartitions resource.</summary>
+            public virtual InstancePartitionsResource InstancePartitions { get; }
+
+            /// <summary>The "instancePartitions" collection of methods.</summary>
+            public class InstancePartitionsResource
+            {
+                private const string Resource = "instancePartitions";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public InstancePartitionsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    Operations = new OperationsResource(service);
+                }
+
+                /// <summary>Gets the Operations resource.</summary>
+                public virtual OperationsResource Operations { get; }
+
+                /// <summary>The "operations" collection of methods.</summary>
+                public class OperationsResource
+                {
+                    private const string Resource = "operations";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public OperationsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to
+                    /// cancel the operation, but success is not guaranteed. If the server doesn't support this method,
+                    /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
+                    /// methods to check whether the cancellation succeeded or whether the operation completed despite
+                    /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
+                    /// `Code.CANCELLED`.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource to be cancelled.</param>
+                    public virtual CancelRequest Cancel(string name)
+                    {
+                        return new CancelRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to
+                    /// cancel the operation, but success is not guaranteed. If the server doesn't support this method,
+                    /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
+                    /// methods to check whether the cancellation succeeded or whether the operation completed despite
+                    /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
+                    /// `Code.CANCELLED`.
+                    /// </summary>
+                    public class CancelRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
+                    {
+                        /// <summary>Constructs a new Cancel request.</summary>
+                        public CancelRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource to be cancelled.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "cancel";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}:cancel";
+
+                        /// <summary>Initializes Cancel parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/instancePartitions/[^/]+/operations/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Deletes a long-running operation. This method indicates that the client is no longer interested
+                    /// in the operation result. It does not cancel the operation. If the server doesn't support this
+                    /// method, it returns `google.rpc.Code.UNIMPLEMENTED`.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource to be deleted.</param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Deletes a long-running operation. This method indicates that the client is no longer interested
+                    /// in the operation result. It does not cancel the operation. If the server doesn't support this
+                    /// method, it returns `google.rpc.Code.UNIMPLEMENTED`.
+                    /// </summary>
+                    public class DeleteRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource to be deleted.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/instancePartitions/[^/]+/operations/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource.</param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Clients can use this method to poll the
+                    /// operation result at intervals as recommended by the API service.
+                    /// </summary>
+                    public class GetRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/instancePartitions/[^/]+/operations/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Lists operations that match the specified filter in the request. If the server doesn't support
+                    /// this method, it returns `UNIMPLEMENTED`.
+                    /// </summary>
+                    /// <param name="name">The name of the operation's parent resource.</param>
+                    public virtual ListRequest List(string name)
+                    {
+                        return new ListRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Lists operations that match the specified filter in the request. If the server doesn't support
+                    /// this method, it returns `UNIMPLEMENTED`.
+                    /// </summary>
+                    public class ListRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ListOperationsResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation's parent resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>The standard list filter.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string Filter { get; set; }
+
+                        /// <summary>The standard list page size.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>The standard list page token.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/instancePartitions/[^/]+/operations$",
+                            });
+                            RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "filter",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// Creates an instance partition and begins preparing it to be used. The returned long-running
+                /// operation can be used to track the progress of preparing the new instance partition. The instance
+                /// partition name is assigned by the caller. If the named instance partition already exists,
+                /// `CreateInstancePartition` returns `ALREADY_EXISTS`. Immediately upon completion of this request: *
+                /// The instance partition is readable via the API, with all requested attributes but no allocated
+                /// resources. Its state is `CREATING`. Until completion of the returned operation: * Cancelling the
+                /// operation renders the instance partition immediately unreadable via the API. * The instance
+                /// partition can be deleted. * All other attempts to modify the instance partition are rejected. Upon
+                /// completion of the returned operation: * Billing for all successfully-allocated resources begins
+                /// (some types may have lower than the requested levels). * Databases can start using this instance
+                /// partition. * The instance partition's allocated resource levels are readable via the API. * The
+                /// instance partition's state becomes `READY`. The returned long-running operation will have a name of
+                /// the format `/operations/` and can be used to track creation of the instance partition. The metadata
+                /// field type is CreateInstancePartitionMetadata. The response field type is InstancePartition, if
+                /// successful.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The name of the instance in which to create the instance partition. Values are of the form
+                /// `projects//instances/`.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Spanner.v1.Data.CreateInstancePartitionRequest body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Creates an instance partition and begins preparing it to be used. The returned long-running
+                /// operation can be used to track the progress of preparing the new instance partition. The instance
+                /// partition name is assigned by the caller. If the named instance partition already exists,
+                /// `CreateInstancePartition` returns `ALREADY_EXISTS`. Immediately upon completion of this request: *
+                /// The instance partition is readable via the API, with all requested attributes but no allocated
+                /// resources. Its state is `CREATING`. Until completion of the returned operation: * Cancelling the
+                /// operation renders the instance partition immediately unreadable via the API. * The instance
+                /// partition can be deleted. * All other attempts to modify the instance partition are rejected. Upon
+                /// completion of the returned operation: * Billing for all successfully-allocated resources begins
+                /// (some types may have lower than the requested levels). * Databases can start using this instance
+                /// partition. * The instance partition's allocated resource levels are readable via the API. * The
+                /// instance partition's state becomes `READY`. The returned long-running operation will have a name of
+                /// the format `/operations/` and can be used to track creation of the instance partition. The metadata
+                /// field type is CreateInstancePartitionMetadata. The response field type is InstancePartition, if
+                /// successful.
+                /// </summary>
+                public class CreateRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.CreateInstancePartitionRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the instance in which to create the instance partition. Values are of the
+                    /// form `projects//instances/`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Spanner.v1.Data.CreateInstancePartitionRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/instancePartitions";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instances/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Deletes an existing instance partition. Requires that the instance partition is not used by any
+                /// database or backup and is not the default instance partition of an instance. Authorization requires
+                /// `spanner.instancePartitions.delete` permission on the resource name.
+                /// </summary>
+                /// <param name="name">
+                /// Required. The name of the instance partition to be deleted. Values are of the form
+                /// `projects/{project}/instances/{instance}/instancePartitions/{instance_partition}`
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Deletes an existing instance partition. Requires that the instance partition is not used by any
+                /// database or backup and is not the default instance partition of an instance. Authorization requires
+                /// `spanner.instancePartitions.delete` permission on the resource name.
+                /// </summary>
+                public class DeleteRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the instance partition to be deleted. Values are of the form
+                    /// `projects/{project}/instances/{instance}/instancePartitions/{instance_partition}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. If not empty, the API only deletes the instance partition when the etag provided
+                    /// matches the current status of the requested instance partition. Otherwise, deletes the instance
+                    /// partition without checking the current status of the requested instance partition.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("etag", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Etag { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instances/[^/]+/instancePartitions/[^/]+$",
+                        });
+                        RequestParameters.Add("etag", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "etag",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Gets information about a particular instance partition.</summary>
+                /// <param name="name">
+                /// Required. The name of the requested instance partition. Values are of the form
+                /// `projects/{project}/instances/{instance}/instancePartitions/{instance_partition}`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets information about a particular instance partition.</summary>
+                public class GetRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.InstancePartition>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the requested instance partition. Values are of the form
+                    /// `projects/{project}/instances/{instance}/instancePartitions/{instance_partition}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instances/[^/]+/instancePartitions/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists all instance partitions for the given instance.</summary>
+                /// <param name="parent">
+                /// Required. The instance whose instance partitions should be listed. Values are of the form
+                /// `projects//instances/`. Use `{instance} = '-'` to list instance partitions for all Instances in a
+                /// project, e.g., `projects/myproject/instances/-`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists all instance partitions for the given instance.</summary>
+                public class ListRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ListInstancePartitionsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The instance whose instance partitions should be listed. Values are of the form
+                    /// `projects//instances/`. Use `{instance} = '-'` to list instance partitions for all Instances in
+                    /// a project, e.g., `projects/myproject/instances/-`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    private object _instancePartitionDeadline;
+
+                    /// <summary>
+                    /// String representation of <see cref="InstancePartitionDeadlineDateTimeOffset"/>, formatted for
+                    /// inclusion in the HTTP request.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("instancePartitionDeadline", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string InstancePartitionDeadlineRaw { get; private set; }
+
+                    /// <summary>
+                    /// <seealso cref="object"/> representation of <see cref="InstancePartitionDeadlineRaw"/>.
+                    /// </summary>
+                    [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use InstancePartitionDeadlineDateTimeOffset instead.")]
+                    public virtual object InstancePartitionDeadline
+                    {
+                        get => _instancePartitionDeadline;
+                        set
+                        {
+                            InstancePartitionDeadlineRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                            _instancePartitionDeadline = value;
+                        }
+                    }
+
+                    public virtual System.DateTimeOffset? InstancePartitionDeadlineDateTimeOffset
+                    {
+                        get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(InstancePartitionDeadlineRaw);
+                        set
+                        {
+                            InstancePartitionDeadlineRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                            _instancePartitionDeadline = value;
+                        }
+                    }
+
+                    /// <summary>
+                    /// Number of instance partitions to be returned in the response. If 0 or less, defaults to the
+                    /// server's maximum allowed page size.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// If non-empty, `page_token` should contain a next_page_token from a previous
+                    /// ListInstancePartitionsResponse.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/instancePartitions";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instances/[^/]+$",
+                        });
+                        RequestParameters.Add("instancePartitionDeadline", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "instancePartitionDeadline",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Updates an instance partition, and begins allocating or releasing resources as requested. The
+                /// returned long-running operation can be used to track the progress of updating the instance
+                /// partition. If the named instance partition does not exist, returns `NOT_FOUND`. Immediately upon
+                /// completion of this request: * For resource types for which a decrease in the instance partition's
+                /// allocation has been requested, billing is based on the newly-requested level. Until completion of
+                /// the returned operation: * Cancelling the operation sets its metadata's cancel_time, and begins
+                /// restoring resources to their pre-request values. The operation is guaranteed to succeed at undoing
+                /// all resource changes, after which point it terminates with a `CANCELLED` status. * All other
+                /// attempts to modify the instance partition are rejected. * Reading the instance partition via the API
+                /// continues to give the pre-request resource levels. Upon completion of the returned operation: *
+                /// Billing begins for all successfully-allocated resources (some types may have lower than the
+                /// requested levels). * All newly-reserved resources are available for serving the instance partition's
+                /// tables. * The instance partition's new resource levels are readable via the API. The returned
+                /// long-running operation will have a name of the format `/operations/` and can be used to track the
+                /// instance partition modification. The metadata field type is UpdateInstancePartitionMetadata. The
+                /// response field type is InstancePartition, if successful. Authorization requires
+                /// `spanner.instancePartitions.update` permission on the resource name.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. A unique identifier for the instance partition. Values are of the form
+                /// `projects//instances//instancePartitions/a-z*[a-z0-9]`. The final segment of the name must be
+                /// between 2 and 64 characters in length. An instance partition's name cannot be changed after the
+                /// instance partition is created.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.Spanner.v1.Data.UpdateInstancePartitionRequest body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Updates an instance partition, and begins allocating or releasing resources as requested. The
+                /// returned long-running operation can be used to track the progress of updating the instance
+                /// partition. If the named instance partition does not exist, returns `NOT_FOUND`. Immediately upon
+                /// completion of this request: * For resource types for which a decrease in the instance partition's
+                /// allocation has been requested, billing is based on the newly-requested level. Until completion of
+                /// the returned operation: * Cancelling the operation sets its metadata's cancel_time, and begins
+                /// restoring resources to their pre-request values. The operation is guaranteed to succeed at undoing
+                /// all resource changes, after which point it terminates with a `CANCELLED` status. * All other
+                /// attempts to modify the instance partition are rejected. * Reading the instance partition via the API
+                /// continues to give the pre-request resource levels. Upon completion of the returned operation: *
+                /// Billing begins for all successfully-allocated resources (some types may have lower than the
+                /// requested levels). * All newly-reserved resources are available for serving the instance partition's
+                /// tables. * The instance partition's new resource levels are readable via the API. The returned
+                /// long-running operation will have a name of the format `/operations/` and can be used to track the
+                /// instance partition modification. The metadata field type is UpdateInstancePartitionMetadata. The
+                /// response field type is InstancePartition, if successful. Authorization requires
+                /// `spanner.instancePartitions.update` permission on the resource name.
+                /// </summary>
+                public class PatchRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.UpdateInstancePartitionRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. A unique identifier for the instance partition. Values are of the form
+                    /// `projects//instances//instancePartitions/a-z*[a-z0-9]`. The final segment of the name must be
+                    /// between 2 and 64 characters in length. An instance partition's name cannot be changed after the
+                    /// instance partition is created.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Spanner.v1.Data.UpdateInstancePartitionRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instances/[^/]+/instancePartitions/[^/]+$",
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets the Operations resource.</summary>
             public virtual OperationsResource Operations { get; }
 
@@ -3838,12 +6968,12 @@ namespace Google.Apis.Spanner.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(string name)
                 {
-                    return new CancelRequest(service, name);
+                    return new CancelRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -3852,7 +6982,7 @@ namespace Google.Apis.Spanner.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 public class CancelRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Empty>
                 {
@@ -3899,7 +7029,7 @@ namespace Google.Apis.Spanner.v1
                 /// <param name="name">The name of the operation resource to be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -3951,7 +7081,7 @@ namespace Google.Apis.Spanner.v1
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -3997,27 +7127,17 @@ namespace Google.Apis.Spanner.v1
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 public class ListRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.ListOperationsResponse>
                 {
@@ -4113,7 +7233,7 @@ namespace Google.Apis.Spanner.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Spanner.v1.Data.CreateInstanceRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -4187,7 +7307,7 @@ namespace Google.Apis.Spanner.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -4240,7 +7360,7 @@ namespace Google.Apis.Spanner.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a particular instance.</summary>
@@ -4310,7 +7430,7 @@ namespace Google.Apis.Spanner.v1
             /// </param>
             public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.Spanner.v1.Data.GetIamPolicyRequest body, string resource)
             {
-                return new GetIamPolicyRequest(service, body, resource);
+                return new GetIamPolicyRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -4372,7 +7492,7 @@ namespace Google.Apis.Spanner.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all instances in the given project.</summary>
@@ -4405,12 +7525,36 @@ namespace Google.Apis.Spanner.v1
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
 
+                private object _instanceDeadline;
+
                 /// <summary>
-                /// Deadline used while retrieving metadata for instances. Instances whose metadata cannot be retrieved
-                /// within this deadline will be added to unreachable in ListInstancesResponse.
+                /// String representation of <see cref="InstanceDeadlineDateTimeOffset"/>, formatted for inclusion in
+                /// the HTTP request.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("instanceDeadline", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual object InstanceDeadline { get; set; }
+                public virtual string InstanceDeadlineRaw { get; private set; }
+
+                /// <summary><seealso cref="object"/> representation of <see cref="InstanceDeadlineRaw"/>.</summary>
+                [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use InstanceDeadlineDateTimeOffset instead.")]
+                public virtual object InstanceDeadline
+                {
+                    get => _instanceDeadline;
+                    set
+                    {
+                        InstanceDeadlineRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                        _instanceDeadline = value;
+                    }
+                }
+
+                public virtual System.DateTimeOffset? InstanceDeadlineDateTimeOffset
+                {
+                    get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(InstanceDeadlineRaw);
+                    set
+                    {
+                        InstanceDeadlineRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                        _instanceDeadline = value;
+                    }
+                }
 
                 /// <summary>
                 /// Number of instances to be returned in the response. If 0 or less, defaults to the server's maximum
@@ -4482,6 +7626,107 @@ namespace Google.Apis.Spanner.v1
             }
 
             /// <summary>
+            /// Moves an instance to the target instance configuration. You can use the returned long-running operation
+            /// to track the progress of moving the instance. `MoveInstance` returns `FAILED_PRECONDITION` if the
+            /// instance meets any of the following criteria: * Is undergoing a move to a different instance
+            /// configuration * Has backups * Has an ongoing update * Contains any CMEK-enabled databases * Is a free
+            /// trial instance While the operation is pending: * All other attempts to modify the instance, including
+            /// changes to its compute capacity, are rejected. * The following database and backup admin operations are
+            /// rejected: * `DatabaseAdmin.CreateDatabase` * `DatabaseAdmin.UpdateDatabaseDdl` (disabled if
+            /// default_leader is specified in the request.) * `DatabaseAdmin.RestoreDatabase` *
+            /// `DatabaseAdmin.CreateBackup` * `DatabaseAdmin.CopyBackup` * Both the source and target instance
+            /// configurations are subject to hourly compute and storage charges. * The instance might experience higher
+            /// read-write latencies and a higher transaction abort rate. However, moving an instance doesn't cause any
+            /// downtime. The returned long-running operation has a name of the format `/operations/` and can be used to
+            /// track the move instance operation. The metadata field type is MoveInstanceMetadata. The response field
+            /// type is Instance, if successful. Cancelling the operation sets its metadata's cancel_time. Cancellation
+            /// is not immediate because it involves moving any data previously moved to the target instance
+            /// configuration back to the original instance configuration. You can use this operation to track the
+            /// progress of the cancellation. Upon successful completion of the cancellation, the operation terminates
+            /// with `CANCELLED` status. If not cancelled, upon completion of the returned operation: * The instance
+            /// successfully moves to the target instance configuration. * You are billed for compute and storage in
+            /// target instance configuration. Authorization requires the `spanner.instances.update` permission on the
+            /// resource instance. For more details, see [Move an
+            /// instance](https://cloud.google.com/spanner/docs/move-instance).
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The instance to move. Values are of the form `projects//instances/`.
+            /// </param>
+            public virtual MoveRequest Move(Google.Apis.Spanner.v1.Data.MoveInstanceRequest body, string name)
+            {
+                return new MoveRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Moves an instance to the target instance configuration. You can use the returned long-running operation
+            /// to track the progress of moving the instance. `MoveInstance` returns `FAILED_PRECONDITION` if the
+            /// instance meets any of the following criteria: * Is undergoing a move to a different instance
+            /// configuration * Has backups * Has an ongoing update * Contains any CMEK-enabled databases * Is a free
+            /// trial instance While the operation is pending: * All other attempts to modify the instance, including
+            /// changes to its compute capacity, are rejected. * The following database and backup admin operations are
+            /// rejected: * `DatabaseAdmin.CreateDatabase` * `DatabaseAdmin.UpdateDatabaseDdl` (disabled if
+            /// default_leader is specified in the request.) * `DatabaseAdmin.RestoreDatabase` *
+            /// `DatabaseAdmin.CreateBackup` * `DatabaseAdmin.CopyBackup` * Both the source and target instance
+            /// configurations are subject to hourly compute and storage charges. * The instance might experience higher
+            /// read-write latencies and a higher transaction abort rate. However, moving an instance doesn't cause any
+            /// downtime. The returned long-running operation has a name of the format `/operations/` and can be used to
+            /// track the move instance operation. The metadata field type is MoveInstanceMetadata. The response field
+            /// type is Instance, if successful. Cancelling the operation sets its metadata's cancel_time. Cancellation
+            /// is not immediate because it involves moving any data previously moved to the target instance
+            /// configuration back to the original instance configuration. You can use this operation to track the
+            /// progress of the cancellation. Upon successful completion of the cancellation, the operation terminates
+            /// with `CANCELLED` status. If not cancelled, upon completion of the returned operation: * The instance
+            /// successfully moves to the target instance configuration. * You are billed for compute and storage in
+            /// target instance configuration. Authorization requires the `spanner.instances.update` permission on the
+            /// resource instance. For more details, see [Move an
+            /// instance](https://cloud.google.com/spanner/docs/move-instance).
+            /// </summary>
+            public class MoveRequest : SpannerBaseServiceRequest<Google.Apis.Spanner.v1.Data.Operation>
+            {
+                /// <summary>Constructs a new Move request.</summary>
+                public MoveRequest(Google.Apis.Services.IClientService service, Google.Apis.Spanner.v1.Data.MoveInstanceRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>Required. The instance to move. Values are of the form `projects//instances/`.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Spanner.v1.Data.MoveInstanceRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "move";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:move";
+
+                /// <summary>Initializes Move parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/instances/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
             /// Updates an instance, and begins allocating or releasing resources as requested. The returned
             /// long-running operation can be used to track the progress of updating the instance. If the named instance
             /// does not exist, returns `NOT_FOUND`. Immediately upon completion of this request: * For resource types
@@ -4506,7 +7751,7 @@ namespace Google.Apis.Spanner.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Spanner.v1.Data.UpdateInstanceRequest body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -4586,7 +7831,7 @@ namespace Google.Apis.Spanner.v1
             /// </param>
             public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.Spanner.v1.Data.SetIamPolicyRequest body, string resource)
             {
-                return new SetIamPolicyRequest(service, body, resource);
+                return new SetIamPolicyRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -4655,7 +7900,7 @@ namespace Google.Apis.Spanner.v1
             /// </param>
             public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.Spanner.v1.Data.TestIamPermissionsRequest body, string resource)
             {
-                return new TestIamPermissionsRequest(service, body, resource);
+                return new TestIamPermissionsRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -4735,7 +7980,7 @@ namespace Google.Apis.Spanner.v1
         /// </param>
         public virtual ListRequest List(string parent)
         {
-            return new ListRequest(service, parent);
+            return new ListRequest(this.service, parent);
         }
 
         /// <summary>Return available scans given a Database-specific resource name.</summary>
@@ -4860,15 +8105,217 @@ namespace Google.Apis.Spanner.v1
 }
 namespace Google.Apis.Spanner.v1.Data
 {
+    /// <summary>The request for AddSplitPoints.</summary>
+    public class AddSplitPointsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. A user-supplied tag associated with the split points. For example, "intital_data_load",
+        /// "special_event_1". Defaults to "CloudAddSplitPointsAPI" if not specified. The length of the tag must not
+        /// exceed 50 characters,else will be trimmed. Only valid UTF8 characters are allowed.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("initiator")]
+        public virtual string Initiator { get; set; }
+
+        /// <summary>Required. The split points to add.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("splitPoints")]
+        public virtual System.Collections.Generic.IList<SplitPoints> SplitPoints { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response for AddSplitPoints.</summary>
+    public class AddSplitPointsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// AsymmetricAutoscalingOption specifies the scaling of replicas identified by the given selection.
+    /// </summary>
+    public class AsymmetricAutoscalingOption : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Overrides applied to the top-level autoscaling configuration for the selected replicas.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("overrides")]
+        public virtual AutoscalingConfigOverrides Overrides { get; set; }
+
+        /// <summary>
+        /// Required. Selects the replicas to which this AsymmetricAutoscalingOption applies. Only read-only replicas
+        /// are supported.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("replicaSelection")]
+        public virtual InstanceReplicaSelection ReplicaSelection { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Autoscaling configuration for an instance.</summary>
+    public class AutoscalingConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Optional asymmetric autoscaling options. Replicas matching the replica selection criteria will be
+        /// autoscaled independently from other replicas. The autoscaler will scale the replicas based on the
+        /// utilization of replicas identified by the replica selection. Replica selections should not overlap with each
+        /// other. Other replicas (those do not match any replica selection) will be autoscaled together and will have
+        /// the same compute capacity allocated to them.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("asymmetricAutoscalingOptions")]
+        public virtual System.Collections.Generic.IList<AsymmetricAutoscalingOption> AsymmetricAutoscalingOptions { get; set; }
+
+        /// <summary>Required. Autoscaling limits for an instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("autoscalingLimits")]
+        public virtual AutoscalingLimits AutoscalingLimits { get; set; }
+
+        /// <summary>Required. The autoscaling targets for an instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("autoscalingTargets")]
+        public virtual AutoscalingTargets AutoscalingTargets { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Overrides the top-level autoscaling configuration for the replicas identified by `replica_selection`. All fields
+    /// in this message are optional. Any unspecified fields will use the corresponding values from the top-level
+    /// autoscaling configuration.
+    /// </summary>
+    public class AutoscalingConfigOverrides : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. If specified, overrides the min/max limit in the top-level autoscaling configuration for the
+        /// selected replicas.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("autoscalingLimits")]
+        public virtual AutoscalingLimits AutoscalingLimits { get; set; }
+
+        /// <summary>
+        /// Optional. If specified, overrides the autoscaling target high_priority_cpu_utilization_percent in the
+        /// top-level autoscaling configuration for the selected replicas.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("autoscalingTargetHighPriorityCpuUtilizationPercent")]
+        public virtual System.Nullable<int> AutoscalingTargetHighPriorityCpuUtilizationPercent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The autoscaling limits for the instance. Users can define the minimum and maximum compute capacity allocated to
+    /// the instance, and the autoscaler will only scale within that range. Users can either use nodes or processing
+    /// units to specify the limits, but should use the same unit to set both the min_limit and max_limit.
+    /// </summary>
+    public class AutoscalingLimits : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Maximum number of nodes allocated to the instance. If set, this number should be greater than or equal to
+        /// min_nodes.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxNodes")]
+        public virtual System.Nullable<int> MaxNodes { get; set; }
+
+        /// <summary>
+        /// Maximum number of processing units allocated to the instance. If set, this number should be multiples of
+        /// 1000 and be greater than or equal to min_processing_units.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxProcessingUnits")]
+        public virtual System.Nullable<int> MaxProcessingUnits { get; set; }
+
+        /// <summary>
+        /// Minimum number of nodes allocated to the instance. If set, this number should be greater than or equal to 1.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minNodes")]
+        public virtual System.Nullable<int> MinNodes { get; set; }
+
+        /// <summary>
+        /// Minimum number of processing units allocated to the instance. If set, this number should be multiples of
+        /// 1000.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minProcessingUnits")]
+        public virtual System.Nullable<int> MinProcessingUnits { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The autoscaling targets for an instance.</summary>
+    public class AutoscalingTargets : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The target high priority cpu utilization percentage that the autoscaler should be trying to
+        /// achieve for the instance. This number is on a scale from 0 (no utilization) to 100 (full utilization). The
+        /// valid range is [10, 90] inclusive.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("highPriorityCpuUtilizationPercent")]
+        public virtual System.Nullable<int> HighPriorityCpuUtilizationPercent { get; set; }
+
+        /// <summary>
+        /// Required. The target storage utilization percentage that the autoscaler should be trying to achieve for the
+        /// instance. This number is on a scale from 0 (no utilization) to 100 (full utilization). The valid range is
+        /// [10, 99] inclusive.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("storageUtilizationPercent")]
+        public virtual System.Nullable<int> StorageUtilizationPercent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A backup of a Cloud Spanner database.</summary>
     public class Backup : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Output only. List of backup schedule URIs that are associated with creating this backup. This is only
+        /// applicable for scheduled backups, and is empty for on-demand backups. To optimize for storage, whenever
+        /// possible, multiple schedules are collapsed together to create one backup. In such cases, this field captures
+        /// the list of all backup schedule URIs that are associated with creating this backup. If collapsing is not
+        /// done, then this field captures the single backup schedule URI associated with creating this backup.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backupSchedules")]
+        public virtual System.Collections.Generic.IList<string> BackupSchedules { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Output only. The time the CreateBackup request is received. If the request does not specify `version_time`,
         /// the `version_time` of the backup will be equivalent to the `create_time`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Required for the CreateBackup operation. Name of the database from which this backup was created. This needs
@@ -4877,9 +8324,37 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("database")]
         public virtual string Database { get; set; }
 
+        /// <summary>Output only. The database dialect information for the backup.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseDialect")]
+        public virtual string DatabaseDialect { get; set; }
+
         /// <summary>Output only. The encryption information for the backup.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("encryptionInfo")]
         public virtual EncryptionInfo EncryptionInfo { get; set; }
+
+        /// <summary>
+        /// Output only. The encryption information for the backup, whether it is protected by one or more KMS keys. The
+        /// information includes all Cloud KMS key versions used to encrypt the backup. The `encryption_status` field
+        /// inside of each `EncryptionInfo` is not populated. At least one of the key versions must be available for the
+        /// backup to be restored. If a key version is revoked in the middle of a restore, the restore behavior is
+        /// undefined.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("encryptionInformation")]
+        public virtual System.Collections.Generic.IList<EncryptionInfo> EncryptionInformation { get; set; }
+
+        /// <summary>
+        /// Output only. For a backup in an incremental backup chain, this is the storage space needed to keep the data
+        /// that has changed since the previous backup. For all other backups, this is always the size of the backup.
+        /// This value may change if backups on the same chain get deleted or expired. This field can be used to
+        /// calculate the total storage space used by a set of backups. For example, the total space used by all backups
+        /// of a database can be computed by summing up this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exclusiveSizeBytes")]
+        public virtual System.Nullable<long> ExclusiveSizeBytes { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
 
         /// <summary>
         /// Required for the CreateBackup operation. The expiration time of the backup, with microseconds granularity
@@ -4888,7 +8363,102 @@ namespace Google.Apis.Spanner.v1.Data
         /// the resources used by the backup.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. The number of bytes that will be freed by deleting this backup. This value will be zero if, for
+        /// example, this backup is part of an incremental backup chain and younger backups in the chain require that we
+        /// keep its data. For backups not in an incremental backup chain, this is always the size of the backup. This
+        /// value may change if backups on the same chain get created, deleted or expired.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("freeableSizeBytes")]
+        public virtual System.Nullable<long> FreeableSizeBytes { get; set; }
+
+        /// <summary>
+        /// Output only. Populated only for backups in an incremental backup chain. Backups share the same chain id if
+        /// and only if they belong to the same incremental backup chain. Use this field to determine which backups are
+        /// part of the same incremental backup chain. The ordering of backups in the chain can be determined by
+        /// ordering the backup `version_time`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("incrementalBackupChainId")]
+        public virtual string IncrementalBackupChainId { get; set; }
+
+        /// <summary>
+        /// Output only. The instance partition(s) storing the backup. This is the same as the list of the instance
+        /// partition(s) that the database had footprint in at the backup's `version_time`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instancePartitions")]
+        public virtual System.Collections.Generic.IList<BackupInstancePartition> InstancePartitions { get; set; }
+
+        private string _maxExpireTimeRaw;
+
+        private object _maxExpireTime;
+
+        /// <summary>
+        /// Output only. The max allowed expiration time of the backup, with microseconds granularity. A backup's
+        /// expiration time can be configured in multiple APIs: CreateBackup, UpdateBackup, CopyBackup. When updating or
+        /// copying an existing backup, the expiration time specified must be less than `Backup.max_expire_time`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxExpireTime")]
+        public virtual string MaxExpireTimeRaw
+        {
+            get => _maxExpireTimeRaw;
+            set
+            {
+                _maxExpireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _maxExpireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="MaxExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use MaxExpireTimeDateTimeOffset instead.")]
+        public virtual object MaxExpireTime
+        {
+            get => _maxExpireTime;
+            set
+            {
+                _maxExpireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _maxExpireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="MaxExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? MaxExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(MaxExpireTimeRaw);
+            set => MaxExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only for the CreateBackup operation. Required for the UpdateBackup operation. A globally unique
@@ -4901,6 +8471,60 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _oldestVersionTimeRaw;
+
+        private object _oldestVersionTime;
+
+        /// <summary>
+        /// Output only. Data deleted at a time older than this is guaranteed not to be retained in order to support
+        /// this backup. For a backup in an incremental backup chain, this is the version time of the oldest backup that
+        /// exists or ever existed in the chain. For all other backups, this is the version time of the backup. This
+        /// field can be used to understand what data is being retained by the backup system.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oldestVersionTime")]
+        public virtual string OldestVersionTimeRaw
+        {
+            get => _oldestVersionTimeRaw;
+            set
+            {
+                _oldestVersionTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _oldestVersionTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="OldestVersionTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use OldestVersionTimeDateTimeOffset instead.")]
+        public virtual object OldestVersionTime
+        {
+            get => _oldestVersionTime;
+            set
+            {
+                _oldestVersionTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _oldestVersionTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="OldestVersionTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? OldestVersionTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(OldestVersionTimeRaw);
+            set => OldestVersionTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. The names of the destination backups being created by copying this source backup. The backup
+        /// names are of the form `projects//instances//backups/`. Referencing backups may exist in different instances.
+        /// The existence of any referencing backup prevents the backup from being deleted. When the copy operation is
+        /// done (either successfully completed or cancelled or the destination backup is deleted), the reference to the
+        /// backup is removed.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("referencingBackups")]
+        public virtual System.Collections.Generic.IList<string> ReferencingBackups { get; set; }
+
         /// <summary>
         /// Output only. The names of the restored databases that reference the backup. The database names are of the
         /// form `projects//instances//databases/`. Referencing databases may exist in different instances. The
@@ -4910,7 +8534,10 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("referencingDatabases")]
         public virtual System.Collections.Generic.IList<string> ReferencingDatabases { get; set; }
 
-        /// <summary>Output only. Size of the backup in bytes.</summary>
+        /// <summary>
+        /// Output only. Size of the backup in bytes. For a backup in an incremental backup chain, this is the sum of
+        /// the `exclusive_size_bytes` of itself and all older backups in the chain.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sizeBytes")]
         public virtual System.Nullable<long> SizeBytes { get; set; }
 
@@ -4918,13 +8545,46 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _versionTimeRaw;
+
+        private object _versionTime;
+
         /// <summary>
         /// The backup will contain an externally consistent copy of the database at the timestamp specified by
         /// `version_time`. If `version_time` is not specified, the system will set `version_time` to the `create_time`
         /// of the backup.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("versionTime")]
-        public virtual object VersionTime { get; set; }
+        public virtual string VersionTimeRaw
+        {
+            get => _versionTimeRaw;
+            set
+            {
+                _versionTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _versionTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="VersionTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use VersionTimeDateTimeOffset instead.")]
+        public virtual object VersionTime
+        {
+            get => _versionTime;
+            set
+            {
+                _versionTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _versionTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="VersionTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? VersionTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(VersionTimeRaw);
+            set => VersionTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4937,13 +8597,50 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("backup")]
         public virtual string Backup { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time the CreateBackup request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Name of the database the backup was created from.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceDatabase")]
         public virtual string SourceDatabase { get; set; }
+
+        private string _versionTimeRaw;
+
+        private object _versionTime;
 
         /// <summary>
         /// The backup contains an externally consistent copy of `source_database` at the timestamp specified by
@@ -4951,7 +8648,143 @@ namespace Google.Apis.Spanner.v1.Data
         /// is equivalent to the `create_time`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("versionTime")]
-        public virtual object VersionTime { get; set; }
+        public virtual string VersionTimeRaw
+        {
+            get => _versionTimeRaw;
+            set
+            {
+                _versionTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _versionTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="VersionTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use VersionTimeDateTimeOffset instead.")]
+        public virtual object VersionTime
+        {
+            get => _versionTime;
+            set
+            {
+                _versionTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _versionTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="VersionTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? VersionTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(VersionTimeRaw);
+            set => VersionTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Instance partition information for the backup.</summary>
+    public class BackupInstancePartition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A unique identifier for the instance partition. Values are of the form
+        /// `projects//instances//instancePartitions/`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instancePartition")]
+        public virtual string InstancePartition { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>BackupSchedule expresses the automated backup creation specification for a Spanner database.</summary>
+    public class BackupSchedule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The encryption configuration that is used to encrypt the backup. If this field is not specified,
+        /// the backup uses the same encryption configuration as the database.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("encryptionConfig")]
+        public virtual CreateBackupEncryptionConfig EncryptionConfig { get; set; }
+
+        /// <summary>The schedule creates only full backups.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fullBackupSpec")]
+        public virtual FullBackupSpec FullBackupSpec { get; set; }
+
+        /// <summary>The schedule creates incremental backup chains.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("incrementalBackupSpec")]
+        public virtual IncrementalBackupSpec IncrementalBackupSpec { get; set; }
+
+        /// <summary>
+        /// Identifier. Output only for the CreateBackupSchedule operation. Required for the UpdateBackupSchedule
+        /// operation. A globally unique identifier for the backup schedule which cannot be changed. Values are of the
+        /// form `projects//instances//databases//backupSchedules/a-z*[a-z0-9]` The final segment of the name must be
+        /// between 2 and 60 characters in length.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Optional. The retention duration of a backup that must be at least 6 hours and at most 366 days. The backup
+        /// is eligible to be automatically deleted once the retention period has elapsed.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("retentionDuration")]
+        public virtual object RetentionDuration { get; set; }
+
+        /// <summary>Optional. The schedule specification based on which the backup creations are triggered.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("spec")]
+        public virtual BackupScheduleSpec Spec { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>
+        /// Output only. The timestamp at which the schedule was last updated. If the schedule has never been updated,
+        /// this field contains the timestamp when the schedule was first created.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Defines specifications of the backup schedule.</summary>
+    public class BackupScheduleSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Cron style schedule specification.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cronSpec")]
+        public virtual CrontabSpec CronSpec { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4987,9 +8820,104 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The request for BatchWrite.</summary>
+    public class BatchWriteRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. When `exclude_txn_from_change_streams` is set to `true`: * Modifications from all transactions in
+        /// this batch write operation will not be recorded in change streams with DDL option `allow_txn_exclusion=true`
+        /// that are tracking columns modified by these transactions. * Modifications from all transactions in this
+        /// batch write operation will be recorded in change streams with DDL option `allow_txn_exclusion=false or not
+        /// set` that are tracking columns modified by these transactions. When `exclude_txn_from_change_streams` is set
+        /// to `false` or not set, Modifications from all transactions in this batch write operation will be recorded in
+        /// all change streams that are tracking columns modified by these transactions.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludeTxnFromChangeStreams")]
+        public virtual System.Nullable<bool> ExcludeTxnFromChangeStreams { get; set; }
+
+        /// <summary>Required. The groups of mutations to be applied.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mutationGroups")]
+        public virtual System.Collections.Generic.IList<MutationGroup> MutationGroups { get; set; }
+
+        /// <summary>Common options for this request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestOptions")]
+        public virtual RequestOptions RequestOptions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The result of applying a batch of mutations.</summary>
+    public class BatchWriteResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _commitTimestampRaw;
+
+        private object _commitTimestamp;
+
+        /// <summary>
+        /// The commit timestamp of the transaction that applied this batch. Present if `status` is `OK`, absent
+        /// otherwise.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("commitTimestamp")]
+        public virtual string CommitTimestampRaw
+        {
+            get => _commitTimestampRaw;
+            set
+            {
+                _commitTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _commitTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CommitTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CommitTimestampDateTimeOffset instead.")]
+        public virtual object CommitTimestamp
+        {
+            get => _commitTimestamp;
+            set
+            {
+                _commitTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _commitTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="CommitTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CommitTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CommitTimestampRaw);
+            set => CommitTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The mutation groups applied in this batch. The values index into the `mutation_groups` field in the
+        /// corresponding `BatchWriteRequest`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("indexes")]
+        public virtual System.Collections.Generic.IList<System.Nullable<int>> Indexes { get; set; }
+
+        /// <summary>An `OK` status indicates success. Any other status indicates a failure.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual Status Status { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The request for BeginTransaction.</summary>
     public class BeginTransactionRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional. Required for read-write transactions on a multiplexed session that commit mutations but do not
+        /// perform any reads or queries. Clients should randomly select one of the mutations from the mutation set and
+        /// send it as a part of this request.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mutationKey")]
+        public virtual Mutation MutationKey { get; set; }
+
         /// <summary>Required. Options for the new transaction.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("options")]
         public virtual TransactionOptions Options { get; set; }
@@ -5020,16 +8948,37 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -5037,21 +8986,134 @@ namespace Google.Apis.Spanner.v1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata type for the long-running operation returned by ChangeQuorum.</summary>
+    public class ChangeQuorumMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>If set, the time at which this operation failed or was completed successfully.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The request for ChangeQuorum.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("request")]
+        public virtual ChangeQuorumRequest Request { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>Time the request was received.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for ChangeQuorum.</summary>
+    public class ChangeQuorumRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The etag is the hash of the `QuorumInfo`. The `ChangeQuorum` operation is only performed if the
+        /// etag matches that of the `QuorumInfo` in the current database resource. Otherwise the API returns an
+        /// `ABORTED` error. The etag is used for optimistic concurrency control as a way to help prevent simultaneous
+        /// change quorum requests that could create a race condition.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Required. Name of the database in which to apply `ChangeQuorum`. Values are of the form
+        /// `projects//instances//databases/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Required. The type of this quorum.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("quorumType")]
+        public virtual QuorumType QuorumType { get; set; }
     }
 
     /// <summary>Metadata associated with a parent-child relationship appearing in a PlanNode.</summary>
@@ -5087,11 +9149,27 @@ namespace Google.Apis.Spanner.v1.Data
     public class CommitRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Optional. The amount of latency this request is configured to incur in order to improve throughput. If this
+        /// field is not set, Spanner assumes requests are relatively latency sensitive and automatically determines an
+        /// appropriate delay time. You can specify a commit delay value between 0 and 500 ms.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxCommitDelay")]
+        public virtual object MaxCommitDelay { get; set; }
+
+        /// <summary>
         /// The mutations to be executed when this transaction commits. All mutations are applied atomically, in the
         /// order they appear in this list.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mutations")]
         public virtual System.Collections.Generic.IList<Mutation> Mutations { get; set; }
+
+        /// <summary>
+        /// Optional. If the read-write transaction was executed on a multiplexed session, the precommit token with the
+        /// highest sequence number received in this transaction attempt, should be included here. Failing to do so will
+        /// result in a FailedPrecondition error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("precommitToken")]
+        public virtual MultiplexedSessionPrecommitToken PrecommitToken { get; set; }
 
         /// <summary>Common options for this request.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestOptions")]
@@ -5132,9 +9210,50 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("commitStats")]
         public virtual CommitStats CommitStats { get; set; }
 
+        private string _commitTimestampRaw;
+
+        private object _commitTimestamp;
+
         /// <summary>The Cloud Spanner timestamp at which the transaction committed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("commitTimestamp")]
-        public virtual object CommitTimestamp { get; set; }
+        public virtual string CommitTimestampRaw
+        {
+            get => _commitTimestampRaw;
+            set
+            {
+                _commitTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _commitTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CommitTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CommitTimestampDateTimeOffset instead.")]
+        public virtual object CommitTimestamp
+        {
+            get => _commitTimestamp;
+            set
+            {
+                _commitTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _commitTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="CommitTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CommitTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CommitTimestampRaw);
+            set => CommitTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// If specified, transaction has not committed yet. Clients must retry the commit with the new precommit token.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("precommitToken")]
+        public virtual MultiplexedSessionPrecommitToken PrecommitToken { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5183,9 +9302,218 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Encryption configuration for the copied backup.</summary>
+    public class CopyBackupEncryptionConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The encryption type of the backup.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("encryptionType")]
+        public virtual string EncryptionType { get; set; }
+
+        /// <summary>
+        /// Optional. The Cloud KMS key that will be used to protect the backup. This field should be set only when
+        /// encryption_type is `CUSTOMER_MANAGED_ENCRYPTION`. Values are of the form
+        /// `projects//locations//keyRings//cryptoKeys/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
+        public virtual string KmsKeyName { get; set; }
+
+        /// <summary>
+        /// Optional. Specifies the KMS configuration for the one or more keys used to protect the backup. Values are of
+        /// the form `projects//locations//keyRings//cryptoKeys/`. KMS keys specified can be in any order. The keys
+        /// referenced by `kms_key_names` must fully cover all regions of the backup's instance configuration. Some
+        /// examples: * For regional (single-region) instance configurations, specify a regional location KMS key. * For
+        /// multi-region instance configurations of type `GOOGLE_MANAGED`, either specify a multi-region location KMS
+        /// key or multiple regional location KMS keys that cover all regions in the instance configuration. * For an
+        /// instance configuration of type `USER_MANAGED`, specify only regional location KMS keys to cover each region
+        /// in the instance configuration. Multi-region location KMS keys aren't supported for `USER_MANAGED` type
+        /// instance configurations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyNames")]
+        public virtual System.Collections.Generic.IList<string> KmsKeyNames { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata type for the operation returned by CopyBackup.</summary>
+    public class CopyBackupMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _cancelTimeRaw;
+
+        private object _cancelTime;
+
+        /// <summary>
+        /// The time at which cancellation of CopyBackup operation was received. Operations.CancelOperation starts
+        /// asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the
+        /// operation, but success is not guaranteed. Clients can use Operations.GetOperation or other methods to check
+        /// whether the cancellation succeeded or whether the operation completed despite cancellation. On successful
+        /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
+        /// with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cancelTime")]
+        public virtual string CancelTimeRaw
+        {
+            get => _cancelTimeRaw;
+            set
+            {
+                _cancelTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _cancelTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CancelTimeDateTimeOffset instead.")]
+        public virtual object CancelTime
+        {
+            get => _cancelTime;
+            set
+            {
+                _cancelTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _cancelTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CancelTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CancelTimeRaw);
+            set => CancelTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The name of the backup being created through the copy operation. Values are of the form
+        /// `projects//instances//backups/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The progress of the CopyBackup operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("progress")]
+        public virtual OperationProgress Progress { get; set; }
+
+        /// <summary>
+        /// The name of the source backup that is being copied. Values are of the form `projects//instances//backups/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceBackup")]
+        public virtual string SourceBackup { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for CopyBackup.</summary>
+    public class CopyBackupRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The id of the backup copy. The `backup_id` appended to `parent` forms the full backup_uri of the
+        /// form `projects//instances//backups/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backupId")]
+        public virtual string BackupId { get; set; }
+
+        /// <summary>
+        /// Optional. The encryption configuration used to encrypt the backup. If this field is not specified, the
+        /// backup will use the same encryption configuration as the source backup by default, namely encryption_type =
+        /// `USE_CONFIG_DEFAULT_OR_BACKUP_ENCRYPTION`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("encryptionConfig")]
+        public virtual CopyBackupEncryptionConfig EncryptionConfig { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>
+        /// Required. The expiration time of the backup in microsecond granularity. The expiration time must be at least
+        /// 6 hours and at most 366 days from the `create_time` of the source backup. Once the `expire_time` has passed,
+        /// the backup is eligible to be automatically deleted by Cloud Spanner to free the resources used by the
+        /// backup.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Required. The source backup to be copied. The source backup needs to be in READY state for it to be copied.
+        /// Once CopyBackup is in progress, the source backup cannot be deleted or cleaned up on expiration until
+        /// CopyBackup is finished. Values are of the form: `projects//instances//backups/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceBackup")]
+        public virtual string SourceBackup { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Encryption configuration for the backup to create.</summary>
+    public class CreateBackupEncryptionConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The encryption type of the backup.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("encryptionType")]
+        public virtual string EncryptionType { get; set; }
+
+        /// <summary>
+        /// Optional. The Cloud KMS key that will be used to protect the backup. This field should be set only when
+        /// encryption_type is `CUSTOMER_MANAGED_ENCRYPTION`. Values are of the form
+        /// `projects//locations//keyRings//cryptoKeys/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
+        public virtual string KmsKeyName { get; set; }
+
+        /// <summary>
+        /// Optional. Specifies the KMS configuration for the one or more keys used to protect the backup. Values are of
+        /// the form `projects//locations//keyRings//cryptoKeys/`. The keys referenced by `kms_key_names` must fully
+        /// cover all regions of the backup's instance configuration. Some examples: * For regional (single-region)
+        /// instance configurations, specify a regional location KMS key. * For multi-region instance configurations of
+        /// type `GOOGLE_MANAGED`, either specify a multi-region location KMS key or multiple regional location KMS keys
+        /// that cover all regions in the instance configuration. * For an instance configuration of type
+        /// `USER_MANAGED`, specify only regional location KMS keys to cover each region in the instance configuration.
+        /// Multi-region location KMS keys aren't supported for `USER_MANAGED` type instance configurations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyNames")]
+        public virtual System.Collections.Generic.IList<string> KmsKeyNames { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Metadata type for the operation returned by CreateBackup.</summary>
     public class CreateBackupMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _cancelTimeRaw;
+
+        private object _cancelTime;
+
         /// <summary>
         /// The time at which cancellation of this operation was received. Operations.CancelOperation starts
         /// asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the
@@ -5195,7 +9523,36 @@ namespace Google.Apis.Spanner.v1.Data
         /// with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cancelTime")]
-        public virtual object CancelTime { get; set; }
+        public virtual string CancelTimeRaw
+        {
+            get => _cancelTimeRaw;
+            set
+            {
+                _cancelTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _cancelTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CancelTimeDateTimeOffset instead.")]
+        public virtual object CancelTime
+        {
+            get => _cancelTime;
+            set
+            {
+                _cancelTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _cancelTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CancelTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CancelTimeRaw);
+            set => CancelTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The name of the database the backup is created from.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("database")]
@@ -5236,6 +9593,10 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("createStatement")]
         public virtual string CreateStatement { get; set; }
 
+        /// <summary>Optional. The dialect of the Cloud Spanner Database.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseDialect")]
+        public virtual string DatabaseDialect { get; set; }
+
         /// <summary>
         /// Optional. The encryption configuration for the database. If this field is not specified, Cloud Spanner will
         /// encrypt/decrypt all data at rest using Google default encryption.
@@ -5251,6 +9612,103 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("extraStatements")]
         public virtual System.Collections.Generic.IList<string> ExtraStatements { get; set; }
 
+        /// <summary>
+        /// Optional. Proto descriptors used by `CREATE/ALTER PROTO BUNDLE` statements in 'extra_statements'. Contains a
+        /// protobuf-serialized
+        /// [`google.protobuf.FileDescriptorSet`](https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/descriptor.proto)
+        /// descriptor set. To generate it, [install](https://grpc.io/docs/protoc-installation/) and run `protoc` with
+        /// --include_imports and --descriptor_set_out. For example, to generate for moon/shot/app.proto, run
+        /// ```
+        /// $protoc --proto_path=/app_path --proto_path=/lib_path \ --include_imports \
+        /// --descriptor_set_out=descriptors.data \ moon/shot/app.proto
+        /// ```
+        /// For more details, see protobuffer [self
+        /// description](https://developers.google.com/protocol-buffers/docs/techniques#self-description).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protoDescriptors")]
+        public virtual string ProtoDescriptors { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata type for the operation returned by CreateInstanceConfig.</summary>
+    public class CreateInstanceConfigMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _cancelTimeRaw;
+
+        private object _cancelTime;
+
+        /// <summary>The time at which this operation was cancelled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cancelTime")]
+        public virtual string CancelTimeRaw
+        {
+            get => _cancelTimeRaw;
+            set
+            {
+                _cancelTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _cancelTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CancelTimeDateTimeOffset instead.")]
+        public virtual object CancelTime
+        {
+            get => _cancelTime;
+            set
+            {
+                _cancelTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _cancelTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CancelTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CancelTimeRaw);
+            set => CancelTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The target instance configuration end state.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceConfig")]
+        public virtual InstanceConfig InstanceConfig { get; set; }
+
+        /// <summary>The progress of the CreateInstanceConfig operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("progress")]
+        public virtual InstanceOperationProgress Progress { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for CreateInstanceConfig.</summary>
+    public class CreateInstanceConfigRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The `InstanceConfig` proto of the configuration to create. `instance_config.name` must be
+        /// `/instanceConfigs/`. `instance_config.base_config` must be a Google-managed configuration name, e.g.
+        /// /instanceConfigs/us-east1, /instanceConfigs/nam3.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceConfig")]
+        public virtual InstanceConfig InstanceConfig { get; set; }
+
+        /// <summary>
+        /// Required. The ID of the instance configuration to create. Valid identifiers are of the form
+        /// `custom-[-a-z0-9]*[a-z0-9]` and must be between 2 and 64 characters in length. The `custom-` prefix is
+        /// required to avoid name conflicts with Google-managed configurations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceConfigId")]
+        public virtual string InstanceConfigId { get; set; }
+
+        /// <summary>
+        /// An option to validate, but not actually execute, a request, and provide the same response.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateOnly")]
+        public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -5258,24 +9716,273 @@ namespace Google.Apis.Spanner.v1.Data
     /// <summary>Metadata type for the operation returned by CreateInstance.</summary>
     public class CreateInstanceMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _cancelTimeRaw;
+
+        private object _cancelTime;
+
         /// <summary>
         /// The time at which this operation was cancelled. If set, this operation is in the process of undoing itself
         /// (which is guaranteed to succeed) and cannot be cancelled again.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cancelTime")]
-        public virtual object CancelTime { get; set; }
+        public virtual string CancelTimeRaw
+        {
+            get => _cancelTimeRaw;
+            set
+            {
+                _cancelTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _cancelTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CancelTimeDateTimeOffset instead.")]
+        public virtual object CancelTime
+        {
+            get => _cancelTime;
+            set
+            {
+                _cancelTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _cancelTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CancelTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CancelTimeRaw);
+            set => CancelTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>The time at which this operation failed or was completed successfully.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The expected fulfillment period of this create operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expectedFulfillmentPeriod")]
+        public virtual string ExpectedFulfillmentPeriod { get; set; }
 
         /// <summary>The instance being created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("instance")]
         public virtual Instance Instance { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time at which the CreateInstance request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata type for the operation returned by CreateInstancePartition.</summary>
+    public class CreateInstancePartitionMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _cancelTimeRaw;
+
+        private object _cancelTime;
+
+        /// <summary>
+        /// The time at which this operation was cancelled. If set, this operation is in the process of undoing itself
+        /// (which is guaranteed to succeed) and cannot be cancelled again.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cancelTime")]
+        public virtual string CancelTimeRaw
+        {
+            get => _cancelTimeRaw;
+            set
+            {
+                _cancelTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _cancelTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CancelTimeDateTimeOffset instead.")]
+        public virtual object CancelTime
+        {
+            get => _cancelTime;
+            set
+            {
+                _cancelTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _cancelTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CancelTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CancelTimeRaw);
+            set => CancelTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>The time at which this operation failed or was completed successfully.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The instance partition being created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instancePartition")]
+        public virtual InstancePartition InstancePartition { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>The time at which the CreateInstancePartition request was received.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for CreateInstancePartition.</summary>
+    public class CreateInstancePartitionRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The instance partition to create. The instance_partition.name may be omitted, but if specified
+        /// must be `/instancePartitions/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instancePartition")]
+        public virtual InstancePartition InstancePartition { get; set; }
+
+        /// <summary>
+        /// Required. The ID of the instance partition to create. Valid identifiers are of the form `a-z*[a-z0-9]` and
+        /// must be between 2 and 64 characters in length.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instancePartitionId")]
+        public virtual string InstancePartitionId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5312,12 +10019,87 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// CrontabSpec can be used to specify the version time and frequency at which the backup is created.
+    /// </summary>
+    public class CrontabSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. Scheduled backups contain an externally consistent copy of the database at the version time
+        /// specified in `schedule_spec.cron_spec`. However, Spanner might not initiate the creation of the scheduled
+        /// backups at that version time. Spanner initiates the creation of scheduled backups within the time window
+        /// bounded by the version_time specified in `schedule_spec.cron_spec` and version_time + `creation_window`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("creationWindow")]
+        public virtual object CreationWindow { get; set; }
+
+        /// <summary>
+        /// Required. Textual representation of the crontab. User can customize the backup frequency and the backup
+        /// version time using the cron expression. The version time must be in UTC timezone. The backup will contain an
+        /// externally consistent copy of the database at the version time. Full backups must be scheduled a minimum of
+        /// 12 hours apart and incremental backups must be scheduled a minimum of 4 hours apart. Examples of valid cron
+        /// specifications: * `0 2/12 * * *` : every 12 hours at (2, 14) hours past midnight in UTC. * `0 2,14 * * *` :
+        /// every 12 hours at (2, 14) hours past midnight in UTC. * `0 */4 * * *` : (incremental backups only) every 4
+        /// hours at (0, 4, 8, 12, 16, 20) hours past midnight in UTC. * `0 2 * * *` : once a day at 2 past midnight in
+        /// UTC. * `0 2 * * 0` : once a week every Sunday at 2 past midnight in UTC. * `0 2 8 * *` : once a month on 8th
+        /// day at 2 past midnight in UTC.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("text")]
+        public virtual string Text { get; set; }
+
+        /// <summary>
+        /// Output only. The time zone of the times in `CrontabSpec.text`. Currently, only UTC is supported.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeZone")]
+        public virtual string TimeZone { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A Cloud Spanner database.</summary>
     public class Database : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. If exists, the time at which the database creation started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. The dialect of the Cloud Spanner Database.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseDialect")]
+        public virtual string DatabaseDialect { get; set; }
 
         /// <summary>
         /// Output only. The read-write region which contains the database's leader replicas. This is the same as the
@@ -5327,6 +10109,10 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("defaultLeader")]
         public virtual string DefaultLeader { get; set; }
 
+        private string _earliestVersionTimeRaw;
+
+        private object _earliestVersionTime;
+
         /// <summary>
         /// Output only. Earliest timestamp at which older versions of the data can be read. This value is continuously
         /// updated by Cloud Spanner and becomes stale the moment it is queried. If you are using this value to recover
@@ -5334,7 +10120,46 @@ namespace Google.Apis.Spanner.v1.Data
         /// initiate the recovery.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("earliestVersionTime")]
-        public virtual object EarliestVersionTime { get; set; }
+        public virtual string EarliestVersionTimeRaw
+        {
+            get => _earliestVersionTimeRaw;
+            set
+            {
+                _earliestVersionTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _earliestVersionTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EarliestVersionTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EarliestVersionTimeDateTimeOffset instead.")]
+        public virtual object EarliestVersionTime
+        {
+            get => _earliestVersionTime;
+            set
+            {
+                _earliestVersionTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _earliestVersionTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="EarliestVersionTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EarliestVersionTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EarliestVersionTimeRaw);
+            set => EarliestVersionTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. Whether drop protection is enabled for this database. Defaults to false, if not set. For more
+        /// details, please see how to [prevent accidental database
+        /// deletion](https://cloud.google.com/spanner/docs/prevent-database-deletion).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableDropProtection")]
+        public virtual System.Nullable<bool> EnableDropProtection { get; set; }
 
         /// <summary>
         /// Output only. For databases that are using customer managed encryption, this field contains the encryption
@@ -5346,10 +10171,10 @@ namespace Google.Apis.Spanner.v1.Data
 
         /// <summary>
         /// Output only. For databases that are using customer managed encryption, this field contains the encryption
-        /// information for the database, such as encryption state and the Cloud KMS key versions that are in use. For
-        /// databases that are using Google default or other types of encryption, this field is empty. This field is
-        /// propagated lazily from the backend. There might be a delay from when a key version is being used and when it
-        /// appears in this field.
+        /// information for the database, such as all Cloud KMS key versions that are in use. The `encryption_status`
+        /// field inside of each `EncryptionInfo` is not populated. For databases that are using Google default or other
+        /// types of encryption, this field is empty. This field is propagated lazily from the backend. There might be a
+        /// delay from when a key version is being used and when it appears in this field.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("encryptionInfo")]
         public virtual System.Collections.Generic.IList<EncryptionInfo> EncryptionInfo { get; set; }
@@ -5361,6 +10186,20 @@ namespace Google.Apis.Spanner.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Output only. Applicable only for databases that use dual-region instance configurations. Contains
+        /// information about the quorum.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("quorumInfo")]
+        public virtual QuorumInfo QuorumInfo { get; set; }
+
+        /// <summary>
+        /// Output only. If true, the database is being updated. If false, there are no ongoing update operations for
+        /// the database.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reconciling")]
+        public virtual System.Nullable<bool> Reconciling { get; set; }
 
         /// <summary>
         /// Output only. Applicable only for restored databases. Contains information about the restore source.
@@ -5379,6 +10218,52 @@ namespace Google.Apis.Spanner.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("versionRetentionPeriod")]
         public virtual string VersionRetentionPeriod { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A Cloud Spanner database role.</summary>
+    public class DatabaseRole : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The name of the database role. Values are of the form
+        /// `projects//instances//databases//databaseRoles/` where `` is as specified in the `CREATE ROLE` DDL
+        /// statement.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Action information extracted from a DDL statement. This proto is used to display the brief info of the DDL
+    /// statement for the operation UpdateDatabaseDdl.
+    /// </summary>
+    public class DdlStatementActionInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The action for the DDL statement, e.g. CREATE, ALTER, DROP, GRANT, etc. This field is a non-empty string.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("action")]
+        public virtual string Action { get; set; }
+
+        /// <summary>
+        /// The entity name(s) being operated on the DDL statement. E.g. 1. For statement "CREATE TABLE t1(...)",
+        /// `entity_names` = ["t1"]. 2. For statement "GRANT ROLE r1, r2 ...", `entity_names` = ["r1", "r2"]. 3. For
+        /// statement "ANALYZE", `entity_names` = [].
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entityNames")]
+        public virtual System.Collections.Generic.IList<string> EntityNames { get; set; }
+
+        /// <summary>
+        /// The entity type for the DDL statement, e.g. TABLE, INDEX, VIEW, etc. This field can be empty string for some
+        /// DDL statement, e.g. for statement "ANALYZE", `entity_type` = "".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entityType")]
+        public virtual string EntityType { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5452,10 +10337,43 @@ namespace Google.Apis.Spanner.v1.Data
     }
 
     /// <summary>
+    /// The DirectedReadOptions can be used to indicate which replicas or regions should be used for non-transactional
+    /// reads or queries. DirectedReadOptions may only be specified for a read-only transaction, otherwise the API will
+    /// return an `INVALID_ARGUMENT` error.
+    /// </summary>
+    public class DirectedReadOptions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Exclude_replicas indicates that specified replicas should be excluded from serving requests. Spanner will
+        /// not route requests to the replicas in this list.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludeReplicas")]
+        public virtual ExcludeReplicas ExcludeReplicas { get; set; }
+
+        /// <summary>
+        /// Include_replicas indicates the order of replicas (as they appear in this list) to process the request. If
+        /// auto_failover_disabled is set to true and all replicas are exhausted without finding a healthy replica,
+        /// Spanner will wait for a replica in the list to become available, requests may fail due to
+        /// `DEADLINE_EXCEEDED` errors.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("includeReplicas")]
+        public virtual IncludeReplicas IncludeReplicas { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Message type for a dual-region quorum. Currently this type has no options.</summary>
+    public class DualRegionQuorum : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5472,6 +10390,19 @@ namespace Google.Apis.Spanner.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
         public virtual string KmsKeyName { get; set; }
+
+        /// <summary>
+        /// Specifies the KMS configuration for one or more keys used to encrypt the database. Values are of the form
+        /// `projects//locations//keyRings//cryptoKeys/`. The keys referenced by `kms_key_names` must fully cover all
+        /// regions of the database's instance configuration. Some examples: * For regional (single-region) instance
+        /// configurations, specify a regional location KMS key. * For multi-region instance configurations of type
+        /// `GOOGLE_MANAGED`, either specify a multi-region location KMS key or multiple regional location KMS keys that
+        /// cover all regions in the instance configuration. * For an instance configuration of type `USER_MANAGED`,
+        /// specify only regional location KMS keys to cover each region in the instance configuration. Multi-region
+        /// location KMS keys aren't supported for `USER_MANAGED` type instance configurations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyNames")]
+        public virtual System.Collections.Generic.IList<string> KmsKeyNames { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5501,9 +10432,32 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// An ExcludeReplicas contains a repeated set of ReplicaSelection that should be excluded from serving requests.
+    /// </summary>
+    public class ExcludeReplicas : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The directed read replica selector.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("replicaSelections")]
+        public virtual System.Collections.Generic.IList<ReplicaSelection> ReplicaSelections { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The request for ExecuteBatchDml.</summary>
     public class ExecuteBatchDmlRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional. If set to true, this request marks the end of the transaction. The transaction should be committed
+        /// or aborted after these statements execute, and attempts to execute any other requests against this
+        /// transaction (including reads and queries) will be rejected. Setting this option may cause some error
+        /// reporting to be deferred until commit time (e.g. validation of unique constraints). Given this, successful
+        /// execution of statements should not be assumed until a subsequent Commit call completes successfully.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastStatements")]
+        public virtual System.Nullable<bool> LastStatements { get; set; }
+
         /// <summary>Common options for this request.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestOptions")]
         public virtual RequestOptions RequestOptions { get; set; }
@@ -5554,6 +10508,14 @@ namespace Google.Apis.Spanner.v1.Data
     public class ExecuteBatchDmlResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Optional. A precommit token will be included if the read-write transaction is on a multiplexed session. The
+        /// precommit token with the highest sequence number from this transaction attempt should be passed to the
+        /// Commit request for this transaction.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("precommitToken")]
+        public virtual MultiplexedSessionPrecommitToken PrecommitToken { get; set; }
+
+        /// <summary>
         /// One ResultSet for each statement in the request that ran successfully, in the same order as the statements
         /// in the request. Each ResultSet does not contain any rows. The ResultSetStats in each ResultSet contain the
         /// number of rows modified by the statement. Only the first ResultSet in the response contains valid
@@ -5576,6 +10538,29 @@ namespace Google.Apis.Spanner.v1.Data
     /// <summary>The request for ExecuteSql and ExecuteStreamingSql.</summary>
     public class ExecuteSqlRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// If this is for a partitioned query and this field is set to `true`, the request is executed with Spanner
+        /// Data Boost independent compute resources. If the field is set to `true` but the request does not set
+        /// `partition_token`, the API returns an `INVALID_ARGUMENT` error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataBoostEnabled")]
+        public virtual System.Nullable<bool> DataBoostEnabled { get; set; }
+
+        /// <summary>Directed read options for this request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("directedReadOptions")]
+        public virtual DirectedReadOptions DirectedReadOptions { get; set; }
+
+        /// <summary>
+        /// Optional. If set to true, this statement marks the end of the transaction. The transaction should be
+        /// committed or aborted after this statement executes, and attempts to execute any other requests against this
+        /// transaction (including reads and queries) will be rejected. For DML statements, setting this option may
+        /// cause some error reporting to be deferred until commit time (e.g. validation of unique constraints). Given
+        /// this, successful execution of a DML statement should not be assumed until a subsequent Commit call completes
+        /// successfully.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastStatement")]
+        public virtual System.Nullable<bool> LastStatement { get; set; }
+
         /// <summary>
         /// It is not always possible for Cloud Spanner to infer the right SQL type from a JSON value. For example,
         /// values of type `BYTES` and values of type `STRING` both appear in params as JSON strings. In these cases,
@@ -5719,9 +10704,124 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Free instance specific metadata that is kept even after an instance has been upgraded for tracking purposes.
+    /// </summary>
+    public class FreeInstanceMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Specifies the expiration behavior of a free instance. The default of ExpireBehavior is
+        /// `REMOVE_AFTER_GRACE_PERIOD`. This can be modified during or after creation, and before expiration.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireBehavior")]
+        public virtual string ExpireBehavior { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>
+        /// Output only. Timestamp after which the instance will either be upgraded or scheduled for deletion after a
+        /// grace period. ExpireBehavior is used to choose between upgrading or scheduling the free instance for
+        /// deletion. This timestamp is set during the creation of a free instance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _upgradeTimeRaw;
+
+        private object _upgradeTime;
+
+        /// <summary>
+        /// Output only. If present, the timestamp at which the free instance was upgraded to a provisioned instance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("upgradeTime")]
+        public virtual string UpgradeTimeRaw
+        {
+            get => _upgradeTimeRaw;
+            set
+            {
+                _upgradeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _upgradeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpgradeTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpgradeTimeDateTimeOffset instead.")]
+        public virtual object UpgradeTime
+        {
+            get => _upgradeTime;
+            set
+            {
+                _upgradeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _upgradeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpgradeTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpgradeTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpgradeTimeRaw);
+            set => UpgradeTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The specification for full backups. A full backup stores the entire contents of the database at a given version
+    /// time.
+    /// </summary>
+    public class FullBackupSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The response for GetDatabaseDdl.</summary>
     public class GetDatabaseDdlResponse : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Proto descriptors stored in the database. Contains a protobuf-serialized
+        /// [google.protobuf.FileDescriptorSet](https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/descriptor.proto).
+        /// For more details, see protobuffer [self
+        /// description](https://developers.google.com/protocol-buffers/docs/techniques#self-description).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protoDescriptors")]
+        public virtual string ProtoDescriptors { get; set; }
+
         /// <summary>
         /// A list of formatted DDL statements defining the schema of the database specified in the request.
         /// </summary>
@@ -5762,6 +10862,57 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// An IncludeReplicas contains a repeated set of ReplicaSelection which indicates the order in which replicas
+    /// should be considered.
+    /// </summary>
+    public class IncludeReplicas : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If true, Spanner will not route requests to a replica outside the include_replicas list when all of the
+        /// specified replicas are unavailable or unhealthy. Default value is `false`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("autoFailoverDisabled")]
+        public virtual System.Nullable<bool> AutoFailoverDisabled { get; set; }
+
+        /// <summary>The directed read replica selector.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("replicaSelections")]
+        public virtual System.Collections.Generic.IList<ReplicaSelection> ReplicaSelections { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The specification for incremental backup chains. An incremental backup stores the delta of changes between a
+    /// previous backup and the database contents at a given version time. An incremental backup chain consists of a
+    /// full backup and zero or more successive incremental backups. The first backup created for an incremental backup
+    /// chain is always a full backup.
+    /// </summary>
+    public class IncrementalBackupSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Recommendation to add new indexes to run queries more efficiently.</summary>
+    public class IndexAdvice : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. DDL statements to add new indexes that will improve the query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ddl")]
+        public virtual System.Collections.Generic.IList<string> Ddl { get; set; }
+
+        /// <summary>
+        /// Optional. Estimated latency improvement factor. For example if the query currently takes 500 ms to run and
+        /// the estimated latency with new indexes is 100 ms this field will be 5.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("improvementFactor")]
+        public virtual System.Nullable<double> ImprovementFactor { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A message representing a (sparse) collection of hot keys for specific key buckets.</summary>
     public class IndexedHotKey : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5792,11 +10943,67 @@ namespace Google.Apis.Spanner.v1.Data
     public class Instance : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Optional. The autoscaling configuration. Autoscaling is enabled if this field is set. When autoscaling is
+        /// enabled, node_count and processing_units are treated as OUTPUT_ONLY fields and reflect the current compute
+        /// capacity allocated to the instance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("autoscalingConfig")]
+        public virtual AutoscalingConfig AutoscalingConfig { get; set; }
+
+        /// <summary>
         /// Required. The name of the instance's configuration. Values are of the form `projects//instanceConfigs/`. See
         /// also InstanceConfig and ListInstanceConfigs.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("config")]
         public virtual string Config { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The time at which the instance was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. Controls the default backup schedule behavior for new databases within the instance. By default, a
+        /// backup schedule is created automatically when a new database is created in a new instance. Note that the
+        /// `AUTOMATIC` value isn't permitted for free instances, as backups and backup schedules aren't supported for
+        /// free instances. In the `GetInstance` or `ListInstances` response, if the value of
+        /// `default_backup_schedule_type` isn't set, or set to `NONE`, Spanner doesn't create a default backup schedule
+        /// for new databases in the instance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("defaultBackupScheduleType")]
+        public virtual string DefaultBackupScheduleType { get; set; }
 
         /// <summary>
         /// Required. The descriptive name for this instance as it appears in UIs. Must be unique per project and
@@ -5805,9 +11012,21 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
+        /// <summary>Optional. The `Edition` of the current instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("edition")]
+        public virtual string Edition { get; set; }
+
         /// <summary>Deprecated. This field is not populated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endpointUris")]
         public virtual System.Collections.Generic.IList<string> EndpointUris { get; set; }
+
+        /// <summary>Free instance metadata. Only populated for free instances.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("freeInstanceMetadata")]
+        public virtual FreeInstanceMetadata FreeInstanceMetadata { get; set; }
+
+        /// <summary>The `InstanceType` of the current instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceType")]
+        public virtual string InstanceType { get; set; }
 
         /// <summary>
         /// Cloud Labels are a flexible and lightweight mechanism for organizing cloud resources into groups that
@@ -5835,22 +11054,35 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The number of nodes allocated to this instance. At most one of either node_count or processing_units should
-        /// be present in the message. This may be zero in API responses for instances that are not yet in state
-        /// `READY`. See [the documentation](https://cloud.google.com/spanner/docs/compute-capacity) for more
-        /// information about nodes and processing units.
+        /// The number of nodes allocated to this instance. At most, one of either `node_count` or `processing_units`
+        /// should be present in the message. Users can set the `node_count` field to specify the target number of nodes
+        /// allocated to the instance. If autoscaling is enabled, `node_count` is treated as an `OUTPUT_ONLY` field and
+        /// reflects the current number of nodes allocated to the instance. This might be zero in API responses for
+        /// instances that are not yet in the `READY` state. For more information, see [Compute capacity, nodes, and
+        /// processing units](https://cloud.google.com/spanner/docs/compute-capacity).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nodeCount")]
         public virtual System.Nullable<int> NodeCount { get; set; }
 
         /// <summary>
-        /// The number of processing units allocated to this instance. At most one of processing_units or node_count
-        /// should be present in the message. This may be zero in API responses for instances that are not yet in state
-        /// `READY`. See [the documentation](https://cloud.google.com/spanner/docs/compute-capacity) for more
-        /// information about nodes and processing units.
+        /// The number of processing units allocated to this instance. At most, one of either `processing_units` or
+        /// `node_count` should be present in the message. Users can set the `processing_units` field to specify the
+        /// target number of processing units allocated to the instance. If autoscaling is enabled, `processing_units`
+        /// is treated as an `OUTPUT_ONLY` field and reflects the current number of processing units allocated to the
+        /// instance. This might be zero in API responses for instances that are not yet in the `READY` state. For more
+        /// information, see [Compute capacity, nodes and processing
+        /// units](https://cloud.google.com/spanner/docs/compute-capacity).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("processingUnits")]
         public virtual System.Nullable<int> ProcessingUnits { get; set; }
+
+        /// <summary>
+        /// Output only. Lists the compute capacity per ReplicaSelection. A replica selection identifies a set of
+        /// replicas with common properties. Replicas identified by a ReplicaSelection are scaled with the same compute
+        /// capacity.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("replicaComputeCapacity")]
+        public virtual System.Collections.Generic.IList<ReplicaComputeCapacity> ReplicaComputeCapacity { get; set; }
 
         /// <summary>
         /// Output only. The current instance state. For CreateInstance, the state must be either omitted or set to
@@ -5858,6 +11090,43 @@ namespace Google.Apis.Spanner.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The time at which the instance was most recently updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5869,9 +11138,58 @@ namespace Google.Apis.Spanner.v1.Data
     /// </summary>
     public class InstanceConfig : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Base configuration name, e.g. projects//instanceConfigs/nam3, based on which this configuration is created.
+        /// Only set for user-managed configurations. `base_config` must refer to a configuration of type
+        /// `GOOGLE_MANAGED` in the same project as this configuration.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("baseConfig")]
+        public virtual string BaseConfig { get; set; }
+
+        /// <summary>
+        /// Output only. Whether this instance configuration is a Google-managed or user-managed configuration.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("configType")]
+        public virtual string ConfigType { get; set; }
+
         /// <summary>The name of this instance configuration as it appears in UIs.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// etag is used for optimistic concurrency control as a way to help prevent simultaneous updates of a instance
+        /// configuration from overwriting each other. It is strongly suggested that systems make use of the etag in the
+        /// read-modify-write cycle to perform instance configuration updates in order to avoid race conditions: An etag
+        /// is returned in the response which contains instance configurations, and systems are expected to put that
+        /// etag in the request to update instance configuration to ensure that their change is applied to the same
+        /// version of the instance configuration. If no etag is provided in the call to update the instance
+        /// configuration, then the existing instance configuration is overwritten blindly.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Output only. Describes whether free instances are available to be created in this instance configuration.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("freeInstanceAvailability")]
+        public virtual string FreeInstanceAvailability { get; set; }
+
+        /// <summary>
+        /// Cloud Labels are a flexible and lightweight mechanism for organizing cloud resources into groups that
+        /// reflect a customer's organizational needs and deployment strategies. Cloud Labels can be used to filter
+        /// collections of resources. They can be used to control how resource metrics are aggregated. And they can be
+        /// used as arguments to policy management rules (e.g. route, firewall, load balancing, etc.). * Label keys must
+        /// be between 1 and 63 characters long and must conform to the following regular expression: `a-z{0,62}`. *
+        /// Label values must be between 0 and 63 characters long and must conform to the regular expression
+        /// `[a-z0-9_-]{0,63}`. * No more than 64 labels can be associated with a given resource. See
+        /// https://goo.gl/xmQnxf for more information on and examples of labels. If you plan to use labels in your own
+        /// code, please note that additional characters may be allowed in the future. Therefore, you are advised to use
+        /// an internal label representation, such as JSON, which doesn't rely upon specific characters being
+        /// disallowed. For example, representing labels as the string: name + "_" + value would prove problematic if we
+        /// were to allow "_" in a future release.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
         /// <summary>
         /// Allowed values of the "default_leader" schema option for databases in instances that use this instance
@@ -5882,15 +11200,301 @@ namespace Google.Apis.Spanner.v1.Data
 
         /// <summary>
         /// A unique identifier for the instance configuration. Values are of the form `projects//instanceConfigs/a-z*`.
+        /// User instance configuration must start with `custom-`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The geographic placement of nodes in this instance configuration and their replication properties.
+        /// Output only. The available optional replicas to choose from for user-managed configurations. Populated for
+        /// Google-managed configurations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("optionalReplicas")]
+        public virtual System.Collections.Generic.IList<ReplicaInfo> OptionalReplicas { get; set; }
+
+        /// <summary>Output only. The `QuorumType` of the instance configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("quorumType")]
+        public virtual string QuorumType { get; set; }
+
+        /// <summary>
+        /// Output only. If true, the instance configuration is being created or updated. If false, there are no ongoing
+        /// operations for the instance configuration.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reconciling")]
+        public virtual System.Nullable<bool> Reconciling { get; set; }
+
+        /// <summary>
+        /// The geographic placement of nodes in this instance configuration and their replication properties. To create
+        /// user-managed configurations, input `replicas` must include all replicas in `replicas` of the `base_config`
+        /// and include one or more replicas in the `optional_replicas` of the `base_config`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("replicas")]
         public virtual System.Collections.Generic.IList<ReplicaInfo> Replicas { get; set; }
+
+        /// <summary>
+        /// Output only. The current instance configuration state. Applicable only for `USER_MANAGED` configurations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>Output only. The storage limit in bytes per processing unit.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("storageLimitPerProcessingUnit")]
+        public virtual System.Nullable<long> StorageLimitPerProcessingUnit { get; set; }
+    }
+
+    /// <summary>
+    /// Encapsulates progress related information for a Cloud Spanner long running instance operations.
+    /// </summary>
+    public class InstanceOperationProgress : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>If set, the time at which this operation failed or was completed successfully.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Percent completion of the operation. Values are between 0 and 100 inclusive.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("progressPercent")]
+        public virtual System.Nullable<int> ProgressPercent { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>Time the request was received.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An isolated set of Cloud Spanner resources that databases can define placements on.</summary>
+    public class InstancePartition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The name of the instance partition's configuration. Values are of the form
+        /// `projects//instanceConfigs/`. See also InstanceConfig and ListInstanceConfigs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("config")]
+        public virtual string Config { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The time at which the instance partition was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Required. The descriptive name for this instance partition as it appears in UIs. Must be unique per project
+        /// and between 4 and 30 characters in length.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// Used for optimistic concurrency control as a way to help prevent simultaneous updates of a instance
+        /// partition from overwriting each other. It is strongly suggested that systems make use of the etag in the
+        /// read-modify-write cycle to perform instance partition updates in order to avoid race conditions: An etag is
+        /// returned in the response which contains instance partitions, and systems are expected to put that etag in
+        /// the request to update instance partitions to ensure that their change will be applied to the same version of
+        /// the instance partition. If no etag is provided in the call to update instance partition, then the existing
+        /// instance partition is overwritten blindly.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Required. A unique identifier for the instance partition. Values are of the form
+        /// `projects//instances//instancePartitions/a-z*[a-z0-9]`. The final segment of the name must be between 2 and
+        /// 64 characters in length. An instance partition's name cannot be changed after the instance partition is
+        /// created.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// The number of nodes allocated to this instance partition. Users can set the `node_count` field to specify
+        /// the target number of nodes allocated to the instance partition. This may be zero in API responses for
+        /// instance partitions that are not yet in state `READY`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nodeCount")]
+        public virtual System.Nullable<int> NodeCount { get; set; }
+
+        /// <summary>
+        /// The number of processing units allocated to this instance partition. Users can set the `processing_units`
+        /// field to specify the target number of processing units allocated to the instance partition. This might be
+        /// zero in API responses for instance partitions that are not yet in the `READY` state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("processingUnits")]
+        public virtual System.Nullable<int> ProcessingUnits { get; set; }
+
+        /// <summary>
+        /// Output only. Deprecated: This field is not populated. Output only. The names of the backups that reference
+        /// this instance partition. Referencing backups should share the parent instance. The existence of any
+        /// referencing backup prevents the instance partition from being deleted.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("referencingBackups")]
+        public virtual System.Collections.Generic.IList<string> ReferencingBackups { get; set; }
+
+        /// <summary>
+        /// Output only. The names of the databases that reference this instance partition. Referencing databases should
+        /// share the parent instance. The existence of any referencing database prevents the instance partition from
+        /// being deleted.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("referencingDatabases")]
+        public virtual System.Collections.Generic.IList<string> ReferencingDatabases { get; set; }
+
+        /// <summary>Output only. The current instance partition state.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The time at which the instance partition was most recently updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+    }
+
+    /// <summary>ReplicaSelection identifies replicas with common properties.</summary>
+    public class InstanceReplicaSelection : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Name of the location of the replicas (e.g., "us-central1").</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A split key.</summary>
+    public class Key : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The column values making up the split key.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyParts")]
+        public virtual System.Collections.Generic.IList<object> KeyParts { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6060,13 +11664,30 @@ namespace Google.Apis.Spanner.v1.Data
 
         /// <summary>
         /// The list of matching backup long-running operations. Each operation's name will be prefixed by the backup's
-        /// name and the operation's metadata will be of type CreateBackupMetadata. Operations returned include those
-        /// that are pending or have completed/failed/canceled within the last 7 days. Operations returned are ordered
-        /// by `operation.metadata.value.progress.start_time` in descending order starting from the most recently
-        /// started operation.
+        /// name. The operation's metadata field type `metadata.type_url` describes the type of the metadata. Operations
+        /// returned include those that are pending or have completed/failed/canceled within the last 7 days. Operations
+        /// returned are ordered by `operation.metadata.value.progress.start_time` in descending order starting from the
+        /// most recently started operation.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("operations")]
         public virtual System.Collections.Generic.IList<Operation> Operations { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response for ListBackupSchedules.</summary>
+    public class ListBackupSchedulesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of backup schedules for a database.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backupSchedules")]
+        public virtual System.Collections.Generic.IList<BackupSchedule> BackupSchedules { get; set; }
+
+        /// <summary>
+        /// `next_page_token` can be sent in a subsequent ListBackupSchedules call to fetch more of the schedules.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6113,6 +11734,23 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The response for ListDatabaseRoles.</summary>
+    public class ListDatabaseRolesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Database roles that matched the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseRoles")]
+        public virtual System.Collections.Generic.IList<DatabaseRole> DatabaseRoles { get; set; }
+
+        /// <summary>
+        /// `next_page_token` can be sent in a subsequent ListDatabaseRoles call to fetch more of the matching roles.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The response for ListDatabases.</summary>
     public class ListDatabasesResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6125,6 +11763,28 @@ namespace Google.Apis.Spanner.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response for ListInstanceConfigOperations.</summary>
+    public class ListInstanceConfigOperationsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// `next_page_token` can be sent in a subsequent ListInstanceConfigOperations call to fetch more of the
+        /// matching metadata.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>
+        /// The list of matching instance configuration long-running operations. Each operation's name will be prefixed
+        /// by the name of the instance configuration. The operation's metadata field type `metadata.type_url` describes
+        /// the type of the metadata.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("operations")]
+        public virtual System.Collections.Generic.IList<Operation> Operations { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6143,6 +11803,60 @@ namespace Google.Apis.Spanner.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response for ListInstancePartitionOperations.</summary>
+    public class ListInstancePartitionOperationsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// `next_page_token` can be sent in a subsequent ListInstancePartitionOperations call to fetch more of the
+        /// matching metadata.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>
+        /// The list of matching instance partition long-running operations. Each operation's name will be prefixed by
+        /// the instance partition's name. The operation's metadata field type `metadata.type_url` describes the type of
+        /// the metadata.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("operations")]
+        public virtual System.Collections.Generic.IList<Operation> Operations { get; set; }
+
+        /// <summary>
+        /// The list of unreachable instance partitions. It includes the names of instance partitions whose operation
+        /// metadata could not be retrieved within instance_partition_deadline.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachableInstancePartitions")]
+        public virtual System.Collections.Generic.IList<string> UnreachableInstancePartitions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response for ListInstancePartitions.</summary>
+    public class ListInstancePartitionsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of requested instancePartitions.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instancePartitions")]
+        public virtual System.Collections.Generic.IList<InstancePartition> InstancePartitions { get; set; }
+
+        /// <summary>
+        /// `next_page_token` can be sent in a subsequent ListInstancePartitions call to fetch more of the matching
+        /// instance partitions.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>
+        /// The list of unreachable instances or instance partitions. It includes the names of instances or instance
+        /// partitions whose metadata could not be retrieved within instance_partition_deadline.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6339,6 +12053,42 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The request for MoveInstance.</summary>
+    public class MoveInstanceRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The target instance configuration where to move the instance. Values are of the form
+        /// `projects//instanceConfigs/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetConfig")]
+        public virtual string TargetConfig { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// When a read-write transaction is executed on a multiplexed session, this precommit token is sent back to the
+    /// client as a part of the [Transaction] message in the BeginTransaction response and also as a part of the
+    /// [ResultSet] and [PartialResultSet] responses.
+    /// </summary>
+    public class MultiplexedSessionPrecommitToken : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Opaque precommit token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("precommitToken")]
+        public virtual string PrecommitToken { get; set; }
+
+        /// <summary>
+        /// An incrementing seq number is generated on every precommit token that is returned. Clients should remember
+        /// the precommit token with the highest sequence number from the current transaction attempt.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("seqNum")]
+        public virtual System.Nullable<int> SeqNum { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A modification to one or more Cloud Spanner rows. Mutations can be applied to a Cloud Spanner database by
     /// sending them in a Commit call.
@@ -6386,6 +12136,20 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// A group of mutations to be committed together. Related mutations should be placed in a group. For example, two
+    /// mutations inserting rows with the same primary key prefix in both parent and child tables are related.
+    /// </summary>
+    public class MutationGroup : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The mutations in this group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mutations")]
+        public virtual System.Collections.Generic.IList<Mutation> Mutations { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>This resource represents a long-running operation that is the result of a network API call.</summary>
     public class Operation : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6416,8 +12180,8 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -6432,17 +12196,83 @@ namespace Google.Apis.Spanner.v1.Data
     /// <summary>Encapsulates progress related information for a Cloud Spanner long running operation.</summary>
     public class OperationProgress : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>If set, the time at which this operation failed or was completed successfully.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Percent completion of the operation. Values are between 0 and 100 inclusive.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("progressPercent")]
         public virtual System.Nullable<int> ProgressPercent { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Time the request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6487,6 +12317,14 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual ResultSetMetadata Metadata { get; set; }
 
         /// <summary>
+        /// Optional. A precommit token will be included if the read-write transaction is on a multiplexed session. The
+        /// precommit token with the highest sequence number from this transaction attempt should be passed to the
+        /// Commit request for this transaction.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("precommitToken")]
+        public virtual MultiplexedSessionPrecommitToken PrecommitToken { get; set; }
+
+        /// <summary>
         /// Streaming calls might be interrupted for a variety of reasons, such as TCP connection loss. If this occurs,
         /// the stream of results can be resumed by re-sending the original request and including `resume_token`. Note
         /// that executing any other transaction in the same session invalidates the token.
@@ -6523,10 +12361,12 @@ namespace Google.Apis.Spanner.v1.Data
         /// objects containing lists of strings. {"a": ["1"]}, {"a": ["2"]} =&amp;gt; {"a": ["12"]} For a more complete
         /// example, suppose a streaming SQL query is yielding a result set whose rows contain a single string field.
         /// The following `PartialResultSet`s might be yielded: { "metadata": { ... } "values": ["Hello", "W"]
-        /// "chunked_value": true "resume_token": "Af65..." } { "values": ["orl"] "chunked_value": true "resume_token":
-        /// "Bqp2..." } { "values": ["d"] "resume_token": "Zx1B..." } This sequence of `PartialResultSet`s encodes two
-        /// rows, one containing the field value `"Hello"`, and a second containing the field value `"World" = "W" +
-        /// "orl" + "d"`.
+        /// "chunked_value": true "resume_token": "Af65..." } { "values": ["orl"] "chunked_value": true } { "values":
+        /// ["d"] "resume_token": "Zx1B..." } This sequence of `PartialResultSet`s encodes two rows, one containing the
+        /// field value `"Hello"`, and a second containing the field value `"World" = "W" + "orl" + "d"`. Not all
+        /// `PartialResultSet`s contain a `resume_token`. Execution can only be resumed from a previously yielded
+        /// `resume_token`. For the above sequence of `PartialResultSet`s, resuming the query with `"resume_token":
+        /// "Af65..."` will yield results from the `PartialResultSet` with value `["orl"]`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("values")]
         public virtual System.Collections.Generic.IList<object> Values { get; set; }
@@ -6600,12 +12440,13 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual PartitionOptions PartitionOptions { get; set; }
 
         /// <summary>
-        /// Required. The query request to generate partitions for. The request will fail if the query is not root
-        /// partitionable. The query plan of a root partitionable query has a single distributed union operator. A
-        /// distributed union operator conceptually divides one or more tables into multiple splits, remotely evaluates
-        /// a subquery independently on each split, and then unions all results. This must not contain DML commands,
-        /// such as INSERT, UPDATE, or DELETE. Use ExecuteStreamingSql with a PartitionedDml transaction for large,
-        /// partition-friendly DML operations.
+        /// Required. The query request to generate partitions for. The request fails if the query is not root
+        /// partitionable. For a query to be root partitionable, it needs to satisfy a few conditions. For example, if
+        /// the query execution plan contains a distributed union operator, then it must be the first operator in the
+        /// plan. For more information about other conditions, see [Read data in
+        /// parallel](https://cloud.google.com/spanner/docs/reads#read_data_in_parallel). The query request must not
+        /// contain DML commands, such as `INSERT`, `UPDATE`, or `DELETE`. Use `ExecuteStreamingSql` with a
+        /// PartitionedDml transaction for large, partition-friendly DML operations.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sql")]
         public virtual string Sql { get; set; }
@@ -6739,18 +12580,26 @@ namespace Google.Apis.Spanner.v1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6827,6 +12676,20 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Output of query advisor analysis.</summary>
+    public class QueryAdvisorResult : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Index Recommendation for a query. This is an optional field and the recommendation will only be
+        /// available when the recommendation guarantees significant improvement in query performance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("indexAdvice")]
+        public virtual System.Collections.Generic.IList<IndexAdvice> IndexAdvice { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Query optimizer configuration.</summary>
     public class QueryOptions : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6836,7 +12699,11 @@ namespace Google.Apis.Spanner.v1.Data
         /// Spanner to use the latest generated statistics package. If not specified, Cloud Spanner uses the statistics
         /// package set at the database level options, or the latest package if the database option is not set. The
         /// statistics package requested by the query has to be exempt from garbage collection. This can be achieved
-        /// with the following DDL statement: ``` ALTER STATISTICS SET OPTIONS (allow_gc=false) ``` The list of
+        /// with the following DDL statement:
+        /// ```
+        /// ALTER STATISTICS SET OPTIONS (allow_gc=false)
+        /// ```
+        /// The list of
         /// available statistics packages can be queried from `INFORMATION_SCHEMA.SPANNER_STATISTICS`. Executing a SQL
         /// statement with an invalid optimizer statistics package or with a statistics package that allows garbage
         /// collection fails with an `INVALID_ARGUMENT` error.
@@ -6872,6 +12739,88 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("planNodes")]
         public virtual System.Collections.Generic.IList<PlanNode> PlanNodes { get; set; }
 
+        /// <summary>
+        /// Optional. The advise/recommendations for a query. Currently this field will be serving index recommendations
+        /// for a query.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("queryAdvice")]
+        public virtual QueryAdvisorResult QueryAdvice { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information about the dual-region quorum.</summary>
+    public class QuorumInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. The etag is used for optimistic concurrency control as a way to help prevent simultaneous
+        /// `ChangeQuorum` requests that might create a race condition.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>Output only. Whether this `ChangeQuorum` is Google or User initiated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("initiator")]
+        public virtual string Initiator { get; set; }
+
+        /// <summary>
+        /// Output only. The type of this quorum. See QuorumType for more information about quorum type specifications.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("quorumType")]
+        public virtual QuorumType QuorumType { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>Output only. The timestamp when the request was triggered.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+    }
+
+    /// <summary>
+    /// Information about the database quorum type. This only applies to dual-region instance configs.
+    /// </summary>
+    public class QuorumType : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Dual-region quorum type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dualRegion")]
+        public virtual DualRegionQuorum DualRegion { get; set; }
+
+        /// <summary>Single-region quorum type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("singleRegion")]
+        public virtual SingleRegionQuorum SingleRegion { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -6900,6 +12849,10 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("maxStaleness")]
         public virtual object MaxStaleness { get; set; }
 
+        private string _minReadTimestampRaw;
+
+        private object _minReadTimestamp;
+
         /// <summary>
         /// Executes all reads at a timestamp &amp;gt;= `min_read_timestamp`. This is useful for requesting fresher data
         /// than some previous read, or data that is fresh enough to observe the effects of some previously committed
@@ -6908,7 +12861,42 @@ namespace Google.Apis.Spanner.v1.Data
         /// `"2014-10-02T15:01:23.045123456Z"`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minReadTimestamp")]
-        public virtual object MinReadTimestamp { get; set; }
+        public virtual string MinReadTimestampRaw
+        {
+            get => _minReadTimestampRaw;
+            set
+            {
+                _minReadTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _minReadTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="MinReadTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use MinReadTimestampDateTimeOffset instead.")]
+        public virtual object MinReadTimestamp
+        {
+            get => _minReadTimestamp;
+            set
+            {
+                _minReadTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _minReadTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="MinReadTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? MinReadTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(MinReadTimestampRaw);
+            set => MinReadTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _readTimestampRaw;
+
+        private object _readTimestamp;
 
         /// <summary>
         /// Executes all reads at the given timestamp. Unlike other modes, reads at a specific timestamp are repeatable;
@@ -6919,7 +12907,36 @@ namespace Google.Apis.Spanner.v1.Data
         /// `"2014-10-02T15:01:23.045123456Z"`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("readTimestamp")]
-        public virtual object ReadTimestamp { get; set; }
+        public virtual string ReadTimestampRaw
+        {
+            get => _readTimestampRaw;
+            set
+            {
+                _readTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _readTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ReadTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReadTimestampDateTimeOffset instead.")]
+        public virtual object ReadTimestamp
+        {
+            get => _readTimestamp;
+            set
+            {
+                _readTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _readTimestamp = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ReadTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ReadTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReadTimestampRaw);
+            set => ReadTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// If true, the Cloud Spanner-selected read timestamp is included in the Transaction message that describes the
@@ -6942,6 +12959,18 @@ namespace Google.Apis.Spanner.v1.Data
         /// <summary>Required. The columns of table to be returned for each row matching this request.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("columns")]
         public virtual System.Collections.Generic.IList<string> Columns { get; set; }
+
+        /// <summary>
+        /// If this is for a partitioned read and this field is set to `true`, the request is executed with Spanner Data
+        /// Boost independent compute resources. If the field is set to `true` but the request does not set
+        /// `partition_token`, the API returns an `INVALID_ARGUMENT` error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataBoostEnabled")]
+        public virtual System.Nullable<bool> DataBoostEnabled { get; set; }
+
+        /// <summary>Directed read options for this request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("directedReadOptions")]
+        public virtual DirectedReadOptions DirectedReadOptions { get; set; }
 
         /// <summary>
         /// If non-empty, the name of an index on table. This index is used instead of the table primary key when
@@ -6967,6 +12996,19 @@ namespace Google.Apis.Spanner.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("limit")]
         public virtual System.Nullable<long> Limit { get; set; }
+
+        /// <summary>Optional. Lock Hint for the request, it can only be used with read-write transactions.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lockHint")]
+        public virtual string LockHint { get; set; }
+
+        /// <summary>
+        /// Optional. Order for the returned rows. By default, Spanner will return result rows in primary key order
+        /// except for PartitionRead requests. For applications that do not require rows to be returned in primary key
+        /// (`ORDER_BY_PRIMARY_KEY`) order, setting `ORDER_BY_NO_ORDER` option allows Spanner to optimize row retrieval,
+        /// resulting in lower latencies in certain cases (e.g. bulk point lookups).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("orderBy")]
+        public virtual string OrderBy { get; set; }
 
         /// <summary>
         /// If present, results will be restricted to the specified partition previously created using PartitionRead().
@@ -7008,6 +13050,48 @@ namespace Google.Apis.Spanner.v1.Data
     /// </summary>
     public class ReadWrite : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional. Clients should pass the transaction ID of the previous transaction attempt that was aborted if
+        /// this transaction is being executed on a multiplexed session.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("multiplexedSessionPreviousTransactionId")]
+        public virtual string MultiplexedSessionPreviousTransactionId { get; set; }
+
+        /// <summary>Read lock mode for the transaction.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("readLockMode")]
+        public virtual string ReadLockMode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// ReplicaComputeCapacity describes the amount of server resources that are allocated to each replica identified by
+    /// the replica selection.
+    /// </summary>
+    public class ReplicaComputeCapacity : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The number of nodes allocated to each replica. This may be zero in API responses for instances that are not
+        /// yet in state `READY`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nodeCount")]
+        public virtual System.Nullable<int> NodeCount { get; set; }
+
+        /// <summary>
+        /// The number of processing units allocated to each replica. This may be zero in API responses for instances
+        /// that are not yet in state `READY`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("processingUnits")]
+        public virtual System.Nullable<int> ProcessingUnits { get; set; }
+
+        /// <summary>
+        /// Required. Identifies replicas by specified properties. All replicas in the selection have the same amount of
+        /// compute capacity.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("replicaSelection")]
+        public virtual InstanceReplicaSelection ReplicaSelection { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -7022,7 +13106,30 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("defaultLeaderLocation")]
         public virtual System.Nullable<bool> DefaultLeaderLocation { get; set; }
 
-        /// <summary>The location of the serving resources, e.g. "us-central1".</summary>
+        /// <summary>The location of the serving resources, e.g., "us-central1".</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>The type of replica.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The directed read replica selector. Callers must provide one or more of the following fields for replica
+    /// selection: * `location` - The location must be one of the regions within the multi-region configuration of your
+    /// database. * `type` - The type of the replica. Some examples of using replica_selectors are: *
+    /// `location:us-east1` --&amp;gt; The "us-east1" replica(s) of any available type will be used to process the
+    /// request. * `type:READ_ONLY` --&amp;gt; The "READ_ONLY" type replica(s) in nearest available location will be
+    /// used to process the request. * `location:us-east1 type:READ_ONLY` --&amp;gt; The "READ_ONLY" type replica(s) in
+    /// location "us-east1" will be used to process the request.
+    /// </summary>
+    public class ReplicaSelection : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The location or region of the serving requests, e.g. "us-east1".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("location")]
         public virtual string Location { get; set; }
 
@@ -7082,6 +13189,19 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
         public virtual string KmsKeyName { get; set; }
 
+        /// <summary>
+        /// Optional. Specifies the KMS configuration for one or more keys used to encrypt the database. Values have the
+        /// form `projects//locations//keyRings//cryptoKeys/`. The keys referenced by `kms_key_names` must fully cover
+        /// all regions of the database's instance configuration. Some examples: * For regional (single-region) instance
+        /// configurations, specify a regional location KMS key. * For multi-region instance configurations of type
+        /// `GOOGLE_MANAGED`, either specify a multi-region location KMS key or multiple regional location KMS keys that
+        /// cover all regions in the instance configuration. * For an instance configuration of type `USER_MANAGED`,
+        /// specify only regional location KMS keys to cover each region in the instance configuration. Multi-region
+        /// location KMS keys aren't supported for `USER_MANAGED` type instance configurations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyNames")]
+        public virtual System.Collections.Generic.IList<string> KmsKeyNames { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -7093,6 +13213,10 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("backupInfo")]
         public virtual BackupInfo BackupInfo { get; set; }
 
+        private string _cancelTimeRaw;
+
+        private object _cancelTime;
+
         /// <summary>
         /// The time at which cancellation of this operation was received. Operations.CancelOperation starts
         /// asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the
@@ -7102,7 +13226,36 @@ namespace Google.Apis.Spanner.v1.Data
         /// with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cancelTime")]
-        public virtual object CancelTime { get; set; }
+        public virtual string CancelTimeRaw
+        {
+            get => _cancelTimeRaw;
+            set
+            {
+                _cancelTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _cancelTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CancelTimeDateTimeOffset instead.")]
+        public virtual object CancelTime
+        {
+            get => _cancelTime;
+            set
+            {
+                _cancelTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _cancelTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CancelTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CancelTimeRaw);
+            set => CancelTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Name of the database being created and restored to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -7187,6 +13340,14 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual ResultSetMetadata Metadata { get; set; }
 
         /// <summary>
+        /// Optional. A precommit token will be included if the read-write transaction is on a multiplexed session. The
+        /// precommit token with the highest sequence number from this transaction attempt should be passed to the
+        /// Commit request for this transaction.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("precommitToken")]
+        public virtual MultiplexedSessionPrecommitToken PrecommitToken { get; set; }
+
+        /// <summary>
         /// Each element in `rows` is a row whose format is defined by metadata.row_type. The ith element in each row
         /// matches the ith field in metadata.row_type. Elements are encoded based on type as described here.
         /// </summary>
@@ -7223,6 +13384,16 @@ namespace Google.Apis.Spanner.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("transaction")]
         public virtual Transaction Transaction { get; set; }
+
+        /// <summary>
+        /// A SQL query can be parameterized. In PLAN mode, these parameters can be undeclared. This indicates the field
+        /// names and types for those undeclared parameters in the SQL query. For example, a SQL query like `"SELECT *
+        /// FROM Users where UserId = @userId and UserName = @userName "` could return a `undeclared_parameters` value
+        /// like: "fields": [ { "name": "UserId", "type": { "code": "INT64" } }, { "name": "UserName", "type": { "code":
+        /// "STRING" } }, ]
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("undeclaredParameters")]
+        public virtual StructType UndeclaredParameters { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7275,9 +13446,42 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("details")]
         public virtual System.Collections.Generic.IDictionary<string, object> Details { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The upper bound for when the scan is defined.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The unique name of the scan, specific to the Database service implementing this interface.
@@ -7291,11 +13495,44 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("scanData")]
         public virtual ScanData ScanData { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>
         /// A range of time (inclusive) for when the scan is defined. The lower bound for when the scan is defined.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7313,16 +13550,82 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("data")]
         public virtual VisualizationData Data { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The upper bound for when the contained data is defined.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>
         /// A range of time (inclusive) for when the contained data is defined. The lower bound for when the contained
         /// data is defined.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7331,16 +13634,88 @@ namespace Google.Apis.Spanner.v1.Data
     /// <summary>A session in the Cloud Spanner API.</summary>
     public class Session : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _approximateLastUseTimeRaw;
+
+        private object _approximateLastUseTime;
+
         /// <summary>
         /// Output only. The approximate timestamp when the session is last used. It is typically earlier than the
         /// actual last use time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("approximateLastUseTime")]
-        public virtual object ApproximateLastUseTime { get; set; }
+        public virtual string ApproximateLastUseTimeRaw
+        {
+            get => _approximateLastUseTimeRaw;
+            set
+            {
+                _approximateLastUseTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _approximateLastUseTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ApproximateLastUseTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ApproximateLastUseTimeDateTimeOffset instead.")]
+        public virtual object ApproximateLastUseTime
+        {
+            get => _approximateLastUseTime;
+            set
+            {
+                _approximateLastUseTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _approximateLastUseTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ApproximateLastUseTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ApproximateLastUseTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ApproximateLastUseTimeRaw);
+            set => ApproximateLastUseTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
 
         /// <summary>Output only. The timestamp when the session is created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The database role which created this session.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("creatorRole")]
+        public virtual string CreatorRole { get; set; }
 
         /// <summary>
         /// The labels for the session. * Label keys must be between 1 and 63 characters long and must conform to the
@@ -7351,6 +13726,15 @@ namespace Google.Apis.Spanner.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
+        /// Optional. If true, specifies a multiplexed session. Use a multiplexed session for multiple, concurrent
+        /// read-only operations. Don't use them for read-write transactions, partitioned reads, or partitioned queries.
+        /// Use CreateSession to create multiplexed sessions. Don't use BatchCreateSessions to create a multiplexed
+        /// session. You can't delete or list multiplexed sessions.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("multiplexed")]
+        public virtual System.Nullable<bool> Multiplexed { get; set; }
 
         /// <summary>Output only. The name of the session. This is always system-assigned.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -7365,7 +13749,7 @@ namespace Google.Apis.Spanner.v1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -7389,6 +13773,81 @@ namespace Google.Apis.Spanner.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("subqueries")]
         public virtual System.Collections.Generic.IDictionary<string, System.Nullable<int>> Subqueries { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Message type for a single-region quorum.</summary>
+    public class SingleRegionQuorum : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The location of the serving region, e.g. "us-central1". The location must be one of the regions
+        /// within the dual-region instance configuration of your database. The list of valid locations is available
+        /// using the GetInstanceConfig API. This should only be used if you plan to change quorum to the single-region
+        /// quorum type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("servingLocation")]
+        public virtual string ServingLocation { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The split points of a table/index.</summary>
+    public class SplitPoints : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>
+        /// Optional. The expiration timestamp of the split points. A timestamp in the past means immediate expiration.
+        /// The maximum value can be 30 days in the future. Defaults to 10 days in the future if not specified.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The index to split. If specified, the `table` field must refer to the index's base table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("index")]
+        public virtual string Index { get; set; }
+
+        /// <summary>Required. The list of split keys, i.e., the split boundaries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keys")]
+        public virtual System.Collections.Generic.IList<Key> Keys { get; set; }
+
+        /// <summary>The table to split.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("table")]
+        public virtual string Table { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7506,12 +13965,54 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string Id { get; set; }
 
         /// <summary>
+        /// A precommit token will be included in the response of a BeginTransaction request if the read-write
+        /// transaction is on a multiplexed session and a mutation_key was specified in the BeginTransaction. The
+        /// precommit token with the highest sequence number from this transaction attempt should be passed to the
+        /// Commit request for this transaction.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("precommitToken")]
+        public virtual MultiplexedSessionPrecommitToken PrecommitToken { get; set; }
+
+        private string _readTimestampRaw;
+
+        private object _readTimestamp;
+
+        /// <summary>
         /// For snapshot read-only transactions, the read timestamp chosen for the transaction. Not returned by default:
         /// see TransactionOptions.ReadOnly.return_read_timestamp. A timestamp in RFC3339 UTC \"Zulu\" format, accurate
         /// to nanoseconds. Example: `"2014-10-02T15:01:23.045123456Z"`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("readTimestamp")]
-        public virtual object ReadTimestamp { get; set; }
+        public virtual string ReadTimestampRaw
+        {
+            get => _readTimestampRaw;
+            set
+            {
+                _readTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _readTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ReadTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReadTimestampDateTimeOffset instead.")]
+        public virtual object ReadTimestamp
+        {
+            get => _readTimestamp;
+            set
+            {
+                _readTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _readTimestamp = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ReadTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ReadTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReadTimestampRaw);
+            set => ReadTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7521,71 +14022,79 @@ namespace Google.Apis.Spanner.v1.Data
     /// Transactions: Each session can have at most one active transaction at a time (note that standalone reads and
     /// queries use a transaction internally and do count towards the one transaction limit). After the active
     /// transaction is completed, the session can immediately be re-used for the next transaction. It is not necessary
-    /// to create a new session for each transaction. Transaction Modes: Cloud Spanner supports three transaction modes:
+    /// to create a new session for each transaction. Transaction modes: Cloud Spanner supports three transaction modes:
     /// 1. Locking read-write. This type of transaction is the only way to write data into Cloud Spanner. These
     /// transactions rely on pessimistic locking and, if necessary, two-phase commit. Locking read-write transactions
-    /// may abort, requiring the application to retry. 2. Snapshot read-only. This transaction type provides guaranteed
-    /// consistency across several reads, but does not allow writes. Snapshot read-only transactions can be configured
-    /// to read at timestamps in the past. Snapshot read-only transactions do not need to be committed. 3. Partitioned
-    /// DML. This type of transaction is used to execute a single Partitioned DML statement. Partitioned DML partitions
-    /// the key space and runs the DML statement over each partition in parallel using separate, internal transactions
-    /// that commit independently. Partitioned DML transactions do not need to be committed. For transactions that only
-    /// read, snapshot read-only transactions provide simpler semantics and are almost always faster. In particular,
-    /// read-only transactions do not take locks, so they do not conflict with read-write transactions. As a consequence
-    /// of not taking locks, they also do not abort, so retry loops are not needed. Transactions may only read/write
-    /// data in a single database. They may, however, read/write data in different tables within that database. Locking
-    /// Read-Write Transactions: Locking transactions may be used to atomically read-modify-write data anywhere in a
-    /// database. This type of transaction is externally consistent. Clients should attempt to minimize the amount of
-    /// time a transaction is active. Faster transactions commit with higher probability and cause less contention.
-    /// Cloud Spanner attempts to keep read locks active as long as the transaction continues to do reads, and the
-    /// transaction has not been terminated by Commit or Rollback. Long periods of inactivity at the client may cause
-    /// Cloud Spanner to release a transaction's locks and abort it. Conceptually, a read-write transaction consists of
-    /// zero or more reads or SQL statements followed by Commit. At any time before Commit, the client can send a
-    /// Rollback request to abort the transaction. Semantics: Cloud Spanner can commit the transaction if all read locks
-    /// it acquired are still valid at commit time, and it is able to acquire write locks for all writes. Cloud Spanner
-    /// can abort the transaction for any reason. If a commit attempt returns `ABORTED`, Cloud Spanner guarantees that
-    /// the transaction has not modified any user data in Cloud Spanner. Unless the transaction commits, Cloud Spanner
-    /// makes no guarantees about how long the transaction's locks were held for. It is an error to use Cloud Spanner
-    /// locks for any sort of mutual exclusion other than between Cloud Spanner transactions themselves. Retrying
-    /// Aborted Transactions: When a transaction aborts, the application can choose to retry the whole transaction
-    /// again. To maximize the chances of successfully committing the retry, the client should execute the retry in the
-    /// same session as the original attempt. The original session's lock priority increases with each consecutive
-    /// abort, meaning that each attempt has a slightly better chance of success than the previous. Under some
-    /// circumstances (for example, many transactions attempting to modify the same row(s)), a transaction can abort
-    /// many times in a short period before successfully committing. Thus, it is not a good idea to cap the number of
-    /// retries a transaction can attempt; instead, it is better to limit the total amount of time spent retrying. Idle
-    /// Transactions: A transaction is considered idle if it has no outstanding reads or SQL queries and has not started
-    /// a read or SQL query within the last 10 seconds. Idle transactions can be aborted by Cloud Spanner so that they
-    /// don't hold on to locks indefinitely. If an idle transaction is aborted, the commit will fail with error
-    /// `ABORTED`. If this behavior is undesirable, periodically executing a simple SQL query in the transaction (for
-    /// example, `SELECT 1`) prevents the transaction from becoming idle. Snapshot Read-Only Transactions: Snapshot
-    /// read-only transactions provides a simpler method than locking read-write transactions for doing several
-    /// consistent reads. However, this type of transaction does not support writes. Snapshot transactions do not take
-    /// locks. Instead, they work by choosing a Cloud Spanner timestamp, then executing all reads at that timestamp.
-    /// Since they do not acquire locks, they do not block concurrent read-write transactions. Unlike locking read-write
-    /// transactions, snapshot read-only transactions never abort. They can fail if the chosen read timestamp is garbage
-    /// collected; however, the default garbage collection policy is generous enough that most applications do not need
-    /// to worry about this in practice. Snapshot read-only transactions do not need to call Commit or Rollback (and in
-    /// fact are not permitted to do so). To execute a snapshot transaction, the client specifies a timestamp bound,
-    /// which tells Cloud Spanner how to choose a read timestamp. The types of timestamp bound are: - Strong (the
-    /// default). - Bounded staleness. - Exact staleness. If the Cloud Spanner database to be read is geographically
-    /// distributed, stale read-only transactions can execute more quickly than strong or read-write transaction,
-    /// because they are able to execute far from the leader replica. Each type of timestamp bound is discussed in
-    /// detail below. Strong: Strong reads are guaranteed to see the effects of all transactions that have committed
-    /// before the start of the read. Furthermore, all rows yielded by a single read are consistent with each other --
-    /// if any part of the read observes a transaction, all parts of the read see the transaction. Strong reads are not
-    /// repeatable: two consecutive strong read-only transactions might return inconsistent results if there are
+    /// may abort, requiring the application to retry. 2. Snapshot read-only. Snapshot read-only transactions provide
+    /// guaranteed consistency across several reads, but do not allow writes. Snapshot read-only transactions can be
+    /// configured to read at timestamps in the past, or configured to perform a strong read (where Spanner will select
+    /// a timestamp such that the read is guaranteed to see the effects of all transactions that have committed before
+    /// the start of the read). Snapshot read-only transactions do not need to be committed. Queries on change streams
+    /// must be performed with the snapshot read-only transaction mode, specifying a strong read. See
+    /// TransactionOptions.ReadOnly.strong for more details. 3. Partitioned DML. This type of transaction is used to
+    /// execute a single Partitioned DML statement. Partitioned DML partitions the key space and runs the DML statement
+    /// over each partition in parallel using separate, internal transactions that commit independently. Partitioned DML
+    /// transactions do not need to be committed. For transactions that only read, snapshot read-only transactions
+    /// provide simpler semantics and are almost always faster. In particular, read-only transactions do not take locks,
+    /// so they do not conflict with read-write transactions. As a consequence of not taking locks, they also do not
+    /// abort, so retry loops are not needed. Transactions may only read-write data in a single database. They may,
+    /// however, read-write data in different tables within that database. Locking read-write transactions: Locking
+    /// transactions may be used to atomically read-modify-write data anywhere in a database. This type of transaction
+    /// is externally consistent. Clients should attempt to minimize the amount of time a transaction is active. Faster
+    /// transactions commit with higher probability and cause less contention. Cloud Spanner attempts to keep read locks
+    /// active as long as the transaction continues to do reads, and the transaction has not been terminated by Commit
+    /// or Rollback. Long periods of inactivity at the client may cause Cloud Spanner to release a transaction's locks
+    /// and abort it. Conceptually, a read-write transaction consists of zero or more reads or SQL statements followed
+    /// by Commit. At any time before Commit, the client can send a Rollback request to abort the transaction.
+    /// Semantics: Cloud Spanner can commit the transaction if all read locks it acquired are still valid at commit
+    /// time, and it is able to acquire write locks for all writes. Cloud Spanner can abort the transaction for any
+    /// reason. If a commit attempt returns `ABORTED`, Cloud Spanner guarantees that the transaction has not modified
+    /// any user data in Cloud Spanner. Unless the transaction commits, Cloud Spanner makes no guarantees about how long
+    /// the transaction's locks were held for. It is an error to use Cloud Spanner locks for any sort of mutual
+    /// exclusion other than between Cloud Spanner transactions themselves. Retrying aborted transactions: When a
+    /// transaction aborts, the application can choose to retry the whole transaction again. To maximize the chances of
+    /// successfully committing the retry, the client should execute the retry in the same session as the original
+    /// attempt. The original session's lock priority increases with each consecutive abort, meaning that each attempt
+    /// has a slightly better chance of success than the previous. Note that the lock priority is preserved per session
+    /// (not per transaction). Lock priority is set by the first read or write in the first attempt of a read-write
+    /// transaction. If the application starts a new session to retry the whole transaction, the transaction loses its
+    /// original lock priority. Moreover, the lock priority is only preserved if the transaction fails with an `ABORTED`
+    /// error. Under some circumstances (for example, many transactions attempting to modify the same row(s)), a
+    /// transaction can abort many times in a short period before successfully committing. Thus, it is not a good idea
+    /// to cap the number of retries a transaction can attempt; instead, it is better to limit the total amount of time
+    /// spent retrying. Idle transactions: A transaction is considered idle if it has no outstanding reads or SQL
+    /// queries and has not started a read or SQL query within the last 10 seconds. Idle transactions can be aborted by
+    /// Cloud Spanner so that they don't hold on to locks indefinitely. If an idle transaction is aborted, the commit
+    /// will fail with error `ABORTED`. If this behavior is undesirable, periodically executing a simple SQL query in
+    /// the transaction (for example, `SELECT 1`) prevents the transaction from becoming idle. Snapshot read-only
+    /// transactions: Snapshot read-only transactions provides a simpler method than locking read-write transactions for
+    /// doing several consistent reads. However, this type of transaction does not support writes. Snapshot transactions
+    /// do not take locks. Instead, they work by choosing a Cloud Spanner timestamp, then executing all reads at that
+    /// timestamp. Since they do not acquire locks, they do not block concurrent read-write transactions. Unlike locking
+    /// read-write transactions, snapshot read-only transactions never abort. They can fail if the chosen read timestamp
+    /// is garbage collected; however, the default garbage collection policy is generous enough that most applications
+    /// do not need to worry about this in practice. Snapshot read-only transactions do not need to call Commit or
+    /// Rollback (and in fact are not permitted to do so). To execute a snapshot transaction, the client specifies a
+    /// timestamp bound, which tells Cloud Spanner how to choose a read timestamp. The types of timestamp bound are: -
+    /// Strong (the default). - Bounded staleness. - Exact staleness. If the Cloud Spanner database to be read is
+    /// geographically distributed, stale read-only transactions can execute more quickly than strong or read-write
+    /// transactions, because they are able to execute far from the leader replica. Each type of timestamp bound is
+    /// discussed in detail below. Strong: Strong reads are guaranteed to see the effects of all transactions that have
+    /// committed before the start of the read. Furthermore, all rows yielded by a single read are consistent with each
+    /// other -- if any part of the read observes a transaction, all parts of the read see the transaction. Strong reads
+    /// are not repeatable: two consecutive strong read-only transactions might return inconsistent results if there are
     /// concurrent writes. If consistency across reads is required, the reads should be executed within a transaction or
-    /// at an exact read timestamp. See TransactionOptions.ReadOnly.strong. Exact Staleness: These timestamp bounds
-    /// execute reads at a user-specified timestamp. Reads at a timestamp are guaranteed to see a consistent prefix of
-    /// the global transaction history: they observe modifications done by all transactions with a commit timestamp less
+    /// at an exact read timestamp. Queries on change streams (see below for more details) must also specify the strong
+    /// read timestamp bound. See TransactionOptions.ReadOnly.strong. Exact staleness: These timestamp bounds execute
+    /// reads at a user-specified timestamp. Reads at a timestamp are guaranteed to see a consistent prefix of the
+    /// global transaction history: they observe modifications done by all transactions with a commit timestamp less
     /// than or equal to the read timestamp, and observe none of the modifications done by transactions with a larger
     /// commit timestamp. They will block until all conflicting transactions that may be assigned commit timestamps
     /// &amp;lt;= the read timestamp have finished. The timestamp can either be expressed as an absolute Cloud Spanner
     /// commit timestamp or a staleness relative to the current time. These modes do not require a "negotiation phase"
     /// to pick a timestamp. As a result, they execute slightly faster than the equivalent boundedly stale concurrency
     /// modes. On the other hand, boundedly stale reads usually return fresher results. See
-    /// TransactionOptions.ReadOnly.read_timestamp and TransactionOptions.ReadOnly.exact_staleness. Bounded Staleness:
+    /// TransactionOptions.ReadOnly.read_timestamp and TransactionOptions.ReadOnly.exact_staleness. Bounded staleness:
     /// Bounded staleness modes allow Cloud Spanner to pick the read timestamp, subject to a user-provided staleness
     /// bound. Cloud Spanner chooses the newest timestamp within the staleness bound that allows execution of the reads
     /// at the closest available replica without blocking. All rows yielded are consistent with each other -- if any
@@ -7597,41 +14106,69 @@ namespace Google.Apis.Spanner.v1.Data
     /// comparable exact staleness reads. However, they are typically able to return fresher results, and are more
     /// likely to execute at the closest replica. Because the timestamp negotiation requires up-front knowledge of which
     /// rows will be read, it can only be used with single-use read-only transactions. See
-    /// TransactionOptions.ReadOnly.max_staleness and TransactionOptions.ReadOnly.min_read_timestamp. Old Read
-    /// Timestamps and Garbage Collection: Cloud Spanner continuously garbage collects deleted and overwritten data in
+    /// TransactionOptions.ReadOnly.max_staleness and TransactionOptions.ReadOnly.min_read_timestamp. Old read
+    /// timestamps and garbage collection: Cloud Spanner continuously garbage collects deleted and overwritten data in
     /// the background to reclaim storage space. This process is known as "version GC". By default, version GC reclaims
     /// versions after they are one hour old. Because of this, Cloud Spanner cannot perform reads at read timestamps
     /// more than one hour in the past. This restriction also applies to in-progress reads and/or SQL queries whose
     /// timestamp become too old while executing. Reads and SQL queries with too-old read timestamps fail with the error
-    /// `FAILED_PRECONDITION`. Partitioned DML Transactions: Partitioned DML transactions are used to execute DML
-    /// statements with a different execution strategy that provides different, and often better, scalability properties
-    /// for large, table-wide operations than DML in a ReadWrite transaction. Smaller scoped statements, such as an OLTP
-    /// workload, should prefer using ReadWrite transactions. Partitioned DML partitions the keyspace and runs the DML
-    /// statement on each partition in separate, internal transactions. These transactions commit automatically when
-    /// complete, and run independently from one another. To reduce lock contention, this execution strategy only
-    /// acquires read locks on rows that match the WHERE clause of the statement. Additionally, the smaller
-    /// per-partition transactions hold locks for less time. That said, Partitioned DML is not a drop-in replacement for
-    /// standard DML used in ReadWrite transactions. - The DML statement must be fully-partitionable. Specifically, the
-    /// statement must be expressible as the union of many statements which each access only a single row of the table.
-    /// - The statement is not applied atomically to all rows of the table. Rather, the statement is applied atomically
-    /// to partitions of the table, in independent transactions. Secondary index rows are updated atomically with the
-    /// base table rows. - Partitioned DML does not guarantee exactly-once execution semantics against a partition. The
-    /// statement will be applied at least once to each partition. It is strongly recommended that the DML statement
-    /// should be idempotent to avoid unexpected results. For instance, it is potentially dangerous to run a statement
-    /// such as `UPDATE table SET column = column + 1` as it could be run multiple times against some rows. - The
-    /// partitions are committed automatically - there is no support for Commit or Rollback. If the call returns an
-    /// error, or if the client issuing the ExecuteSql call dies, it is possible that some rows had the statement
-    /// executed on them successfully. It is also possible that statement was never executed against other rows. -
-    /// Partitioned DML transactions may only contain the execution of a single DML statement via ExecuteSql or
-    /// ExecuteStreamingSql. - If any error is encountered during the execution of the partitioned DML operation (for
-    /// instance, a UNIQUE INDEX violation, division by zero, or a value that cannot be stored due to schema
-    /// constraints), then the operation is stopped at that point and an error is returned. It is possible that at this
-    /// point, some partitions have been committed (or even committed multiple times), and other partitions have not
-    /// been run at all. Given the above, Partitioned DML is good fit for large, database-wide, operations that are
-    /// idempotent, such as deleting old rows from a very large table.
+    /// `FAILED_PRECONDITION`. You can configure and extend the `VERSION_RETENTION_PERIOD` of a database up to a period
+    /// as long as one week, which allows Cloud Spanner to perform reads up to one week in the past. Querying change
+    /// Streams: A Change Stream is a schema object that can be configured to watch data changes on the entire database,
+    /// a set of tables, or a set of columns in a database. When a change stream is created, Spanner automatically
+    /// defines a corresponding SQL Table-Valued Function (TVF) that can be used to query the change records in the
+    /// associated change stream using the ExecuteStreamingSql API. The name of the TVF for a change stream is generated
+    /// from the name of the change stream: READ_. All queries on change stream TVFs must be executed using the
+    /// ExecuteStreamingSql API with a single-use read-only transaction with a strong read-only timestamp_bound. The
+    /// change stream TVF allows users to specify the start_timestamp and end_timestamp for the time range of interest.
+    /// All change records within the retention period is accessible using the strong read-only timestamp_bound. All
+    /// other TransactionOptions are invalid for change stream queries. In addition, if
+    /// TransactionOptions.read_only.return_read_timestamp is set to true, a special value of 2^63 - 2 will be returned
+    /// in the Transaction message that describes the transaction, instead of a valid read timestamp. This special value
+    /// should be discarded and not used for any subsequent queries. Please see
+    /// https://cloud.google.com/spanner/docs/change-streams for more details on how to query the change stream TVFs.
+    /// Partitioned DML transactions: Partitioned DML transactions are used to execute DML statements with a different
+    /// execution strategy that provides different, and often better, scalability properties for large, table-wide
+    /// operations than DML in a ReadWrite transaction. Smaller scoped statements, such as an OLTP workload, should
+    /// prefer using ReadWrite transactions. Partitioned DML partitions the keyspace and runs the DML statement on each
+    /// partition in separate, internal transactions. These transactions commit automatically when complete, and run
+    /// independently from one another. To reduce lock contention, this execution strategy only acquires read locks on
+    /// rows that match the WHERE clause of the statement. Additionally, the smaller per-partition transactions hold
+    /// locks for less time. That said, Partitioned DML is not a drop-in replacement for standard DML used in ReadWrite
+    /// transactions. - The DML statement must be fully-partitionable. Specifically, the statement must be expressible
+    /// as the union of many statements which each access only a single row of the table. - The statement is not applied
+    /// atomically to all rows of the table. Rather, the statement is applied atomically to partitions of the table, in
+    /// independent transactions. Secondary index rows are updated atomically with the base table rows. - Partitioned
+    /// DML does not guarantee exactly-once execution semantics against a partition. The statement is applied at least
+    /// once to each partition. It is strongly recommended that the DML statement should be idempotent to avoid
+    /// unexpected results. For instance, it is potentially dangerous to run a statement such as `UPDATE table SET
+    /// column = column + 1` as it could be run multiple times against some rows. - The partitions are committed
+    /// automatically - there is no support for Commit or Rollback. If the call returns an error, or if the client
+    /// issuing the ExecuteSql call dies, it is possible that some rows had the statement executed on them successfully.
+    /// It is also possible that statement was never executed against other rows. - Partitioned DML transactions may
+    /// only contain the execution of a single DML statement via ExecuteSql or ExecuteStreamingSql. - If any error is
+    /// encountered during the execution of the partitioned DML operation (for instance, a UNIQUE INDEX violation,
+    /// division by zero, or a value that cannot be stored due to schema constraints), then the operation is stopped at
+    /// that point and an error is returned. It is possible that at this point, some partitions have been committed (or
+    /// even committed multiple times), and other partitions have not been run at all. Given the above, Partitioned DML
+    /// is good fit for large, database-wide, operations that are idempotent, such as deleting old rows from a very
+    /// large table.
     /// </summary>
     public class TransactionOptions : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// When `exclude_txn_from_change_streams` is set to `true`: * Modifications from this transaction will not be
+        /// recorded in change streams with DDL option `allow_txn_exclusion=true` that are tracking columns modified by
+        /// these transactions. * Modifications from this transaction will be recorded in change streams with DDL option
+        /// `allow_txn_exclusion=false or not set` that are tracking columns modified by these transactions. When
+        /// `exclude_txn_from_change_streams` is set to `false` or not set, Modifications from this transaction will be
+        /// recorded in all change streams that are tracking columns modified by these transactions.
+        /// `exclude_txn_from_change_streams` may only be specified for read-write or partitioned-dml transactions,
+        /// otherwise the API will return an `INVALID_ARGUMENT` error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludeTxnFromChangeStreams")]
+        public virtual System.Nullable<bool> ExcludeTxnFromChangeStreams { get; set; }
+
         /// <summary>
         /// Partitioned DML transaction. Authorization to begin a Partitioned DML transaction requires
         /// `spanner.databases.beginPartitionedDmlTransaction` permission on the `session` resource.
@@ -7699,9 +14236,25 @@ namespace Google.Apis.Spanner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("code")]
         public virtual string Code { get; set; }
 
+        /// <summary>
+        /// If code == PROTO or code == ENUM, then `proto_type_fqn` is the fully qualified name of the proto type
+        /// representing the proto/enum definition.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protoTypeFqn")]
+        public virtual string ProtoTypeFqn { get; set; }
+
         /// <summary>If code == STRUCT, then `struct_type` provides type information for the struct's fields.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("structType")]
         public virtual StructType StructType { get; set; }
+
+        /// <summary>
+        /// The TypeAnnotationCode that disambiguates SQL type that Spanner will use to represent values of this type
+        /// during query processing. This is necessary for some type codes because a single TypeCode can be mapped to
+        /// different SQL types depending on the SQL dialect. type_annotation typically is not needed to process the
+        /// content of a value (it doesn't affect serialization) and clients can ignore it on the read path.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("typeAnnotation")]
+        public virtual string TypeAnnotation { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7710,6 +14263,12 @@ namespace Google.Apis.Spanner.v1.Data
     /// <summary>Metadata type for the operation returned by UpdateDatabaseDdl.</summary>
     public class UpdateDatabaseDdlMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The brief action info for the DDL statements. `actions[i]` is the brief info for `statements[i]`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("actions")]
+        public virtual System.Collections.Generic.IList<DdlStatementActionInfo> Actions { get; set; }
+
         /// <summary>
         /// Reports the commit timestamps of all statements that have succeeded so far, where `commit_timestamps[i]` is
         /// the commit timestamp for the statement `statements[i]`.
@@ -7722,10 +14281,10 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string Database { get; set; }
 
         /// <summary>
-        /// The progress of the UpdateDatabaseDdl operations. Currently, only index creation statements will have a
-        /// continuously updating progress. For non-index creation statements, `progress[i]` will have start time and
-        /// end time populated with commit timestamp of operation, as well as a progress of 100% once the operation has
-        /// completed. `progress[i]` is the operation progress for `statements[i]`.
+        /// The progress of the UpdateDatabaseDdl operations. All DDL statements will have continuously updating
+        /// progress, and `progress[i]` is the operation progress for `statements[i]`. Also, `progress[i]` will have
+        /// start time and end time populated with commit timestamp of operation, as well as a progress of 100% once the
+        /// operation has completed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("progress")]
         public virtual System.Collections.Generic.IList<OperationProgress> Progress { get; set; }
@@ -7738,7 +14297,7 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual System.Collections.Generic.IList<string> Statements { get; set; }
 
         /// <summary>
-        /// Output only. When true, indicates that the operation is throttled e.g due to resource constraints. When
+        /// Output only. When true, indicates that the operation is throttled e.g. due to resource constraints. When
         /// resources become available the operation will resume and this field will be false again.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("throttled")]
@@ -7765,12 +14324,29 @@ namespace Google.Apis.Spanner.v1.Data
         /// `operation_id` is used to construct the name of the resulting Operation. Specifying an explicit operation ID
         /// simplifies determining whether the statements were executed in the event that the UpdateDatabaseDdl call is
         /// replayed, or the return value is otherwise lost: the database and `operation_id` fields can be combined to
-        /// form the name of the resulting longrunning.Operation: `/operations/`. `operation_id` should be unique within
-        /// the database, and must be a valid identifier: `a-z*`. Note that automatically-generated operation IDs always
-        /// begin with an underscore. If the named operation already exists, UpdateDatabaseDdl returns `ALREADY_EXISTS`.
+        /// form the `name` of the resulting longrunning.Operation: `/operations/`. `operation_id` should be unique
+        /// within the database, and must be a valid identifier: `a-z*`. Note that automatically-generated operation IDs
+        /// always begin with an underscore. If the named operation already exists, UpdateDatabaseDdl returns
+        /// `ALREADY_EXISTS`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("operationId")]
         public virtual string OperationId { get; set; }
+
+        /// <summary>
+        /// Optional. Proto descriptors used by CREATE/ALTER PROTO BUNDLE statements. Contains a protobuf-serialized
+        /// [google.protobuf.FileDescriptorSet](https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/descriptor.proto).
+        /// To generate it, [install](https://grpc.io/docs/protoc-installation/) and run `protoc` with --include_imports
+        /// and --descriptor_set_out. For example, to generate for moon/shot/app.proto, run
+        /// ```
+        /// $protoc
+        /// --proto_path=/app_path --proto_path=/lib_path \ --include_imports \ --descriptor_set_out=descriptors.data \
+        /// moon/shot/app.proto
+        /// ```
+        /// For more details, see protobuffer [self
+        /// description](https://developers.google.com/protocol-buffers/docs/techniques#self-description).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protoDescriptors")]
+        public virtual string ProtoDescriptors { get; set; }
 
         /// <summary>Required. DDL statements to be applied to the database.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("statements")]
@@ -7780,27 +14356,433 @@ namespace Google.Apis.Spanner.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Metadata type for the operation returned by UpdateDatabase.</summary>
+    public class UpdateDatabaseMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _cancelTimeRaw;
+
+        private object _cancelTime;
+
+        /// <summary>
+        /// The time at which this operation was cancelled. If set, this operation is in the process of undoing itself
+        /// (which is best-effort).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cancelTime")]
+        public virtual string CancelTimeRaw
+        {
+            get => _cancelTimeRaw;
+            set
+            {
+                _cancelTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _cancelTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CancelTimeDateTimeOffset instead.")]
+        public virtual object CancelTime
+        {
+            get => _cancelTime;
+            set
+            {
+                _cancelTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _cancelTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CancelTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CancelTimeRaw);
+            set => CancelTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The progress of the UpdateDatabase operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("progress")]
+        public virtual OperationProgress Progress { get; set; }
+
+        /// <summary>The request for UpdateDatabase.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("request")]
+        public virtual UpdateDatabaseRequest Request { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for UpdateDatabase.</summary>
+    public class UpdateDatabaseRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The database to update. The `name` field of the database is of the form
+        /// `projects//instances//databases/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("database")]
+        public virtual Database Database { get; set; }
+
+        /// <summary>
+        /// Required. The list of fields to update. Currently, only `enable_drop_protection` field can be updated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
+        public virtual object UpdateMask { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata type for the operation returned by UpdateInstanceConfig.</summary>
+    public class UpdateInstanceConfigMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _cancelTimeRaw;
+
+        private object _cancelTime;
+
+        /// <summary>The time at which this operation was cancelled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cancelTime")]
+        public virtual string CancelTimeRaw
+        {
+            get => _cancelTimeRaw;
+            set
+            {
+                _cancelTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _cancelTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CancelTimeDateTimeOffset instead.")]
+        public virtual object CancelTime
+        {
+            get => _cancelTime;
+            set
+            {
+                _cancelTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _cancelTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CancelTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CancelTimeRaw);
+            set => CancelTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The desired instance configuration after updating.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceConfig")]
+        public virtual InstanceConfig InstanceConfig { get; set; }
+
+        /// <summary>The progress of the UpdateInstanceConfig operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("progress")]
+        public virtual InstanceOperationProgress Progress { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for UpdateInstanceConfig.</summary>
+    public class UpdateInstanceConfigRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The user instance configuration to update, which must always include the instance configuration
+        /// name. Otherwise, only fields mentioned in update_mask need be included. To prevent conflicts of concurrent
+        /// updates, etag can be used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceConfig")]
+        public virtual InstanceConfig InstanceConfig { get; set; }
+
+        /// <summary>
+        /// Required. A mask specifying which fields in InstanceConfig should be updated. The field mask must always be
+        /// specified; this prevents any future fields in InstanceConfig from being erased accidentally by clients that
+        /// do not know about them. Only display_name and labels can be updated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
+        public virtual object UpdateMask { get; set; }
+
+        /// <summary>
+        /// An option to validate, but not actually execute, a request, and provide the same response.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateOnly")]
+        public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Metadata type for the operation returned by UpdateInstance.</summary>
     public class UpdateInstanceMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _cancelTimeRaw;
+
+        private object _cancelTime;
+
         /// <summary>
         /// The time at which this operation was cancelled. If set, this operation is in the process of undoing itself
         /// (which is guaranteed to succeed) and cannot be cancelled again.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cancelTime")]
-        public virtual object CancelTime { get; set; }
+        public virtual string CancelTimeRaw
+        {
+            get => _cancelTimeRaw;
+            set
+            {
+                _cancelTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _cancelTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CancelTimeDateTimeOffset instead.")]
+        public virtual object CancelTime
+        {
+            get => _cancelTime;
+            set
+            {
+                _cancelTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _cancelTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CancelTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CancelTimeRaw);
+            set => CancelTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>The time at which this operation failed or was completed successfully.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The expected fulfillment period of this update operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expectedFulfillmentPeriod")]
+        public virtual string ExpectedFulfillmentPeriod { get; set; }
 
         /// <summary>The desired end state of the update.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("instance")]
         public virtual Instance Instance { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time at which UpdateInstance request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata type for the operation returned by UpdateInstancePartition.</summary>
+    public class UpdateInstancePartitionMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _cancelTimeRaw;
+
+        private object _cancelTime;
+
+        /// <summary>
+        /// The time at which this operation was cancelled. If set, this operation is in the process of undoing itself
+        /// (which is guaranteed to succeed) and cannot be cancelled again.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cancelTime")]
+        public virtual string CancelTimeRaw
+        {
+            get => _cancelTimeRaw;
+            set
+            {
+                _cancelTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _cancelTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CancelTimeDateTimeOffset instead.")]
+        public virtual object CancelTime
+        {
+            get => _cancelTime;
+            set
+            {
+                _cancelTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _cancelTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CancelTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CancelTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CancelTimeRaw);
+            set => CancelTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>The time at which this operation failed or was completed successfully.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The desired end state of the update.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instancePartition")]
+        public virtual InstancePartition InstancePartition { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>The time at which UpdateInstancePartition request was received.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for UpdateInstancePartition.</summary>
+    public class UpdateInstancePartitionRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. A mask specifying which fields in InstancePartition should be updated. The field mask must always
+        /// be specified; this prevents any future fields in InstancePartition from being erased accidentally by clients
+        /// that do not know about them.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fieldMask")]
+        public virtual object FieldMask { get; set; }
+
+        /// <summary>
+        /// Required. The instance partition to update, which must always include the instance partition name.
+        /// Otherwise, only fields mentioned in field_mask need be included.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instancePartition")]
+        public virtual InstancePartition InstancePartition { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

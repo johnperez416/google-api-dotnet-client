@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.PeopleService.v1
             ContactGroups = new ContactGroupsResource(this);
             OtherContacts = new OtherContactsResource(this);
             People = new PeopleResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://people.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://people.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.PeopleService.v1
         public override string Name => "people";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://people.googleapis.com/";
-        #else
-            "https://people.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://people.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the People API.</summary>
         public class Scope
@@ -376,7 +371,7 @@ namespace Google.Apis.PeopleService.v1
             /// <param name="resourceName">Required. The resource name of the contact group to modify.</param>
             public virtual ModifyRequest Modify(Google.Apis.PeopleService.v1.Data.ModifyContactGroupMembersRequest body, string resourceName)
             {
-                return new ModifyRequest(service, body, resourceName);
+                return new ModifyRequest(this.service, body, resourceName);
             }
 
             /// <summary>
@@ -435,7 +430,7 @@ namespace Google.Apis.PeopleService.v1
         /// </summary>
         public virtual BatchGetRequest BatchGet()
         {
-            return new BatchGetRequest(service);
+            return new BatchGetRequest(this.service);
         }
 
         /// <summary>
@@ -514,16 +509,18 @@ namespace Google.Apis.PeopleService.v1
         /// <summary>
         /// Create a new contact group owned by the authenticated user. Created contact group names must be unique to
         /// the users contact groups. Attempting to create a group with a duplicate name will return a HTTP 409 error.
+        /// Mutate requests for the same user should be sent sequentially to avoid increased latency and failures.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.PeopleService.v1.Data.CreateContactGroupRequest body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
         /// Create a new contact group owned by the authenticated user. Created contact group names must be unique to
         /// the users contact groups. Attempting to create a group with a duplicate name will return a HTTP 409 error.
+        /// Mutate requests for the same user should be sent sequentially to avoid increased latency and failures.
         /// </summary>
         public class CreateRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.ContactGroup>
         {
@@ -558,17 +555,17 @@ namespace Google.Apis.PeopleService.v1
 
         /// <summary>
         /// Delete an existing contact group owned by the authenticated user by specifying a contact group resource
-        /// name.
+        /// name. Mutate requests for the same user should be sent sequentially to avoid increased latency and failures.
         /// </summary>
         /// <param name="resourceName">Required. The resource name of the contact group to delete.</param>
         public virtual DeleteRequest Delete(string resourceName)
         {
-            return new DeleteRequest(service, resourceName);
+            return new DeleteRequest(this.service, resourceName);
         }
 
         /// <summary>
         /// Delete an existing contact group owned by the authenticated user by specifying a contact group resource
-        /// name.
+        /// name. Mutate requests for the same user should be sent sequentially to avoid increased latency and failures.
         /// </summary>
         public class DeleteRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.Empty>
         {
@@ -625,7 +622,7 @@ namespace Google.Apis.PeopleService.v1
         /// <param name="resourceName">Required. The resource name of the contact group to get.</param>
         public virtual GetRequest Get(string resourceName)
         {
-            return new GetRequest(service, resourceName);
+            return new GetRequest(this.service, resourceName);
         }
 
         /// <summary>
@@ -704,7 +701,7 @@ namespace Google.Apis.PeopleService.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -798,7 +795,8 @@ namespace Google.Apis.PeopleService.v1
         /// <summary>
         /// Update the name of an existing contact group owned by the authenticated user. Updated contact group names
         /// must be unique to the users contact groups. Attempting to create a group with a duplicate name will return a
-        /// HTTP 409 error.
+        /// HTTP 409 error. Mutate requests for the same user should be sent sequentially to avoid increased latency and
+        /// failures.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resourceName">
@@ -807,13 +805,14 @@ namespace Google.Apis.PeopleService.v1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.PeopleService.v1.Data.UpdateContactGroupRequest body, string resourceName)
         {
-            return new UpdateRequest(service, body, resourceName);
+            return new UpdateRequest(this.service, body, resourceName);
         }
 
         /// <summary>
         /// Update the name of an existing contact group owned by the authenticated user. Updated contact group names
         /// must be unique to the users contact groups. Attempting to create a group with a duplicate name will return a
-        /// HTTP 409 error.
+        /// HTTP 409 error. Mutate requests for the same user should be sent sequentially to avoid increased latency and
+        /// failures.
         /// </summary>
         public class UpdateRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.ContactGroup>
         {
@@ -877,15 +876,21 @@ namespace Google.Apis.PeopleService.v1
             this.service = service;
         }
 
-        /// <summary>Copies an "Other contact" to a new contact in the user's "myContacts" group</summary>
+        /// <summary>
+        /// Copies an "Other contact" to a new contact in the user's "myContacts" group Mutate requests for the same
+        /// user should be sent sequentially to avoid increased latency and failures.
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resourceName">Required. The resource name of the "Other contact" to copy.</param>
         public virtual CopyOtherContactToMyContactsGroupRequest CopyOtherContactToMyContactsGroup(Google.Apis.PeopleService.v1.Data.CopyOtherContactToMyContactsGroupRequest body, string resourceName)
         {
-            return new CopyOtherContactToMyContactsGroupRequest(service, body, resourceName);
+            return new CopyOtherContactToMyContactsGroupRequest(this.service, body, resourceName);
         }
 
-        /// <summary>Copies an "Other contact" to a new contact in the user's "myContacts" group</summary>
+        /// <summary>
+        /// Copies an "Other contact" to a new contact in the user's "myContacts" group Mutate requests for the same
+        /// user should be sent sequentially to avoid increased latency and failures.
+        /// </summary>
         public class CopyOtherContactToMyContactsGroupRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.Person>
         {
             /// <summary>Constructs a new CopyOtherContactToMyContactsGroup request.</summary>
@@ -933,32 +938,34 @@ namespace Google.Apis.PeopleService.v1
         /// <summary>
         /// List all "Other contacts", that is contacts that are not in a contact group. "Other contacts" are typically
         /// auto created contacts from interactions. Sync tokens expire 7 days after the full sync. A request with an
-        /// expired sync token will result in a 410 error. In the case of such an error clients should make a full sync
-        /// request without a `sync_token`. The first page of a full sync request has an additional quota. If the quota
-        /// is exceeded, a 429 error will be returned. This quota is fixed and can not be increased. When the
-        /// `sync_token` is specified, resources deleted since the last sync will be returned as a person with
-        /// `PersonMetadata.deleted` set to true. When the `page_token` or `sync_token` is specified, all other request
-        /// parameters must match the first call. Writes may have a propagation delay of several minutes for sync
-        /// requests. Incremental syncs are not intended for read-after-write use cases. See example usage at [List the
-        /// user's other contacts that have
+        /// expired sync token will get an error with an
+        /// [google.rpc.ErrorInfo](https://cloud.google.com/apis/design/errors#error_info) with reason
+        /// "EXPIRED_SYNC_TOKEN". In the case of such an error clients should make a full sync request without a
+        /// `sync_token`. The first page of a full sync request has an additional quota. If the quota is exceeded, a 429
+        /// error will be returned. This quota is fixed and can not be increased. When the `sync_token` is specified,
+        /// resources deleted since the last sync will be returned as a person with `PersonMetadata.deleted` set to
+        /// true. When the `page_token` or `sync_token` is specified, all other request parameters must match the first
+        /// call. Writes may have a propagation delay of several minutes for sync requests. Incremental syncs are not
+        /// intended for read-after-write use cases. See example usage at [List the user's other contacts that have
         /// changed](/people/v1/other-contacts#list_the_users_other_contacts_that_have_changed).
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
         /// List all "Other contacts", that is contacts that are not in a contact group. "Other contacts" are typically
         /// auto created contacts from interactions. Sync tokens expire 7 days after the full sync. A request with an
-        /// expired sync token will result in a 410 error. In the case of such an error clients should make a full sync
-        /// request without a `sync_token`. The first page of a full sync request has an additional quota. If the quota
-        /// is exceeded, a 429 error will be returned. This quota is fixed and can not be increased. When the
-        /// `sync_token` is specified, resources deleted since the last sync will be returned as a person with
-        /// `PersonMetadata.deleted` set to true. When the `page_token` or `sync_token` is specified, all other request
-        /// parameters must match the first call. Writes may have a propagation delay of several minutes for sync
-        /// requests. Incremental syncs are not intended for read-after-write use cases. See example usage at [List the
-        /// user's other contacts that have
+        /// expired sync token will get an error with an
+        /// [google.rpc.ErrorInfo](https://cloud.google.com/apis/design/errors#error_info) with reason
+        /// "EXPIRED_SYNC_TOKEN". In the case of such an error clients should make a full sync request without a
+        /// `sync_token`. The first page of a full sync request has an additional quota. If the quota is exceeded, a 429
+        /// error will be returned. This quota is fixed and can not be increased. When the `sync_token` is specified,
+        /// resources deleted since the last sync will be returned as a person with `PersonMetadata.deleted` set to
+        /// true. When the `page_token` or `sync_token` is specified, all other request parameters must match the first
+        /// call. Writes may have a propagation delay of several minutes for sync requests. Incremental syncs are not
+        /// intended for read-after-write use cases. See example usage at [List the user's other contacts that have
         /// changed](/people/v1/other-contacts#list_the_users_other_contacts_that_have_changed).
         /// </summary>
         public class ListRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.ListOtherContactsResponse>
@@ -1007,6 +1014,9 @@ namespace Google.Apis.PeopleService.v1
 
             /// <summary>
             /// Optional. A mask of what source types to return. Defaults to READ_SOURCE_TYPE_CONTACT if not set.
+            /// Possible values for this field are: * READ_SOURCE_TYPE_CONTACT *
+            /// READ_SOURCE_TYPE_CONTACT,READ_SOURCE_TYPE_PROFILE Specifying READ_SOURCE_TYPE_PROFILE without specifying
+            /// READ_SOURCE_TYPE_CONTACT is not permitted.
             /// </summary>
             /// <remarks>
             /// Use this property to set a single value for the parameter, or <see cref="SourcesList"/> to set multiple
@@ -1017,6 +1027,9 @@ namespace Google.Apis.PeopleService.v1
 
             /// <summary>
             /// Optional. A mask of what source types to return. Defaults to READ_SOURCE_TYPE_CONTACT if not set.
+            /// Possible values for this field are: * READ_SOURCE_TYPE_CONTACT *
+            /// READ_SOURCE_TYPE_CONTACT,READ_SOURCE_TYPE_PROFILE Specifying READ_SOURCE_TYPE_PROFILE without specifying
+            /// READ_SOURCE_TYPE_CONTACT is not permitted.
             /// </summary>
             /// <remarks>
             /// Use this property to set one or more values for the parameter. Do not set both this property and
@@ -1027,6 +1040,9 @@ namespace Google.Apis.PeopleService.v1
 
             /// <summary>
             /// Optional. A mask of what source types to return. Defaults to READ_SOURCE_TYPE_CONTACT if not set.
+            /// Possible values for this field are: * READ_SOURCE_TYPE_CONTACT *
+            /// READ_SOURCE_TYPE_CONTACT,READ_SOURCE_TYPE_PROFILE Specifying READ_SOURCE_TYPE_PROFILE without specifying
+            /// READ_SOURCE_TYPE_CONTACT is not permitted.
             /// </summary>
             public enum SourcesEnum
             {
@@ -1045,6 +1061,10 @@ namespace Google.Apis.PeopleService.v1
                 /// <summary>Returns SourceType.DOMAIN_CONTACT.</summary>
                 [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_DOMAIN_CONTACT")]
                 READSOURCETYPEDOMAINCONTACT = 3,
+
+                /// <summary>Returns SourceType.OTHER_CONTACT.</summary>
+                [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_OTHER_CONTACT")]
+                READSOURCETYPEOTHERCONTACT = 4,
             }
 
             /// <summary>
@@ -1129,7 +1149,7 @@ namespace Google.Apis.PeopleService.v1
         /// </summary>
         public virtual SearchRequest Search()
         {
-            return new SearchRequest(service);
+            return new SearchRequest(this.service);
         }
 
         /// <summary>
@@ -1245,14 +1265,16 @@ namespace Google.Apis.PeopleService.v1
 
             /// <summary>
             /// Provides a list of the authenticated user's contacts. Sync tokens expire 7 days after the full sync. A
-            /// request with an expired sync token will result in a 410 error. In the case of such an error clients
-            /// should make a full sync request without a `sync_token`. The first page of a full sync request has an
-            /// additional quota. If the quota is exceeded, a 429 error will be returned. This quota is fixed and can
-            /// not be increased. When the `sync_token` is specified, resources deleted since the last sync will be
-            /// returned as a person with `PersonMetadata.deleted` set to true. When the `page_token` or `sync_token` is
-            /// specified, all other request parameters must match the first call. Writes may have a propagation delay
-            /// of several minutes for sync requests. Incremental syncs are not intended for read-after-write use cases.
-            /// See example usage at [List the user's contacts that have
+            /// request with an expired sync token will get an error with an
+            /// [google.rpc.ErrorInfo](https://cloud.google.com/apis/design/errors#error_info) with reason
+            /// "EXPIRED_SYNC_TOKEN". In the case of such an error clients should make a full sync request without a
+            /// `sync_token`. The first page of a full sync request has an additional quota. If the quota is exceeded, a
+            /// 429 error will be returned. This quota is fixed and can not be increased. When the `sync_token` is
+            /// specified, resources deleted since the last sync will be returned as a person with
+            /// `PersonMetadata.deleted` set to true. When the `page_token` or `sync_token` is specified, all other
+            /// request parameters must match the first call. Writes may have a propagation delay of several minutes for
+            /// sync requests. Incremental syncs are not intended for read-after-write use cases. See example usage at
+            /// [List the user's contacts that have
             /// changed](/people/v1/contacts#list_the_users_contacts_that_have_changed).
             /// </summary>
             /// <param name="resourceName">
@@ -1260,19 +1282,21 @@ namespace Google.Apis.PeopleService.v1
             /// </param>
             public virtual ListRequest List(string resourceName)
             {
-                return new ListRequest(service, resourceName);
+                return new ListRequest(this.service, resourceName);
             }
 
             /// <summary>
             /// Provides a list of the authenticated user's contacts. Sync tokens expire 7 days after the full sync. A
-            /// request with an expired sync token will result in a 410 error. In the case of such an error clients
-            /// should make a full sync request without a `sync_token`. The first page of a full sync request has an
-            /// additional quota. If the quota is exceeded, a 429 error will be returned. This quota is fixed and can
-            /// not be increased. When the `sync_token` is specified, resources deleted since the last sync will be
-            /// returned as a person with `PersonMetadata.deleted` set to true. When the `page_token` or `sync_token` is
-            /// specified, all other request parameters must match the first call. Writes may have a propagation delay
-            /// of several minutes for sync requests. Incremental syncs are not intended for read-after-write use cases.
-            /// See example usage at [List the user's contacts that have
+            /// request with an expired sync token will get an error with an
+            /// [google.rpc.ErrorInfo](https://cloud.google.com/apis/design/errors#error_info) with reason
+            /// "EXPIRED_SYNC_TOKEN". In the case of such an error clients should make a full sync request without a
+            /// `sync_token`. The first page of a full sync request has an additional quota. If the quota is exceeded, a
+            /// 429 error will be returned. This quota is fixed and can not be increased. When the `sync_token` is
+            /// specified, resources deleted since the last sync will be returned as a person with
+            /// `PersonMetadata.deleted` set to true. When the `page_token` or `sync_token` is specified, all other
+            /// request parameters must match the first call. Writes may have a propagation delay of several minutes for
+            /// sync requests. Incremental syncs are not intended for read-after-write use cases. See example usage at
+            /// [List the user's contacts that have
             /// changed](/people/v1/contacts#list_the_users_contacts_that_have_changed).
             /// </summary>
             public class ListRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.ListConnectionsResponse>
@@ -1404,6 +1428,10 @@ namespace Google.Apis.PeopleService.v1
                     /// <summary>Returns SourceType.DOMAIN_CONTACT.</summary>
                     [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_DOMAIN_CONTACT")]
                     READSOURCETYPEDOMAINCONTACT = 3,
+
+                    /// <summary>Returns SourceType.OTHER_CONTACT.</summary>
+                    [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_OTHER_CONTACT")]
+                    READSOURCETYPEOTHERCONTACT = 4,
                 }
 
                 /// <summary>
@@ -1505,18 +1533,18 @@ namespace Google.Apis.PeopleService.v1
         }
 
         /// <summary>
-        /// Create a batch of new contacts and return the PersonResponses for the newly created contacts. Limited to 10
-        /// parallel requests per user.
+        /// Create a batch of new contacts and return the PersonResponses for the newly Mutate requests for the same
+        /// user should be sent sequentially to avoid increased latency and failures.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual BatchCreateContactsRequest BatchCreateContacts(Google.Apis.PeopleService.v1.Data.BatchCreateContactsRequest body)
         {
-            return new BatchCreateContactsRequest(service, body);
+            return new BatchCreateContactsRequest(this.service, body);
         }
 
         /// <summary>
-        /// Create a batch of new contacts and return the PersonResponses for the newly created contacts. Limited to 10
-        /// parallel requests per user.
+        /// Create a batch of new contacts and return the PersonResponses for the newly Mutate requests for the same
+        /// user should be sent sequentially to avoid increased latency and failures.
         /// </summary>
         public class BatchCreateContactsRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.BatchCreateContactsResponse>
         {
@@ -1550,18 +1578,18 @@ namespace Google.Apis.PeopleService.v1
         }
 
         /// <summary>
-        /// Delete a batch of contacts. Any non-contact data will not be deleted. Limited to 10 parallel requests per
-        /// user.
+        /// Delete a batch of contacts. Any non-contact data will not be deleted. Mutate requests for the same user
+        /// should be sent sequentially to avoid increased latency and failures.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual BatchDeleteContactsRequest BatchDeleteContacts(Google.Apis.PeopleService.v1.Data.BatchDeleteContactsRequest body)
         {
-            return new BatchDeleteContactsRequest(service, body);
+            return new BatchDeleteContactsRequest(this.service, body);
         }
 
         /// <summary>
-        /// Delete a batch of contacts. Any non-contact data will not be deleted. Limited to 10 parallel requests per
-        /// user.
+        /// Delete a batch of contacts. Any non-contact data will not be deleted. Mutate requests for the same user
+        /// should be sent sequentially to avoid increased latency and failures.
         /// </summary>
         public class BatchDeleteContactsRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.Empty>
         {
@@ -1596,17 +1624,17 @@ namespace Google.Apis.PeopleService.v1
 
         /// <summary>
         /// Update a batch of contacts and return a map of resource names to PersonResponses for the updated contacts.
-        /// Limited to 10 parallel requests per user.
+        /// Mutate requests for the same user should be sent sequentially to avoid increased latency and failures.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual BatchUpdateContactsRequest BatchUpdateContacts(Google.Apis.PeopleService.v1.Data.BatchUpdateContactsRequest body)
         {
-            return new BatchUpdateContactsRequest(service, body);
+            return new BatchUpdateContactsRequest(this.service, body);
         }
 
         /// <summary>
         /// Update a batch of contacts and return a map of resource names to PersonResponses for the updated contacts.
-        /// Limited to 10 parallel requests per user.
+        /// Mutate requests for the same user should be sent sequentially to avoid increased latency and failures.
         /// </summary>
         public class BatchUpdateContactsRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.BatchUpdateContactsResponse>
         {
@@ -1642,18 +1670,20 @@ namespace Google.Apis.PeopleService.v1
         /// <summary>
         /// Create a new contact and return the person resource for that contact. The request returns a 400 error if
         /// more than one field is specified on a field that is a singleton for contact sources: * biographies *
-        /// birthdays * genders * names
+        /// birthdays * genders * names Mutate requests for the same user should be sent sequentially to avoid increased
+        /// latency and failures.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual CreateContactRequest CreateContact(Google.Apis.PeopleService.v1.Data.Person body)
         {
-            return new CreateContactRequest(service, body);
+            return new CreateContactRequest(this.service, body);
         }
 
         /// <summary>
         /// Create a new contact and return the person resource for that contact. The request returns a 400 error if
         /// more than one field is specified on a field that is a singleton for contact sources: * biographies *
-        /// birthdays * genders * names
+        /// birthdays * genders * names Mutate requests for the same user should be sent sequentially to avoid increased
+        /// latency and failures.
         /// </summary>
         public class CreateContactRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.Person>
         {
@@ -1718,6 +1748,10 @@ namespace Google.Apis.PeopleService.v1
                 /// <summary>Returns SourceType.DOMAIN_CONTACT.</summary>
                 [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_DOMAIN_CONTACT")]
                 READSOURCETYPEDOMAINCONTACT = 3,
+
+                /// <summary>Returns SourceType.OTHER_CONTACT.</summary>
+                [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_OTHER_CONTACT")]
+                READSOURCETYPEOTHERCONTACT = 4,
             }
 
             /// <summary>Gets or sets the body of this request.</summary>
@@ -1758,14 +1792,20 @@ namespace Google.Apis.PeopleService.v1
             }
         }
 
-        /// <summary>Delete a contact person. Any non-contact data will not be deleted.</summary>
+        /// <summary>
+        /// Delete a contact person. Any non-contact data will not be deleted. Mutate requests for the same user should
+        /// be sent sequentially to avoid increased latency and failures.
+        /// </summary>
         /// <param name="resourceName">Required. The resource name of the contact to delete.</param>
         public virtual DeleteContactRequest DeleteContact(string resourceName)
         {
-            return new DeleteContactRequest(service, resourceName);
+            return new DeleteContactRequest(this.service, resourceName);
         }
 
-        /// <summary>Delete a contact person. Any non-contact data will not be deleted.</summary>
+        /// <summary>
+        /// Delete a contact person. Any non-contact data will not be deleted. Mutate requests for the same user should
+        /// be sent sequentially to avoid increased latency and failures.
+        /// </summary>
         public class DeleteContactRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.Empty>
         {
             /// <summary>Constructs a new DeleteContact request.</summary>
@@ -1803,14 +1843,20 @@ namespace Google.Apis.PeopleService.v1
             }
         }
 
-        /// <summary>Delete a contact's photo.</summary>
+        /// <summary>
+        /// Delete a contact's photo. Mutate requests for the same user should be done sequentially to avoid // lock
+        /// contention.
+        /// </summary>
         /// <param name="resourceName">Required. The resource name of the contact whose photo will be deleted.</param>
         public virtual DeleteContactPhotoRequest DeleteContactPhoto(string resourceName)
         {
-            return new DeleteContactPhotoRequest(service, resourceName);
+            return new DeleteContactPhotoRequest(this.service, resourceName);
         }
 
-        /// <summary>Delete a contact's photo.</summary>
+        /// <summary>
+        /// Delete a contact's photo. Mutate requests for the same user should be done sequentially to avoid // lock
+        /// contention.
+        /// </summary>
         public class DeleteContactPhotoRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.DeleteContactPhotoResponse>
         {
             /// <summary>Constructs a new DeleteContactPhoto request.</summary>
@@ -1878,6 +1924,10 @@ namespace Google.Apis.PeopleService.v1
                 /// <summary>Returns SourceType.DOMAIN_CONTACT.</summary>
                 [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_DOMAIN_CONTACT")]
                 READSOURCETYPEDOMAINCONTACT = 3,
+
+                /// <summary>Returns SourceType.OTHER_CONTACT.</summary>
+                [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_OTHER_CONTACT")]
+                READSOURCETYPEOTHERCONTACT = 4,
             }
 
             /// <summary>Gets the method name.</summary>
@@ -1932,7 +1982,7 @@ namespace Google.Apis.PeopleService.v1
         /// </param>
         public virtual GetRequest Get(string resourceName)
         {
-            return new GetRequest(service, resourceName);
+            return new GetRequest(this.service, resourceName);
         }
 
         /// <summary>
@@ -2018,6 +2068,10 @@ namespace Google.Apis.PeopleService.v1
                 /// <summary>Returns SourceType.DOMAIN_CONTACT.</summary>
                 [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_DOMAIN_CONTACT")]
                 READSOURCETYPEDOMAINCONTACT = 3,
+
+                /// <summary>Returns SourceType.OTHER_CONTACT.</summary>
+                [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_OTHER_CONTACT")]
+                READSOURCETYPEOTHERCONTACT = 4,
             }
 
             /// <summary>Gets the method name.</summary>
@@ -2075,7 +2129,7 @@ namespace Google.Apis.PeopleService.v1
         /// </summary>
         public virtual GetBatchGetRequest GetBatchGet()
         {
-            return new GetBatchGetRequest(service);
+            return new GetBatchGetRequest(this.service);
         }
 
         /// <summary>
@@ -2164,6 +2218,10 @@ namespace Google.Apis.PeopleService.v1
                 /// <summary>Returns SourceType.DOMAIN_CONTACT.</summary>
                 [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_DOMAIN_CONTACT")]
                 READSOURCETYPEDOMAINCONTACT = 3,
+
+                /// <summary>Returns SourceType.OTHER_CONTACT.</summary>
+                [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_OTHER_CONTACT")]
+                READSOURCETYPEOTHERCONTACT = 4,
             }
 
             /// <summary>Gets the method name.</summary>
@@ -2224,7 +2282,7 @@ namespace Google.Apis.PeopleService.v1
         /// </summary>
         public virtual ListDirectoryPeopleRequest ListDirectoryPeople()
         {
-            return new ListDirectoryPeopleRequest(service);
+            return new ListDirectoryPeopleRequest(this.service);
         }
 
         /// <summary>
@@ -2436,7 +2494,7 @@ namespace Google.Apis.PeopleService.v1
         /// </summary>
         public virtual SearchContactsRequest SearchContacts()
         {
-            return new SearchContactsRequest(service);
+            return new SearchContactsRequest(this.service);
         }
 
         /// <summary>
@@ -2520,6 +2578,10 @@ namespace Google.Apis.PeopleService.v1
                 /// <summary>Returns SourceType.DOMAIN_CONTACT.</summary>
                 [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_DOMAIN_CONTACT")]
                 READSOURCETYPEDOMAINCONTACT = 3,
+
+                /// <summary>Returns SourceType.OTHER_CONTACT.</summary>
+                [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_OTHER_CONTACT")]
+                READSOURCETYPEOTHERCONTACT = 4,
             }
 
             /// <summary>Gets the method name.</summary>
@@ -2576,7 +2638,7 @@ namespace Google.Apis.PeopleService.v1
         /// </summary>
         public virtual SearchDirectoryPeopleRequest SearchDirectoryPeople()
         {
-            return new SearchDirectoryPeopleRequest(service);
+            return new SearchDirectoryPeopleRequest(this.service);
         }
 
         /// <summary>
@@ -2767,15 +2829,16 @@ namespace Google.Apis.PeopleService.v1
         /// latest person. The server returns a 400 error if `memberships` are being updated and there are no contact
         /// group memberships specified on the person. The server returns a 400 error if more than one field is
         /// specified on a field that is a singleton for contact sources: * biographies * birthdays * genders * names
+        /// Mutate requests for the same user should be sent sequentially to avoid increased latency and failures.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resourceName">
-        /// The resource name for the person, assigned by the server. An ASCII string with a max length of 27
-        /// characters, in the form of `people/{person_id}`.
+        /// The resource name for the person, assigned by the server. An ASCII string in the form of
+        /// `people/{person_id}`.
         /// </param>
         public virtual UpdateContactRequest UpdateContact(Google.Apis.PeopleService.v1.Data.Person body, string resourceName)
         {
-            return new UpdateContactRequest(service, body, resourceName);
+            return new UpdateContactRequest(this.service, body, resourceName);
         }
 
         /// <summary>
@@ -2788,6 +2851,7 @@ namespace Google.Apis.PeopleService.v1
         /// latest person. The server returns a 400 error if `memberships` are being updated and there are no contact
         /// group memberships specified on the person. The server returns a 400 error if more than one field is
         /// specified on a field that is a singleton for contact sources: * biographies * birthdays * genders * names
+        /// Mutate requests for the same user should be sent sequentially to avoid increased latency and failures.
         /// </summary>
         public class UpdateContactRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.Person>
         {
@@ -2800,8 +2864,8 @@ namespace Google.Apis.PeopleService.v1
             }
 
             /// <summary>
-            /// The resource name for the person, assigned by the server. An ASCII string with a max length of 27
-            /// characters, in the form of `people/{person_id}`.
+            /// The resource name for the person, assigned by the server. An ASCII string in the form of
+            /// `people/{person_id}`.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resourceName", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string ResourceName { get; private set; }
@@ -2860,6 +2924,10 @@ namespace Google.Apis.PeopleService.v1
                 /// <summary>Returns SourceType.DOMAIN_CONTACT.</summary>
                 [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_DOMAIN_CONTACT")]
                 READSOURCETYPEDOMAINCONTACT = 3,
+
+                /// <summary>Returns SourceType.OTHER_CONTACT.</summary>
+                [Google.Apis.Util.StringValueAttribute("READ_SOURCE_TYPE_OTHER_CONTACT")]
+                READSOURCETYPEOTHERCONTACT = 4,
             }
 
             /// <summary>
@@ -2926,15 +2994,21 @@ namespace Google.Apis.PeopleService.v1
             }
         }
 
-        /// <summary>Update a contact's photo.</summary>
+        /// <summary>
+        /// Update a contact's photo. Mutate requests for the same user should be sent sequentially to avoid increased
+        /// latency and failures.
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resourceName">Required. Person resource name</param>
         public virtual UpdateContactPhotoRequest UpdateContactPhoto(Google.Apis.PeopleService.v1.Data.UpdateContactPhotoRequest body, string resourceName)
         {
-            return new UpdateContactPhotoRequest(service, body, resourceName);
+            return new UpdateContactPhotoRequest(this.service, body, resourceName);
         }
 
-        /// <summary>Update a contact's photo.</summary>
+        /// <summary>
+        /// Update a contact's photo. Mutate requests for the same user should be sent sequentially to avoid increased
+        /// latency and failures.
+        /// </summary>
         public class UpdateContactPhotoRequest : PeopleServiceBaseServiceRequest<Google.Apis.PeopleService.v1.Data.UpdateContactPhotoResponse>
         {
             /// <summary>Constructs a new UpdateContactPhoto request.</summary>
@@ -3211,11 +3285,12 @@ namespace Google.Apis.PeopleService.v1.Data
 
     /// <summary>
     /// A person's birthday. At least one of the `date` and `text` fields are specified. The `date` and `text` fields
-    /// typically represent the same date, but are not guaranteed to.
+    /// typically represent the same date, but are not guaranteed to. Clients should always set the `date` field when
+    /// mutating birthdays.
     /// </summary>
     public class Birthday : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The date of the birthday.</summary>
+        /// <summary>The structured date of the birthday.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("date")]
         public virtual Date Date { get; set; }
 
@@ -3223,7 +3298,10 @@ namespace Google.Apis.PeopleService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
         public virtual FieldMetadata Metadata { get; set; }
 
-        /// <summary>A free-form string representing the user's birthday.</summary>
+        /// <summary>
+        /// Prefer to use the `date` field if set. A free-form string representing the user's birthday. This value is
+        /// not validated.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("text")]
         public virtual string Text { get; set; }
 
@@ -3384,9 +3462,42 @@ namespace Google.Apis.PeopleService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("deleted")]
         public virtual System.Nullable<bool> Deleted { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time the group was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3500,10 +3611,10 @@ namespace Google.Apis.PeopleService.v1.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class Date : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3586,8 +3697,7 @@ namespace Google.Apis.PeopleService.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4414,8 +4524,8 @@ namespace Google.Apis.PeopleService.v1.Data
         public virtual System.Collections.Generic.IList<Residence> Residences { get; set; }
 
         /// <summary>
-        /// The resource name for the person, assigned by the server. An ASCII string with a max length of 27
-        /// characters, in the form of `people/{person_id}`.
+        /// The resource name for the person, assigned by the server. An ASCII string in the form of
+        /// `people/{person_id}`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resourceName")]
         public virtual string ResourceName { get; set; }
@@ -4807,11 +4917,44 @@ namespace Google.Apis.PeopleService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
         /// Output only. **Only populated in `person.metadata.sources`.** Last update timestamp of this source.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
     }
 
     /// <summary>

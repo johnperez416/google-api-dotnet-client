@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,9 +34,13 @@ namespace Google.Apis.CloudBuild.v1
         /// <param name="initializer">The service initializer.</param>
         public CloudBuildService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
+            GithubDotComWebhook = new GithubDotComWebhookResource(this);
+            Locations = new LocationsResource(this);
             Operations = new OperationsResource(this);
             Projects = new ProjectsResource(this);
             V1 = new V1Resource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudbuild.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudbuild.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +50,16 @@ namespace Google.Apis.CloudBuild.v1
         public override string Name => "cloudbuild";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudbuild.googleapis.com/";
-        #else
-            "https://cloudbuild.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudbuild.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Build API.</summary>
         public class Scope
@@ -83,6 +80,12 @@ namespace Google.Apis.CloudBuild.v1
             /// </summary>
             public const string CloudPlatform = "https://www.googleapis.com/auth/cloud-platform";
         }
+
+        /// <summary>Gets the GithubDotComWebhook resource.</summary>
+        public virtual GithubDotComWebhookResource GithubDotComWebhook { get; }
+
+        /// <summary>Gets the Locations resource.</summary>
+        public virtual LocationsResource Locations { get; }
 
         /// <summary>Gets the Operations resource.</summary>
         public virtual OperationsResource Operations { get; }
@@ -275,6 +278,158 @@ namespace Google.Apis.CloudBuild.v1
         }
     }
 
+    /// <summary>The "githubDotComWebhook" collection of methods.</summary>
+    public class GithubDotComWebhookResource
+    {
+        private const string Resource = "githubDotComWebhook";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public GithubDotComWebhookResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>ReceiveGitHubDotComWebhook is called when the API receives a github.com webhook.</summary>
+        /// <param name="body">The body of the request.</param>
+        public virtual ReceiveRequest Receive(Google.Apis.CloudBuild.v1.Data.HttpBody body)
+        {
+            return new ReceiveRequest(this.service, body);
+        }
+
+        /// <summary>ReceiveGitHubDotComWebhook is called when the API receives a github.com webhook.</summary>
+        public class ReceiveRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Empty>
+        {
+            /// <summary>Constructs a new Receive request.</summary>
+            public ReceiveRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudBuild.v1.Data.HttpBody body) : base(service)
+            {
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// For GitHub Enterprise webhooks, this key is used to associate the webhook request with the
+            /// GitHubEnterpriseConfig to use for validation.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("webhookKey", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string WebhookKey { get; set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.CloudBuild.v1.Data.HttpBody Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "receive";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/githubDotComWebhook:receive";
+
+            /// <summary>Initializes Receive parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("webhookKey", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "webhookKey",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
+    /// <summary>The "locations" collection of methods.</summary>
+    public class LocationsResource
+    {
+        private const string Resource = "locations";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public LocationsResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>ReceiveRegionalWebhook is called when the API receives a regional GitHub webhook.</summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="location">Required. The location where the webhook should be sent.</param>
+        public virtual RegionalWebhookRequest RegionalWebhook(Google.Apis.CloudBuild.v1.Data.HttpBody body, string location)
+        {
+            return new RegionalWebhookRequest(this.service, body, location);
+        }
+
+        /// <summary>ReceiveRegionalWebhook is called when the API receives a regional GitHub webhook.</summary>
+        public class RegionalWebhookRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Empty>
+        {
+            /// <summary>Constructs a new RegionalWebhook request.</summary>
+            public RegionalWebhookRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudBuild.v1.Data.HttpBody body, string location) : base(service)
+            {
+                Location = location;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Required. The location where the webhook should be sent.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("location", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Location { get; private set; }
+
+            /// <summary>
+            /// For GitHub Enterprise webhooks, this key is used to associate the webhook request with the
+            /// GitHubEnterpriseConfig to use for validation.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("webhookKey", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string WebhookKey { get; set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.CloudBuild.v1.Data.HttpBody Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "regionalWebhook";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+location}/regionalWebhook";
+
+            /// <summary>Initializes RegionalWebhook parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("location", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "location",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^locations/[^/]+$",
+                });
+                RequestParameters.Add("webhookKey", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "webhookKey",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
     /// <summary>The "operations" collection of methods.</summary>
     public class OperationsResource
     {
@@ -295,13 +450,13 @@ namespace Google.Apis.CloudBuild.v1
         /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether
         /// the cancellation succeeded or whether the operation completed despite cancellation. On successful
         /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
-        /// with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+        /// with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="name">The name of the operation resource to be cancelled.</param>
         public virtual CancelRequest Cancel(Google.Apis.CloudBuild.v1.Data.CancelOperationRequest body, string name)
         {
-            return new CancelRequest(service, body, name);
+            return new CancelRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -310,7 +465,7 @@ namespace Google.Apis.CloudBuild.v1
         /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether
         /// the cancellation succeeded or whether the operation completed despite cancellation. On successful
         /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
-        /// with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+        /// with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
         /// </summary>
         public class CancelRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Empty>
         {
@@ -363,7 +518,7 @@ namespace Google.Apis.CloudBuild.v1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -453,7 +608,7 @@ namespace Google.Apis.CloudBuild.v1
             /// </param>
             public virtual ApproveRequest Approve(Google.Apis.CloudBuild.v1.Data.ApproveBuildRequest body, string name)
             {
-                return new ApproveRequest(service, body, name);
+                return new ApproveRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -512,7 +667,7 @@ namespace Google.Apis.CloudBuild.v1
             /// <param name="id">Required. ID of the build.</param>
             public virtual CancelRequest Cancel(Google.Apis.CloudBuild.v1.Data.CancelBuildRequest body, string projectId, string id)
             {
-                return new CancelRequest(service, body, projectId, id);
+                return new CancelRequest(this.service, body, projectId, id);
             }
 
             /// <summary>Cancels a build in progress.</summary>
@@ -582,7 +737,7 @@ namespace Google.Apis.CloudBuild.v1
             /// <param name="projectId">Required. ID of the project.</param>
             public virtual CreateRequest Create(Google.Apis.CloudBuild.v1.Data.Build body, string projectId)
             {
-                return new CreateRequest(service, body, projectId);
+                return new CreateRequest(this.service, body, projectId);
             }
 
             /// <summary>
@@ -657,7 +812,7 @@ namespace Google.Apis.CloudBuild.v1
             /// <param name="id">Required. ID of the build.</param>
             public virtual GetRequest Get(string projectId, string id)
             {
-                return new GetRequest(service, projectId, id);
+                return new GetRequest(this.service, projectId, id);
             }
 
             /// <summary>
@@ -736,7 +891,7 @@ namespace Google.Apis.CloudBuild.v1
             /// <param name="projectId">Required. ID of the project.</param>
             public virtual ListRequest List(string projectId)
             {
-                return new ListRequest(service, projectId);
+                return new ListRequest(this.service, projectId);
             }
 
             /// <summary>
@@ -774,7 +929,7 @@ namespace Google.Apis.CloudBuild.v1
                 public virtual string PageToken { get; set; }
 
                 /// <summary>
-                /// The parent of the collection of `Builds`. Format: `projects/{project}/locations/location`
+                /// The parent of the collection of `Builds`. Format: `projects/{project}/locations/{location}`
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Parent { get; set; }
@@ -843,9 +998,9 @@ namespace Google.Apis.CloudBuild.v1
             /// built from the tip of a branch, the retried build will build from the tip of that branch, which may not
             /// be the same revision as the original build. * If the original build specified a commit sha or revision
             /// ID, the retried build will use the identical source. For builds that specify `StorageSource`: * If the
-            /// original build pulled source from Google Cloud Storage without specifying the generation of the object,
-            /// the new build will use the current object, which may be different from the original build source. * If
-            /// the original build pulled source from Cloud Storage and specified the generation of the object, the new
+            /// original build pulled source from Cloud Storage without specifying the generation of the object, the new
+            /// build will use the current object, which may be different from the original build source. * If the
+            /// original build pulled source from Cloud Storage and specified the generation of the object, the new
             /// build will attempt to use the same object, which may or may not be available depending on the bucket's
             /// lifecycle management settings.
             /// </summary>
@@ -854,7 +1009,7 @@ namespace Google.Apis.CloudBuild.v1
             /// <param name="id">Required. Build ID of the original build.</param>
             public virtual RetryRequest Retry(Google.Apis.CloudBuild.v1.Data.RetryBuildRequest body, string projectId, string id)
             {
-                return new RetryRequest(service, body, projectId, id);
+                return new RetryRequest(this.service, body, projectId, id);
             }
 
             /// <summary>
@@ -865,9 +1020,9 @@ namespace Google.Apis.CloudBuild.v1
             /// built from the tip of a branch, the retried build will build from the tip of that branch, which may not
             /// be the same revision as the original build. * If the original build specified a commit sha or revision
             /// ID, the retried build will use the identical source. For builds that specify `StorageSource`: * If the
-            /// original build pulled source from Google Cloud Storage without specifying the generation of the object,
-            /// the new build will use the current object, which may be different from the original build source. * If
-            /// the original build pulled source from Cloud Storage and specified the generation of the object, the new
+            /// original build pulled source from Cloud Storage without specifying the generation of the object, the new
+            /// build will use the current object, which may be different from the original build source. * If the
+            /// original build pulled source from Cloud Storage and specified the generation of the object, the new
             /// build will attempt to use the same object, which may or may not be available depending on the bucket's
             /// lifecycle management settings.
             /// </summary>
@@ -953,7 +1108,7 @@ namespace Google.Apis.CloudBuild.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.CloudBuild.v1.Data.GitHubEnterpriseConfig body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Create an association between a GCP project and a GitHub Enterprise server.</summary>
@@ -975,7 +1130,7 @@ namespace Google.Apis.CloudBuild.v1
 
                 /// <summary>
                 /// Optional. The ID to use for the GithubEnterpriseConfig, which will become the final component of the
-                /// GithubEnterpriseConfig’s resource name. ghe_config_id must meet the following requirements: + They
+                /// GithubEnterpriseConfig's resource name. ghe_config_id must meet the following requirements: + They
                 /// must contain only alphanumeric characters and dashes. + They can be 1-64 characters long. + They
                 /// must begin and end with an alphanumeric character
                 /// </summary>
@@ -1035,11 +1190,11 @@ namespace Google.Apis.CloudBuild.v1
             /// <summary>Delete an association between a GCP project and a GitHub Enterprise server.</summary>
             /// <param name="name">
             /// This field should contain the name of the enterprise config resource. For example:
-            /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+            /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Delete an association between a GCP project and a GitHub Enterprise server.</summary>
@@ -1054,7 +1209,7 @@ namespace Google.Apis.CloudBuild.v1
 
                 /// <summary>
                 /// This field should contain the name of the enterprise config resource. For example:
-                /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+                /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
@@ -1110,11 +1265,11 @@ namespace Google.Apis.CloudBuild.v1
             /// <summary>Retrieve a GitHubEnterpriseConfig.</summary>
             /// <param name="name">
             /// This field should contain the name of the enterprise config resource. For example:
-            /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+            /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Retrieve a GitHubEnterpriseConfig.</summary>
@@ -1129,7 +1284,7 @@ namespace Google.Apis.CloudBuild.v1
 
                 /// <summary>
                 /// This field should contain the name of the enterprise config resource. For example:
-                /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+                /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
@@ -1188,7 +1343,7 @@ namespace Google.Apis.CloudBuild.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>List all GitHubEnterpriseConfigs for a given project.</summary>
@@ -1246,12 +1401,12 @@ namespace Google.Apis.CloudBuild.v1
             /// <summary>Update an association between a GCP project and a GitHub Enterprise server.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
-            /// Optional. The full resource name for the GitHubEnterpriseConfig For example:
-            /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+            /// The full resource name for the GitHubEnterpriseConfig For example:
+            /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.CloudBuild.v1.Data.GitHubEnterpriseConfig body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Update an association between a GCP project and a GitHub Enterprise server.</summary>
@@ -1266,8 +1421,8 @@ namespace Google.Apis.CloudBuild.v1
                 }
 
                 /// <summary>
-                /// Optional. The full resource name for the GitHubEnterpriseConfig For example:
-                /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+                /// The full resource name for the GitHubEnterpriseConfig For example:
+                /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
@@ -1333,11 +1488,578 @@ namespace Google.Apis.CloudBuild.v1
             public LocationsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                BitbucketServerConfigs = new BitbucketServerConfigsResource(service);
                 Builds = new BuildsResource(service);
+                GitLabConfigs = new GitLabConfigsResource(service);
                 GithubEnterpriseConfigs = new GithubEnterpriseConfigsResource(service);
                 Operations = new OperationsResource(service);
                 Triggers = new TriggersResource(service);
                 WorkerPools = new WorkerPoolsResource(service);
+            }
+
+            /// <summary>Gets the BitbucketServerConfigs resource.</summary>
+            public virtual BitbucketServerConfigsResource BitbucketServerConfigs { get; }
+
+            /// <summary>The "bitbucketServerConfigs" collection of methods.</summary>
+            public class BitbucketServerConfigsResource
+            {
+                private const string Resource = "bitbucketServerConfigs";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public BitbucketServerConfigsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    ConnectedRepositories = new ConnectedRepositoriesResource(service);
+                    Repos = new ReposResource(service);
+                }
+
+                /// <summary>Gets the ConnectedRepositories resource.</summary>
+                public virtual ConnectedRepositoriesResource ConnectedRepositories { get; }
+
+                /// <summary>The "connectedRepositories" collection of methods.</summary>
+                public class ConnectedRepositoriesResource
+                {
+                    private const string Resource = "connectedRepositories";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public ConnectedRepositoriesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>Batch connecting Bitbucket Server repositories to Cloud Build.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// The name of the `BitbucketServerConfig` that added connected repository. Format:
+                    /// `projects/{project}/locations/{location}/bitbucketServerConfigs/{config}`
+                    /// </param>
+                    public virtual BatchCreateRequest BatchCreate(Google.Apis.CloudBuild.v1.Data.BatchCreateBitbucketServerConnectedRepositoriesRequest body, string parent)
+                    {
+                        return new BatchCreateRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>Batch connecting Bitbucket Server repositories to Cloud Build.</summary>
+                    public class BatchCreateRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new BatchCreate request.</summary>
+                        public BatchCreateRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudBuild.v1.Data.BatchCreateBitbucketServerConnectedRepositoriesRequest body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// The name of the `BitbucketServerConfig` that added connected repository. Format:
+                        /// `projects/{project}/locations/{location}/bitbucketServerConfigs/{config}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.CloudBuild.v1.Data.BatchCreateBitbucketServerConnectedRepositoriesRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "batchCreate";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+parent}/connectedRepositories:batchCreate";
+
+                        /// <summary>Initializes BatchCreate parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/bitbucketServerConfigs/[^/]+$",
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>Gets the Repos resource.</summary>
+                public virtual ReposResource Repos { get; }
+
+                /// <summary>The "repos" collection of methods.</summary>
+                public class ReposResource
+                {
+                    private const string Resource = "repos";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public ReposResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// List all repositories for a given `BitbucketServerConfig`. This API is experimental.
+                    /// </summary>
+                    /// <param name="parent">Required. Name of the parent resource.</param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>
+                    /// List all repositories for a given `BitbucketServerConfig`. This API is experimental.
+                    /// </summary>
+                    public class ListRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.ListBitbucketServerRepositoriesResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. Name of the parent resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// The maximum number of configs to return. The service may return fewer than this value. The
+                        /// maximum value is 1000; values above 1000 will be coerced to 1000.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// A page token, received from a previous `ListBitbucketServerRepositoriesRequest` call.
+                        /// Provide this to retrieve the subsequent page. When paginating, all other parameters provided
+                        /// to `ListBitbucketServerConfigsRequest` must match the call that provided the page token.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+parent}/repos";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/bitbucketServerConfigs/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>Creates a new `BitbucketServerConfig`. This API is experimental.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">Required. Name of the parent resource.</param>
+                public virtual CreateRequest Create(Google.Apis.CloudBuild.v1.Data.BitbucketServerConfig body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new `BitbucketServerConfig`. This API is experimental.</summary>
+                public class CreateRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudBuild.v1.Data.BitbucketServerConfig body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Name of the parent resource.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The ID to use for the BitbucketServerConfig, which will become the final component of
+                    /// the BitbucketServerConfig's resource name. bitbucket_server_config_id must meet the following
+                    /// requirements: + They must contain only alphanumeric characters and dashes. + They can be 1-64
+                    /// characters long. + They must begin and end with an alphanumeric character.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("bitbucketServerConfigId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string BitbucketServerConfigId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudBuild.v1.Data.BitbucketServerConfig Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/bitbucketServerConfigs";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("bitbucketServerConfigId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "bitbucketServerConfigId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Delete a `BitbucketServerConfig`. This API is experimental.</summary>
+                /// <param name="name">Required. The config resource name.</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Delete a `BitbucketServerConfig`. This API is experimental.</summary>
+                public class DeleteRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The config resource name.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/bitbucketServerConfigs/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Retrieve a `BitbucketServerConfig`. This API is experimental.</summary>
+                /// <param name="name">Required. The config resource name.</param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Retrieve a `BitbucketServerConfig`. This API is experimental.</summary>
+                public class GetRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.BitbucketServerConfig>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The config resource name.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/bitbucketServerConfigs/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>List all `BitbucketServerConfigs` for a given project. This API is experimental.</summary>
+                /// <param name="parent">Required. Name of the parent resource.</param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>List all `BitbucketServerConfigs` for a given project. This API is experimental.</summary>
+                public class ListRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.ListBitbucketServerConfigsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Name of the parent resource.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// The maximum number of configs to return. The service may return fewer than this value. If
+                    /// unspecified, at most 50 configs will be returned. The maximum value is 1000; values above 1000
+                    /// will be coerced to 1000.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A page token, received from a previous `ListBitbucketServerConfigsRequest` call. Provide this to
+                    /// retrieve the subsequent page. When paginating, all other parameters provided to
+                    /// `ListBitbucketServerConfigsRequest` must match the call that provided the page token.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/bitbucketServerConfigs";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates an existing `BitbucketServerConfig`. This API is experimental.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">The resource name for the config.</param>
+                public virtual PatchRequest Patch(Google.Apis.CloudBuild.v1.Data.BitbucketServerConfig body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates an existing `BitbucketServerConfig`. This API is experimental.</summary>
+                public class PatchRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudBuild.v1.Data.BitbucketServerConfig body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>The resource name for the config.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Update mask for the resource. If this is set, the server will only update the fields specified
+                    /// in the field mask. Otherwise, a full update of the mutable resource fields will be performed.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudBuild.v1.Data.BitbucketServerConfig Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/bitbucketServerConfigs/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Remove a Bitbucket Server repository from a given BitbucketServerConfig's connected repositories.
+                /// This API is experimental.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="config">
+                /// Required. The name of the `BitbucketServerConfig` to remove a connected repository. Format:
+                /// `projects/{project}/locations/{location}/bitbucketServerConfigs/{config}`
+                /// </param>
+                public virtual RemoveBitbucketServerConnectedRepositoryRequest RemoveBitbucketServerConnectedRepository(Google.Apis.CloudBuild.v1.Data.RemoveBitbucketServerConnectedRepositoryRequest body, string config)
+                {
+                    return new RemoveBitbucketServerConnectedRepositoryRequest(this.service, body, config);
+                }
+
+                /// <summary>
+                /// Remove a Bitbucket Server repository from a given BitbucketServerConfig's connected repositories.
+                /// This API is experimental.
+                /// </summary>
+                public class RemoveBitbucketServerConnectedRepositoryRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new RemoveBitbucketServerConnectedRepository request.</summary>
+                    public RemoveBitbucketServerConnectedRepositoryRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudBuild.v1.Data.RemoveBitbucketServerConnectedRepositoryRequest body, string config) : base(service)
+                    {
+                        Config = config;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the `BitbucketServerConfig` to remove a connected repository. Format:
+                    /// `projects/{project}/locations/{location}/bitbucketServerConfigs/{config}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("config", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Config { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudBuild.v1.Data.RemoveBitbucketServerConnectedRepositoryRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "removeBitbucketServerConnectedRepository";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+config}:removeBitbucketServerConnectedRepository";
+
+                    /// <summary>Initializes RemoveBitbucketServerConnectedRepository parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("config", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "config",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/bitbucketServerConfigs/[^/]+$",
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Builds resource.</summary>
@@ -1367,7 +2089,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual ApproveRequest Approve(Google.Apis.CloudBuild.v1.Data.ApproveBuildRequest body, string name)
                 {
-                    return new ApproveRequest(service, body, name);
+                    return new ApproveRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1427,7 +2149,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual CancelRequest Cancel(Google.Apis.CloudBuild.v1.Data.CancelBuildRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>Cancels a build in progress.</summary>
@@ -1490,7 +2212,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CloudBuild.v1.Data.Build body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1567,7 +2289,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1643,11 +2365,11 @@ namespace Google.Apis.CloudBuild.v1
                 /// finished successfully or unsuccessfully.
                 /// </summary>
                 /// <param name="parent">
-                /// The parent of the collection of `Builds`. Format: `projects/{project}/locations/location`
+                /// The parent of the collection of `Builds`. Format: `projects/{project}/locations/{location}`
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -1664,7 +2386,7 @@ namespace Google.Apis.CloudBuild.v1
                     }
 
                     /// <summary>
-                    /// The parent of the collection of `Builds`. Format: `projects/{project}/locations/location`
+                    /// The parent of the collection of `Builds`. Format: `projects/{project}/locations/{location}`
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -1754,11 +2476,11 @@ namespace Google.Apis.CloudBuild.v1
                 /// build built from the tip of a branch, the retried build will build from the tip of that branch,
                 /// which may not be the same revision as the original build. * If the original build specified a commit
                 /// sha or revision ID, the retried build will use the identical source. For builds that specify
-                /// `StorageSource`: * If the original build pulled source from Google Cloud Storage without specifying
-                /// the generation of the object, the new build will use the current object, which may be different from
-                /// the original build source. * If the original build pulled source from Cloud Storage and specified
-                /// the generation of the object, the new build will attempt to use the same object, which may or may
-                /// not be available depending on the bucket's lifecycle management settings.
+                /// `StorageSource`: * If the original build pulled source from Cloud Storage without specifying the
+                /// generation of the object, the new build will use the current object, which may be different from the
+                /// original build source. * If the original build pulled source from Cloud Storage and specified the
+                /// generation of the object, the new build will attempt to use the same object, which may or may not be
+                /// available depending on the bucket's lifecycle management settings.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -1766,7 +2488,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual RetryRequest Retry(Google.Apis.CloudBuild.v1.Data.RetryBuildRequest body, string name)
                 {
-                    return new RetryRequest(service, body, name);
+                    return new RetryRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1777,11 +2499,11 @@ namespace Google.Apis.CloudBuild.v1
                 /// build built from the tip of a branch, the retried build will build from the tip of that branch,
                 /// which may not be the same revision as the original build. * If the original build specified a commit
                 /// sha or revision ID, the retried build will use the identical source. For builds that specify
-                /// `StorageSource`: * If the original build pulled source from Google Cloud Storage without specifying
-                /// the generation of the object, the new build will use the current object, which may be different from
-                /// the original build source. * If the original build pulled source from Cloud Storage and specified
-                /// the generation of the object, the new build will attempt to use the same object, which may or may
-                /// not be available depending on the bucket's lifecycle management settings.
+                /// `StorageSource`: * If the original build pulled source from Cloud Storage without specifying the
+                /// generation of the object, the new build will use the current object, which may be different from the
+                /// original build source. * If the original build pulled source from Cloud Storage and specified the
+                /// generation of the object, the new build will attempt to use the same object, which may or may not be
+                /// available depending on the bucket's lifecycle management settings.
                 /// </summary>
                 public class RetryRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Operation>
                 {
@@ -1831,6 +2553,570 @@ namespace Google.Apis.CloudBuild.v1
                 }
             }
 
+            /// <summary>Gets the GitLabConfigs resource.</summary>
+            public virtual GitLabConfigsResource GitLabConfigs { get; }
+
+            /// <summary>The "gitLabConfigs" collection of methods.</summary>
+            public class GitLabConfigsResource
+            {
+                private const string Resource = "gitLabConfigs";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public GitLabConfigsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    ConnectedRepositories = new ConnectedRepositoriesResource(service);
+                    Repos = new ReposResource(service);
+                }
+
+                /// <summary>Gets the ConnectedRepositories resource.</summary>
+                public virtual ConnectedRepositoriesResource ConnectedRepositories { get; }
+
+                /// <summary>The "connectedRepositories" collection of methods.</summary>
+                public class ConnectedRepositoriesResource
+                {
+                    private const string Resource = "connectedRepositories";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public ConnectedRepositoriesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Batch connecting GitLab repositories to Cloud Build. This API is experimental.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// The name of the `GitLabConfig` that adds connected repositories. Format:
+                    /// `projects/{project}/locations/{location}/gitLabConfigs/{config}`
+                    /// </param>
+                    public virtual BatchCreateRequest BatchCreate(Google.Apis.CloudBuild.v1.Data.BatchCreateGitLabConnectedRepositoriesRequest body, string parent)
+                    {
+                        return new BatchCreateRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>
+                    /// Batch connecting GitLab repositories to Cloud Build. This API is experimental.
+                    /// </summary>
+                    public class BatchCreateRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new BatchCreate request.</summary>
+                        public BatchCreateRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudBuild.v1.Data.BatchCreateGitLabConnectedRepositoriesRequest body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// The name of the `GitLabConfig` that adds connected repositories. Format:
+                        /// `projects/{project}/locations/{location}/gitLabConfigs/{config}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.CloudBuild.v1.Data.BatchCreateGitLabConnectedRepositoriesRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "batchCreate";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+parent}/connectedRepositories:batchCreate";
+
+                        /// <summary>Initializes BatchCreate parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/gitLabConfigs/[^/]+$",
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>Gets the Repos resource.</summary>
+                public virtual ReposResource Repos { get; }
+
+                /// <summary>The "repos" collection of methods.</summary>
+                public class ReposResource
+                {
+                    private const string Resource = "repos";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public ReposResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>List all repositories for a given `GitLabConfig`. This API is experimental</summary>
+                    /// <param name="parent">Required. Name of the parent resource.</param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>List all repositories for a given `GitLabConfig`. This API is experimental</summary>
+                    public class ListRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.ListGitLabRepositoriesResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. Name of the parent resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// The maximum number of repositories to return. The service may return fewer than this value.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// A page token, received from a previous ListGitLabRepositoriesRequest` call. Provide this to
+                        /// retrieve the subsequent page. When paginating, all other parameters provided to
+                        /// `ListGitLabRepositoriesRequest` must match the call that provided the page token.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+parent}/repos";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/gitLabConfigs/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>Creates a new `GitLabConfig`. This API is experimental</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">Required. Name of the parent resource.</param>
+                public virtual CreateRequest Create(Google.Apis.CloudBuild.v1.Data.GitLabConfig body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new `GitLabConfig`. This API is experimental</summary>
+                public class CreateRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudBuild.v1.Data.GitLabConfig body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Name of the parent resource.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The ID to use for the GitLabConfig, which will become the final component of the
+                    /// GitLabConfig’s resource name. gitlab_config_id must meet the following requirements: + They must
+                    /// contain only alphanumeric characters and dashes. + They can be 1-64 characters long. + They must
+                    /// begin and end with an alphanumeric character
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("gitlabConfigId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string GitlabConfigId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudBuild.v1.Data.GitLabConfig Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/gitLabConfigs";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("gitlabConfigId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "gitlabConfigId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Delete a `GitLabConfig`. This API is experimental</summary>
+                /// <param name="name">Required. The config resource name.</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Delete a `GitLabConfig`. This API is experimental</summary>
+                public class DeleteRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The config resource name.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/gitLabConfigs/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Retrieves a `GitLabConfig`. This API is experimental</summary>
+                /// <param name="name">Required. The config resource name.</param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Retrieves a `GitLabConfig`. This API is experimental</summary>
+                public class GetRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.GitLabConfig>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The config resource name.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/gitLabConfigs/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>List all `GitLabConfigs` for a given project. This API is experimental</summary>
+                /// <param name="parent">Required. Name of the parent resource</param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>List all `GitLabConfigs` for a given project. This API is experimental</summary>
+                public class ListRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.ListGitLabConfigsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Name of the parent resource</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// The maximum number of configs to return. The service may return fewer than this value. If
+                    /// unspecified, at most 50 configs will be returned. The maximum value is 1000;, values above 1000
+                    /// will be coerced to 1000.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A page token, received from a previous ‘ListGitlabConfigsRequest’ call. Provide this to retrieve
+                    /// the subsequent page. When paginating, all other parameters provided to
+                    /// ‘ListGitlabConfigsRequest’ must match the call that provided the page token.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/gitLabConfigs";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates an existing `GitLabConfig`. This API is experimental</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">The resource name for the config.</param>
+                public virtual PatchRequest Patch(Google.Apis.CloudBuild.v1.Data.GitLabConfig body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates an existing `GitLabConfig`. This API is experimental</summary>
+                public class PatchRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudBuild.v1.Data.GitLabConfig body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>The resource name for the config.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Update mask for the resource. If this is set, the server will only update the fields specified
+                    /// in the field mask. Otherwise, a full update of the mutable resource fields will be performed.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudBuild.v1.Data.GitLabConfig Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/gitLabConfigs/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Remove a GitLab repository from a given GitLabConfig's connected repositories. This API is
+                /// experimental.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="config">
+                /// Required. The name of the `GitLabConfig` to remove a connected repository. Format:
+                /// `projects/{project}/locations/{location}/gitLabConfigs/{config}`
+                /// </param>
+                public virtual RemoveGitLabConnectedRepositoryRequest RemoveGitLabConnectedRepository(Google.Apis.CloudBuild.v1.Data.RemoveGitLabConnectedRepositoryRequest body, string config)
+                {
+                    return new RemoveGitLabConnectedRepositoryRequest(this.service, body, config);
+                }
+
+                /// <summary>
+                /// Remove a GitLab repository from a given GitLabConfig's connected repositories. This API is
+                /// experimental.
+                /// </summary>
+                public class RemoveGitLabConnectedRepositoryRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new RemoveGitLabConnectedRepository request.</summary>
+                    public RemoveGitLabConnectedRepositoryRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudBuild.v1.Data.RemoveGitLabConnectedRepositoryRequest body, string config) : base(service)
+                    {
+                        Config = config;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the `GitLabConfig` to remove a connected repository. Format:
+                    /// `projects/{project}/locations/{location}/gitLabConfigs/{config}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("config", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Config { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudBuild.v1.Data.RemoveGitLabConnectedRepositoryRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "removeGitLabConnectedRepository";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+config}:removeGitLabConnectedRepository";
+
+                    /// <summary>Initializes RemoveGitLabConnectedRepository parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("config", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "config",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/gitLabConfigs/[^/]+$",
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets the GithubEnterpriseConfigs resource.</summary>
             public virtual GithubEnterpriseConfigsResource GithubEnterpriseConfigs { get; }
 
@@ -1855,7 +3141,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CloudBuild.v1.Data.GitHubEnterpriseConfig body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Create an association between a GCP project and a GitHub Enterprise server.</summary>
@@ -1877,7 +3163,7 @@ namespace Google.Apis.CloudBuild.v1
 
                     /// <summary>
                     /// Optional. The ID to use for the GithubEnterpriseConfig, which will become the final component of
-                    /// the GithubEnterpriseConfig’s resource name. ghe_config_id must meet the following requirements:
+                    /// the GithubEnterpriseConfig's resource name. ghe_config_id must meet the following requirements:
                     /// + They must contain only alphanumeric characters and dashes. + They can be 1-64 characters long.
                     /// + They must begin and end with an alphanumeric character
                     /// </summary>
@@ -1937,11 +3223,11 @@ namespace Google.Apis.CloudBuild.v1
                 /// <summary>Delete an association between a GCP project and a GitHub Enterprise server.</summary>
                 /// <param name="name">
                 /// This field should contain the name of the enterprise config resource. For example:
-                /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+                /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Delete an association between a GCP project and a GitHub Enterprise server.</summary>
@@ -1956,7 +3242,7 @@ namespace Google.Apis.CloudBuild.v1
 
                     /// <summary>
                     /// This field should contain the name of the enterprise config resource. For example:
-                    /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+                    /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -2012,11 +3298,11 @@ namespace Google.Apis.CloudBuild.v1
                 /// <summary>Retrieve a GitHubEnterpriseConfig.</summary>
                 /// <param name="name">
                 /// This field should contain the name of the enterprise config resource. For example:
-                /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+                /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Retrieve a GitHubEnterpriseConfig.</summary>
@@ -2031,7 +3317,7 @@ namespace Google.Apis.CloudBuild.v1
 
                     /// <summary>
                     /// This field should contain the name of the enterprise config resource. For example:
-                    /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+                    /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -2090,7 +3376,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>List all GitHubEnterpriseConfigs for a given project.</summary>
@@ -2148,12 +3434,12 @@ namespace Google.Apis.CloudBuild.v1
                 /// <summary>Update an association between a GCP project and a GitHub Enterprise server.</summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// Optional. The full resource name for the GitHubEnterpriseConfig For example:
-                /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+                /// The full resource name for the GitHubEnterpriseConfig For example:
+                /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CloudBuild.v1.Data.GitHubEnterpriseConfig body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Update an association between a GCP project and a GitHub Enterprise server.</summary>
@@ -2168,8 +3454,8 @@ namespace Google.Apis.CloudBuild.v1
                     }
 
                     /// <summary>
-                    /// Optional. The full resource name for the GitHubEnterpriseConfig For example:
-                    /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+                    /// The full resource name for the GitHubEnterpriseConfig For example:
+                    /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -2243,13 +3529,13 @@ namespace Google.Apis.CloudBuild.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.CloudBuild.v1.Data.CancelOperationRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -2258,7 +3544,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 public class CancelRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Empty>
                 {
@@ -2311,7 +3597,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -2373,7 +3659,7 @@ namespace Google.Apis.CloudBuild.v1
                     this.service = service;
                 }
 
-                /// <summary>Creates a new `BuildTrigger`. This API is experimental.</summary>
+                /// <summary>Creates a new `BuildTrigger`.</summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// The parent resource where this trigger will be created. Format:
@@ -2381,10 +3667,10 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CloudBuild.v1.Data.BuildTrigger body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
-                /// <summary>Creates a new `BuildTrigger`. This API is experimental.</summary>
+                /// <summary>Creates a new `BuildTrigger`.</summary>
                 public class CreateRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.BuildTrigger>
                 {
                     /// <summary>Constructs a new Create request.</summary>
@@ -2444,21 +3730,17 @@ namespace Google.Apis.CloudBuild.v1
                     }
                 }
 
-                /// <summary>
-                /// Deletes a `BuildTrigger` by its project ID and trigger ID. This API is experimental.
-                /// </summary>
+                /// <summary>Deletes a `BuildTrigger` by its project ID and trigger ID.</summary>
                 /// <param name="name">
                 /// The name of the `Trigger` to delete. Format:
                 /// `projects/{project}/locations/{location}/triggers/{trigger}`
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
-                /// <summary>
-                /// Deletes a `BuildTrigger` by its project ID and trigger ID. This API is experimental.
-                /// </summary>
+                /// <summary>Deletes a `BuildTrigger` by its project ID and trigger ID.</summary>
                 public class DeleteRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Empty>
                 {
                     /// <summary>Constructs a new Delete request.</summary>
@@ -2523,17 +3805,17 @@ namespace Google.Apis.CloudBuild.v1
                     }
                 }
 
-                /// <summary>Returns information about a `BuildTrigger`. This API is experimental.</summary>
+                /// <summary>Returns information about a `BuildTrigger`.</summary>
                 /// <param name="name">
                 /// The name of the `Trigger` to retrieve. Format:
                 /// `projects/{project}/locations/{location}/triggers/{trigger}`
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
-                /// <summary>Returns information about a `BuildTrigger`. This API is experimental.</summary>
+                /// <summary>Returns information about a `BuildTrigger`.</summary>
                 public class GetRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.BuildTrigger>
                 {
                     /// <summary>Constructs a new Get request.</summary>
@@ -2598,16 +3880,16 @@ namespace Google.Apis.CloudBuild.v1
                     }
                 }
 
-                /// <summary>Lists existing `BuildTrigger`s. This API is experimental.</summary>
+                /// <summary>Lists existing `BuildTrigger`s.</summary>
                 /// <param name="parent">
                 /// The parent of the collection of `Triggers`. Format: `projects/{project}/locations/{location}`
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
-                /// <summary>Lists existing `BuildTrigger`s. This API is experimental.</summary>
+                /// <summary>Lists existing `BuildTrigger`s.</summary>
                 public class ListRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.ListBuildTriggersResponse>
                 {
                     /// <summary>Constructs a new List request.</summary>
@@ -2683,9 +3965,7 @@ namespace Google.Apis.CloudBuild.v1
                     }
                 }
 
-                /// <summary>
-                /// Updates a `BuildTrigger` by its project ID and trigger ID. This API is experimental.
-                /// </summary>
+                /// <summary>Updates a `BuildTrigger` by its project ID and trigger ID.</summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resourceName">
                 /// The `Trigger` name with format: `projects/{project}/locations/{location}/triggers/{trigger}`, where
@@ -2693,12 +3973,10 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CloudBuild.v1.Data.BuildTrigger body, string resourceName)
                 {
-                    return new PatchRequest(service, body, resourceName);
+                    return new PatchRequest(this.service, body, resourceName);
                 }
 
-                /// <summary>
-                /// Updates a `BuildTrigger` by its project ID and trigger ID. This API is experimental.
-                /// </summary>
+                /// <summary>Updates a `BuildTrigger` by its project ID and trigger ID.</summary>
                 public class PatchRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.BuildTrigger>
                 {
                     /// <summary>Constructs a new Patch request.</summary>
@@ -2723,6 +4001,13 @@ namespace Google.Apis.CloudBuild.v1
                     /// <summary>Required. ID of the `BuildTrigger` to update.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("triggerId", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string TriggerId { get; set; }
+
+                    /// <summary>
+                    /// Update mask for the resource. If this is set, the server will only update the fields specified
+                    /// in the field mask. Otherwise, a full update of the mutable resource fields will be performed.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
 
                     /// <summary>Gets or sets the body of this request.</summary>
                     Google.Apis.CloudBuild.v1.Data.BuildTrigger Body { get; set; }
@@ -2767,10 +4052,23 @@ namespace Google.Apis.CloudBuild.v1
                             DefaultValue = null,
                             Pattern = null,
                         });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
                     }
                 }
 
-                /// <summary>Runs a `BuildTrigger` at a particular source revision.</summary>
+                /// <summary>
+                /// Runs a `BuildTrigger` at a particular source revision. To run a regional or global trigger, use the
+                /// POST request that includes the location endpoint in the path (ex.
+                /// v1/projects/{projectId}/locations/{region}/triggers/{triggerId}:run). The POST request that does not
+                /// include the location endpoint in the path can only be used when running global triggers.
+                /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
                 /// The name of the `Trigger` to run. Format:
@@ -2778,10 +4076,15 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual RunRequest Run(Google.Apis.CloudBuild.v1.Data.RunBuildTriggerRequest body, string name)
                 {
-                    return new RunRequest(service, body, name);
+                    return new RunRequest(this.service, body, name);
                 }
 
-                /// <summary>Runs a `BuildTrigger` at a particular source revision.</summary>
+                /// <summary>
+                /// Runs a `BuildTrigger` at a particular source revision. To run a regional or global trigger, use the
+                /// POST request that includes the location endpoint in the path (ex.
+                /// v1/projects/{projectId}/locations/{region}/triggers/{triggerId}:run). The POST request that does not
+                /// include the location endpoint in the path can only be used when running global triggers.
+                /// </summary>
                 public class RunRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Operation>
                 {
                     /// <summary>Constructs a new Run request.</summary>
@@ -2840,7 +4143,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual WebhookRequest Webhook(Google.Apis.CloudBuild.v1.Data.HttpBody body, string name)
                 {
-                    return new WebhookRequest(service, body, name);
+                    return new WebhookRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -2956,7 +4259,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CloudBuild.v1.Data.WorkerPool body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a `WorkerPool`.</summary>
@@ -3039,11 +4342,11 @@ namespace Google.Apis.CloudBuild.v1
                 /// <summary>Deletes a `WorkerPool`.</summary>
                 /// <param name="name">
                 /// Required. The name of the `WorkerPool` to delete. Format:
-                /// `projects/{project}/locations/{workerPool}/workerPools/{workerPool}`.
+                /// `projects/{project}/locations/{location}/workerPools/{workerPool}`.
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes a `WorkerPool`.</summary>
@@ -3058,7 +4361,7 @@ namespace Google.Apis.CloudBuild.v1
 
                     /// <summary>
                     /// Required. The name of the `WorkerPool` to delete. Format:
-                    /// `projects/{project}/locations/{workerPool}/workerPools/{workerPool}`.
+                    /// `projects/{project}/locations/{location}/workerPools/{workerPool}`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -3138,7 +4441,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Returns details of a `WorkerPool`.</summary>
@@ -3189,7 +4492,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists `WorkerPool`s.</summary>
@@ -3273,7 +4576,7 @@ namespace Google.Apis.CloudBuild.v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CloudBuild.v1.Data.WorkerPool body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates a `WorkerPool`.</summary>
@@ -3296,7 +4599,7 @@ namespace Google.Apis.CloudBuild.v1
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
 
-                    /// <summary>A mask specifying which fields in `worker_pool` to update.</summary>
+                    /// <summary>Optional. A mask specifying which fields in `worker_pool` to update.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual object UpdateMask { get; set; }
 
@@ -3352,6 +4655,57 @@ namespace Google.Apis.CloudBuild.v1
                     }
                 }
             }
+
+            /// <summary>Returns the `DefaultServiceAccount` used by the project.</summary>
+            /// <param name="name">
+            /// Required. The name of the `DefaultServiceAccount` to retrieve. Format:
+            /// `projects/{project}/locations/{location}/defaultServiceAccount`
+            /// </param>
+            public virtual GetDefaultServiceAccountRequest GetDefaultServiceAccount(string name)
+            {
+                return new GetDefaultServiceAccountRequest(this.service, name);
+            }
+
+            /// <summary>Returns the `DefaultServiceAccount` used by the project.</summary>
+            public class GetDefaultServiceAccountRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.DefaultServiceAccount>
+            {
+                /// <summary>Constructs a new GetDefaultServiceAccount request.</summary>
+                public GetDefaultServiceAccountRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The name of the `DefaultServiceAccount` to retrieve. Format:
+                /// `projects/{project}/locations/{location}/defaultServiceAccount`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "getDefaultServiceAccount";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes GetDefaultServiceAccount parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/locations/[^/]+/defaultServiceAccount$",
+                    });
+                }
+            }
         }
 
         /// <summary>Gets the Triggers resource.</summary>
@@ -3371,15 +4725,15 @@ namespace Google.Apis.CloudBuild.v1
                 this.service = service;
             }
 
-            /// <summary>Creates a new `BuildTrigger`. This API is experimental.</summary>
+            /// <summary>Creates a new `BuildTrigger`.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="projectId">Required. ID of the project for which to configure automatic builds.</param>
             public virtual CreateRequest Create(Google.Apis.CloudBuild.v1.Data.BuildTrigger body, string projectId)
             {
-                return new CreateRequest(service, body, projectId);
+                return new CreateRequest(this.service, body, projectId);
             }
 
-            /// <summary>Creates a new `BuildTrigger`. This API is experimental.</summary>
+            /// <summary>Creates a new `BuildTrigger`.</summary>
             public class CreateRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.BuildTrigger>
             {
                 /// <summary>Constructs a new Create request.</summary>
@@ -3439,15 +4793,15 @@ namespace Google.Apis.CloudBuild.v1
                 }
             }
 
-            /// <summary>Deletes a `BuildTrigger` by its project ID and trigger ID. This API is experimental.</summary>
+            /// <summary>Deletes a `BuildTrigger` by its project ID and trigger ID.</summary>
             /// <param name="projectId">Required. ID of the project that owns the trigger.</param>
             /// <param name="triggerId">Required. ID of the `BuildTrigger` to delete.</param>
             public virtual DeleteRequest Delete(string projectId, string triggerId)
             {
-                return new DeleteRequest(service, projectId, triggerId);
+                return new DeleteRequest(this.service, projectId, triggerId);
             }
 
-            /// <summary>Deletes a `BuildTrigger` by its project ID and trigger ID. This API is experimental.</summary>
+            /// <summary>Deletes a `BuildTrigger` by its project ID and trigger ID.</summary>
             public class DeleteRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Empty>
             {
                 /// <summary>Constructs a new Delete request.</summary>
@@ -3513,15 +4867,15 @@ namespace Google.Apis.CloudBuild.v1
                 }
             }
 
-            /// <summary>Returns information about a `BuildTrigger`. This API is experimental.</summary>
+            /// <summary>Returns information about a `BuildTrigger`.</summary>
             /// <param name="projectId">Required. ID of the project that owns the trigger.</param>
             /// <param name="triggerId">Required. Identifier (`id` or `name`) of the `BuildTrigger` to get.</param>
             public virtual GetRequest Get(string projectId, string triggerId)
             {
-                return new GetRequest(service, projectId, triggerId);
+                return new GetRequest(this.service, projectId, triggerId);
             }
 
-            /// <summary>Returns information about a `BuildTrigger`. This API is experimental.</summary>
+            /// <summary>Returns information about a `BuildTrigger`.</summary>
             public class GetRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.BuildTrigger>
             {
                 /// <summary>Constructs a new Get request.</summary>
@@ -3587,14 +4941,14 @@ namespace Google.Apis.CloudBuild.v1
                 }
             }
 
-            /// <summary>Lists existing `BuildTrigger`s. This API is experimental.</summary>
+            /// <summary>Lists existing `BuildTrigger`s.</summary>
             /// <param name="projectId">Required. ID of the project for which to list BuildTriggers.</param>
             public virtual ListRequest List(string projectId)
             {
-                return new ListRequest(service, projectId);
+                return new ListRequest(this.service, projectId);
             }
 
-            /// <summary>Lists existing `BuildTrigger`s. This API is experimental.</summary>
+            /// <summary>Lists existing `BuildTrigger`s.</summary>
             public class ListRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.ListBuildTriggersResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -3670,16 +5024,16 @@ namespace Google.Apis.CloudBuild.v1
                 }
             }
 
-            /// <summary>Updates a `BuildTrigger` by its project ID and trigger ID. This API is experimental.</summary>
+            /// <summary>Updates a `BuildTrigger` by its project ID and trigger ID.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="projectId">Required. ID of the project that owns the trigger.</param>
             /// <param name="triggerId">Required. ID of the `BuildTrigger` to update.</param>
             public virtual PatchRequest Patch(Google.Apis.CloudBuild.v1.Data.BuildTrigger body, string projectId, string triggerId)
             {
-                return new PatchRequest(service, body, projectId, triggerId);
+                return new PatchRequest(this.service, body, projectId, triggerId);
             }
 
-            /// <summary>Updates a `BuildTrigger` by its project ID and trigger ID. This API is experimental.</summary>
+            /// <summary>Updates a `BuildTrigger` by its project ID and trigger ID.</summary>
             public class PatchRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.BuildTrigger>
             {
                 /// <summary>Constructs a new Patch request.</summary>
@@ -3698,6 +5052,13 @@ namespace Google.Apis.CloudBuild.v1
                 /// <summary>Required. ID of the `BuildTrigger` to update.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("triggerId", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string TriggerId { get; private set; }
+
+                /// <summary>
+                /// Update mask for the resource. If this is set, the server will only update the fields specified in
+                /// the field mask. Otherwise, a full update of the mutable resource fields will be performed.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual object UpdateMask { get; set; }
 
                 /// <summary>Gets or sets the body of this request.</summary>
                 Google.Apis.CloudBuild.v1.Data.BuildTrigger Body { get; set; }
@@ -3734,19 +5095,37 @@ namespace Google.Apis.CloudBuild.v1
                         DefaultValue = null,
                         Pattern = null,
                     });
+                    RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "updateMask",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                 }
             }
 
-            /// <summary>Runs a `BuildTrigger` at a particular source revision.</summary>
+            /// <summary>
+            /// Runs a `BuildTrigger` at a particular source revision. To run a regional or global trigger, use the POST
+            /// request that includes the location endpoint in the path (ex.
+            /// v1/projects/{projectId}/locations/{region}/triggers/{triggerId}:run). The POST request that does not
+            /// include the location endpoint in the path can only be used when running global triggers.
+            /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="projectId">Required. ID of the project.</param>
             /// <param name="triggerId">Required. ID of the trigger.</param>
             public virtual RunRequest Run(Google.Apis.CloudBuild.v1.Data.RepoSource body, string projectId, string triggerId)
             {
-                return new RunRequest(service, body, projectId, triggerId);
+                return new RunRequest(this.service, body, projectId, triggerId);
             }
 
-            /// <summary>Runs a `BuildTrigger` at a particular source revision.</summary>
+            /// <summary>
+            /// Runs a `BuildTrigger` at a particular source revision. To run a regional or global trigger, use the POST
+            /// request that includes the location endpoint in the path (ex.
+            /// v1/projects/{projectId}/locations/{region}/triggers/{triggerId}:run). The POST request that does not
+            /// include the location endpoint in the path can only be used when running global triggers.
+            /// </summary>
             public class RunRequest : CloudBuildBaseServiceRequest<Google.Apis.CloudBuild.v1.Data.Operation>
             {
                 /// <summary>Constructs a new Run request.</summary>
@@ -3828,7 +5207,7 @@ namespace Google.Apis.CloudBuild.v1
             /// <param name="trigger">Name of the trigger to run the payload against</param>
             public virtual WebhookRequest Webhook(Google.Apis.CloudBuild.v1.Data.HttpBody body, string projectId, string trigger)
             {
-                return new WebhookRequest(service, body, projectId, trigger);
+                return new WebhookRequest(this.service, body, projectId, trigger);
             }
 
             /// <summary>
@@ -3939,7 +5318,7 @@ namespace Google.Apis.CloudBuild.v1
         /// <param name="body">The body of the request.</param>
         public virtual WebhookRequest Webhook(Google.Apis.CloudBuild.v1.Data.HttpBody body)
         {
-            return new WebhookRequest(service, body);
+            return new WebhookRequest(this.service, body);
         }
 
         /// <summary>ReceiveWebhook is called when the API receives a GitHub webhook.</summary>
@@ -4011,9 +5390,42 @@ namespace Google.Apis.CloudBuild.v1.Data
     /// </summary>
     public class ApprovalResult : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _approvalTimeRaw;
+
+        private object _approvalTime;
+
         /// <summary>Output only. The time when the approval decision was made.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("approvalTime")]
-        public virtual object ApprovalTime { get; set; }
+        public virtual string ApprovalTimeRaw
+        {
+            get => _approvalTimeRaw;
+            set
+            {
+                _approvalTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _approvalTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ApprovalTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ApprovalTimeDateTimeOffset instead.")]
+        public virtual object ApprovalTime
+        {
+            get => _approvalTime;
+            set
+            {
+                _approvalTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _approvalTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ApprovalTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ApprovalTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ApprovalTimeRaw);
+            set => ApprovalTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. Email of the user that called the ApproveBuild API to approve or reject a build at the time
@@ -4088,7 +5500,7 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual System.Collections.Generic.IList<FileHashes> FileHash { get; set; }
 
         /// <summary>
-        /// The path of an artifact in a Google Cloud Storage bucket, with the generation number. For example,
+        /// The path of an artifact in a Cloud Storage bucket, with the generation number. For example,
         /// `gs://mybucket/path/to/output.jar#generation`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("location")]
@@ -4104,12 +5516,36 @@ namespace Google.Apis.CloudBuild.v1.Data
     public class Artifacts : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Optional. A list of Go modules to be uploaded to Artifact Registry upon successful completion of all build
+        /// steps. If any objects fail to be pushed, the build is marked FAILURE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("goModules")]
+        public virtual System.Collections.Generic.IList<GoModule> GoModules { get; set; }
+
+        /// <summary>
         /// A list of images to be pushed upon the successful completion of all build steps. The images will be pushed
         /// using the builder service account's credentials. The digests of the pushed images will be stored in the
         /// Build resource's results field. If any of the images fail to be pushed, the build is marked FAILURE.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("images")]
         public virtual System.Collections.Generic.IList<string> Images { get; set; }
+
+        /// <summary>
+        /// A list of Maven artifacts to be uploaded to Artifact Registry upon successful completion of all build steps.
+        /// Artifacts in the workspace matching specified paths globs will be uploaded to the specified Artifact
+        /// Registry repository using the builder service account's credentials. If any artifacts fail to be pushed, the
+        /// build is marked FAILURE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mavenArtifacts")]
+        public virtual System.Collections.Generic.IList<MavenArtifact> MavenArtifacts { get; set; }
+
+        /// <summary>
+        /// A list of npm packages to be uploaded to Artifact Registry upon successful completion of all build steps.
+        /// Npm packages in the specified paths will be uploaded to the specified Artifact Registry repository using the
+        /// builder service account's credentials. If any packages fail to be pushed, the build is marked FAILURE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("npmPackages")]
+        public virtual System.Collections.Generic.IList<NpmPackage> NpmPackages { get; set; }
 
         /// <summary>
         /// A list of objects to be uploaded to Cloud Storage upon successful completion of all build steps. Files in
@@ -4120,6 +5556,39 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("objects")]
         public virtual ArtifactObjects Objects { get; set; }
 
+        /// <summary>
+        /// A list of Python packages to be uploaded to Artifact Registry upon successful completion of all build steps.
+        /// The build service account credentials will be used to perform the upload. If any objects fail to be pushed,
+        /// the build is marked FAILURE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pythonPackages")]
+        public virtual System.Collections.Generic.IList<PythonPackage> PythonPackages { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>RPC request object accepted by BatchCreateBitbucketServerConnectedRepositories RPC method.</summary>
+    public class BatchCreateBitbucketServerConnectedRepositoriesRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Requests to connect Bitbucket Server repositories.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requests")]
+        public virtual System.Collections.Generic.IList<CreateBitbucketServerConnectedRepositoryRequest> Requests { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Response of BatchCreateBitbucketServerConnectedRepositories RPC method including all successfully connected
+    /// Bitbucket Server repositories.
+    /// </summary>
+    public class BatchCreateBitbucketServerConnectedRepositoriesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The connected Bitbucket Server repositories.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bitbucketServerConnectedRepositories")]
+        public virtual System.Collections.Generic.IList<BitbucketServerConnectedRepository> BitbucketServerConnectedRepositories { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -4127,9 +5596,42 @@ namespace Google.Apis.CloudBuild.v1.Data
     /// <summary>Metadata for `BatchCreateBitbucketServerConnectedRepositories` operation.</summary>
     public class BatchCreateBitbucketServerConnectedRepositoriesResponseMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
         /// <summary>Time the operation was completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
-        public virtual object CompleteTime { get; set; }
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The name of the `BitbucketServerConfig` that added connected repositories. Format:
@@ -4138,9 +5640,396 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("config")]
         public virtual string Config { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>RPC request object accepted by BatchCreateGitLabConnectedRepositories RPC method.</summary>
+    public class BatchCreateGitLabConnectedRepositoriesRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Requests to connect GitLab repositories.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requests")]
+        public virtual System.Collections.Generic.IList<CreateGitLabConnectedRepositoryRequest> Requests { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response of BatchCreateGitLabConnectedRepositories RPC method.</summary>
+    public class BatchCreateGitLabConnectedRepositoriesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The GitLab connected repository requests' responses.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitlabConnectedRepositories")]
+        public virtual System.Collections.Generic.IList<GitLabConnectedRepository> GitlabConnectedRepositories { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for `BatchCreateGitLabConnectedRepositories` operation.</summary>
+    public class BatchCreateGitLabConnectedRepositoriesResponseMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
+        /// <summary>Time the operation was completed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The name of the `GitLabConfig` that added connected repositories. Format:
+        /// `projects/{project}/locations/{location}/gitLabConfigs/{config}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("config")]
+        public virtual string Config { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Time the operation was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>BitbucketServerConfig represents the configuration for a Bitbucket Server.</summary>
+    public class BitbucketServerConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Immutable. API Key that will be attached to webhook. Once this field has been set, it cannot be
+        /// changed. If you need to change it, please create another BitbucketServerConfig.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiKey")]
+        public virtual string ApiKey { get; set; }
+
+        /// <summary>Output only. Connected Bitbucket Server repositories for this config.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connectedRepositories")]
+        public virtual System.Collections.Generic.IList<BitbucketServerRepositoryId> ConnectedRepositories { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Time when the config was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Required. Immutable. The URI of the Bitbucket Server host. Once this field has been set, it cannot be
+        /// changed. If you need to change it, please create another BitbucketServerConfig.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hostUri")]
+        public virtual string HostUri { get; set; }
+
+        /// <summary>The resource name for the config.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Optional. The network to be used when reaching out to the Bitbucket Server instance. The VPC network must be
+        /// enabled for private service connection. This should be set if the Bitbucket Server instance is hosted
+        /// on-premises and not reachable by public internet. If this field is left empty, no network peering will occur
+        /// and calls to the Bitbucket Server instance will be made over the public internet. Must be in the format
+        /// `projects/{project}/global/networks/{network}`, where {project} is a project number or id and {network} is
+        /// the name of a VPC network in the project.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("peeredNetwork")]
+        public virtual string PeeredNetwork { get; set; }
+
+        /// <summary>
+        /// Immutable. IP range within the peered network. This is specified in CIDR notation with a slash and the
+        /// subnet prefix size. You can optionally specify an IP address before the subnet prefix value. e.g.
+        /// `192.168.0.0/29` would specify an IP range starting at 192.168.0.0 with a 29 bit prefix size. `/16` would
+        /// specify a prefix size of 16 bits, with an automatically determined IP within the peered VPC. If unspecified,
+        /// a value of `/24` will be used. The field only has an effect if peered_network is set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("peeredNetworkIpRange")]
+        public virtual string PeeredNetworkIpRange { get; set; }
+
+        /// <summary>Required. Secret Manager secrets needed by the config.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("secrets")]
+        public virtual BitbucketServerSecrets Secrets { get; set; }
+
+        /// <summary>
+        /// Optional. SSL certificate to use for requests to Bitbucket Server. The format should be PEM format but the
+        /// extension can be one of .pem, .cer, or .crt.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sslCa")]
+        public virtual string SslCa { get; set; }
+
+        /// <summary>Username of the account Cloud Build will use on Bitbucket Server.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("username")]
+        public virtual string Username { get; set; }
+
+        /// <summary>
+        /// Output only. UUID included in webhook requests. The UUID is used to look up the corresponding config.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("webhookKey")]
+        public virtual string WebhookKey { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>/ BitbucketServerConnectedRepository represents a connected Bitbucket Server / repository.</summary>
+    public class BitbucketServerConnectedRepository : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The name of the `BitbucketServerConfig` that added connected repository. Format:
+        /// `projects/{project}/locations/{location}/bitbucketServerConfigs/{config}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parent")]
+        public virtual string Parent { get; set; }
+
+        /// <summary>The Bitbucket Server repositories to connect.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repo")]
+        public virtual BitbucketServerRepositoryId Repo { get; set; }
+
+        /// <summary>Output only. The status of the repo connection request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual Status Status { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>BitbucketServerRepository represents a repository hosted on a Bitbucket Server.</summary>
+    public class BitbucketServerRepository : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Link to the browse repo page on the Bitbucket Server instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("browseUri")]
+        public virtual string BrowseUri { get; set; }
+
+        /// <summary>Description of the repository.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Display name of the repository.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>The resource name of the repository.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Identifier for a repository hosted on a Bitbucket Server.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repoId")]
+        public virtual BitbucketServerRepositoryId RepoId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>BitbucketServerRepositoryId identifies a specific repository hosted on a Bitbucket Server.</summary>
+    public class BitbucketServerRepositoryId : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Identifier for the project storing the repository.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectKey")]
+        public virtual string ProjectKey { get; set; }
+
+        /// <summary>Required. Identifier for the repository.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repoSlug")]
+        public virtual string RepoSlug { get; set; }
+
+        /// <summary>
+        /// Output only. The ID of the webhook that was created for receiving events from this repo. We only create and
+        /// manage a single webhook for each repo.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("webhookId")]
+        public virtual System.Nullable<int> WebhookId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>BitbucketServerSecrets represents the secrets in Secret Manager for a Bitbucket Server.</summary>
+    public class BitbucketServerSecrets : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The resource name for the admin access token's secret version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("adminAccessTokenVersionName")]
+        public virtual string AdminAccessTokenVersionName { get; set; }
+
+        /// <summary>Required. The resource name for the read access token's secret version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("readAccessTokenVersionName")]
+        public virtual string ReadAccessTokenVersionName { get; set; }
+
+        /// <summary>
+        /// Required. Immutable. The resource name for the webhook secret's secret version. Once this field has been
+        /// set, it cannot be changed. If you need to change it, please create another BitbucketServerConfig.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("webhookSecretVersionName")]
+        public virtual string WebhookSecretVersionName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// BitbucketServerTriggerConfig describes the configuration of a trigger that creates a build whenever a Bitbucket
+    /// Server event is received.
+    /// </summary>
+    public class BitbucketServerTriggerConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. The BitbucketServerConfig specified in the bitbucket_server_config_resource field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bitbucketServerConfig")]
+        public virtual BitbucketServerConfig BitbucketServerConfig { get; set; }
+
+        /// <summary>Required. The Bitbucket server config resource that this trigger config maps to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bitbucketServerConfigResource")]
+        public virtual string BitbucketServerConfigResource { get; set; }
+
+        /// <summary>
+        /// Required. Key of the project that the repo is in. For example: The key for
+        /// https://mybitbucket.server/projects/TEST/repos/test-repo is "TEST".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectKey")]
+        public virtual string ProjectKey { get; set; }
+
+        /// <summary>Filter to match changes in pull requests.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pullRequest")]
+        public virtual PullRequestFilter PullRequest { get; set; }
+
+        /// <summary>Filter to match changes in refs like branches, tags.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("push")]
+        public virtual PushFilter Push { get; set; }
+
+        /// <summary>
+        /// Required. Slug of the repository. A repository slug is a URL-friendly version of a repository name,
+        /// automatically generated by Bitbucket for use in the URL. For example, if the repository name is 'test repo',
+        /// in the URL it would become 'test-repo' as in https://mybitbucket.server/projects/TEST/repos/test-repo.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repoSlug")]
+        public virtual string RepoSlug { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4178,20 +6067,90 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("buildTriggerId")]
         public virtual string BuildTriggerId { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time at which the request to create the build was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Contains information about the build when status=FAILURE.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("failureInfo")]
         public virtual FailureInfo FailureInfo { get; set; }
+
+        private string _finishTimeRaw;
+
+        private object _finishTime;
 
         /// <summary>
         /// Output only. Time at which execution of the build was finished. The difference between finish_time and
         /// start_time is the duration of the build's execution.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finishTime")]
-        public virtual object FinishTime { get; set; }
+        public virtual string FinishTimeRaw
+        {
+            get => _finishTimeRaw;
+            set
+            {
+                _finishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _finishTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FinishTimeDateTimeOffset instead.")]
+        public virtual object FinishTime
+        {
+            get => _finishTime;
+            set
+            {
+                _finishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _finishTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FinishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FinishTimeRaw);
+            set => FinishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. Configuration for git operations.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitConfig")]
+        public virtual GitConfig GitConfig { get; set; }
 
         /// <summary>Output only. Unique identifier of the build.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
@@ -4210,7 +6169,7 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string LogUrl { get; set; }
 
         /// <summary>
-        /// Google Cloud Storage bucket where logs should be written (see [Bucket Name
+        /// Cloud Storage bucket where logs should be written (see [Bucket Name
         /// Requirements](https://cloud.google.com/storage/docs/bucket-naming#requirements)). Logs file names will be of
         /// the format `${logs_bucket}/log-${build_id}.txt`.
         /// </summary>
@@ -4259,7 +6218,7 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("serviceAccount")]
         public virtual string ServiceAccount { get; set; }
 
-        /// <summary>The location of the source files to build.</summary>
+        /// <summary>Optional. The location of the source files to build.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("source")]
         public virtual Source Source { get; set; }
 
@@ -4267,9 +6226,42 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sourceProvenance")]
         public virtual SourceProvenance SourceProvenance { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Output only. Time at which execution of the build was started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Status of the build.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
@@ -4294,15 +6286,16 @@ namespace Google.Apis.CloudBuild.v1.Data
         /// <summary>
         /// Amount of time that this build should be allowed to run, to second granularity. If this amount of time
         /// elapses, work on the build will cease and the build status will be `TIMEOUT`. `timeout` starts ticking from
-        /// `startTime`. Default time is ten minutes.
+        /// `startTime`. Default time is 60 minutes.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timeout")]
         public virtual object Timeout { get; set; }
 
         /// <summary>
         /// Output only. Stores timing information for phases of the build. Valid keys are: * BUILD: time to execute all
-        /// build steps. * PUSH: time to push all specified images. * FETCHSOURCE: time to fetch source. * SETUPBUILD:
-        /// time to set up build. If the build does not specify source or images, these keys will not be included.
+        /// build steps. * PUSH: time to push all artifacts including docker images and non docker artifacts. *
+        /// FETCHSOURCE: time to fetch source. * SETUPBUILD: time to set up build. If the build does not specify source
+        /// or images, these keys will not be included.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timing")]
         public virtual System.Collections.Generic.IDictionary<string, TimeSpan> Timing { get; set; }
@@ -4348,11 +6341,19 @@ namespace Google.Apis.CloudBuild.v1.Data
     /// <summary>Optional arguments to enable specific features of builds.</summary>
     public class BuildOptions : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Option to include built-in and custom substitutions as env variables for all build steps.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("automapSubstitutions")]
+        public virtual System.Nullable<bool> AutomapSubstitutions { get; set; }
+
+        /// <summary>Optional. Option to specify how default logs buckets are setup.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("defaultLogsBucketBehavior")]
+        public virtual string DefaultLogsBucketBehavior { get; set; }
+
         /// <summary>
         /// Requested disk size for the VM that runs the build. Note that this is *NOT* "disk free"; some of the space
         /// will be used by the operating system and build utilities. Also note that this is the minimum disk size that
         /// will be allocated for the build -- the build may run with a larger disk than requested. At present, the
-        /// maximum disk size is 1000GB; builds that request more than the maximum are rejected with an error.
+        /// maximum disk size is 4000GB; builds that request more than the maximum are rejected with an error.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("diskSizeGb")]
         public virtual System.Nullable<long> DiskSizeGb { get; set; }
@@ -4365,6 +6366,13 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual System.Nullable<bool> DynamicSubstitutions { get; set; }
 
         /// <summary>
+        /// Optional. Option to specify whether structured logging is enabled. If true, JSON-formatted logs are parsed
+        /// as structured logs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableStructuredLogging")]
+        public virtual System.Nullable<bool> EnableStructuredLogging { get; set; }
+
+        /// <summary>
         /// A list of global environment variable definitions that will exist for all build steps in this build. If a
         /// variable is defined in both globally and in a build step, the variable will use the build step value. The
         /// elements are of the form "KEY=VALUE" for the environment variable "KEY" being given the value "VALUE".
@@ -4372,7 +6380,7 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("env")]
         public virtual System.Collections.Generic.IList<string> Env { get; set; }
 
-        /// <summary>Option to define build log streaming behavior to Google Cloud Storage.</summary>
+        /// <summary>Option to define build log streaming behavior to Cloud Storage.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("logStreamingOption")]
         public virtual string LogStreamingOption { get; set; }
 
@@ -4436,6 +6444,21 @@ namespace Google.Apis.CloudBuild.v1.Data
     public class BuildStep : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Allow this build step to fail without failing the entire build if and only if the exit code is one of the
+        /// specified codes. If allow_failure is also specified, this field will take precedence.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowExitCodes")]
+        public virtual System.Collections.Generic.IList<System.Nullable<int>> AllowExitCodes { get; set; }
+
+        /// <summary>
+        /// Allow this build step to fail without failing the entire build. If false, the entire build will fail if this
+        /// step fails. Otherwise, the build will succeed, but this step will still have a failure status. Error
+        /// information will be reported in the failure_detail field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowFailure")]
+        public virtual System.Nullable<bool> AllowFailure { get; set; }
+
+        /// <summary>
         /// A list of arguments that will be presented to the step when it is started. If the image used to run the
         /// step's container has an entrypoint, the `args` are used as arguments to that entrypoint. If the image does
         /// not define an entrypoint, the first element in args is used as the entrypoint, and the remainder will be
@@ -4443,6 +6466,13 @@ namespace Google.Apis.CloudBuild.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("args")]
         public virtual System.Collections.Generic.IList<string> Args { get; set; }
+
+        /// <summary>
+        /// Option to include built-in and custom substitutions as env variables for this build step. This option will
+        /// override the global option in BuildOption.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("automapSubstitutions")]
+        public virtual System.Nullable<bool> AutomapSubstitutions { get; set; }
 
         /// <summary>
         /// Working directory to use when running this step's container. If this value is a relative path, it is
@@ -4467,6 +6497,10 @@ namespace Google.Apis.CloudBuild.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("env")]
         public virtual System.Collections.Generic.IList<string> Env { get; set; }
+
+        /// <summary>Output only. Return code from running the step.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exitCode")]
+        public virtual System.Nullable<int> ExitCode { get; set; }
 
         /// <summary>
         /// Unique identifier for this build step, used in `wait_for` to reference this build step as a dependency.
@@ -4558,13 +6592,53 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("autodetect")]
         public virtual System.Nullable<bool> Autodetect { get; set; }
 
+        /// <summary>
+        /// BitbucketServerTriggerConfig describes the configuration of a trigger that creates a build whenever a
+        /// Bitbucket Server event is received.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bitbucketServerTriggerConfig")]
+        public virtual BitbucketServerTriggerConfig BitbucketServerTriggerConfig { get; set; }
+
         /// <summary>Contents of the build template.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("build")]
         public virtual Build Build { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time when the trigger was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Human-readable description of this trigger.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -4575,8 +6649,8 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual System.Nullable<bool> Disabled { get; set; }
 
         /// <summary>
-        /// Optional. EventType allows the user to explicitly set the type of event to which this BuildTrigger should
-        /// respond. This field is optional but will be validated against the rest of the configuration if it is set.
+        /// EventType allows the user to explicitly set the type of event to which this BuildTrigger should respond.
+        /// This field will be validated against the rest of the configuration if it is set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("eventType")]
         public virtual string EventType { get; set; }
@@ -4600,6 +6674,13 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("github")]
         public virtual GitHubEventsConfig Github { get; set; }
 
+        /// <summary>
+        /// GitLabEnterpriseEventsConfig describes the configuration of a trigger that creates a build whenever a GitLab
+        /// Enterprise event is received.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitlabEnterpriseEventsConfig")]
+        public virtual GitLabEventsConfig GitlabEnterpriseEventsConfig { get; set; }
+
         /// <summary>Output only. Unique identifier of the trigger.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
@@ -4613,6 +6694,14 @@ namespace Google.Apis.CloudBuild.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ignoredFiles")]
         public virtual System.Collections.Generic.IList<string> IgnoredFiles { get; set; }
+
+        /// <summary>
+        /// If set to INCLUDE_BUILD_LOGS_WITH_STATUS, log url will be shown on GitHub page when build status is final.
+        /// Setting this field to INCLUDE_BUILD_LOGS_WITH_STATUS for non GitHub triggers results in INVALID_ARGUMENT
+        /// error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("includeBuildLogs")]
+        public virtual string IncludeBuildLogs { get; set; }
 
         /// <summary>
         /// If any of the files altered in the commit pass the ignored_files filter and included_files is empty, then as
@@ -4639,6 +6728,12 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual PubsubConfig PubsubConfig { get; set; }
 
         /// <summary>
+        /// The configuration of a trigger that creates a build whenever an event from Repo API is received.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repositoryEventConfig")]
+        public virtual RepositoryEventConfig RepositoryEventConfig { get; set; }
+
+        /// <summary>
         /// The `Trigger` name with format: `projects/{project}/locations/{location}/triggers/{trigger}`, where
         /// {trigger} is a unique identifier generated by the service.
         /// </summary>
@@ -4647,9 +6742,9 @@ namespace Google.Apis.CloudBuild.v1.Data
 
         /// <summary>
         /// The service account used for all user-controlled operations including UpdateBuildTrigger, RunBuildTrigger,
-        /// CreateBuild, and CancelBuild. If no service account is set, then the standard Cloud Build service account
-        /// ([PROJECT_NUM]@system.gserviceaccount.com) will be used instead. Format:
-        /// `projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT_ID_OR_EMAIL}`
+        /// CreateBuild, and CancelBuild. If no service account is set and the legacy Cloud Build service account
+        /// ([PROJECT_NUM]@cloudbuild.gserviceaccount.com) is the default for the project then it will be used instead.
+        /// Format: `projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT_ID_OR_EMAIL}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("serviceAccount")]
         public virtual string ServiceAccount { get; set; }
@@ -4740,16 +6835,213 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Metadata for `CreateGithubEnterpriseConfig` operation.</summary>
-    public class CreateGitHubEnterpriseConfigOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    /// <summary>Location of the source in a 2nd-gen Google Cloud Build repository resource.</summary>
+    public class ConnectedRepository : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Optional. Directory, relative to the source root, in which to run the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dir")]
+        public virtual string Dir { get; set; }
+
+        /// <summary>
+        /// Required. Name of the Google Cloud Build repository, formatted as
+        /// `projects/*/locations/*/connections/*/repositories/*`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repository")]
+        public virtual string Repository { get; set; }
+
+        /// <summary>
+        /// Required. The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git
+        /// ref.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("revision")]
+        public virtual string Revision { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for `CreateBitbucketServerConfig` operation.</summary>
+    public class CreateBitbucketServerConfigOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The resource name of the BitbucketServerConfig to be created. Format:
+        /// `projects/{project}/locations/{location}/bitbucketServerConfigs/{id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bitbucketServerConfig")]
+        public virtual string BitbucketServerConfig { get; set; }
+
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
         /// <summary>Time the operation was completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
-        public virtual object CompleteTime { get; set; }
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
 
         /// <summary>Time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request to connect a repository from a connected Bitbucket Server host.</summary>
+    public class CreateBitbucketServerConnectedRepositoryRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The Bitbucket Server repository to connect.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bitbucketServerConnectedRepository")]
+        public virtual BitbucketServerConnectedRepository BitbucketServerConnectedRepository { get; set; }
+
+        /// <summary>
+        /// Required. The name of the `BitbucketServerConfig` that added connected repository. Format:
+        /// `projects/{project}/locations/{location}/bitbucketServerConfigs/{config}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parent")]
+        public virtual string Parent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for `CreateGithubEnterpriseConfig` operation.</summary>
+    public class CreateGitHubEnterpriseConfigOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
+        /// <summary>Time the operation was completed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Time the operation was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The resource name of the GitHubEnterprise to be created. Format:
@@ -4762,16 +7054,188 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Metadata for the `CreateWorkerPool` operation.</summary>
-    public class CreateWorkerPoolOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    /// <summary>Metadata for `CreateGitLabConfig` operation.</summary>
+    public class CreateGitLabConfigOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
         /// <summary>Time the operation was completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
-        public virtual object CompleteTime { get; set; }
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
 
         /// <summary>Time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The resource name of the GitLabConfig to be created. Format:
+        /// `projects/{project}/locations/{location}/gitlabConfigs/{id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitlabConfig")]
+        public virtual string GitlabConfig { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request to connect a repository from a connected GitLab host.</summary>
+    public class CreateGitLabConnectedRepositoryRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The GitLab repository to connect.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitlabConnectedRepository")]
+        public virtual GitLabConnectedRepository GitlabConnectedRepository { get; set; }
+
+        /// <summary>
+        /// Required. The name of the `GitLabConfig` that adds connected repository. Format:
+        /// `projects/{project}/locations/{location}/gitLabConfigs/{config}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parent")]
+        public virtual string Parent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for the `CreateWorkerPool` operation.</summary>
+    public class CreateWorkerPoolOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
+        /// <summary>Time the operation was completed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Time the operation was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The resource name of the `WorkerPool` to create. Format:
@@ -4784,16 +7248,192 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Metadata for `DeleteGitHubEnterpriseConfig` operation.</summary>
-    public class DeleteGitHubEnterpriseConfigOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    /// <summary>The default service account used for `Builds`.</summary>
+    public class DefaultServiceAccount : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Identifier. Format: `projects/{project}/locations/{location}/defaultServiceAccount</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Output only. The email address of the service account identity that will be used for a build by default.
+        /// This is returned in the format `projects/{project}/serviceAccounts/{service_account}` where
+        /// `{service_account}` could be the legacy Cloud Build SA, in the format
+        /// [PROJECT_NUMBER]@cloudbuild.gserviceaccount.com or the Compute SA, in the format
+        /// [PROJECT_NUMBER]-compute@developer.gserviceaccount.com. If no service account will be used by default, this
+        /// will be empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceAccountEmail")]
+        public virtual string ServiceAccountEmail { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for `DeleteBitbucketServerConfig` operation.</summary>
+    public class DeleteBitbucketServerConfigOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The resource name of the BitbucketServerConfig to be deleted. Format:
+        /// `projects/{project}/locations/{location}/bitbucketServerConfigs/{id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bitbucketServerConfig")]
+        public virtual string BitbucketServerConfig { get; set; }
+
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
         /// <summary>Time the operation was completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
-        public virtual object CompleteTime { get; set; }
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
 
         /// <summary>Time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for `DeleteGitHubEnterpriseConfig` operation.</summary>
+    public class DeleteGitHubEnterpriseConfigOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
+        /// <summary>Time the operation was completed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Time the operation was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The resource name of the GitHubEnterprise to be deleted. Format:
@@ -4806,16 +7446,170 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Metadata for the `DeleteWorkerPool` operation.</summary>
-    public class DeleteWorkerPoolOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    /// <summary>Metadata for `DeleteGitLabConfig` operation.</summary>
+    public class DeleteGitLabConfigOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
         /// <summary>Time the operation was completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
-        public virtual object CompleteTime { get; set; }
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
 
         /// <summary>Time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The resource name of the GitLabConfig to be created. Format:
+        /// `projects/{project}/locations/{location}/gitlabConfigs/{id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitlabConfig")]
+        public virtual string GitlabConfig { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for the `DeleteWorkerPool` operation.</summary>
+    public class DeleteWorkerPoolOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
+        /// <summary>Time the operation was completed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Time the operation was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The resource name of the `WorkerPool` being deleted. Format:
@@ -4828,11 +7622,35 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>This config defines the location of a source through Developer Connect.</summary>
+    public class DeveloperConnectConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Directory, relative to the source root, in which to run the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dir")]
+        public virtual string Dir { get; set; }
+
+        /// <summary>
+        /// Required. The Developer Connect Git repository link, formatted as
+        /// `projects/*/locations/*/connections/*/gitRepositoryLink/*`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitRepositoryLink")]
+        public virtual string GitRepositoryLink { get; set; }
+
+        /// <summary>
+        /// Required. The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git
+        /// ref.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("revision")]
+        public virtual string Revision { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4869,9 +7687,35 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>GitConfig is a configuration for git operations.</summary>
+    public class GitConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Configuration for HTTP related git operations.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("http")]
+        public virtual HttpConfig Http { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>GitFileSource describes a file within a (possibly remote) code repository.</summary>
     public class GitFileSource : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The full resource name of the bitbucket server config. Format:
+        /// `projects/{project}/locations/{location}/bitbucketServerConfigs/{id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bitbucketServerConfig")]
+        public virtual string BitbucketServerConfig { get; set; }
+
+        /// <summary>
+        /// The full resource name of the github enterprise config. Format:
+        /// `projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}`.
+        /// `projects/{project}/githubEnterpriseConfigs/{id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("githubEnterpriseConfig")]
+        public virtual string GithubEnterpriseConfig { get; set; }
+
         /// <summary>The path of the file, with the repo root as the root of the path.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("path")]
         public virtual string Path { get; set; }
@@ -4879,6 +7723,14 @@ namespace Google.Apis.CloudBuild.v1.Data
         /// <summary>See RepoType above.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("repoType")]
         public virtual string RepoType { get; set; }
+
+        /// <summary>
+        /// The fully qualified resource name of the Repos API repository. Either URI or repository can be specified. If
+        /// unspecified, the repo from which the trigger invocation originated is assumed to be the repo from which to
+        /// read the specified path.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repository")]
+        public virtual string Repository { get; set; }
 
         /// <summary>
         /// The branch, tag, arbitrary ref, or SHA version of the repo to use when resolving the filename (optional).
@@ -4890,8 +7742,8 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string Revision { get; set; }
 
         /// <summary>
-        /// The URI of the repo (optional). If unspecified, the repo from which the trigger invocation originated is
-        /// assumed to be the repo from which to read the specified path.
+        /// The URI of the repo. Either uri or repository can be specified. If unspecified, the repo from which the
+        /// trigger invocation originated is assumed to be the repo from which to read the specified path.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uri")]
         public virtual string Uri { get; set; }
@@ -4907,11 +7759,44 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("appId")]
         public virtual System.Nullable<long> AppId { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time when the installation was associated with the project.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
 
-        /// <summary>Name to display for this config.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. Name to display for this config.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
@@ -4920,8 +7805,8 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string HostUrl { get; set; }
 
         /// <summary>
-        /// Optional. The full resource name for the GitHubEnterpriseConfig For example:
-        /// "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+        /// The full resource name for the GitHubEnterpriseConfig For example:
+        /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -4937,7 +7822,7 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("peeredNetwork")]
         public virtual string PeeredNetwork { get; set; }
 
-        /// <summary>Names of secrets in Secret Manager.</summary>
+        /// <summary>Optional. Names of secrets in Secret Manager.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("secrets")]
         public virtual GitHubEnterpriseSecrets Secrets { get; set; }
 
@@ -5002,8 +7887,8 @@ namespace Google.Apis.CloudBuild.v1.Data
     public class GitHubEventsConfig : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Optional. The resource name of the github enterprise config that should be applied to this installation. For
-        /// example: "projects/{$project_id}/githubEnterpriseConfigs/{$config_id}"
+        /// The resource name of the github enterprise config that should be applied to this installation. For example:
+        /// "projects/{$project_id}/locations/{$location_id}/githubEnterpriseConfigs/{$config_id}"
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("enterpriseConfigResourceName")]
         public virtual string EnterpriseConfigResourceName { get; set; }
@@ -5038,9 +7923,243 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>GitLabConfig represents the configuration for a GitLab integration.</summary>
+    public class GitLabConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Connected GitLab.com or GitLabEnterprise repositories for this config.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connectedRepositories")]
+        public virtual System.Collections.Generic.IList<GitLabRepositoryId> ConnectedRepositories { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Time when the config was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. GitLabEnterprise config.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enterpriseConfig")]
+        public virtual GitLabEnterpriseConfig EnterpriseConfig { get; set; }
+
+        /// <summary>The resource name for the config.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Required. Secret Manager secrets needed by the config.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("secrets")]
+        public virtual GitLabSecrets Secrets { get; set; }
+
+        /// <summary>Username of the GitLab.com or GitLab Enterprise account Cloud Build will use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("username")]
+        public virtual string Username { get; set; }
+
+        /// <summary>
+        /// Output only. UUID included in webhook requests. The UUID is used to look up the corresponding config.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("webhookKey")]
+        public virtual string WebhookKey { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>GitLabConnectedRepository represents a GitLab connected repository request response.</summary>
+    public class GitLabConnectedRepository : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The name of the `GitLabConfig` that added connected repository. Format:
+        /// `projects/{project}/locations/{location}/gitLabConfigs/{config}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parent")]
+        public virtual string Parent { get; set; }
+
+        /// <summary>The GitLab repositories to connect.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repo")]
+        public virtual GitLabRepositoryId Repo { get; set; }
+
+        /// <summary>Output only. The status of the repo connection request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual Status Status { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>GitLabEnterpriseConfig represents the configuration for a GitLabEnterprise integration.</summary>
+    public class GitLabEnterpriseConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Immutable. The URI of the GitlabEnterprise host.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hostUri")]
+        public virtual string HostUri { get; set; }
+
+        /// <summary>
+        /// The Service Directory configuration to be used when reaching out to the GitLab Enterprise instance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceDirectoryConfig")]
+        public virtual ServiceDirectoryConfig ServiceDirectoryConfig { get; set; }
+
+        /// <summary>The SSL certificate to use in requests to GitLab Enterprise instances.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sslCa")]
+        public virtual string SslCa { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// GitLabEventsConfig describes the configuration of a trigger that creates a build whenever a GitLab event is
+    /// received.
+    /// </summary>
+    public class GitLabEventsConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. The GitLabConfig specified in the gitlab_config_resource field.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitlabConfig")]
+        public virtual GitLabConfig GitlabConfig { get; set; }
+
+        /// <summary>The GitLab config resource that this trigger config maps to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitlabConfigResource")]
+        public virtual string GitlabConfigResource { get; set; }
+
+        /// <summary>Namespace of the GitLab project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectNamespace")]
+        public virtual string ProjectNamespace { get; set; }
+
+        /// <summary>Filter to match changes in pull requests.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pullRequest")]
+        public virtual PullRequestFilter PullRequest { get; set; }
+
+        /// <summary>Filter to match changes in refs like branches, tags.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("push")]
+        public virtual PushFilter Push { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Proto Representing a GitLabRepository</summary>
+    public class GitLabRepository : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Link to the browse repo page on the GitLab instance</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("browseUri")]
+        public virtual string BrowseUri { get; set; }
+
+        /// <summary>Description of the repository</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Display name of the repository</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>The resource name of the repository</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Identifier for a repository</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repositoryId")]
+        public virtual GitLabRepositoryId RepositoryId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>GitLabRepositoryId identifies a specific repository hosted on GitLab.com or GitLabEnterprise</summary>
+    public class GitLabRepositoryId : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Identifier for the repository. example: "namespace/project-slug", namespace is usually the
+        /// username or group ID
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>
+        /// Output only. The ID of the webhook that was created for receiving events from this repo. We only create and
+        /// manage a single webhook for each repo.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("webhookId")]
+        public virtual System.Nullable<int> WebhookId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>GitLabSecrets represents the secrets in Secret Manager for a GitLab integration.</summary>
+    public class GitLabSecrets : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The resource name for the api access token’s secret version</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiAccessTokenVersion")]
+        public virtual string ApiAccessTokenVersion { get; set; }
+
+        /// <summary>
+        /// Required. Immutable. API Key that will be attached to webhook requests from GitLab to Cloud Build.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiKeyVersion")]
+        public virtual string ApiKeyVersion { get; set; }
+
+        /// <summary>Required. The resource name for the read access token’s secret version</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("readAccessTokenVersion")]
+        public virtual string ReadAccessTokenVersion { get; set; }
+
+        /// <summary>
+        /// Required. Immutable. The resource name for the webhook secret’s secret version. Once this field has been
+        /// set, it cannot be changed. If you need to change it, please create another GitLabConfig.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("webhookSecretVersion")]
+        public virtual string WebhookSecretVersion { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>GitRepoSource describes a repo and ref of a code repository.</summary>
     public class GitRepoSource : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The full resource name of the bitbucket server config. Format:
+        /// `projects/{project}/locations/{location}/bitbucketServerConfigs/{id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bitbucketServerConfig")]
+        public virtual string BitbucketServerConfig { get; set; }
+
+        /// <summary>
+        /// The full resource name of the github enterprise config. Format:
+        /// `projects/{project}/locations/{location}/githubEnterpriseConfigs/{id}`.
+        /// `projects/{project}/githubEnterpriseConfigs/{id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("githubEnterpriseConfig")]
+        public virtual string GithubEnterpriseConfig { get; set; }
+
         /// <summary>The branch or tag to use. Must start with "refs/" (required).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ref")]
         public virtual string Ref__ { get; set; }
@@ -5049,59 +8168,96 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("repoType")]
         public virtual string RepoType { get; set; }
 
-        /// <summary>The URI of the repo (required).</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
-        public virtual string Uri { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>Represents the metadata of the long-running operation.</summary>
-    public class GoogleDevtoolsCloudbuildV2OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>Output only. API version used to start the operation.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
-        public virtual string ApiVersion { get; set; }
-
-        /// <summary>Output only. The time the operation was created.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
-
-        /// <summary>Output only. The time the operation finished running.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        /// <summary>
+        /// The connected repository resource name, in the format `projects/*/locations/*/connections/*/repositories/*`.
+        /// Either `uri` or `repository` can be specified and is required.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repository")]
+        public virtual string Repository { get; set; }
 
         /// <summary>
-        /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
-        /// successfully been cancelled have Operation.error value with a google.rpc.Status.code of 1, corresponding to
-        /// `Code.CANCELLED`.
+        /// The URI of the repo (e.g. https://github.com/user/repo.git). Either `uri` or `repository` can be specified
+        /// and is required.
         /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("requestedCancellation")]
-        public virtual System.Nullable<bool> RequestedCancellation { get; set; }
-
-        /// <summary>Output only. Human-readable status of the operation, if any.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("statusMessage")]
-        public virtual string StatusMessage { get; set; }
-
-        /// <summary>Output only. Server-defined resource path for the target of the operation.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("target")]
-        public virtual string Target { get; set; }
-
-        /// <summary>Output only. Name of the verb executed by the operation.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("verb")]
-        public virtual string Verb { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>HTTPDelivery is the delivery configuration for an HTTP notification.</summary>
-    public class HTTPDelivery : Google.Apis.Requests.IDirectResponseSchema
+    /// <summary>Location of the source in any accessible Git repository.</summary>
+    public class GitSource : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The URI to which JSON-containing HTTP POST requests should be sent.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
-        public virtual string Uri { get; set; }
+        /// <summary>
+        /// Optional. Directory, relative to the source root, in which to run the build. This must be a relative path.
+        /// If a step's `dir` is specified and is an absolute path, this value is ignored for that step's execution.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dir")]
+        public virtual string Dir { get; set; }
+
+        /// <summary>
+        /// Optional. The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git
+        /// ref. Cloud Build uses `git fetch` to fetch the revision from the Git repository; therefore make sure that
+        /// the string you provide for `revision` is parsable by the command. For information on string values accepted
+        /// by `git fetch`, see https://git-scm.com/docs/gitrevisions#_specifying_revisions. For information on `git
+        /// fetch`, see https://git-scm.com/docs/git-fetch.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("revision")]
+        public virtual string Revision { get; set; }
+
+        /// <summary>
+        /// Required. Location of the Git repo to build. This will be used as a `git remote`, see
+        /// https://git-scm.com/docs/git-remote.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("url")]
+        public virtual string Url { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Go module to upload to Artifact Registry upon successful completion of all build steps. A module refers to all
+    /// dependencies in a go.mod file.
+    /// </summary>
+    public class GoModule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. The Go module's "module path". e.g. example.com/foo/v2</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("modulePath")]
+        public virtual string ModulePath { get; set; }
+
+        /// <summary>
+        /// Optional. The Go module's semantic version in the form vX.Y.Z. e.g. v0.1.1 Pre-release identifiers can also
+        /// be added by appending a dash and dot separated ASCII alphanumeric characters and hyphens. e.g.
+        /// v0.2.3-alpha.x.12m.5
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("moduleVersion")]
+        public virtual string ModuleVersion { get; set; }
+
+        /// <summary>
+        /// Optional. Location of the Artifact Registry repository. i.e. us-east1 Defaults to the build’s location.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repositoryLocation")]
+        public virtual string RepositoryLocation { get; set; }
+
+        /// <summary>
+        /// Optional. Artifact Registry repository name. Specified Go modules will be zipped and uploaded to Artifact
+        /// Registry with this location as a prefix. e.g. my-go-repo
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repositoryName")]
+        public virtual string RepositoryName { get; set; }
+
+        /// <summary>Optional. Project ID of the Artifact Registry repository. Defaults to the build project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repositoryProjectId")]
+        public virtual string RepositoryProjectId { get; set; }
+
+        /// <summary>
+        /// Optional. Source path of the go.mod file in the build's workspace. If not specified, this will default to
+        /// the current directory. e.g. ~/code/go/mypackage
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourcePath")]
+        public virtual string SourcePath { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5155,6 +8311,21 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>HttpConfig is a configuration for HTTP related git operations.</summary>
+    public class HttpConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// SecretVersion resource of the HTTP proxy URL. The Service Account used in the build (either the default
+        /// Service Account or user-specified Service Account) should have `secretmanager.versions.access` permissions
+        /// on this secret. The proxy URL should be in format `protocol://@]proxyhost[:port]`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("proxySecretVersionName")]
+        public virtual string ProxySecretVersionName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Pairs a set of secret environment variables mapped to encrypted values with the Cloud KMS key to use to decrypt
     /// the value.
@@ -5175,6 +8346,42 @@ namespace Google.Apis.CloudBuild.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
         public virtual string KmsKeyName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>RPC response object returned by ListBitbucketServerConfigs RPC method.</summary>
+    public class ListBitbucketServerConfigsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A list of BitbucketServerConfigs</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bitbucketServerConfigs")]
+        public virtual System.Collections.Generic.IList<BitbucketServerConfig> BitbucketServerConfigs { get; set; }
+
+        /// <summary>
+        /// A token that can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no
+        /// subsequent pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>RPC response object returned by the ListBitbucketServerRepositories RPC method.</summary>
+    public class ListBitbucketServerRepositoriesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of Bitbucket Server repositories.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bitbucketServerRepositories")]
+        public virtual System.Collections.Generic.IList<BitbucketServerRepository> BitbucketServerRepositories { get; set; }
+
+        /// <summary>
+        /// A token that can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no
+        /// subsequent pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5213,6 +8420,42 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>RPC response object returned by ListGitLabConfigs RPC method.</summary>
+    public class ListGitLabConfigsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A list of GitLabConfigs</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitlabConfigs")]
+        public virtual System.Collections.Generic.IList<GitLabConfig> GitlabConfigs { get; set; }
+
+        /// <summary>
+        /// A token that can be sent as `page_token` to retrieve the next page If this field is omitted, there are no
+        /// subsequent pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>RPC response object returned by the ListGitLabRepositories RPC method.</summary>
+    public class ListGitLabRepositoriesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of GitLab repositories</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitlabRepositories")]
+        public virtual System.Collections.Generic.IList<GitLabRepository> GitlabRepositories { get; set; }
+
+        /// <summary>
+        /// A token that can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no
+        /// subsequent pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>RPC response object returned by ListGithubEnterpriseConfigs RPC method.</summary>
     public class ListGithubEnterpriseConfigsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5242,6 +8485,42 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// A Maven artifact to upload to Artifact Registry upon successful completion of all build steps.
+    /// </summary>
+    public class MavenArtifact : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Maven `artifactId` value used when uploading the artifact to Artifact Registry.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("artifactId")]
+        public virtual string ArtifactId { get; set; }
+
+        /// <summary>Maven `groupId` value used when uploading the artifact to Artifact Registry.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("groupId")]
+        public virtual string GroupId { get; set; }
+
+        /// <summary>
+        /// Path to an artifact in the build's workspace to be uploaded to Artifact Registry. This can be either an
+        /// absolute path, e.g. /workspace/my-app/target/my-app-1.0.SNAPSHOT.jar or a relative path from /workspace,
+        /// e.g. my-app/target/my-app-1.0.SNAPSHOT.jar.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("path")]
+        public virtual string Path { get; set; }
+
+        /// <summary>
+        /// Artifact Registry repository, in the form "https://$REGION-maven.pkg.dev/$PROJECT/$REPOSITORY" Artifact in
+        /// the workspace specified by path will be uploaded to Artifact Registry with this location as a prefix.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repository")]
+        public virtual string Repository { get; set; }
+
+        /// <summary>Maven `version` value used when uploading the artifact to Artifact Registry.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual string Version { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Defines the network configuration for the pool.</summary>
     public class NetworkConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5259,133 +8538,34 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("peeredNetwork")]
         public virtual string PeeredNetwork { get; set; }
 
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>
-    /// Notification is the container which holds the data that is relevant to this particular notification.
-    /// </summary>
-    public class Notification : Google.Apis.Requests.IDirectResponseSchema
-    {
         /// <summary>
-        /// The filter string to use for notification filtering. Currently, this is assumed to be a CEL program. See
-        /// https://opensource.google/projects/cel for more.
+        /// Immutable. Subnet IP range within the peered network. This is specified in CIDR notation with a slash and
+        /// the subnet prefix size. You can optionally specify an IP address before the subnet prefix value. e.g.
+        /// `192.168.0.0/29` would specify an IP range starting at 192.168.0.0 with a prefix size of 29 bits. `/16`
+        /// would specify a prefix size of 16 bits, with an automatically determined IP within the peered VPC. If
+        /// unspecified, a value of `/24` will be used.
         /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("filter")]
-        public virtual string Filter { get; set; }
-
-        /// <summary>Configuration for HTTP delivery.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("httpDelivery")]
-        public virtual HTTPDelivery HttpDelivery { get; set; }
-
-        /// <summary>Configuration for Slack delivery.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("slackDelivery")]
-        public virtual SlackDelivery SlackDelivery { get; set; }
-
-        /// <summary>Configuration for SMTP (email) delivery.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("smtpDelivery")]
-        public virtual SMTPDelivery SmtpDelivery { get; set; }
-
-        /// <summary>Escape hatch for users to supply custom delivery configs.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("structDelivery")]
-        public virtual System.Collections.Generic.IDictionary<string, object> StructDelivery { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("peeredNetworkIpRange")]
+        public virtual string PeeredNetworkIpRange { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>NotifierConfig is the top-level configuration message.</summary>
-    public class NotifierConfig : Google.Apis.Requests.IDirectResponseSchema
+    /// <summary>Npm package to upload to Artifact Registry upon successful completion of all build steps.</summary>
+    public class NpmPackage : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The API version of this configuration format.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
-        public virtual string ApiVersion { get; set; }
-
-        /// <summary>The type of notifier to use (e.g. SMTPNotifier).</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
-        public virtual string Kind { get; set; }
-
-        /// <summary>Metadata for referring to/handling/deploying this notifier.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
-        public virtual NotifierMetadata Metadata { get; set; }
-
-        /// <summary>The actual configuration for this notifier.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("spec")]
-        public virtual NotifierSpec Spec { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>NotifierMetadata contains the data which can be used to reference or describe this notifier.</summary>
-    public class NotifierMetadata : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>
-        /// The human-readable and user-given name for the notifier. For example: "repo-merge-email-notifier".
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("name")]
-        public virtual string Name { get; set; }
+        /// <summary>Path to the package.json. e.g. workspace/path/to/package</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("packagePath")]
+        public virtual string PackagePath { get; set; }
 
         /// <summary>
-        /// The string representing the name and version of notifier to deploy. Expected to be of the form of "/:". For
-        /// example: "gcr.io/my-project/notifiers/smtp:1.2.34".
+        /// Artifact Registry repository, in the form "https://$REGION-npm.pkg.dev/$PROJECT/$REPOSITORY" Npm package in
+        /// the workspace specified by path will be zipped and uploaded to Artifact Registry with this location as a
+        /// prefix.
         /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("notifier")]
-        public virtual string Notifier { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>
-    /// NotifierSecret is the container that maps a secret name (reference) to its Google Cloud Secret Manager resource
-    /// path.
-    /// </summary>
-    public class NotifierSecret : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>Name is the local name of the secret, such as the verbatim string "my-smtp-password".</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("name")]
-        public virtual string Name { get; set; }
-
-        /// <summary>
-        /// Value is interpreted to be a resource path for fetching the actual (versioned) secret data for this secret.
-        /// For example, this would be a Google Cloud Secret Manager secret version resource path like:
-        /// "projects/my-project/secrets/my-secret/versions/latest".
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("value")]
-        public virtual string Value { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>
-    /// NotifierSecretRef contains the reference to a secret stored in the corresponding NotifierSpec.
-    /// </summary>
-    public class NotifierSecretRef : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>
-        /// The value of `secret_ref` should be a `name` that is registered in a `Secret` in the `secrets` list of the
-        /// `Spec`.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("secretRef")]
-        public virtual string SecretRef { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>NotifierSpec is the configuration container for notifications.</summary>
-    public class NotifierSpec : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>The configuration of this particular notifier.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("notification")]
-        public virtual Notification Notification { get; set; }
-
-        /// <summary>Configurations for secret resources used by this particular notifier.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("secrets")]
-        public virtual System.Collections.Generic.IList<NotifierSecret> Secrets { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("repository")]
+        public virtual string Repository { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5421,8 +8601,8 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -5443,19 +8623,85 @@ namespace Google.Apis.CloudBuild.v1.Data
 
         /// <summary>
         /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
-        /// been cancelled successfully have Operation.error value with a google.rpc.Status.code of 1, corresponding to
-        /// `Code.CANCELLED`.
+        /// been cancelled successfully have google.longrunning.Operation.error value with a google.rpc.Status.code of
+        /// `1`, corresponding to `Code.CANCELLED`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cancelRequested")]
         public virtual System.Nullable<bool> CancelRequested { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. The time the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Human-readable status of the operation, if any.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("statusDetail")]
@@ -5497,6 +8743,10 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("networkConfig")]
         public virtual NetworkConfig NetworkConfig { get; set; }
 
+        /// <summary>Immutable. Private Service Connect(PSC) Network configuration for the pool.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("privateServiceConnect")]
+        public virtual PrivateServiceConnect PrivateServiceConnect { get; set; }
+
         /// <summary>Machine configuration for the workers in the pool.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("workerConfig")]
         public virtual WorkerConfig WorkerConfig { get; set; }
@@ -5505,16 +8755,117 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Defines the Private Service Connect network configuration for the pool.</summary>
+    public class PrivateServiceConnect : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Immutable. The network attachment that the worker network interface is peered to. Must be in the
+        /// format `projects/{project}/regions/{region}/networkAttachments/{networkAttachment}`. The region of network
+        /// attachment must be the same as the worker pool. See [Network
+        /// Attachments](https://cloud.google.com/vpc/docs/about-network-attachments)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("networkAttachment")]
+        public virtual string NetworkAttachment { get; set; }
+
+        /// <summary>
+        /// Required. Immutable. Disable public IP on the primary network interface. If true, workers are created
+        /// without any public address, which prevents network egress to public IPs unless a network proxy is
+        /// configured. If false, workers are created with a public address which allows for public internet egress. The
+        /// public address only applies to traffic through the primary network interface. If `route_all_traffic` is set
+        /// to true, all traffic will go through the non-primary network interface, this boolean has no effect.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("publicIpAddressDisabled")]
+        public virtual System.Nullable<bool> PublicIpAddressDisabled { get; set; }
+
+        /// <summary>
+        /// Immutable. Route all traffic through PSC interface. Enable this if you want full control of traffic in the
+        /// private pool. Configure Cloud NAT for the subnet of network attachment if you need to access public
+        /// Internet. If false, Only route private IPs, e.g. 10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16 through PSC
+        /// interface.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("routeAllTraffic")]
+        public virtual System.Nullable<bool> RouteAllTraffic { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Metadata for `ProcessAppManifestCallback` operation.</summary>
     public class ProcessAppManifestCallbackOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
         /// <summary>Time the operation was completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
-        public virtual object CompleteTime { get; set; }
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
 
         /// <summary>Time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The resource name of the GitHubEnterprise to be created. Format:
@@ -5550,7 +8901,7 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string Subscription { get; set; }
 
         /// <summary>
-        /// The name of the topic from which this subscription is receiving messages. Format is
+        /// Optional. The name of the topic from which this subscription is receiving messages. Format is
         /// `projects/{project}/topics/{topic}`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("topic")]
@@ -5571,7 +8922,10 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string Branch { get; set; }
 
         /// <summary>
-        /// Configure builds to run whether a repository owner or collaborator need to comment `/gcbrun`.
+        /// If CommentControl is enabled, depending on the setting, builds may not fire until a repository writer
+        /// comments `/gcbrun` on a pull request or `/gcbrun` is in the pull request description. Only PR comments that
+        /// contain `/gcbrun` will trigger builds. If CommentControl is set to disabled, comments with `/gcbrun` from a
+        /// user with repository write permission or above will still trigger builds to run.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("commentControl")]
         public virtual string CommentControl { get; set; }
@@ -5610,10 +8964,56 @@ namespace Google.Apis.CloudBuild.v1.Data
     }
 
     /// <summary>
+    /// Python package to upload to Artifact Registry upon successful completion of all build steps. A package can
+    /// encapsulate multiple objects to be uploaded to a single repository.
+    /// </summary>
+    public class PythonPackage : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Path globs used to match files in the build's workspace. For Python/ Twine, this is usually `dist/*`, and
+        /// sometimes additionally an `.asc` file.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("paths")]
+        public virtual System.Collections.Generic.IList<string> Paths { get; set; }
+
+        /// <summary>
+        /// Artifact Registry repository, in the form "https://$REGION-python.pkg.dev/$PROJECT/$REPOSITORY" Files in the
+        /// workspace matching any path pattern will be uploaded to Artifact Registry with this location as a prefix.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repository")]
+        public virtual string Repository { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// ReceiveTriggerWebhookResponse [Experimental] is the response object for the ReceiveTriggerWebhook method.
     /// </summary>
     public class ReceiveTriggerWebhookResponse : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>RPC request object accepted by RemoveBitbucketServerConnectedRepository RPC method.</summary>
+    public class RemoveBitbucketServerConnectedRepositoryRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The connected repository to remove.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connectedRepository")]
+        public virtual BitbucketServerRepositoryId ConnectedRepository { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>RPC request object accepted by RemoveGitLabConnectedRepository RPC method.</summary>
+    public class RemoveGitLabConnectedRepositoryRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The connected repository to remove.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connectedRepository")]
+        public virtual GitLabRepositoryId ConnectedRepository { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -5633,28 +9033,30 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string CommitSha { get; set; }
 
         /// <summary>
-        /// Directory, relative to the source root, in which to run the build. This must be a relative path. If a step's
-        /// `dir` is specified and is an absolute path, this value is ignored for that step's execution.
+        /// Optional. Directory, relative to the source root, in which to run the build. This must be a relative path.
+        /// If a step's `dir` is specified and is an absolute path, this value is ignored for that step's execution.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dir")]
         public virtual string Dir { get; set; }
 
-        /// <summary>Only trigger a build if the revision regex does NOT match the revision regex.</summary>
+        /// <summary>Optional. Only trigger a build if the revision regex does NOT match the revision regex.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("invertRegex")]
         public virtual System.Nullable<bool> InvertRegex { get; set; }
 
         /// <summary>
-        /// ID of the project that owns the Cloud Source Repository. If omitted, the project ID requesting the build is
-        /// assumed.
+        /// Optional. ID of the project that owns the Cloud Source Repository. If omitted, the project ID requesting the
+        /// build is assumed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
 
-        /// <summary>Name of the Cloud Source Repository.</summary>
+        /// <summary>Required. Name of the Cloud Source Repository.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("repoName")]
         public virtual string RepoName { get; set; }
 
-        /// <summary>Substitutions to use in a triggered build. Should only be used with RunBuildTrigger</summary>
+        /// <summary>
+        /// Optional. Substitutions to use in a triggered build. Should only be used with RunBuildTrigger
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("substitutions")]
         public virtual System.Collections.Generic.IDictionary<string, string> Substitutions { get; set; }
 
@@ -5669,14 +9071,42 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// The configuration of a trigger that creates a build whenever an event from Repo API is received.
+    /// </summary>
+    public class RepositoryEventConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Filter to match changes in pull requests.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pullRequest")]
+        public virtual PullRequestFilter PullRequest { get; set; }
+
+        /// <summary>Filter to match changes in refs like branches, tags.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("push")]
+        public virtual PushFilter Push { get; set; }
+
+        /// <summary>The resource name of the Repo API resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repository")]
+        public virtual string Repository { get; set; }
+
+        /// <summary>Output only. The type of the SCM vendor the repository points to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("repositoryType")]
+        public virtual string RepositoryType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Artifacts created by the build pipeline.</summary>
     public class Results : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Path to the artifact manifest. Only populated when artifacts are uploaded.</summary>
+        /// <summary>
+        /// Path to the artifact manifest for non-container artifacts uploaded to Cloud Storage. Only populated when
+        /// artifacts are uploaded to Cloud Storage.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("artifactManifest")]
         public virtual string ArtifactManifest { get; set; }
 
-        /// <summary>Time to push all non-container artifacts.</summary>
+        /// <summary>Time to push all non-container artifacts to Cloud Storage.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("artifactTiming")]
         public virtual TimeSpan ArtifactTiming { get; set; }
 
@@ -5687,18 +9117,38 @@ namespace Google.Apis.CloudBuild.v1.Data
         /// <summary>
         /// List of build step outputs, produced by builder images, in the order corresponding to build step indices.
         /// [Cloud Builders](https://cloud.google.com/cloud-build/docs/cloud-builders) can produce this output by
-        /// writing to `$BUILDER_OUTPUT/output`. Only the first 4KB of data is stored.
+        /// writing to `$BUILDER_OUTPUT/output`. Only the first 50KB of data is stored. Note that the `$BUILDER_OUTPUT`
+        /// variable is read-only and can't be substituted.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("buildStepOutputs")]
         public virtual System.Collections.Generic.IList<string> BuildStepOutputs { get; set; }
+
+        /// <summary>Optional. Go module artifacts uploaded to Artifact Registry at the end of the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("goModules")]
+        public virtual System.Collections.Generic.IList<UploadedGoModule> GoModules { get; set; }
 
         /// <summary>Container images that were built as a part of the build.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("images")]
         public virtual System.Collections.Generic.IList<BuiltImage> Images { get; set; }
 
-        /// <summary>Number of artifacts uploaded. Only populated when artifacts are uploaded.</summary>
+        /// <summary>Maven artifacts uploaded to Artifact Registry at the end of the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mavenArtifacts")]
+        public virtual System.Collections.Generic.IList<UploadedMavenArtifact> MavenArtifacts { get; set; }
+
+        /// <summary>Npm packages uploaded to Artifact Registry at the end of the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("npmPackages")]
+        public virtual System.Collections.Generic.IList<UploadedNpmPackage> NpmPackages { get; set; }
+
+        /// <summary>
+        /// Number of non-container artifacts uploaded to Cloud Storage. Only populated when artifacts are uploaded to
+        /// Cloud Storage.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("numArtifacts")]
         public virtual System.Nullable<long> NumArtifacts { get; set; }
+
+        /// <summary>Python artifacts uploaded to Artifact Registry at the end of the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pythonPackages")]
+        public virtual System.Collections.Generic.IList<UploadedPythonPackage> PythonPackages { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5732,49 +9182,15 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
 
-        /// <summary>Source to build against this trigger.</summary>
+        /// <summary>
+        /// Source to build against this trigger. Branch and tag names cannot consist of regular expressions.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("source")]
         public virtual RepoSource Source { get; set; }
 
         /// <summary>Required. ID of the trigger.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("triggerId")]
         public virtual string TriggerId { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>SMTPDelivery is the delivery configuration for an SMTP (email) notification.</summary>
-    public class SMTPDelivery : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>
-        /// This is the SMTP account/email that appears in the `From:` of the email. If empty, it is assumed to be
-        /// sender.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("fromAddress")]
-        public virtual string FromAddress { get; set; }
-
-        /// <summary>The SMTP sender's password.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("password")]
-        public virtual NotifierSecretRef Password { get; set; }
-
-        /// <summary>The SMTP port of the server.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("port")]
-        public virtual string Port { get; set; }
-
-        /// <summary>
-        /// This is the list of addresses to which we send the email (i.e. in the `To:` of the email).
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("recipientAddresses")]
-        public virtual System.Collections.Generic.IList<string> RecipientAddresses { get; set; }
-
-        /// <summary>This is the SMTP account/email that is used to send the message.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("senderAddress")]
-        public virtual string SenderAddress { get; set; }
-
-        /// <summary>The address of the SMTP server.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("server")]
-        public virtual string Server { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5836,15 +9252,15 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>
-    /// SlackDelivery is the delivery configuration for delivering Slack messages via webhooks. See Slack webhook
-    /// documentation at: https://api.slack.com/messaging/webhooks.
-    /// </summary>
-    public class SlackDelivery : Google.Apis.Requests.IDirectResponseSchema
+    /// <summary>ServiceDirectoryConfig represents Service Directory configuration for a SCM host connection.</summary>
+    public class ServiceDirectoryConfig : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The secret reference for the Slack webhook URI for sending messages to a channel.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("webhookUri")]
-        public virtual NotifierSecretRef WebhookUri { get; set; }
+        /// <summary>
+        /// The Service Directory service name. Format:
+        /// projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("service")]
+        public virtual string Service { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5853,17 +9269,31 @@ namespace Google.Apis.CloudBuild.v1.Data
     /// <summary>Location of the source in a supported storage service.</summary>
     public class Source : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Optional. If provided, get the source from this 2nd-gen Google Cloud Build repository resource.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("connectedRepository")]
+        public virtual ConnectedRepository ConnectedRepository { get; set; }
+
+        /// <summary>If provided, get the source from this Developer Connect config.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("developerConnectConfig")]
+        public virtual DeveloperConnectConfig DeveloperConnectConfig { get; set; }
+
+        /// <summary>If provided, get the source from this Git repository.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitSource")]
+        public virtual GitSource GitSource { get; set; }
+
         /// <summary>If provided, get the source from this location in a Cloud Source Repository.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("repoSource")]
         public virtual RepoSource RepoSource { get; set; }
 
-        /// <summary>If provided, get the source from this location in Google Cloud Storage.</summary>
+        /// <summary>If provided, get the source from this location in Cloud Storage.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storageSource")]
         public virtual StorageSource StorageSource { get; set; }
 
         /// <summary>
-        /// If provided, get the source from this manifest in Google Cloud Storage. This feature is in Preview; see
-        /// description [here](https://github.com/GoogleCloudPlatform/cloud-builders/tree/master/gcs-fetcher).
+        /// If provided, get the source from this manifest in Cloud Storage. This feature is in Preview; see description
+        /// [here](https://github.com/GoogleCloudPlatform/cloud-builders/tree/master/gcs-fetcher).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storageSourceManifest")]
         public virtual StorageSourceManifest StorageSourceManifest { get; set; }
@@ -5886,6 +9316,18 @@ namespace Google.Apis.CloudBuild.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fileHashes")]
         public virtual System.Collections.Generic.IDictionary<string, FileHashes> FileHashes { get; set; }
+
+        /// <summary>
+        /// Output only. A copy of the build's `source.connected_repository`, if exists, with any revisions resolved.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resolvedConnectedRepository")]
+        public virtual ConnectedRepository ResolvedConnectedRepository { get; set; }
+
+        /// <summary>
+        /// Output only. A copy of the build's `source.git_source`, if exists, with any revisions resolved.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resolvedGitSource")]
+        public virtual GitSource ResolvedGitSource { get; set; }
 
         /// <summary>A copy of the build's `source.repo_source`, if exists, with any revisions resolved.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resolvedRepoSource")]
@@ -5935,56 +9377,59 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Location of the source in an archive file in Google Cloud Storage.</summary>
+    /// <summary>Location of the source in an archive file in Cloud Storage.</summary>
     public class StorageSource : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Google Cloud Storage bucket containing the source (see [Bucket Name
+        /// Cloud Storage bucket containing the source (see [Bucket Name
         /// Requirements](https://cloud.google.com/storage/docs/bucket-naming#requirements)).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bucket")]
         public virtual string Bucket { get; set; }
 
         /// <summary>
-        /// Google Cloud Storage generation for the object. If the generation is omitted, the latest generation will be
-        /// used.
+        /// Optional. Cloud Storage generation for the object. If the generation is omitted, the latest generation will
+        /// be used.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("generation")]
         public virtual System.Nullable<long> Generation { get; set; }
 
         /// <summary>
-        /// Google Cloud Storage object containing the source. This object must be a zipped (`.zip`) or gzipped archive
-        /// file (`.tar.gz`) containing source to build.
+        /// Required. Cloud Storage object containing the source. This object must be a zipped (`.zip`) or gzipped
+        /// archive file (`.tar.gz`) containing source to build.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("object")]
         public virtual string Object__ { get; set; }
+
+        /// <summary>Optional. Option to specify the tool to fetch the source file for the build.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceFetcher")]
+        public virtual string SourceFetcher { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
     /// <summary>
-    /// Location of the source manifest in Google Cloud Storage. This feature is in Preview; see description
+    /// Location of the source manifest in Cloud Storage. This feature is in Preview; see description
     /// [here](https://github.com/GoogleCloudPlatform/cloud-builders/tree/master/gcs-fetcher).
     /// </summary>
     public class StorageSourceManifest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Google Cloud Storage bucket containing the source manifest (see [Bucket Name
+        /// Required. Cloud Storage bucket containing the source manifest (see [Bucket Name
         /// Requirements](https://cloud.google.com/storage/docs/bucket-naming#requirements)).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bucket")]
         public virtual string Bucket { get; set; }
 
         /// <summary>
-        /// Google Cloud Storage generation for the object. If the generation is omitted, the latest generation will be
-        /// used.
+        /// Cloud Storage generation for the object. If the generation is omitted, the latest generation will be used.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("generation")]
         public virtual System.Nullable<long> Generation { get; set; }
 
         /// <summary>
-        /// Google Cloud Storage object containing the source manifest. This object must be a JSON file.
+        /// Required. Cloud Storage object containing the source manifest. This object must be a JSON file.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("object")]
         public virtual string Object__ { get; set; }
@@ -5996,13 +9441,167 @@ namespace Google.Apis.CloudBuild.v1.Data
     /// <summary>Start and end times for a build execution phase.</summary>
     public class TimeSpan : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>End of time span.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>Start of time span.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for `UpdateBitbucketServerConfig` operation.</summary>
+    public class UpdateBitbucketServerConfigOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The resource name of the BitbucketServerConfig to be updated. Format:
+        /// `projects/{project}/locations/{location}/bitbucketServerConfigs/{id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bitbucketServerConfig")]
+        public virtual string BitbucketServerConfig { get; set; }
+
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
+        /// <summary>Time the operation was completed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Time the operation was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6011,13 +9610,79 @@ namespace Google.Apis.CloudBuild.v1.Data
     /// <summary>Metadata for `UpdateGitHubEnterpriseConfig` operation.</summary>
     public class UpdateGitHubEnterpriseConfigOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
         /// <summary>Time the operation was completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
-        public virtual object CompleteTime { get; set; }
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
 
         /// <summary>Time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The resource name of the GitHubEnterprise to be updated. Format:
@@ -6030,16 +9695,170 @@ namespace Google.Apis.CloudBuild.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Metadata for the `UpdateWorkerPool` operation.</summary>
-    public class UpdateWorkerPoolOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    /// <summary>Metadata for `UpdateGitLabConfig` operation.</summary>
+    public class UpdateGitLabConfigOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
         /// <summary>Time the operation was completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
-        public virtual object CompleteTime { get; set; }
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
 
         /// <summary>Time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The resource name of the GitLabConfig to be created. Format:
+        /// `projects/{project}/locations/{location}/gitlabConfigs/{id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gitlabConfig")]
+        public virtual string GitlabConfig { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for the `UpdateWorkerPool` operation.</summary>
+    public class UpdateWorkerPoolOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _completeTimeRaw;
+
+        private object _completeTime;
+
+        /// <summary>Time the operation was completed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("completeTime")]
+        public virtual string CompleteTimeRaw
+        {
+            get => _completeTimeRaw;
+            set
+            {
+                _completeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _completeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CompleteTimeDateTimeOffset instead.")]
+        public virtual object CompleteTime
+        {
+            get => _completeTime;
+            set
+            {
+                _completeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _completeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CompleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CompleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CompleteTimeRaw);
+            set => CompleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Time the operation was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The resource name of the `WorkerPool` being updated. Format:
@@ -6047,6 +9866,82 @@ namespace Google.Apis.CloudBuild.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("workerPool")]
         public virtual string WorkerPool { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A Go module artifact uploaded to Artifact Registry using the GoModule directive.</summary>
+    public class UploadedGoModule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Hash types and values of the Go Module Artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileHashes")]
+        public virtual FileHashes FileHashes { get; set; }
+
+        /// <summary>Output only. Stores timing information for pushing the specified artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pushTiming")]
+        public virtual TimeSpan PushTiming { get; set; }
+
+        /// <summary>URI of the uploaded artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A Maven artifact uploaded using the MavenArtifact directive.</summary>
+    public class UploadedMavenArtifact : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Hash types and values of the Maven Artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileHashes")]
+        public virtual FileHashes FileHashes { get; set; }
+
+        /// <summary>Output only. Stores timing information for pushing the specified artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pushTiming")]
+        public virtual TimeSpan PushTiming { get; set; }
+
+        /// <summary>URI of the uploaded artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An npm package uploaded to Artifact Registry using the NpmPackage directive.</summary>
+    public class UploadedNpmPackage : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Hash types and values of the npm package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileHashes")]
+        public virtual FileHashes FileHashes { get; set; }
+
+        /// <summary>Output only. Stores timing information for pushing the specified artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pushTiming")]
+        public virtual TimeSpan PushTiming { get; set; }
+
+        /// <summary>URI of the uploaded npm package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Artifact uploaded using the PythonPackage directive.</summary>
+    public class UploadedPythonPackage : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Hash types and values of the Python Artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileHashes")]
+        public virtual FileHashes FileHashes { get; set; }
+
+        /// <summary>Output only. Stores timing information for pushing the specified artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pushTiming")]
+        public virtual TimeSpan PushTiming { get; set; }
+
+        /// <summary>URI of the uploaded artifact.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6117,13 +10012,13 @@ namespace Google.Apis.CloudBuild.v1.Data
         /// <summary>
         /// Size of the disk attached to the worker, in GB. See [Worker pool config
         /// file](https://cloud.google.com/build/docs/private-pools/worker-pool-config-file-schema). Specify a value of
-        /// up to 1000. If `0` is specified, Cloud Build will use a standard disk size.
+        /// up to 2000. If `0` is specified, Cloud Build will use a standard disk size.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("diskSizeGb")]
         public virtual System.Nullable<long> DiskSizeGb { get; set; }
 
         /// <summary>
-        /// Machine type of a worker, such as `e2-medium`. See [Worker pool config
+        /// Optional. Machine type of a worker, such as `e2-medium`. See [Worker pool config
         /// file](https://cloud.google.com/build/docs/private-pools/worker-pool-config-file-schema). If left blank,
         /// Cloud Build will use a sensible default.
         /// </summary>
@@ -6151,13 +10046,79 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("annotations")]
         public virtual System.Collections.Generic.IDictionary<string, string> Annotations { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time at which the request to create the `WorkerPool` was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _deleteTimeRaw;
+
+        private object _deleteTime;
 
         /// <summary>Output only. Time at which the request to delete the `WorkerPool` was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deleteTime")]
-        public virtual object DeleteTime { get; set; }
+        public virtual string DeleteTimeRaw
+        {
+            get => _deleteTimeRaw;
+            set
+            {
+                _deleteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deleteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeleteTimeDateTimeOffset instead.")]
+        public virtual object DeleteTime
+        {
+            get => _deleteTime;
+            set
+            {
+                _deleteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deleteTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeleteTimeRaw);
+            set => DeleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// A user-specified, human-readable name for the `WorkerPool`. If provided, this value must be 1-63 characters.
@@ -6181,7 +10142,7 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
-        /// <summary>Private Pool using a v1 configuration.</summary>
+        /// <summary>Legacy Private Pool configuration.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("privatePoolV1Config")]
         public virtual PrivatePoolV1Config PrivatePoolV1Config { get; set; }
 
@@ -6193,8 +10154,41 @@ namespace Google.Apis.CloudBuild.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("uid")]
         public virtual string Uid { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Time at which the request to update the `WorkerPool` was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
     }
 }

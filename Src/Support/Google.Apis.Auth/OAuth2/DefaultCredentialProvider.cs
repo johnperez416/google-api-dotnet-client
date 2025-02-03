@@ -16,6 +16,7 @@ limitations under the License.
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,6 +24,7 @@ using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Json;
 using Google.Apis.Logging;
+using Google.Apis.Util;
 
 namespace Google.Apis.Auth.OAuth2
 {
@@ -56,8 +58,8 @@ namespace Google.Apis.Auth.OAuth2
         private const string CloudSDKConfigDirectoryWindows = "gcloud";
 
         /// <summary>Help link to the application default credentials feature.</summary>
-        private const string HelpPermalink = 
-            "https://developers.google.com/accounts/docs/application-default-credentials";
+        private const string HelpPermalink =
+            "https://cloud.google.com/docs/authentication/external/set-up-adc";
 
         /// <summary>GCloud configuration directory on Linux/Mac, relative to $HOME.</summary>
         private static readonly string CloudSDKConfigDirectoryUnix = Path.Combine(".config", "gcloud");
@@ -81,70 +83,73 @@ namespace Google.Apis.Auth.OAuth2
         /// <summary>Creates a new default credential.</summary>
         private async Task<GoogleCredential> CreateDefaultCredentialAsync()
         {
-            // 1. First try the environment variable.
-            string credentialPath = GetEnvironmentVariable(CredentialEnvironmentVariable);
-            if (!string.IsNullOrWhiteSpace(credentialPath))
-            {
-                try
-                {
-                    return await CreateDefaultCredentialFromFileAsync(credentialPath, default).ConfigureAwait(false);
-                }
-                catch (Exception e)
-                {
-                    // Catching generic exception type because any corrupted file could manifest in different ways
-                    // including but not limited to the System, System.IO or from the Newtonsoft.Json namespace.
-                    throw new InvalidOperationException(
-                        String.Format("Error reading credential file from location {0}: {1}"
-                            + "\nPlease check the value of the Environment Variable {2}",
-                            credentialPath,
-                            e.Message,
-                            CredentialEnvironmentVariable), e);
-                }
-            }
-            
-            // 2. Then try the well known file.
-            credentialPath = GetWellKnownCredentialFilePath();
-            if (!string.IsNullOrWhiteSpace(credentialPath))
-            {
-                try
-                {
-                    return await CreateDefaultCredentialFromFileAsync(credentialPath, default).ConfigureAwait(false);
-                }
-                catch (FileNotFoundException)
-                {
-                    // File is not present, eat the exception and move on to the next check.
-                    Logger.Debug("Well-known credential file {0} not found.", credentialPath);
-                }
-                catch (DirectoryNotFoundException)
-                {
-                    // Directory not present, eat the exception and move on to the next check.
-                    Logger.Debug("Well-known credential file {0} not found.", credentialPath);
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidOperationException(
-                        String.Format("Error reading credential file from location {0}: {1}"
-                            + "\nPlease rerun 'gcloud auth login' to regenerate credentials file.",
-                            credentialPath,
-                            e.Message), e);
-                }
-            }
-
-            // 3. Then try the compute engine.
-            Logger.Debug("Checking whether the application is running on ComputeEngine.");
-            if (await ComputeCredential.IsRunningOnComputeEngine().ConfigureAwait(false))
-            {
-                Logger.Debug("ComputeEngine check passed. Using ComputeEngine Credentials.");
-                return new GoogleCredential(new ComputeCredential());
-            }
-
+            GoogleCredential credential =
+                // 1. First try the environment variable.
+                await GetAdcFromEnvironmentVariableAsync().ConfigureAwait(false)
+                // 2. Then try the well known file.
+                ?? await GetAdcFromWellKnownFileAsync().ConfigureAwait(false)
+                // 3. Then try the compute engine.
+                ?? await GetAdcFromComputeAsync().ConfigureAwait(false)
             // If everything we tried has failed, throw an exception.
-            throw new InvalidOperationException(
-                String.Format("The Application Default Credentials are not available. They are available if running"
-                    + " in Google Compute Engine. Otherwise, the environment variable {0} must be defined"
-                    + " pointing to a file defining the credentials. See {1} for more information.",
-                    CredentialEnvironmentVariable,
-                    HelpPermalink));
+                ?? throw new InvalidOperationException($"Your default credentials were not found. To set up Application Default Credentials, see {HelpPermalink}.");
+
+            return credential.CreateWithEnvironmentQuotaProject();
+
+            async Task<GoogleCredential> GetAdcFromEnvironmentVariableAsync()
+            {
+                string credentialPath = GetEnvironmentVariable(CredentialEnvironmentVariable);
+                if (!string.IsNullOrWhiteSpace(credentialPath))
+                {
+                    try
+                    {
+                        return await CreateDefaultCredentialFromFileAsync(credentialPath, default).ConfigureAwait(false);
+                    }
+                    catch (Exception e)
+                    {
+                        // Catching generic exception type because any corrupted file could manifest in different ways
+                        // including but not limited to the System, System.IO or from the Newtonsoft.Json namespace.
+                        throw new InvalidOperationException(
+                            $"Error reading credential file from location {credentialPath}: {e.Message}{Environment.NewLine}" +
+                            $"Please check the value of the Environment Variable {CredentialEnvironmentVariable}.", e);
+                    }
+                }
+                return null;
+            }
+
+            async Task<GoogleCredential> GetAdcFromWellKnownFileAsync()
+            {
+                string credentialPath = GetWellKnownCredentialFilePath();
+                if (!string.IsNullOrWhiteSpace(credentialPath))
+                {
+                    try
+                    {
+                        return await CreateDefaultCredentialFromFileAsync(credentialPath, default).ConfigureAwait(false);
+                    }
+                    catch (Exception e) when (e is FileNotFoundException || e is DirectoryNotFoundException)
+                    {
+                        // File is not present, eat the exception and move on to the next check.
+                        Logger.Debug($"Well-known credential file {credentialPath} not found.");
+                    }
+                    catch (Exception e)
+                    {
+                        throw new InvalidOperationException(
+                            $"Error reading credential file from location {credentialPath}: {e.Message}{Environment.NewLine}" +
+                            "Please rerun 'gcloud auth login' to regenerate credentials file.", e);
+                    }
+                }
+                return null;
+            }
+
+            async Task<GoogleCredential> GetAdcFromComputeAsync()
+            {
+                Logger.Debug("Checking whether the application is running on ComputeEngine.");
+                if (await ComputeCredential.IsRunningOnComputeEngine().ConfigureAwait(false))
+                {
+                    Logger.Debug("ComputeEngine check passed. Using ComputeEngine Credentials.");
+                    return new GoogleCredential(new ComputeCredential());
+                }
+                return null;
+            }
         }
 
         private async Task<GoogleCredential> CreateDefaultCredentialFromFileAsync(string credentialPath, CancellationToken cancellationToken)
@@ -204,21 +209,15 @@ namespace Google.Apis.Auth.OAuth2
 
 
         /// <summary>Creates a default credential from JSON data.</summary>
-        private static GoogleCredential CreateDefaultCredentialFromParameters(JsonCredentialParameters credentialParameters)
-        {
-            switch (credentialParameters.Type)
+        internal GoogleCredential CreateDefaultCredentialFromParameters(JsonCredentialParameters credentialParameters) =>
+            credentialParameters.ThrowIfNull(nameof(credentialParameters)).Type switch
             {
-                case JsonCredentialParameters.AuthorizedUserCredentialType:
-                    return new GoogleCredential(CreateUserCredentialFromParameters(credentialParameters));
-                case JsonCredentialParameters.ServiceAccountCredentialType:
-                    return GoogleCredential.FromServiceAccountCredential(
-                        CreateServiceAccountCredentialFromParameters(credentialParameters));
-                default:
-                    throw new InvalidOperationException(
-                        String.Format("Error creating credential from JSON. Unrecognized credential type {0}.", 
-                            credentialParameters.Type));
-            }
-        }
+                JsonCredentialParameters.AuthorizedUserCredentialType => new GoogleCredential(CreateUserCredentialFromParameters(credentialParameters)),
+                JsonCredentialParameters.ServiceAccountCredentialType => GoogleCredential.FromServiceAccountCredential(CreateServiceAccountCredentialFromParameters(credentialParameters)),
+                JsonCredentialParameters.ExternalAccountCredentialType => new GoogleCredential(CreateExternalCredentialFromParameters(credentialParameters)),
+                JsonCredentialParameters.ImpersonatedServiceAccountCredentialType => new GoogleCredential(CreateImpersonatedServiceAccountCredentialFromParameters(credentialParameters)),
+                _ => throw new InvalidOperationException($"Error creating credential from JSON or JSON parameters. Unrecognized credential type {credentialParameters.Type}."),
+            };
 
         /// <summary>Creates a user credential from JSON data.</summary>
         private static UserCredential CreateUserCredentialFromParameters(JsonCredentialParameters credentialParameters)
@@ -228,6 +227,10 @@ namespace Google.Apis.Auth.OAuth2
                 string.IsNullOrEmpty(credentialParameters.ClientSecret))
             {
                 throw new InvalidOperationException("JSON data does not represent a valid user credential.");
+            }
+            if (credentialParameters.UniverseDomain is not null && credentialParameters.UniverseDomain != GoogleAuthConsts.DefaultUniverseDomain)
+            {
+                throw new InvalidOperationException($"{nameof(UserCredential)} is not supported in universe domains other than {GoogleAuthConsts.DefaultUniverseDomain}");
             }
 
             var token = new TokenResponse
@@ -258,13 +261,121 @@ namespace Google.Apis.Auth.OAuth2
             {
                 throw new InvalidOperationException("JSON data does not represent a valid service account credential.");
             }
-            var initializer = new ServiceAccountCredential.Initializer(credentialParameters.ClientEmail)
+            var initializer = new ServiceAccountCredential.Initializer(
+                credentialParameters.ClientEmail, credentialParameters.TokenUri)
             {
                 ProjectId = credentialParameters.ProjectId,
                 QuotaProject = credentialParameters.QuotaProject,
-                KeyId = credentialParameters.PrivateKeyId
+                KeyId = credentialParameters.PrivateKeyId,
+                UniverseDomain = credentialParameters.UniverseDomain,
+                UseJwtAccessWithScopes = credentialParameters.UniverseDomain is not null && credentialParameters.UniverseDomain != GoogleAuthConsts.DefaultUniverseDomain
             };
             return new ServiceAccountCredential(initializer.FromPrivateKey(credentialParameters.PrivateKey));
+        }
+
+        /// <summary>
+        /// Creates an external account credential from JSON data.
+        /// </summary>
+        private static IGoogleCredential CreateExternalCredentialFromParameters(JsonCredentialParameters parameters)
+        {
+            if (parameters.Type != JsonCredentialParameters.ExternalAccountCredentialType || parameters.CredentialSourceConfig is null)
+            {
+                throw new InvalidOperationException("JSON data does not represent a valid external account credential.");
+            }
+
+            // Build the external credential of the correct type.
+            // The order in which these checks are performed is relevant, see https://google.aip.dev/auth/4117.
+            if (!string.IsNullOrEmpty(parameters.CredentialSourceConfig.EnvironmentId))
+            {
+                if (!parameters.CredentialSourceConfig.EnvironmentId.Equals(AwsExternalAccountCredential.SupportedVersion, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException(
+                        $"Only {AwsExternalAccountCredential.SupportedVersion} version of AWS external account credentials is supported by this library.");
+                }
+
+                return new AwsExternalAccountCredential(new AwsExternalAccountCredential.Initializer(
+                    parameters.TokenUrl, parameters.Audience, parameters.SubjectTokenType,
+                    parameters.CredentialSourceConfig.RegionalCredentialVerificationUrl)
+                {
+                    QuotaProject = parameters.QuotaProject,
+                    ServiceAccountImpersonationUrl = parameters.ServiceAccountImpersonationUrl,
+                    WorkforcePoolUserProject = parameters.WorkforcePoolUserProject,
+                    ClientId = parameters.ClientId,
+                    ClientSecret = parameters.ClientSecret,
+                    RegionUrl = parameters.CredentialSourceConfig.RegionUrl,
+                    SecurityCredentialsUrl = parameters.CredentialSourceConfig.Url,
+                    ImdsV2SessionTokenUrl = parameters.CredentialSourceConfig.ImdsV2SessionTokenUrl,
+                    UniverseDomain = parameters.UniverseDomain,
+                });
+            }
+            else if (!string.IsNullOrEmpty(parameters.CredentialSourceConfig.File))
+            {
+                return new FileSourcedExternalAccountCredential(new FileSourcedExternalAccountCredential.Initializer(
+                    parameters.TokenUrl, parameters.Audience, parameters.SubjectTokenType, parameters.CredentialSourceConfig.File)
+                {
+                    QuotaProject = parameters.QuotaProject,
+                    ServiceAccountImpersonationUrl = parameters.ServiceAccountImpersonationUrl,
+                    WorkforcePoolUserProject = parameters.WorkforcePoolUserProject,
+                    ClientId = parameters.ClientId,
+                    ClientSecret = parameters.ClientSecret,
+                    SubjectTokenJsonFieldName = parameters.ExtractSubjectTokenFieldName(),
+                    UniverseDomain = parameters.UniverseDomain,
+                });
+            }
+            else if (!string.IsNullOrEmpty(parameters.CredentialSourceConfig.Url))
+            {
+                var initializer = new UrlSourcedExternalAccountCredential.Initializer(
+                    parameters.TokenUrl, parameters.Audience, parameters.SubjectTokenType, parameters.CredentialSourceConfig.Url)
+                {
+                    QuotaProject = parameters.QuotaProject,
+                    ServiceAccountImpersonationUrl = parameters.ServiceAccountImpersonationUrl,
+                    WorkforcePoolUserProject = parameters.WorkforcePoolUserProject,
+                    ClientId = parameters.ClientId,
+                    ClientSecret = parameters.ClientSecret,
+                    SubjectTokenJsonFieldName = parameters.ExtractSubjectTokenFieldName(),
+                    UniverseDomain = parameters.UniverseDomain,
+                };
+                if (parameters.CredentialSourceConfig.Headers is object)
+                {
+                    foreach (var header in parameters.CredentialSourceConfig.Headers)
+                    {
+                        initializer.Headers.Add(header);
+                    }
+                }
+
+                return new UrlSourcedExternalAccountCredential(initializer);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unrecognized external credential configuration");
+            }
+        }
+
+        private ImpersonatedCredential CreateImpersonatedServiceAccountCredentialFromParameters(JsonCredentialParameters parameters)
+        {
+            if (parameters.Type != JsonCredentialParameters.ImpersonatedServiceAccountCredentialType
+                || parameters.SourceCredential is null
+                || string.IsNullOrEmpty(parameters.ServiceAccountImpersonationUrl))
+            {
+                throw new InvalidOperationException("JSON data does not represent a valid impersonated service account credential.");
+            }
+
+            // If source credential is of a credential type that does not support impersonation, attemting to create the
+            // impersonated credential will fail a few lines later.
+            var sourceCredential = CreateDefaultCredentialFromParameters(parameters.SourceCredential);
+            var maybeTargetPrincipal = ImpersonatedCredential.ExtractTargetPrincipal(parameters.ServiceAccountImpersonationUrl);
+            var initializer = new ImpersonatedCredential.Initializer(parameters.ServiceAccountImpersonationUrl, maybeTargetPrincipal)
+            {
+                DelegateAccounts = parameters.Delegates?.Length > 0 ? parameters.Delegates.ToList() : null,
+                QuotaProject = parameters.QuotaProject,
+            };
+
+            var impersonatedCredential = ImpersonatedCredential.Create(sourceCredential, initializer);
+            if (parameters.UniverseDomain != parameters.SourceCredential.UniverseDomain)
+            {
+                return (impersonatedCredential as IGoogleCredential).WithUniverseDomain(parameters.UniverseDomain) as ImpersonatedCredential;
+            }
+            return impersonatedCredential;
         }
 
         /// <summary> 
@@ -274,7 +385,8 @@ namespace Google.Apis.Auth.OAuth2
         private string GetWellKnownCredentialFilePath()
         {
             var appData = GetEnvironmentVariable(AppdataEnvironmentVariable);
-            if (appData != null) {
+            if (appData != null)
+            {
                 return Path.Combine(appData, CloudSDKConfigDirectoryWindows, WellKnownCredentialsFile);
             }
             var unixHome = GetEnvironmentVariable(HomeEnvironmentVariable);

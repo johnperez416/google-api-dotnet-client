@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.BigQueryDataTransfer.v1
         public BigQueryDataTransferService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://bigquerydatatransfer.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://bigquerydatatransfer.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.BigQueryDataTransfer.v1
         public override string Name => "bigquerydatatransfer";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://bigquerydatatransfer.googleapis.com/";
-        #else
-            "https://bigquerydatatransfer.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://bigquerydatatransfer.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the BigQuery Data Transfer API.</summary>
         public class Scope
@@ -322,10 +317,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
             }
 
             /// <summary>
-            /// Returns true if valid credentials exist for the given data source and requesting user. Some data sources
-            /// doesn't support service account, so we need to talk to them on behalf of the end user. This API just
-            /// checks whether we have OAuth token for the particular user, which is a pre-requisite before user can
-            /// create a transfer config.
+            /// Returns true if valid credentials exist for the given data source and requesting user.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -334,14 +326,11 @@ namespace Google.Apis.BigQueryDataTransfer.v1
             /// </param>
             public virtual CheckValidCredsRequest CheckValidCreds(Google.Apis.BigQueryDataTransfer.v1.Data.CheckValidCredsRequest body, string name)
             {
-                return new CheckValidCredsRequest(service, body, name);
+                return new CheckValidCredsRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Returns true if valid credentials exist for the given data source and requesting user. Some data sources
-            /// doesn't support service account, so we need to talk to them on behalf of the end user. This API just
-            /// checks whether we have OAuth token for the particular user, which is a pre-requisite before user can
-            /// create a transfer config.
+            /// Returns true if valid credentials exist for the given data source and requesting user.
             /// </summary>
             public class CheckValidCredsRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.CheckValidCredsResponse>
             {
@@ -390,9 +379,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 }
             }
 
-            /// <summary>
-            /// Retrieves a supported data source and returns its settings, which can be used for UI rendering.
-            /// </summary>
+            /// <summary>Retrieves a supported data source and returns its settings.</summary>
             /// <param name="name">
             /// Required. The field will contain name of the resource requested, for example:
             /// `projects/{project_id}/dataSources/{data_source_id}` or
@@ -400,12 +387,10 @@ namespace Google.Apis.BigQueryDataTransfer.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
-            /// <summary>
-            /// Retrieves a supported data source and returns its settings, which can be used for UI rendering.
-            /// </summary>
+            /// <summary>Retrieves a supported data source and returns its settings.</summary>
             public class GetRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.DataSource>
             {
                 /// <summary>Constructs a new Get request.</summary>
@@ -447,21 +432,17 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 }
             }
 
-            /// <summary>
-            /// Lists supported data sources and returns their settings, which can be used for UI rendering.
-            /// </summary>
+            /// <summary>Lists supported data sources and returns their settings.</summary>
             /// <param name="parent">
             /// Required. The BigQuery project id for which data sources should be returned. Must be in the form:
-            /// `projects/{project_id}` or `projects/{project_id}/locations/{location_id}
+            /// `projects/{project_id}` or `projects/{project_id}/locations/{location_id}`
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
-            /// <summary>
-            /// Lists supported data sources and returns their settings, which can be used for UI rendering.
-            /// </summary>
+            /// <summary>Lists supported data sources and returns their settings.</summary>
             public class ListRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.ListDataSourcesResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -473,7 +454,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
 
                 /// <summary>
                 /// Required. The BigQuery project id for which data sources should be returned. Must be in the form:
-                /// `projects/{project_id}` or `projects/{project_id}/locations/{location_id}
+                /// `projects/{project_id}` or `projects/{project_id}/locations/{location_id}`
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -568,10 +549,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 }
 
                 /// <summary>
-                /// Returns true if valid credentials exist for the given data source and requesting user. Some data
-                /// sources doesn't support service account, so we need to talk to them on behalf of the end user. This
-                /// API just checks whether we have OAuth token for the particular user, which is a pre-requisite before
-                /// user can create a transfer config.
+                /// Returns true if valid credentials exist for the given data source and requesting user.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -580,14 +558,11 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 /// </param>
                 public virtual CheckValidCredsRequest CheckValidCreds(Google.Apis.BigQueryDataTransfer.v1.Data.CheckValidCredsRequest body, string name)
                 {
-                    return new CheckValidCredsRequest(service, body, name);
+                    return new CheckValidCredsRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Returns true if valid credentials exist for the given data source and requesting user. Some data
-                /// sources doesn't support service account, so we need to talk to them on behalf of the end user. This
-                /// API just checks whether we have OAuth token for the particular user, which is a pre-requisite before
-                /// user can create a transfer config.
+                /// Returns true if valid credentials exist for the given data source and requesting user.
                 /// </summary>
                 public class CheckValidCredsRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.CheckValidCredsResponse>
                 {
@@ -636,9 +611,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     }
                 }
 
-                /// <summary>
-                /// Retrieves a supported data source and returns its settings, which can be used for UI rendering.
-                /// </summary>
+                /// <summary>Retrieves a supported data source and returns its settings.</summary>
                 /// <param name="name">
                 /// Required. The field will contain name of the resource requested, for example:
                 /// `projects/{project_id}/dataSources/{data_source_id}` or
@@ -646,12 +619,10 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
-                /// <summary>
-                /// Retrieves a supported data source and returns its settings, which can be used for UI rendering.
-                /// </summary>
+                /// <summary>Retrieves a supported data source and returns its settings.</summary>
                 public class GetRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.DataSource>
                 {
                     /// <summary>Constructs a new Get request.</summary>
@@ -693,21 +664,17 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     }
                 }
 
-                /// <summary>
-                /// Lists supported data sources and returns their settings, which can be used for UI rendering.
-                /// </summary>
+                /// <summary>Lists supported data sources and returns their settings.</summary>
                 /// <param name="parent">
                 /// Required. The BigQuery project id for which data sources should be returned. Must be in the form:
-                /// `projects/{project_id}` or `projects/{project_id}/locations/{location_id}
+                /// `projects/{project_id}` or `projects/{project_id}/locations/{location_id}`
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
-                /// <summary>
-                /// Lists supported data sources and returns their settings, which can be used for UI rendering.
-                /// </summary>
+                /// <summary>Lists supported data sources and returns their settings.</summary>
                 public class ListRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.ListDataSourcesResponse>
                 {
                     /// <summary>Constructs a new List request.</summary>
@@ -719,7 +686,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
 
                     /// <summary>
                     /// Required. The BigQuery project id for which data sources should be returned. Must be in the
-                    /// form: `projects/{project_id}` or `projects/{project_id}/locations/{location_id}
+                    /// form: `projects/{project_id}` or `projects/{project_id}/locations/{location_id}`
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -830,7 +797,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                             this.service = service;
                         }
 
-                        /// <summary>Returns user facing log messages for the data transfer run.</summary>
+                        /// <summary>Returns log messages for the transfer run.</summary>
                         /// <param name="parent">
                         /// Required. Transfer run name in the form:
                         /// `projects/{project_id}/transferConfigs/{config_id}/runs/{run_id}` or
@@ -838,10 +805,10 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                         /// </param>
                         public virtual ListRequest List(string parent)
                         {
-                            return new ListRequest(service, parent);
+                            return new ListRequest(this.service, parent);
                         }
 
-                        /// <summary>Returns user facing log messages for the data transfer run.</summary>
+                        /// <summary>Returns log messages for the transfer run.</summary>
                         public class ListRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.ListTransferLogsResponse>
                         {
                             /// <summary>Constructs a new List request.</summary>
@@ -976,7 +943,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes the specified transfer run.</summary>
@@ -1029,7 +996,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Returns information about the particular transfer run.</summary>
@@ -1074,7 +1041,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                         }
                     }
 
-                    /// <summary>Returns information about running and completed jobs.</summary>
+                    /// <summary>Returns information about running and completed transfer runs.</summary>
                     /// <param name="parent">
                     /// Required. Name of transfer configuration for which transfer runs should be retrieved. Format of
                     /// transfer configuration resource name is: `projects/{project_id}/transferConfigs/{config_id}` or
@@ -1082,10 +1049,10 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
-                    /// <summary>Returns information about running and completed jobs.</summary>
+                    /// <summary>Returns information about running and completed transfer runs.</summary>
                     public class ListRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.ListTransferRunsResponse>
                     {
                         /// <summary>Constructs a new List request.</summary>
@@ -1244,7 +1211,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.BigQueryDataTransfer.v1.Data.TransferConfig body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a new data transfer configuration.</summary>
@@ -1267,35 +1234,40 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     public virtual string Parent { get; private set; }
 
                     /// <summary>
-                    /// Optional OAuth2 authorization code to use with this transfer configuration. This is required if
-                    /// new credentials are needed, as indicated by `CheckValidCreds`. In order to obtain
-                    /// authorization_code, please make a request to
-                    /// https://www.gstatic.com/bigquerydatatransfer/oauthz/auth?client_id=&amp;amp;scope=&amp;amp;redirect_uri=
-                    /// * client_id should be OAuth client_id of BigQuery DTS API for the given data source returned by
-                    /// ListDataSources method. * data_source_scopes are the scopes returned by ListDataSources method.
-                    /// * redirect_uri is an optional parameter. If not specified, then authorization code is posted to
-                    /// the opener of authorization flow window. Otherwise it will be sent to the redirect uri. A
-                    /// special value of urn:ietf:wg:oauth:2.0:oob means that authorization code should be returned in
-                    /// the title bar of the browser, with the page text prompting the user to copy the code and paste
-                    /// it in the application.
+                    /// Deprecated: Authorization code was required when `transferConfig.dataSourceId` is
+                    /// 'youtube_channel' but it is no longer used in any data sources. Use `version_info` instead.
+                    /// Optional OAuth2 authorization code to use with this transfer configuration. This is required
+                    /// only if `transferConfig.dataSourceId` is 'youtube_channel' and new credentials are needed, as
+                    /// indicated by `CheckValidCreds`. In order to obtain authorization_code, make a request to the
+                    /// following URL:
+                    /// https://bigquery.cloud.google.com/datatransfer/oauthz/auth?redirect_uri=urn:ietf:wg:oauth:2.0:oob&amp;amp;response_type=authorization_code&amp;amp;client_id=client_id&amp;amp;scope=data_source_scopes
+                    /// * The client_id is the OAuth client_id of the data source as returned by ListDataSources method.
+                    /// * data_source_scopes are the scopes returned by ListDataSources method. Note that this should
+                    /// not be set when `service_account_name` is used to create the transfer config.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("authorizationCode", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string AuthorizationCode { get; set; }
 
                     /// <summary>
-                    /// Optional service account name. If this field is set, transfer config will be created with this
-                    /// service account credentials. It requires that requesting user calling this API has permissions
-                    /// to act as this service account.
+                    /// Optional service account email. If this field is set, the transfer config will be created with
+                    /// this service account's credentials. It requires that the requesting user calling this API has
+                    /// permissions to act as this service account. Note that not all data sources support service
+                    /// account credentials when creating a transfer config. For the latest list of data sources, read
+                    /// about [using service
+                    /// accounts](https://cloud.google.com/bigquery-transfer/docs/use-service-accounts).
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("serviceAccountName", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string ServiceAccountName { get; set; }
 
                     /// <summary>
-                    /// Optional version info. If users want to find a very recent access token, that is, immediately
-                    /// after approving access, users have to set the version_info claim in the token request. To obtain
-                    /// the version_info, users must use the "none+gsession" response type. which be return a
-                    /// version_info back in the authorization response which be be put in a JWT claim in the token
-                    /// request.
+                    /// Optional version info. This parameter replaces `authorization_code` which is no longer used in
+                    /// any data sources. This is required only if `transferConfig.dataSourceId` is 'youtube_channel'
+                    /// *or* new credentials are needed, as indicated by `CheckValidCreds`. In order to obtain version
+                    /// info, make a request to the following URL:
+                    /// https://bigquery.cloud.google.com/datatransfer/oauthz/auth?redirect_uri=urn:ietf:wg:oauth:2.0:oob&amp;amp;response_type=version_info&amp;amp;client_id=client_id&amp;amp;scope=data_source_scopes
+                    /// * The client_id is the OAuth client_id of the data source as returned by ListDataSources method.
+                    /// * data_source_scopes are the scopes returned by ListDataSources method. Note that this should
+                    /// not be set when `service_account_name` is used to create the transfer config.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("versionInfo", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string VersionInfo { get; set; }
@@ -1364,7 +1336,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1419,7 +1391,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Returns information about a data transfer config.</summary>
@@ -1468,12 +1440,12 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 /// Returns information about all transfer configs owned by a project in the specified location.
                 /// </summary>
                 /// <param name="parent">
-                /// Required. The BigQuery project id for which data sources should be returned: `projects/{project_id}`
-                /// or `projects/{project_id}/locations/{location_id}`
+                /// Required. The BigQuery project id for which transfer configs should be returned:
+                /// `projects/{project_id}` or `projects/{project_id}/locations/{location_id}`
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -1489,7 +1461,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     }
 
                     /// <summary>
-                    /// Required. The BigQuery project id for which data sources should be returned:
+                    /// Required. The BigQuery project id for which transfer configs should be returned:
                     /// `projects/{project_id}` or `projects/{project_id}/locations/{location_id}`
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
@@ -1564,14 +1536,14 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// The resource name of the transfer config. Transfer config names have the form
-                /// `projects/{project_id}/locations/{region}/transferConfigs/{config_id}`. Where `config_id` is usually
-                /// a uuid, even though it is not guaranteed or required. The name is ignored when creating a transfer
-                /// config.
+                /// Identifier. The resource name of the transfer config. Transfer config names have the form either
+                /// `projects/{project_id}/locations/{region}/transferConfigs/{config_id}` or
+                /// `projects/{project_id}/transferConfigs/{config_id}`, where `config_id` is usually a UUID, even
+                /// though it is not guaranteed or required. The name is ignored when creating a transfer config.
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.BigQueryDataTransfer.v1.Data.TransferConfig body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1588,34 +1560,36 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     }
 
                     /// <summary>
-                    /// The resource name of the transfer config. Transfer config names have the form
-                    /// `projects/{project_id}/locations/{region}/transferConfigs/{config_id}`. Where `config_id` is
-                    /// usually a uuid, even though it is not guaranteed or required. The name is ignored when creating
-                    /// a transfer config.
+                    /// Identifier. The resource name of the transfer config. Transfer config names have the form either
+                    /// `projects/{project_id}/locations/{region}/transferConfigs/{config_id}` or
+                    /// `projects/{project_id}/transferConfigs/{config_id}`, where `config_id` is usually a UUID, even
+                    /// though it is not guaranteed or required. The name is ignored when creating a transfer config.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
 
                     /// <summary>
-                    /// Optional OAuth2 authorization code to use with this transfer configuration. If it is provided,
-                    /// the transfer configuration will be associated with the authorizing user. In order to obtain
-                    /// authorization_code, please make a request to
-                    /// https://www.gstatic.com/bigquerydatatransfer/oauthz/auth?client_id=&amp;amp;scope=&amp;amp;redirect_uri=
-                    /// * client_id should be OAuth client_id of BigQuery DTS API for the given data source returned by
-                    /// ListDataSources method. * data_source_scopes are the scopes returned by ListDataSources method.
-                    /// * redirect_uri is an optional parameter. If not specified, then authorization code is posted to
-                    /// the opener of authorization flow window. Otherwise it will be sent to the redirect uri. A
-                    /// special value of urn:ietf:wg:oauth:2.0:oob means that authorization code should be returned in
-                    /// the title bar of the browser, with the page text prompting the user to copy the code and paste
-                    /// it in the application.
+                    /// Deprecated: Authorization code was required when `transferConfig.dataSourceId` is
+                    /// 'youtube_channel' but it is no longer used in any data sources. Use `version_info` instead.
+                    /// Optional OAuth2 authorization code to use with this transfer configuration. This is required
+                    /// only if `transferConfig.dataSourceId` is 'youtube_channel' and new credentials are needed, as
+                    /// indicated by `CheckValidCreds`. In order to obtain authorization_code, make a request to the
+                    /// following URL:
+                    /// https://bigquery.cloud.google.com/datatransfer/oauthz/auth?redirect_uri=urn:ietf:wg:oauth:2.0:oob&amp;amp;response_type=authorization_code&amp;amp;client_id=client_id&amp;amp;scope=data_source_scopes
+                    /// * The client_id is the OAuth client_id of the data source as returned by ListDataSources method.
+                    /// * data_source_scopes are the scopes returned by ListDataSources method. Note that this should
+                    /// not be set when `service_account_name` is used to update the transfer config.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("authorizationCode", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string AuthorizationCode { get; set; }
 
                     /// <summary>
-                    /// Optional service account name. If this field is set and "service_account_name" is set in
-                    /// update_mask, transfer config will be updated to use this service account credentials. It
-                    /// requires that requesting user calling this API has permissions to act as this service account.
+                    /// Optional service account email. If this field is set, the transfer config will be created with
+                    /// this service account's credentials. It requires that the requesting user calling this API has
+                    /// permissions to act as this service account. Note that not all data sources support service
+                    /// account credentials when creating a transfer config. For the latest list of data sources, read
+                    /// about [using service
+                    /// accounts](https://cloud.google.com/bigquery-transfer/docs/use-service-accounts).
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("serviceAccountName", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string ServiceAccountName { get; set; }
@@ -1625,11 +1599,14 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     public virtual object UpdateMask { get; set; }
 
                     /// <summary>
-                    /// Optional version info. If users want to find a very recent access token, that is, immediately
-                    /// after approving access, users have to set the version_info claim in the token request. To obtain
-                    /// the version_info, users must use the "none+gsession" response type. which be return a
-                    /// version_info back in the authorization response which be be put in a JWT claim in the token
-                    /// request.
+                    /// Optional version info. This parameter replaces `authorization_code` which is no longer used in
+                    /// any data sources. This is required only if `transferConfig.dataSourceId` is 'youtube_channel'
+                    /// *or* new credentials are needed, as indicated by `CheckValidCreds`. In order to obtain version
+                    /// info, make a request to the following URL:
+                    /// https://bigquery.cloud.google.com/datatransfer/oauthz/auth?redirect_uri=urn:ietf:wg:oauth:2.0:oob&amp;amp;response_type=version_info&amp;amp;client_id=client_id&amp;amp;scope=data_source_scopes
+                    /// * The client_id is the OAuth client_id of the data source as returned by ListDataSources method.
+                    /// * data_source_scopes are the scopes returned by ListDataSources method. Note that this should
+                    /// not be set when `service_account_name` is used to update the transfer config.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("versionInfo", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string VersionInfo { get; set; }
@@ -1709,7 +1686,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 /// </param>
                 public virtual ScheduleRunsRequest ScheduleRuns(Google.Apis.BigQueryDataTransfer.v1.Data.ScheduleTransferRunsRequest body, string parent)
                 {
-                    return new ScheduleRunsRequest(service, body, parent);
+                    return new ScheduleRunsRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1772,12 +1749,13 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
-                /// Transfer configuration name in the form: `projects/{project_id}/transferConfigs/{config_id}` or
+                /// Required. Transfer configuration name in the form:
+                /// `projects/{project_id}/transferConfigs/{config_id}` or
                 /// `projects/{project_id}/locations/{location_id}/transferConfigs/{config_id}`.
                 /// </param>
                 public virtual StartManualRunsRequest StartManualRuns(Google.Apis.BigQueryDataTransfer.v1.Data.StartManualTransferRunsRequest body, string parent)
                 {
-                    return new StartManualRunsRequest(service, body, parent);
+                    return new StartManualRunsRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1796,7 +1774,8 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     }
 
                     /// <summary>
-                    /// Transfer configuration name in the form: `projects/{project_id}/transferConfigs/{config_id}` or
+                    /// Required. Transfer configuration name in the form:
+                    /// `projects/{project_id}/transferConfigs/{config_id}` or
                     /// `projects/{project_id}/locations/{location_id}/transferConfigs/{config_id}`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
@@ -1835,24 +1814,26 @@ namespace Google.Apis.BigQueryDataTransfer.v1
 
             /// <summary>
             /// Enroll data sources in a user project. This allows users to create transfer configurations for these
-            /// data sources. They will also appear in the ListDataSources RPC and as such, will appear in the BigQuery
-            /// UI 'https://bigquery.cloud.google.com' (and the documents can be found at
-            /// https://cloud.google.com/bigquery/bigquery-web-ui and
-            /// https://cloud.google.com/bigquery/docs/working-with-transfers).
+            /// data sources. They will also appear in the ListDataSources RPC and as such, will appear in the [BigQuery
+            /// UI](https://console.cloud.google.com/bigquery), and the documents can be found in the public guide for
+            /// [BigQuery Web UI](https://cloud.google.com/bigquery/bigquery-web-ui) and [Data Transfer
+            /// Service](https://cloud.google.com/bigquery/docs/working-with-transfers).
             /// </summary>
             /// <param name="body">The body of the request.</param>
-            /// <param name="name">The name of the project resource in the form: `projects/{project_id}`</param>
+            /// <param name="name">
+            /// Required. The name of the project resource in the form: `projects/{project_id}`
+            /// </param>
             public virtual EnrollDataSourcesRequest EnrollDataSources(Google.Apis.BigQueryDataTransfer.v1.Data.EnrollDataSourcesRequest body, string name)
             {
-                return new EnrollDataSourcesRequest(service, body, name);
+                return new EnrollDataSourcesRequest(this.service, body, name);
             }
 
             /// <summary>
             /// Enroll data sources in a user project. This allows users to create transfer configurations for these
-            /// data sources. They will also appear in the ListDataSources RPC and as such, will appear in the BigQuery
-            /// UI 'https://bigquery.cloud.google.com' (and the documents can be found at
-            /// https://cloud.google.com/bigquery/bigquery-web-ui and
-            /// https://cloud.google.com/bigquery/docs/working-with-transfers).
+            /// data sources. They will also appear in the ListDataSources RPC and as such, will appear in the [BigQuery
+            /// UI](https://console.cloud.google.com/bigquery), and the documents can be found in the public guide for
+            /// [BigQuery Web UI](https://cloud.google.com/bigquery/bigquery-web-ui) and [Data Transfer
+            /// Service](https://cloud.google.com/bigquery/docs/working-with-transfers).
             /// </summary>
             public class EnrollDataSourcesRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.Empty>
             {
@@ -1864,7 +1845,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     InitParameters();
                 }
 
-                /// <summary>The name of the project resource in the form: `projects/{project_id}`</summary>
+                /// <summary>Required. The name of the project resource in the form: `projects/{project_id}`</summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
 
@@ -1902,7 +1883,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -1947,7 +1928,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -1966,7 +1947,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -2031,6 +2012,71 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     });
                 }
             }
+
+            /// <summary>
+            /// Unenroll data sources in a user project. This allows users to remove transfer configurations for these
+            /// data sources. They will no longer appear in the ListDataSources RPC and will also no longer appear in
+            /// the [BigQuery UI](https://console.cloud.google.com/bigquery). Data transfers configurations of
+            /// unenrolled data sources will not be scheduled.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The name of the project resource in the form: `projects/{project_id}`
+            /// </param>
+            public virtual UnenrollDataSourcesRequest UnenrollDataSources(Google.Apis.BigQueryDataTransfer.v1.Data.UnenrollDataSourcesRequest body, string name)
+            {
+                return new UnenrollDataSourcesRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Unenroll data sources in a user project. This allows users to remove transfer configurations for these
+            /// data sources. They will no longer appear in the ListDataSources RPC and will also no longer appear in
+            /// the [BigQuery UI](https://console.cloud.google.com/bigquery). Data transfers configurations of
+            /// unenrolled data sources will not be scheduled.
+            /// </summary>
+            public class UnenrollDataSourcesRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.Empty>
+            {
+                /// <summary>Constructs a new UnenrollDataSources request.</summary>
+                public UnenrollDataSourcesRequest(Google.Apis.Services.IClientService service, Google.Apis.BigQueryDataTransfer.v1.Data.UnenrollDataSourcesRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>Required. The name of the project resource in the form: `projects/{project_id}`</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.BigQueryDataTransfer.v1.Data.UnenrollDataSourcesRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "unenrollDataSources";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:unenrollDataSources";
+
+                /// <summary>Initializes UnenrollDataSources parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                    });
+                }
+            }
         }
 
         /// <summary>Gets the TransferConfigs resource.</summary>
@@ -2086,7 +2132,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                         this.service = service;
                     }
 
-                    /// <summary>Returns user facing log messages for the data transfer run.</summary>
+                    /// <summary>Returns log messages for the transfer run.</summary>
                     /// <param name="parent">
                     /// Required. Transfer run name in the form:
                     /// `projects/{project_id}/transferConfigs/{config_id}/runs/{run_id}` or
@@ -2094,10 +2140,10 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
-                    /// <summary>Returns user facing log messages for the data transfer run.</summary>
+                    /// <summary>Returns log messages for the transfer run.</summary>
                     public class ListRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.ListTransferLogsResponse>
                     {
                         /// <summary>Constructs a new List request.</summary>
@@ -2226,7 +2272,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes the specified transfer run.</summary>
@@ -2279,7 +2325,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Returns information about the particular transfer run.</summary>
@@ -2324,7 +2370,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                     }
                 }
 
-                /// <summary>Returns information about running and completed jobs.</summary>
+                /// <summary>Returns information about running and completed transfer runs.</summary>
                 /// <param name="parent">
                 /// Required. Name of transfer configuration for which transfer runs should be retrieved. Format of
                 /// transfer configuration resource name is: `projects/{project_id}/transferConfigs/{config_id}` or
@@ -2332,10 +2378,10 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
-                /// <summary>Returns information about running and completed jobs.</summary>
+                /// <summary>Returns information about running and completed transfer runs.</summary>
                 public class ListRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.ListTransferRunsResponse>
                 {
                     /// <summary>Constructs a new List request.</summary>
@@ -2493,7 +2539,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.BigQueryDataTransfer.v1.Data.TransferConfig body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a new data transfer configuration.</summary>
@@ -2516,33 +2562,38 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 public virtual string Parent { get; private set; }
 
                 /// <summary>
-                /// Optional OAuth2 authorization code to use with this transfer configuration. This is required if new
-                /// credentials are needed, as indicated by `CheckValidCreds`. In order to obtain authorization_code,
-                /// please make a request to
-                /// https://www.gstatic.com/bigquerydatatransfer/oauthz/auth?client_id=&amp;amp;scope=&amp;amp;redirect_uri=
-                /// * client_id should be OAuth client_id of BigQuery DTS API for the given data source returned by
-                /// ListDataSources method. * data_source_scopes are the scopes returned by ListDataSources method. *
-                /// redirect_uri is an optional parameter. If not specified, then authorization code is posted to the
-                /// opener of authorization flow window. Otherwise it will be sent to the redirect uri. A special value
-                /// of urn:ietf:wg:oauth:2.0:oob means that authorization code should be returned in the title bar of
-                /// the browser, with the page text prompting the user to copy the code and paste it in the application.
+                /// Deprecated: Authorization code was required when `transferConfig.dataSourceId` is 'youtube_channel'
+                /// but it is no longer used in any data sources. Use `version_info` instead. Optional OAuth2
+                /// authorization code to use with this transfer configuration. This is required only if
+                /// `transferConfig.dataSourceId` is 'youtube_channel' and new credentials are needed, as indicated by
+                /// `CheckValidCreds`. In order to obtain authorization_code, make a request to the following URL:
+                /// https://bigquery.cloud.google.com/datatransfer/oauthz/auth?redirect_uri=urn:ietf:wg:oauth:2.0:oob&amp;amp;response_type=authorization_code&amp;amp;client_id=client_id&amp;amp;scope=data_source_scopes
+                /// * The client_id is the OAuth client_id of the data source as returned by ListDataSources method. *
+                /// data_source_scopes are the scopes returned by ListDataSources method. Note that this should not be
+                /// set when `service_account_name` is used to create the transfer config.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("authorizationCode", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string AuthorizationCode { get; set; }
 
                 /// <summary>
-                /// Optional service account name. If this field is set, transfer config will be created with this
-                /// service account credentials. It requires that requesting user calling this API has permissions to
-                /// act as this service account.
+                /// Optional service account email. If this field is set, the transfer config will be created with this
+                /// service account's credentials. It requires that the requesting user calling this API has permissions
+                /// to act as this service account. Note that not all data sources support service account credentials
+                /// when creating a transfer config. For the latest list of data sources, read about [using service
+                /// accounts](https://cloud.google.com/bigquery-transfer/docs/use-service-accounts).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("serviceAccountName", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string ServiceAccountName { get; set; }
 
                 /// <summary>
-                /// Optional version info. If users want to find a very recent access token, that is, immediately after
-                /// approving access, users have to set the version_info claim in the token request. To obtain the
-                /// version_info, users must use the "none+gsession" response type. which be return a version_info back
-                /// in the authorization response which be be put in a JWT claim in the token request.
+                /// Optional version info. This parameter replaces `authorization_code` which is no longer used in any
+                /// data sources. This is required only if `transferConfig.dataSourceId` is 'youtube_channel' *or* new
+                /// credentials are needed, as indicated by `CheckValidCreds`. In order to obtain version info, make a
+                /// request to the following URL:
+                /// https://bigquery.cloud.google.com/datatransfer/oauthz/auth?redirect_uri=urn:ietf:wg:oauth:2.0:oob&amp;amp;response_type=version_info&amp;amp;client_id=client_id&amp;amp;scope=data_source_scopes
+                /// * The client_id is the OAuth client_id of the data source as returned by ListDataSources method. *
+                /// data_source_scopes are the scopes returned by ListDataSources method. Note that this should not be
+                /// set when `service_account_name` is used to create the transfer config.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("versionInfo", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string VersionInfo { get; set; }
@@ -2611,7 +2662,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -2666,7 +2717,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Returns information about a data transfer config.</summary>
@@ -2715,12 +2766,12 @@ namespace Google.Apis.BigQueryDataTransfer.v1
             /// Returns information about all transfer configs owned by a project in the specified location.
             /// </summary>
             /// <param name="parent">
-            /// Required. The BigQuery project id for which data sources should be returned: `projects/{project_id}` or
-            /// `projects/{project_id}/locations/{location_id}`
+            /// Required. The BigQuery project id for which transfer configs should be returned: `projects/{project_id}`
+            /// or `projects/{project_id}/locations/{location_id}`
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -2736,8 +2787,8 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 }
 
                 /// <summary>
-                /// Required. The BigQuery project id for which data sources should be returned: `projects/{project_id}`
-                /// or `projects/{project_id}/locations/{location_id}`
+                /// Required. The BigQuery project id for which transfer configs should be returned:
+                /// `projects/{project_id}` or `projects/{project_id}/locations/{location_id}`
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -2811,13 +2862,14 @@ namespace Google.Apis.BigQueryDataTransfer.v1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
-            /// The resource name of the transfer config. Transfer config names have the form
-            /// `projects/{project_id}/locations/{region}/transferConfigs/{config_id}`. Where `config_id` is usually a
-            /// uuid, even though it is not guaranteed or required. The name is ignored when creating a transfer config.
+            /// Identifier. The resource name of the transfer config. Transfer config names have the form either
+            /// `projects/{project_id}/locations/{region}/transferConfigs/{config_id}` or
+            /// `projects/{project_id}/transferConfigs/{config_id}`, where `config_id` is usually a UUID, even though it
+            /// is not guaranteed or required. The name is ignored when creating a transfer config.
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.BigQueryDataTransfer.v1.Data.TransferConfig body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -2834,33 +2886,34 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 }
 
                 /// <summary>
-                /// The resource name of the transfer config. Transfer config names have the form
-                /// `projects/{project_id}/locations/{region}/transferConfigs/{config_id}`. Where `config_id` is usually
-                /// a uuid, even though it is not guaranteed or required. The name is ignored when creating a transfer
-                /// config.
+                /// Identifier. The resource name of the transfer config. Transfer config names have the form either
+                /// `projects/{project_id}/locations/{region}/transferConfigs/{config_id}` or
+                /// `projects/{project_id}/transferConfigs/{config_id}`, where `config_id` is usually a UUID, even
+                /// though it is not guaranteed or required. The name is ignored when creating a transfer config.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
 
                 /// <summary>
-                /// Optional OAuth2 authorization code to use with this transfer configuration. If it is provided, the
-                /// transfer configuration will be associated with the authorizing user. In order to obtain
-                /// authorization_code, please make a request to
-                /// https://www.gstatic.com/bigquerydatatransfer/oauthz/auth?client_id=&amp;amp;scope=&amp;amp;redirect_uri=
-                /// * client_id should be OAuth client_id of BigQuery DTS API for the given data source returned by
-                /// ListDataSources method. * data_source_scopes are the scopes returned by ListDataSources method. *
-                /// redirect_uri is an optional parameter. If not specified, then authorization code is posted to the
-                /// opener of authorization flow window. Otherwise it will be sent to the redirect uri. A special value
-                /// of urn:ietf:wg:oauth:2.0:oob means that authorization code should be returned in the title bar of
-                /// the browser, with the page text prompting the user to copy the code and paste it in the application.
+                /// Deprecated: Authorization code was required when `transferConfig.dataSourceId` is 'youtube_channel'
+                /// but it is no longer used in any data sources. Use `version_info` instead. Optional OAuth2
+                /// authorization code to use with this transfer configuration. This is required only if
+                /// `transferConfig.dataSourceId` is 'youtube_channel' and new credentials are needed, as indicated by
+                /// `CheckValidCreds`. In order to obtain authorization_code, make a request to the following URL:
+                /// https://bigquery.cloud.google.com/datatransfer/oauthz/auth?redirect_uri=urn:ietf:wg:oauth:2.0:oob&amp;amp;response_type=authorization_code&amp;amp;client_id=client_id&amp;amp;scope=data_source_scopes
+                /// * The client_id is the OAuth client_id of the data source as returned by ListDataSources method. *
+                /// data_source_scopes are the scopes returned by ListDataSources method. Note that this should not be
+                /// set when `service_account_name` is used to update the transfer config.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("authorizationCode", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string AuthorizationCode { get; set; }
 
                 /// <summary>
-                /// Optional service account name. If this field is set and "service_account_name" is set in
-                /// update_mask, transfer config will be updated to use this service account credentials. It requires
-                /// that requesting user calling this API has permissions to act as this service account.
+                /// Optional service account email. If this field is set, the transfer config will be created with this
+                /// service account's credentials. It requires that the requesting user calling this API has permissions
+                /// to act as this service account. Note that not all data sources support service account credentials
+                /// when creating a transfer config. For the latest list of data sources, read about [using service
+                /// accounts](https://cloud.google.com/bigquery-transfer/docs/use-service-accounts).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("serviceAccountName", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string ServiceAccountName { get; set; }
@@ -2870,10 +2923,14 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 public virtual object UpdateMask { get; set; }
 
                 /// <summary>
-                /// Optional version info. If users want to find a very recent access token, that is, immediately after
-                /// approving access, users have to set the version_info claim in the token request. To obtain the
-                /// version_info, users must use the "none+gsession" response type. which be return a version_info back
-                /// in the authorization response which be be put in a JWT claim in the token request.
+                /// Optional version info. This parameter replaces `authorization_code` which is no longer used in any
+                /// data sources. This is required only if `transferConfig.dataSourceId` is 'youtube_channel' *or* new
+                /// credentials are needed, as indicated by `CheckValidCreds`. In order to obtain version info, make a
+                /// request to the following URL:
+                /// https://bigquery.cloud.google.com/datatransfer/oauthz/auth?redirect_uri=urn:ietf:wg:oauth:2.0:oob&amp;amp;response_type=version_info&amp;amp;client_id=client_id&amp;amp;scope=data_source_scopes
+                /// * The client_id is the OAuth client_id of the data source as returned by ListDataSources method. *
+                /// data_source_scopes are the scopes returned by ListDataSources method. Note that this should not be
+                /// set when `service_account_name` is used to update the transfer config.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("versionInfo", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string VersionInfo { get; set; }
@@ -2952,7 +3009,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
             /// </param>
             public virtual ScheduleRunsRequest ScheduleRuns(Google.Apis.BigQueryDataTransfer.v1.Data.ScheduleTransferRunsRequest body, string parent)
             {
-                return new ScheduleRunsRequest(service, body, parent);
+                return new ScheduleRunsRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -3015,12 +3072,12 @@ namespace Google.Apis.BigQueryDataTransfer.v1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
-            /// Transfer configuration name in the form: `projects/{project_id}/transferConfigs/{config_id}` or
-            /// `projects/{project_id}/locations/{location_id}/transferConfigs/{config_id}`.
+            /// Required. Transfer configuration name in the form: `projects/{project_id}/transferConfigs/{config_id}`
+            /// or `projects/{project_id}/locations/{location_id}/transferConfigs/{config_id}`.
             /// </param>
             public virtual StartManualRunsRequest StartManualRuns(Google.Apis.BigQueryDataTransfer.v1.Data.StartManualTransferRunsRequest body, string parent)
             {
-                return new StartManualRunsRequest(service, body, parent);
+                return new StartManualRunsRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -3039,7 +3096,8 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 }
 
                 /// <summary>
-                /// Transfer configuration name in the form: `projects/{project_id}/transferConfigs/{config_id}` or
+                /// Required. Transfer configuration name in the form:
+                /// `projects/{project_id}/transferConfigs/{config_id}` or
                 /// `projects/{project_id}/locations/{location_id}/transferConfigs/{config_id}`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
@@ -3078,24 +3136,24 @@ namespace Google.Apis.BigQueryDataTransfer.v1
 
         /// <summary>
         /// Enroll data sources in a user project. This allows users to create transfer configurations for these data
-        /// sources. They will also appear in the ListDataSources RPC and as such, will appear in the BigQuery UI
-        /// 'https://bigquery.cloud.google.com' (and the documents can be found at
-        /// https://cloud.google.com/bigquery/bigquery-web-ui and
-        /// https://cloud.google.com/bigquery/docs/working-with-transfers).
+        /// sources. They will also appear in the ListDataSources RPC and as such, will appear in the [BigQuery
+        /// UI](https://console.cloud.google.com/bigquery), and the documents can be found in the public guide for
+        /// [BigQuery Web UI](https://cloud.google.com/bigquery/bigquery-web-ui) and [Data Transfer
+        /// Service](https://cloud.google.com/bigquery/docs/working-with-transfers).
         /// </summary>
         /// <param name="body">The body of the request.</param>
-        /// <param name="name">The name of the project resource in the form: `projects/{project_id}`</param>
+        /// <param name="name">Required. The name of the project resource in the form: `projects/{project_id}`</param>
         public virtual EnrollDataSourcesRequest EnrollDataSources(Google.Apis.BigQueryDataTransfer.v1.Data.EnrollDataSourcesRequest body, string name)
         {
-            return new EnrollDataSourcesRequest(service, body, name);
+            return new EnrollDataSourcesRequest(this.service, body, name);
         }
 
         /// <summary>
         /// Enroll data sources in a user project. This allows users to create transfer configurations for these data
-        /// sources. They will also appear in the ListDataSources RPC and as such, will appear in the BigQuery UI
-        /// 'https://bigquery.cloud.google.com' (and the documents can be found at
-        /// https://cloud.google.com/bigquery/bigquery-web-ui and
-        /// https://cloud.google.com/bigquery/docs/working-with-transfers).
+        /// sources. They will also appear in the ListDataSources RPC and as such, will appear in the [BigQuery
+        /// UI](https://console.cloud.google.com/bigquery), and the documents can be found in the public guide for
+        /// [BigQuery Web UI](https://cloud.google.com/bigquery/bigquery-web-ui) and [Data Transfer
+        /// Service](https://cloud.google.com/bigquery/docs/working-with-transfers).
         /// </summary>
         public class EnrollDataSourcesRequest : BigQueryDataTransferBaseServiceRequest<Google.Apis.BigQueryDataTransfer.v1.Data.Empty>
         {
@@ -3107,7 +3165,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1
                 InitParameters();
             }
 
-            /// <summary>The name of the project resource in the form: `projects/{project_id}`</summary>
+            /// <summary>Required. The name of the project resource in the form: `projects/{project_id}`</summary>
             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Name { get; private set; }
 
@@ -3167,9 +3225,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>
-    /// Represents data source metadata. Metadata is sufficient to render UI and request proper OAuth tokens.
-    /// </summary>
+    /// <summary>Defines the properties and custom parameters for a data source.</summary>
     public class DataSource : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Indicates the type of authorization.</summary>
@@ -3266,12 +3322,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>
-    /// Represents a data source parameter with validation rules, so that parameters can be rendered in the UI. These
-    /// parameters are given to us by supported data sources, and include all needed information for rendering and
-    /// validation. Thus, whoever uses this api can decide to generate either generic ui, or custom data source specific
-    /// forms.
-    /// </summary>
+    /// <summary>A parameter used to define custom fields in a data source definition.</summary>
     public class DataSourceParameter : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>All possible values for the parameter.</summary>
@@ -3298,7 +3349,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("immutable")]
         public virtual System.Nullable<bool> Immutable { get; set; }
 
-        /// <summary>For integer and double values specifies maxminum allowed value.</summary>
+        /// <summary>For integer and double values specifies maximum allowed value.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maxValue")]
         public virtual System.Nullable<double> MaxValue { get; set; }
 
@@ -3359,11 +3410,21 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Represents the encryption configuration for a transfer.</summary>
+    public class EncryptionConfiguration : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The name of the KMS key used for encrypting BigQuery data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
+        public virtual string KmsKeyName { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3376,6 +3437,20 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         /// <summary>Data sources that are enrolled. It is required to provide at least one data source id.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataSourceIds")]
         public virtual System.Collections.Generic.IList<string> DataSourceIds { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Options customizing EventDriven transfers schedule.</summary>
+    public class EventDrivenSchedule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Pub/Sub subscription name used to receive events. Only Google Cloud Storage data source support this option.
+        /// Format: projects/{project}/subscriptions/{subscription}
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pubsubSubscription")]
+        public virtual string PubsubSubscription { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3468,7 +3543,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -3500,6 +3575,13 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Options customizing manual transfers schedule.</summary>
+    public class ManualSchedule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Options customizing the data transfer schedule.</summary>
     public class ScheduleOptions : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3511,21 +3593,115 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("disableAutoScheduling")]
         public virtual System.Nullable<bool> DisableAutoScheduling { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// Defines time to stop scheduling transfer runs. A transfer run cannot be scheduled at or after the end time.
-        /// The end time can be changed at any moment. The time when a data transfer can be trigerred manually is not
+        /// The end time can be changed at any moment. The time when a data transfer can be triggered manually is not
         /// limited by this option.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>
         /// Specifies time to start scheduling transfer runs. The first run will be scheduled at or after the start time
         /// according to a recurrence pattern defined in the schedule string. The start time can be changed at any
-        /// moment. The time when a data transfer can be trigerred manually is not limited by this option.
+        /// moment. The time when a data transfer can be triggered manually is not limited by this option.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// V2 options customizing different types of data transfer schedule. This field supports existing time-based and
+    /// manual transfer schedule. Also supports Event-Driven transfer schedule. ScheduleOptionsV2 cannot be used
+    /// together with ScheduleOptions/Schedule.
+    /// </summary>
+    public class ScheduleOptionsV2 : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Event driven transfer schedule options. If set, the transfer will be scheduled upon events arrial.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventDrivenSchedule")]
+        public virtual EventDrivenSchedule EventDrivenSchedule { get; set; }
+
+        /// <summary>
+        /// Manual transfer schedule. If set, the transfer run will not be auto-scheduled by the system, unless the
+        /// client invokes StartManualTransferRuns. This is equivalent to disable_auto_scheduling = true.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("manualSchedule")]
+        public virtual ManualSchedule ManualSchedule { get; set; }
+
+        /// <summary>Time based transfer schedule options. This is the default schedule option.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeBasedSchedule")]
+        public virtual TimeBasedSchedule TimeBasedSchedule { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3534,17 +3710,83 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
     /// <summary>A request to schedule transfer runs for a time range.</summary>
     public class ScheduleTransferRunsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// Required. End time of the range of transfer runs. For example, `"2017-05-30T00:00:00+00:00"`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>
         /// Required. Start time of the range of transfer runs. For example, `"2017-05-25T00:00:00+00:00"`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3564,13 +3806,53 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
     /// <summary>A request to start manual transfer runs.</summary>
     public class StartManualTransferRunsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _requestedRunTimeRaw;
+
+        private object _requestedRunTime;
+
         /// <summary>
-        /// Specific run_time for a transfer run to be started. The requested_run_time must not be in the future.
+        /// A run_time timestamp for historical data files or reports that are scheduled to be transferred by the
+        /// scheduled transfer run. requested_run_time must be a past time and cannot include future time values.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestedRunTime")]
-        public virtual object RequestedRunTime { get; set; }
+        public virtual string RequestedRunTimeRaw
+        {
+            get => _requestedRunTimeRaw;
+            set
+            {
+                _requestedRunTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestedRunTimeRaw = value;
+            }
+        }
 
-        /// <summary>Time range for the transfer runs that should be started.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestedRunTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestedRunTimeDateTimeOffset instead.")]
+        public virtual object RequestedRunTime
+        {
+            get => _requestedRunTime;
+            set
+            {
+                _requestedRunTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestedRunTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestedRunTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestedRunTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestedRunTimeRaw);
+            set => RequestedRunTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// A time_range start and end timestamp for historical data files or reports that are scheduled to be
+        /// transferred by the scheduled transfer run. requested_time_range must be a past time and cannot include
+        /// future time values.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestedTimeRange")]
         public virtual TimeRange RequestedTimeRange { get; set; }
 
@@ -3619,18 +3901,158 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
     }
 
     /// <summary>
+    /// Options customizing the time based transfer schedule. Options are migrated from the original ScheduleOptions
+    /// message.
+    /// </summary>
+    public class TimeBasedSchedule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>
+        /// Defines time to stop scheduling transfer runs. A transfer run cannot be scheduled at or after the end time.
+        /// The end time can be changed at any moment.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Data transfer schedule. If the data source does not support a custom schedule, this should be empty. If it
+        /// is empty, the default value for the data source will be used. The specified times are in UTC. Examples of
+        /// valid format: `1st,3rd monday of month 15:30`, `every wed,fri of jan,jun 13:15`, and `first sunday of
+        /// quarter 00:00`. See more explanation about the format here:
+        /// https://cloud.google.com/appengine/docs/flexible/python/scheduling-jobs-with-cron-yaml#the_schedule_format
+        /// NOTE: The minimum interval time between recurring transfers depends on the data source; refer to the
+        /// documentation for your data source.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("schedule")]
+        public virtual string Schedule { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>
+        /// Specifies time to start scheduling transfer runs. The first run will be scheduled at or after the start time
+        /// according to a recurrence pattern defined in the schedule string. The start time can be changed at any
+        /// moment.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// A specification for a time range, this will request transfer runs with run_time between start_time (inclusive)
     /// and end_time (exclusive).
     /// </summary>
     public class TimeRange : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// End time of the range of transfer runs. For example, `"2017-05-30T00:00:00+00:00"`. The end_time must not be
         /// in the future. Creates transfer runs where run_time is in the range between start_time (inclusive) and
         /// end_time (exclusive).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>
         /// Start time of the range of transfer runs. For example, `"2017-05-25T00:00:00+00:00"`. The start_time must be
@@ -3638,7 +4060,36 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         /// (inclusive) and end_time (exclusive).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3660,7 +4111,11 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("dataRefreshWindowDays")]
         public virtual System.Nullable<int> DataRefreshWindowDays { get; set; }
 
-        /// <summary>Data source id. Cannot be changed once data transfer is created.</summary>
+        /// <summary>
+        /// Data source ID. This cannot be changed once data transfer is created. The full list of available data source
+        /// IDs can be returned through an API call:
+        /// https://cloud.google.com/bigquery-transfer/docs/reference/datatransfer/rest/v1/projects.locations.dataSources/list
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataSourceId")]
         public virtual string DataSourceId { get; set; }
 
@@ -3672,7 +4127,9 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("destinationDatasetId")]
         public virtual string DestinationDatasetId { get; set; }
 
-        /// <summary>Is this config disabled. When set to true, no runs are scheduled for a given transfer.</summary>
+        /// <summary>
+        /// Is this config disabled. When set to true, no runs will be scheduled for this transfer config.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("disabled")]
         public virtual System.Nullable<bool> Disabled { get; set; }
 
@@ -3688,20 +4145,69 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         public virtual EmailPreferences EmailPreferences { get; set; }
 
         /// <summary>
-        /// The resource name of the transfer config. Transfer config names have the form
-        /// `projects/{project_id}/locations/{region}/transferConfigs/{config_id}`. Where `config_id` is usually a uuid,
-        /// even though it is not guaranteed or required. The name is ignored when creating a transfer config.
+        /// The encryption configuration part. Currently, it is only used for the optional KMS key name. The BigQuery
+        /// service account of your project must be granted permissions to use the key. Read methods will return the key
+        /// name applied in effect. Write methods will apply the key if it is present, or otherwise try to apply project
+        /// default keys if it is absent.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("encryptionConfiguration")]
+        public virtual EncryptionConfiguration EncryptionConfiguration { get; set; }
+
+        /// <summary>
+        /// Output only. Error code with detailed information about reason of the latest config failure.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("error")]
+        public virtual Status Error { get; set; }
+
+        /// <summary>
+        /// Identifier. The resource name of the transfer config. Transfer config names have the form either
+        /// `projects/{project_id}/locations/{region}/transferConfigs/{config_id}` or
+        /// `projects/{project_id}/transferConfigs/{config_id}`, where `config_id` is usually a UUID, even though it is
+        /// not guaranteed or required. The name is ignored when creating a transfer config.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _nextRunTimeRaw;
+
+        private object _nextRunTime;
+
         /// <summary>Output only. Next time when data transfer will run.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextRunTime")]
-        public virtual object NextRunTime { get; set; }
+        public virtual string NextRunTimeRaw
+        {
+            get => _nextRunTimeRaw;
+            set
+            {
+                _nextRunTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _nextRunTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="NextRunTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use NextRunTimeDateTimeOffset instead.")]
+        public virtual object NextRunTime
+        {
+            get => _nextRunTime;
+            set
+            {
+                _nextRunTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _nextRunTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="NextRunTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? NextRunTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(NextRunTimeRaw);
+            set => NextRunTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Pub/Sub topic where notifications will be sent after transfer runs associated with this transfer config
-        /// finish. The format for specifying a pubsub topic is: `projects/{project}/topics/{topic}`
+        /// finish. The format for specifying a pubsub topic is: `projects/{project_id}/topics/{topic_id}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("notificationPubsubTopic")]
         public virtual string NotificationPubsubTopic { get; set; }
@@ -3738,13 +4244,53 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleOptions")]
         public virtual ScheduleOptions ScheduleOptions { get; set; }
 
+        /// <summary>
+        /// Options customizing different types of data transfer schedule. This field replaces "schedule" and
+        /// "schedule_options" fields. ScheduleOptionsV2 cannot be used together with ScheduleOptions/Schedule.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scheduleOptionsV2")]
+        public virtual ScheduleOptionsV2 ScheduleOptionsV2 { get; set; }
+
         /// <summary>Output only. State of the most recently updated transfer run.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Data transfer modification time. Ignored by server on input.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Deprecated. Unique ID of the user on whose behalf transfer is done.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userId")]
@@ -3761,9 +4307,42 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("messageText")]
         public virtual string MessageText { get; set; }
 
+        private string _messageTimeRaw;
+
+        private object _messageTime;
+
         /// <summary>Time when message was logged.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("messageTime")]
-        public virtual object MessageTime { get; set; }
+        public virtual string MessageTimeRaw
+        {
+            get => _messageTimeRaw;
+            set
+            {
+                _messageTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _messageTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="MessageTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use MessageTimeDateTimeOffset instead.")]
+        public virtual object MessageTime
+        {
+            get => _messageTime;
+            set
+            {
+                _messageTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _messageTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="MessageTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? MessageTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(MessageTimeRaw);
+            set => MessageTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Message severity.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("severity")]
@@ -3791,18 +4370,51 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("emailPreferences")]
         public virtual EmailPreferences EmailPreferences { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// Output only. Time when transfer run ended. Parameter ignored by server for input requests.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Status of the transfer run.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("errorStatus")]
         public virtual Status ErrorStatus { get; set; }
 
         /// <summary>
-        /// The resource name of the transfer run. Transfer run names have the form
+        /// Identifier. The resource name of the transfer run. Transfer run names have the form
         /// `projects/{project_id}/locations/{location}/transferConfigs/{config_id}/runs/{run_id}`. The name is ignored
         /// when creating a transfer run.
         /// </summary>
@@ -3811,7 +4423,7 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
 
         /// <summary>
         /// Output only. Pub/Sub topic where a notification will be sent after this transfer run finishes. The format
-        /// for specifying a pubsub topic is: `projects/{project}/topics/{topic}`
+        /// for specifying a pubsub topic is: `projects/{project_id}/topics/{topic_id}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("notificationPubsubTopic")]
         public virtual string NotificationPubsubTopic { get; set; }
@@ -3824,9 +4436,42 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("params")]
         public virtual System.Collections.Generic.IDictionary<string, object> Params__ { get; set; }
 
+        private string _runTimeRaw;
+
+        private object _runTime;
+
         /// <summary>For batch transfer runs, specifies the date and time of the data should be ingested.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("runTime")]
-        public virtual object RunTime { get; set; }
+        public virtual string RunTimeRaw
+        {
+            get => _runTimeRaw;
+            set
+            {
+                _runTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _runTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RunTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RunTimeDateTimeOffset instead.")]
+        public virtual object RunTime
+        {
+            get => _runTime;
+            set
+            {
+                _runTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _runTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RunTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RunTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RunTimeRaw);
+            set => RunTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. Describes the schedule of this transfer run if it was created as part of a regular schedule.
@@ -3836,27 +4481,139 @@ namespace Google.Apis.BigQueryDataTransfer.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("schedule")]
         public virtual string Schedule { get; set; }
 
+        private string _scheduleTimeRaw;
+
+        private object _scheduleTime;
+
         /// <summary>Minimum time after which a transfer run can be started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleTime")]
-        public virtual object ScheduleTime { get; set; }
+        public virtual string ScheduleTimeRaw
+        {
+            get => _scheduleTimeRaw;
+            set
+            {
+                _scheduleTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleTimeDateTimeOffset instead.")]
+        public virtual object ScheduleTime
+        {
+            get => _scheduleTime;
+            set
+            {
+                _scheduleTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleTimeRaw);
+            set => ScheduleTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>
         /// Output only. Time when transfer run was started. Parameter ignored by server for input requests.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Data transfer run state. Ignored for input requests.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Last time the data transfer run state was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Deprecated. Unique ID of the user on whose behalf transfer is done.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userId")]
         public virtual System.Nullable<long> UserId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A request to unenroll a set of data sources so they are no longer visible in the BigQuery UI's `Transfer` tab.
+    /// </summary>
+    public class UnenrollDataSourcesRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Data sources that are unenrolled. It is required to provide at least one data source id.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataSourceIds")]
+        public virtual System.Collections.Generic.IList<string> DataSourceIds { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

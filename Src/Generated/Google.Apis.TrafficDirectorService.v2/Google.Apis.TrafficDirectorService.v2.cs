@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.TrafficDirectorService.v2
         public TrafficDirectorServiceService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Discovery = new DiscoveryResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://trafficdirector.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://trafficdirector.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.TrafficDirectorService.v2
         public override string Name => "trafficdirector";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://trafficdirector.googleapis.com/";
-        #else
-            "https://trafficdirector.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://trafficdirector.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Traffic Director API.</summary>
         public class Scope
@@ -285,7 +280,7 @@ namespace Google.Apis.TrafficDirectorService.v2
         /// <param name="body">The body of the request.</param>
         public virtual ClientStatusRequest ClientStatus(Google.Apis.TrafficDirectorService.v2.Data.ClientStatusRequest body)
         {
-            return new ClientStatusRequest(service, body);
+            return new ClientStatusRequest(this.service, body);
         }
 
         /// <summary></summary>
@@ -475,9 +470,42 @@ namespace Google.Apis.TrafficDirectorService.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cluster")]
         public virtual System.Collections.Generic.IDictionary<string, object> Cluster { get; set; }
 
+        private string _lastUpdatedRaw;
+
+        private object _lastUpdated;
+
         /// <summary>The timestamp when the Cluster was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdated")]
-        public virtual object LastUpdated { get; set; }
+        public virtual string LastUpdatedRaw
+        {
+            get => _lastUpdatedRaw;
+            set
+            {
+                _lastUpdated = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdatedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdatedDateTimeOffset instead.")]
+        public virtual object LastUpdated
+        {
+            get => _lastUpdated;
+            set
+            {
+                _lastUpdatedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdated = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdatedRaw);
+            set => LastUpdatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// This is the per-resource version information. This version is currently taken from the :ref:`version_info `
@@ -531,9 +559,42 @@ namespace Google.Apis.TrafficDirectorService.v2.Data
 
     public class DynamicListenerState : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _lastUpdatedRaw;
+
+        private object _lastUpdated;
+
         /// <summary>The timestamp when the Listener was last successfully updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdated")]
-        public virtual object LastUpdated { get; set; }
+        public virtual string LastUpdatedRaw
+        {
+            get => _lastUpdatedRaw;
+            set
+            {
+                _lastUpdated = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdatedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdatedDateTimeOffset instead.")]
+        public virtual object LastUpdated
+        {
+            get => _lastUpdated;
+            set
+            {
+                _lastUpdatedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdated = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdatedRaw);
+            set => LastUpdatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The listener config.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("listener")]
@@ -553,9 +614,42 @@ namespace Google.Apis.TrafficDirectorService.v2.Data
 
     public class DynamicRouteConfig : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _lastUpdatedRaw;
+
+        private object _lastUpdated;
+
         /// <summary>The timestamp when the Route was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdated")]
-        public virtual object LastUpdated { get; set; }
+        public virtual string LastUpdatedRaw
+        {
+            get => _lastUpdatedRaw;
+            set
+            {
+                _lastUpdated = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdatedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdatedDateTimeOffset instead.")]
+        public virtual object LastUpdated
+        {
+            get => _lastUpdated;
+            set
+            {
+                _lastUpdatedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdated = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdatedRaw);
+            set => LastUpdatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The route config.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("routeConfig")]
@@ -574,9 +668,42 @@ namespace Google.Apis.TrafficDirectorService.v2.Data
 
     public class DynamicScopedRouteConfigs : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _lastUpdatedRaw;
+
+        private object _lastUpdated;
+
         /// <summary>The timestamp when the scoped route config set was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdated")]
-        public virtual object LastUpdated { get; set; }
+        public virtual string LastUpdatedRaw
+        {
+            get => _lastUpdatedRaw;
+            set
+            {
+                _lastUpdated = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdatedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdatedDateTimeOffset instead.")]
+        public virtual object LastUpdated
+        {
+            get => _lastUpdated;
+            set
+            {
+                _lastUpdatedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdated = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdatedRaw);
+            set => LastUpdatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The name assigned to the scoped route configurations.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -637,13 +764,13 @@ namespace Google.Apis.TrafficDirectorService.v2.Data
     /// <summary>
     /// Google's `RE2 `_ regex engine. The regex string must adhere to the documented `syntax `_. The engine is designed
     /// to complete execution in linear time as well as limit the amount of memory used. Envoy supports program size
-    /// checking via runtime. The runtime keys `re2.max_program_size.error_level` and `re2.max_program_size.warn_level`
-    /// can be set to integers as the maximum program size or complexity that a compiled regex can have before an
-    /// exception is thrown or a warning is logged, respectively. `re2.max_program_size.error_level` defaults to 100,
-    /// and `re2.max_program_size.warn_level` has no default if unset (will not check/log a warning). Envoy emits two
-    /// stats for tracking the program size of regexes: the histogram `re2.program_size`, which records the program
-    /// size, and the counter `re2.exceeded_warn_level`, which is incremented each time the program size exceeds the
-    /// warn level threshold.
+    /// checking via runtime. The runtime keys ``re2.max_program_size.error_level`` and
+    /// ``re2.max_program_size.warn_level`` can be set to integers as the maximum program size or complexity that a
+    /// compiled regex can have before an exception is thrown or a warning is logged, respectively.
+    /// ``re2.max_program_size.error_level`` defaults to 100, and ``re2.max_program_size.warn_level`` has no default if
+    /// unset (will not check/log a warning). Envoy emits two stats for tracking the program size of regexes: the
+    /// histogram `re2.program_size`, which records the program size, and the counter `re2.exceeded_warn_level`, which
+    /// is incremented each time the program size exceeds the warn level threshold.
     /// </summary>
     public class GoogleRE2 : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -663,9 +790,42 @@ namespace Google.Apis.TrafficDirectorService.v2.Data
 
     public class InlineScopedRouteConfigs : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _lastUpdatedRaw;
+
+        private object _lastUpdated;
+
         /// <summary>The timestamp when the scoped route config set was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdated")]
-        public virtual object LastUpdated { get; set; }
+        public virtual string LastUpdatedRaw
+        {
+            get => _lastUpdatedRaw;
+            set
+            {
+                _lastUpdated = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdatedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdatedDateTimeOffset instead.")]
+        public virtual object LastUpdated
+        {
+            get => _lastUpdated;
+            set
+            {
+                _lastUpdatedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdated = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdatedRaw);
+            set => LastUpdatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The name assigned to the scoped route configurations.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -1025,9 +1185,42 @@ namespace Google.Apis.TrafficDirectorService.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cluster")]
         public virtual System.Collections.Generic.IDictionary<string, object> Cluster { get; set; }
 
+        private string _lastUpdatedRaw;
+
+        private object _lastUpdated;
+
         /// <summary>The timestamp when the Cluster was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdated")]
-        public virtual object LastUpdated { get; set; }
+        public virtual string LastUpdatedRaw
+        {
+            get => _lastUpdatedRaw;
+            set
+            {
+                _lastUpdated = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdatedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdatedDateTimeOffset instead.")]
+        public virtual object LastUpdated
+        {
+            get => _lastUpdated;
+            set
+            {
+                _lastUpdatedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdated = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdatedRaw);
+            set => LastUpdatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1036,9 +1229,42 @@ namespace Google.Apis.TrafficDirectorService.v2.Data
     /// <summary>Describes a statically loaded listener.</summary>
     public class StaticListener : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _lastUpdatedRaw;
+
+        private object _lastUpdated;
+
         /// <summary>The timestamp when the Listener was last successfully updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdated")]
-        public virtual object LastUpdated { get; set; }
+        public virtual string LastUpdatedRaw
+        {
+            get => _lastUpdatedRaw;
+            set
+            {
+                _lastUpdated = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdatedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdatedDateTimeOffset instead.")]
+        public virtual object LastUpdated
+        {
+            get => _lastUpdated;
+            set
+            {
+                _lastUpdatedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdated = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdatedRaw);
+            set => LastUpdatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The listener config.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("listener")]
@@ -1050,9 +1276,42 @@ namespace Google.Apis.TrafficDirectorService.v2.Data
 
     public class StaticRouteConfig : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _lastUpdatedRaw;
+
+        private object _lastUpdated;
+
         /// <summary>The timestamp when the Route was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdated")]
-        public virtual object LastUpdated { get; set; }
+        public virtual string LastUpdatedRaw
+        {
+            get => _lastUpdatedRaw;
+            set
+            {
+                _lastUpdated = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdatedRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdatedDateTimeOffset instead.")]
+        public virtual object LastUpdated
+        {
+            get => _lastUpdated;
+            set
+            {
+                _lastUpdatedRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdated = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdatedRaw);
+            set => LastUpdatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The route config.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("routeConfig")]
@@ -1146,9 +1405,44 @@ namespace Google.Apis.TrafficDirectorService.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("failedConfiguration")]
         public virtual System.Collections.Generic.IDictionary<string, object> FailedConfiguration { get; set; }
 
+        private string _lastUpdateAttemptRaw;
+
+        private object _lastUpdateAttempt;
+
         /// <summary>Time of the latest failed update attempt.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdateAttempt")]
-        public virtual object LastUpdateAttempt { get; set; }
+        public virtual string LastUpdateAttemptRaw
+        {
+            get => _lastUpdateAttemptRaw;
+            set
+            {
+                _lastUpdateAttempt = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdateAttemptRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdateAttemptRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdateAttemptDateTimeOffset instead.")]
+        public virtual object LastUpdateAttempt
+        {
+            get => _lastUpdateAttempt;
+            set
+            {
+                _lastUpdateAttemptRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdateAttempt = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdateAttemptRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdateAttemptDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdateAttemptRaw);
+            set => LastUpdateAttemptRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

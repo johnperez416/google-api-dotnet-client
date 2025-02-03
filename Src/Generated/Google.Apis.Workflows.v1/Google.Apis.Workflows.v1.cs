@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Workflows.v1
         public WorkflowsService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://workflows.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://workflows.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Workflows.v1
         public override string Name => "workflows";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://workflows.googleapis.com/";
-        #else
-            "https://workflows.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://workflows.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Workflows API.</summary>
         public class Scope
@@ -326,7 +321,7 @@ namespace Google.Apis.Workflows.v1
                 /// <param name="name">The name of the operation resource to be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -378,7 +373,7 @@ namespace Google.Apis.Workflows.v1
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -424,27 +419,17 @@ namespace Google.Apis.Workflows.v1
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 public class ListRequest : WorkflowsBaseServiceRequest<Google.Apis.Workflows.v1.Data.ListOperationsResponse>
                 {
@@ -539,7 +524,7 @@ namespace Google.Apis.Workflows.v1
 
                 /// <summary>
                 /// Creates a new workflow. If a workflow with the specified name already exists in the specified
-                /// project and location, the long running operation will return ALREADY_EXISTS error.
+                /// project and location, the long running operation returns a ALREADY_EXISTS error.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
@@ -548,12 +533,12 @@ namespace Google.Apis.Workflows.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.Workflows.v1.Data.Workflow body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
                 /// Creates a new workflow. If a workflow with the specified name already exists in the specified
-                /// project and location, the long running operation will return ALREADY_EXISTS error.
+                /// project and location, the long running operation returns a ALREADY_EXISTS error.
                 /// </summary>
                 public class CreateRequest : WorkflowsBaseServiceRequest<Google.Apis.Workflows.v1.Data.Operation>
                 {
@@ -629,7 +614,7 @@ namespace Google.Apis.Workflows.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -676,17 +661,17 @@ namespace Google.Apis.Workflows.v1
                     }
                 }
 
-                /// <summary>Gets details of a single Workflow.</summary>
+                /// <summary>Gets details of a single workflow.</summary>
                 /// <param name="name">
-                /// Required. Name of the workflow which information should be retrieved. Format:
+                /// Required. Name of the workflow for which information should be retrieved. Format:
                 /// projects/{project}/locations/{location}/workflows/{workflow}
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
-                /// <summary>Gets details of a single Workflow.</summary>
+                /// <summary>Gets details of a single workflow.</summary>
                 public class GetRequest : WorkflowsBaseServiceRequest<Google.Apis.Workflows.v1.Data.Workflow>
                 {
                     /// <summary>Constructs a new Get request.</summary>
@@ -697,11 +682,20 @@ namespace Google.Apis.Workflows.v1
                     }
 
                     /// <summary>
-                    /// Required. Name of the workflow which information should be retrieved. Format:
+                    /// Required. Name of the workflow for which information should be retrieved. Format:
                     /// projects/{project}/locations/{location}/workflows/{workflow}
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The revision of the workflow to retrieve. If the revision_id is empty, the latest
+                    /// revision is retrieved. The format is "000001-a4d", where the first six characters define the
+                    /// zero-padded decimal revision number. They are followed by a hyphen and three hexadecimal
+                    /// characters.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("revisionId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string RevisionId { get; set; }
 
                     /// <summary>Gets the method name.</summary>
                     public override string MethodName => "get";
@@ -724,11 +718,19 @@ namespace Google.Apis.Workflows.v1
                             DefaultValue = null,
                             Pattern = @"^projects/[^/]+/locations/[^/]+/workflows/[^/]+$",
                         });
+                        RequestParameters.Add("revisionId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "revisionId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
                     }
                 }
 
                 /// <summary>
-                /// Lists Workflows in a given project and location. The default order is not specified.
+                /// Lists workflows in a given project and location. The default order is not specified.
                 /// </summary>
                 /// <param name="parent">
                 /// Required. Project and location from which the workflows should be listed. Format:
@@ -736,11 +738,11 @@ namespace Google.Apis.Workflows.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
-                /// Lists Workflows in a given project and location. The default order is not specified.
+                /// Lists workflows in a given project and location. The default order is not specified.
                 /// </summary>
                 public class ListRequest : WorkflowsBaseServiceRequest<Google.Apis.Workflows.v1.Data.ListWorkflowsResponse>
                 {
@@ -758,22 +760,26 @@ namespace Google.Apis.Workflows.v1
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
 
-                    /// <summary>Filter to restrict results to specific workflows.</summary>
+                    /// <summary>
+                    /// Filter to restrict results to specific workflows. For details, see AIP-160. For example, if you
+                    /// are using the Google APIs Explorer: `state="SUCCEEDED"` or `createTime&amp;gt;"2023-08-01" AND
+                    /// state="FAILED"`
+                    /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string Filter { get; set; }
 
                     /// <summary>
-                    /// Comma-separated list of fields that that specify the order of the results. Default sorting order
-                    /// for a field is ascending. To specify descending order for a field, append a " desc" suffix. If
-                    /// not specified, the results will be returned in an unspecified order.
+                    /// Comma-separated list of fields that specify the order of the results. Default sorting order for
+                    /// a field is ascending. To specify descending order for a field, append a "desc" suffix. If not
+                    /// specified, the results are returned in an unspecified order.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string OrderBy { get; set; }
 
                     /// <summary>
-                    /// Maximum number of workflows to return per call. The service may return fewer than this value. If
-                    /// the value is not specified, a default value of 500 will be used. The maximum permitted value is
-                    /// 1000 and values greater than 1000 will be coerced down to 1000.
+                    /// Maximum number of workflows to return per call. The service might return fewer than this value
+                    /// even if not at the end of the collection. If a value is not specified, a default value of 500 is
+                    /// used. The maximum permitted value is 1000 and values greater than 1000 are coerced down to 1000.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<int> PageSize { get; set; }
@@ -842,25 +848,108 @@ namespace Google.Apis.Workflows.v1
                     }
                 }
 
-                /// <summary>
-                /// Updates an existing workflow. Running this method has no impact on already running executions of the
-                /// workflow. A new revision of the workflow may be created as a result of a successful update
-                /// operation. In that case, such revision will be used in new workflow executions.
-                /// </summary>
-                /// <param name="body">The body of the request.</param>
+                /// <summary>Lists revisions for a given workflow.</summary>
                 /// <param name="name">
-                /// The resource name of the workflow. Format:
+                /// Required. Workflow for which the revisions should be listed. Format:
                 /// projects/{project}/locations/{location}/workflows/{workflow}
                 /// </param>
-                public virtual PatchRequest Patch(Google.Apis.Workflows.v1.Data.Workflow body, string name)
+                public virtual ListRevisionsRequest ListRevisions(string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new ListRevisionsRequest(this.service, name);
+                }
+
+                /// <summary>Lists revisions for a given workflow.</summary>
+                public class ListRevisionsRequest : WorkflowsBaseServiceRequest<Google.Apis.Workflows.v1.Data.ListWorkflowRevisionsResponse>
+                {
+                    /// <summary>Constructs a new ListRevisions request.</summary>
+                    public ListRevisionsRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Workflow for which the revisions should be listed. Format:
+                    /// projects/{project}/locations/{location}/workflows/{workflow}
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// The maximum number of revisions to return per page. If a value is not specified, a default value
+                    /// of 20 is used. The maximum permitted value is 100. Values greater than 100 are coerced down to
+                    /// 100.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// The page token, received from a previous ListWorkflowRevisions call. Provide this to retrieve
+                    /// the subsequent page.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "listRevisions";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}:listRevisions";
+
+                    /// <summary>Initializes ListRevisions parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/workflows/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
                 }
 
                 /// <summary>
                 /// Updates an existing workflow. Running this method has no impact on already running executions of the
-                /// workflow. A new revision of the workflow may be created as a result of a successful update
-                /// operation. In that case, such revision will be used in new workflow executions.
+                /// workflow. A new revision of the workflow might be created as a result of a successful update
+                /// operation. In that case, the new revision is used in new workflow executions.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// The resource name of the workflow. Format:
+                /// projects/{project}/locations/{location}/workflows/{workflow}. This is a workflow-wide field and is
+                /// not tied to a specific revision.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.Workflows.v1.Data.Workflow body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Updates an existing workflow. Running this method has no impact on already running executions of the
+                /// workflow. A new revision of the workflow might be created as a result of a successful update
+                /// operation. In that case, the new revision is used in new workflow executions.
                 /// </summary>
                 public class PatchRequest : WorkflowsBaseServiceRequest<Google.Apis.Workflows.v1.Data.Operation>
                 {
@@ -874,7 +963,8 @@ namespace Google.Apis.Workflows.v1
 
                     /// <summary>
                     /// The resource name of the workflow. Format:
-                    /// projects/{project}/locations/{location}/workflows/{workflow}
+                    /// projects/{project}/locations/{location}/workflows/{workflow}. This is a workflow-wide field and
+                    /// is not tied to a specific revision.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -928,7 +1018,7 @@ namespace Google.Apis.Workflows.v1
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -973,7 +1063,7 @@ namespace Google.Apis.Workflows.v1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -992,7 +1082,7 @@ namespace Google.Apis.Workflows.v1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -1065,8 +1155,7 @@ namespace Google.Apis.Workflows.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1104,6 +1193,24 @@ namespace Google.Apis.Workflows.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Response for the ListWorkflowRevisions method.</summary>
+    public class ListWorkflowRevisionsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A token, which can be sent as `page_token` to retrieve the next page. If this field is omitted, there are no
+        /// subsequent pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The revisions of the workflow, ordered in reverse chronological order.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("workflows")]
+        public virtual System.Collections.Generic.IList<Workflow> Workflows { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Response for the ListWorkflows method.</summary>
     public class ListWorkflowsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1118,7 +1225,7 @@ namespace Google.Apis.Workflows.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
         public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
 
-        /// <summary>The workflows which match the request.</summary>
+        /// <summary>The workflows that match the request.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("workflows")]
         public virtual System.Collections.Generic.IList<Workflow> Workflows { get; set; }
 
@@ -1126,7 +1233,7 @@ namespace Google.Apis.Workflows.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -1188,8 +1295,8 @@ namespace Google.Apis.Workflows.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -1208,13 +1315,79 @@ namespace Google.Apis.Workflows.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
         public virtual string ApiVersion { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>The time the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Server-defined resource path for the target of the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("target")]
@@ -1223,6 +1396,21 @@ namespace Google.Apis.Workflows.v1.Data
         /// <summary>Name of the verb executed by the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("verb")]
         public virtual string Verb { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes an error related to the current state of the workflow.</summary>
+    public class StateError : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Provides specifics about the error.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual string Details { get; set; }
+
+        /// <summary>The type of this state error.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1260,39 +1448,155 @@ namespace Google.Apis.Workflows.v1.Data
     /// <summary>Workflow program to be executed by Workflows.</summary>
     public class Workflow : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Output only. The timestamp of when the workflow was created.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        /// <summary>
+        /// Output only. A list of all KMS crypto keys used to encrypt or decrypt the data associated with the workflow.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allKmsKeys")]
+        public virtual System.Collections.Generic.IList<string> AllKmsKeys { get; set; }
 
         /// <summary>
-        /// Description of the workflow provided by the user. Must be at most 1000 unicode characters long.
+        /// Output only. A list of all KMS crypto key versions used to encrypt or decrypt the data associated with the
+        /// workflow.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allKmsKeysVersions")]
+        public virtual System.Collections.Generic.IList<string> AllKmsKeysVersions { get; set; }
+
+        /// <summary>
+        /// Optional. Describes the level of platform logging to apply to calls and call responses during executions of
+        /// this workflow. If both the workflow and the execution specify a logging level, the execution level takes
+        /// precedence.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("callLogLevel")]
+        public virtual string CallLogLevel { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>
+        /// Output only. The timestamp for when the workflow was created. This is a workflow-wide field and is not tied
+        /// to a specific revision.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. The resource name of a KMS crypto key used to encrypt or decrypt the data associated with the
+        /// workflow. Format: projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey} Using
+        /// `-` as a wildcard for the `{project}` or not providing one at all will infer the project from the account.
+        /// If not provided, data associated with the workflow will not be CMEK-encrypted.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cryptoKeyName")]
+        public virtual string CryptoKeyName { get; set; }
+
+        /// <summary>
+        /// Output only. The resource name of a KMS crypto key version used to encrypt or decrypt the data associated
+        /// with the workflow. Format:
+        /// projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}/cryptoKeyVersions/{cryptoKeyVersion}
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cryptoKeyVersion")]
+        public virtual string CryptoKeyVersion { get; set; }
+
+        /// <summary>
+        /// Description of the workflow provided by the user. Must be at most 1000 Unicode characters long. This is a
+        /// workflow-wide field and is not tied to a specific revision.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual string Description { get; set; }
 
+        /// <summary>Optional. Describes the level of the execution history feature to apply to this workflow.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("executionHistoryLevel")]
+        public virtual string ExecutionHistoryLevel { get; set; }
+
         /// <summary>
         /// Labels associated with this workflow. Labels can contain at most 64 entries. Keys and values can be no
-        /// longer than 63 characters and can only contain lowercase letters, numeric characters, underscores and
-        /// dashes. Label keys must start with a letter. International characters are allowed.
+        /// longer than 63 characters and can only contain lowercase letters, numeric characters, underscores, and
+        /// dashes. Label keys must start with a letter. International characters are allowed. This is a workflow-wide
+        /// field and is not tied to a specific revision.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
         /// <summary>
-        /// The resource name of the workflow. Format: projects/{project}/locations/{location}/workflows/{workflow}
+        /// The resource name of the workflow. Format: projects/{project}/locations/{location}/workflows/{workflow}.
+        /// This is a workflow-wide field and is not tied to a specific revision.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
-        /// <summary>Output only. The timestamp that the latest revision of the workflow was created.</summary>
+        private string _revisionCreateTimeRaw;
+
+        private object _revisionCreateTime;
+
+        /// <summary>Output only. The timestamp for the latest revision of the workflow's creation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("revisionCreateTime")]
-        public virtual object RevisionCreateTime { get; set; }
+        public virtual string RevisionCreateTimeRaw
+        {
+            get => _revisionCreateTimeRaw;
+            set
+            {
+                _revisionCreateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _revisionCreateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RevisionCreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RevisionCreateTimeDateTimeOffset instead.")]
+        public virtual object RevisionCreateTime
+        {
+            get => _revisionCreateTime;
+            set
+            {
+                _revisionCreateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _revisionCreateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="RevisionCreateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RevisionCreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RevisionCreateTimeRaw);
+            set => RevisionCreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The revision of the workflow. A new revision of a workflow is created as a result of updating
         /// the following properties of a workflow: - Service account - Workflow code to be executed The format is
-        /// "000001-a4d", where the first 6 characters define the zero-padded revision ordinal number. They are followed
-        /// by a hyphen and 3 hexadecimal random characters.
+        /// "000001-a4d", where the first six characters define the zero-padded revision ordinal number. They are
+        /// followed by a hyphen and three hexadecimal random characters.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("revisionId")]
         public virtual string RevisionId { get; set; }
@@ -1316,9 +1620,64 @@ namespace Google.Apis.Workflows.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
-        /// <summary>Output only. The last update timestamp of the workflow.</summary>
+        /// <summary>
+        /// Output only. Error regarding the state of the workflow. For example, this field will have error details if
+        /// the execution data is unavailable due to revoked KMS key permissions.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stateError")]
+        public virtual StateError StateError { get; set; }
+
+        /// <summary>Optional. Input only. Immutable. Tags associated with this workflow.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tags")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Tags { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>
+        /// Output only. The timestamp for when the workflow was last updated. This is a workflow-wide field and is not
+        /// tied to a specific revision.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. User-defined environment variables associated with this workflow revision. This map has a maximum
+        /// length of 20. Each string can take up to 4KiB. Keys cannot be empty strings and cannot start with "GOOGLE"
+        /// or "WORKFLOWS".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userEnvVars")]
+        public virtual System.Collections.Generic.IDictionary<string, string> UserEnvVars { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

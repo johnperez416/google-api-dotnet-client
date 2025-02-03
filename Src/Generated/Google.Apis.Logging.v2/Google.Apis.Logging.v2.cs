@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ namespace Google.Apis.Logging.v2
             Projects = new ProjectsResource(this);
             Sinks = new SinksResource(this);
             V2 = new V2Resource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://logging.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://logging.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -54,23 +56,16 @@ namespace Google.Apis.Logging.v2
         public override string Name => "logging";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://logging.googleapis.com/";
-        #else
-            "https://logging.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://logging.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Logging API.</summary>
         public class Scope
@@ -347,161 +342,10 @@ namespace Google.Apis.Logging.v2
         public BillingAccountsResource(Google.Apis.Services.IClientService service)
         {
             this.service = service;
-            Buckets = new BucketsResource(service);
             Exclusions = new ExclusionsResource(service);
             Locations = new LocationsResource(service);
             Logs = new LogsResource(service);
-            Operations = new OperationsResource(service);
             Sinks = new SinksResource(service);
-        }
-
-        /// <summary>Gets the Buckets resource.</summary>
-        public virtual BucketsResource Buckets { get; }
-
-        /// <summary>The "buckets" collection of methods.</summary>
-        public class BucketsResource
-        {
-            private const string Resource = "buckets";
-
-            /// <summary>The service which this resource belongs to.</summary>
-            private readonly Google.Apis.Services.IClientService service;
-
-            /// <summary>Constructs a new resource.</summary>
-            public BucketsResource(Google.Apis.Services.IClientService service)
-            {
-                this.service = service;
-                Views = new ViewsResource(service);
-            }
-
-            /// <summary>Gets the Views resource.</summary>
-            public virtual ViewsResource Views { get; }
-
-            /// <summary>The "views" collection of methods.</summary>
-            public class ViewsResource
-            {
-                private const string Resource = "views";
-
-                /// <summary>The service which this resource belongs to.</summary>
-                private readonly Google.Apis.Services.IClientService service;
-
-                /// <summary>Constructs a new resource.</summary>
-                public ViewsResource(Google.Apis.Services.IClientService service)
-                {
-                    this.service = service;
-                }
-
-                /// <summary>Gets a view on a log bucket..</summary>
-                /// <param name="name">
-                /// Required. The resource name of the policy:
-                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]" For
-                /// example:"projects/my-project/locations/global/buckets/my-bucket/views/my-view"
-                /// </param>
-                public virtual GetRequest Get(string name)
-                {
-                    return new GetRequest(service, name);
-                }
-
-                /// <summary>Gets a view on a log bucket..</summary>
-                public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogView>
-                {
-                    /// <summary>Constructs a new Get request.</summary>
-                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
-                    {
-                        Name = name;
-                        InitParameters();
-                    }
-
-                    /// <summary>
-                    /// Required. The resource name of the policy:
-                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]" For
-                    /// example:"projects/my-project/locations/global/buckets/my-bucket/views/my-view"
-                    /// </summary>
-                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
-                    public virtual string Name { get; private set; }
-
-                    /// <summary>Gets the method name.</summary>
-                    public override string MethodName => "get";
-
-                    /// <summary>Gets the HTTP method.</summary>
-                    public override string HttpMethod => "GET";
-
-                    /// <summary>Gets the REST path.</summary>
-                    public override string RestPath => "v2/{+name}";
-
-                    /// <summary>Initializes Get parameter list.</summary>
-                    protected override void InitParameters()
-                    {
-                        base.InitParameters();
-                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
-                        {
-                            Name = "name",
-                            IsRequired = true,
-                            ParameterType = "path",
-                            DefaultValue = null,
-                            Pattern = @"^billingAccounts/[^/]+/buckets/[^/]+/views/[^/]+$",
-                        });
-                    }
-                }
-            }
-
-            /// <summary>Gets a log bucket.</summary>
-            /// <param name="name">
-            /// Required. The resource name of the bucket:
-            /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
-            /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
-            /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
-            /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
-            /// example:"projects/my-project/locations/global/buckets/my-bucket"
-            /// </param>
-            public virtual GetRequest Get(string name)
-            {
-                return new GetRequest(service, name);
-            }
-
-            /// <summary>Gets a log bucket.</summary>
-            public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogBucket>
-            {
-                /// <summary>Constructs a new Get request.</summary>
-                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
-                {
-                    Name = name;
-                    InitParameters();
-                }
-
-                /// <summary>
-                /// Required. The resource name of the bucket:
-                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
-                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
-                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
-                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
-                /// example:"projects/my-project/locations/global/buckets/my-bucket"
-                /// </summary>
-                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
-                public virtual string Name { get; private set; }
-
-                /// <summary>Gets the method name.</summary>
-                public override string MethodName => "get";
-
-                /// <summary>Gets the HTTP method.</summary>
-                public override string HttpMethod => "GET";
-
-                /// <summary>Gets the REST path.</summary>
-                public override string RestPath => "v2/{+name}";
-
-                /// <summary>Initializes Get parameter list.</summary>
-                protected override void InitParameters()
-                {
-                    base.InitParameters();
-                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "name",
-                        IsRequired = true,
-                        ParameterType = "path",
-                        DefaultValue = null,
-                        Pattern = @"^billingAccounts/[^/]+/buckets/[^/]+$",
-                    });
-                }
-            }
         }
 
         /// <summary>Gets the Exclusions resource.</summary>
@@ -533,7 +377,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogExclusion body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -599,7 +443,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes an exclusion in the _Default sink.</summary>
@@ -657,7 +501,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the description of an exclusion in the _Default sink.</summary>
@@ -712,7 +556,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all the exclusions on the _Default sink in a parent resource.</summary>
@@ -800,7 +644,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogExclusion body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Changes one or more properties of an existing exclusion in the _Default sink.</summary>
@@ -890,6 +734,8 @@ namespace Google.Apis.Logging.v2
                 this.service = service;
                 Buckets = new BucketsResource(service);
                 Operations = new OperationsResource(service);
+                RecentQueries = new RecentQueriesResource(service);
+                SavedQueries = new SavedQueriesResource(service);
             }
 
             /// <summary>Gets the Buckets resource.</summary>
@@ -907,7 +753,314 @@ namespace Google.Apis.Logging.v2
                 public BucketsResource(Google.Apis.Services.IClientService service)
                 {
                     this.service = service;
+                    Links = new LinksResource(service);
                     Views = new ViewsResource(service);
+                }
+
+                /// <summary>Gets the Links resource.</summary>
+                public virtual LinksResource Links { get; }
+
+                /// <summary>The "links" collection of methods.</summary>
+                public class LinksResource
+                {
+                    private const string Resource = "links";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public LinksResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Asynchronously creates a linked dataset in BigQuery which makes it possible to use BigQuery to
+                    /// read the logs stored in the log bucket. A log bucket may currently only contain one link.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// Required. The full resource name of the bucket to create a link for.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// </param>
+                    public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.Link body, string parent)
+                    {
+                        return new CreateRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>
+                    /// Asynchronously creates a linked dataset in BigQuery which makes it possible to use BigQuery to
+                    /// read the logs stored in the log bucket. A log bucket may currently only contain one link.
+                    /// </summary>
+                    public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Create request.</summary>
+                        public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.Link body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The full resource name of the bucket to create a link for.
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Required. The ID to use for the link. The link_id can have up to 100 characters. A valid
+                        /// link_id must only have alphanumeric characters and underscores within it.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("linkId", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string LinkId { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.Link Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "create";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+parent}/links";
+
+                        /// <summary>Initializes Create parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                            });
+                            RequestParameters.Add("linkId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "linkId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Deletes a link. This will also delete the corresponding BigQuery linked dataset.
+                    /// </summary>
+                    /// <param name="name">
+                    /// Required. The full resource name of the link to delete.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// </param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Deletes a link. This will also delete the corresponding BigQuery linked dataset.
+                    /// </summary>
+                    public class DeleteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The full resource name of the link to delete.
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/buckets/[^/]+/links/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Gets a link.</summary>
+                    /// <param name="name">
+                    /// Required. The resource name of the link:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// </param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>Gets a link.</summary>
+                    public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Link>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The resource name of the link:
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/buckets/[^/]+/links/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Lists links.</summary>
+                    /// <param name="parent">
+                    /// Required. The parent resource whose links are to be listed:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists links.</summary>
+                    public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListLinksResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The parent resource whose links are to be listed:
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>Optional. The maximum number of results to return from this request.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// Optional. If present, then retrieve the next batch of results from the preceding call to
+                        /// this method. pageToken must be the value of nextPageToken from the previous response.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+parent}/links";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>Gets the Views resource.</summary>
@@ -925,6 +1078,135 @@ namespace Google.Apis.Logging.v2
                     public ViewsResource(Google.Apis.Services.IClientService service)
                     {
                         this.service = service;
+                        Logs = new LogsResource(service);
+                    }
+
+                    /// <summary>Gets the Logs resource.</summary>
+                    public virtual LogsResource Logs { get; }
+
+                    /// <summary>The "logs" collection of methods.</summary>
+                    public class LogsResource
+                    {
+                        private const string Resource = "logs";
+
+                        /// <summary>The service which this resource belongs to.</summary>
+                        private readonly Google.Apis.Services.IClientService service;
+
+                        /// <summary>Constructs a new resource.</summary>
+                        public LogsResource(Google.Apis.Services.IClientService service)
+                        {
+                            this.service = service;
+                        }
+
+                        /// <summary>
+                        /// Lists the logs in projects, organizations, folders, or billing accounts. Only logs that have
+                        /// entries are listed.
+                        /// </summary>
+                        /// <param name="parent">
+                        /// Required. The resource name to list logs for: projects/[PROJECT_ID]
+                        /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                        /// </param>
+                        public virtual ListRequest List(string parent)
+                        {
+                            return new ListRequest(this.service, parent);
+                        }
+
+                        /// <summary>
+                        /// Lists the logs in projects, organizations, folders, or billing accounts. Only logs that have
+                        /// entries are listed.
+                        /// </summary>
+                        public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListLogsResponse>
+                        {
+                            /// <summary>Constructs a new List request.</summary>
+                            public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                            {
+                                Parent = parent;
+                                InitParameters();
+                            }
+
+                            /// <summary>
+                            /// Required. The resource name to list logs for: projects/[PROJECT_ID]
+                            /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                            public virtual string Parent { get; private set; }
+
+                            /// <summary>
+                            /// Optional. The maximum number of results to return from this request. Non-positive values
+                            /// are ignored. The presence of nextPageToken in the response indicates that more results
+                            /// might be available.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual System.Nullable<int> PageSize { get; set; }
+
+                            /// <summary>
+                            /// Optional. If present, then retrieve the next batch of results from the preceding call to
+                            /// this method. pageToken must be the value of nextPageToken from the previous response.
+                            /// The values of other method parameters should be identical to those in the previous call.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual string PageToken { get; set; }
+
+                            /// <summary>
+                            /// Optional. List of resource names to list logs for:
+                            /// projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+                            /// organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+                            /// billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+                            /// folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]To
+                            /// support legacy queries, it could also be: projects/[PROJECT_ID]
+                            /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID]
+                            /// folders/[FOLDER_ID]The resource name in the parent field is added to this list.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("resourceNames", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual Google.Apis.Util.Repeatable<string> ResourceNames { get; set; }
+
+                            /// <summary>Gets the method name.</summary>
+                            public override string MethodName => "list";
+
+                            /// <summary>Gets the HTTP method.</summary>
+                            public override string HttpMethod => "GET";
+
+                            /// <summary>Gets the REST path.</summary>
+                            public override string RestPath => "v2/{+parent}/logs";
+
+                            /// <summary>Initializes List parameter list.</summary>
+                            protected override void InitParameters()
+                            {
+                                base.InitParameters();
+                                RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "parent",
+                                    IsRequired = true,
+                                    ParameterType = "path",
+                                    DefaultValue = null,
+                                    Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                                });
+                                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "pageSize",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "pageToken",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                                RequestParameters.Add("resourceNames", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "resourceNames",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                            }
+                        }
                     }
 
                     /// <summary>
@@ -938,7 +1220,7 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogView body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -962,7 +1244,10 @@ namespace Google.Apis.Logging.v2
                         [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Parent { get; private set; }
 
-                        /// <summary>Required. The id to use for this view.</summary>
+                        /// <summary>
+                        /// Required. A client-assigned identifier such as "my-view". Identifiers are limited to 100
+                        /// characters and can include only letters, digits, underscores, and hyphens.
+                        /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("viewId", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual string ViewId { get; set; }
 
@@ -1016,7 +1301,7 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1065,6 +1350,59 @@ namespace Google.Apis.Logging.v2
                         }
                     }
 
+                    /// <summary>Gets a view on a log bucket.</summary>
+                    /// <param name="name">
+                    /// Required. The resource name of the policy:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]" For
+                    /// example:"projects/my-project/locations/global/buckets/my-bucket/views/my-view"
+                    /// </param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>Gets a view on a log bucket.</summary>
+                    public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogView>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The resource name of the policy:
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]" For
+                        /// example:"projects/my-project/locations/global/buckets/my-bucket/views/my-view"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                            });
+                        }
+                    }
+
                     /// <summary>Lists views on a log bucket.</summary>
                     /// <param name="parent">
                     /// Required. The bucket whose views are to be listed:
@@ -1072,7 +1410,7 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists views on a log bucket.</summary>
@@ -1149,10 +1487,10 @@ namespace Google.Apis.Logging.v2
                     }
 
                     /// <summary>
-                    /// Updates a view on a log bucket. This method replaces the following fields in the existing view
-                    /// with values from the new view: filter. If an UNAVAILABLE error is returned, this indicates that
-                    /// system is not in a state where it can update the view. If this occurs, please try again in a few
-                    /// minutes.
+                    /// Updates a view on a log bucket. This method replaces the value of the filter field from the
+                    /// existing view with the corresponding value from the new view. If an UNAVAILABLE error is
+                    /// returned, this indicates that system is not in a state where it can update the view. If this
+                    /// occurs, please try again in a few minutes.
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">
@@ -1162,14 +1500,14 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogView body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>
-                    /// Updates a view on a log bucket. This method replaces the following fields in the existing view
-                    /// with values from the new view: filter. If an UNAVAILABLE error is returned, this indicates that
-                    /// system is not in a state where it can update the view. If this occurs, please try again in a few
-                    /// minutes.
+                    /// Updates a view on a log bucket. This method replaces the value of the filter field from the
+                    /// existing view with the corresponding value from the new view. If an UNAVAILABLE error is
+                    /// returned, this indicates that system is not in a state where it can update the view. If this
+                    /// occurs, please try again in a few minutes.
                     /// </summary>
                     public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogView>
                     {
@@ -1249,7 +1587,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogBucket body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1276,7 +1614,8 @@ namespace Google.Apis.Logging.v2
 
                     /// <summary>
                     /// Required. A client-assigned identifier such as "my-bucket". Identifiers are limited to 100
-                    /// characters and can include only letters, digits, underscores, hyphens, and periods.
+                    /// characters and can include only letters, digits, underscores, hyphens, and periods. Bucket
+                    /// identifiers must start with an alphanumeric character.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("bucketId", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string BucketId { get; set; }
@@ -1320,6 +1659,88 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
+                /// Creates a log bucket asynchronously that can be used to store log entries.After a bucket has been
+                /// created, the bucket's location cannot be changed.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The resource in which to create the log bucket:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For example:"projects/my-project/locations/global"
+                /// </param>
+                public virtual CreateAsyncRequest CreateAsync(Google.Apis.Logging.v2.Data.LogBucket body, string parent)
+                {
+                    return new CreateAsyncRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Creates a log bucket asynchronously that can be used to store log entries.After a bucket has been
+                /// created, the bucket's location cannot be changed.
+                /// </summary>
+                public class CreateAsyncRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new CreateAsync request.</summary>
+                    public CreateAsyncRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogBucket body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource in which to create the log bucket:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For
+                    /// example:"projects/my-project/locations/global"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. A client-assigned identifier such as "my-bucket". Identifiers are limited to 100
+                    /// characters and can include only letters, digits, underscores, hyphens, and periods. Bucket
+                    /// identifiers must start with an alphanumeric character.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("bucketId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string BucketId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogBucket Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "createAsync";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/buckets:createAsync";
+
+                    /// <summary>Initializes CreateAsync parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("bucketId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "bucketId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
                 /// Deletes a log bucket.Changes the bucket's lifecycle_state to the DELETE_REQUESTED state. After 7
                 /// days, the bucket will be purged and all log entries in the bucket will be permanently deleted.
                 /// </summary>
@@ -1333,7 +1754,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1384,6 +1805,65 @@ namespace Google.Apis.Logging.v2
                     }
                 }
 
+                /// <summary>Gets a log bucket.</summary>
+                /// <param name="name">
+                /// Required. The resource name of the bucket:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+                /// example:"projects/my-project/locations/global/buckets/my-bucket"
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a log bucket.</summary>
+                public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogBucket>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the bucket:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+                    /// example:"projects/my-project/locations/global/buckets/my-bucket"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                        });
+                    }
+                }
+
                 /// <summary>Lists log buckets.</summary>
                 /// <param name="parent">
                 /// Required. The parent resource whose buckets are to be listed:
@@ -1395,7 +1875,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists log buckets.</summary>
@@ -1476,9 +1956,7 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
-                /// Updates a log bucket. This method replaces the following fields in the existing bucket with values
-                /// from the new bucket: retention_periodIf the retention period is decreased and the bucket is locked,
-                /// FAILED_PRECONDITION will be returned.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// Updates a log bucket.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
                 /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
                 /// be changed.
                 /// </summary>
@@ -1493,13 +1971,11 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogBucket body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates a log bucket. This method replaces the following fields in the existing bucket with values
-                /// from the new bucket: retention_periodIf the retention period is decreased and the bucket is locked,
-                /// FAILED_PRECONDITION will be returned.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// Updates a log bucket.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
                 /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
                 /// be changed.
                 /// </summary>
@@ -1587,7 +2063,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual UndeleteRequest Undelete(Google.Apis.Logging.v2.Data.UndeleteBucketRequest body, string name)
                 {
-                    return new UndeleteRequest(service, body, name);
+                    return new UndeleteRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1644,6 +2120,99 @@ namespace Google.Apis.Logging.v2
                         });
                     }
                 }
+
+                /// <summary>
+                /// Updates a log bucket asynchronously.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
+                /// be changed.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. The full resource name of the bucket to update.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+                /// example:"projects/my-project/locations/global/buckets/my-bucket"
+                /// </param>
+                public virtual UpdateAsyncRequest UpdateAsync(Google.Apis.Logging.v2.Data.LogBucket body, string name)
+                {
+                    return new UpdateAsyncRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Updates a log bucket asynchronously.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
+                /// be changed.
+                /// </summary>
+                public class UpdateAsyncRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new UpdateAsync request.</summary>
+                    public UpdateAsyncRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogBucket body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The full resource name of the bucket to update.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+                    /// example:"projects/my-project/locations/global/buckets/my-bucket"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. Field mask that specifies the fields in bucket that need an update. A bucket field
+                    /// will be overwritten if, and only if, it is in the update mask. name and output only fields
+                    /// cannot be updated.For a detailed FieldMask definition, see:
+                    /// https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMaskFor
+                    /// example: updateMask=retention_days
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogBucket Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "updateAsync";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}:updateAsync";
+
+                    /// <summary>Initializes UpdateAsync parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Operations resource.</summary>
@@ -1675,7 +2244,7 @@ namespace Google.Apis.Logging.v2
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.Logging.v2.Data.CancelOperationRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1731,28 +2300,69 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
-                /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding
-                /// to use different resource name schemes, such as users/*/operations. To override the binding, API
-                /// services can add a binding such as "/v1/{name=users/*}/operations" to their service configuration.
-                /// For backwards compatibility, the default name includes the operations collection id, however
-                /// overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
+                /// result at intervals as recommended by the API service.
                 /// </summary>
-                /// <param name="name">The name of the operation's parent resource.</param>
-                public virtual ListRequest List(string name)
+                /// <param name="name">The name of the operation resource.</param>
+                public virtual GetRequest Get(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
+                /// result at intervals as recommended by the API service.
+                /// </summary>
+                public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation resource.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/operations/[^/]+$",
+                        });
+                    }
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding
-                /// to use different resource name schemes, such as users/*/operations. To override the binding, API
-                /// services can add a binding such as "/v1/{name=users/*}/operations" to their service configuration.
-                /// For backwards compatibility, the default name includes the operations collection id, however
-                /// overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns UNIMPLEMENTED.
+                /// </summary>
+                /// <param name="name">The name of the operation's parent resource.</param>
+                public virtual ListRequest List(string name)
+                {
+                    return new ListRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Lists operations that match the specified filter in the request. If the server doesn't support this
+                /// method, it returns UNIMPLEMENTED.
                 /// </summary>
                 public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListOperationsResponse>
                 {
@@ -1828,11 +2438,562 @@ namespace Google.Apis.Logging.v2
                 }
             }
 
+            /// <summary>Gets the RecentQueries resource.</summary>
+            public virtual RecentQueriesResource RecentQueries { get; }
+
+            /// <summary>The "recentQueries" collection of methods.</summary>
+            public class RecentQueriesResource
+            {
+                private const string Resource = "recentQueries";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public RecentQueriesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Lists the RecentQueries that were created by the user making the request.</summary>
+                /// <param name="parent">
+                /// Required. The resource to which the listed queries belong.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For
+                /// example:projects/my-project/locations/us-central1Note: The location portion of the resource must be
+                /// specified, but supplying the character - in place of LOCATION_ID will return all recent queries.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists the RecentQueries that were created by the user making the request.</summary>
+                public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListRecentQueriesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource to which the listed queries belong.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For
+                    /// example:projects/my-project/locations/us-central1Note: The location portion of the resource must
+                    /// be specified, but supplying the character - in place of LOCATION_ID will return all recent
+                    /// queries.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Specifies the type ("Logging" or "OpsAnalytics") of the recent queries to list. The
+                    /// only valid value for this field is one of the two allowable type function calls, which are the
+                    /// following: type("Logging") type("OpsAnalytics")
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. The maximum number of results to return from this request. Non-positive values are
+                    /// ignored. The presence of nextPageToken in the response indicates that more results might be
+                    /// available.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If present, then retrieve the next batch of results from the preceding call to this
+                    /// method. pageToken must be the value of nextPageToken from the previous response. The values of
+                    /// other method parameters should be identical to those in the previous call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/recentQueries";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the SavedQueries resource.</summary>
+            public virtual SavedQueriesResource SavedQueries { get; }
+
+            /// <summary>The "savedQueries" collection of methods.</summary>
+            public class SavedQueriesResource
+            {
+                private const string Resource = "savedQueries";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public SavedQueriesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a new SavedQuery for the user making the request.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource in which to create the saved query:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example: "projects/my-project/locations/global"
+                /// "organizations/123456789/locations/us-central1"
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.SavedQuery body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new SavedQuery for the user making the request.</summary>
+                public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.SavedQuery>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.SavedQuery body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource in which to create the saved query:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example:
+                    /// "projects/my-project/locations/global" "organizations/123456789/locations/us-central1"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The ID to use for the saved query, which will become the final component of the saved
+                    /// query's resource name.If the saved_query_id is not provided, the system will generate an
+                    /// alphanumeric ID.The saved_query_id is limited to 100 characters and can include only the
+                    /// following characters: upper and lower-case alphanumeric characters, underscores, hyphens,
+                    /// periods.First character has to be alphanumeric.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("savedQueryId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string SavedQueryId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.SavedQuery Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/savedQueries";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("savedQueryId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "savedQueryId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes an existing SavedQuery that was created by the user making the request.</summary>
+                /// <param name="name">
+                /// Required. The full resource name of the saved query to delete.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes an existing SavedQuery that was created by the user making the request.</summary>
+                public class DeleteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The full resource name of the saved query to delete.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                    /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/savedQueries/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Returns all data associated with the requested query.</summary>
+                /// <param name="name">
+                /// Required. The resource name of the saved query.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Returns all data associated with the requested query.</summary>
+                public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.SavedQuery>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the saved query.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                    /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/savedQueries/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists the SavedQueries that were created by the user making the request.</summary>
+                /// <param name="parent">
+                /// Required. The resource to which the listed queries belong.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example:
+                /// "projects/my-project/locations/us-central1" Note: The locations portion of the resource must be
+                /// specified. To get a list of all saved queries, a wildcard character - can be used for LOCATION_ID,
+                /// for example: "projects/my-project/locations/-"
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists the SavedQueries that were created by the user making the request.</summary>
+                public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListSavedQueriesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource to which the listed queries belong.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example:
+                    /// "projects/my-project/locations/us-central1" Note: The locations portion of the resource must be
+                    /// specified. To get a list of all saved queries, a wildcard character - can be used for
+                    /// LOCATION_ID, for example: "projects/my-project/locations/-"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Specifies the type ("Logging" or "OpsAnalytics") and the visibility (PRIVATE or
+                    /// SHARED) of the saved queries to list. If provided, the filter must contain either the type
+                    /// function or a visibility token, or both. If both are chosen, they can be placed in any order,
+                    /// but they must be joined by the AND operator or the empty character.The two supported type
+                    /// function calls are: type("Logging") type("OpsAnalytics")The two supported visibility tokens are:
+                    /// visibility = PRIVATE visibility = SHAREDFor example:type("Logging") AND visibility = PRIVATE
+                    /// visibility=SHARED type("OpsAnalytics") type("OpsAnalytics)" visibility = PRIVATE visibility =
+                    /// SHARED
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. The maximum number of results to return from this request.Non-positive values are
+                    /// ignored. The presence of nextPageToken in the response indicates that more results might be
+                    /// available.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If present, then retrieve the next batch of results from the preceding call to this
+                    /// method. pageToken must be the value of nextPageToken from the previous response. The values of
+                    /// other method parameters should be identical to those in the previous call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/savedQueries";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates an existing SavedQuery.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Output only. Resource name of the saved query.In the format:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For a list of supported
+                /// locations, see Supported Regions
+                /// (https://cloud.google.com/logging/docs/region-support#bucket-regions)After the saved query is
+                /// created, the location cannot be changed.If the user doesn't provide a QUERY_ID, the system will
+                /// generate an alphanumeric ID.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.SavedQuery body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates an existing SavedQuery.</summary>
+                public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.SavedQuery>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.SavedQuery body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Output only. Resource name of the saved query.In the format:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For a list of supported
+                    /// locations, see Supported Regions
+                    /// (https://cloud.google.com/logging/docs/region-support#bucket-regions)After the saved query is
+                    /// created, the location cannot be changed.If the user doesn't provide a QUERY_ID, the system will
+                    /// generate an alphanumeric ID.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. A non-empty list of fields to change in the existing saved query. Fields are relative
+                    /// to the saved_query and new values for the fields are taken from the corresponding fields in the
+                    /// SavedQuery included in this request. Fields not mentioned in update_mask are not changed and are
+                    /// ignored in the request.To update all mutable fields, specify an update_mask of *.For example, to
+                    /// change the description and query filter text of a saved query, specify an update_mask of
+                    /// "description, query.filter".
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.SavedQuery Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/savedQueries/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets information about a location.</summary>
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -1877,7 +3038,7 @@ namespace Google.Apis.Logging.v2
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -1994,7 +3155,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string logName)
             {
-                return new DeleteRequest(service, logName);
+                return new DeleteRequest(this.service, logName);
             }
 
             /// <summary>
@@ -2051,12 +3212,12 @@ namespace Google.Apis.Logging.v2
             /// listed.
             /// </summary>
             /// <param name="parent">
-            /// Required. The resource name that owns the logs: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
+            /// Required. The resource name to list logs for: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
             /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -2073,8 +3234,8 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
-                /// Required. The resource name that owns the logs: projects/[PROJECT_ID]
-                /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                /// Required. The resource name to list logs for: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
+                /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -2096,13 +3257,14 @@ namespace Google.Apis.Logging.v2
                 public virtual string PageToken { get; set; }
 
                 /// <summary>
-                /// Optional. The resource name that owns the logs:
+                /// Optional. List of resource names to list logs for:
                 /// projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
                 /// organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
                 /// billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
                 /// folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]To support legacy
                 /// queries, it could also be: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
-                /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]The resource name in the parent field is
+                /// added to this list.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resourceNames", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual Google.Apis.Util.Repeatable<string> ResourceNames { get; set; }
@@ -2156,75 +3318,6 @@ namespace Google.Apis.Logging.v2
             }
         }
 
-        /// <summary>Gets the Operations resource.</summary>
-        public virtual OperationsResource Operations { get; }
-
-        /// <summary>The "operations" collection of methods.</summary>
-        public class OperationsResource
-        {
-            private const string Resource = "operations";
-
-            /// <summary>The service which this resource belongs to.</summary>
-            private readonly Google.Apis.Services.IClientService service;
-
-            /// <summary>Constructs a new resource.</summary>
-            public OperationsResource(Google.Apis.Services.IClientService service)
-            {
-                this.service = service;
-            }
-
-            /// <summary>
-            /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
-            /// result at intervals as recommended by the API service.
-            /// </summary>
-            /// <param name="name">The name of the operation resource.</param>
-            public virtual GetRequest Get(string name)
-            {
-                return new GetRequest(service, name);
-            }
-
-            /// <summary>
-            /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
-            /// result at intervals as recommended by the API service.
-            /// </summary>
-            public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
-            {
-                /// <summary>Constructs a new Get request.</summary>
-                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
-                {
-                    Name = name;
-                    InitParameters();
-                }
-
-                /// <summary>The name of the operation resource.</summary>
-                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
-                public virtual string Name { get; private set; }
-
-                /// <summary>Gets the method name.</summary>
-                public override string MethodName => "get";
-
-                /// <summary>Gets the HTTP method.</summary>
-                public override string HttpMethod => "GET";
-
-                /// <summary>Gets the REST path.</summary>
-                public override string RestPath => "v2/{+name}";
-
-                /// <summary>Initializes Get parameter list.</summary>
-                protected override void InitParameters()
-                {
-                    base.InitParameters();
-                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "name",
-                        IsRequired = true,
-                        ParameterType = "path",
-                        DefaultValue = null,
-                        Pattern = @"^billingAccounts/[^/]+/operations/[^/]+$",
-                    });
-                }
-            }
-        }
-
         /// <summary>Gets the Sinks resource.</summary>
         public virtual SinksResource Sinks { get; }
 
@@ -2243,9 +3336,9 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Creates a sink that exports specified log entries to a destination. The export of newly-ingested log
-            /// entries begins immediately, unless the sink's writer_identity is not permitted to write to the
-            /// destination. A sink can export log entries only from the resource owning the sink.
+            /// Creates a sink that exports specified log entries to a destination. The export begins upon ingress,
+            /// unless the sink's writer_identity is not permitted to write to the destination. A sink can export log
+            /// entries only from the resource owning the sink.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
@@ -2255,13 +3348,13 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogSink body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
-            /// Creates a sink that exports specified log entries to a destination. The export of newly-ingested log
-            /// entries begins immediately, unless the sink's writer_identity is not permitted to write to the
-            /// destination. A sink can export log entries only from the resource owning the sink.
+            /// Creates a sink that exports specified log entries to a destination. The export begins upon ingress,
+            /// unless the sink's writer_identity is not permitted to write to the destination. A sink can export log
+            /// entries only from the resource owning the sink.
             /// </summary>
             public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
             {
@@ -2282,13 +3375,23 @@ namespace Google.Apis.Logging.v2
                 public virtual string Parent { get; private set; }
 
                 /// <summary>
+                /// Optional. The service account provided by the caller that will be used to write the log entries. The
+                /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs
+                /// to a log bucket that is in a different project than the sink. When not specified, a Logging service
+                /// account will automatically be generated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string CustomWriterIdentity { get; set; }
+
+                /// <summary>
                 /// Optional. Determines the kind of IAM identity returned as writer_identity in the new sink. If this
                 /// value is omitted or set to false, and if the sink's parent is a project, then the value returned as
                 /// writer_identity is the same group or service account used by Cloud Logging before the addition of
                 /// writer identities to this API. The sink's destination must be in the same project as the sink
                 /// itself.If this field is set to true, or if the sink is owned by a non-project resource such as an
-                /// organization, then the value of writer_identity will be a unique service account used only for
-                /// exports from the new sink. For more information, see writer_identity in LogSink.
+                /// organization, then the value of writer_identity will be a service agent
+                /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) used by the sinks with the
+                /// same parent. For more information, see writer_identity in LogSink.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -2320,6 +3423,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^billingAccounts/[^/]+$",
                     });
+                    RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "customWriterIdentity",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                     {
                         Name = "uniqueWriterIdentity",
@@ -2342,7 +3453,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string sinkName)
             {
-                return new DeleteRequest(service, sinkName);
+                return new DeleteRequest(this.service, sinkName);
             }
 
             /// <summary>
@@ -2399,7 +3510,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual GetRequest Get(string sinkName)
             {
-                return new GetRequest(service, sinkName);
+                return new GetRequest(this.service, sinkName);
             }
 
             /// <summary>Gets a sink.</summary>
@@ -2452,7 +3563,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists sinks.</summary>
@@ -2471,6 +3582,16 @@ namespace Google.Apis.Logging.v2
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. A filter expression to constrain the sinks returned. Today, this only supports the
+                /// following strings: '' 'in_scope("ALL")', 'in_scope("ANCESTOR")', 'in_scope("DEFAULT")'.Description
+                /// of scopes below. ALL: Includes all of the sinks which can be returned in any other scope. ANCESTOR:
+                /// Includes intercepting sinks owned by ancestor resources. DEFAULT: Includes sinks owned by
+                /// parent.When the empty string is provided, then the filter 'in_scope("DEFAULT")' is applied.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
 
                 /// <summary>
                 /// Optional. The maximum number of results to return from this request. Non-positive values are
@@ -2509,6 +3630,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^billingAccounts/[^/]+$",
                     });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
                     {
                         Name = "pageSize",
@@ -2529,9 +3658,9 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="sinkName">
@@ -2542,13 +3671,13 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogSink body, string sinkName)
             {
-                return new PatchRequest(service, body, sinkName);
+                return new PatchRequest(this.service, body, sinkName);
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
             {
@@ -2571,12 +3700,22 @@ namespace Google.Apis.Logging.v2
                 public virtual string SinkName { get; private set; }
 
                 /// <summary>
+                /// Optional. The service account provided by the caller that will be used to write the log entries. The
+                /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs
+                /// to a log bucket that is in a different project than the sink. When not specified, a Logging service
+                /// account will automatically be generated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string CustomWriterIdentity { get; set; }
+
+                /// <summary>
                 /// Optional. See sinks.create for a description of this field. When updating a sink, the effect of this
                 /// field on the value of writer_identity in the updated sink depends on both the old and new values of
                 /// this field: If the old and new values of this field are both false or both true, then there is no
                 /// change to the sink's writer_identity. If the old value is false and the new value is true, then
-                /// writer_identity is changed to a unique service account. It is an error if the old value is true and
-                /// the new value is set to false or defaulted to false.
+                /// writer_identity is changed to a service agent
+                /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) owned by Cloud Logging. It
+                /// is an error if the old value is true and the new value is set to false or defaulted to false.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -2621,6 +3760,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^billingAccounts/[^/]+/sinks/[^/]+$",
                     });
+                    RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "customWriterIdentity",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                     {
                         Name = "uniqueWriterIdentity",
@@ -2641,9 +3788,9 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="sinkName">
@@ -2654,13 +3801,13 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual UpdateRequest Update(Google.Apis.Logging.v2.Data.LogSink body, string sinkName)
             {
-                return new UpdateRequest(service, body, sinkName);
+                return new UpdateRequest(this.service, body, sinkName);
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             public class UpdateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
             {
@@ -2683,12 +3830,22 @@ namespace Google.Apis.Logging.v2
                 public virtual string SinkName { get; private set; }
 
                 /// <summary>
+                /// Optional. The service account provided by the caller that will be used to write the log entries. The
+                /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs
+                /// to a log bucket that is in a different project than the sink. When not specified, a Logging service
+                /// account will automatically be generated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string CustomWriterIdentity { get; set; }
+
+                /// <summary>
                 /// Optional. See sinks.create for a description of this field. When updating a sink, the effect of this
                 /// field on the value of writer_identity in the updated sink depends on both the old and new values of
                 /// this field: If the old and new values of this field are both false or both true, then there is no
                 /// change to the sink's writer_identity. If the old value is false and the new value is true, then
-                /// writer_identity is changed to a unique service account. It is an error if the old value is true and
-                /// the new value is set to false or defaulted to false.
+                /// writer_identity is changed to a service agent
+                /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) owned by Cloud Logging. It
+                /// is an error if the old value is true and the new value is set to false or defaulted to false.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -2733,6 +3890,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^billingAccounts/[^/]+/sinks/[^/]+$",
                     });
+                    RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "customWriterIdentity",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                     {
                         Name = "uniqueWriterIdentity",
@@ -2755,26 +3920,26 @@ namespace Google.Apis.Logging.v2
 
         /// <summary>
         /// Gets the Logging CMEK settings for the given resource.Note: CMEK for the Log Router can be configured for
-        /// Google Cloud projects, folders, organizations and billing accounts. Once configured for an organization, it
-        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Logs Router
+        /// Google Cloud projects, folders, organizations, and billing accounts. Once configured for an organization, it
+        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Log Router
         /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
         /// </summary>
         /// <param name="name">
         /// Required. The resource for which to retrieve CMEK settings. "projects/[PROJECT_ID]/cmekSettings"
         /// "organizations/[ORGANIZATION_ID]/cmekSettings" "billingAccounts/[BILLING_ACCOUNT_ID]/cmekSettings"
         /// "folders/[FOLDER_ID]/cmekSettings" For example:"organizations/12345/cmekSettings"Note: CMEK for the Log
-        /// Router can be configured for Google Cloud projects, folders, organizations and billing accounts. Once
+        /// Router can be configured for Google Cloud projects, folders, organizations, and billing accounts. Once
         /// configured for an organization, it applies to all projects and folders in the Google Cloud organization.
         /// </param>
         public virtual GetCmekSettingsRequest GetCmekSettings(string name)
         {
-            return new GetCmekSettingsRequest(service, name);
+            return new GetCmekSettingsRequest(this.service, name);
         }
 
         /// <summary>
         /// Gets the Logging CMEK settings for the given resource.Note: CMEK for the Log Router can be configured for
-        /// Google Cloud projects, folders, organizations and billing accounts. Once configured for an organization, it
-        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Logs Router
+        /// Google Cloud projects, folders, organizations, and billing accounts. Once configured for an organization, it
+        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Log Router
         /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
         /// </summary>
         public class GetCmekSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.CmekSettings>
@@ -2790,7 +3955,7 @@ namespace Google.Apis.Logging.v2
             /// Required. The resource for which to retrieve CMEK settings. "projects/[PROJECT_ID]/cmekSettings"
             /// "organizations/[ORGANIZATION_ID]/cmekSettings" "billingAccounts/[BILLING_ACCOUNT_ID]/cmekSettings"
             /// "folders/[FOLDER_ID]/cmekSettings" For example:"organizations/12345/cmekSettings"Note: CMEK for the Log
-            /// Router can be configured for Google Cloud projects, folders, organizations and billing accounts. Once
+            /// Router can be configured for Google Cloud projects, folders, organizations, and billing accounts. Once
             /// configured for an organization, it applies to all projects and folders in the Google Cloud organization.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -2806,6 +3971,69 @@ namespace Google.Apis.Logging.v2
             public override string RestPath => "v2/{+name}/cmekSettings";
 
             /// <summary>Initializes GetCmekSettings parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^billingAccounts/[^/]+$",
+                });
+            }
+        }
+
+        /// <summary>
+        /// Gets the settings for the given resource.Note: Settings can be retrieved for Google Cloud projects, folders,
+        /// organizations, and billing accounts.See View default resource settings for Logging
+        /// (https://cloud.google.com/logging/docs/default-settings#view-org-settings) for more information.
+        /// </summary>
+        /// <param name="name">
+        /// Required. The resource for which to retrieve settings. "projects/[PROJECT_ID]/settings"
+        /// "organizations/[ORGANIZATION_ID]/settings" "billingAccounts/[BILLING_ACCOUNT_ID]/settings"
+        /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"Note: Settings can be retrieved for
+        /// Google Cloud projects, folders, organizations, and billing accounts.
+        /// </param>
+        public virtual GetSettingsRequest GetSettings(string name)
+        {
+            return new GetSettingsRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Gets the settings for the given resource.Note: Settings can be retrieved for Google Cloud projects, folders,
+        /// organizations, and billing accounts.See View default resource settings for Logging
+        /// (https://cloud.google.com/logging/docs/default-settings#view-org-settings) for more information.
+        /// </summary>
+        public class GetSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Settings>
+        {
+            /// <summary>Constructs a new GetSettings request.</summary>
+            public GetSettingsRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The resource for which to retrieve settings. "projects/[PROJECT_ID]/settings"
+            /// "organizations/[ORGANIZATION_ID]/settings" "billingAccounts/[BILLING_ACCOUNT_ID]/settings"
+            /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"Note: Settings can be retrieved
+            /// for Google Cloud projects, folders, organizations, and billing accounts.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getSettings";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v2/{+name}/settings";
+
+            /// <summary>Initializes GetSettings parameter list.</summary>
             protected override void InitParameters()
             {
                 base.InitParameters();
@@ -2839,7 +4067,7 @@ namespace Google.Apis.Logging.v2
         /// <param name="body">The body of the request.</param>
         public virtual CopyRequest Copy(Google.Apis.Logging.v2.Data.CopyLogEntriesRequest body)
         {
-            return new CopyRequest(service, body);
+            return new CopyRequest(this.service, body);
         }
 
         /// <summary>Copies a set of log entries from a log bucket to a Cloud Storage bucket.</summary>
@@ -2882,7 +4110,7 @@ namespace Google.Apis.Logging.v2
         /// <param name="body">The body of the request.</param>
         public virtual ListRequest List(Google.Apis.Logging.v2.Data.ListLogEntriesRequest body)
         {
-            return new ListRequest(service, body);
+            return new ListRequest(this.service, body);
         }
 
         /// <summary>
@@ -2922,17 +4150,17 @@ namespace Google.Apis.Logging.v2
         }
 
         /// <summary>
-        /// Streaming read of log entries as they are ingested. Until the stream is terminated, it will continue reading
+        /// Streaming read of log entries as they are received. Until the stream is terminated, it will continue reading
         /// logs.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual TailRequest Tail(Google.Apis.Logging.v2.Data.TailLogEntriesRequest body)
         {
-            return new TailRequest(service, body);
+            return new TailRequest(this.service, body);
         }
 
         /// <summary>
-        /// Streaming read of log entries as they are ingested. Until the stream is terminated, it will continue reading
+        /// Streaming read of log entries as they are received. Until the stream is terminated, it will continue reading
         /// logs.
         /// </summary>
         public class TailRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.TailLogEntriesResponse>
@@ -2969,20 +4197,22 @@ namespace Google.Apis.Logging.v2
         /// <summary>
         /// Writes log entries to Logging. This API method is the only way to send log entries to Logging. This method
         /// is used, directly or indirectly, by the Logging agent (fluentd) and all logging libraries configured to use
-        /// Logging. A single request may contain log entries for a maximum of 1000 different resources (projects,
-        /// organizations, billing accounts or folders)
+        /// Logging. A single request may contain log entries for a maximum of 1000 different resource names (projects,
+        /// organizations, billing accounts or folders), where the resource name for a log entry is determined from its
+        /// logName field.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual WriteRequest Write(Google.Apis.Logging.v2.Data.WriteLogEntriesRequest body)
         {
-            return new WriteRequest(service, body);
+            return new WriteRequest(this.service, body);
         }
 
         /// <summary>
         /// Writes log entries to Logging. This API method is the only way to send log entries to Logging. This method
         /// is used, directly or indirectly, by the Logging agent (fluentd) and all logging libraries configured to use
-        /// Logging. A single request may contain log entries for a maximum of 1000 different resources (projects,
-        /// organizations, billing accounts or folders)
+        /// Logging. A single request may contain log entries for a maximum of 1000 different resource names (projects,
+        /// organizations, billing accounts or folders), where the resource name for a log entry is determined from its
+        /// logName field.
         /// </summary>
         public class WriteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.WriteLogEntriesResponse>
         {
@@ -3042,7 +4272,7 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogExclusion body, string parent)
         {
-            return new CreateRequest(service, body, parent);
+            return new CreateRequest(this.service, body, parent);
         }
 
         /// <summary>
@@ -3107,7 +4337,7 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>Deletes an exclusion in the _Default sink.</summary>
@@ -3164,7 +4394,7 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Gets the description of an exclusion in the _Default sink.</summary>
@@ -3218,7 +4448,7 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual ListRequest List(string parent)
         {
-            return new ListRequest(service, parent);
+            return new ListRequest(this.service, parent);
         }
 
         /// <summary>Lists all the exclusions on the _Default sink in a parent resource.</summary>
@@ -3303,7 +4533,7 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogExclusion body, string name)
         {
-            return new PatchRequest(service, body, name);
+            return new PatchRequest(this.service, body, name);
         }
 
         /// <summary>Changes one or more properties of an existing exclusion in the _Default sink.</summary>
@@ -3423,7 +4653,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogExclusion body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -3489,7 +4719,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes an exclusion in the _Default sink.</summary>
@@ -3547,7 +4777,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the description of an exclusion in the _Default sink.</summary>
@@ -3602,7 +4832,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all the exclusions on the _Default sink in a parent resource.</summary>
@@ -3690,7 +4920,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogExclusion body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Changes one or more properties of an existing exclusion in the _Default sink.</summary>
@@ -3779,7 +5009,10 @@ namespace Google.Apis.Logging.v2
             {
                 this.service = service;
                 Buckets = new BucketsResource(service);
+                LogScopes = new LogScopesResource(service);
                 Operations = new OperationsResource(service);
+                RecentQueries = new RecentQueriesResource(service);
+                SavedQueries = new SavedQueriesResource(service);
             }
 
             /// <summary>Gets the Buckets resource.</summary>
@@ -3797,7 +5030,314 @@ namespace Google.Apis.Logging.v2
                 public BucketsResource(Google.Apis.Services.IClientService service)
                 {
                     this.service = service;
+                    Links = new LinksResource(service);
                     Views = new ViewsResource(service);
+                }
+
+                /// <summary>Gets the Links resource.</summary>
+                public virtual LinksResource Links { get; }
+
+                /// <summary>The "links" collection of methods.</summary>
+                public class LinksResource
+                {
+                    private const string Resource = "links";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public LinksResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Asynchronously creates a linked dataset in BigQuery which makes it possible to use BigQuery to
+                    /// read the logs stored in the log bucket. A log bucket may currently only contain one link.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// Required. The full resource name of the bucket to create a link for.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// </param>
+                    public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.Link body, string parent)
+                    {
+                        return new CreateRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>
+                    /// Asynchronously creates a linked dataset in BigQuery which makes it possible to use BigQuery to
+                    /// read the logs stored in the log bucket. A log bucket may currently only contain one link.
+                    /// </summary>
+                    public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Create request.</summary>
+                        public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.Link body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The full resource name of the bucket to create a link for.
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Required. The ID to use for the link. The link_id can have up to 100 characters. A valid
+                        /// link_id must only have alphanumeric characters and underscores within it.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("linkId", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string LinkId { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.Link Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "create";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+parent}/links";
+
+                        /// <summary>Initializes Create parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^folders/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                            });
+                            RequestParameters.Add("linkId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "linkId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Deletes a link. This will also delete the corresponding BigQuery linked dataset.
+                    /// </summary>
+                    /// <param name="name">
+                    /// Required. The full resource name of the link to delete.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// </param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Deletes a link. This will also delete the corresponding BigQuery linked dataset.
+                    /// </summary>
+                    public class DeleteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The full resource name of the link to delete.
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^folders/[^/]+/locations/[^/]+/buckets/[^/]+/links/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Gets a link.</summary>
+                    /// <param name="name">
+                    /// Required. The resource name of the link:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// </param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>Gets a link.</summary>
+                    public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Link>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The resource name of the link:
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^folders/[^/]+/locations/[^/]+/buckets/[^/]+/links/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Lists links.</summary>
+                    /// <param name="parent">
+                    /// Required. The parent resource whose links are to be listed:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists links.</summary>
+                    public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListLinksResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The parent resource whose links are to be listed:
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>Optional. The maximum number of results to return from this request.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// Optional. If present, then retrieve the next batch of results from the preceding call to
+                        /// this method. pageToken must be the value of nextPageToken from the previous response.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+parent}/links";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^folders/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>Gets the Views resource.</summary>
@@ -3815,6 +5355,135 @@ namespace Google.Apis.Logging.v2
                     public ViewsResource(Google.Apis.Services.IClientService service)
                     {
                         this.service = service;
+                        Logs = new LogsResource(service);
+                    }
+
+                    /// <summary>Gets the Logs resource.</summary>
+                    public virtual LogsResource Logs { get; }
+
+                    /// <summary>The "logs" collection of methods.</summary>
+                    public class LogsResource
+                    {
+                        private const string Resource = "logs";
+
+                        /// <summary>The service which this resource belongs to.</summary>
+                        private readonly Google.Apis.Services.IClientService service;
+
+                        /// <summary>Constructs a new resource.</summary>
+                        public LogsResource(Google.Apis.Services.IClientService service)
+                        {
+                            this.service = service;
+                        }
+
+                        /// <summary>
+                        /// Lists the logs in projects, organizations, folders, or billing accounts. Only logs that have
+                        /// entries are listed.
+                        /// </summary>
+                        /// <param name="parent">
+                        /// Required. The resource name to list logs for: projects/[PROJECT_ID]
+                        /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                        /// </param>
+                        public virtual ListRequest List(string parent)
+                        {
+                            return new ListRequest(this.service, parent);
+                        }
+
+                        /// <summary>
+                        /// Lists the logs in projects, organizations, folders, or billing accounts. Only logs that have
+                        /// entries are listed.
+                        /// </summary>
+                        public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListLogsResponse>
+                        {
+                            /// <summary>Constructs a new List request.</summary>
+                            public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                            {
+                                Parent = parent;
+                                InitParameters();
+                            }
+
+                            /// <summary>
+                            /// Required. The resource name to list logs for: projects/[PROJECT_ID]
+                            /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                            public virtual string Parent { get; private set; }
+
+                            /// <summary>
+                            /// Optional. The maximum number of results to return from this request. Non-positive values
+                            /// are ignored. The presence of nextPageToken in the response indicates that more results
+                            /// might be available.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual System.Nullable<int> PageSize { get; set; }
+
+                            /// <summary>
+                            /// Optional. If present, then retrieve the next batch of results from the preceding call to
+                            /// this method. pageToken must be the value of nextPageToken from the previous response.
+                            /// The values of other method parameters should be identical to those in the previous call.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual string PageToken { get; set; }
+
+                            /// <summary>
+                            /// Optional. List of resource names to list logs for:
+                            /// projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+                            /// organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+                            /// billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+                            /// folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]To
+                            /// support legacy queries, it could also be: projects/[PROJECT_ID]
+                            /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID]
+                            /// folders/[FOLDER_ID]The resource name in the parent field is added to this list.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("resourceNames", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual Google.Apis.Util.Repeatable<string> ResourceNames { get; set; }
+
+                            /// <summary>Gets the method name.</summary>
+                            public override string MethodName => "list";
+
+                            /// <summary>Gets the HTTP method.</summary>
+                            public override string HttpMethod => "GET";
+
+                            /// <summary>Gets the REST path.</summary>
+                            public override string RestPath => "v2/{+parent}/logs";
+
+                            /// <summary>Initializes List parameter list.</summary>
+                            protected override void InitParameters()
+                            {
+                                base.InitParameters();
+                                RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "parent",
+                                    IsRequired = true,
+                                    ParameterType = "path",
+                                    DefaultValue = null,
+                                    Pattern = @"^folders/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                                });
+                                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "pageSize",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "pageToken",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                                RequestParameters.Add("resourceNames", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "resourceNames",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                            }
+                        }
                     }
 
                     /// <summary>
@@ -3828,7 +5497,7 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogView body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -3852,7 +5521,10 @@ namespace Google.Apis.Logging.v2
                         [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Parent { get; private set; }
 
-                        /// <summary>Required. The id to use for this view.</summary>
+                        /// <summary>
+                        /// Required. A client-assigned identifier such as "my-view". Identifiers are limited to 100
+                        /// characters and can include only letters, digits, underscores, and hyphens.
+                        /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("viewId", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual string ViewId { get; set; }
 
@@ -3906,7 +5578,7 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -3955,7 +5627,7 @@ namespace Google.Apis.Logging.v2
                         }
                     }
 
-                    /// <summary>Gets a view on a log bucket..</summary>
+                    /// <summary>Gets a view on a log bucket.</summary>
                     /// <param name="name">
                     /// Required. The resource name of the policy:
                     /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]" For
@@ -3963,10 +5635,10 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
-                    /// <summary>Gets a view on a log bucket..</summary>
+                    /// <summary>Gets a view on a log bucket.</summary>
                     public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogView>
                     {
                         /// <summary>Constructs a new Get request.</summary>
@@ -4008,6 +5680,72 @@ namespace Google.Apis.Logging.v2
                         }
                     }
 
+                    /// <summary>
+                    /// Gets the access control policy for a resource. Returns an empty policy if the resource exists
+                    /// and does not have a policy set.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The resource for which the policy is being requested. See Resource names
+                    /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                    /// </param>
+                    public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.Logging.v2.Data.GetIamPolicyRequest body, string resource)
+                    {
+                        return new GetIamPolicyRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Gets the access control policy for a resource. Returns an empty policy if the resource exists
+                    /// and does not have a policy set.
+                    /// </summary>
+                    public class GetIamPolicyRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Policy>
+                    {
+                        /// <summary>Constructs a new GetIamPolicy request.</summary>
+                        public GetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.GetIamPolicyRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The resource for which the policy is being requested. See Resource names
+                        /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                        /// field.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.GetIamPolicyRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "getIamPolicy";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+resource}:getIamPolicy";
+
+                        /// <summary>Initializes GetIamPolicy parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^folders/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                            });
+                        }
+                    }
+
                     /// <summary>Lists views on a log bucket.</summary>
                     /// <param name="parent">
                     /// Required. The bucket whose views are to be listed:
@@ -4015,7 +5753,7 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists views on a log bucket.</summary>
@@ -4092,10 +5830,10 @@ namespace Google.Apis.Logging.v2
                     }
 
                     /// <summary>
-                    /// Updates a view on a log bucket. This method replaces the following fields in the existing view
-                    /// with values from the new view: filter. If an UNAVAILABLE error is returned, this indicates that
-                    /// system is not in a state where it can update the view. If this occurs, please try again in a few
-                    /// minutes.
+                    /// Updates a view on a log bucket. This method replaces the value of the filter field from the
+                    /// existing view with the corresponding value from the new view. If an UNAVAILABLE error is
+                    /// returned, this indicates that system is not in a state where it can update the view. If this
+                    /// occurs, please try again in a few minutes.
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">
@@ -4105,14 +5843,14 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogView body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>
-                    /// Updates a view on a log bucket. This method replaces the following fields in the existing view
-                    /// with values from the new view: filter. If an UNAVAILABLE error is returned, this indicates that
-                    /// system is not in a state where it can update the view. If this occurs, please try again in a few
-                    /// minutes.
+                    /// Updates a view on a log bucket. This method replaces the value of the filter field from the
+                    /// existing view with the corresponding value from the new view. If an UNAVAILABLE error is
+                    /// returned, this indicates that system is not in a state where it can update the view. If this
+                    /// occurs, please try again in a few minutes.
                     /// </summary>
                     public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogView>
                     {
@@ -4179,6 +5917,142 @@ namespace Google.Apis.Logging.v2
                             });
                         }
                     }
+
+                    /// <summary>
+                    /// Sets the access control policy on the specified resource. Replaces any existing policy.Can
+                    /// return NOT_FOUND, INVALID_ARGUMENT, and PERMISSION_DENIED errors.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The resource for which the policy is being specified. See Resource names
+                    /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                    /// </param>
+                    public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.Logging.v2.Data.SetIamPolicyRequest body, string resource)
+                    {
+                        return new SetIamPolicyRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Sets the access control policy on the specified resource. Replaces any existing policy.Can
+                    /// return NOT_FOUND, INVALID_ARGUMENT, and PERMISSION_DENIED errors.
+                    /// </summary>
+                    public class SetIamPolicyRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Policy>
+                    {
+                        /// <summary>Constructs a new SetIamPolicy request.</summary>
+                        public SetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.SetIamPolicyRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The resource for which the policy is being specified. See Resource names
+                        /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                        /// field.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.SetIamPolicyRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "setIamPolicy";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+resource}:setIamPolicy";
+
+                        /// <summary>Initializes SetIamPolicy parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^folders/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                    /// this will return an empty set of permissions, not a NOT_FOUND error.Note: This operation is
+                    /// designed to be used for building permission-aware UIs and command-line tools, not for
+                    /// authorization checking. This operation may "fail open" without warning.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The resource for which the policy detail is being requested. See Resource names
+                    /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                    /// </param>
+                    public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.Logging.v2.Data.TestIamPermissionsRequest body, string resource)
+                    {
+                        return new TestIamPermissionsRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                    /// this will return an empty set of permissions, not a NOT_FOUND error.Note: This operation is
+                    /// designed to be used for building permission-aware UIs and command-line tools, not for
+                    /// authorization checking. This operation may "fail open" without warning.
+                    /// </summary>
+                    public class TestIamPermissionsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.TestIamPermissionsResponse>
+                    {
+                        /// <summary>Constructs a new TestIamPermissions request.</summary>
+                        public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.TestIamPermissionsRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The resource for which the policy detail is being requested. See Resource names
+                        /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                        /// field.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.TestIamPermissionsRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "testIamPermissions";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+resource}:testIamPermissions";
+
+                        /// <summary>Initializes TestIamPermissions parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^folders/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>
@@ -4192,7 +6066,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogBucket body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -4219,7 +6093,8 @@ namespace Google.Apis.Logging.v2
 
                     /// <summary>
                     /// Required. A client-assigned identifier such as "my-bucket". Identifiers are limited to 100
-                    /// characters and can include only letters, digits, underscores, hyphens, and periods.
+                    /// characters and can include only letters, digits, underscores, hyphens, and periods. Bucket
+                    /// identifiers must start with an alphanumeric character.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("bucketId", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string BucketId { get; set; }
@@ -4263,6 +6138,88 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
+                /// Creates a log bucket asynchronously that can be used to store log entries.After a bucket has been
+                /// created, the bucket's location cannot be changed.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The resource in which to create the log bucket:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For example:"projects/my-project/locations/global"
+                /// </param>
+                public virtual CreateAsyncRequest CreateAsync(Google.Apis.Logging.v2.Data.LogBucket body, string parent)
+                {
+                    return new CreateAsyncRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Creates a log bucket asynchronously that can be used to store log entries.After a bucket has been
+                /// created, the bucket's location cannot be changed.
+                /// </summary>
+                public class CreateAsyncRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new CreateAsync request.</summary>
+                    public CreateAsyncRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogBucket body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource in which to create the log bucket:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For
+                    /// example:"projects/my-project/locations/global"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. A client-assigned identifier such as "my-bucket". Identifiers are limited to 100
+                    /// characters and can include only letters, digits, underscores, hyphens, and periods. Bucket
+                    /// identifiers must start with an alphanumeric character.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("bucketId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string BucketId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogBucket Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "createAsync";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/buckets:createAsync";
+
+                    /// <summary>Initializes CreateAsync parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("bucketId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "bucketId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
                 /// Deletes a log bucket.Changes the bucket's lifecycle_state to the DELETE_REQUESTED state. After 7
                 /// days, the bucket will be purged and all log entries in the bucket will be permanently deleted.
                 /// </summary>
@@ -4276,7 +6233,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -4338,7 +6295,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a log bucket.</summary>
@@ -4397,7 +6354,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists log buckets.</summary>
@@ -4478,9 +6435,7 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
-                /// Updates a log bucket. This method replaces the following fields in the existing bucket with values
-                /// from the new bucket: retention_periodIf the retention period is decreased and the bucket is locked,
-                /// FAILED_PRECONDITION will be returned.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// Updates a log bucket.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
                 /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
                 /// be changed.
                 /// </summary>
@@ -4495,13 +6450,11 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogBucket body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates a log bucket. This method replaces the following fields in the existing bucket with values
-                /// from the new bucket: retention_periodIf the retention period is decreased and the bucket is locked,
-                /// FAILED_PRECONDITION will be returned.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// Updates a log bucket.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
                 /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
                 /// be changed.
                 /// </summary>
@@ -4589,7 +6542,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual UndeleteRequest Undelete(Google.Apis.Logging.v2.Data.UndeleteBucketRequest body, string name)
                 {
-                    return new UndeleteRequest(service, body, name);
+                    return new UndeleteRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -4646,6 +6599,459 @@ namespace Google.Apis.Logging.v2
                         });
                     }
                 }
+
+                /// <summary>
+                /// Updates a log bucket asynchronously.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
+                /// be changed.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. The full resource name of the bucket to update.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+                /// example:"projects/my-project/locations/global/buckets/my-bucket"
+                /// </param>
+                public virtual UpdateAsyncRequest UpdateAsync(Google.Apis.Logging.v2.Data.LogBucket body, string name)
+                {
+                    return new UpdateAsyncRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Updates a log bucket asynchronously.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
+                /// be changed.
+                /// </summary>
+                public class UpdateAsyncRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new UpdateAsync request.</summary>
+                    public UpdateAsyncRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogBucket body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The full resource name of the bucket to update.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+                    /// example:"projects/my-project/locations/global/buckets/my-bucket"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. Field mask that specifies the fields in bucket that need an update. A bucket field
+                    /// will be overwritten if, and only if, it is in the update mask. name and output only fields
+                    /// cannot be updated.For a detailed FieldMask definition, see:
+                    /// https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMaskFor
+                    /// example: updateMask=retention_days
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogBucket Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "updateAsync";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}:updateAsync";
+
+                    /// <summary>Initializes UpdateAsync parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the LogScopes resource.</summary>
+            public virtual LogScopesResource LogScopes { get; }
+
+            /// <summary>The "logScopes" collection of methods.</summary>
+            public class LogScopesResource
+            {
+                private const string Resource = "logScopes";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public LogScopesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a log scope.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent project in which to create the log scope
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For example:"projects/my-project/locations/global"
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogScope body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a log scope.</summary>
+                public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogScope>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogScope body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent project in which to create the log scope
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For
+                    /// example:"projects/my-project/locations/global"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. A client-assigned identifier such as "log-scope". Identifiers are limited to 100
+                    /// characters and can include only letters, digits, underscores, hyphens, and periods. First
+                    /// character has to be alphanumeric.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("logScopeId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string LogScopeId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogScope Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/logScopes";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("logScopeId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "logScopeId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a log scope.</summary>
+                /// <param name="name">
+                /// Required. The resource name of the log scope to delete:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/logScopes/[LOG_SCOPE_ID]" For
+                /// example:"projects/my-project/locations/global/logScopes/my-log-scope"
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a log scope.</summary>
+                public class DeleteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the log scope to delete:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/logScopes/[LOG_SCOPE_ID]" For
+                    /// example:"projects/my-project/locations/global/logScopes/my-log-scope"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+/logScopes/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a log scope.</summary>
+                /// <param name="name">
+                /// Required. The resource name of the log scope:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/logScopes/[LOG_SCOPE_ID]" For
+                /// example:"projects/my-project/locations/global/logScopes/my-log-scope"
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a log scope.</summary>
+                public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogScope>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the log scope:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/logScopes/[LOG_SCOPE_ID]" For
+                    /// example:"projects/my-project/locations/global/logScopes/my-log-scope"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+/logScopes/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists log scopes.</summary>
+                /// <param name="parent">
+                /// Required. The parent resource whose log scopes are to be listed:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists log scopes.</summary>
+                public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListLogScopesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource whose log scopes are to be listed:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The maximum number of results to return from this request.Non-positive values are
+                    /// ignored. The presence of nextPageToken in the response indicates that more results might be
+                    /// available.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If present, then retrieve the next batch of results from the preceding call to this
+                    /// method. pageToken must be the value of nextPageToken from the previous response. The values of
+                    /// other method parameters should be identical to those in the previous call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/logScopes";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates a log scope.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Output only. The resource name of the log scope.Log scopes are only available in the global
+                /// location. For example:projects/my-project/locations/global/logScopes/my-log-scope
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogScope body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates a log scope.</summary>
+                public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogScope>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogScope body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Output only. The resource name of the log scope.Log scopes are only available in the global
+                    /// location. For example:projects/my-project/locations/global/logScopes/my-log-scope
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Field mask that specifies the fields in log_scope that need an update. A field will be
+                    /// overwritten if, and only if, it is in the update mask. name and output only fields cannot be
+                    /// updated.For a detailed FieldMask definition, see
+                    /// https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMaskFor
+                    /// example: updateMask=description
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogScope Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+/logScopes/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Operations resource.</summary>
@@ -4677,7 +7083,7 @@ namespace Google.Apis.Logging.v2
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.Logging.v2.Data.CancelOperationRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -4739,7 +7145,7 @@ namespace Google.Apis.Logging.v2
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -4785,27 +7191,17 @@ namespace Google.Apis.Logging.v2
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding
-                /// to use different resource name schemes, such as users/*/operations. To override the binding, API
-                /// services can add a binding such as "/v1/{name=users/*}/operations" to their service configuration.
-                /// For backwards compatibility, the default name includes the operations collection id, however
-                /// overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns UNIMPLEMENTED.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding
-                /// to use different resource name schemes, such as users/*/operations. To override the binding, API
-                /// services can add a binding such as "/v1/{name=users/*}/operations" to their service configuration.
-                /// For backwards compatibility, the default name includes the operations collection id, however
-                /// overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns UNIMPLEMENTED.
                 /// </summary>
                 public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListOperationsResponse>
                 {
@@ -4881,11 +7277,562 @@ namespace Google.Apis.Logging.v2
                 }
             }
 
+            /// <summary>Gets the RecentQueries resource.</summary>
+            public virtual RecentQueriesResource RecentQueries { get; }
+
+            /// <summary>The "recentQueries" collection of methods.</summary>
+            public class RecentQueriesResource
+            {
+                private const string Resource = "recentQueries";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public RecentQueriesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Lists the RecentQueries that were created by the user making the request.</summary>
+                /// <param name="parent">
+                /// Required. The resource to which the listed queries belong.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For
+                /// example:projects/my-project/locations/us-central1Note: The location portion of the resource must be
+                /// specified, but supplying the character - in place of LOCATION_ID will return all recent queries.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists the RecentQueries that were created by the user making the request.</summary>
+                public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListRecentQueriesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource to which the listed queries belong.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For
+                    /// example:projects/my-project/locations/us-central1Note: The location portion of the resource must
+                    /// be specified, but supplying the character - in place of LOCATION_ID will return all recent
+                    /// queries.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Specifies the type ("Logging" or "OpsAnalytics") of the recent queries to list. The
+                    /// only valid value for this field is one of the two allowable type function calls, which are the
+                    /// following: type("Logging") type("OpsAnalytics")
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. The maximum number of results to return from this request. Non-positive values are
+                    /// ignored. The presence of nextPageToken in the response indicates that more results might be
+                    /// available.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If present, then retrieve the next batch of results from the preceding call to this
+                    /// method. pageToken must be the value of nextPageToken from the previous response. The values of
+                    /// other method parameters should be identical to those in the previous call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/recentQueries";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the SavedQueries resource.</summary>
+            public virtual SavedQueriesResource SavedQueries { get; }
+
+            /// <summary>The "savedQueries" collection of methods.</summary>
+            public class SavedQueriesResource
+            {
+                private const string Resource = "savedQueries";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public SavedQueriesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a new SavedQuery for the user making the request.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource in which to create the saved query:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example: "projects/my-project/locations/global"
+                /// "organizations/123456789/locations/us-central1"
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.SavedQuery body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new SavedQuery for the user making the request.</summary>
+                public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.SavedQuery>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.SavedQuery body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource in which to create the saved query:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example:
+                    /// "projects/my-project/locations/global" "organizations/123456789/locations/us-central1"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The ID to use for the saved query, which will become the final component of the saved
+                    /// query's resource name.If the saved_query_id is not provided, the system will generate an
+                    /// alphanumeric ID.The saved_query_id is limited to 100 characters and can include only the
+                    /// following characters: upper and lower-case alphanumeric characters, underscores, hyphens,
+                    /// periods.First character has to be alphanumeric.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("savedQueryId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string SavedQueryId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.SavedQuery Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/savedQueries";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("savedQueryId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "savedQueryId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes an existing SavedQuery that was created by the user making the request.</summary>
+                /// <param name="name">
+                /// Required. The full resource name of the saved query to delete.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes an existing SavedQuery that was created by the user making the request.</summary>
+                public class DeleteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The full resource name of the saved query to delete.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                    /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+/savedQueries/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Returns all data associated with the requested query.</summary>
+                /// <param name="name">
+                /// Required. The resource name of the saved query.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Returns all data associated with the requested query.</summary>
+                public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.SavedQuery>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the saved query.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                    /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+/savedQueries/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists the SavedQueries that were created by the user making the request.</summary>
+                /// <param name="parent">
+                /// Required. The resource to which the listed queries belong.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example:
+                /// "projects/my-project/locations/us-central1" Note: The locations portion of the resource must be
+                /// specified. To get a list of all saved queries, a wildcard character - can be used for LOCATION_ID,
+                /// for example: "projects/my-project/locations/-"
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists the SavedQueries that were created by the user making the request.</summary>
+                public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListSavedQueriesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource to which the listed queries belong.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example:
+                    /// "projects/my-project/locations/us-central1" Note: The locations portion of the resource must be
+                    /// specified. To get a list of all saved queries, a wildcard character - can be used for
+                    /// LOCATION_ID, for example: "projects/my-project/locations/-"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Specifies the type ("Logging" or "OpsAnalytics") and the visibility (PRIVATE or
+                    /// SHARED) of the saved queries to list. If provided, the filter must contain either the type
+                    /// function or a visibility token, or both. If both are chosen, they can be placed in any order,
+                    /// but they must be joined by the AND operator or the empty character.The two supported type
+                    /// function calls are: type("Logging") type("OpsAnalytics")The two supported visibility tokens are:
+                    /// visibility = PRIVATE visibility = SHAREDFor example:type("Logging") AND visibility = PRIVATE
+                    /// visibility=SHARED type("OpsAnalytics") type("OpsAnalytics)" visibility = PRIVATE visibility =
+                    /// SHARED
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. The maximum number of results to return from this request.Non-positive values are
+                    /// ignored. The presence of nextPageToken in the response indicates that more results might be
+                    /// available.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If present, then retrieve the next batch of results from the preceding call to this
+                    /// method. pageToken must be the value of nextPageToken from the previous response. The values of
+                    /// other method parameters should be identical to those in the previous call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/savedQueries";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates an existing SavedQuery.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Output only. Resource name of the saved query.In the format:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For a list of supported
+                /// locations, see Supported Regions
+                /// (https://cloud.google.com/logging/docs/region-support#bucket-regions)After the saved query is
+                /// created, the location cannot be changed.If the user doesn't provide a QUERY_ID, the system will
+                /// generate an alphanumeric ID.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.SavedQuery body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates an existing SavedQuery.</summary>
+                public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.SavedQuery>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.SavedQuery body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Output only. Resource name of the saved query.In the format:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For a list of supported
+                    /// locations, see Supported Regions
+                    /// (https://cloud.google.com/logging/docs/region-support#bucket-regions)After the saved query is
+                    /// created, the location cannot be changed.If the user doesn't provide a QUERY_ID, the system will
+                    /// generate an alphanumeric ID.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. A non-empty list of fields to change in the existing saved query. Fields are relative
+                    /// to the saved_query and new values for the fields are taken from the corresponding fields in the
+                    /// SavedQuery included in this request. Fields not mentioned in update_mask are not changed and are
+                    /// ignored in the request.To update all mutable fields, specify an update_mask of *.For example, to
+                    /// change the description and query filter text of a saved query, specify an update_mask of
+                    /// "description, query.filter".
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.SavedQuery Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^folders/[^/]+/locations/[^/]+/savedQueries/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets information about a location.</summary>
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -4930,7 +7877,7 @@ namespace Google.Apis.Logging.v2
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -5047,7 +7994,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string logName)
             {
-                return new DeleteRequest(service, logName);
+                return new DeleteRequest(this.service, logName);
             }
 
             /// <summary>
@@ -5104,12 +8051,12 @@ namespace Google.Apis.Logging.v2
             /// listed.
             /// </summary>
             /// <param name="parent">
-            /// Required. The resource name that owns the logs: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
+            /// Required. The resource name to list logs for: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
             /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -5126,8 +8073,8 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
-                /// Required. The resource name that owns the logs: projects/[PROJECT_ID]
-                /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                /// Required. The resource name to list logs for: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
+                /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -5149,13 +8096,14 @@ namespace Google.Apis.Logging.v2
                 public virtual string PageToken { get; set; }
 
                 /// <summary>
-                /// Optional. The resource name that owns the logs:
+                /// Optional. List of resource names to list logs for:
                 /// projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
                 /// organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
                 /// billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
                 /// folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]To support legacy
                 /// queries, it could also be: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
-                /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]The resource name in the parent field is
+                /// added to this list.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resourceNames", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual Google.Apis.Util.Repeatable<string> ResourceNames { get; set; }
@@ -5227,9 +8175,9 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Creates a sink that exports specified log entries to a destination. The export of newly-ingested log
-            /// entries begins immediately, unless the sink's writer_identity is not permitted to write to the
-            /// destination. A sink can export log entries only from the resource owning the sink.
+            /// Creates a sink that exports specified log entries to a destination. The export begins upon ingress,
+            /// unless the sink's writer_identity is not permitted to write to the destination. A sink can export log
+            /// entries only from the resource owning the sink.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
@@ -5239,13 +8187,13 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogSink body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
-            /// Creates a sink that exports specified log entries to a destination. The export of newly-ingested log
-            /// entries begins immediately, unless the sink's writer_identity is not permitted to write to the
-            /// destination. A sink can export log entries only from the resource owning the sink.
+            /// Creates a sink that exports specified log entries to a destination. The export begins upon ingress,
+            /// unless the sink's writer_identity is not permitted to write to the destination. A sink can export log
+            /// entries only from the resource owning the sink.
             /// </summary>
             public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
             {
@@ -5266,13 +8214,23 @@ namespace Google.Apis.Logging.v2
                 public virtual string Parent { get; private set; }
 
                 /// <summary>
+                /// Optional. The service account provided by the caller that will be used to write the log entries. The
+                /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs
+                /// to a log bucket that is in a different project than the sink. When not specified, a Logging service
+                /// account will automatically be generated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string CustomWriterIdentity { get; set; }
+
+                /// <summary>
                 /// Optional. Determines the kind of IAM identity returned as writer_identity in the new sink. If this
                 /// value is omitted or set to false, and if the sink's parent is a project, then the value returned as
                 /// writer_identity is the same group or service account used by Cloud Logging before the addition of
                 /// writer identities to this API. The sink's destination must be in the same project as the sink
                 /// itself.If this field is set to true, or if the sink is owned by a non-project resource such as an
-                /// organization, then the value of writer_identity will be a unique service account used only for
-                /// exports from the new sink. For more information, see writer_identity in LogSink.
+                /// organization, then the value of writer_identity will be a service agent
+                /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) used by the sinks with the
+                /// same parent. For more information, see writer_identity in LogSink.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -5304,6 +8262,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^folders/[^/]+$",
                     });
+                    RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "customWriterIdentity",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                     {
                         Name = "uniqueWriterIdentity",
@@ -5326,7 +8292,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string sinkName)
             {
-                return new DeleteRequest(service, sinkName);
+                return new DeleteRequest(this.service, sinkName);
             }
 
             /// <summary>
@@ -5383,7 +8349,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual GetRequest Get(string sinkName)
             {
-                return new GetRequest(service, sinkName);
+                return new GetRequest(this.service, sinkName);
             }
 
             /// <summary>Gets a sink.</summary>
@@ -5436,7 +8402,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists sinks.</summary>
@@ -5455,6 +8421,16 @@ namespace Google.Apis.Logging.v2
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. A filter expression to constrain the sinks returned. Today, this only supports the
+                /// following strings: '' 'in_scope("ALL")', 'in_scope("ANCESTOR")', 'in_scope("DEFAULT")'.Description
+                /// of scopes below. ALL: Includes all of the sinks which can be returned in any other scope. ANCESTOR:
+                /// Includes intercepting sinks owned by ancestor resources. DEFAULT: Includes sinks owned by
+                /// parent.When the empty string is provided, then the filter 'in_scope("DEFAULT")' is applied.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
 
                 /// <summary>
                 /// Optional. The maximum number of results to return from this request. Non-positive values are
@@ -5493,6 +8469,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^folders/[^/]+$",
                     });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
                     {
                         Name = "pageSize",
@@ -5513,9 +8497,9 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="sinkName">
@@ -5526,13 +8510,13 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogSink body, string sinkName)
             {
-                return new PatchRequest(service, body, sinkName);
+                return new PatchRequest(this.service, body, sinkName);
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
             {
@@ -5555,12 +8539,22 @@ namespace Google.Apis.Logging.v2
                 public virtual string SinkName { get; private set; }
 
                 /// <summary>
+                /// Optional. The service account provided by the caller that will be used to write the log entries. The
+                /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs
+                /// to a log bucket that is in a different project than the sink. When not specified, a Logging service
+                /// account will automatically be generated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string CustomWriterIdentity { get; set; }
+
+                /// <summary>
                 /// Optional. See sinks.create for a description of this field. When updating a sink, the effect of this
                 /// field on the value of writer_identity in the updated sink depends on both the old and new values of
                 /// this field: If the old and new values of this field are both false or both true, then there is no
                 /// change to the sink's writer_identity. If the old value is false and the new value is true, then
-                /// writer_identity is changed to a unique service account. It is an error if the old value is true and
-                /// the new value is set to false or defaulted to false.
+                /// writer_identity is changed to a service agent
+                /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) owned by Cloud Logging. It
+                /// is an error if the old value is true and the new value is set to false or defaulted to false.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -5605,6 +8599,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^folders/[^/]+/sinks/[^/]+$",
                     });
+                    RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "customWriterIdentity",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                     {
                         Name = "uniqueWriterIdentity",
@@ -5625,9 +8627,9 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="sinkName">
@@ -5638,13 +8640,13 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual UpdateRequest Update(Google.Apis.Logging.v2.Data.LogSink body, string sinkName)
             {
-                return new UpdateRequest(service, body, sinkName);
+                return new UpdateRequest(this.service, body, sinkName);
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             public class UpdateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
             {
@@ -5667,12 +8669,22 @@ namespace Google.Apis.Logging.v2
                 public virtual string SinkName { get; private set; }
 
                 /// <summary>
+                /// Optional. The service account provided by the caller that will be used to write the log entries. The
+                /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs
+                /// to a log bucket that is in a different project than the sink. When not specified, a Logging service
+                /// account will automatically be generated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string CustomWriterIdentity { get; set; }
+
+                /// <summary>
                 /// Optional. See sinks.create for a description of this field. When updating a sink, the effect of this
                 /// field on the value of writer_identity in the updated sink depends on both the old and new values of
                 /// this field: If the old and new values of this field are both false or both true, then there is no
                 /// change to the sink's writer_identity. If the old value is false and the new value is true, then
-                /// writer_identity is changed to a unique service account. It is an error if the old value is true and
-                /// the new value is set to false or defaulted to false.
+                /// writer_identity is changed to a service agent
+                /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) owned by Cloud Logging. It
+                /// is an error if the old value is true and the new value is set to false or defaulted to false.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -5717,6 +8729,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^folders/[^/]+/sinks/[^/]+$",
                     });
+                    RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "customWriterIdentity",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                     {
                         Name = "uniqueWriterIdentity",
@@ -5739,26 +8759,26 @@ namespace Google.Apis.Logging.v2
 
         /// <summary>
         /// Gets the Logging CMEK settings for the given resource.Note: CMEK for the Log Router can be configured for
-        /// Google Cloud projects, folders, organizations and billing accounts. Once configured for an organization, it
-        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Logs Router
+        /// Google Cloud projects, folders, organizations, and billing accounts. Once configured for an organization, it
+        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Log Router
         /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
         /// </summary>
         /// <param name="name">
         /// Required. The resource for which to retrieve CMEK settings. "projects/[PROJECT_ID]/cmekSettings"
         /// "organizations/[ORGANIZATION_ID]/cmekSettings" "billingAccounts/[BILLING_ACCOUNT_ID]/cmekSettings"
         /// "folders/[FOLDER_ID]/cmekSettings" For example:"organizations/12345/cmekSettings"Note: CMEK for the Log
-        /// Router can be configured for Google Cloud projects, folders, organizations and billing accounts. Once
+        /// Router can be configured for Google Cloud projects, folders, organizations, and billing accounts. Once
         /// configured for an organization, it applies to all projects and folders in the Google Cloud organization.
         /// </param>
         public virtual GetCmekSettingsRequest GetCmekSettings(string name)
         {
-            return new GetCmekSettingsRequest(service, name);
+            return new GetCmekSettingsRequest(this.service, name);
         }
 
         /// <summary>
         /// Gets the Logging CMEK settings for the given resource.Note: CMEK for the Log Router can be configured for
-        /// Google Cloud projects, folders, organizations and billing accounts. Once configured for an organization, it
-        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Logs Router
+        /// Google Cloud projects, folders, organizations, and billing accounts. Once configured for an organization, it
+        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Log Router
         /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
         /// </summary>
         public class GetCmekSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.CmekSettings>
@@ -5774,7 +8794,7 @@ namespace Google.Apis.Logging.v2
             /// Required. The resource for which to retrieve CMEK settings. "projects/[PROJECT_ID]/cmekSettings"
             /// "organizations/[ORGANIZATION_ID]/cmekSettings" "billingAccounts/[BILLING_ACCOUNT_ID]/cmekSettings"
             /// "folders/[FOLDER_ID]/cmekSettings" For example:"organizations/12345/cmekSettings"Note: CMEK for the Log
-            /// Router can be configured for Google Cloud projects, folders, organizations and billing accounts. Once
+            /// Router can be configured for Google Cloud projects, folders, organizations, and billing accounts. Once
             /// configured for an organization, it applies to all projects and folders in the Google Cloud organization.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -5800,6 +8820,160 @@ namespace Google.Apis.Logging.v2
                     ParameterType = "path",
                     DefaultValue = null,
                     Pattern = @"^folders/[^/]+$",
+                });
+            }
+        }
+
+        /// <summary>
+        /// Gets the settings for the given resource.Note: Settings can be retrieved for Google Cloud projects, folders,
+        /// organizations, and billing accounts.See View default resource settings for Logging
+        /// (https://cloud.google.com/logging/docs/default-settings#view-org-settings) for more information.
+        /// </summary>
+        /// <param name="name">
+        /// Required. The resource for which to retrieve settings. "projects/[PROJECT_ID]/settings"
+        /// "organizations/[ORGANIZATION_ID]/settings" "billingAccounts/[BILLING_ACCOUNT_ID]/settings"
+        /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"Note: Settings can be retrieved for
+        /// Google Cloud projects, folders, organizations, and billing accounts.
+        /// </param>
+        public virtual GetSettingsRequest GetSettings(string name)
+        {
+            return new GetSettingsRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Gets the settings for the given resource.Note: Settings can be retrieved for Google Cloud projects, folders,
+        /// organizations, and billing accounts.See View default resource settings for Logging
+        /// (https://cloud.google.com/logging/docs/default-settings#view-org-settings) for more information.
+        /// </summary>
+        public class GetSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Settings>
+        {
+            /// <summary>Constructs a new GetSettings request.</summary>
+            public GetSettingsRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The resource for which to retrieve settings. "projects/[PROJECT_ID]/settings"
+            /// "organizations/[ORGANIZATION_ID]/settings" "billingAccounts/[BILLING_ACCOUNT_ID]/settings"
+            /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"Note: Settings can be retrieved
+            /// for Google Cloud projects, folders, organizations, and billing accounts.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getSettings";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v2/{+name}/settings";
+
+            /// <summary>Initializes GetSettings parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^folders/[^/]+$",
+                });
+            }
+        }
+
+        /// <summary>
+        /// Updates the settings for the given resource. This method applies to all feature configurations for
+        /// organization and folders.UpdateSettings fails when any of the following are true: The value of
+        /// storage_location either isn't supported by Logging or violates the location OrgPolicy. The
+        /// default_sink_config field is set, but it has an unspecified filter write mode. The value of kms_key_name is
+        /// invalid. The associated service account doesn't have the required roles/cloudkms.cryptoKeyEncrypterDecrypter
+        /// role assigned for the key. Access to the key is disabled.See Configure default settings for organizations
+        /// and folders (https://cloud.google.com/logging/docs/default-settings) for more information.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="name">
+        /// Required. The resource name for the settings to update. "organizations/[ORGANIZATION_ID]/settings"
+        /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"
+        /// </param>
+        public virtual UpdateSettingsRequest UpdateSettings(Google.Apis.Logging.v2.Data.Settings body, string name)
+        {
+            return new UpdateSettingsRequest(this.service, body, name);
+        }
+
+        /// <summary>
+        /// Updates the settings for the given resource. This method applies to all feature configurations for
+        /// organization and folders.UpdateSettings fails when any of the following are true: The value of
+        /// storage_location either isn't supported by Logging or violates the location OrgPolicy. The
+        /// default_sink_config field is set, but it has an unspecified filter write mode. The value of kms_key_name is
+        /// invalid. The associated service account doesn't have the required roles/cloudkms.cryptoKeyEncrypterDecrypter
+        /// role assigned for the key. Access to the key is disabled.See Configure default settings for organizations
+        /// and folders (https://cloud.google.com/logging/docs/default-settings) for more information.
+        /// </summary>
+        public class UpdateSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Settings>
+        {
+            /// <summary>Constructs a new UpdateSettings request.</summary>
+            public UpdateSettingsRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.Settings body, string name) : base(service)
+            {
+                Name = name;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The resource name for the settings to update. "organizations/[ORGANIZATION_ID]/settings"
+            /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>
+            /// Optional. Field mask identifying which fields from settings should be updated. A field will be
+            /// overwritten if and only if it is in the update mask. Output only fields cannot be updated.See FieldMask
+            /// for more information.For example: "updateMask=kmsKeyName"
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual object UpdateMask { get; set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Logging.v2.Data.Settings Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "updateSettings";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "PATCH";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v2/{+name}/settings";
+
+            /// <summary>Initializes UpdateSettings parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^folders/[^/]+$",
+                });
+                RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "updateMask",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
                 });
             }
         }
@@ -5836,7 +9010,310 @@ namespace Google.Apis.Logging.v2
             public BucketsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                Links = new LinksResource(service);
                 Views = new ViewsResource(service);
+            }
+
+            /// <summary>Gets the Links resource.</summary>
+            public virtual LinksResource Links { get; }
+
+            /// <summary>The "links" collection of methods.</summary>
+            public class LinksResource
+            {
+                private const string Resource = "links";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public LinksResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Asynchronously creates a linked dataset in BigQuery which makes it possible to use BigQuery to read
+                /// the logs stored in the log bucket. A log bucket may currently only contain one link.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The full resource name of the bucket to create a link for.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.Link body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Asynchronously creates a linked dataset in BigQuery which makes it possible to use BigQuery to read
+                /// the logs stored in the log bucket. A log bucket may currently only contain one link.
+                /// </summary>
+                public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.Link body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The full resource name of the bucket to create a link for.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. The ID to use for the link. The link_id can have up to 100 characters. A valid link_id
+                    /// must only have alphanumeric characters and underscores within it.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("linkId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string LinkId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.Link Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/links";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^[^/]+/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                        });
+                        RequestParameters.Add("linkId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "linkId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a link. This will also delete the corresponding BigQuery linked dataset.</summary>
+                /// <param name="name">
+                /// Required. The full resource name of the link to delete.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a link. This will also delete the corresponding BigQuery linked dataset.</summary>
+                public class DeleteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The full resource name of the link to delete.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^[^/]+/[^/]+/locations/[^/]+/buckets/[^/]+/links/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a link.</summary>
+                /// <param name="name">
+                /// Required. The resource name of the link:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a link.</summary>
+                public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Link>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the link:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^[^/]+/[^/]+/locations/[^/]+/buckets/[^/]+/links/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists links.</summary>
+                /// <param name="parent">
+                /// Required. The parent resource whose links are to be listed:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists links.</summary>
+                public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListLinksResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource whose links are to be listed:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Optional. The maximum number of results to return from this request.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If present, then retrieve the next batch of results from the preceding call to this
+                    /// method. pageToken must be the value of nextPageToken from the previous response.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/links";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^[^/]+/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Views resource.</summary>
@@ -5867,7 +9344,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogView body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -5891,7 +9368,10 @@ namespace Google.Apis.Logging.v2
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
 
-                    /// <summary>Required. The id to use for this view.</summary>
+                    /// <summary>
+                    /// Required. A client-assigned identifier such as "my-view". Identifiers are limited to 100
+                    /// characters and can include only letters, digits, underscores, and hyphens.
+                    /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("viewId", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string ViewId { get; set; }
 
@@ -5944,7 +9424,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -5992,7 +9472,7 @@ namespace Google.Apis.Logging.v2
                     }
                 }
 
-                /// <summary>Gets a view on a log bucket..</summary>
+                /// <summary>Gets a view on a log bucket.</summary>
                 /// <param name="name">
                 /// Required. The resource name of the policy:
                 /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]" For
@@ -6000,10 +9480,10 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
-                /// <summary>Gets a view on a log bucket..</summary>
+                /// <summary>Gets a view on a log bucket.</summary>
                 public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogView>
                 {
                     /// <summary>Constructs a new Get request.</summary>
@@ -6045,6 +9525,71 @@ namespace Google.Apis.Logging.v2
                     }
                 }
 
+                /// <summary>
+                /// Gets the access control policy for a resource. Returns an empty policy if the resource exists and
+                /// does not have a policy set.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy is being requested. See Resource names
+                /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                /// </param>
+                public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.Logging.v2.Data.GetIamPolicyRequest body, string resource)
+                {
+                    return new GetIamPolicyRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Gets the access control policy for a resource. Returns an empty policy if the resource exists and
+                /// does not have a policy set.
+                /// </summary>
+                public class GetIamPolicyRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Policy>
+                {
+                    /// <summary>Constructs a new GetIamPolicy request.</summary>
+                    public GetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.GetIamPolicyRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy is being requested. See Resource names
+                    /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.GetIamPolicyRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getIamPolicy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+resource}:getIamPolicy";
+
+                    /// <summary>Initializes GetIamPolicy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^[^/]+/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                        });
+                    }
+                }
+
                 /// <summary>Lists views on a log bucket.</summary>
                 /// <param name="parent">
                 /// Required. The bucket whose views are to be listed:
@@ -6052,7 +9597,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists views on a log bucket.</summary>
@@ -6129,9 +9674,10 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
-                /// Updates a view on a log bucket. This method replaces the following fields in the existing view with
-                /// values from the new view: filter. If an UNAVAILABLE error is returned, this indicates that system is
-                /// not in a state where it can update the view. If this occurs, please try again in a few minutes.
+                /// Updates a view on a log bucket. This method replaces the value of the filter field from the existing
+                /// view with the corresponding value from the new view. If an UNAVAILABLE error is returned, this
+                /// indicates that system is not in a state where it can update the view. If this occurs, please try
+                /// again in a few minutes.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -6141,13 +9687,14 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogView body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates a view on a log bucket. This method replaces the following fields in the existing view with
-                /// values from the new view: filter. If an UNAVAILABLE error is returned, this indicates that system is
-                /// not in a state where it can update the view. If this occurs, please try again in a few minutes.
+                /// Updates a view on a log bucket. This method replaces the value of the filter field from the existing
+                /// view with the corresponding value from the new view. If an UNAVAILABLE error is returned, this
+                /// indicates that system is not in a state where it can update the view. If this occurs, please try
+                /// again in a few minutes.
                 /// </summary>
                 public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogView>
                 {
@@ -6214,6 +9761,140 @@ namespace Google.Apis.Logging.v2
                         });
                     }
                 }
+
+                /// <summary>
+                /// Sets the access control policy on the specified resource. Replaces any existing policy.Can return
+                /// NOT_FOUND, INVALID_ARGUMENT, and PERMISSION_DENIED errors.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy is being specified. See Resource names
+                /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                /// </param>
+                public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.Logging.v2.Data.SetIamPolicyRequest body, string resource)
+                {
+                    return new SetIamPolicyRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Sets the access control policy on the specified resource. Replaces any existing policy.Can return
+                /// NOT_FOUND, INVALID_ARGUMENT, and PERMISSION_DENIED errors.
+                /// </summary>
+                public class SetIamPolicyRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Policy>
+                {
+                    /// <summary>Constructs a new SetIamPolicy request.</summary>
+                    public SetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.SetIamPolicyRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy is being specified. See Resource names
+                    /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.SetIamPolicyRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "setIamPolicy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+resource}:setIamPolicy";
+
+                    /// <summary>Initializes SetIamPolicy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^[^/]+/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                /// this will return an empty set of permissions, not a NOT_FOUND error.Note: This operation is designed
+                /// to be used for building permission-aware UIs and command-line tools, not for authorization checking.
+                /// This operation may "fail open" without warning.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy detail is being requested. See Resource names
+                /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                /// </param>
+                public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.Logging.v2.Data.TestIamPermissionsRequest body, string resource)
+                {
+                    return new TestIamPermissionsRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                /// this will return an empty set of permissions, not a NOT_FOUND error.Note: This operation is designed
+                /// to be used for building permission-aware UIs and command-line tools, not for authorization checking.
+                /// This operation may "fail open" without warning.
+                /// </summary>
+                public class TestIamPermissionsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.TestIamPermissionsResponse>
+                {
+                    /// <summary>Constructs a new TestIamPermissions request.</summary>
+                    public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.TestIamPermissionsRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy detail is being requested. See Resource names
+                    /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.TestIamPermissionsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "testIamPermissions";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+resource}:testIamPermissions";
+
+                    /// <summary>Initializes TestIamPermissions parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^[^/]+/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                        });
+                    }
+                }
             }
 
             /// <summary>
@@ -6227,7 +9908,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogBucket body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -6253,7 +9934,8 @@ namespace Google.Apis.Logging.v2
 
                 /// <summary>
                 /// Required. A client-assigned identifier such as "my-bucket". Identifiers are limited to 100
-                /// characters and can include only letters, digits, underscores, hyphens, and periods.
+                /// characters and can include only letters, digits, underscores, hyphens, and periods. Bucket
+                /// identifiers must start with an alphanumeric character.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("bucketId", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string BucketId { get; set; }
@@ -6297,6 +9979,87 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
+            /// Creates a log bucket asynchronously that can be used to store log entries.After a bucket has been
+            /// created, the bucket's location cannot be changed.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. The resource in which to create the log bucket:
+            /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For example:"projects/my-project/locations/global"
+            /// </param>
+            public virtual CreateAsyncRequest CreateAsync(Google.Apis.Logging.v2.Data.LogBucket body, string parent)
+            {
+                return new CreateAsyncRequest(this.service, body, parent);
+            }
+
+            /// <summary>
+            /// Creates a log bucket asynchronously that can be used to store log entries.After a bucket has been
+            /// created, the bucket's location cannot be changed.
+            /// </summary>
+            public class CreateAsyncRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+            {
+                /// <summary>Constructs a new CreateAsync request.</summary>
+                public CreateAsyncRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogBucket body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource in which to create the log bucket:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For example:"projects/my-project/locations/global"
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Required. A client-assigned identifier such as "my-bucket". Identifiers are limited to 100
+                /// characters and can include only letters, digits, underscores, hyphens, and periods. Bucket
+                /// identifiers must start with an alphanumeric character.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("bucketId", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string BucketId { get; set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Logging.v2.Data.LogBucket Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "createAsync";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v2/{+parent}/buckets:createAsync";
+
+                /// <summary>Initializes CreateAsync parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^[^/]+/[^/]+/locations/[^/]+$",
+                    });
+                    RequestParameters.Add("bucketId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "bucketId",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>
             /// Deletes a log bucket.Changes the bucket's lifecycle_state to the DELETE_REQUESTED state. After 7 days,
             /// the bucket will be purged and all log entries in the bucket will be permanently deleted.
             /// </summary>
@@ -6310,7 +10073,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -6372,7 +10135,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a log bucket.</summary>
@@ -6431,7 +10194,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists log buckets.</summary>
@@ -6512,11 +10275,8 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Updates a log bucket. This method replaces the following fields in the existing bucket with values from
-            /// the new bucket: retention_periodIf the retention period is decreased and the bucket is locked,
-            /// FAILED_PRECONDITION will be returned.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
-            /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot be
-            /// changed.
+            /// Updates a log bucket.If the bucket has a lifecycle_state of DELETE_REQUESTED, then FAILED_PRECONDITION
+            /// will be returned.After a bucket has been created, the bucket's location cannot be changed.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -6529,15 +10289,12 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogBucket body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Updates a log bucket. This method replaces the following fields in the existing bucket with values from
-            /// the new bucket: retention_periodIf the retention period is decreased and the bucket is locked,
-            /// FAILED_PRECONDITION will be returned.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
-            /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot be
-            /// changed.
+            /// Updates a log bucket.If the bucket has a lifecycle_state of DELETE_REQUESTED, then FAILED_PRECONDITION
+            /// will be returned.After a bucket has been created, the bucket's location cannot be changed.
             /// </summary>
             public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogBucket>
             {
@@ -6623,7 +10380,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual UndeleteRequest Undelete(Google.Apis.Logging.v2.Data.UndeleteBucketRequest body, string name)
             {
-                return new UndeleteRequest(service, body, name);
+                return new UndeleteRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -6680,6 +10437,99 @@ namespace Google.Apis.Logging.v2
                     });
                 }
             }
+
+            /// <summary>
+            /// Updates a log bucket asynchronously.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+            /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot be
+            /// changed.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The full resource name of the bucket to update.
+            /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+            /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+            /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+            /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+            /// example:"projects/my-project/locations/global/buckets/my-bucket"
+            /// </param>
+            public virtual UpdateAsyncRequest UpdateAsync(Google.Apis.Logging.v2.Data.LogBucket body, string name)
+            {
+                return new UpdateAsyncRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Updates a log bucket asynchronously.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+            /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot be
+            /// changed.
+            /// </summary>
+            public class UpdateAsyncRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+            {
+                /// <summary>Constructs a new UpdateAsync request.</summary>
+                public UpdateAsyncRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogBucket body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The full resource name of the bucket to update.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+                /// example:"projects/my-project/locations/global/buckets/my-bucket"
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>
+                /// Required. Field mask that specifies the fields in bucket that need an update. A bucket field will be
+                /// overwritten if, and only if, it is in the update mask. name and output only fields cannot be
+                /// updated.For a detailed FieldMask definition, see:
+                /// https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMaskFor
+                /// example: updateMask=retention_days
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual object UpdateMask { get; set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Logging.v2.Data.LogBucket Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "updateAsync";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v2/{+name}:updateAsync";
+
+                /// <summary>Initializes UpdateAsync parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^[^/]+/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                    });
+                    RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "updateMask",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
         }
 
         /// <summary>Gets the Operations resource.</summary>
@@ -6711,7 +10561,7 @@ namespace Google.Apis.Logging.v2
             /// <param name="name">The name of the operation resource to be cancelled.</param>
             public virtual CancelRequest Cancel(Google.Apis.Logging.v2.Data.CancelOperationRequest body, string name)
             {
-                return new CancelRequest(service, body, name);
+                return new CancelRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -6773,7 +10623,7 @@ namespace Google.Apis.Logging.v2
             /// <param name="name">The name of the operation resource.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -6819,25 +10669,17 @@ namespace Google.Apis.Logging.v2
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding to
-            /// use different resource name schemes, such as users/*/operations. To override the binding, API services
-            /// can add a binding such as "/v1/{name=users/*}/operations" to their service configuration. For backwards
-            /// compatibility, the default name includes the operations collection id, however overriding users must
-            /// ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns UNIMPLEMENTED.
             /// </summary>
             /// <param name="name">The name of the operation's parent resource.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding to
-            /// use different resource name schemes, such as users/*/operations. To override the binding, API services
-            /// can add a binding such as "/v1/{name=users/*}/operations" to their service configuration. For backwards
-            /// compatibility, the default name includes the operations collection id, however overriding users must
-            /// ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns UNIMPLEMENTED.
             /// </summary>
             public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListOperationsResponse>
             {
@@ -6917,7 +10759,7 @@ namespace Google.Apis.Logging.v2
         /// <param name="name">Resource name for the location.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Gets information about a location.</summary>
@@ -6962,7 +10804,7 @@ namespace Google.Apis.Logging.v2
         /// <param name="name">The resource that owns the locations collection, if applicable.</param>
         public virtual ListRequest List(string name)
         {
-            return new ListRequest(service, name);
+            return new ListRequest(this.service, name);
         }
 
         /// <summary>Lists information about the supported locations for this service.</summary>
@@ -7074,7 +10916,7 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual DeleteRequest Delete(string logName)
         {
-            return new DeleteRequest(service, logName);
+            return new DeleteRequest(this.service, logName);
         }
 
         /// <summary>
@@ -7130,12 +10972,12 @@ namespace Google.Apis.Logging.v2
         /// listed.
         /// </summary>
         /// <param name="parent">
-        /// Required. The resource name that owns the logs: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
+        /// Required. The resource name to list logs for: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
         /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
         /// </param>
         public virtual ListRequest List(string parent)
         {
-            return new ListRequest(service, parent);
+            return new ListRequest(this.service, parent);
         }
 
         /// <summary>
@@ -7152,7 +10994,7 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Required. The resource name that owns the logs: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
+            /// Required. The resource name to list logs for: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
             /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
@@ -7174,13 +11016,14 @@ namespace Google.Apis.Logging.v2
             public virtual string PageToken { get; set; }
 
             /// <summary>
-            /// Optional. The resource name that owns the logs:
+            /// Optional. List of resource names to list logs for:
             /// projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
             /// organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
             /// billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
             /// folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]To support legacy
             /// queries, it could also be: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
-            /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+            /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]The resource name in the parent field is added
+            /// to this list.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resourceNames", Google.Apis.Util.RequestParameterType.Query)]
             public virtual Google.Apis.Util.Repeatable<string> ResourceNames { get; set; }
@@ -7251,7 +11094,7 @@ namespace Google.Apis.Logging.v2
         /// <summary>Lists the descriptors for monitored resource types used by Logging.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists the descriptors for monitored resource types used by Logging.</summary>
@@ -7358,7 +11201,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogExclusion body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -7424,7 +11267,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes an exclusion in the _Default sink.</summary>
@@ -7482,7 +11325,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the description of an exclusion in the _Default sink.</summary>
@@ -7537,7 +11380,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all the exclusions on the _Default sink in a parent resource.</summary>
@@ -7625,7 +11468,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogExclusion body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Changes one or more properties of an existing exclusion in the _Default sink.</summary>
@@ -7714,7 +11557,10 @@ namespace Google.Apis.Logging.v2
             {
                 this.service = service;
                 Buckets = new BucketsResource(service);
+                LogScopes = new LogScopesResource(service);
                 Operations = new OperationsResource(service);
+                RecentQueries = new RecentQueriesResource(service);
+                SavedQueries = new SavedQueriesResource(service);
             }
 
             /// <summary>Gets the Buckets resource.</summary>
@@ -7732,7 +11578,314 @@ namespace Google.Apis.Logging.v2
                 public BucketsResource(Google.Apis.Services.IClientService service)
                 {
                     this.service = service;
+                    Links = new LinksResource(service);
                     Views = new ViewsResource(service);
+                }
+
+                /// <summary>Gets the Links resource.</summary>
+                public virtual LinksResource Links { get; }
+
+                /// <summary>The "links" collection of methods.</summary>
+                public class LinksResource
+                {
+                    private const string Resource = "links";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public LinksResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Asynchronously creates a linked dataset in BigQuery which makes it possible to use BigQuery to
+                    /// read the logs stored in the log bucket. A log bucket may currently only contain one link.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// Required. The full resource name of the bucket to create a link for.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// </param>
+                    public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.Link body, string parent)
+                    {
+                        return new CreateRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>
+                    /// Asynchronously creates a linked dataset in BigQuery which makes it possible to use BigQuery to
+                    /// read the logs stored in the log bucket. A log bucket may currently only contain one link.
+                    /// </summary>
+                    public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Create request.</summary>
+                        public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.Link body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The full resource name of the bucket to create a link for.
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Required. The ID to use for the link. The link_id can have up to 100 characters. A valid
+                        /// link_id must only have alphanumeric characters and underscores within it.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("linkId", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string LinkId { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.Link Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "create";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+parent}/links";
+
+                        /// <summary>Initializes Create parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^organizations/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                            });
+                            RequestParameters.Add("linkId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "linkId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Deletes a link. This will also delete the corresponding BigQuery linked dataset.
+                    /// </summary>
+                    /// <param name="name">
+                    /// Required. The full resource name of the link to delete.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// </param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Deletes a link. This will also delete the corresponding BigQuery linked dataset.
+                    /// </summary>
+                    public class DeleteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The full resource name of the link to delete.
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^organizations/[^/]+/locations/[^/]+/buckets/[^/]+/links/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Gets a link.</summary>
+                    /// <param name="name">
+                    /// Required. The resource name of the link:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// </param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>Gets a link.</summary>
+                    public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Link>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The resource name of the link:
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^organizations/[^/]+/locations/[^/]+/buckets/[^/]+/links/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Lists links.</summary>
+                    /// <param name="parent">
+                    /// Required. The parent resource whose links are to be listed:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists links.</summary>
+                    public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListLinksResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The parent resource whose links are to be listed:
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>Optional. The maximum number of results to return from this request.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// Optional. If present, then retrieve the next batch of results from the preceding call to
+                        /// this method. pageToken must be the value of nextPageToken from the previous response.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+parent}/links";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^organizations/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>Gets the Views resource.</summary>
@@ -7750,6 +11903,135 @@ namespace Google.Apis.Logging.v2
                     public ViewsResource(Google.Apis.Services.IClientService service)
                     {
                         this.service = service;
+                        Logs = new LogsResource(service);
+                    }
+
+                    /// <summary>Gets the Logs resource.</summary>
+                    public virtual LogsResource Logs { get; }
+
+                    /// <summary>The "logs" collection of methods.</summary>
+                    public class LogsResource
+                    {
+                        private const string Resource = "logs";
+
+                        /// <summary>The service which this resource belongs to.</summary>
+                        private readonly Google.Apis.Services.IClientService service;
+
+                        /// <summary>Constructs a new resource.</summary>
+                        public LogsResource(Google.Apis.Services.IClientService service)
+                        {
+                            this.service = service;
+                        }
+
+                        /// <summary>
+                        /// Lists the logs in projects, organizations, folders, or billing accounts. Only logs that have
+                        /// entries are listed.
+                        /// </summary>
+                        /// <param name="parent">
+                        /// Required. The resource name to list logs for: projects/[PROJECT_ID]
+                        /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                        /// </param>
+                        public virtual ListRequest List(string parent)
+                        {
+                            return new ListRequest(this.service, parent);
+                        }
+
+                        /// <summary>
+                        /// Lists the logs in projects, organizations, folders, or billing accounts. Only logs that have
+                        /// entries are listed.
+                        /// </summary>
+                        public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListLogsResponse>
+                        {
+                            /// <summary>Constructs a new List request.</summary>
+                            public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                            {
+                                Parent = parent;
+                                InitParameters();
+                            }
+
+                            /// <summary>
+                            /// Required. The resource name to list logs for: projects/[PROJECT_ID]
+                            /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                            public virtual string Parent { get; private set; }
+
+                            /// <summary>
+                            /// Optional. The maximum number of results to return from this request. Non-positive values
+                            /// are ignored. The presence of nextPageToken in the response indicates that more results
+                            /// might be available.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual System.Nullable<int> PageSize { get; set; }
+
+                            /// <summary>
+                            /// Optional. If present, then retrieve the next batch of results from the preceding call to
+                            /// this method. pageToken must be the value of nextPageToken from the previous response.
+                            /// The values of other method parameters should be identical to those in the previous call.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual string PageToken { get; set; }
+
+                            /// <summary>
+                            /// Optional. List of resource names to list logs for:
+                            /// projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+                            /// organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+                            /// billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+                            /// folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]To
+                            /// support legacy queries, it could also be: projects/[PROJECT_ID]
+                            /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID]
+                            /// folders/[FOLDER_ID]The resource name in the parent field is added to this list.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("resourceNames", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual Google.Apis.Util.Repeatable<string> ResourceNames { get; set; }
+
+                            /// <summary>Gets the method name.</summary>
+                            public override string MethodName => "list";
+
+                            /// <summary>Gets the HTTP method.</summary>
+                            public override string HttpMethod => "GET";
+
+                            /// <summary>Gets the REST path.</summary>
+                            public override string RestPath => "v2/{+parent}/logs";
+
+                            /// <summary>Initializes List parameter list.</summary>
+                            protected override void InitParameters()
+                            {
+                                base.InitParameters();
+                                RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "parent",
+                                    IsRequired = true,
+                                    ParameterType = "path",
+                                    DefaultValue = null,
+                                    Pattern = @"^organizations/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                                });
+                                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "pageSize",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "pageToken",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                                RequestParameters.Add("resourceNames", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "resourceNames",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                            }
+                        }
                     }
 
                     /// <summary>
@@ -7763,7 +12045,7 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogView body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -7787,7 +12069,10 @@ namespace Google.Apis.Logging.v2
                         [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Parent { get; private set; }
 
-                        /// <summary>Required. The id to use for this view.</summary>
+                        /// <summary>
+                        /// Required. A client-assigned identifier such as "my-view". Identifiers are limited to 100
+                        /// characters and can include only letters, digits, underscores, and hyphens.
+                        /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("viewId", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual string ViewId { get; set; }
 
@@ -7841,7 +12126,7 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -7890,7 +12175,7 @@ namespace Google.Apis.Logging.v2
                         }
                     }
 
-                    /// <summary>Gets a view on a log bucket..</summary>
+                    /// <summary>Gets a view on a log bucket.</summary>
                     /// <param name="name">
                     /// Required. The resource name of the policy:
                     /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]" For
@@ -7898,10 +12183,10 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
-                    /// <summary>Gets a view on a log bucket..</summary>
+                    /// <summary>Gets a view on a log bucket.</summary>
                     public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogView>
                     {
                         /// <summary>Constructs a new Get request.</summary>
@@ -7943,6 +12228,72 @@ namespace Google.Apis.Logging.v2
                         }
                     }
 
+                    /// <summary>
+                    /// Gets the access control policy for a resource. Returns an empty policy if the resource exists
+                    /// and does not have a policy set.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The resource for which the policy is being requested. See Resource names
+                    /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                    /// </param>
+                    public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.Logging.v2.Data.GetIamPolicyRequest body, string resource)
+                    {
+                        return new GetIamPolicyRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Gets the access control policy for a resource. Returns an empty policy if the resource exists
+                    /// and does not have a policy set.
+                    /// </summary>
+                    public class GetIamPolicyRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Policy>
+                    {
+                        /// <summary>Constructs a new GetIamPolicy request.</summary>
+                        public GetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.GetIamPolicyRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The resource for which the policy is being requested. See Resource names
+                        /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                        /// field.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.GetIamPolicyRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "getIamPolicy";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+resource}:getIamPolicy";
+
+                        /// <summary>Initializes GetIamPolicy parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^organizations/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                            });
+                        }
+                    }
+
                     /// <summary>Lists views on a log bucket.</summary>
                     /// <param name="parent">
                     /// Required. The bucket whose views are to be listed:
@@ -7950,7 +12301,7 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists views on a log bucket.</summary>
@@ -8027,10 +12378,10 @@ namespace Google.Apis.Logging.v2
                     }
 
                     /// <summary>
-                    /// Updates a view on a log bucket. This method replaces the following fields in the existing view
-                    /// with values from the new view: filter. If an UNAVAILABLE error is returned, this indicates that
-                    /// system is not in a state where it can update the view. If this occurs, please try again in a few
-                    /// minutes.
+                    /// Updates a view on a log bucket. This method replaces the value of the filter field from the
+                    /// existing view with the corresponding value from the new view. If an UNAVAILABLE error is
+                    /// returned, this indicates that system is not in a state where it can update the view. If this
+                    /// occurs, please try again in a few minutes.
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">
@@ -8040,14 +12391,14 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogView body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>
-                    /// Updates a view on a log bucket. This method replaces the following fields in the existing view
-                    /// with values from the new view: filter. If an UNAVAILABLE error is returned, this indicates that
-                    /// system is not in a state where it can update the view. If this occurs, please try again in a few
-                    /// minutes.
+                    /// Updates a view on a log bucket. This method replaces the value of the filter field from the
+                    /// existing view with the corresponding value from the new view. If an UNAVAILABLE error is
+                    /// returned, this indicates that system is not in a state where it can update the view. If this
+                    /// occurs, please try again in a few minutes.
                     /// </summary>
                     public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogView>
                     {
@@ -8114,6 +12465,142 @@ namespace Google.Apis.Logging.v2
                             });
                         }
                     }
+
+                    /// <summary>
+                    /// Sets the access control policy on the specified resource. Replaces any existing policy.Can
+                    /// return NOT_FOUND, INVALID_ARGUMENT, and PERMISSION_DENIED errors.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The resource for which the policy is being specified. See Resource names
+                    /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                    /// </param>
+                    public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.Logging.v2.Data.SetIamPolicyRequest body, string resource)
+                    {
+                        return new SetIamPolicyRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Sets the access control policy on the specified resource. Replaces any existing policy.Can
+                    /// return NOT_FOUND, INVALID_ARGUMENT, and PERMISSION_DENIED errors.
+                    /// </summary>
+                    public class SetIamPolicyRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Policy>
+                    {
+                        /// <summary>Constructs a new SetIamPolicy request.</summary>
+                        public SetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.SetIamPolicyRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The resource for which the policy is being specified. See Resource names
+                        /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                        /// field.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.SetIamPolicyRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "setIamPolicy";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+resource}:setIamPolicy";
+
+                        /// <summary>Initializes SetIamPolicy parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^organizations/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                    /// this will return an empty set of permissions, not a NOT_FOUND error.Note: This operation is
+                    /// designed to be used for building permission-aware UIs and command-line tools, not for
+                    /// authorization checking. This operation may "fail open" without warning.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The resource for which the policy detail is being requested. See Resource names
+                    /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                    /// </param>
+                    public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.Logging.v2.Data.TestIamPermissionsRequest body, string resource)
+                    {
+                        return new TestIamPermissionsRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                    /// this will return an empty set of permissions, not a NOT_FOUND error.Note: This operation is
+                    /// designed to be used for building permission-aware UIs and command-line tools, not for
+                    /// authorization checking. This operation may "fail open" without warning.
+                    /// </summary>
+                    public class TestIamPermissionsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.TestIamPermissionsResponse>
+                    {
+                        /// <summary>Constructs a new TestIamPermissions request.</summary>
+                        public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.TestIamPermissionsRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The resource for which the policy detail is being requested. See Resource names
+                        /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                        /// field.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.TestIamPermissionsRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "testIamPermissions";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+resource}:testIamPermissions";
+
+                        /// <summary>Initializes TestIamPermissions parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^organizations/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>
@@ -8127,7 +12614,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogBucket body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -8154,7 +12641,8 @@ namespace Google.Apis.Logging.v2
 
                     /// <summary>
                     /// Required. A client-assigned identifier such as "my-bucket". Identifiers are limited to 100
-                    /// characters and can include only letters, digits, underscores, hyphens, and periods.
+                    /// characters and can include only letters, digits, underscores, hyphens, and periods. Bucket
+                    /// identifiers must start with an alphanumeric character.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("bucketId", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string BucketId { get; set; }
@@ -8198,6 +12686,88 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
+                /// Creates a log bucket asynchronously that can be used to store log entries.After a bucket has been
+                /// created, the bucket's location cannot be changed.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The resource in which to create the log bucket:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For example:"projects/my-project/locations/global"
+                /// </param>
+                public virtual CreateAsyncRequest CreateAsync(Google.Apis.Logging.v2.Data.LogBucket body, string parent)
+                {
+                    return new CreateAsyncRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Creates a log bucket asynchronously that can be used to store log entries.After a bucket has been
+                /// created, the bucket's location cannot be changed.
+                /// </summary>
+                public class CreateAsyncRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new CreateAsync request.</summary>
+                    public CreateAsyncRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogBucket body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource in which to create the log bucket:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For
+                    /// example:"projects/my-project/locations/global"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. A client-assigned identifier such as "my-bucket". Identifiers are limited to 100
+                    /// characters and can include only letters, digits, underscores, hyphens, and periods. Bucket
+                    /// identifiers must start with an alphanumeric character.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("bucketId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string BucketId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogBucket Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "createAsync";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/buckets:createAsync";
+
+                    /// <summary>Initializes CreateAsync parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("bucketId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "bucketId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
                 /// Deletes a log bucket.Changes the bucket's lifecycle_state to the DELETE_REQUESTED state. After 7
                 /// days, the bucket will be purged and all log entries in the bucket will be permanently deleted.
                 /// </summary>
@@ -8211,7 +12781,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -8273,7 +12843,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a log bucket.</summary>
@@ -8332,7 +12902,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists log buckets.</summary>
@@ -8413,9 +12983,7 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
-                /// Updates a log bucket. This method replaces the following fields in the existing bucket with values
-                /// from the new bucket: retention_periodIf the retention period is decreased and the bucket is locked,
-                /// FAILED_PRECONDITION will be returned.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// Updates a log bucket.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
                 /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
                 /// be changed.
                 /// </summary>
@@ -8430,13 +12998,11 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogBucket body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates a log bucket. This method replaces the following fields in the existing bucket with values
-                /// from the new bucket: retention_periodIf the retention period is decreased and the bucket is locked,
-                /// FAILED_PRECONDITION will be returned.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// Updates a log bucket.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
                 /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
                 /// be changed.
                 /// </summary>
@@ -8524,7 +13090,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual UndeleteRequest Undelete(Google.Apis.Logging.v2.Data.UndeleteBucketRequest body, string name)
                 {
-                    return new UndeleteRequest(service, body, name);
+                    return new UndeleteRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -8581,6 +13147,459 @@ namespace Google.Apis.Logging.v2
                         });
                     }
                 }
+
+                /// <summary>
+                /// Updates a log bucket asynchronously.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
+                /// be changed.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. The full resource name of the bucket to update.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+                /// example:"projects/my-project/locations/global/buckets/my-bucket"
+                /// </param>
+                public virtual UpdateAsyncRequest UpdateAsync(Google.Apis.Logging.v2.Data.LogBucket body, string name)
+                {
+                    return new UpdateAsyncRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Updates a log bucket asynchronously.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
+                /// be changed.
+                /// </summary>
+                public class UpdateAsyncRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new UpdateAsync request.</summary>
+                    public UpdateAsyncRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogBucket body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The full resource name of the bucket to update.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+                    /// example:"projects/my-project/locations/global/buckets/my-bucket"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. Field mask that specifies the fields in bucket that need an update. A bucket field
+                    /// will be overwritten if, and only if, it is in the update mask. name and output only fields
+                    /// cannot be updated.For a detailed FieldMask definition, see:
+                    /// https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMaskFor
+                    /// example: updateMask=retention_days
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogBucket Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "updateAsync";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}:updateAsync";
+
+                    /// <summary>Initializes UpdateAsync parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the LogScopes resource.</summary>
+            public virtual LogScopesResource LogScopes { get; }
+
+            /// <summary>The "logScopes" collection of methods.</summary>
+            public class LogScopesResource
+            {
+                private const string Resource = "logScopes";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public LogScopesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a log scope.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent project in which to create the log scope
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For example:"projects/my-project/locations/global"
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogScope body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a log scope.</summary>
+                public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogScope>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogScope body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent project in which to create the log scope
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For
+                    /// example:"projects/my-project/locations/global"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. A client-assigned identifier such as "log-scope". Identifiers are limited to 100
+                    /// characters and can include only letters, digits, underscores, hyphens, and periods. First
+                    /// character has to be alphanumeric.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("logScopeId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string LogScopeId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogScope Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/logScopes";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("logScopeId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "logScopeId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a log scope.</summary>
+                /// <param name="name">
+                /// Required. The resource name of the log scope to delete:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/logScopes/[LOG_SCOPE_ID]" For
+                /// example:"projects/my-project/locations/global/logScopes/my-log-scope"
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a log scope.</summary>
+                public class DeleteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the log scope to delete:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/logScopes/[LOG_SCOPE_ID]" For
+                    /// example:"projects/my-project/locations/global/logScopes/my-log-scope"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/logScopes/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a log scope.</summary>
+                /// <param name="name">
+                /// Required. The resource name of the log scope:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/logScopes/[LOG_SCOPE_ID]" For
+                /// example:"projects/my-project/locations/global/logScopes/my-log-scope"
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a log scope.</summary>
+                public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogScope>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the log scope:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/logScopes/[LOG_SCOPE_ID]" For
+                    /// example:"projects/my-project/locations/global/logScopes/my-log-scope"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/logScopes/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists log scopes.</summary>
+                /// <param name="parent">
+                /// Required. The parent resource whose log scopes are to be listed:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists log scopes.</summary>
+                public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListLogScopesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource whose log scopes are to be listed:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The maximum number of results to return from this request.Non-positive values are
+                    /// ignored. The presence of nextPageToken in the response indicates that more results might be
+                    /// available.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If present, then retrieve the next batch of results from the preceding call to this
+                    /// method. pageToken must be the value of nextPageToken from the previous response. The values of
+                    /// other method parameters should be identical to those in the previous call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/logScopes";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates a log scope.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Output only. The resource name of the log scope.Log scopes are only available in the global
+                /// location. For example:projects/my-project/locations/global/logScopes/my-log-scope
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogScope body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates a log scope.</summary>
+                public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogScope>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogScope body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Output only. The resource name of the log scope.Log scopes are only available in the global
+                    /// location. For example:projects/my-project/locations/global/logScopes/my-log-scope
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Field mask that specifies the fields in log_scope that need an update. A field will be
+                    /// overwritten if, and only if, it is in the update mask. name and output only fields cannot be
+                    /// updated.For a detailed FieldMask definition, see
+                    /// https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMaskFor
+                    /// example: updateMask=description
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogScope Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/logScopes/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Operations resource.</summary>
@@ -8612,7 +13631,7 @@ namespace Google.Apis.Logging.v2
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.Logging.v2.Data.CancelOperationRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -8674,7 +13693,7 @@ namespace Google.Apis.Logging.v2
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -8720,27 +13739,17 @@ namespace Google.Apis.Logging.v2
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding
-                /// to use different resource name schemes, such as users/*/operations. To override the binding, API
-                /// services can add a binding such as "/v1/{name=users/*}/operations" to their service configuration.
-                /// For backwards compatibility, the default name includes the operations collection id, however
-                /// overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns UNIMPLEMENTED.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding
-                /// to use different resource name schemes, such as users/*/operations. To override the binding, API
-                /// services can add a binding such as "/v1/{name=users/*}/operations" to their service configuration.
-                /// For backwards compatibility, the default name includes the operations collection id, however
-                /// overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns UNIMPLEMENTED.
                 /// </summary>
                 public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListOperationsResponse>
                 {
@@ -8816,11 +13825,562 @@ namespace Google.Apis.Logging.v2
                 }
             }
 
+            /// <summary>Gets the RecentQueries resource.</summary>
+            public virtual RecentQueriesResource RecentQueries { get; }
+
+            /// <summary>The "recentQueries" collection of methods.</summary>
+            public class RecentQueriesResource
+            {
+                private const string Resource = "recentQueries";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public RecentQueriesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Lists the RecentQueries that were created by the user making the request.</summary>
+                /// <param name="parent">
+                /// Required. The resource to which the listed queries belong.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For
+                /// example:projects/my-project/locations/us-central1Note: The location portion of the resource must be
+                /// specified, but supplying the character - in place of LOCATION_ID will return all recent queries.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists the RecentQueries that were created by the user making the request.</summary>
+                public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListRecentQueriesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource to which the listed queries belong.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For
+                    /// example:projects/my-project/locations/us-central1Note: The location portion of the resource must
+                    /// be specified, but supplying the character - in place of LOCATION_ID will return all recent
+                    /// queries.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Specifies the type ("Logging" or "OpsAnalytics") of the recent queries to list. The
+                    /// only valid value for this field is one of the two allowable type function calls, which are the
+                    /// following: type("Logging") type("OpsAnalytics")
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. The maximum number of results to return from this request. Non-positive values are
+                    /// ignored. The presence of nextPageToken in the response indicates that more results might be
+                    /// available.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If present, then retrieve the next batch of results from the preceding call to this
+                    /// method. pageToken must be the value of nextPageToken from the previous response. The values of
+                    /// other method parameters should be identical to those in the previous call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/recentQueries";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the SavedQueries resource.</summary>
+            public virtual SavedQueriesResource SavedQueries { get; }
+
+            /// <summary>The "savedQueries" collection of methods.</summary>
+            public class SavedQueriesResource
+            {
+                private const string Resource = "savedQueries";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public SavedQueriesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a new SavedQuery for the user making the request.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource in which to create the saved query:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example: "projects/my-project/locations/global"
+                /// "organizations/123456789/locations/us-central1"
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.SavedQuery body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new SavedQuery for the user making the request.</summary>
+                public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.SavedQuery>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.SavedQuery body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource in which to create the saved query:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example:
+                    /// "projects/my-project/locations/global" "organizations/123456789/locations/us-central1"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The ID to use for the saved query, which will become the final component of the saved
+                    /// query's resource name.If the saved_query_id is not provided, the system will generate an
+                    /// alphanumeric ID.The saved_query_id is limited to 100 characters and can include only the
+                    /// following characters: upper and lower-case alphanumeric characters, underscores, hyphens,
+                    /// periods.First character has to be alphanumeric.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("savedQueryId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string SavedQueryId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.SavedQuery Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/savedQueries";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("savedQueryId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "savedQueryId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes an existing SavedQuery that was created by the user making the request.</summary>
+                /// <param name="name">
+                /// Required. The full resource name of the saved query to delete.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes an existing SavedQuery that was created by the user making the request.</summary>
+                public class DeleteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The full resource name of the saved query to delete.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                    /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/savedQueries/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Returns all data associated with the requested query.</summary>
+                /// <param name="name">
+                /// Required. The resource name of the saved query.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Returns all data associated with the requested query.</summary>
+                public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.SavedQuery>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the saved query.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                    /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/savedQueries/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists the SavedQueries that were created by the user making the request.</summary>
+                /// <param name="parent">
+                /// Required. The resource to which the listed queries belong.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example:
+                /// "projects/my-project/locations/us-central1" Note: The locations portion of the resource must be
+                /// specified. To get a list of all saved queries, a wildcard character - can be used for LOCATION_ID,
+                /// for example: "projects/my-project/locations/-"
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists the SavedQueries that were created by the user making the request.</summary>
+                public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListSavedQueriesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource to which the listed queries belong.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example:
+                    /// "projects/my-project/locations/us-central1" Note: The locations portion of the resource must be
+                    /// specified. To get a list of all saved queries, a wildcard character - can be used for
+                    /// LOCATION_ID, for example: "projects/my-project/locations/-"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Specifies the type ("Logging" or "OpsAnalytics") and the visibility (PRIVATE or
+                    /// SHARED) of the saved queries to list. If provided, the filter must contain either the type
+                    /// function or a visibility token, or both. If both are chosen, they can be placed in any order,
+                    /// but they must be joined by the AND operator or the empty character.The two supported type
+                    /// function calls are: type("Logging") type("OpsAnalytics")The two supported visibility tokens are:
+                    /// visibility = PRIVATE visibility = SHAREDFor example:type("Logging") AND visibility = PRIVATE
+                    /// visibility=SHARED type("OpsAnalytics") type("OpsAnalytics)" visibility = PRIVATE visibility =
+                    /// SHARED
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. The maximum number of results to return from this request.Non-positive values are
+                    /// ignored. The presence of nextPageToken in the response indicates that more results might be
+                    /// available.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If present, then retrieve the next batch of results from the preceding call to this
+                    /// method. pageToken must be the value of nextPageToken from the previous response. The values of
+                    /// other method parameters should be identical to those in the previous call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/savedQueries";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates an existing SavedQuery.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Output only. Resource name of the saved query.In the format:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For a list of supported
+                /// locations, see Supported Regions
+                /// (https://cloud.google.com/logging/docs/region-support#bucket-regions)After the saved query is
+                /// created, the location cannot be changed.If the user doesn't provide a QUERY_ID, the system will
+                /// generate an alphanumeric ID.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.SavedQuery body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates an existing SavedQuery.</summary>
+                public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.SavedQuery>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.SavedQuery body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Output only. Resource name of the saved query.In the format:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For a list of supported
+                    /// locations, see Supported Regions
+                    /// (https://cloud.google.com/logging/docs/region-support#bucket-regions)After the saved query is
+                    /// created, the location cannot be changed.If the user doesn't provide a QUERY_ID, the system will
+                    /// generate an alphanumeric ID.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. A non-empty list of fields to change in the existing saved query. Fields are relative
+                    /// to the saved_query and new values for the fields are taken from the corresponding fields in the
+                    /// SavedQuery included in this request. Fields not mentioned in update_mask are not changed and are
+                    /// ignored in the request.To update all mutable fields, specify an update_mask of *.For example, to
+                    /// change the description and query filter text of a saved query, specify an update_mask of
+                    /// "description, query.filter".
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.SavedQuery Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/savedQueries/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets information about a location.</summary>
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -8865,7 +14425,7 @@ namespace Google.Apis.Logging.v2
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -8982,7 +14542,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string logName)
             {
-                return new DeleteRequest(service, logName);
+                return new DeleteRequest(this.service, logName);
             }
 
             /// <summary>
@@ -9039,12 +14599,12 @@ namespace Google.Apis.Logging.v2
             /// listed.
             /// </summary>
             /// <param name="parent">
-            /// Required. The resource name that owns the logs: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
+            /// Required. The resource name to list logs for: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
             /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -9061,8 +14621,8 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
-                /// Required. The resource name that owns the logs: projects/[PROJECT_ID]
-                /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                /// Required. The resource name to list logs for: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
+                /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -9084,13 +14644,14 @@ namespace Google.Apis.Logging.v2
                 public virtual string PageToken { get; set; }
 
                 /// <summary>
-                /// Optional. The resource name that owns the logs:
+                /// Optional. List of resource names to list logs for:
                 /// projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
                 /// organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
                 /// billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
                 /// folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]To support legacy
                 /// queries, it could also be: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
-                /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]The resource name in the parent field is
+                /// added to this list.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resourceNames", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual Google.Apis.Util.Repeatable<string> ResourceNames { get; set; }
@@ -9162,9 +14723,9 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Creates a sink that exports specified log entries to a destination. The export of newly-ingested log
-            /// entries begins immediately, unless the sink's writer_identity is not permitted to write to the
-            /// destination. A sink can export log entries only from the resource owning the sink.
+            /// Creates a sink that exports specified log entries to a destination. The export begins upon ingress,
+            /// unless the sink's writer_identity is not permitted to write to the destination. A sink can export log
+            /// entries only from the resource owning the sink.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
@@ -9174,13 +14735,13 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogSink body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
-            /// Creates a sink that exports specified log entries to a destination. The export of newly-ingested log
-            /// entries begins immediately, unless the sink's writer_identity is not permitted to write to the
-            /// destination. A sink can export log entries only from the resource owning the sink.
+            /// Creates a sink that exports specified log entries to a destination. The export begins upon ingress,
+            /// unless the sink's writer_identity is not permitted to write to the destination. A sink can export log
+            /// entries only from the resource owning the sink.
             /// </summary>
             public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
             {
@@ -9201,13 +14762,23 @@ namespace Google.Apis.Logging.v2
                 public virtual string Parent { get; private set; }
 
                 /// <summary>
+                /// Optional. The service account provided by the caller that will be used to write the log entries. The
+                /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs
+                /// to a log bucket that is in a different project than the sink. When not specified, a Logging service
+                /// account will automatically be generated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string CustomWriterIdentity { get; set; }
+
+                /// <summary>
                 /// Optional. Determines the kind of IAM identity returned as writer_identity in the new sink. If this
                 /// value is omitted or set to false, and if the sink's parent is a project, then the value returned as
                 /// writer_identity is the same group or service account used by Cloud Logging before the addition of
                 /// writer identities to this API. The sink's destination must be in the same project as the sink
                 /// itself.If this field is set to true, or if the sink is owned by a non-project resource such as an
-                /// organization, then the value of writer_identity will be a unique service account used only for
-                /// exports from the new sink. For more information, see writer_identity in LogSink.
+                /// organization, then the value of writer_identity will be a service agent
+                /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) used by the sinks with the
+                /// same parent. For more information, see writer_identity in LogSink.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -9239,6 +14810,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^organizations/[^/]+$",
                     });
+                    RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "customWriterIdentity",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                     {
                         Name = "uniqueWriterIdentity",
@@ -9261,7 +14840,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string sinkName)
             {
-                return new DeleteRequest(service, sinkName);
+                return new DeleteRequest(this.service, sinkName);
             }
 
             /// <summary>
@@ -9318,7 +14897,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual GetRequest Get(string sinkName)
             {
-                return new GetRequest(service, sinkName);
+                return new GetRequest(this.service, sinkName);
             }
 
             /// <summary>Gets a sink.</summary>
@@ -9371,7 +14950,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists sinks.</summary>
@@ -9390,6 +14969,16 @@ namespace Google.Apis.Logging.v2
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. A filter expression to constrain the sinks returned. Today, this only supports the
+                /// following strings: '' 'in_scope("ALL")', 'in_scope("ANCESTOR")', 'in_scope("DEFAULT")'.Description
+                /// of scopes below. ALL: Includes all of the sinks which can be returned in any other scope. ANCESTOR:
+                /// Includes intercepting sinks owned by ancestor resources. DEFAULT: Includes sinks owned by
+                /// parent.When the empty string is provided, then the filter 'in_scope("DEFAULT")' is applied.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
 
                 /// <summary>
                 /// Optional. The maximum number of results to return from this request. Non-positive values are
@@ -9428,6 +15017,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^organizations/[^/]+$",
                     });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
                     {
                         Name = "pageSize",
@@ -9448,9 +15045,9 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="sinkName">
@@ -9461,13 +15058,13 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogSink body, string sinkName)
             {
-                return new PatchRequest(service, body, sinkName);
+                return new PatchRequest(this.service, body, sinkName);
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
             {
@@ -9490,12 +15087,22 @@ namespace Google.Apis.Logging.v2
                 public virtual string SinkName { get; private set; }
 
                 /// <summary>
+                /// Optional. The service account provided by the caller that will be used to write the log entries. The
+                /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs
+                /// to a log bucket that is in a different project than the sink. When not specified, a Logging service
+                /// account will automatically be generated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string CustomWriterIdentity { get; set; }
+
+                /// <summary>
                 /// Optional. See sinks.create for a description of this field. When updating a sink, the effect of this
                 /// field on the value of writer_identity in the updated sink depends on both the old and new values of
                 /// this field: If the old and new values of this field are both false or both true, then there is no
                 /// change to the sink's writer_identity. If the old value is false and the new value is true, then
-                /// writer_identity is changed to a unique service account. It is an error if the old value is true and
-                /// the new value is set to false or defaulted to false.
+                /// writer_identity is changed to a service agent
+                /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) owned by Cloud Logging. It
+                /// is an error if the old value is true and the new value is set to false or defaulted to false.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -9540,6 +15147,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^organizations/[^/]+/sinks/[^/]+$",
                     });
+                    RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "customWriterIdentity",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                     {
                         Name = "uniqueWriterIdentity",
@@ -9560,9 +15175,9 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="sinkName">
@@ -9573,13 +15188,13 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual UpdateRequest Update(Google.Apis.Logging.v2.Data.LogSink body, string sinkName)
             {
-                return new UpdateRequest(service, body, sinkName);
+                return new UpdateRequest(this.service, body, sinkName);
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             public class UpdateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
             {
@@ -9602,12 +15217,22 @@ namespace Google.Apis.Logging.v2
                 public virtual string SinkName { get; private set; }
 
                 /// <summary>
+                /// Optional. The service account provided by the caller that will be used to write the log entries. The
+                /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs
+                /// to a log bucket that is in a different project than the sink. When not specified, a Logging service
+                /// account will automatically be generated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string CustomWriterIdentity { get; set; }
+
+                /// <summary>
                 /// Optional. See sinks.create for a description of this field. When updating a sink, the effect of this
                 /// field on the value of writer_identity in the updated sink depends on both the old and new values of
                 /// this field: If the old and new values of this field are both false or both true, then there is no
                 /// change to the sink's writer_identity. If the old value is false and the new value is true, then
-                /// writer_identity is changed to a unique service account. It is an error if the old value is true and
-                /// the new value is set to false or defaulted to false.
+                /// writer_identity is changed to a service agent
+                /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) owned by Cloud Logging. It
+                /// is an error if the old value is true and the new value is set to false or defaulted to false.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -9652,6 +15277,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^organizations/[^/]+/sinks/[^/]+$",
                     });
+                    RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "customWriterIdentity",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                     {
                         Name = "uniqueWriterIdentity",
@@ -9674,26 +15307,26 @@ namespace Google.Apis.Logging.v2
 
         /// <summary>
         /// Gets the Logging CMEK settings for the given resource.Note: CMEK for the Log Router can be configured for
-        /// Google Cloud projects, folders, organizations and billing accounts. Once configured for an organization, it
-        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Logs Router
+        /// Google Cloud projects, folders, organizations, and billing accounts. Once configured for an organization, it
+        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Log Router
         /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
         /// </summary>
         /// <param name="name">
         /// Required. The resource for which to retrieve CMEK settings. "projects/[PROJECT_ID]/cmekSettings"
         /// "organizations/[ORGANIZATION_ID]/cmekSettings" "billingAccounts/[BILLING_ACCOUNT_ID]/cmekSettings"
         /// "folders/[FOLDER_ID]/cmekSettings" For example:"organizations/12345/cmekSettings"Note: CMEK for the Log
-        /// Router can be configured for Google Cloud projects, folders, organizations and billing accounts. Once
+        /// Router can be configured for Google Cloud projects, folders, organizations, and billing accounts. Once
         /// configured for an organization, it applies to all projects and folders in the Google Cloud organization.
         /// </param>
         public virtual GetCmekSettingsRequest GetCmekSettings(string name)
         {
-            return new GetCmekSettingsRequest(service, name);
+            return new GetCmekSettingsRequest(this.service, name);
         }
 
         /// <summary>
         /// Gets the Logging CMEK settings for the given resource.Note: CMEK for the Log Router can be configured for
-        /// Google Cloud projects, folders, organizations and billing accounts. Once configured for an organization, it
-        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Logs Router
+        /// Google Cloud projects, folders, organizations, and billing accounts. Once configured for an organization, it
+        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Log Router
         /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
         /// </summary>
         public class GetCmekSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.CmekSettings>
@@ -9709,7 +15342,7 @@ namespace Google.Apis.Logging.v2
             /// Required. The resource for which to retrieve CMEK settings. "projects/[PROJECT_ID]/cmekSettings"
             /// "organizations/[ORGANIZATION_ID]/cmekSettings" "billingAccounts/[BILLING_ACCOUNT_ID]/cmekSettings"
             /// "folders/[FOLDER_ID]/cmekSettings" For example:"organizations/12345/cmekSettings"Note: CMEK for the Log
-            /// Router can be configured for Google Cloud projects, folders, organizations and billing accounts. Once
+            /// Router can be configured for Google Cloud projects, folders, organizations, and billing accounts. Once
             /// configured for an organization, it applies to all projects and folders in the Google Cloud organization.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -9740,12 +15373,76 @@ namespace Google.Apis.Logging.v2
         }
 
         /// <summary>
+        /// Gets the settings for the given resource.Note: Settings can be retrieved for Google Cloud projects, folders,
+        /// organizations, and billing accounts.See View default resource settings for Logging
+        /// (https://cloud.google.com/logging/docs/default-settings#view-org-settings) for more information.
+        /// </summary>
+        /// <param name="name">
+        /// Required. The resource for which to retrieve settings. "projects/[PROJECT_ID]/settings"
+        /// "organizations/[ORGANIZATION_ID]/settings" "billingAccounts/[BILLING_ACCOUNT_ID]/settings"
+        /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"Note: Settings can be retrieved for
+        /// Google Cloud projects, folders, organizations, and billing accounts.
+        /// </param>
+        public virtual GetSettingsRequest GetSettings(string name)
+        {
+            return new GetSettingsRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Gets the settings for the given resource.Note: Settings can be retrieved for Google Cloud projects, folders,
+        /// organizations, and billing accounts.See View default resource settings for Logging
+        /// (https://cloud.google.com/logging/docs/default-settings#view-org-settings) for more information.
+        /// </summary>
+        public class GetSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Settings>
+        {
+            /// <summary>Constructs a new GetSettings request.</summary>
+            public GetSettingsRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The resource for which to retrieve settings. "projects/[PROJECT_ID]/settings"
+            /// "organizations/[ORGANIZATION_ID]/settings" "billingAccounts/[BILLING_ACCOUNT_ID]/settings"
+            /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"Note: Settings can be retrieved
+            /// for Google Cloud projects, folders, organizations, and billing accounts.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getSettings";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v2/{+name}/settings";
+
+            /// <summary>Initializes GetSettings parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^organizations/[^/]+$",
+                });
+            }
+        }
+
+        /// <summary>
         /// Updates the Log Router CMEK settings for the given resource.Note: CMEK for the Log Router can currently only
         /// be configured for Google Cloud organizations. Once configured, it applies to all projects and folders in the
-        /// Google Cloud organization.UpdateCmekSettings will fail if 1) kms_key_name is invalid, or 2) the associated
-        /// service account does not have the required roles/cloudkms.cryptoKeyEncrypterDecrypter role assigned for the
-        /// key, or 3) access to the key is disabled.See Enabling CMEK for Log Router
-        /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
+        /// Google Cloud organization.UpdateCmekSettings fails when any of the following are true: The value of
+        /// kms_key_name is invalid. The associated service account doesn't have the required
+        /// roles/cloudkms.cryptoKeyEncrypterDecrypter role assigned for the key. Access to the key is disabled.See
+        /// Enabling CMEK for Log Router (https://cloud.google.com/logging/docs/routing/managed-encryption) for more
+        /// information.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="name">
@@ -9757,16 +15454,17 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual UpdateCmekSettingsRequest UpdateCmekSettings(Google.Apis.Logging.v2.Data.CmekSettings body, string name)
         {
-            return new UpdateCmekSettingsRequest(service, body, name);
+            return new UpdateCmekSettingsRequest(this.service, body, name);
         }
 
         /// <summary>
         /// Updates the Log Router CMEK settings for the given resource.Note: CMEK for the Log Router can currently only
         /// be configured for Google Cloud organizations. Once configured, it applies to all projects and folders in the
-        /// Google Cloud organization.UpdateCmekSettings will fail if 1) kms_key_name is invalid, or 2) the associated
-        /// service account does not have the required roles/cloudkms.cryptoKeyEncrypterDecrypter role assigned for the
-        /// key, or 3) access to the key is disabled.See Enabling CMEK for Log Router
-        /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
+        /// Google Cloud organization.UpdateCmekSettings fails when any of the following are true: The value of
+        /// kms_key_name is invalid. The associated service account doesn't have the required
+        /// roles/cloudkms.cryptoKeyEncrypterDecrypter role assigned for the key. Access to the key is disabled.See
+        /// Enabling CMEK for Log Router (https://cloud.google.com/logging/docs/routing/managed-encryption) for more
+        /// information.
         /// </summary>
         public class UpdateCmekSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.CmekSettings>
         {
@@ -9812,6 +15510,97 @@ namespace Google.Apis.Logging.v2
             public override string RestPath => "v2/{+name}/cmekSettings";
 
             /// <summary>Initializes UpdateCmekSettings parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^organizations/[^/]+$",
+                });
+                RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "updateMask",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Updates the settings for the given resource. This method applies to all feature configurations for
+        /// organization and folders.UpdateSettings fails when any of the following are true: The value of
+        /// storage_location either isn't supported by Logging or violates the location OrgPolicy. The
+        /// default_sink_config field is set, but it has an unspecified filter write mode. The value of kms_key_name is
+        /// invalid. The associated service account doesn't have the required roles/cloudkms.cryptoKeyEncrypterDecrypter
+        /// role assigned for the key. Access to the key is disabled.See Configure default settings for organizations
+        /// and folders (https://cloud.google.com/logging/docs/default-settings) for more information.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="name">
+        /// Required. The resource name for the settings to update. "organizations/[ORGANIZATION_ID]/settings"
+        /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"
+        /// </param>
+        public virtual UpdateSettingsRequest UpdateSettings(Google.Apis.Logging.v2.Data.Settings body, string name)
+        {
+            return new UpdateSettingsRequest(this.service, body, name);
+        }
+
+        /// <summary>
+        /// Updates the settings for the given resource. This method applies to all feature configurations for
+        /// organization and folders.UpdateSettings fails when any of the following are true: The value of
+        /// storage_location either isn't supported by Logging or violates the location OrgPolicy. The
+        /// default_sink_config field is set, but it has an unspecified filter write mode. The value of kms_key_name is
+        /// invalid. The associated service account doesn't have the required roles/cloudkms.cryptoKeyEncrypterDecrypter
+        /// role assigned for the key. Access to the key is disabled.See Configure default settings for organizations
+        /// and folders (https://cloud.google.com/logging/docs/default-settings) for more information.
+        /// </summary>
+        public class UpdateSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Settings>
+        {
+            /// <summary>Constructs a new UpdateSettings request.</summary>
+            public UpdateSettingsRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.Settings body, string name) : base(service)
+            {
+                Name = name;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The resource name for the settings to update. "organizations/[ORGANIZATION_ID]/settings"
+            /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>
+            /// Optional. Field mask identifying which fields from settings should be updated. A field will be
+            /// overwritten if and only if it is in the update mask. Output only fields cannot be updated.See FieldMask
+            /// for more information.For example: "updateMask=kmsKeyName"
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual object UpdateMask { get; set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Logging.v2.Data.Settings Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "updateSettings";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "PATCH";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v2/{+name}/settings";
+
+            /// <summary>Initializes UpdateSettings parameter list.</summary>
             protected override void InitParameters()
             {
                 base.InitParameters();
@@ -9883,7 +15672,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogExclusion body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -9949,7 +15738,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes an exclusion in the _Default sink.</summary>
@@ -10007,7 +15796,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the description of an exclusion in the _Default sink.</summary>
@@ -10062,7 +15851,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all the exclusions on the _Default sink in a parent resource.</summary>
@@ -10150,7 +15939,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogExclusion body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Changes one or more properties of an existing exclusion in the _Default sink.</summary>
@@ -10239,7 +16028,10 @@ namespace Google.Apis.Logging.v2
             {
                 this.service = service;
                 Buckets = new BucketsResource(service);
+                LogScopes = new LogScopesResource(service);
                 Operations = new OperationsResource(service);
+                RecentQueries = new RecentQueriesResource(service);
+                SavedQueries = new SavedQueriesResource(service);
             }
 
             /// <summary>Gets the Buckets resource.</summary>
@@ -10257,7 +16049,314 @@ namespace Google.Apis.Logging.v2
                 public BucketsResource(Google.Apis.Services.IClientService service)
                 {
                     this.service = service;
+                    Links = new LinksResource(service);
                     Views = new ViewsResource(service);
+                }
+
+                /// <summary>Gets the Links resource.</summary>
+                public virtual LinksResource Links { get; }
+
+                /// <summary>The "links" collection of methods.</summary>
+                public class LinksResource
+                {
+                    private const string Resource = "links";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public LinksResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Asynchronously creates a linked dataset in BigQuery which makes it possible to use BigQuery to
+                    /// read the logs stored in the log bucket. A log bucket may currently only contain one link.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// Required. The full resource name of the bucket to create a link for.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// </param>
+                    public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.Link body, string parent)
+                    {
+                        return new CreateRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>
+                    /// Asynchronously creates a linked dataset in BigQuery which makes it possible to use BigQuery to
+                    /// read the logs stored in the log bucket. A log bucket may currently only contain one link.
+                    /// </summary>
+                    public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Create request.</summary>
+                        public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.Link body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The full resource name of the bucket to create a link for.
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Required. The ID to use for the link. The link_id can have up to 100 characters. A valid
+                        /// link_id must only have alphanumeric characters and underscores within it.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("linkId", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string LinkId { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.Link Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "create";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+parent}/links";
+
+                        /// <summary>Initializes Create parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                            });
+                            RequestParameters.Add("linkId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "linkId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Deletes a link. This will also delete the corresponding BigQuery linked dataset.
+                    /// </summary>
+                    /// <param name="name">
+                    /// Required. The full resource name of the link to delete.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// </param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Deletes a link. This will also delete the corresponding BigQuery linked dataset.
+                    /// </summary>
+                    public class DeleteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The full resource name of the link to delete.
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/buckets/[^/]+/links/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Gets a link.</summary>
+                    /// <param name="name">
+                    /// Required. The resource name of the link:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                    /// </param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>Gets a link.</summary>
+                    public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Link>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The resource name of the link:
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/buckets/[^/]+/links/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Lists links.</summary>
+                    /// <param name="parent">
+                    /// Required. The parent resource whose links are to be listed:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists links.</summary>
+                    public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListLinksResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The parent resource whose links are to be listed:
+                        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>Optional. The maximum number of results to return from this request.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// Optional. If present, then retrieve the next batch of results from the preceding call to
+                        /// this method. pageToken must be the value of nextPageToken from the previous response.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+parent}/links";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>Gets the Views resource.</summary>
@@ -10275,6 +16374,135 @@ namespace Google.Apis.Logging.v2
                     public ViewsResource(Google.Apis.Services.IClientService service)
                     {
                         this.service = service;
+                        Logs = new LogsResource(service);
+                    }
+
+                    /// <summary>Gets the Logs resource.</summary>
+                    public virtual LogsResource Logs { get; }
+
+                    /// <summary>The "logs" collection of methods.</summary>
+                    public class LogsResource
+                    {
+                        private const string Resource = "logs";
+
+                        /// <summary>The service which this resource belongs to.</summary>
+                        private readonly Google.Apis.Services.IClientService service;
+
+                        /// <summary>Constructs a new resource.</summary>
+                        public LogsResource(Google.Apis.Services.IClientService service)
+                        {
+                            this.service = service;
+                        }
+
+                        /// <summary>
+                        /// Lists the logs in projects, organizations, folders, or billing accounts. Only logs that have
+                        /// entries are listed.
+                        /// </summary>
+                        /// <param name="parent">
+                        /// Required. The resource name to list logs for: projects/[PROJECT_ID]
+                        /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                        /// </param>
+                        public virtual ListRequest List(string parent)
+                        {
+                            return new ListRequest(this.service, parent);
+                        }
+
+                        /// <summary>
+                        /// Lists the logs in projects, organizations, folders, or billing accounts. Only logs that have
+                        /// entries are listed.
+                        /// </summary>
+                        public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListLogsResponse>
+                        {
+                            /// <summary>Constructs a new List request.</summary>
+                            public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                            {
+                                Parent = parent;
+                                InitParameters();
+                            }
+
+                            /// <summary>
+                            /// Required. The resource name to list logs for: projects/[PROJECT_ID]
+                            /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                            public virtual string Parent { get; private set; }
+
+                            /// <summary>
+                            /// Optional. The maximum number of results to return from this request. Non-positive values
+                            /// are ignored. The presence of nextPageToken in the response indicates that more results
+                            /// might be available.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual System.Nullable<int> PageSize { get; set; }
+
+                            /// <summary>
+                            /// Optional. If present, then retrieve the next batch of results from the preceding call to
+                            /// this method. pageToken must be the value of nextPageToken from the previous response.
+                            /// The values of other method parameters should be identical to those in the previous call.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual string PageToken { get; set; }
+
+                            /// <summary>
+                            /// Optional. List of resource names to list logs for:
+                            /// projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+                            /// organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+                            /// billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+                            /// folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]To
+                            /// support legacy queries, it could also be: projects/[PROJECT_ID]
+                            /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID]
+                            /// folders/[FOLDER_ID]The resource name in the parent field is added to this list.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("resourceNames", Google.Apis.Util.RequestParameterType.Query)]
+                            public virtual Google.Apis.Util.Repeatable<string> ResourceNames { get; set; }
+
+                            /// <summary>Gets the method name.</summary>
+                            public override string MethodName => "list";
+
+                            /// <summary>Gets the HTTP method.</summary>
+                            public override string HttpMethod => "GET";
+
+                            /// <summary>Gets the REST path.</summary>
+                            public override string RestPath => "v2/{+parent}/logs";
+
+                            /// <summary>Initializes List parameter list.</summary>
+                            protected override void InitParameters()
+                            {
+                                base.InitParameters();
+                                RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "parent",
+                                    IsRequired = true,
+                                    ParameterType = "path",
+                                    DefaultValue = null,
+                                    Pattern = @"^projects/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                                });
+                                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "pageSize",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "pageToken",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                                RequestParameters.Add("resourceNames", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "resourceNames",
+                                    IsRequired = false,
+                                    ParameterType = "query",
+                                    DefaultValue = null,
+                                    Pattern = null,
+                                });
+                            }
+                        }
                     }
 
                     /// <summary>
@@ -10288,7 +16516,7 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogView body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -10312,7 +16540,10 @@ namespace Google.Apis.Logging.v2
                         [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Parent { get; private set; }
 
-                        /// <summary>Required. The id to use for this view.</summary>
+                        /// <summary>
+                        /// Required. A client-assigned identifier such as "my-view". Identifiers are limited to 100
+                        /// characters and can include only letters, digits, underscores, and hyphens.
+                        /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("viewId", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual string ViewId { get; set; }
 
@@ -10366,7 +16597,7 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -10415,7 +16646,7 @@ namespace Google.Apis.Logging.v2
                         }
                     }
 
-                    /// <summary>Gets a view on a log bucket..</summary>
+                    /// <summary>Gets a view on a log bucket.</summary>
                     /// <param name="name">
                     /// Required. The resource name of the policy:
                     /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]" For
@@ -10423,10 +16654,10 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
-                    /// <summary>Gets a view on a log bucket..</summary>
+                    /// <summary>Gets a view on a log bucket.</summary>
                     public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogView>
                     {
                         /// <summary>Constructs a new Get request.</summary>
@@ -10468,6 +16699,72 @@ namespace Google.Apis.Logging.v2
                         }
                     }
 
+                    /// <summary>
+                    /// Gets the access control policy for a resource. Returns an empty policy if the resource exists
+                    /// and does not have a policy set.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The resource for which the policy is being requested. See Resource names
+                    /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                    /// </param>
+                    public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.Logging.v2.Data.GetIamPolicyRequest body, string resource)
+                    {
+                        return new GetIamPolicyRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Gets the access control policy for a resource. Returns an empty policy if the resource exists
+                    /// and does not have a policy set.
+                    /// </summary>
+                    public class GetIamPolicyRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Policy>
+                    {
+                        /// <summary>Constructs a new GetIamPolicy request.</summary>
+                        public GetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.GetIamPolicyRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The resource for which the policy is being requested. See Resource names
+                        /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                        /// field.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.GetIamPolicyRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "getIamPolicy";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+resource}:getIamPolicy";
+
+                        /// <summary>Initializes GetIamPolicy parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                            });
+                        }
+                    }
+
                     /// <summary>Lists views on a log bucket.</summary>
                     /// <param name="parent">
                     /// Required. The bucket whose views are to be listed:
@@ -10475,7 +16772,7 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists views on a log bucket.</summary>
@@ -10552,10 +16849,10 @@ namespace Google.Apis.Logging.v2
                     }
 
                     /// <summary>
-                    /// Updates a view on a log bucket. This method replaces the following fields in the existing view
-                    /// with values from the new view: filter. If an UNAVAILABLE error is returned, this indicates that
-                    /// system is not in a state where it can update the view. If this occurs, please try again in a few
-                    /// minutes.
+                    /// Updates a view on a log bucket. This method replaces the value of the filter field from the
+                    /// existing view with the corresponding value from the new view. If an UNAVAILABLE error is
+                    /// returned, this indicates that system is not in a state where it can update the view. If this
+                    /// occurs, please try again in a few minutes.
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">
@@ -10565,14 +16862,14 @@ namespace Google.Apis.Logging.v2
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogView body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>
-                    /// Updates a view on a log bucket. This method replaces the following fields in the existing view
-                    /// with values from the new view: filter. If an UNAVAILABLE error is returned, this indicates that
-                    /// system is not in a state where it can update the view. If this occurs, please try again in a few
-                    /// minutes.
+                    /// Updates a view on a log bucket. This method replaces the value of the filter field from the
+                    /// existing view with the corresponding value from the new view. If an UNAVAILABLE error is
+                    /// returned, this indicates that system is not in a state where it can update the view. If this
+                    /// occurs, please try again in a few minutes.
                     /// </summary>
                     public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogView>
                     {
@@ -10639,6 +16936,142 @@ namespace Google.Apis.Logging.v2
                             });
                         }
                     }
+
+                    /// <summary>
+                    /// Sets the access control policy on the specified resource. Replaces any existing policy.Can
+                    /// return NOT_FOUND, INVALID_ARGUMENT, and PERMISSION_DENIED errors.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The resource for which the policy is being specified. See Resource names
+                    /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                    /// </param>
+                    public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.Logging.v2.Data.SetIamPolicyRequest body, string resource)
+                    {
+                        return new SetIamPolicyRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Sets the access control policy on the specified resource. Replaces any existing policy.Can
+                    /// return NOT_FOUND, INVALID_ARGUMENT, and PERMISSION_DENIED errors.
+                    /// </summary>
+                    public class SetIamPolicyRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Policy>
+                    {
+                        /// <summary>Constructs a new SetIamPolicy request.</summary>
+                        public SetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.SetIamPolicyRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The resource for which the policy is being specified. See Resource names
+                        /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                        /// field.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.SetIamPolicyRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "setIamPolicy";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+resource}:setIamPolicy";
+
+                        /// <summary>Initializes SetIamPolicy parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                    /// this will return an empty set of permissions, not a NOT_FOUND error.Note: This operation is
+                    /// designed to be used for building permission-aware UIs and command-line tools, not for
+                    /// authorization checking. This operation may "fail open" without warning.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The resource for which the policy detail is being requested. See Resource names
+                    /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
+                    /// </param>
+                    public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.Logging.v2.Data.TestIamPermissionsRequest body, string resource)
+                    {
+                        return new TestIamPermissionsRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                    /// this will return an empty set of permissions, not a NOT_FOUND error.Note: This operation is
+                    /// designed to be used for building permission-aware UIs and command-line tools, not for
+                    /// authorization checking. This operation may "fail open" without warning.
+                    /// </summary>
+                    public class TestIamPermissionsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.TestIamPermissionsResponse>
+                    {
+                        /// <summary>Constructs a new TestIamPermissions request.</summary>
+                        public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.TestIamPermissionsRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The resource for which the policy detail is being requested. See Resource names
+                        /// (https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                        /// field.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Logging.v2.Data.TestIamPermissionsRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "testIamPermissions";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+resource}:testIamPermissions";
+
+                        /// <summary>Initializes TestIamPermissions parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/buckets/[^/]+/views/[^/]+$",
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>
@@ -10652,7 +17085,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogBucket body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -10679,7 +17112,8 @@ namespace Google.Apis.Logging.v2
 
                     /// <summary>
                     /// Required. A client-assigned identifier such as "my-bucket". Identifiers are limited to 100
-                    /// characters and can include only letters, digits, underscores, hyphens, and periods.
+                    /// characters and can include only letters, digits, underscores, hyphens, and periods. Bucket
+                    /// identifiers must start with an alphanumeric character.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("bucketId", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string BucketId { get; set; }
@@ -10723,6 +17157,88 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
+                /// Creates a log bucket asynchronously that can be used to store log entries.After a bucket has been
+                /// created, the bucket's location cannot be changed.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The resource in which to create the log bucket:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For example:"projects/my-project/locations/global"
+                /// </param>
+                public virtual CreateAsyncRequest CreateAsync(Google.Apis.Logging.v2.Data.LogBucket body, string parent)
+                {
+                    return new CreateAsyncRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Creates a log bucket asynchronously that can be used to store log entries.After a bucket has been
+                /// created, the bucket's location cannot be changed.
+                /// </summary>
+                public class CreateAsyncRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new CreateAsync request.</summary>
+                    public CreateAsyncRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogBucket body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource in which to create the log bucket:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For
+                    /// example:"projects/my-project/locations/global"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. A client-assigned identifier such as "my-bucket". Identifiers are limited to 100
+                    /// characters and can include only letters, digits, underscores, hyphens, and periods. Bucket
+                    /// identifiers must start with an alphanumeric character.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("bucketId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string BucketId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogBucket Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "createAsync";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/buckets:createAsync";
+
+                    /// <summary>Initializes CreateAsync parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("bucketId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "bucketId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
                 /// Deletes a log bucket.Changes the bucket's lifecycle_state to the DELETE_REQUESTED state. After 7
                 /// days, the bucket will be purged and all log entries in the bucket will be permanently deleted.
                 /// </summary>
@@ -10736,7 +17252,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -10798,7 +17314,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a log bucket.</summary>
@@ -10857,7 +17373,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists log buckets.</summary>
@@ -10938,9 +17454,7 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
-                /// Updates a log bucket. This method replaces the following fields in the existing bucket with values
-                /// from the new bucket: retention_periodIf the retention period is decreased and the bucket is locked,
-                /// FAILED_PRECONDITION will be returned.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// Updates a log bucket.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
                 /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
                 /// be changed.
                 /// </summary>
@@ -10955,13 +17469,11 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogBucket body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates a log bucket. This method replaces the following fields in the existing bucket with values
-                /// from the new bucket: retention_periodIf the retention period is decreased and the bucket is locked,
-                /// FAILED_PRECONDITION will be returned.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// Updates a log bucket.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
                 /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
                 /// be changed.
                 /// </summary>
@@ -11049,7 +17561,7 @@ namespace Google.Apis.Logging.v2
                 /// </param>
                 public virtual UndeleteRequest Undelete(Google.Apis.Logging.v2.Data.UndeleteBucketRequest body, string name)
                 {
-                    return new UndeleteRequest(service, body, name);
+                    return new UndeleteRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -11106,6 +17618,459 @@ namespace Google.Apis.Logging.v2
                         });
                     }
                 }
+
+                /// <summary>
+                /// Updates a log bucket asynchronously.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
+                /// be changed.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. The full resource name of the bucket to update.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+                /// example:"projects/my-project/locations/global/buckets/my-bucket"
+                /// </param>
+                public virtual UpdateAsyncRequest UpdateAsync(Google.Apis.Logging.v2.Data.LogBucket body, string name)
+                {
+                    return new UpdateAsyncRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Updates a log bucket asynchronously.If the bucket has a lifecycle_state of DELETE_REQUESTED, then
+                /// FAILED_PRECONDITION will be returned.After a bucket has been created, the bucket's location cannot
+                /// be changed.
+                /// </summary>
+                public class UpdateAsyncRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new UpdateAsync request.</summary>
+                    public UpdateAsyncRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogBucket body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The full resource name of the bucket to update.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+                    /// example:"projects/my-project/locations/global/buckets/my-bucket"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. Field mask that specifies the fields in bucket that need an update. A bucket field
+                    /// will be overwritten if, and only if, it is in the update mask. name and output only fields
+                    /// cannot be updated.For a detailed FieldMask definition, see:
+                    /// https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMaskFor
+                    /// example: updateMask=retention_days
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogBucket Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "updateAsync";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}:updateAsync";
+
+                    /// <summary>Initializes UpdateAsync parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/buckets/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the LogScopes resource.</summary>
+            public virtual LogScopesResource LogScopes { get; }
+
+            /// <summary>The "logScopes" collection of methods.</summary>
+            public class LogScopesResource
+            {
+                private const string Resource = "logScopes";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public LogScopesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a log scope.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent project in which to create the log scope
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For example:"projects/my-project/locations/global"
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogScope body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a log scope.</summary>
+                public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogScope>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogScope body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent project in which to create the log scope
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For
+                    /// example:"projects/my-project/locations/global"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. A client-assigned identifier such as "log-scope". Identifiers are limited to 100
+                    /// characters and can include only letters, digits, underscores, hyphens, and periods. First
+                    /// character has to be alphanumeric.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("logScopeId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string LogScopeId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogScope Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/logScopes";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("logScopeId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "logScopeId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a log scope.</summary>
+                /// <param name="name">
+                /// Required. The resource name of the log scope to delete:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/logScopes/[LOG_SCOPE_ID]" For
+                /// example:"projects/my-project/locations/global/logScopes/my-log-scope"
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a log scope.</summary>
+                public class DeleteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the log scope to delete:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/logScopes/[LOG_SCOPE_ID]" For
+                    /// example:"projects/my-project/locations/global/logScopes/my-log-scope"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/logScopes/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets a log scope.</summary>
+                /// <param name="name">
+                /// Required. The resource name of the log scope:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/logScopes/[LOG_SCOPE_ID]" For
+                /// example:"projects/my-project/locations/global/logScopes/my-log-scope"
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets a log scope.</summary>
+                public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogScope>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the log scope:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/logScopes/[LOG_SCOPE_ID]" For
+                    /// example:"projects/my-project/locations/global/logScopes/my-log-scope"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/logScopes/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists log scopes.</summary>
+                /// <param name="parent">
+                /// Required. The parent resource whose log scopes are to be listed:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists log scopes.</summary>
+                public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListLogScopesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource whose log scopes are to be listed:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The maximum number of results to return from this request.Non-positive values are
+                    /// ignored. The presence of nextPageToken in the response indicates that more results might be
+                    /// available.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If present, then retrieve the next batch of results from the preceding call to this
+                    /// method. pageToken must be the value of nextPageToken from the previous response. The values of
+                    /// other method parameters should be identical to those in the previous call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/logScopes";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates a log scope.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Output only. The resource name of the log scope.Log scopes are only available in the global
+                /// location. For example:projects/my-project/locations/global/logScopes/my-log-scope
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogScope body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates a log scope.</summary>
+                public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogScope>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.LogScope body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Output only. The resource name of the log scope.Log scopes are only available in the global
+                    /// location. For example:projects/my-project/locations/global/logScopes/my-log-scope
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Field mask that specifies the fields in log_scope that need an update. A field will be
+                    /// overwritten if, and only if, it is in the update mask. name and output only fields cannot be
+                    /// updated.For a detailed FieldMask definition, see
+                    /// https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMaskFor
+                    /// example: updateMask=description
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.LogScope Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/logScopes/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Operations resource.</summary>
@@ -11137,7 +18102,7 @@ namespace Google.Apis.Logging.v2
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.Logging.v2.Data.CancelOperationRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -11199,7 +18164,7 @@ namespace Google.Apis.Logging.v2
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -11245,27 +18210,17 @@ namespace Google.Apis.Logging.v2
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding
-                /// to use different resource name schemes, such as users/*/operations. To override the binding, API
-                /// services can add a binding such as "/v1/{name=users/*}/operations" to their service configuration.
-                /// For backwards compatibility, the default name includes the operations collection id, however
-                /// overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns UNIMPLEMENTED.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding
-                /// to use different resource name schemes, such as users/*/operations. To override the binding, API
-                /// services can add a binding such as "/v1/{name=users/*}/operations" to their service configuration.
-                /// For backwards compatibility, the default name includes the operations collection id, however
-                /// overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns UNIMPLEMENTED.
                 /// </summary>
                 public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListOperationsResponse>
                 {
@@ -11341,11 +18296,562 @@ namespace Google.Apis.Logging.v2
                 }
             }
 
+            /// <summary>Gets the RecentQueries resource.</summary>
+            public virtual RecentQueriesResource RecentQueries { get; }
+
+            /// <summary>The "recentQueries" collection of methods.</summary>
+            public class RecentQueriesResource
+            {
+                private const string Resource = "recentQueries";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public RecentQueriesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Lists the RecentQueries that were created by the user making the request.</summary>
+                /// <param name="parent">
+                /// Required. The resource to which the listed queries belong.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For
+                /// example:projects/my-project/locations/us-central1Note: The location portion of the resource must be
+                /// specified, but supplying the character - in place of LOCATION_ID will return all recent queries.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists the RecentQueries that were created by the user making the request.</summary>
+                public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListRecentQueriesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource to which the listed queries belong.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For
+                    /// example:projects/my-project/locations/us-central1Note: The location portion of the resource must
+                    /// be specified, but supplying the character - in place of LOCATION_ID will return all recent
+                    /// queries.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Specifies the type ("Logging" or "OpsAnalytics") of the recent queries to list. The
+                    /// only valid value for this field is one of the two allowable type function calls, which are the
+                    /// following: type("Logging") type("OpsAnalytics")
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. The maximum number of results to return from this request. Non-positive values are
+                    /// ignored. The presence of nextPageToken in the response indicates that more results might be
+                    /// available.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If present, then retrieve the next batch of results from the preceding call to this
+                    /// method. pageToken must be the value of nextPageToken from the previous response. The values of
+                    /// other method parameters should be identical to those in the previous call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/recentQueries";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the SavedQueries resource.</summary>
+            public virtual SavedQueriesResource SavedQueries { get; }
+
+            /// <summary>The "savedQueries" collection of methods.</summary>
+            public class SavedQueriesResource
+            {
+                private const string Resource = "savedQueries";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public SavedQueriesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates a new SavedQuery for the user making the request.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource in which to create the saved query:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example: "projects/my-project/locations/global"
+                /// "organizations/123456789/locations/us-central1"
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.SavedQuery body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new SavedQuery for the user making the request.</summary>
+                public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.SavedQuery>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.SavedQuery body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource in which to create the saved query:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example:
+                    /// "projects/my-project/locations/global" "organizations/123456789/locations/us-central1"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The ID to use for the saved query, which will become the final component of the saved
+                    /// query's resource name.If the saved_query_id is not provided, the system will generate an
+                    /// alphanumeric ID.The saved_query_id is limited to 100 characters and can include only the
+                    /// following characters: upper and lower-case alphanumeric characters, underscores, hyphens,
+                    /// periods.First character has to be alphanumeric.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("savedQueryId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string SavedQueryId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.SavedQuery Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/savedQueries";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("savedQueryId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "savedQueryId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes an existing SavedQuery that was created by the user making the request.</summary>
+                /// <param name="name">
+                /// Required. The full resource name of the saved query to delete.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes an existing SavedQuery that was created by the user making the request.</summary>
+                public class DeleteRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The full resource name of the saved query to delete.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                    /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/savedQueries/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Returns all data associated with the requested query.</summary>
+                /// <param name="name">
+                /// Required. The resource name of the saved query.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Returns all data associated with the requested query.</summary>
+                public class GetRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.SavedQuery>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the saved query.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For example:
+                    /// "projects/my-project/locations/global/savedQueries/my-saved-query"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/savedQueries/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists the SavedQueries that were created by the user making the request.</summary>
+                /// <param name="parent">
+                /// Required. The resource to which the listed queries belong.
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example:
+                /// "projects/my-project/locations/us-central1" Note: The locations portion of the resource must be
+                /// specified. To get a list of all saved queries, a wildcard character - can be used for LOCATION_ID,
+                /// for example: "projects/my-project/locations/-"
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists the SavedQueries that were created by the user making the request.</summary>
+                public class ListRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.ListSavedQueriesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource to which the listed queries belong.
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+                    /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]"
+                    /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]"
+                    /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]" For example:
+                    /// "projects/my-project/locations/us-central1" Note: The locations portion of the resource must be
+                    /// specified. To get a list of all saved queries, a wildcard character - can be used for
+                    /// LOCATION_ID, for example: "projects/my-project/locations/-"
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Specifies the type ("Logging" or "OpsAnalytics") and the visibility (PRIVATE or
+                    /// SHARED) of the saved queries to list. If provided, the filter must contain either the type
+                    /// function or a visibility token, or both. If both are chosen, they can be placed in any order,
+                    /// but they must be joined by the AND operator or the empty character.The two supported type
+                    /// function calls are: type("Logging") type("OpsAnalytics")The two supported visibility tokens are:
+                    /// visibility = PRIVATE visibility = SHAREDFor example:type("Logging") AND visibility = PRIVATE
+                    /// visibility=SHARED type("OpsAnalytics") type("OpsAnalytics)" visibility = PRIVATE visibility =
+                    /// SHARED
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. The maximum number of results to return from this request.Non-positive values are
+                    /// ignored. The presence of nextPageToken in the response indicates that more results might be
+                    /// available.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. If present, then retrieve the next batch of results from the preceding call to this
+                    /// method. pageToken must be the value of nextPageToken from the previous response. The values of
+                    /// other method parameters should be identical to those in the previous call.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+parent}/savedQueries";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates an existing SavedQuery.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Output only. Resource name of the saved query.In the format:
+                /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For a list of supported
+                /// locations, see Supported Regions
+                /// (https://cloud.google.com/logging/docs/region-support#bucket-regions)After the saved query is
+                /// created, the location cannot be changed.If the user doesn't provide a QUERY_ID, the system will
+                /// generate an alphanumeric ID.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.SavedQuery body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates an existing SavedQuery.</summary>
+                public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.SavedQuery>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.SavedQuery body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Output only. Resource name of the saved query.In the format:
+                    /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For a list of supported
+                    /// locations, see Supported Regions
+                    /// (https://cloud.google.com/logging/docs/region-support#bucket-regions)After the saved query is
+                    /// created, the location cannot be changed.If the user doesn't provide a QUERY_ID, the system will
+                    /// generate an alphanumeric ID.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. A non-empty list of fields to change in the existing saved query. Fields are relative
+                    /// to the saved_query and new values for the fields are taken from the corresponding fields in the
+                    /// SavedQuery included in this request. Fields not mentioned in update_mask are not changed and are
+                    /// ignored in the request.To update all mutable fields, specify an update_mask of *.For example, to
+                    /// change the description and query filter text of a saved query, specify an update_mask of
+                    /// "description, query.filter".
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Logging.v2.Data.SavedQuery Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/savedQueries/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets information about a location.</summary>
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -11390,7 +18896,7 @@ namespace Google.Apis.Logging.v2
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -11507,7 +19013,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string logName)
             {
-                return new DeleteRequest(service, logName);
+                return new DeleteRequest(this.service, logName);
             }
 
             /// <summary>
@@ -11564,12 +19070,12 @@ namespace Google.Apis.Logging.v2
             /// listed.
             /// </summary>
             /// <param name="parent">
-            /// Required. The resource name that owns the logs: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
+            /// Required. The resource name to list logs for: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
             /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -11586,8 +19092,8 @@ namespace Google.Apis.Logging.v2
                 }
 
                 /// <summary>
-                /// Required. The resource name that owns the logs: projects/[PROJECT_ID]
-                /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                /// Required. The resource name to list logs for: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
+                /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -11609,13 +19115,14 @@ namespace Google.Apis.Logging.v2
                 public virtual string PageToken { get; set; }
 
                 /// <summary>
-                /// Optional. The resource name that owns the logs:
+                /// Optional. List of resource names to list logs for:
                 /// projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
                 /// organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
                 /// billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
                 /// folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]To support legacy
                 /// queries, it could also be: projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
-                /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+                /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]The resource name in the parent field is
+                /// added to this list.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resourceNames", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual Google.Apis.Util.Repeatable<string> ResourceNames { get; set; }
@@ -11694,7 +19201,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogMetric body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a logs-based metric.</summary>
@@ -11751,7 +19258,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string metricName)
             {
-                return new DeleteRequest(service, metricName);
+                return new DeleteRequest(this.service, metricName);
             }
 
             /// <summary>Deletes a logs-based metric.</summary>
@@ -11800,7 +19307,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual GetRequest Get(string metricName)
             {
-                return new GetRequest(service, metricName);
+                return new GetRequest(this.service, metricName);
             }
 
             /// <summary>Gets a logs-based metric.</summary>
@@ -11849,7 +19356,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists logs-based metrics.</summary>
@@ -11933,7 +19440,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual UpdateRequest Update(Google.Apis.Logging.v2.Data.LogMetric body, string metricName)
             {
-                return new UpdateRequest(service, body, metricName);
+                return new UpdateRequest(this.service, body, metricName);
             }
 
             /// <summary>Creates or updates a logs-based metric.</summary>
@@ -12004,9 +19511,9 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Creates a sink that exports specified log entries to a destination. The export of newly-ingested log
-            /// entries begins immediately, unless the sink's writer_identity is not permitted to write to the
-            /// destination. A sink can export log entries only from the resource owning the sink.
+            /// Creates a sink that exports specified log entries to a destination. The export begins upon ingress,
+            /// unless the sink's writer_identity is not permitted to write to the destination. A sink can export log
+            /// entries only from the resource owning the sink.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
@@ -12016,13 +19523,13 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogSink body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
-            /// Creates a sink that exports specified log entries to a destination. The export of newly-ingested log
-            /// entries begins immediately, unless the sink's writer_identity is not permitted to write to the
-            /// destination. A sink can export log entries only from the resource owning the sink.
+            /// Creates a sink that exports specified log entries to a destination. The export begins upon ingress,
+            /// unless the sink's writer_identity is not permitted to write to the destination. A sink can export log
+            /// entries only from the resource owning the sink.
             /// </summary>
             public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
             {
@@ -12043,13 +19550,23 @@ namespace Google.Apis.Logging.v2
                 public virtual string Parent { get; private set; }
 
                 /// <summary>
+                /// Optional. The service account provided by the caller that will be used to write the log entries. The
+                /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs
+                /// to a log bucket that is in a different project than the sink. When not specified, a Logging service
+                /// account will automatically be generated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string CustomWriterIdentity { get; set; }
+
+                /// <summary>
                 /// Optional. Determines the kind of IAM identity returned as writer_identity in the new sink. If this
                 /// value is omitted or set to false, and if the sink's parent is a project, then the value returned as
                 /// writer_identity is the same group or service account used by Cloud Logging before the addition of
                 /// writer identities to this API. The sink's destination must be in the same project as the sink
                 /// itself.If this field is set to true, or if the sink is owned by a non-project resource such as an
-                /// organization, then the value of writer_identity will be a unique service account used only for
-                /// exports from the new sink. For more information, see writer_identity in LogSink.
+                /// organization, then the value of writer_identity will be a service agent
+                /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) used by the sinks with the
+                /// same parent. For more information, see writer_identity in LogSink.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -12081,6 +19598,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^projects/[^/]+$",
                     });
+                    RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "customWriterIdentity",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                     {
                         Name = "uniqueWriterIdentity",
@@ -12103,7 +19628,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual DeleteRequest Delete(string sinkName)
             {
-                return new DeleteRequest(service, sinkName);
+                return new DeleteRequest(this.service, sinkName);
             }
 
             /// <summary>
@@ -12160,7 +19685,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual GetRequest Get(string sinkName)
             {
-                return new GetRequest(service, sinkName);
+                return new GetRequest(this.service, sinkName);
             }
 
             /// <summary>Gets a sink.</summary>
@@ -12213,7 +19738,7 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists sinks.</summary>
@@ -12232,6 +19757,16 @@ namespace Google.Apis.Logging.v2
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. A filter expression to constrain the sinks returned. Today, this only supports the
+                /// following strings: '' 'in_scope("ALL")', 'in_scope("ANCESTOR")', 'in_scope("DEFAULT")'.Description
+                /// of scopes below. ALL: Includes all of the sinks which can be returned in any other scope. ANCESTOR:
+                /// Includes intercepting sinks owned by ancestor resources. DEFAULT: Includes sinks owned by
+                /// parent.When the empty string is provided, then the filter 'in_scope("DEFAULT")' is applied.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
 
                 /// <summary>
                 /// Optional. The maximum number of results to return from this request. Non-positive values are
@@ -12270,6 +19805,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^projects/[^/]+$",
                     });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
                     {
                         Name = "pageSize",
@@ -12290,9 +19833,9 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="sinkName">
@@ -12303,13 +19846,13 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Logging.v2.Data.LogSink body, string sinkName)
             {
-                return new PatchRequest(service, body, sinkName);
+                return new PatchRequest(this.service, body, sinkName);
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             public class PatchRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
             {
@@ -12332,12 +19875,22 @@ namespace Google.Apis.Logging.v2
                 public virtual string SinkName { get; private set; }
 
                 /// <summary>
+                /// Optional. The service account provided by the caller that will be used to write the log entries. The
+                /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs
+                /// to a log bucket that is in a different project than the sink. When not specified, a Logging service
+                /// account will automatically be generated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string CustomWriterIdentity { get; set; }
+
+                /// <summary>
                 /// Optional. See sinks.create for a description of this field. When updating a sink, the effect of this
                 /// field on the value of writer_identity in the updated sink depends on both the old and new values of
                 /// this field: If the old and new values of this field are both false or both true, then there is no
                 /// change to the sink's writer_identity. If the old value is false and the new value is true, then
-                /// writer_identity is changed to a unique service account. It is an error if the old value is true and
-                /// the new value is set to false or defaulted to false.
+                /// writer_identity is changed to a service agent
+                /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) owned by Cloud Logging. It
+                /// is an error if the old value is true and the new value is set to false or defaulted to false.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -12382,6 +19935,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^projects/[^/]+/sinks/[^/]+$",
                     });
+                    RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "customWriterIdentity",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                     {
                         Name = "uniqueWriterIdentity",
@@ -12402,9 +19963,9 @@ namespace Google.Apis.Logging.v2
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="sinkName">
@@ -12415,13 +19976,13 @@ namespace Google.Apis.Logging.v2
             /// </param>
             public virtual UpdateRequest Update(Google.Apis.Logging.v2.Data.LogSink body, string sinkName)
             {
-                return new UpdateRequest(service, body, sinkName);
+                return new UpdateRequest(this.service, body, sinkName);
             }
 
             /// <summary>
-            /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-            /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-            /// unique_writer_identity field.
+            /// Updates a sink. This method replaces the values of the destination and filter fields of the existing
+            /// sink with the corresponding values from the new sink.The updated sink might also have a new
+            /// writer_identity; see the unique_writer_identity field.
             /// </summary>
             public class UpdateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
             {
@@ -12444,12 +20005,22 @@ namespace Google.Apis.Logging.v2
                 public virtual string SinkName { get; private set; }
 
                 /// <summary>
+                /// Optional. The service account provided by the caller that will be used to write the log entries. The
+                /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs
+                /// to a log bucket that is in a different project than the sink. When not specified, a Logging service
+                /// account will automatically be generated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string CustomWriterIdentity { get; set; }
+
+                /// <summary>
                 /// Optional. See sinks.create for a description of this field. When updating a sink, the effect of this
                 /// field on the value of writer_identity in the updated sink depends on both the old and new values of
                 /// this field: If the old and new values of this field are both false or both true, then there is no
                 /// change to the sink's writer_identity. If the old value is false and the new value is true, then
-                /// writer_identity is changed to a unique service account. It is an error if the old value is true and
-                /// the new value is set to false or defaulted to false.
+                /// writer_identity is changed to a service agent
+                /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) owned by Cloud Logging. It
+                /// is an error if the old value is true and the new value is set to false or defaulted to false.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -12494,6 +20065,14 @@ namespace Google.Apis.Logging.v2
                         DefaultValue = null,
                         Pattern = @"^projects/[^/]+/sinks/[^/]+$",
                     });
+                    RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "customWriterIdentity",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                     {
                         Name = "uniqueWriterIdentity",
@@ -12516,26 +20095,26 @@ namespace Google.Apis.Logging.v2
 
         /// <summary>
         /// Gets the Logging CMEK settings for the given resource.Note: CMEK for the Log Router can be configured for
-        /// Google Cloud projects, folders, organizations and billing accounts. Once configured for an organization, it
-        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Logs Router
+        /// Google Cloud projects, folders, organizations, and billing accounts. Once configured for an organization, it
+        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Log Router
         /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
         /// </summary>
         /// <param name="name">
         /// Required. The resource for which to retrieve CMEK settings. "projects/[PROJECT_ID]/cmekSettings"
         /// "organizations/[ORGANIZATION_ID]/cmekSettings" "billingAccounts/[BILLING_ACCOUNT_ID]/cmekSettings"
         /// "folders/[FOLDER_ID]/cmekSettings" For example:"organizations/12345/cmekSettings"Note: CMEK for the Log
-        /// Router can be configured for Google Cloud projects, folders, organizations and billing accounts. Once
+        /// Router can be configured for Google Cloud projects, folders, organizations, and billing accounts. Once
         /// configured for an organization, it applies to all projects and folders in the Google Cloud organization.
         /// </param>
         public virtual GetCmekSettingsRequest GetCmekSettings(string name)
         {
-            return new GetCmekSettingsRequest(service, name);
+            return new GetCmekSettingsRequest(this.service, name);
         }
 
         /// <summary>
         /// Gets the Logging CMEK settings for the given resource.Note: CMEK for the Log Router can be configured for
-        /// Google Cloud projects, folders, organizations and billing accounts. Once configured for an organization, it
-        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Logs Router
+        /// Google Cloud projects, folders, organizations, and billing accounts. Once configured for an organization, it
+        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Log Router
         /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
         /// </summary>
         public class GetCmekSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.CmekSettings>
@@ -12551,7 +20130,7 @@ namespace Google.Apis.Logging.v2
             /// Required. The resource for which to retrieve CMEK settings. "projects/[PROJECT_ID]/cmekSettings"
             /// "organizations/[ORGANIZATION_ID]/cmekSettings" "billingAccounts/[BILLING_ACCOUNT_ID]/cmekSettings"
             /// "folders/[FOLDER_ID]/cmekSettings" For example:"organizations/12345/cmekSettings"Note: CMEK for the Log
-            /// Router can be configured for Google Cloud projects, folders, organizations and billing accounts. Once
+            /// Router can be configured for Google Cloud projects, folders, organizations, and billing accounts. Once
             /// configured for an organization, it applies to all projects and folders in the Google Cloud organization.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -12567,6 +20146,69 @@ namespace Google.Apis.Logging.v2
             public override string RestPath => "v2/{+name}/cmekSettings";
 
             /// <summary>Initializes GetCmekSettings parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^projects/[^/]+$",
+                });
+            }
+        }
+
+        /// <summary>
+        /// Gets the settings for the given resource.Note: Settings can be retrieved for Google Cloud projects, folders,
+        /// organizations, and billing accounts.See View default resource settings for Logging
+        /// (https://cloud.google.com/logging/docs/default-settings#view-org-settings) for more information.
+        /// </summary>
+        /// <param name="name">
+        /// Required. The resource for which to retrieve settings. "projects/[PROJECT_ID]/settings"
+        /// "organizations/[ORGANIZATION_ID]/settings" "billingAccounts/[BILLING_ACCOUNT_ID]/settings"
+        /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"Note: Settings can be retrieved for
+        /// Google Cloud projects, folders, organizations, and billing accounts.
+        /// </param>
+        public virtual GetSettingsRequest GetSettings(string name)
+        {
+            return new GetSettingsRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Gets the settings for the given resource.Note: Settings can be retrieved for Google Cloud projects, folders,
+        /// organizations, and billing accounts.See View default resource settings for Logging
+        /// (https://cloud.google.com/logging/docs/default-settings#view-org-settings) for more information.
+        /// </summary>
+        public class GetSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Settings>
+        {
+            /// <summary>Constructs a new GetSettings request.</summary>
+            public GetSettingsRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The resource for which to retrieve settings. "projects/[PROJECT_ID]/settings"
+            /// "organizations/[ORGANIZATION_ID]/settings" "billingAccounts/[BILLING_ACCOUNT_ID]/settings"
+            /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"Note: Settings can be retrieved
+            /// for Google Cloud projects, folders, organizations, and billing accounts.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getSettings";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v2/{+name}/settings";
+
+            /// <summary>Initializes GetSettings parameter list.</summary>
             protected override void InitParameters()
             {
                 base.InitParameters();
@@ -12597,9 +20239,9 @@ namespace Google.Apis.Logging.v2
         }
 
         /// <summary>
-        /// Creates a sink that exports specified log entries to a destination. The export of newly-ingested log entries
-        /// begins immediately, unless the sink's writer_identity is not permitted to write to the destination. A sink
-        /// can export log entries only from the resource owning the sink.
+        /// Creates a sink that exports specified log entries to a destination. The export begins upon ingress, unless
+        /// the sink's writer_identity is not permitted to write to the destination. A sink can export log entries only
+        /// from the resource owning the sink.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="parent">
@@ -12609,13 +20251,13 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual CreateRequest Create(Google.Apis.Logging.v2.Data.LogSink body, string parent)
         {
-            return new CreateRequest(service, body, parent);
+            return new CreateRequest(this.service, body, parent);
         }
 
         /// <summary>
-        /// Creates a sink that exports specified log entries to a destination. The export of newly-ingested log entries
-        /// begins immediately, unless the sink's writer_identity is not permitted to write to the destination. A sink
-        /// can export log entries only from the resource owning the sink.
+        /// Creates a sink that exports specified log entries to a destination. The export begins upon ingress, unless
+        /// the sink's writer_identity is not permitted to write to the destination. A sink can export log entries only
+        /// from the resource owning the sink.
         /// </summary>
         public class CreateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
         {
@@ -12636,13 +20278,23 @@ namespace Google.Apis.Logging.v2
             public virtual string Parent { get; private set; }
 
             /// <summary>
+            /// Optional. The service account provided by the caller that will be used to write the log entries. The
+            /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs to
+            /// a log bucket that is in a different project than the sink. When not specified, a Logging service account
+            /// will automatically be generated.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string CustomWriterIdentity { get; set; }
+
+            /// <summary>
             /// Optional. Determines the kind of IAM identity returned as writer_identity in the new sink. If this value
             /// is omitted or set to false, and if the sink's parent is a project, then the value returned as
             /// writer_identity is the same group or service account used by Cloud Logging before the addition of writer
             /// identities to this API. The sink's destination must be in the same project as the sink itself.If this
             /// field is set to true, or if the sink is owned by a non-project resource such as an organization, then
-            /// the value of writer_identity will be a unique service account used only for exports from the new sink.
-            /// For more information, see writer_identity in LogSink.
+            /// the value of writer_identity will be a service agent
+            /// (https://cloud.google.com/iam/docs/service-account-types#service-agents) used by the sinks with the same
+            /// parent. For more information, see writer_identity in LogSink.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -12674,6 +20326,14 @@ namespace Google.Apis.Logging.v2
                     DefaultValue = null,
                     Pattern = @"^[^/]+/[^/]+$",
                 });
+                RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "customWriterIdentity",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                 {
                     Name = "uniqueWriterIdentity",
@@ -12696,7 +20356,7 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual DeleteRequest Delete(string sinkName)
         {
-            return new DeleteRequest(service, sinkName);
+            return new DeleteRequest(this.service, sinkName);
         }
 
         /// <summary>
@@ -12752,7 +20412,7 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual GetRequest Get(string sinkName)
         {
-            return new GetRequest(service, sinkName);
+            return new GetRequest(this.service, sinkName);
         }
 
         /// <summary>Gets a sink.</summary>
@@ -12804,7 +20464,7 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual ListRequest List(string parent)
         {
-            return new ListRequest(service, parent);
+            return new ListRequest(this.service, parent);
         }
 
         /// <summary>Lists sinks.</summary>
@@ -12823,6 +20483,16 @@ namespace Google.Apis.Logging.v2
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Parent { get; private set; }
+
+            /// <summary>
+            /// Optional. A filter expression to constrain the sinks returned. Today, this only supports the following
+            /// strings: '' 'in_scope("ALL")', 'in_scope("ANCESTOR")', 'in_scope("DEFAULT")'.Description of scopes
+            /// below. ALL: Includes all of the sinks which can be returned in any other scope. ANCESTOR: Includes
+            /// intercepting sinks owned by ancestor resources. DEFAULT: Includes sinks owned by parent.When the empty
+            /// string is provided, then the filter 'in_scope("DEFAULT")' is applied.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Filter { get; set; }
 
             /// <summary>
             /// Optional. The maximum number of results to return from this request. Non-positive values are ignored.
@@ -12860,6 +20530,14 @@ namespace Google.Apis.Logging.v2
                     DefaultValue = null,
                     Pattern = @"^[^/]+/[^/]+$",
                 });
+                RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "filter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
                 {
                     Name = "pageSize",
@@ -12880,9 +20558,9 @@ namespace Google.Apis.Logging.v2
         }
 
         /// <summary>
-        /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-        /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-        /// unique_writer_identity field.
+        /// Updates a sink. This method replaces the values of the destination and filter fields of the existing sink
+        /// with the corresponding values from the new sink.The updated sink might also have a new writer_identity; see
+        /// the unique_writer_identity field.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="sinkName">
@@ -12893,13 +20571,13 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.Logging.v2.Data.LogSink body, string sinkName)
         {
-            return new UpdateRequest(service, body, sinkName);
+            return new UpdateRequest(this.service, body, sinkName);
         }
 
         /// <summary>
-        /// Updates a sink. This method replaces the following fields in the existing sink with values from the new
-        /// sink: destination, and filter.The updated sink might also have a new writer_identity; see the
-        /// unique_writer_identity field.
+        /// Updates a sink. This method replaces the values of the destination and filter fields of the existing sink
+        /// with the corresponding values from the new sink.The updated sink might also have a new writer_identity; see
+        /// the unique_writer_identity field.
         /// </summary>
         public class UpdateRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.LogSink>
         {
@@ -12921,12 +20599,22 @@ namespace Google.Apis.Logging.v2
             public virtual string SinkName { get; private set; }
 
             /// <summary>
+            /// Optional. The service account provided by the caller that will be used to write the log entries. The
+            /// format must be serviceAccount:some@email. This field can only be specified when you are routing logs to
+            /// a log bucket that is in a different project than the sink. When not specified, a Logging service account
+            /// will automatically be generated.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("customWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string CustomWriterIdentity { get; set; }
+
+            /// <summary>
             /// Optional. See sinks.create for a description of this field. When updating a sink, the effect of this
             /// field on the value of writer_identity in the updated sink depends on both the old and new values of this
             /// field: If the old and new values of this field are both false or both true, then there is no change to
             /// the sink's writer_identity. If the old value is false and the new value is true, then writer_identity is
-            /// changed to a unique service account. It is an error if the old value is true and the new value is set to
-            /// false or defaulted to false.
+            /// changed to a service agent (https://cloud.google.com/iam/docs/service-account-types#service-agents)
+            /// owned by Cloud Logging. It is an error if the old value is true and the new value is set to false or
+            /// defaulted to false.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("uniqueWriterIdentity", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> UniqueWriterIdentity { get; set; }
@@ -12970,6 +20658,14 @@ namespace Google.Apis.Logging.v2
                     DefaultValue = null,
                     Pattern = @"^[^/]+/[^/]+/sinks/[^/]+$",
                 });
+                RequestParameters.Add("customWriterIdentity", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "customWriterIdentity",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("uniqueWriterIdentity", new Google.Apis.Discovery.Parameter
                 {
                     Name = "uniqueWriterIdentity",
@@ -13006,26 +20702,26 @@ namespace Google.Apis.Logging.v2
 
         /// <summary>
         /// Gets the Logging CMEK settings for the given resource.Note: CMEK for the Log Router can be configured for
-        /// Google Cloud projects, folders, organizations and billing accounts. Once configured for an organization, it
-        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Logs Router
+        /// Google Cloud projects, folders, organizations, and billing accounts. Once configured for an organization, it
+        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Log Router
         /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
         /// </summary>
         /// <param name="name">
         /// Required. The resource for which to retrieve CMEK settings. "projects/[PROJECT_ID]/cmekSettings"
         /// "organizations/[ORGANIZATION_ID]/cmekSettings" "billingAccounts/[BILLING_ACCOUNT_ID]/cmekSettings"
         /// "folders/[FOLDER_ID]/cmekSettings" For example:"organizations/12345/cmekSettings"Note: CMEK for the Log
-        /// Router can be configured for Google Cloud projects, folders, organizations and billing accounts. Once
+        /// Router can be configured for Google Cloud projects, folders, organizations, and billing accounts. Once
         /// configured for an organization, it applies to all projects and folders in the Google Cloud organization.
         /// </param>
         public virtual GetCmekSettingsRequest GetCmekSettings(string name)
         {
-            return new GetCmekSettingsRequest(service, name);
+            return new GetCmekSettingsRequest(this.service, name);
         }
 
         /// <summary>
         /// Gets the Logging CMEK settings for the given resource.Note: CMEK for the Log Router can be configured for
-        /// Google Cloud projects, folders, organizations and billing accounts. Once configured for an organization, it
-        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Logs Router
+        /// Google Cloud projects, folders, organizations, and billing accounts. Once configured for an organization, it
+        /// applies to all projects and folders in the Google Cloud organization.See Enabling CMEK for Log Router
         /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
         /// </summary>
         public class GetCmekSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.CmekSettings>
@@ -13041,7 +20737,7 @@ namespace Google.Apis.Logging.v2
             /// Required. The resource for which to retrieve CMEK settings. "projects/[PROJECT_ID]/cmekSettings"
             /// "organizations/[ORGANIZATION_ID]/cmekSettings" "billingAccounts/[BILLING_ACCOUNT_ID]/cmekSettings"
             /// "folders/[FOLDER_ID]/cmekSettings" For example:"organizations/12345/cmekSettings"Note: CMEK for the Log
-            /// Router can be configured for Google Cloud projects, folders, organizations and billing accounts. Once
+            /// Router can be configured for Google Cloud projects, folders, organizations, and billing accounts. Once
             /// configured for an organization, it applies to all projects and folders in the Google Cloud organization.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -13072,12 +20768,76 @@ namespace Google.Apis.Logging.v2
         }
 
         /// <summary>
+        /// Gets the settings for the given resource.Note: Settings can be retrieved for Google Cloud projects, folders,
+        /// organizations, and billing accounts.See View default resource settings for Logging
+        /// (https://cloud.google.com/logging/docs/default-settings#view-org-settings) for more information.
+        /// </summary>
+        /// <param name="name">
+        /// Required. The resource for which to retrieve settings. "projects/[PROJECT_ID]/settings"
+        /// "organizations/[ORGANIZATION_ID]/settings" "billingAccounts/[BILLING_ACCOUNT_ID]/settings"
+        /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"Note: Settings can be retrieved for
+        /// Google Cloud projects, folders, organizations, and billing accounts.
+        /// </param>
+        public virtual GetSettingsRequest GetSettings(string name)
+        {
+            return new GetSettingsRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Gets the settings for the given resource.Note: Settings can be retrieved for Google Cloud projects, folders,
+        /// organizations, and billing accounts.See View default resource settings for Logging
+        /// (https://cloud.google.com/logging/docs/default-settings#view-org-settings) for more information.
+        /// </summary>
+        public class GetSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Settings>
+        {
+            /// <summary>Constructs a new GetSettings request.</summary>
+            public GetSettingsRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The resource for which to retrieve settings. "projects/[PROJECT_ID]/settings"
+            /// "organizations/[ORGANIZATION_ID]/settings" "billingAccounts/[BILLING_ACCOUNT_ID]/settings"
+            /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"Note: Settings can be retrieved
+            /// for Google Cloud projects, folders, organizations, and billing accounts.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getSettings";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v2/{+name}/settings";
+
+            /// <summary>Initializes GetSettings parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^[^/]+/[^/]+$",
+                });
+            }
+        }
+
+        /// <summary>
         /// Updates the Log Router CMEK settings for the given resource.Note: CMEK for the Log Router can currently only
         /// be configured for Google Cloud organizations. Once configured, it applies to all projects and folders in the
-        /// Google Cloud organization.UpdateCmekSettings will fail if 1) kms_key_name is invalid, or 2) the associated
-        /// service account does not have the required roles/cloudkms.cryptoKeyEncrypterDecrypter role assigned for the
-        /// key, or 3) access to the key is disabled.See Enabling CMEK for Log Router
-        /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
+        /// Google Cloud organization.UpdateCmekSettings fails when any of the following are true: The value of
+        /// kms_key_name is invalid. The associated service account doesn't have the required
+        /// roles/cloudkms.cryptoKeyEncrypterDecrypter role assigned for the key. Access to the key is disabled.See
+        /// Enabling CMEK for Log Router (https://cloud.google.com/logging/docs/routing/managed-encryption) for more
+        /// information.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="name">
@@ -13089,16 +20849,17 @@ namespace Google.Apis.Logging.v2
         /// </param>
         public virtual UpdateCmekSettingsRequest UpdateCmekSettings(Google.Apis.Logging.v2.Data.CmekSettings body, string name)
         {
-            return new UpdateCmekSettingsRequest(service, body, name);
+            return new UpdateCmekSettingsRequest(this.service, body, name);
         }
 
         /// <summary>
         /// Updates the Log Router CMEK settings for the given resource.Note: CMEK for the Log Router can currently only
         /// be configured for Google Cloud organizations. Once configured, it applies to all projects and folders in the
-        /// Google Cloud organization.UpdateCmekSettings will fail if 1) kms_key_name is invalid, or 2) the associated
-        /// service account does not have the required roles/cloudkms.cryptoKeyEncrypterDecrypter role assigned for the
-        /// key, or 3) access to the key is disabled.See Enabling CMEK for Log Router
-        /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
+        /// Google Cloud organization.UpdateCmekSettings fails when any of the following are true: The value of
+        /// kms_key_name is invalid. The associated service account doesn't have the required
+        /// roles/cloudkms.cryptoKeyEncrypterDecrypter role assigned for the key. Access to the key is disabled.See
+        /// Enabling CMEK for Log Router (https://cloud.google.com/logging/docs/routing/managed-encryption) for more
+        /// information.
         /// </summary>
         public class UpdateCmekSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.CmekSettings>
         {
@@ -13165,10 +20926,117 @@ namespace Google.Apis.Logging.v2
                 });
             }
         }
+
+        /// <summary>
+        /// Updates the settings for the given resource. This method applies to all feature configurations for
+        /// organization and folders.UpdateSettings fails when any of the following are true: The value of
+        /// storage_location either isn't supported by Logging or violates the location OrgPolicy. The
+        /// default_sink_config field is set, but it has an unspecified filter write mode. The value of kms_key_name is
+        /// invalid. The associated service account doesn't have the required roles/cloudkms.cryptoKeyEncrypterDecrypter
+        /// role assigned for the key. Access to the key is disabled.See Configure default settings for organizations
+        /// and folders (https://cloud.google.com/logging/docs/default-settings) for more information.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="name">
+        /// Required. The resource name for the settings to update. "organizations/[ORGANIZATION_ID]/settings"
+        /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"
+        /// </param>
+        public virtual UpdateSettingsRequest UpdateSettings(Google.Apis.Logging.v2.Data.Settings body, string name)
+        {
+            return new UpdateSettingsRequest(this.service, body, name);
+        }
+
+        /// <summary>
+        /// Updates the settings for the given resource. This method applies to all feature configurations for
+        /// organization and folders.UpdateSettings fails when any of the following are true: The value of
+        /// storage_location either isn't supported by Logging or violates the location OrgPolicy. The
+        /// default_sink_config field is set, but it has an unspecified filter write mode. The value of kms_key_name is
+        /// invalid. The associated service account doesn't have the required roles/cloudkms.cryptoKeyEncrypterDecrypter
+        /// role assigned for the key. Access to the key is disabled.See Configure default settings for organizations
+        /// and folders (https://cloud.google.com/logging/docs/default-settings) for more information.
+        /// </summary>
+        public class UpdateSettingsRequest : LoggingBaseServiceRequest<Google.Apis.Logging.v2.Data.Settings>
+        {
+            /// <summary>Constructs a new UpdateSettings request.</summary>
+            public UpdateSettingsRequest(Google.Apis.Services.IClientService service, Google.Apis.Logging.v2.Data.Settings body, string name) : base(service)
+            {
+                Name = name;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The resource name for the settings to update. "organizations/[ORGANIZATION_ID]/settings"
+            /// "folders/[FOLDER_ID]/settings" For example:"organizations/12345/settings"
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>
+            /// Optional. Field mask identifying which fields from settings should be updated. A field will be
+            /// overwritten if and only if it is in the update mask. Output only fields cannot be updated.See FieldMask
+            /// for more information.For example: "updateMask=kmsKeyName"
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual object UpdateMask { get; set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Logging.v2.Data.Settings Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "updateSettings";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "PATCH";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v2/{+name}/settings";
+
+            /// <summary>Initializes UpdateSettings parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^[^/]+/[^/]+$",
+                });
+                RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "updateMask",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
     }
 }
 namespace Google.Apis.Logging.v2.Data
 {
+    /// <summary>Describes a BigQuery dataset that was created by a link.</summary>
+    public class BigQueryDataset : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. The full resource name of the BigQuery dataset. The DATASET_ID will match the ID of the link,
+        /// so the link must match the naming restrictions of BigQuery datasets (alphanumeric characters and underscores
+        /// only).The dataset will have a resource path of
+        /// "bigquery.googleapis.com/projects/PROJECT_ID/datasets/DATASET_ID"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetId")]
+        public virtual string DatasetId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Options that change functionality of a sink exporting data to BigQuery.</summary>
     public class BigQueryOptions : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -13183,13 +21051,178 @@ namespace Google.Apis.Logging.v2.Data
         public virtual System.Nullable<bool> UsePartitionedTables { get; set; }
 
         /// <summary>
-        /// Output only. True if new timestamp column based partitioning is in use, false if legacy ingestion-time
+        /// Output only. True if new timestamp column based partitioning is in use, false if legacy ingress-time
         /// partitioning is in use.All new sinks will have this field set true and will use timestamp column based
         /// partitioning. If use_partitioned_tables is false, this value has no meaning and will be false. Legacy sinks
         /// using partitioned tables will have this field set to false.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("usesTimestampColumnPartitioning")]
         public virtual System.Nullable<bool> UsesTimestampColumnPartitioning { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Associates members, or principals, with a role.</summary>
+    public class Binding : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The condition that is associated with this binding.If the condition evaluates to true, then this binding
+        /// applies to the current request.If the condition evaluates to false, then this binding does not apply to the
+        /// current request. However, a different role binding might grant the same role to one or more of the
+        /// principals in this binding.To learn which resources support conditions in their IAM policies, see the IAM
+        /// documentation (https://cloud.google.com/iam/help/conditions/resource-policies).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("condition")]
+        public virtual Expr Condition { get; set; }
+
+        /// <summary>
+        /// Specifies the principals requesting access for a Google Cloud resource. members can have the following
+        /// values: allUsers: A special identifier that represents anyone who is on the internet; with or without a
+        /// Google account. allAuthenticatedUsers: A special identifier that represents anyone who is authenticated with
+        /// a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. user:{emailid}: An email address that represents a specific
+        /// Google account. For example, alice@example.com . serviceAccount:{emailid}: An email address that represents
+        /// a Google service account. For example, my-other-app@appspot.gserviceaccount.com.
+        /// serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]: An identifier for a Kubernetes service
+        /// account (https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For example,
+        /// my-project.svc.id.goog[my-namespace/my-kubernetes-sa]. group:{emailid}: An email address that represents a
+        /// Google group. For example, admins@example.com. domain:{domain}: The G Suite domain (primary) that represents
+        /// all the users of that domain. For example, google.com or example.com.
+        /// principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}:
+        /// A single identity in a workforce identity pool.
+        /// principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}: All workforce
+        /// identities in a group.
+        /// principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}:
+        /// All workforce identities with a specific attribute value.
+        /// principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*: All identities in a workforce
+        /// identity pool.
+        /// principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}:
+        /// A single identity in a workload identity pool.
+        /// principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}:
+        /// A workload identity pool group.
+        /// principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}:
+        /// All identities in a workload identity pool with a certain attribute.
+        /// principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*:
+        /// All identities in a workload identity pool. deleted:user:{emailid}?uid={uniqueid}: An email address (plus
+        /// unique identifier) representing a user that has been recently deleted. For example,
+        /// alice@example.com?uid=123456789012345678901. If the user is recovered, this value reverts to user:{emailid}
+        /// and the recovered user retains the role in the binding. deleted:serviceAccount:{emailid}?uid={uniqueid}: An
+        /// email address (plus unique identifier) representing a service account that has been recently deleted. For
+        /// example, my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901. If the service account is
+        /// undeleted, this value reverts to serviceAccount:{emailid} and the undeleted service account retains the role
+        /// in the binding. deleted:group:{emailid}?uid={uniqueid}: An email address (plus unique identifier)
+        /// representing a Google group that has been recently deleted. For example,
+        /// admins@example.com?uid=123456789012345678901. If the group is recovered, this value reverts to
+        /// group:{emailid} and the recovered group retains the role in the binding.
+        /// deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("members")]
+        public virtual System.Collections.Generic.IList<string> Members { get; set; }
+
+        /// <summary>
+        /// Role that is assigned to the list of members, or principals. For example, roles/viewer, roles/editor, or
+        /// roles/owner.For an overview of the IAM roles and permissions, see the IAM documentation
+        /// (https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined roles, see here
+        /// (https://cloud.google.com/iam/docs/understanding-roles).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("role")]
+        public virtual string Role { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for LongRunningUpdateBucket Operations.</summary>
+    public class BucketMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>LongRunningCreateBucket RPC request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createBucketRequest")]
+        public virtual CreateBucketRequest CreateBucketRequest { get; set; }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>The end time of an operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>The create time of an operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. State of an operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>LongRunningUpdateBucket RPC request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateBucketRequest")]
+        public virtual UpdateBucketRequest UpdateBucketRequest { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -13241,10 +21274,10 @@ namespace Google.Apis.Logging.v2.Data
     public class CmekSettings : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The resource name for the configured Cloud KMS key.KMS key name format:
+        /// Optional. The resource name for the configured Cloud KMS key.KMS key name format:
         /// "projects/[PROJECT_ID]/locations/[LOCATION]/keyRings/[KEYRING]/cryptoKeys/[KEY]" For
         /// example:"projects/my-project/locations/us-central1/keyRings/my-ring/cryptoKeys/my-key"To enable CMEK for the
-        /// Log Router, set this field to a valid kms_key_name for which the associated service account has the required
+        /// Log Router, set this field to a valid kms_key_name for which the associated service account has the needed
         /// cloudkms.cryptoKeyEncrypterDecrypter roles assigned for the key.The Cloud KMS key used by the Log Router can
         /// be updated by changing the kms_key_name to a new valid key name or disabled by setting the key name to an
         /// empty string. Encryption operations that are in progress will be completed with the key that was in use when
@@ -13256,6 +21289,18 @@ namespace Google.Apis.Logging.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
         public virtual string KmsKeyName { get; set; }
 
+        /// <summary>
+        /// Output only. The CryptoKeyVersion resource name for the configured Cloud KMS key.KMS key name format:
+        /// "projects/[PROJECT_ID]/locations/[LOCATION]/keyRings/[KEYRING]/cryptoKeys/[KEY]/cryptoKeyVersions/[VERSION]"
+        /// For
+        /// example:"projects/my-project/locations/us-central1/keyRings/my-ring/cryptoKeys/my-key/cryptoKeyVersions/1"This
+        /// is a read-only field used to convey the specific configured CryptoKeyVersion of kms_key that has been
+        /// configured. It will be populated in cases where the CMEK settings are bound to a single key version.If this
+        /// field is populated, the kms_key is tied to a specific CryptoKeyVersion.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyVersionName")]
+        public virtual string KmsKeyVersionName { get; set; }
+
         /// <summary>Output only. The resource name of the CMEK settings.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -13264,7 +21309,7 @@ namespace Google.Apis.Logging.v2.Data
         /// Output only. The service account that will be used by the Log Router to access your Cloud KMS key.Before
         /// enabling CMEK for Log Router, you must first assign the cloudkms.cryptoKeyEncrypterDecrypter role to the
         /// service account that the Log Router will use to access your Cloud KMS key. Use GetCmekSettings to obtain the
-        /// service account ID.See Enabling CMEK for Logs Router
+        /// service account ID.See Enabling CMEK for Log Router
         /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("serviceAccountId")]
@@ -13281,25 +21326,109 @@ namespace Google.Apis.Logging.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cancellationRequested")]
         public virtual System.Nullable<bool> CancellationRequested { get; set; }
 
+        /// <summary>
+        /// Destination to which to copy log entries.For example, a Cloud Storage
+        /// bucket:"storage.googleapis.com/my-cloud-storage-bucket"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("destination")]
+        public virtual string Destination { get; set; }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The end time of an operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Estimated progress of the operation (0 - 100%).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("progress")]
         public virtual System.Nullable<int> Progress { get; set; }
 
-        /// <summary>CopyLogEntries RPC request.</summary>
+        /// <summary>CopyLogEntries RPC request. This field is deprecated and not used.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("request")]
         public virtual CopyLogEntriesRequest Request { get; set; }
 
+        /// <summary>
+        /// Source from which to copy log entries.For example, a log
+        /// bucket:"projects/my-project/locations/global/buckets/my-source-bucket"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("source")]
+        public virtual string Source { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The create time of an operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
 
-        /// <summary>State of an operation.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. State of an operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
+
+        /// <summary>Name of the verb executed by the operation.For example,"copy"</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verb")]
+        public virtual string Verb { get; set; }
 
         /// <summary>
         /// The IAM identity of a service account that must be granted access to the destination.If the service account
@@ -13316,7 +21445,9 @@ namespace Google.Apis.Logging.v2.Data
     /// <summary>The parameters to CopyLogEntries.</summary>
     public class CopyLogEntriesRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Required. Destination to which to copy log entries.</summary>
+        /// <summary>
+        /// Required. Destination to which to copy log entries. For example: "storage.googleapis.com/GCS_BUCKET"
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("destination")]
         public virtual string Destination { get; set; }
 
@@ -13349,11 +21480,118 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The parameters to CreateBucket.</summary>
+    public class CreateBucketRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The new bucket. The region specified in the new bucket must be compliant with any Location
+        /// Restriction Org Policy. The name field in the bucket is ignored.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bucket")]
+        public virtual LogBucket Bucket { get; set; }
+
+        /// <summary>
+        /// Required. A client-assigned identifier such as "my-bucket". Identifiers are limited to 100 characters and
+        /// can include only letters, digits, underscores, hyphens, and periods. Bucket identifiers must start with an
+        /// alphanumeric character.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bucketId")]
+        public virtual string BucketId { get; set; }
+
+        /// <summary>
+        /// Required. The resource in which to create the log bucket: "projects/[PROJECT_ID]/locations/[LOCATION_ID]"
+        /// For example:"projects/my-project/locations/global"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parent")]
+        public virtual string Parent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The parameters to CreateLink.</summary>
+    public class CreateLinkRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The new link.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("link")]
+        public virtual Link Link { get; set; }
+
+        /// <summary>
+        /// Required. The ID to use for the link. The link_id can have up to 100 characters. A valid link_id must only
+        /// have alphanumeric characters and underscores within it.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("linkId")]
+        public virtual string LinkId { get; set; }
+
+        /// <summary>
+        /// Required. The full resource name of the bucket to create a link for.
+        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parent")]
+        public virtual string Parent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Describes the custom _Default sink configuration that is used to override the built-in _Default sink
+    /// configuration in newly created resource containers, such as projects or folders.
+    /// </summary>
+    public class DefaultSinkConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Specifies the set of exclusions to be added to the _Default sink in newly created resource
+        /// containers.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exclusions")]
+        public virtual System.Collections.Generic.IList<LogExclusion> Exclusions { get; set; }
+
+        /// <summary>
+        /// Optional. An advanced logs filter (https://cloud.google.com/logging/docs/view/advanced-queries). The only
+        /// exported log entries are those that are in the resource owning the sink and that match the filter.For
+        /// example:logName="projects/[PROJECT_ID]/logs/[LOG_ID]" AND severity&amp;gt;=ERRORTo match all logs, don't add
+        /// exclusions and use the following line as the value of filter:logName:*Cannot be empty or unset when the
+        /// value of mode is OVERWRITE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filter")]
+        public virtual string Filter { get; set; }
+
+        /// <summary>
+        /// Required. Determines the behavior to apply to the built-in _Default sink inclusion filter.Exclusions are
+        /// always appended, as built-in _Default sinks have no exclusions.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mode")]
+        public virtual string Mode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The parameters to DeleteLink.</summary>
+    public class DeleteLinkRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The full resource name of the link to delete.
+        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for Empty is empty JSON
-    /// object {}.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -13381,7 +21619,7 @@ namespace Google.Apis.Logging.v2.Data
     /// Specifies an exponential sequence of buckets that have a width that is proportional to the value of the lower
     /// bound. Each bucket represents a constant relative uncertainty on a specific value in the bucket.There are
     /// num_finite_buckets + 2 (= N) buckets. Bucket i has the following boundaries:Upper bound (0 &amp;lt;= i &amp;lt;
-    /// N-1): scale * (growth_factor ^ i). Lower bound (1 &amp;lt;= i &amp;lt; N): scale * (growth_factor ^ (i - 1)).
+    /// N-1): scale * (growth_factor ^ i).Lower bound (1 &amp;lt;= i &amp;lt; N): scale * (growth_factor ^ (i - 1)).
     /// </summary>
     public class Exponential : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -13396,6 +21634,80 @@ namespace Google.Apis.Logging.v2.Data
         /// <summary>Must be greater than 0.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scale")]
         public virtual System.Nullable<double> Scale { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression
+    /// language. The syntax and semantics of CEL are documented at https://github.com/google/cel-spec.Example
+    /// (Comparison): title: "Summary size limit" description: "Determines if a summary is less than 100 chars"
+    /// expression: "document.summary.size() &amp;lt; 100" Example (Equality): title: "Requestor is owner" description:
+    /// "Determines if requestor is the document owner" expression: "document.owner == request.auth.claims.email"
+    /// Example (Logic): title: "Public documents" description: "Determine whether the document should be publicly
+    /// visible" expression: "document.type != 'private' &amp;amp;&amp;amp; document.type != 'internal'" Example (Data
+    /// Manipulation): title: "Notification string" description: "Create a notification string with a timestamp."
+    /// expression: "'New message received at ' + string(document.create_time)" The exact variables and functions that
+    /// may be referenced within an expression are determined by the service that evaluates it. See the service
+    /// documentation for additional information.
+    /// </summary>
+    public class Expr : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Description of the expression. This is a longer text which describes the expression, e.g. when
+        /// hovered over it in a UI.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Textual representation of an expression in Common Expression Language syntax.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expression")]
+        public virtual string Expression { get; set; }
+
+        /// <summary>
+        /// Optional. String indicating the location of the expression for error reporting, e.g. a file name and a
+        /// position in the file.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>
+        /// Optional. Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs
+        /// which allow to enter the expression.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for GetIamPolicy method.</summary>
+    public class GetIamPolicyRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>OPTIONAL: A GetPolicyOptions object for specifying options to GetIamPolicy.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("options")]
+        public virtual GetPolicyOptions Options { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Encapsulates settings provided to GetIamPolicy.</summary>
+    public class GetPolicyOptions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The maximum policy version that will be used to format the policy.Valid values are 0, 1, and 3.
+        /// Requests specifying an invalid value will be rejected.Requests for policies with any conditional role
+        /// bindings must specify version 3. Policies with no conditional role bindings may specify any valid value or
+        /// leave the field unset.The policy in the response might use the policy version that you specified, or it
+        /// might use a lower policy version. For example, if you specify version 3, but the policy has no conditional
+        /// role bindings, the response uses version 1.To learn which resources support conditions in their IAM
+        /// policies, see the IAM documentation (https://cloud.google.com/iam/help/conditions/resource-policies).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestedPolicyVersion")]
+        public virtual System.Nullable<int> RequestedPolicyVersion { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -13430,18 +21742,18 @@ namespace Google.Apis.Logging.v2.Data
 
         /// <summary>
         /// The request processing latency on the server, from the time the request was received until the response was
-        /// sent.
+        /// sent. For WebSocket connections, this field refers to the entire time duration of the connection.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("latency")]
         public virtual object Latency { get; set; }
 
-        /// <summary>Protocol used for the request. Examples: "HTTP/1.1", "HTTP/2", "websocket"</summary>
+        /// <summary>Protocol used for the request. Examples: "HTTP/1.1", "HTTP/2"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("protocol")]
         public virtual string Protocol { get; set; }
 
         /// <summary>
         /// The referer URL of the request, as defined in HTTP/1.1 Header Field Definitions
-        /// (http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html).
+        /// (https://datatracker.ietf.org/doc/html/rfc2616#section-14.36).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("referer")]
         public virtual string Referer { get; set; }
@@ -13499,6 +21811,66 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Configuration for an indexed field.</summary>
+    public class IndexConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>
+        /// Output only. The timestamp when the index was last modified.This is used to return the timestamp, and will
+        /// be ignored if supplied during update.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Required. The LogEntry field path to index.Note that some paths are automatically indexed, and other paths
+        /// are not eligible for indexing. See indexing documentation(
+        /// https://cloud.google.com/logging/docs/analyze/custom-index) for details.For example:
+        /// jsonPayload.request.status
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fieldPath")]
+        public virtual string FieldPath { get; set; }
+
+        /// <summary>Required. The type of data in this index.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A description of a label.</summary>
     public class LabelDescriptor : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -13522,7 +21894,7 @@ namespace Google.Apis.Logging.v2.Data
     /// Specifies a linear sequence of buckets that all have the same width (except overflow and underflow). Each bucket
     /// represents a constant absolute uncertainty on the specific value in the bucket.There are num_finite_buckets + 2
     /// (= N) buckets. Bucket i has the following boundaries:Upper bound (0 &amp;lt;= i &amp;lt; N-1): offset + (width *
-    /// i). Lower bound (1 &amp;lt;= i &amp;lt; N): offset + (width * (i - 1)).
+    /// i).Lower bound (1 &amp;lt;= i &amp;lt; N): offset + (width * (i - 1)).
     /// </summary>
     public class Linear : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -13537,6 +21909,171 @@ namespace Google.Apis.Logging.v2.Data
         /// <summary>Must be greater than 0.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("width")]
         public virtual System.Nullable<double> Width { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes a link connected to an analytics enabled bucket.</summary>
+    public class Link : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The information of a BigQuery Dataset. When a link is created, a BigQuery dataset is created along
+        /// with it, in the same project as the LogBucket it's linked to. This dataset will also have BigQuery Views
+        /// corresponding to the LogViews in the bucket.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bigqueryDataset")]
+        public virtual BigQueryDataset BigqueryDataset { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The creation timestamp of the link.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. Describes this link.The maximum length of the description is 8000 characters.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Output only. The resource lifecycle state.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lifecycleState")]
+        public virtual string LifecycleState { get; set; }
+
+        /// <summary>
+        /// Output only. The resource name of the link. The name can have up to 100 characters. A valid link id (at the
+        /// end of the link name) must only have alphanumeric characters and underscores within it.
+        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]"
+        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/links/[LINK_ID]" For
+        /// example:`projects/my-project/locations/global/buckets/my-bucket/links/my_link
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for long running Link operations.</summary>
+    public class LinkMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>CreateLink RPC request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createLinkRequest")]
+        public virtual CreateLinkRequest CreateLinkRequest { get; set; }
+
+        /// <summary>DeleteLink RPC request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deleteLinkRequest")]
+        public virtual DeleteLinkRequest DeleteLinkRequest { get; set; }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>The end time of an operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>The start time of an operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. State of an operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -13578,6 +22115,24 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The response from ListLinks.</summary>
+    public class ListLinksResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A list of links.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("links")]
+        public virtual System.Collections.Generic.IList<Link> Links { get; set; }
+
+        /// <summary>
+        /// If there might be more results than those appearing in this response, then nextPageToken is included. To get
+        /// the next set of results, call the same method again using the value of nextPageToken as pageToken.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The response message for Locations.ListLocations.</summary>
     public class ListLocationsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -13597,11 +22152,14 @@ namespace Google.Apis.Logging.v2.Data
     public class ListLogEntriesRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Optional. A filter that chooses which log entries to return. See Advanced Logs Queries
-        /// (https://cloud.google.com/logging/docs/view/advanced-queries). Only log entries that match the filter are
-        /// returned. An empty filter matches all log entries in the resources listed in resource_names. Referencing a
-        /// parent resource that is not listed in resource_names will cause the filter to return no results. The maximum
-        /// length of the filter is 20000 characters.
+        /// Optional. A filter that chooses which log entries to return. For more information, see Logging query
+        /// language (https://cloud.google.com/logging/docs/view/logging-query-language).Only log entries that match the
+        /// filter are returned. An empty filter matches all log entries in the resources listed in resource_names.
+        /// Referencing a parent resource that is not listed in resource_names will cause the filter to return no
+        /// results. The maximum length of a filter is 20,000 characters.To make queries faster, you can make the filter
+        /// more selective by using restrictions on indexed fields
+        /// (https://cloud.google.com/logging/docs/view/logging-query-language#indexed-fields) as well as limit the time
+        /// range of the query by adding range restrictions on the timestamp field.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("filter")]
         public virtual string Filter { get; set; }
@@ -13610,15 +22168,18 @@ namespace Google.Apis.Logging.v2.Data
         /// Optional. How the results should be sorted. Presently, the only permitted values are "timestamp asc"
         /// (default) and "timestamp desc". The first option returns entries in order of increasing values of
         /// LogEntry.timestamp (oldest first), and the second option returns entries in order of decreasing timestamps
-        /// (newest first). Entries with equal timestamps are returned in order of their insert_id values.
+        /// (newest first). Entries with equal timestamps are returned in order of their insert_id values.We recommend
+        /// setting the order_by field to "timestamp desc" when listing recently ingested log entries. If not set, the
+        /// default value of "timestamp asc" may take a long time to fetch matching logs that are only recently
+        /// ingested.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("orderBy")]
         public virtual string OrderBy { get; set; }
 
         /// <summary>
-        /// Optional. The maximum number of results to return from this request. Default is 50. If the value is negative
-        /// or exceeds 1000, the request is rejected. The presence of next_page_token in the response indicates that
-        /// more results might be available.
+        /// Optional. The maximum number of results to return from this request. Default is 50. If the value is
+        /// negative, the request is rejected.The presence of next_page_token in the response indicates that more
+        /// results might be available.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pageSize")]
         public virtual System.Nullable<int> PageSize { get; set; }
@@ -13639,13 +22200,17 @@ namespace Google.Apis.Logging.v2.Data
         public virtual System.Collections.Generic.IList<string> ProjectIds { get; set; }
 
         /// <summary>
-        /// Required. Names of one or more parent resources from which to retrieve log entries: projects/[PROJECT_ID]
-        /// organizations/[ORGANIZATION_ID] billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]May alternatively be
-        /// one or more views: projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
+        /// Required. Names of one or more parent resources from which to retrieve log entries. Resources may either be
+        /// resource containers or specific LogViews. For the case of resource containers, all logs ingested into that
+        /// container will be returned regardless of which LogBuckets they are actually stored in - i.e. these queries
+        /// may fan out to multiple regions. In the event of region unavailability, specify a specific set of LogViews
+        /// that do not include the unavailable region. projects/[PROJECT_ID] organizations/[ORGANIZATION_ID]
+        /// billingAccounts/[BILLING_ACCOUNT_ID] folders/[FOLDER_ID]
+        /// projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
         /// organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
         /// billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]
         /// folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]Projects listed in the
-        /// project_ids field are added to this list.
+        /// project_ids field are added to this list. A maximum of 100 resources may be specified in a single request.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resourceNames")]
         public virtual System.Collections.Generic.IList<string> ResourceNames { get; set; }
@@ -13689,6 +22254,26 @@ namespace Google.Apis.Logging.v2.Data
         /// <summary>
         /// If there might be more results than appear in this response, then nextPageToken is included. To get the next
         /// set of results, call this method again using the value of nextPageToken as pageToken.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The response from ListLogScopes. Every project has a _Default log scope that cannot be modified or deleted.
+    /// </summary>
+    public class ListLogScopesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A list of log scopes.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("logScopes")]
+        public virtual System.Collections.Generic.IList<LogScope> LogScopes { get; set; }
+
+        /// <summary>
+        /// If there might be more results than appear in this response, then nextPageToken is included. To get the next
+        /// set of results, call the same method again using the value of nextPageToken as pageToken.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -13751,6 +22336,66 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The response from ListRecentQueries.</summary>
+    public class ListRecentQueriesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If there might be more results than appear in this response, then nextPageToken is included. To get the next
+        /// set of results, call the same method again using the value of nextPageToken as pageToken.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>A list of recent queries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("recentQueries")]
+        public virtual System.Collections.Generic.IList<RecentQuery> RecentQueries { get; set; }
+
+        /// <summary>
+        /// The unreachable resources. Each resource can be either 1) a saved query if a specific query is unreachable
+        /// or 2) a location if a specific location is unreachable.
+        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/recentQueries/[QUERY_ID]"
+        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For
+        /// example:"projects/my-project/locations/global/recentQueries/12345678"
+        /// "projects/my-project/locations/global"If there are unreachable resources, the response will first return
+        /// pages that contain recent queries, and then return pages that contain the unreachable resources.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response from ListSavedQueries.</summary>
+    public class ListSavedQueriesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If there might be more results than appear in this response, then nextPageToken is included. To get the next
+        /// set of results, call the same method again using the value of nextPageToken as pageToken.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>A list of saved queries.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("savedQueries")]
+        public virtual System.Collections.Generic.IList<SavedQuery> SavedQueries { get; set; }
+
+        /// <summary>
+        /// The unreachable resources. It can be either 1) a saved query if a specific query is unreachable or 2) a
+        /// location if a specific location is unreachabe.
+        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]"
+        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]" For example:
+        /// "projects/my-project/locations/global/savedQueries/12345678" "projects/my-project/locations/global" If there
+        /// are unreachable resources, the response will first return pages that contain saved queries, and then return
+        /// pages that contain the unreachable resources.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Result returned from ListSinks.</summary>
     public class ListSinksResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -13787,7 +22432,7 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -13819,34 +22464,89 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Cloud Logging specific location metadata.</summary>
+    public class LocationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Indicates whether or not Log Analytics features are supported in the given location.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("logAnalyticsEnabled")]
+        public virtual System.Nullable<bool> LogAnalyticsEnabled { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Describes a repository in which log entries are stored.</summary>
     public class LogBucket : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The CMEK settings of the log bucket. If present, new log entries written to this log bucket are encrypted
-        /// using the CMEK key provided in this configuration. If a log bucket has CMEK settings, the CMEK settings
-        /// cannot be disabled later by updating the log bucket. Changing the KMS key is allowed.
+        /// Optional. Whether log analytics is enabled for this bucket.Once enabled, log analytics features cannot be
+        /// disabled.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("analyticsEnabled")]
+        public virtual System.Nullable<bool> AnalyticsEnabled { get; set; }
+
+        /// <summary>
+        /// Optional. The CMEK settings of the log bucket. If present, new log entries written to this log bucket are
+        /// encrypted using the CMEK key provided in this configuration. If a log bucket has CMEK settings, the CMEK
+        /// settings cannot be disabled later by updating the log bucket. Changing the KMS key is allowed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cmekSettings")]
         public virtual CmekSettings CmekSettings { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
 
         /// <summary>
         /// Output only. The creation timestamp of the bucket. This is not set for any of the default buckets.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
 
-        /// <summary>Describes this bucket.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. Describes this bucket.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual string Description { get; set; }
+
+        /// <summary>Optional. A list of indexed fields and related configuration data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("indexConfigs")]
+        public virtual System.Collections.Generic.IList<IndexConfig> IndexConfigs { get; set; }
 
         /// <summary>Output only. The bucket lifecycle state.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lifecycleState")]
         public virtual string LifecycleState { get; set; }
 
         /// <summary>
-        /// Whether the bucket is locked.The retention period on a locked bucket cannot be changed. Locked buckets may
-        /// only be deleted if they are empty.
+        /// Optional. Whether the bucket is locked.The retention period on a locked bucket cannot be changed. Locked
+        /// buckets may only be deleted if they are empty.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("locked")]
         public virtual System.Nullable<bool> Locked { get; set; }
@@ -13862,25 +22562,58 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Log entry field paths that are denied access in this bucket.The following fields and their children are
-        /// eligible: textPayload, jsonPayload, protoPayload, httpRequest, labels, sourceLocation.Restricting a repeated
-        /// field will restrict all values. Adding a parent will block all child fields. (e.g. foo.bar will block
-        /// foo.bar.baz)
+        /// Optional. Log entry field paths that are denied access in this bucket.The following fields and their
+        /// children are eligible: textPayload, jsonPayload, protoPayload, httpRequest, labels,
+        /// sourceLocation.Restricting a repeated field will restrict all values. Adding a parent will block all child
+        /// fields. (e.g. foo.bar will block foo.bar.baz)
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("restrictedFields")]
         public virtual System.Collections.Generic.IList<string> RestrictedFields { get; set; }
 
         /// <summary>
-        /// Logs will be retained by default for this amount of time, after which they will automatically be deleted.
-        /// The minimum retention period is 1 day. If this value is set to zero at bucket creation time, the default
-        /// time of 30 days will be used.
+        /// Optional. Logs will be retained by default for this amount of time, after which they will automatically be
+        /// deleted. The minimum retention period is 1 day. If this value is set to zero at bucket creation time, the
+        /// default time of 30 days will be used.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("retentionDays")]
         public virtual System.Nullable<int> RetentionDays { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The last update timestamp of the bucket.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -13889,6 +22622,16 @@ namespace Google.Apis.Logging.v2.Data
     /// <summary>An individual entry in a log.</summary>
     public class LogEntry : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Output only. The Error Reporting (https://cloud.google.com/error-reporting) error groups associated with
+        /// this LogEntry. Error Reporting sets the values for this field during error group creation.For more
+        /// information, see View error details(
+        /// https://cloud.google.com/error-reporting/docs/viewing-errors#view_error_details)This field isn't available
+        /// during log routing (https://cloud.google.com/logging/docs/routing/overview)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errorGroups")]
+        public virtual System.Collections.Generic.IList<LogErrorGroup> ErrorGroups { get; set; }
+
         /// <summary>
         /// Optional. Information about the HTTP request associated with this log entry, if applicable.
         /// </summary>
@@ -13932,7 +22675,7 @@ namespace Google.Apis.Logging.v2.Data
         /// "organizations/1234567890/logs/cloudresourcemanager.googleapis.com%2Factivity".[LOG_ID] must be less than
         /// 512 characters long and can only include the following characters: upper and lower case alphanumeric
         /// characters, forward-slash, underscore, hyphen, and period.For backward compatibility, if log_name begins
-        /// with a forward-slash, such as /projects/..., then the log entry is ingested as usual, but the forward-slash
+        /// with a forward-slash, such as /projects/..., then the log entry is processed as usual, but the forward-slash
         /// is removed. Listing the log entry will not show the leading slash and filtering for a log name with a
         /// leading slash will never return any results.
         /// </summary>
@@ -13958,9 +22701,44 @@ namespace Google.Apis.Logging.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("protoPayload")]
         public virtual System.Collections.Generic.IDictionary<string, object> ProtoPayload { get; set; }
 
+        private string _receiveTimestampRaw;
+
+        private object _receiveTimestamp;
+
         /// <summary>Output only. The time the log entry was received by Logging.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("receiveTimestamp")]
-        public virtual object ReceiveTimestamp { get; set; }
+        public virtual string ReceiveTimestampRaw
+        {
+            get => _receiveTimestampRaw;
+            set
+            {
+                _receiveTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _receiveTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ReceiveTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReceiveTimestampDateTimeOffset instead.")]
+        public virtual object ReceiveTimestamp
+        {
+            get => _receiveTimestamp;
+            set
+            {
+                _receiveTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _receiveTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ReceiveTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ReceiveTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReceiveTimestampRaw);
+            set => ReceiveTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Required. The monitored resource that produced this log entry.Example: a log entry that reports a database
@@ -13979,16 +22757,37 @@ namespace Google.Apis.Logging.v2.Data
         public virtual LogEntrySourceLocation SourceLocation { get; set; }
 
         /// <summary>
-        /// Optional. The span ID within the trace associated with the log entry.For Trace spans, this is the same
-        /// format that the Trace API v2 uses: a 16-character hexadecimal encoding of an 8-byte array, such as
-        /// 000000000000004a.
+        /// Optional. The ID of the Cloud Trace (https://cloud.google.com/trace) span associated with the current
+        /// operation in which the log is being written. For example, if a span has the REST resource name of
+        /// "projects/some-project/traces/some-trace/spans/some-span-id", then the span_id field is "some-span-id".A
+        /// Span (https://cloud.google.com/trace/docs/reference/v2/rest/v2/projects.traces/batchWrite#Span) represents a
+        /// single operation within a trace. Whereas a trace may involve multiple different microservices running on
+        /// multiple different machines, a span generally corresponds to a single logical operation being performed in a
+        /// single instance of a microservice on one specific machine. Spans are the nodes within the tree that is a
+        /// trace.Applications that are instrumented for tracing (https://cloud.google.com/trace/docs/setup) will
+        /// generally assign a new, unique span ID on each incoming request. It is also common to create and record
+        /// additional spans corresponding to internal processing elements as well as issuing requests to
+        /// dependencies.The span ID is expected to be a 16-character, hexadecimal encoding of an 8-byte array and
+        /// should not be zero. It should be unique within the trace and should, ideally, be generated in a manner that
+        /// is uniformly random.Example values: 000000000000004a 7a2190356c3fc94b 0000f00300090021 d39223e101960076
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("spanId")]
         public virtual string SpanId { get; set; }
 
+        /// <summary>
+        /// Optional. Information indicating this LogEntry is part of a sequence of multiple log entries split from a
+        /// single LogEntry.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("split")]
+        public virtual LogSplit Split { get; set; }
+
         /// <summary>The log entry payload, represented as a Unicode string (UTF-8).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("textPayload")]
         public virtual string TextPayload { get; set; }
+
+        private string _timestampRaw;
+
+        private object _timestamp;
 
         /// <summary>
         /// Optional. The time the event described by the log entry occurred. This time is used to compute the log
@@ -13997,24 +22796,56 @@ namespace Google.Apis.Logging.v2.Data
         /// fractional seconds might be omitted when the timestamp is displayed.Incoming log entries must have
         /// timestamps that don't exceed the logs retention period
         /// (https://cloud.google.com/logging/quotas#logs_retention_periods) in the past, and that don't exceed 24 hours
-        /// in the future. Log entries outside those time boundaries aren't ingested by Logging.
+        /// in the future. Log entries outside those time boundaries are rejected by Logging.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timestamp")]
-        public virtual object Timestamp { get; set; }
+        public virtual string TimestampRaw
+        {
+            get => _timestampRaw;
+            set
+            {
+                _timestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimestampDateTimeOffset instead.")]
+        public virtual object Timestamp
+        {
+            get => _timestamp;
+            set
+            {
+                _timestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _timestamp = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimestampRaw);
+            set => TimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
-        /// Optional. Resource name of the trace associated with the log entry, if any. If it contains a relative
-        /// resource name, the name is assumed to be relative to //tracing.googleapis.com. Example:
-        /// projects/my-projectid/traces/06796866738c859f2f19b7cfb3214824
+        /// Optional. The REST resource name of the trace being written to Cloud Trace (https://cloud.google.com/trace)
+        /// in association with this log entry. For example, if your trace data is stored in the Cloud project
+        /// "my-trace-project" and if the service that is creating the log entry receives a trace header that includes
+        /// the trace ID "12345", then the service should use "projects/my-trace-project/traces/12345".The trace field
+        /// provides the link between logs and traces. By using this field, you can navigate from a log entry to a
+        /// trace.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("trace")]
         public virtual string Trace { get; set; }
 
         /// <summary>
-        /// Optional. The sampling decision of the trace associated with the log entry.True means that the trace
-        /// resource name in the trace field was sampled for storage in a trace backend. False means that the trace was
-        /// not sampled for storage when this log entry was written, or the sampling decision was unknown at the time. A
-        /// non-sampled trace value is still useful as a request correlation identifier. The default is False.
+        /// Optional. The sampling decision of the span associated with the log entry at the time the log entry was
+        /// created. This field corresponds to the sampled flag in the W3C trace-context specification
+        /// (https://www.w3.org/TR/trace-context/#sampled-flag). A non-sampled trace value is still useful as a request
+        /// correlation identifier. The default is False.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("traceSampled")]
         public virtual System.Nullable<bool> TraceSampled { get; set; }
@@ -14081,6 +22912,22 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Contains metadata that associates the LogEntry to Error Reporting error groups.</summary>
+    public class LogErrorGroup : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The id is a unique identifier for a particular error group; it is the last part of the error group resource
+        /// name: /project/[PROJECT_ID]/errors/[ERROR_GROUP_ID]. Example: COShysOX0r_51QE. The id is derived from key
+        /// parts of the error-log content and is treated as Service Data. For information about how Service Data is
+        /// handled, see Google Cloud Privacy Notice (https://cloud.google.com/terms/cloud-privacy-notice).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Specifies a set of log entries that are filtered out by a sink. If your Google Cloud resource receives a large
     /// volume of log entries, you can use exclusions to reduce your chargeable logs. Note that exclusions on
@@ -14089,11 +22936,44 @@ namespace Google.Apis.Logging.v2.Data
     /// </summary>
     public class LogExclusion : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Output only. The creation timestamp of the exclusion.This field may not be present for older exclusions.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Optional. A description of this exclusion.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -14117,18 +22997,51 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string Filter { get; set; }
 
         /// <summary>
-        /// Required. A client-assigned identifier, such as "load-balancer-exclusion". Identifiers are limited to 100
+        /// Output only. A client-assigned identifier, such as "load-balancer-exclusion". Identifiers are limited to 100
         /// characters and can include only letters, digits, underscores, hyphens, and periods. First character has to
         /// be alphanumeric.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
         /// Output only. The last update timestamp of the exclusion.This field may not be present for older exclusions.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -14149,9 +23062,42 @@ namespace Google.Apis.Logging.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sourceLocation")]
         public virtual SourceLocation SourceLocation { get; set; }
 
+        private string _timeRaw;
+
+        private object _time;
+
         /// <summary>Approximate time when this log entry was made.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("time")]
-        public virtual object Time { get; set; }
+        public virtual string TimeRaw
+        {
+            get => _timeRaw;
+            set
+            {
+                _time = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeDateTimeOffset instead.")]
+        public virtual object Time
+        {
+            get => _time;
+            set
+            {
+                _timeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _time = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimeRaw);
+            set => TimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -14166,17 +23112,59 @@ namespace Google.Apis.Logging.v2.Data
     public class LogMetric : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Optional. The resource name of the Log Bucket that owns the Log Metric. Only Log Buckets in projects are
+        /// supported. The bucket has to be in the same project as the metric.For
+        /// example:projects/my-project/locations/global/buckets/my-bucketIf empty, then the Log Metric is considered a
+        /// non-Bucket Log Metric.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bucketName")]
+        public virtual string BucketName { get; set; }
+
+        /// <summary>
         /// Optional. The bucket_options are required when the logs-based metric is using a DISTRIBUTION value type and
         /// it describes the bucket boundaries used to create a histogram of the extracted values.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bucketOptions")]
         public virtual BucketOptions BucketOptions { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Output only. The creation timestamp of the metric.This field may not be present for older metrics.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. A description of this metric, which is used in documentation. The maximum length of the
@@ -14203,7 +23191,7 @@ namespace Google.Apis.Logging.v2.Data
         /// Optional. A map from a label key string to an extractor expression which is used to extract data from a log
         /// entry field and assign as the label value. Each label key specified in the LabelDescriptor must have an
         /// associated extractor expression in this map. The syntax of the extractor expression is the same as for the
-        /// value_extractor field.The extracted value is converted to the type defined in the label descriptor. If the
+        /// value_extractor field.The extracted value is converted to the type defined in the label descriptor. If
         /// either the extraction or the type conversion fails, the label will have a default value. The default value
         /// for a string label is an empty string, for an integer label its 0, and for a boolean label its false.Note
         /// that there are upper bounds on the maximum number of labels and the number of active time series that are
@@ -14231,25 +23219,63 @@ namespace Google.Apis.Logging.v2.Data
         /// Required. The client-assigned metric identifier. Examples: "error_count", "nginx/requests".Metric
         /// identifiers are limited to 100 characters and can include only the following characters: A-Z, a-z, 0-9, and
         /// the special characters _-.,+!*',()%/. The forward-slash character (/) denotes a hierarchy of name pieces,
-        /// and it cannot be the first character of the name.The metric identifier in this field must not be URL-encoded
-        /// (https://en.wikipedia.org/wiki/Percent-encoding). However, when the metric identifier appears as the
-        /// [METRIC_ID] part of a metric_name API parameter, then the metric identifier must be URL-encoded. Example:
-        /// "projects/my-project/metrics/nginx%2Frequests".
+        /// and it cannot be the first character of the name.This field is the [METRIC_ID] part of a metric resource
+        /// name in the format "projects/PROJECT_ID/metrics/METRIC_ID". Example: If the resource name of a metric is
+        /// "projects/my-project/metrics/nginx%2Frequests", this field's value is "nginx/requests".
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
         /// <summary>
+        /// Output only. The resource name of the metric: "projects/[PROJECT_ID]/metrics/[METRIC_ID]"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceName")]
+        public virtual string ResourceName { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>
         /// Output only. The last update timestamp of the metric.This field may not be present for older metrics.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. A value_extractor is required when using a distribution logs-based metric to extract the values to
         /// record from a log entry. Two functions are supported for value extraction: EXTRACT(field) or
-        /// REGEXP_EXTRACT(field, regex). The argument are: 1. field: The name of the log entry field from which the
-        /// value is to be extracted. 2. regex: A regular expression using the Google RE2 syntax
+        /// REGEXP_EXTRACT(field, regex). The arguments are: field: The name of the log entry field from which the value
+        /// is to be extracted. regex: A regular expression using the Google RE2 syntax
         /// (https://github.com/google/re2/wiki/Syntax) with a single capture group to extract data from the specified
         /// log entry field. The value of the field is converted to a string before applying the regex. It is an error
         /// to specify a regex that does not include exactly one capture group.The result of the extraction must be
@@ -14271,9 +23297,111 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Describes a group of resources to read log entries from.</summary>
+    public class LogScope : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The creation timestamp of the log scope.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. Describes this log scope.The maximum length of the description is 8000 characters.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>
+        /// Output only. The resource name of the log scope.Log scopes are only available in the global location. For
+        /// example:projects/my-project/locations/global/logScopes/my-log-scope
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Required. Names of one or more parent resources: projects/[PROJECT_ID]May alternatively be one or more
+        /// views: projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]A log scope can
+        /// include a maximum of 5 projects and a maximum of 100 resources in total.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceNames")]
+        public virtual System.Collections.Generic.IList<string> ResourceNames { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The last update timestamp of the log scope.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
-    /// Describes a sink used to export log entries to one of the following destinations in any project: a Cloud Storage
-    /// bucket, a BigQuery dataset, a Pub/Sub topic or a Cloud Logging log bucket. A logs filter controls which log
+    /// Describes a sink used to export log entries to one of the following destinations: a Cloud Logging log bucket, a
+    /// Cloud Storage bucket, a BigQuery dataset, a Pub/Sub topic, a Cloud project.A logs filter controls which log
     /// entries are exported. The sink must be created within a project, organization, billing account, or folder.
     /// </summary>
     public class LogSink : Google.Apis.Requests.IDirectResponseSchema
@@ -14282,11 +23410,44 @@ namespace Google.Apis.Logging.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("bigqueryOptions")]
         public virtual BigQueryOptions BigqueryOptions { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Output only. The creation timestamp of the sink.This field may not be present for older sinks.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. A description of this sink.The maximum length of the description is 8000 characters.
@@ -14297,9 +23458,11 @@ namespace Google.Apis.Logging.v2.Data
         /// <summary>
         /// Required. The export destination: "storage.googleapis.com/[GCS_BUCKET]"
         /// "bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]"
-        /// "pubsub.googleapis.com/projects/[PROJECT_ID]/topics/[TOPIC_ID]" The sink's writer_identity, set when the
-        /// sink is created, must have permission to write to the destination or else the log entries are not exported.
-        /// For more information, see Exporting Logs with Sinks
+        /// "pubsub.googleapis.com/projects/[PROJECT_ID]/topics/[TOPIC_ID]"
+        /// "logging.googleapis.com/projects/[PROJECT_ID]"
+        /// "logging.googleapis.com/projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" The sink's
+        /// writer_identity, set when the sink is created, must have permission to write to the destination or else the
+        /// log entries are not exported. For more information, see Exporting Logs with Sinks
         /// (https://cloud.google.com/logging/docs/api/tasks/exporting-logs).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("destination")]
@@ -14340,9 +23503,20 @@ namespace Google.Apis.Logging.v2.Data
         public virtual System.Nullable<bool> IncludeChildren { get; set; }
 
         /// <summary>
-        /// Required. The client-assigned sink identifier, unique within the project.For example:
-        /// "my-syslog-errors-to-pubsub". Sink identifiers are limited to 100 characters and can include only the
-        /// following characters: upper and lower-case alphanumeric characters, underscores, hyphens, and periods. First
+        /// Optional. This field applies only to sinks owned by organizations and folders.When the value of
+        /// 'intercept_children' is true, the following restrictions apply: The sink must have the include_children flag
+        /// set to true. The sink destination must be a Cloud project.Also, the following behaviors apply: Any logs
+        /// matched by the sink won't be included by non-_Required sinks owned by child resources. The sink appears in
+        /// the results of a ListSinks call from a child resource if the value of the filter field in its request is
+        /// either 'in_scope("ALL")' or 'in_scope("ANCESTOR")'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("interceptChildren")]
+        public virtual System.Nullable<bool> InterceptChildren { get; set; }
+
+        /// <summary>
+        /// Output only. The client-assigned sink identifier, unique within the project.For example:
+        /// "my-syslog-errors-to-pubsub".Sink identifiers are limited to 100 characters and can include only the
+        /// following characters: upper and lower-case alphanumeric characters, underscores, hyphens, periods.First
         /// character has to be alphanumeric.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -14353,19 +23527,61 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string OutputVersionFormat { get; set; }
 
         /// <summary>
+        /// Output only. The resource name of the sink. "projects/[PROJECT_ID]/sinks/[SINK_NAME]
+        /// "organizations/[ORGANIZATION_ID]/sinks/[SINK_NAME] "billingAccounts/[BILLING_ACCOUNT_ID]/sinks/[SINK_NAME]
+        /// "folders/[FOLDER_ID]/sinks/[SINK_NAME] For example: projects/my_project/sinks/SINK_NAME
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceName")]
+        public virtual string ResourceName { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>
         /// Output only. The last update timestamp of the sink.This field may not be present for older sinks.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. An IAM identity—a service account or group—under which Cloud Logging writes the exported log
-        /// entries to the sink's destination. This field is set by sinks.create and sinks.update based on the value of
-        /// unique_writer_identity in those methods.Until you grant this identity write-access to the destination, log
-        /// entry exports from this sink will fail. For more information, see Granting Access for a Resource
+        /// entries to the sink's destination. This field is either set by specifying custom_writer_identity or set
+        /// automatically by sinks.create and sinks.update based on the value of unique_writer_identity in those
+        /// methods.Until you grant this identity write-access to the destination, log entry exports from this sink will
+        /// fail. For more information, see Granting Access for a Resource
         /// (https://cloud.google.com/iam/docs/granting-roles-to-service-accounts#granting_access_to_a_service_account_for_a_resource).
         /// Consult the destination service's documentation to determine the appropriate IAM roles to assign to the
-        /// identity.Sinks that have a destination that is a log bucket in the same project as the sink do not have a
+        /// identity.Sinks that have a destination that is a log bucket in the same project as the sink cannot have a
         /// writer_identity and no additional permissions are required.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("writerIdentity")]
@@ -14375,36 +23591,163 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Additional information used to correlate multiple log entries. Used when a single LogEntry would exceed the
+    /// Google Cloud Logging size limit and is split across multiple log entries.
+    /// </summary>
+    public class LogSplit : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The index of this LogEntry in the sequence of split log entries. Log entries are given |index| values 0, 1,
+        /// ..., n-1 for a sequence of n log entries.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("index")]
+        public virtual System.Nullable<int> Index { get; set; }
+
+        /// <summary>The total number of log entries that the original LogEntry was split into.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("totalSplits")]
+        public virtual System.Nullable<int> TotalSplits { get; set; }
+
+        /// <summary>
+        /// A globally unique identifier for all log entries in a sequence of split log entries. All log entries with
+        /// the same |LogSplit.uid| are assumed to be part of the same sequence of split log entries.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uid")]
+        public virtual string Uid { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Describes a view over log entries in a bucket.</summary>
     public class LogView : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The creation timestamp of the view.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
 
-        /// <summary>Describes this view.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. Describes this view.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual string Description { get; set; }
 
         /// <summary>
-        /// Filter that restricts which log entries in a bucket are visible in this view.Filters are restricted to be a
-        /// logical AND of ==/!= of any of the following: originating project/folder/organization/billing account.
-        /// resource type log idFor example:SOURCE("projects/myproject") AND resource.type = "gce_instance" AND
-        /// LOG_ID("stdout")
+        /// Optional. Filter that restricts which log entries in a bucket are visible in this view.Filters must be
+        /// logical conjunctions that use the AND operator, and they can use any of the following qualifiers: SOURCE(),
+        /// which specifies a project, folder, organization, or billing account of origin. resource.type, which
+        /// specifies the resource type. LOG_ID(), which identifies the log.They can also use the negations of these
+        /// qualifiers with the NOT operator.For example:SOURCE("projects/myproject") AND resource.type = "gce_instance"
+        /// AND NOT LOG_ID("stdout")
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("filter")]
         public virtual string Filter { get; set; }
 
         /// <summary>
-        /// The resource name of the view.For
+        /// Output only. The resource name of the view.For
         /// example:projects/my-project/locations/global/buckets/my-bucket/views/my-view
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The last update timestamp of the view.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Describes a Cloud Logging query that can be run in Logs Explorer UI or via the logging API.In addition to the
+    /// query itself, additional information may be stored to capture the display configuration and other UI state used
+    /// in association with analysis of query results.
+    /// </summary>
+    public class LoggingQuery : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. An advanced query using the Logging Query Language
+        /// (https://cloud.google.com/logging/docs/view/logging-query-language). The maximum length of the filter is
+        /// 20000 characters.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filter")]
+        public virtual string Filter { get; set; }
+
+        /// <summary>Characters will be counted from the end of the string.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("summaryFieldEnd")]
+        public virtual System.Nullable<int> SummaryFieldEnd { get; set; }
+
+        /// <summary>Characters will be counted from the start of the string.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("summaryFieldStart")]
+        public virtual System.Nullable<int> SummaryFieldStart { get; set; }
+
+        /// <summary>Optional. The set of summary fields to display for this saved query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("summaryFields")]
+        public virtual System.Collections.Generic.IList<SummaryField> SummaryFields { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -14541,6 +23884,10 @@ namespace Google.Apis.Logging.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("samplePeriod")]
         public virtual object SamplePeriod { get; set; }
 
+        /// <summary>The scope of the timeseries data of the metric.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeSeriesResourceHierarchyLevel")]
+        public virtual System.Collections.Generic.IList<string> TimeSeriesResourceHierarchyLevel { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -14551,8 +23898,8 @@ namespace Google.Apis.Logging.v2.Data
     /// MonitoredResourceDescriptor object that describes the resource's schema. Information in the labels field
     /// identifies the actual resource and its attributes according to the schema. For example, a particular Compute
     /// Engine VM instance could be represented by the following object, because the MonitoredResourceDescriptor for
-    /// "gce_instance" has labels "instance_id" and "zone": { "type": "gce_instance", "labels": { "instance_id":
-    /// "12345678901234", "zone": "us-central1-a" }}
+    /// "gce_instance" has labels "project_id", "instance_id" and "zone": { "type": "gce_instance", "labels": {
+    /// "project_id": "my-project", "instance_id": "12345678901234", "zone": "us-central1-a" }}
     /// </summary>
     public class MonitoredResource : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -14565,7 +23912,8 @@ namespace Google.Apis.Logging.v2.Data
 
         /// <summary>
         /// Required. The monitored resource type. This field must match the type field of a MonitoredResourceDescriptor
-        /// object. For example, the type of a Compute Engine VM instance is gce_instance.
+        /// object. For example, the type of a Compute Engine VM instance is gce_instance. Some descriptors include the
+        /// service name in the type; for example, the type of a Datastream stream is datastream.googleapis.com/Stream.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
@@ -14619,7 +23967,7 @@ namespace Google.Apis.Logging.v2.Data
 
         /// <summary>
         /// Required. The monitored resource type. For example, the type "cloudsql_database" represents databases in
-        /// Google Cloud SQL. For a list of types, see Monitoring resource types
+        /// Google Cloud SQL. For a list of types, see Monitored resource types
         /// (https://cloud.google.com/monitoring/api/resources) and Logging resource types
         /// (https://cloud.google.com/logging/docs/api/v2/resource-list).
         /// </summary>
@@ -14685,14 +24033,158 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as Delete, the response is google.protobuf.Empty. If the original method is standard Get/Create/Update,
-        /// the response should be the resource. For other methods, the response should have the type XxxResponse, where
-        /// Xxx is the original method name. For example, if the original method name is TakeSnapshot(), the inferred
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// Delete, the response is google.protobuf.Empty. If the original method is standard Get/Create/Update, the
+        /// response should be the resource. For other methods, the response should have the type XxxResponse, where Xxx
+        /// is the original method name. For example, if the original method name is TakeSnapshot(), the inferred
         /// response type is TakeSnapshotResponse.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("response")]
         public virtual System.Collections.Generic.IDictionary<string, object> Response { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Describes an analytics query that can be run in the Log Analytics page of Google Cloud console.Preview: This is
+    /// a preview feature and may be subject to change before final release.
+    /// </summary>
+    public class OpsAnalyticsQuery : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. A logs analytics SQL query, which generally follows BigQuery format.This is the SQL query that
+        /// appears in the Log Analytics UI's query editor.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sqlQueryText")]
+        public virtual string SqlQueryText { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources.A
+    /// Policy is a collection of bindings. A binding binds one or more members, or principals, to a single role.
+    /// Principals can be user accounts, service accounts, Google groups, and domains (such as G Suite). A role is a
+    /// named list of permissions; each role can be an IAM predefined role or a user-created custom role.For some types
+    /// of Google Cloud resources, a binding can also specify a condition, which is a logical expression that allows
+    /// access to a resource only if the expression evaluates to true. A condition can add constraints based on
+    /// attributes of the request, the resource, or both. To learn which resources support conditions in their IAM
+    /// policies, see the IAM documentation (https://cloud.google.com/iam/help/conditions/resource-policies).JSON
+    /// example: { "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [
+    /// "user:mike@example.com", "group:admins@example.com", "domain:google.com",
+    /// "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] }, { "role":
+    /// "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": { "title":
+    /// "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time &amp;lt;
+    /// timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } YAML example: bindings: -
+    /// members: - user:mike@example.com - group:admins@example.com - domain:google.com -
+    /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
+    /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
+    /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
+    /// see the IAM documentation (https://cloud.google.com/iam/docs/).
+    /// </summary>
+    public class Policy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Associates a list of members, or principals, with a role. Optionally, may specify a condition that
+        /// determines how and when the bindings are applied. Each of the bindings must contain at least one
+        /// principal.The bindings in a Policy can refer to up to 1,500 principals; up to 250 of these principals can be
+        /// Google groups. Each occurrence of a principal counts towards these limits. For example, if the bindings
+        /// grant 50 different roles to user:alice@example.com, and not to any other principal, then you can add another
+        /// 1,450 principals to the bindings in the Policy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bindings")]
+        public virtual System.Collections.Generic.IList<Binding> Bindings { get; set; }
+
+        /// <summary>
+        /// etag is used for optimistic concurrency control as a way to help prevent simultaneous updates of a policy
+        /// from overwriting each other. It is strongly suggested that systems make use of the etag in the
+        /// read-modify-write cycle to perform policy updates in order to avoid race conditions: An etag is returned in
+        /// the response to getIamPolicy, and systems are expected to put that etag in the request to setIamPolicy to
+        /// ensure that their change will be applied to the same version of the policy.Important: If you use IAM
+        /// Conditions, you must include the etag field whenever you call setIamPolicy. If you omit this field, then IAM
+        /// allows you to overwrite a version 3 policy with a version 1 policy, and all of the conditions in the version
+        /// 3 policy are lost.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Specifies the format of the policy.Valid values are 0, 1, and 3. Requests that specify an invalid value are
+        /// rejected.Any operation that affects conditional role bindings must specify version 3. This requirement
+        /// applies to the following operations: Getting a policy that includes a conditional role binding Adding a
+        /// conditional role binding to a policy Changing a conditional role binding in a policy Removing any role
+        /// binding, with or without a condition, from a policy that includes conditionsImportant: If you use IAM
+        /// Conditions, you must include the etag field whenever you call setIamPolicy. If you omit this field, then IAM
+        /// allows you to overwrite a version 3 policy with a version 1 policy, and all of the conditions in the version
+        /// 3 policy are lost.If a policy does not include any conditions, operations on that policy may specify any
+        /// valid version or leave the field unset.To learn which resources support conditions in their IAM policies,
+        /// see the IAM documentation (https://cloud.google.com/iam/help/conditions/resource-policies).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual System.Nullable<int> Version { get; set; }
+    }
+
+    /// <summary>
+    /// Describes a recent query executed on the Logs Explorer or Log Analytics page within the last ~ 30 days.
+    /// </summary>
+    public class RecentQuery : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _lastRunTimeRaw;
+
+        private object _lastRunTime;
+
+        /// <summary>Output only. The timestamp when this query was last run.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastRunTime")]
+        public virtual string LastRunTimeRaw
+        {
+            get => _lastRunTimeRaw;
+            set
+            {
+                _lastRunTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastRunTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastRunTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastRunTimeDateTimeOffset instead.")]
+        public virtual object LastRunTime
+        {
+            get => _lastRunTime;
+            set
+            {
+                _lastRunTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastRunTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastRunTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastRunTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastRunTimeRaw);
+            set => LastRunTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Logging query that can be executed in Logs Explorer or via Logging API.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loggingQuery")]
+        public virtual LoggingQuery LoggingQuery { get; set; }
+
+        /// <summary>
+        /// Output only. Resource name of the recent query.In the format:
+        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/recentQueries/[QUERY_ID]" For a list of supported locations,
+        /// see Supported Regions (https://cloud.google.com/logging/docs/region-support)The QUERY_ID is a system
+        /// generated alphanumeric ID.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Analytics query that can be executed in Log Analytics.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("opsAnalyticsQuery")]
+        public virtual OpsAnalyticsQuery OpsAnalyticsQuery { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -14713,9 +24205,42 @@ namespace Google.Apis.Logging.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cost")]
         public virtual System.Nullable<double> Cost { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Time when the request finished.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Whether this request is finished or active.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finished")]
@@ -14814,9 +24339,46 @@ namespace Google.Apis.Logging.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sourceReference")]
         public virtual System.Collections.Generic.IList<SourceReference> SourceReference { get; set; }
 
+        /// <summary>Stackdriver Trace span identifier for this request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("spanId")]
+        public virtual string SpanId { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Time when the request started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>HTTP response status code. Example: 200, 404.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
@@ -14853,6 +24415,202 @@ namespace Google.Apis.Logging.v2.Data
         /// <summary>Whether this was a loading request for the instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("wasLoadingRequest")]
         public virtual System.Nullable<bool> WasLoadingRequest { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes a query that has been saved by a user.</summary>
+    public class SavedQuery : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The timestamp when the saved query was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Optional. A human readable description of the saved query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Required. The user specified title for the SavedQuery.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Logging query that can be executed in Logs Explorer or via Logging API.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loggingQuery")]
+        public virtual LoggingQuery LoggingQuery { get; set; }
+
+        /// <summary>
+        /// Output only. Resource name of the saved query.In the format:
+        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/savedQueries/[QUERY_ID]" For a list of supported locations,
+        /// see Supported Regions (https://cloud.google.com/logging/docs/region-support#bucket-regions)After the saved
+        /// query is created, the location cannot be changed.If the user doesn't provide a QUERY_ID, the system will
+        /// generate an alphanumeric ID.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Analytics query that can be executed in Log Analytics.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("opsAnalyticsQuery")]
+        public virtual OpsAnalyticsQuery OpsAnalyticsQuery { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The timestamp when the saved query was last updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Required. The visibility status of this query, which determines its ownership.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("visibility")]
+        public virtual string Visibility { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for SetIamPolicy method.</summary>
+    public class SetIamPolicyRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// REQUIRED: The complete policy to be applied to the resource. The size of the policy is limited to a few 10s
+        /// of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might reject
+        /// them.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policy")]
+        public virtual Policy Policy { get; set; }
+
+        /// <summary>
+        /// OPTIONAL: A FieldMask specifying which fields of the policy to modify. Only the fields in the mask will be
+        /// modified. If no mask is provided, the following default mask is used:paths: "bindings, etag"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
+        public virtual object UpdateMask { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes the settings associated with a project, folder, organization, or billing account.</summary>
+    public class Settings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Overrides the built-in configuration for _Default sink.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("defaultSinkConfig")]
+        public virtual DefaultSinkConfig DefaultSinkConfig { get; set; }
+
+        /// <summary>
+        /// Optional. If set to true, the _Default sink in newly created projects and folders will created in a disabled
+        /// state. This can be used to automatically disable log storage if there is already an aggregated sink
+        /// configured in the hierarchy. The _Default sink can be re-enabled manually if needed.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disableDefaultSink")]
+        public virtual System.Nullable<bool> DisableDefaultSink { get; set; }
+
+        /// <summary>
+        /// Optional. The resource name for the configured Cloud KMS key.KMS key name format:
+        /// "projects/[PROJECT_ID]/locations/[LOCATION]/keyRings/[KEYRING]/cryptoKeys/[KEY]" For
+        /// example:"projects/my-project/locations/us-central1/keyRings/my-ring/cryptoKeys/my-key"To enable CMEK, set
+        /// this field to a valid kms_key_name for which the associated service account has the required
+        /// roles/cloudkms.cryptoKeyEncrypterDecrypter role assigned for the key.The Cloud KMS key used by the Log
+        /// Router can be updated by changing the kms_key_name to a new valid key name.To disable CMEK for the Log
+        /// Router, set this field to an empty string.See Enabling CMEK for Log Router
+        /// (https://cloud.google.com/logging/docs/routing/managed-encryption) for more information.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
+        public virtual string KmsKeyName { get; set; }
+
+        /// <summary>
+        /// Output only. The service account that will be used by the Log Router to access your Cloud KMS key.Before
+        /// enabling CMEK, you must first assign the role roles/cloudkms.cryptoKeyEncrypterDecrypter to the service
+        /// account that will be used to access your Cloud KMS key. Use GetSettings to obtain the service account ID.See
+        /// Enabling CMEK for Log Router (https://cloud.google.com/logging/docs/routing/managed-encryption) for more
+        /// information.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsServiceAccountId")]
+        public virtual string KmsServiceAccountId { get; set; }
+
+        /// <summary>
+        /// Output only. The service account for the given resource container, such as project or folder. Log sinks use
+        /// this service account as their writer_identity if no custom service account is provided in the request when
+        /// calling the create sink method.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loggingServiceAccountId")]
+        public virtual string LoggingServiceAccountId { get; set; }
+
+        /// <summary>Output only. The resource name of the settings.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Optional. The storage location for the _Default and _Required log buckets of newly created projects and
+        /// folders, unless the storage location is explicitly provided.Example value: europe-west1.Note: this setting
+        /// does not affect the location of resources where a location is explicitly provided when created, such as
+        /// custom log buckets.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("storageLocation")]
+        public virtual string StorageLocation { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -14937,6 +24695,24 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// A field from the LogEntry that is added to the summary line
+    /// (https://cloud.google.com/logging/docs/view/logs-explorer-interface#add-summary-fields) for a query in the Logs
+    /// Explorer.
+    /// </summary>
+    public class SummaryField : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The field from the LogEntry to include in the summary line, for example resource.type or
+        /// jsonPayload.name.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("field")]
+        public virtual string Field { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Information about entries that were omitted from the session.</summary>
     public class SuppressionInfo : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -14964,11 +24740,9 @@ namespace Google.Apis.Logging.v2.Data
         public virtual object BufferWindow { get; set; }
 
         /// <summary>
-        /// Optional. A filter that chooses which log entries to return. See Advanced Logs Filters
-        /// (https://cloud.google.com/logging/docs/view/advanced_filters). Only log entries that match the filter are
-        /// returned. An empty filter matches all log entries in the resources listed in resource_names. Referencing a
-        /// parent resource that is not in resource_names will cause the filter to return no results. The maximum length
-        /// of the filter is 20000 characters.
+        /// Optional. Only log entries that match the filter are returned. An empty filter matches all log entries in
+        /// the resources listed in resource_names. Referencing a parent resource that is not listed in resource_names
+        /// will cause the filter to return no results. The maximum length of a filter is 20,000 characters.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("filter")]
         public virtual string Filter { get; set; }
@@ -15011,9 +24785,66 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Request message for TestIamPermissions method.</summary>
+    public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The set of permissions to check for the resource. Permissions with wildcards (such as * or storage.*) are
+        /// not allowed. For more information see IAM Overview (https://cloud.google.com/iam/docs/overview#permissions).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("permissions")]
+        public virtual System.Collections.Generic.IList<string> Permissions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for TestIamPermissions method.</summary>
+    public class TestIamPermissionsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A subset of TestPermissionsRequest.permissions that the caller is allowed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("permissions")]
+        public virtual System.Collections.Generic.IList<string> Permissions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The parameters to UndeleteBucket.</summary>
     public class UndeleteBucketRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The parameters to UpdateBucket.</summary>
+    public class UpdateBucketRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The updated bucket.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bucket")]
+        public virtual LogBucket Bucket { get; set; }
+
+        /// <summary>
+        /// Required. The full resource name of the bucket to update.
+        /// "projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+        /// "organizations/[ORGANIZATION_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+        /// "billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"
+        /// "folders/[FOLDER_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]" For
+        /// example:"projects/my-project/locations/global/buckets/my-bucket"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Required. Field mask that specifies the fields in bucket that need an update. A bucket field will be
+        /// overwritten if, and only if, it is in the update mask. name and output only fields cannot be updated.For a
+        /// detailed FieldMask definition, see:
+        /// https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMaskFor
+        /// example: updateMask=retention_days
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
+        public virtual object UpdateMask { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -15068,10 +24899,11 @@ namespace Google.Apis.Logging.v2.Data
         public virtual string LogName { get; set; }
 
         /// <summary>
-        /// Optional. Whether valid entries should be written even if some other entries fail due to INVALID_ARGUMENT or
-        /// PERMISSION_DENIED errors. If any entry is not written, then the response status is the error associated with
-        /// one of the failed entries and the response includes error details keyed by the entries' zero-based index in
-        /// the entries.write method.
+        /// Optional. Whether a batch's valid entries should be written even if some other entry failed due to a
+        /// permanent error such as INVALID_ARGUMENT or PERMISSION_DENIED. If any entry failed, then the response status
+        /// is the response status of one of the failed entries. The response will include error details in
+        /// WriteLogEntriesPartialErrors.log_entry_errors keyed by the entries' zero-based index in the entries. Failed
+        /// requests for which no entries are written will not include per-entry errors.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("partialSuccess")]
         public virtual System.Nullable<bool> PartialSuccess { get; set; }

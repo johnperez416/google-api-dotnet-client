@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CertificateAuthorityService.v1
         public CertificateAuthorityServiceService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://privateca.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://privateca.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CertificateAuthorityService.v1
         public override string Name => "privateca";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://privateca.googleapis.com/";
-        #else
-            "https://privateca.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://privateca.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Certificate Authority API.</summary>
         public class Scope
@@ -360,7 +355,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         /// <param name="name">Required. The name of the CertificateRevocationList to get.</param>
                         public virtual GetRequest Get(string name)
                         {
-                            return new GetRequest(service, name);
+                            return new GetRequest(this.service, name);
                         }
 
                         /// <summary>Returns a CertificateRevocationList.</summary>
@@ -406,12 +401,13 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         /// exists and does not have a policy set.
                         /// </summary>
                         /// <param name="resource">
-                        /// REQUIRED: The resource for which the policy is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </param>
                         public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                         {
-                            return new GetIamPolicyRequest(service, resource);
+                            return new GetIamPolicyRequest(this.service, resource);
                         }
 
                         /// <summary>
@@ -428,8 +424,9 @@ namespace Google.Apis.CertificateAuthorityService.v1
                             }
 
                             /// <summary>
-                            /// REQUIRED: The resource for which the policy is being requested. See the operation
-                            /// documentation for the appropriate value for this field.
+                            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value
+                            /// for this field.
                             /// </summary>
                             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                             public virtual string Resource { get; private set; }
@@ -487,7 +484,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         /// </param>
                         public virtual ListRequest List(string parent)
                         {
-                            return new ListRequest(service, parent);
+                            return new ListRequest(this.service, parent);
                         }
 
                         /// <summary>Lists CertificateRevocationLists.</summary>
@@ -593,12 +590,12 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         /// <summary>Update a CertificateRevocationList.</summary>
                         /// <param name="body">The body of the request.</param>
                         /// <param name="name">
-                        /// Output only. The resource name for this CertificateRevocationList in the format
+                        /// Identifier. The resource name for this CertificateRevocationList in the format
                         /// `projects/*/locations/*/caPools/*certificateAuthorities/*/ certificateRevocationLists/*`.
                         /// </param>
                         public virtual PatchRequest Patch(Google.Apis.CertificateAuthorityService.v1.Data.CertificateRevocationList body, string name)
                         {
-                            return new PatchRequest(service, body, name);
+                            return new PatchRequest(this.service, body, name);
                         }
 
                         /// <summary>Update a CertificateRevocationList.</summary>
@@ -613,7 +610,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                             }
 
                             /// <summary>
-                            /// Output only. The resource name for this CertificateRevocationList in the format
+                            /// Identifier. The resource name for this CertificateRevocationList in the format
                             /// `projects/*/locations/*/caPools/*certificateAuthorities/*/
                             /// certificateRevocationLists/*`.
                             /// </summary>
@@ -624,7 +621,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                             /// Optional. An ID to identify requests. Specify a unique request ID so that if you must
                             /// retry your request, the server will know to ignore the request if it has already been
                             /// completed. The server will guarantee that for at least 60 minutes since the first
-                            /// request. For example, consider a situation where you make an initial request and t he
+                            /// request. For example, consider a situation where you make an initial request and the
                             /// request times out. If you make the request again with the same request ID, the server
                             /// can check if original operation with the same request ID was received, and if so, will
                             /// ignore the second request. This prevents clients from accidentally creating duplicate
@@ -690,12 +687,13 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         /// </summary>
                         /// <param name="body">The body of the request.</param>
                         /// <param name="resource">
-                        /// REQUIRED: The resource for which the policy is being specified. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </param>
                         public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CertificateAuthorityService.v1.Data.SetIamPolicyRequest body, string resource)
                         {
-                            return new SetIamPolicyRequest(service, body, resource);
+                            return new SetIamPolicyRequest(this.service, body, resource);
                         }
 
                         /// <summary>
@@ -713,8 +711,9 @@ namespace Google.Apis.CertificateAuthorityService.v1
                             }
 
                             /// <summary>
-                            /// REQUIRED: The resource for which the policy is being specified. See the operation
-                            /// documentation for the appropriate value for this field.
+                            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value
+                            /// for this field.
                             /// </summary>
                             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                             public virtual string Resource { get; private set; }
@@ -757,12 +756,13 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         /// </summary>
                         /// <param name="body">The body of the request.</param>
                         /// <param name="resource">
-                        /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </param>
                         public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CertificateAuthorityService.v1.Data.TestIamPermissionsRequest body, string resource)
                         {
-                            return new TestIamPermissionsRequest(service, body, resource);
+                            return new TestIamPermissionsRequest(this.service, body, resource);
                         }
 
                         /// <summary>
@@ -782,8 +782,9 @@ namespace Google.Apis.CertificateAuthorityService.v1
                             }
 
                             /// <summary>
-                            /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                            /// documentation for the appropriate value for this field.
+                            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value
+                            /// for this field.
                             /// </summary>
                             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                             public virtual string Resource { get; private set; }
@@ -831,7 +832,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// </param>
                     public virtual ActivateRequest Activate(Google.Apis.CertificateAuthorityService.v1.Data.ActivateCertificateAuthorityRequest body, string name)
                     {
-                        return new ActivateRequest(service, body, name);
+                        return new ActivateRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -894,7 +895,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.CertificateAuthorityService.v1.Data.CertificateAuthority body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>Create a new CertificateAuthority in a given Project and Location.</summary>
@@ -926,7 +927,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry
                         /// your request, the server will know to ignore the request if it has already been completed.
                         /// The server will guarantee that for at least 60 minutes since the first request. For example,
-                        /// consider a situation where you make an initial request and t he request times out. If you
+                        /// consider a situation where you make an initial request and the request times out. If you
                         /// make the request again with the same request ID, the server can check if original operation
                         /// with the same request ID was received, and if so, will ignore the second request. This
                         /// prevents clients from accidentally creating duplicate commitments. The request ID must be a
@@ -989,7 +990,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Delete a CertificateAuthority.</summary>
@@ -1017,10 +1018,18 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         public virtual System.Nullable<bool> IgnoreActiveCertificates { get; set; }
 
                         /// <summary>
+                        /// Optional. This field allows this CA to be deleted even if it's being depended on by another
+                        /// resource. However, doing so may result in unintended and unrecoverable effects on any
+                        /// dependent resources since the CA will no longer be able to issue certificates.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("ignoreDependentResources", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<bool> IgnoreDependentResources { get; set; }
+
+                        /// <summary>
                         /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry
                         /// your request, the server will know to ignore the request if it has already been completed.
                         /// The server will guarantee that for at least 60 minutes since the first request. For example,
-                        /// consider a situation where you make an initial request and t he request times out. If you
+                        /// consider a situation where you make an initial request and the request times out. If you
                         /// make the request again with the same request ID, the server can check if original operation
                         /// with the same request ID was received, and if so, will ignore the second request. This
                         /// prevents clients from accidentally creating duplicate commitments. The request ID must be a
@@ -1029,6 +1038,14 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual string RequestId { get; set; }
+
+                        /// <summary>
+                        /// Optional. If this flag is set, the Certificate Authority will be deleted as soon as possible
+                        /// without a 30-day grace period where undeletion would have been allowed. If you proceed,
+                        /// there will be no way to recover this CA.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("skipGracePeriod", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<bool> SkipGracePeriod { get; set; }
 
                         /// <summary>Gets the method name.</summary>
                         public override string MethodName => "delete";
@@ -1059,9 +1076,25 @@ namespace Google.Apis.CertificateAuthorityService.v1
                                 DefaultValue = null,
                                 Pattern = null,
                             });
+                            RequestParameters.Add("ignoreDependentResources", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "ignoreDependentResources",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
                             RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
                             {
                                 Name = "requestId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("skipGracePeriod", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "skipGracePeriod",
                                 IsRequired = false,
                                 ParameterType = "query",
                                 DefaultValue = null,
@@ -1078,7 +1111,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// </param>
                     public virtual DisableRequest Disable(Google.Apis.CertificateAuthorityService.v1.Data.DisableCertificateAuthorityRequest body, string name)
                     {
-                        return new DisableRequest(service, body, name);
+                        return new DisableRequest(this.service, body, name);
                     }
 
                     /// <summary>Disable a CertificateAuthority.</summary>
@@ -1137,7 +1170,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// </param>
                     public virtual EnableRequest Enable(Google.Apis.CertificateAuthorityService.v1.Data.EnableCertificateAuthorityRequest body, string name)
                     {
-                        return new EnableRequest(service, body, name);
+                        return new EnableRequest(this.service, body, name);
                     }
 
                     /// <summary>Enable a CertificateAuthority.</summary>
@@ -1200,7 +1233,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// </param>
                     public virtual FetchRequest Fetch(string name)
                     {
-                        return new FetchRequest(service, name);
+                        return new FetchRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1253,7 +1286,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// <param name="name">Required. The name of the CertificateAuthority to get.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Returns a CertificateAuthority.</summary>
@@ -1301,7 +1334,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists CertificateAuthorities.</summary>
@@ -1404,12 +1437,12 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// <summary>Update a CertificateAuthority.</summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">
-                    /// Output only. The resource name for this CertificateAuthority in the format
+                    /// Identifier. The resource name for this CertificateAuthority in the format
                     /// `projects/*/locations/*/caPools/*/certificateAuthorities/*`.
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.CertificateAuthorityService.v1.Data.CertificateAuthority body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>Update a CertificateAuthority.</summary>
@@ -1424,7 +1457,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         }
 
                         /// <summary>
-                        /// Output only. The resource name for this CertificateAuthority in the format
+                        /// Identifier. The resource name for this CertificateAuthority in the format
                         /// `projects/*/locations/*/caPools/*/certificateAuthorities/*`.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -1434,7 +1467,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry
                         /// your request, the server will know to ignore the request if it has already been completed.
                         /// The server will guarantee that for at least 60 minutes since the first request. For example,
-                        /// consider a situation where you make an initial request and t he request times out. If you
+                        /// consider a situation where you make an initial request and the request times out. If you
                         /// make the request again with the same request ID, the server can check if original operation
                         /// with the same request ID was received, and if so, will ignore the second request. This
                         /// prevents clients from accidentally creating duplicate commitments. The request ID must be a
@@ -1502,7 +1535,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// </param>
                     public virtual UndeleteRequest Undelete(Google.Apis.CertificateAuthorityService.v1.Data.UndeleteCertificateAuthorityRequest body, string name)
                     {
-                        return new UndeleteRequest(service, body, name);
+                        return new UndeleteRequest(this.service, body, name);
                     }
 
                     /// <summary>Undelete a CertificateAuthority that has been deleted.</summary>
@@ -1581,7 +1614,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.CertificateAuthorityService.v1.Data.Certificate body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -1607,7 +1640,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         /// <summary>
                         /// Optional. It must be unique within a location and match the regular expression
                         /// `[a-zA-Z0-9_-]{1,63}`. This field is required when using a CertificateAuthority in the
-                        /// Enterprise CertificateAuthority.Tier, but is optional and its value is ignored otherwise.
+                        /// Enterprise CertificateAuthority.tier, but is optional and its value is ignored otherwise.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("certificateId", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual string CertificateId { get; set; }
@@ -1713,7 +1746,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// <param name="name">Required. The name of the Certificate to get.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Returns a Certificate.</summary>
@@ -1761,7 +1794,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists Certificates.</summary>
@@ -1873,12 +1906,12 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">
-                    /// Output only. The resource name for this Certificate in the format
+                    /// Identifier. The resource name for this Certificate in the format
                     /// `projects/*/locations/*/caPools/*/certificates/*`.
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.CertificateAuthorityService.v1.Data.Certificate body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1895,7 +1928,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         }
 
                         /// <summary>
-                        /// Output only. The resource name for this Certificate in the format
+                        /// Identifier. The resource name for this Certificate in the format
                         /// `projects/*/locations/*/caPools/*/certificates/*`.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -1905,7 +1938,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                         /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry
                         /// your request, the server will know to ignore the request if it has already been completed.
                         /// The server will guarantee that for at least 60 minutes since the first request. For example,
-                        /// consider a situation where you make an initial request and t he request times out. If you
+                        /// consider a situation where you make an initial request and the request times out. If you
                         /// make the request again with the same request ID, the server can check if original operation
                         /// with the same request ID was received, and if so, will ignore the second request. This
                         /// prevents clients from accidentally creating duplicate commitments. The request ID must be a
@@ -1973,7 +2006,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// </param>
                     public virtual RevokeRequest Revoke(Google.Apis.CertificateAuthorityService.v1.Data.RevokeCertificateRequest body, string name)
                     {
-                        return new RevokeRequest(service, body, name);
+                        return new RevokeRequest(this.service, body, name);
                     }
 
                     /// <summary>Revoke a Certificate.</summary>
@@ -2033,7 +2066,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CertificateAuthorityService.v1.Data.CaPool body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Create a CaPool.</summary>
@@ -2065,7 +2098,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry your
                     /// request, the server will know to ignore the request if it has already been completed. The server
                     /// will guarantee that for at least 60 minutes since the first request. For example, consider a
-                    /// situation where you make an initial request and t he request times out. If you make the request
+                    /// situation where you make an initial request and the request times out. If you make the request
                     /// again with the same request ID, the server can check if original operation with the same request
                     /// ID was received, and if so, will ignore the second request. This prevents clients from
                     /// accidentally creating duplicate commitments. The request ID must be a valid UUID with the
@@ -2126,7 +2159,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Delete a CaPool.</summary>
@@ -2146,10 +2179,18 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     public virtual string Name { get; private set; }
 
                     /// <summary>
+                    /// Optional. This field allows this pool to be deleted even if it's being depended on by another
+                    /// resource. However, doing so may result in unintended and unrecoverable effects on any dependent
+                    /// resources since the pool will no longer be able to issue certificates.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("ignoreDependentResources", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> IgnoreDependentResources { get; set; }
+
+                    /// <summary>
                     /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry your
                     /// request, the server will know to ignore the request if it has already been completed. The server
                     /// will guarantee that for at least 60 minutes since the first request. For example, consider a
-                    /// situation where you make an initial request and t he request times out. If you make the request
+                    /// situation where you make an initial request and the request times out. If you make the request
                     /// again with the same request ID, the server can check if original operation with the same request
                     /// ID was received, and if so, will ignore the second request. This prevents clients from
                     /// accidentally creating duplicate commitments. The request ID must be a valid UUID with the
@@ -2179,6 +2220,14 @@ namespace Google.Apis.CertificateAuthorityService.v1
                             DefaultValue = null,
                             Pattern = @"^projects/[^/]+/locations/[^/]+/caPools/[^/]+$",
                         });
+                        RequestParameters.Add("ignoreDependentResources", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "ignoreDependentResources",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
                         RequestParameters.Add("requestId", new Google.Apis.Discovery.Parameter
                         {
                             Name = "requestId",
@@ -2192,7 +2241,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
 
                 /// <summary>
                 /// FetchCaCerts returns the current trust anchor for the CaPool. This will include CA certificate
-                /// chains for all ACTIVE CertificateAuthority resources in the CaPool.
+                /// chains for all certificate authorities in the ENABLED, DISABLED, or STAGED states.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="caPool">
@@ -2200,12 +2249,12 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// </param>
                 public virtual FetchCaCertsRequest FetchCaCerts(Google.Apis.CertificateAuthorityService.v1.Data.FetchCaCertsRequest body, string caPool)
                 {
-                    return new FetchCaCertsRequest(service, body, caPool);
+                    return new FetchCaCertsRequest(this.service, body, caPool);
                 }
 
                 /// <summary>
                 /// FetchCaCerts returns the current trust anchor for the CaPool. This will include CA certificate
-                /// chains for all ACTIVE CertificateAuthority resources in the CaPool.
+                /// chains for all certificate authorities in the ENABLED, DISABLED, or STAGED states.
                 /// </summary>
                 public class FetchCaCertsRequest : CertificateAuthorityServiceBaseServiceRequest<Google.Apis.CertificateAuthorityService.v1.Data.FetchCaCertsResponse>
                 {
@@ -2257,7 +2306,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// <param name="name">Required. The name of the CaPool to get.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Returns a CaPool.</summary>
@@ -2303,12 +2352,13 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// does not have a policy set.
                 /// </summary>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                 {
-                    return new GetIamPolicyRequest(service, resource);
+                    return new GetIamPolicyRequest(this.service, resource);
                 }
 
                 /// <summary>
@@ -2325,8 +2375,9 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -2383,7 +2434,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists CaPools.</summary>
@@ -2484,11 +2535,11 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// <summary>Update a CaPool.</summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// Output only. The resource name for this CaPool in the format `projects/*/locations/*/caPools/*`.
+                /// Identifier. The resource name for this CaPool in the format `projects/*/locations/*/caPools/*`.
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CertificateAuthorityService.v1.Data.CaPool body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Update a CaPool.</summary>
@@ -2503,7 +2554,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     }
 
                     /// <summary>
-                    /// Output only. The resource name for this CaPool in the format `projects/*/locations/*/caPools/*`.
+                    /// Identifier. The resource name for this CaPool in the format `projects/*/locations/*/caPools/*`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -2512,7 +2563,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry your
                     /// request, the server will know to ignore the request if it has already been completed. The server
                     /// will guarantee that for at least 60 minutes since the first request. For example, consider a
-                    /// situation where you make an initial request and t he request times out. If you make the request
+                    /// situation where you make an initial request and the request times out. If you make the request
                     /// again with the same request ID, the server can check if original operation with the same request
                     /// ID was received, and if so, will ignore the second request. This prevents clients from
                     /// accidentally creating duplicate commitments. The request ID must be a valid UUID with the
@@ -2577,12 +2628,13 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CertificateAuthorityService.v1.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -2600,8 +2652,9 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -2644,12 +2697,13 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CertificateAuthorityService.v1.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -2669,8 +2723,9 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -2731,7 +2786,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CertificateAuthorityService.v1.Data.CertificateTemplate body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Create a new CertificateTemplate in a given Project and Location.</summary>
@@ -2763,7 +2818,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry your
                     /// request, the server will know to ignore the request if it has already been completed. The server
                     /// will guarantee that for at least 60 minutes since the first request. For example, consider a
-                    /// situation where you make an initial request and t he request times out. If you make the request
+                    /// situation where you make an initial request and the request times out. If you make the request
                     /// again with the same request ID, the server can check if original operation with the same request
                     /// ID was received, and if so, will ignore the second request. This prevents clients from
                     /// accidentally creating duplicate commitments. The request ID must be a valid UUID with the
@@ -2825,7 +2880,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>DeleteCertificateTemplate deletes a CertificateTemplate.</summary>
@@ -2849,7 +2904,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry your
                     /// request, the server will know to ignore the request if it has already been completed. The server
                     /// will guarantee that for at least 60 minutes since the first request. For example, consider a
-                    /// situation where you make an initial request and t he request times out. If you make the request
+                    /// situation where you make an initial request and the request times out. If you make the request
                     /// again with the same request ID, the server can check if original operation with the same request
                     /// ID was received, and if so, will ignore the second request. This prevents clients from
                     /// accidentally creating duplicate commitments. The request ID must be a valid UUID with the
@@ -2894,7 +2949,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// <param name="name">Required. The name of the CertificateTemplate to get.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Returns a CertificateTemplate.</summary>
@@ -2940,12 +2995,13 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// does not have a policy set.
                 /// </summary>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                 {
-                    return new GetIamPolicyRequest(service, resource);
+                    return new GetIamPolicyRequest(this.service, resource);
                 }
 
                 /// <summary>
@@ -2962,8 +3018,9 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -3020,7 +3077,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists CertificateTemplates.</summary>
@@ -3123,12 +3180,12 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// <summary>Update a CertificateTemplate.</summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// Output only. The resource name for this CertificateTemplate in the format
+                /// Identifier. The resource name for this CertificateTemplate in the format
                 /// `projects/*/locations/*/certificateTemplates/*`.
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CertificateAuthorityService.v1.Data.CertificateTemplate body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Update a CertificateTemplate.</summary>
@@ -3143,7 +3200,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     }
 
                     /// <summary>
-                    /// Output only. The resource name for this CertificateTemplate in the format
+                    /// Identifier. The resource name for this CertificateTemplate in the format
                     /// `projects/*/locations/*/certificateTemplates/*`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -3153,7 +3210,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry your
                     /// request, the server will know to ignore the request if it has already been completed. The server
                     /// will guarantee that for at least 60 minutes since the first request. For example, consider a
-                    /// situation where you make an initial request and t he request times out. If you make the request
+                    /// situation where you make an initial request and the request times out. If you make the request
                     /// again with the same request ID, the server can check if original operation with the same request
                     /// ID was received, and if so, will ignore the second request. This prevents clients from
                     /// accidentally creating duplicate commitments. The request ID must be a valid UUID with the
@@ -3218,12 +3275,13 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CertificateAuthorityService.v1.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -3241,8 +3299,9 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -3285,12 +3344,13 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CertificateAuthorityService.v1.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -3310,8 +3370,9 @@ namespace Google.Apis.CertificateAuthorityService.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -3370,13 +3431,13 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.CertificateAuthorityService.v1.Data.CancelOperationRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -3385,7 +3446,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 public class CancelRequest : CertificateAuthorityServiceBaseServiceRequest<Google.Apis.CertificateAuthorityService.v1.Data.Empty>
                 {
@@ -3439,7 +3500,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// <param name="name">The name of the operation resource to be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -3491,7 +3552,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -3537,27 +3598,17 @@ namespace Google.Apis.CertificateAuthorityService.v1
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 public class ListRequest : CertificateAuthorityServiceBaseServiceRequest<Google.Apis.CertificateAuthorityService.v1.Data.ListOperationsResponse>
                 {
@@ -3637,7 +3688,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -3682,7 +3733,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -3701,7 +3752,7 @@ namespace Google.Apis.CertificateAuthorityService.v1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -3805,7 +3856,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry your request,
         /// the server will know to ignore the request if it has already been completed. The server will guarantee that
         /// for at least 60 minutes since the first request. For example, consider a situation where you make an initial
-        /// request and t he request times out. If you make the request again with the same request ID, the server can
+        /// request and the request times out. If you make the request again with the same request ID, the server can
         /// check if original operation with the same request ID was received, and if so, will ignore the second
         /// request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a
         /// valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
@@ -3853,7 +3904,8 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3908,16 +3960,37 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -3925,15 +3998,19 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -3942,20 +4019,23 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Describes values that are relevant in a CA certificate.</summary>
+    /// <summary>
+    /// Describes the X.509 basic constraints extension, per [RFC 5280 section
+    /// 4.2.1.9](https://tools.ietf.org/html/rfc5280#section-4.2.1.9)
+    /// </summary>
     public class CaOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Optional. Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing, the
-        /// extension will be omitted from the CA certificate.
+        /// Optional. Refers to the "CA" boolean field in the X.509 extension. When this value is missing, the basic
+        /// constraints extension will be omitted from the certificate.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("isCa")]
         public virtual System.Nullable<bool> IsCa { get; set; }
 
         /// <summary>
-        /// Optional. Refers to the path length restriction X.509 extension. For a CA certificate, this value describes
-        /// the depth of subordinate CA certificates that are allowed. If this value is less than 0, the request will
-        /// fail. If this value is missing, the max path length will be omitted from the CA certificate.
+        /// Optional. Refers to the path length constraint field in the X.509 extension. For a CA certificate, this
+        /// value describes the depth of subordinate CA certificates that are allowed. If this value is less than 0, the
+        /// request will fail. If this value is missing, the max path length will be omitted from the certificate.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maxIssuerPathLength")]
         public virtual System.Nullable<int> MaxIssuerPathLength { get; set; }
@@ -3980,7 +4060,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
         /// <summary>
-        /// Output only. The resource name for this CaPool in the format `projects/*/locations/*/caPools/*`.
+        /// Identifier. The resource name for this CaPool in the format `projects/*/locations/*/caPools/*`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -4037,9 +4117,42 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("config")]
         public virtual CertificateConfig Config { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time at which this Certificate was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The resource name of the issuing CertificateAuthority in the format
@@ -4061,7 +4174,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual object Lifetime { get; set; }
 
         /// <summary>
-        /// Output only. The resource name for this Certificate in the format
+        /// Identifier. The resource name for this Certificate in the format
         /// `projects/*/locations/*/caPools/*/certificates/*`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -4096,9 +4209,42 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("subjectMode")]
         public virtual string SubjectMode { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time at which this Certificate was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4127,22 +4273,121 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("config")]
         public virtual CertificateConfig Config { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time at which this CertificateAuthority was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _deleteTimeRaw;
+
+        private object _deleteTime;
 
         /// <summary>
         /// Output only. The time at which this CertificateAuthority was soft deleted, if it is in the DELETED state.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deleteTime")]
-        public virtual object DeleteTime { get; set; }
+        public virtual string DeleteTimeRaw
+        {
+            get => _deleteTimeRaw;
+            set
+            {
+                _deleteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deleteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeleteTimeDateTimeOffset instead.")]
+        public virtual object DeleteTime
+        {
+            get => _deleteTime;
+            set
+            {
+                _deleteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deleteTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeleteTimeRaw);
+            set => DeleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
 
         /// <summary>
         /// Output only. The time at which this CertificateAuthority will be permanently purged, if it is in the DELETED
         /// state.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Immutable. The name of a Cloud Storage bucket where this CertificateAuthority will publish content, such as
@@ -4173,7 +4418,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual object Lifetime { get; set; }
 
         /// <summary>
-        /// Output only. The resource name for this CertificateAuthority in the format
+        /// Identifier. The resource name for this CertificateAuthority in the format
         /// `projects/*/locations/*/caPools/*/certificateAuthorities/*`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -4186,6 +4431,14 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pemCaCertificates")]
         public virtual System.Collections.Generic.IList<string> PemCaCertificates { get; set; }
+
+        /// <summary>Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzi")]
+        public virtual System.Nullable<bool> SatisfiesPzi { get; set; }
+
+        /// <summary>Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzs")]
+        public virtual System.Nullable<bool> SatisfiesPzs { get; set; }
 
         /// <summary>Output only. The State for this CertificateAuthority.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -4207,9 +4460,50 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time at which this CertificateAuthority was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. User-defined URLs for accessing content published by this CertificateAuthority, including the CA
+        /// certificate and the PEM-encoded CRLs. The service does not publish content to these URLs. It is up to the
+        /// user to mirror content to these URLs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userDefinedAccessUrls")]
+        public virtual UserDefinedAccessUrls UserDefinedAccessUrls { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4233,10 +4527,32 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual SubjectConfig SubjectConfig { get; set; }
 
         /// <summary>
+        /// Optional. When specified this provides a custom SKI to be used in the certificate. This should only be used
+        /// to maintain a SKI of an existing CA originally created outside CA service, which was not generated using
+        /// method (1) described in RFC 5280 section 4.2.1.2.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subjectKeyId")]
+        public virtual CertificateConfigKeyId SubjectKeyId { get; set; }
+
+        /// <summary>
         /// Required. Describes how some of the technical X.509 fields in a certificate should be populated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("x509Config")]
         public virtual X509Parameters X509Config { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A KeyId identifies a specific public key, usually by hashing the public key.</summary>
+    public class CertificateConfigKeyId : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The value of this KeyId encoded in lowercase hexadecimal. This is most likely the 160 bit SHA-1
+        /// hash of the public key.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyId")]
+        public virtual string KeyId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4289,6 +4605,13 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("subjectKeyId")]
         public virtual KeyId SubjectKeyId { get; set; }
+
+        /// <summary>
+        /// The hash of the pre-signed certificate, which will be signed by the CA. Corresponds to the TBS Certificate
+        /// in https://tools.ietf.org/html/rfc5280#section-4.1.2. The field will always be populated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tbsCertificateDigest")]
+        public virtual string TbsCertificateDigest { get; set; }
 
         /// <summary>Describes some of the technical X.509 fields in a certificate.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("x509Description")]
@@ -4369,16 +4692,49 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("accessUrl")]
         public virtual string AccessUrl { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time at which this CertificateRevocationList was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Optional. Labels with user-defined metadata.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
         /// <summary>
-        /// Output only. The resource name for this CertificateRevocationList in the format
+        /// Identifier. The resource name for this CertificateRevocationList in the format
         /// `projects/*/locations/*/caPools/*certificateAuthorities/*/ certificateRevocationLists/*`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -4407,9 +4763,42 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time at which this CertificateRevocationList was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4418,9 +4807,42 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
     /// <summary>A CertificateTemplate refers to a managed template for certificate issuance.</summary>
     public class CertificateTemplate : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time at which this CertificateTemplate was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Optional. A human-readable description of scenarios this template is intended for.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -4438,7 +4860,16 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
         /// <summary>
-        /// Output only. The resource name for this CertificateTemplate in the format
+        /// Optional. The maximum lifetime allowed for issued Certificates that use this template. If the issuing CaPool
+        /// resource's IssuancePolicy specifies a maximum_lifetime the minimum of the two durations will be the maximum
+        /// lifetime for issued Certificates. Note that if the issuing CertificateAuthority expires before a
+        /// Certificate's requested maximum_lifetime, the effective lifetime will be explicitly truncated to match it.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maximumLifetime")]
+        public virtual object MaximumLifetime { get; set; }
+
+        /// <summary>
+        /// Identifier. The resource name for this CertificateTemplate in the format
         /// `projects/*/locations/*/certificateTemplates/*`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -4464,9 +4895,42 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("predefinedValues")]
         public virtual X509Parameters PredefinedValues { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time at which this CertificateTemplate was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4476,10 +4940,18 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
     public class DisableCertificateAuthorityRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Optional. This field allows this CA to be disabled even if it's being depended on by another resource.
+        /// However, doing so may result in unintended and unrecoverable effects on any dependent resources since the CA
+        /// will no longer be able to issue certificates.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ignoreDependentResources")]
+        public virtual System.Nullable<bool> IgnoreDependentResources { get; set; }
+
+        /// <summary>
         /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry your request,
         /// the server will know to ignore the request if it has already been completed. The server will guarantee that
         /// for at least 60 minutes since the first request. For example, consider a situation where you make an initial
-        /// request and t he request times out. If you make the request again with the same request ID, the server can
+        /// request and the request times out. If you make the request again with the same request ID, the server can
         /// check if original operation with the same request ID was received, and if so, will ignore the second
         /// request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a
         /// valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
@@ -4508,8 +4980,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4524,7 +4995,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry your request,
         /// the server will know to ignore the request if it has already been completed. The server will guarantee that
         /// for at least 60 minutes since the first request. For example, consider a situation where you make an initial
-        /// request and t he request times out. If you make the request again with the same request ID, the server can
+        /// request and the request times out. If you make the request again with the same request ID, the server can
         /// check if original operation with the same request ID was received, and if so, will ignore the second
         /// request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a
         /// valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
@@ -4632,7 +5103,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry your request,
         /// the server will know to ignore the request if it has already been completed. The server will guarantee that
         /// for at least 60 minutes since the first request. For example, consider a situation where you make an initial
-        /// request and t he request times out. If you make the request again with the same request ID, the server can
+        /// request and the request times out. If you make the request again with the same request ID, the server can
         /// check if original operation with the same request ID was received, and if so, will ignore the second
         /// request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a
         /// valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
@@ -4648,7 +5119,8 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
     public class FetchCaCertsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The PEM encoded CA certificate chains of all ACTIVE CertificateAuthority resources in this CaPool.
+        /// The PEM encoded CA certificate chains of all certificate authorities in this CaPool in the ENABLED,
+        /// DISABLED, or STAGED states.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("caCerts")]
         public virtual System.Collections.Generic.IList<CertChain> CaCerts { get; set; }
@@ -4721,8 +5193,8 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
 
         /// <summary>
         /// Optional. The maximum lifetime allowed for issued Certificates. Note that if the issuing
-        /// CertificateAuthority expires before a Certificate's requested maximum_lifetime, the effective lifetime will
-        /// be explicitly truncated to match it.
+        /// CertificateAuthority expires before a Certificate resource's requested maximum_lifetime, the effective
+        /// lifetime will be explicitly truncated to match it.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maximumLifetime")]
         public virtual object MaximumLifetime { get; set; }
@@ -4856,8 +5328,8 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual System.Collections.Generic.IList<CaPool> CaPools { get; set; }
 
         /// <summary>
-        /// A token to retrieve next page of results. Pass this value in
-        /// ListCertificateAuthoritiesRequest.next_page_token to retrieve the next page of results.
+        /// A token to retrieve next page of results. Pass this value in ListCertificateAuthoritiesRequest.page_token to
+        /// retrieve the next page of results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -4878,8 +5350,8 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual System.Collections.Generic.IList<CertificateAuthority> CertificateAuthorities { get; set; }
 
         /// <summary>
-        /// A token to retrieve next page of results. Pass this value in
-        /// ListCertificateAuthoritiesRequest.next_page_token to retrieve the next page of results.
+        /// A token to retrieve next page of results. Pass this value in ListCertificateAuthoritiesRequest.page_token to
+        /// retrieve the next page of results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -4901,7 +5373,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
 
         /// <summary>
         /// A token to retrieve next page of results. Pass this value in
-        /// ListCertificateRevocationListsRequest.next_page_token to retrieve the next page of results.
+        /// ListCertificateRevocationListsRequest.page_token to retrieve the next page of results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -4922,8 +5394,8 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual System.Collections.Generic.IList<CertificateTemplate> CertificateTemplates { get; set; }
 
         /// <summary>
-        /// A token to retrieve next page of results. Pass this value in ListCertificateTemplatesRequest.next_page_token
-        /// to retrieve the next page of results.
+        /// A token to retrieve next page of results. Pass this value in ListCertificateTemplatesRequest.page_token to
+        /// retrieve the next page of results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -4944,8 +5416,8 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual System.Collections.Generic.IList<Certificate> Certificates { get; set; }
 
         /// <summary>
-        /// A token to retrieve next page of results. Pass this value in ListCertificatesRequest.next_page_token to
-        /// retrieve the next page of results.
+        /// A token to retrieve next page of results. Pass this value in ListCertificatesRequest.page_token to retrieve
+        /// the next page of results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -4988,7 +5460,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -5015,6 +5487,79 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Describes the X.509 name constraints extension, per https://tools.ietf.org/html/rfc5280#section-4.2.1.10
+    /// </summary>
+    public class NameConstraints : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Indicates whether or not the name constraints are marked critical.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("critical")]
+        public virtual System.Nullable<bool> Critical { get; set; }
+
+        /// <summary>
+        /// Contains excluded DNS names. Any DNS name that can be constructed by simply adding zero or more labels to
+        /// the left-hand side of the name satisfies the name constraint. For example, `example.com`, `www.example.com`,
+        /// `www.sub.example.com` would satisfy `example.com` while `example1.com` does not.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludedDnsNames")]
+        public virtual System.Collections.Generic.IList<string> ExcludedDnsNames { get; set; }
+
+        /// <summary>
+        /// Contains the excluded email addresses. The value can be a particular email address, a hostname to indicate
+        /// all email addresses on that host or a domain with a leading period (e.g. `.example.com`) to indicate all
+        /// email addresses in that domain.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludedEmailAddresses")]
+        public virtual System.Collections.Generic.IList<string> ExcludedEmailAddresses { get; set; }
+
+        /// <summary>
+        /// Contains the excluded IP ranges. For IPv4 addresses, the ranges are expressed using CIDR notation as
+        /// specified in RFC 4632. For IPv6 addresses, the ranges are expressed in similar encoding as IPv4 addresses.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludedIpRanges")]
+        public virtual System.Collections.Generic.IList<string> ExcludedIpRanges { get; set; }
+
+        /// <summary>
+        /// Contains the excluded URIs that apply to the host part of the name. The value can be a hostname or a domain
+        /// with a leading period (like `.example.com`)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("excludedUris")]
+        public virtual System.Collections.Generic.IList<string> ExcludedUris { get; set; }
+
+        /// <summary>
+        /// Contains permitted DNS names. Any DNS name that can be constructed by simply adding zero or more labels to
+        /// the left-hand side of the name satisfies the name constraint. For example, `example.com`, `www.example.com`,
+        /// `www.sub.example.com` would satisfy `example.com` while `example1.com` does not.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("permittedDnsNames")]
+        public virtual System.Collections.Generic.IList<string> PermittedDnsNames { get; set; }
+
+        /// <summary>
+        /// Contains the permitted email addresses. The value can be a particular email address, a hostname to indicate
+        /// all email addresses on that host or a domain with a leading period (e.g. `.example.com`) to indicate all
+        /// email addresses in that domain.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("permittedEmailAddresses")]
+        public virtual System.Collections.Generic.IList<string> PermittedEmailAddresses { get; set; }
+
+        /// <summary>
+        /// Contains the permitted IP ranges. For IPv4 addresses, the ranges are expressed using CIDR notation as
+        /// specified in RFC 4632. For IPv6 addresses, the ranges are expressed in similar encoding as IPv4 addresses.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("permittedIpRanges")]
+        public virtual System.Collections.Generic.IList<string> PermittedIpRanges { get; set; }
+
+        /// <summary>
+        /// Contains the permitted URIs that apply to the host part of the name. The value can be a hostname or a domain
+        /// with a leading period (like `.example.com`)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("permittedUris")]
+        public virtual System.Collections.Generic.IList<string> PermittedUris { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5063,8 +5608,8 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -5083,18 +5628,84 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
         public virtual string ApiVersion { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. The time the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
-        /// successfully been cancelled have Operation.error value with a google.rpc.Status.code of 1, corresponding to
-        /// `Code.CANCELLED`.
+        /// successfully been cancelled have google.longrunning.Operation.error value with a google.rpc.Status.code of
+        /// 1, corresponding to `Code.CANCELLED`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestedCancellation")]
         public virtual System.Nullable<bool> RequestedCancellation { get; set; }
@@ -5124,18 +5735,26 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5210,6 +5829,13 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
     public class PublishingOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Optional. Specifies the encoding format of each CertificateAuthority resource's CA certificate and CRLs. If
+        /// this is omitted, CA certificates and CRLs will be published in PEM.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("encodingFormat")]
+        public virtual string EncodingFormat { get; set; }
+
+        /// <summary>
         /// Optional. When true, publishes each CertificateAuthority's CA certificate and includes its URL in the
         /// "Authority Information Access" X.509 extension in all issued Certificates. If this is false, the CA
         /// certificate will not be published and the corresponding X.509 extension will not be written in issued
@@ -5238,6 +5864,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("deleteResource")]
         public virtual System.Nullable<bool> DeleteResource { get; set; }
 
+        /// <summary>Excluisive action returned by the CLH.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("exclusiveAction")]
         public virtual string ExclusiveAction { get; set; }
 
@@ -5252,9 +5879,44 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("revocationState")]
         public virtual string RevocationState { get; set; }
 
+        private string _revocationTimeRaw;
+
+        private object _revocationTime;
+
         /// <summary>The time at which this Certificate was revoked.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("revocationTime")]
-        public virtual object RevocationTime { get; set; }
+        public virtual string RevocationTimeRaw
+        {
+            get => _revocationTimeRaw;
+            set
+            {
+                _revocationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _revocationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RevocationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RevocationTimeDateTimeOffset instead.")]
+        public virtual object RevocationTime
+        {
+            get => _revocationTime;
+            set
+            {
+                _revocationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _revocationTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="RevocationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RevocationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RevocationTimeRaw);
+            set => RevocationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5271,7 +5933,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry your request,
         /// the server will know to ignore the request if it has already been completed. The server will guarantee that
         /// for at least 60 minutes since the first request. For example, consider a situation where you make an initial
-        /// request and t he request times out. If you make the request again with the same request ID, the server can
+        /// request and the request times out. If you make the request again with the same request ID, the server can
         /// check if original operation with the same request ID was received, and if so, will ignore the second
         /// request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a
         /// valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
@@ -5330,7 +5992,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -5423,7 +6085,10 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
     /// </summary>
     public class SubjectAltNames : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Contains additional subject alternative name values.</summary>
+        /// <summary>
+        /// Contains additional subject alternative name values. For each custom_san, the `value` field must contain an
+        /// ASN.1 encoded UTF8String.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customSans")]
         public virtual System.Collections.Generic.IList<X509Extension> CustomSans { get; set; }
 
@@ -5454,7 +6119,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
     public class SubjectConfig : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. Contains distinguished name fields such as the common name, location and organization.
+        /// Optional. Contains distinguished name fields such as the common name, location and organization.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("subject")]
         public virtual Subject Subject { get; set; }
@@ -5481,17 +6146,83 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("lifetime")]
         public virtual object Lifetime { get; set; }
 
+        private string _notAfterTimeRaw;
+
+        private object _notAfterTime;
+
         /// <summary>
         /// The time after which the certificate is expired. Per RFC 5280, the validity period for a certificate is the
         /// period of time from not_before_time through not_after_time, inclusive. Corresponds to 'not_before_time' +
         /// 'lifetime' - 1 second.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("notAfterTime")]
-        public virtual object NotAfterTime { get; set; }
+        public virtual string NotAfterTimeRaw
+        {
+            get => _notAfterTimeRaw;
+            set
+            {
+                _notAfterTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _notAfterTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="NotAfterTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use NotAfterTimeDateTimeOffset instead.")]
+        public virtual object NotAfterTime
+        {
+            get => _notAfterTime;
+            set
+            {
+                _notAfterTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _notAfterTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="NotAfterTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? NotAfterTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(NotAfterTimeRaw);
+            set => NotAfterTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _notBeforeTimeRaw;
+
+        private object _notBeforeTime;
 
         /// <summary>The time at which the certificate becomes valid.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("notBeforeTime")]
-        public virtual object NotBeforeTime { get; set; }
+        public virtual string NotBeforeTimeRaw
+        {
+            get => _notBeforeTimeRaw;
+            set
+            {
+                _notBeforeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _notBeforeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="NotBeforeTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use NotBeforeTimeDateTimeOffset instead.")]
+        public virtual object NotBeforeTime
+        {
+            get => _notBeforeTime;
+            set
+            {
+                _notBeforeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _notBeforeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="NotBeforeTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? NotBeforeTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(NotBeforeTimeRaw);
+            set => NotBeforeTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Contains distinguished name fields such as the common name, location and / organization.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("subject")]
@@ -5548,7 +6279,7 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>
@@ -5577,13 +6308,34 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         /// Optional. An ID to identify requests. Specify a unique request ID so that if you must retry your request,
         /// the server will know to ignore the request if it has already been completed. The server will guarantee that
         /// for at least 60 minutes since the first request. For example, consider a situation where you make an initial
-        /// request and t he request times out. If you make the request again with the same request ID, the server can
+        /// request and the request times out. If you make the request again with the same request ID, the server can
         /// check if original operation with the same request ID was received, and if so, will ignore the second
         /// request. This prevents clients from accidentally creating duplicate commitments. The request ID must be a
         /// valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestId")]
         public virtual string RequestId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>User-defined URLs for accessing content published by this CertificateAuthority.</summary>
+    public class UserDefinedAccessUrls : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. A list of URLs where the issuer CA certificate may be downloaded, which appears in the "Authority
+        /// Information Access" extension in the certificate.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("aiaIssuingCertificateUrls")]
+        public virtual System.Collections.Generic.IList<string> AiaIssuingCertificateUrls { get; set; }
+
+        /// <summary>
+        /// Optional. A list of URLs where to obtain CRL information, i.e. the DistributionPoint.fullName described by
+        /// https://tools.ietf.org/html/rfc5280#section-4.2.1.13
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("crlAccessUrls")]
+        public virtual System.Collections.Generic.IList<string> CrlAccessUrls { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5631,13 +6383,20 @@ namespace Google.Apis.CertificateAuthorityService.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("aiaOcspServers")]
         public virtual System.Collections.Generic.IList<string> AiaOcspServers { get; set; }
 
-        /// <summary>Optional. Describes options in this X509Parameters that are relevant in a CA certificate.</summary>
+        /// <summary>
+        /// Optional. Describes options in this X509Parameters that are relevant in a CA certificate. If not specified,
+        /// a default basic constraints extension with `is_ca=false` will be added for leaf certificates.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("caOptions")]
         public virtual CaOptions CaOptions { get; set; }
 
         /// <summary>Optional. Indicates the intended use for keys that correspond to a certificate.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("keyUsage")]
         public virtual KeyUsage KeyUsage { get; set; }
+
+        /// <summary>Optional. Describes the X.509 name constraints extension.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nameConstraints")]
+        public virtual NameConstraints NameConstraints { get; set; }
 
         /// <summary>
         /// Optional. Describes the X.509 certificate policy object identifiers, per

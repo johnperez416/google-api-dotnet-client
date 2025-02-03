@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Playcustomapp.v1
         public PlaycustomappService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Accounts = new AccountsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://playcustomapp.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://playcustomapp.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Playcustomapp.v1
         public override string Name => "playcustomapp";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://playcustomapp.googleapis.com/";
-        #else
-            "https://playcustomapp.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://playcustomapp.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Play Custom App Publishing API.</summary>
         public class Scope
@@ -300,7 +295,7 @@ namespace Google.Apis.Playcustomapp.v1
             /// <param name="account">Developer account ID.</param>
             public virtual CreateRequest Create(Google.Apis.Playcustomapp.v1.Data.CustomApp body, long account)
             {
-                return new CreateRequest(service, body, account);
+                return new CreateRequest(this.service, body, account);
             }
 
             /// <summary>Creates a new custom app.</summary>

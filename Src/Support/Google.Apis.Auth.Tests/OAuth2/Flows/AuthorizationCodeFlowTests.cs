@@ -23,10 +23,8 @@ using Google.Apis.Json;
 using Google.Apis.Tests.Mocks;
 using Google.Apis.Util;
 using Google.Apis.Util.Store;
-using Moq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -46,17 +44,10 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
         [Fact]
         public void TestConstructor_ArgumentException()
         {
+            var initializer = new AuthorizationCodeFlow.Initializer("https://authorization_code.com", "https://token.com");
             // ClientSecrets are missing.
-            try
-            {
-                new AuthorizationCodeFlow(new AuthorizationCodeFlow.Initializer(
-                    "https://authorization_code.com", "https://token.com"));
-                Assert.True(false, "Exception expected");
-            }
-            catch (ArgumentException ex)
-            {
-                Assert.Contains("You MUST set ClientSecret or ClientSecretStream", ex.Message);
-            }
+            var exception = Assert.Throws<ArgumentException>(() => new AuthorizationCodeFlow(initializer));
+            Assert.Contains("You MUST set ClientSecret or ClientSecretStream", exception.Message);
         }
 
         [Fact]
@@ -78,10 +69,14 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
             // Disable "<member> is obsolete" warning for these uses.
             // MessageHandler no longer provides a supported way for clients to query the list of handlers,
             // but we rely on the obsolete property as an implementation detail here.
-            #pragma warning disable 618
-            Assert.Single(flow.HttpClient.MessageHandler.UnsuccessfulResponseHandlers);
-            Assert.IsType<BackOffHandler>(flow.HttpClient.MessageHandler.UnsuccessfulResponseHandlers.First());
-            #pragma warning restore 618
+#pragma warning disable 618
+            IHttpUnsuccessfulResponseHandler badResponseHandler = Assert.Single(flow.HttpClient.MessageHandler.UnsuccessfulResponseHandlers);
+            IHttpExceptionHandler exceptionHandler = Assert.Single(flow.HttpClient.MessageHandler.ExceptionHandlers);
+#pragma warning restore 618
+
+            BackOffHandler backOffBadResponseHandler = Assert.IsType<BackOffHandler>(badResponseHandler);
+            BackOffHandler backOffExceptionHandler = Assert.IsType<BackOffHandler>(exceptionHandler);
+            Assert.Same(backOffBadResponseHandler, backOffExceptionHandler);
         }
 
         #endregion
@@ -100,44 +95,106 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
             Assert.Same(factory, flowWithFactory.HttpClientFactory);
         }
 
+        [Fact]
+        public void Deafault_RecommendedRetryPolicy()
+        {
+            var mockFactory = new MockHttpClientFactory(new FetchesTokenMessageHandler());
+            var flow = CreateFlow(httpClientFactory: mockFactory);
+
+            var args = Assert.Single(mockFactory.AllCreateHttpClientArgs);
+
+            var retryInitializer = Assert.Single(args.Initializers);
+            Assert.Same(GoogleAuthConsts.OAuth2TokenEndpointRecommendedRetry, retryInitializer);
+        }
+
+        [Fact]
+        public void BadResponse503AndRecommended_RecommendedRetryPolicy()
+        {
+            var mockFactory = new MockHttpClientFactory(new FetchesTokenMessageHandler());
+            var flow = CreateFlow(
+                httpClientFactory: mockFactory,
+                exponentialBackOffPolicy: ExponentialBackOffPolicy.UnsuccessfulResponse503 | ExponentialBackOffPolicy.RecommendedOrDefault);
+
+            var args = Assert.Single(mockFactory.AllCreateHttpClientArgs);
+
+            var retryInitializer = Assert.Single(args.Initializers);
+            Assert.Same(GoogleAuthConsts.OAuth2TokenEndpointRecommendedRetry, retryInitializer);
+        }
+
+        [Fact]
+        public void ExceptionAndRecommended_RecommendedAndOtherRetryPolicy()
+        {
+            var mockFactory = new MockHttpClientFactory(new FetchesTokenMessageHandler());
+            var flow = CreateFlow(
+                httpClientFactory: mockFactory,
+                exponentialBackOffPolicy: ExponentialBackOffPolicy.Exception | ExponentialBackOffPolicy.RecommendedOrDefault);
+
+            var args = Assert.Single(mockFactory.AllCreateHttpClientArgs);
+
+            Assert.Equal(2, args.Initializers.Count);
+            Assert.Contains(GoogleAuthConsts.OAuth2TokenEndpointRecommendedRetry, args.Initializers);
+            Assert.Contains(args.Initializers, initializer => initializer != GoogleAuthConsts.OAuth2TokenEndpointRecommendedRetry);
+        }
+
+        [Fact]
+        public void NoRetryPolicy()
+        {
+            var mockFactory = new MockHttpClientFactory(new FetchesTokenMessageHandler());
+            var flow = CreateFlow(httpClientFactory: mockFactory, exponentialBackOffPolicy: ExponentialBackOffPolicy.None);
+
+            var args = Assert.Single(mockFactory.AllCreateHttpClientArgs);
+
+            Assert.Empty(args.Initializers);
+        }
+
+        [Theory]
+        [InlineData(ExponentialBackOffPolicy.Exception)]
+        [InlineData(ExponentialBackOffPolicy.UnsuccessfulResponse503)]
+        [InlineData(ExponentialBackOffPolicy.Exception | ExponentialBackOffPolicy.UnsuccessfulResponse503)]
+        public void OtherThanRecommendedRetryPolicy(ExponentialBackOffPolicy policy)
+        {
+            var mockFactory = new MockHttpClientFactory(new FetchesTokenMessageHandler());
+            var flow = CreateFlow(httpClientFactory: mockFactory, exponentialBackOffPolicy: policy);
+
+            var args = Assert.Single(mockFactory.AllCreateHttpClientArgs);
+
+            var retryInitializer = Assert.Single(args.Initializers);
+            Assert.NotSame(GoogleAuthConsts.OAuth2TokenEndpointRecommendedRetry, retryInitializer);
+        }
+
         #region LoadToken
 
         [Fact]
-        public void LoadTokenAsync_NoDataStore()
+        public async Task LoadTokenAsync_NoDataStore()
         {
             var flow = CreateFlow();
-            Assert.Null(flow.LoadTokenAsync("user", CancellationToken.None).Result);
+            Assert.Null(await flow.LoadTokenAsync("user", default));
         }
 
         [Fact]
-        public void LoadTokenAsync_NullResponse()
+        public async Task LoadTokenAsync_NullResponse()
         {
-            TaskCompletionSource<TokenResponse> tcs = new TaskCompletionSource<TokenResponse>();
-            tcs.SetResult(null);
-            Assert.Null(SubtestLoadTokenAsync(tcs));
+            Assert.Null(await SubtestLoadTokenAsync(null));
         }
 
         [Fact]
-        public void LoadTokenAsync_TokenResponse()
+        public async Task LoadTokenAsync_TokenResponse()
         {
             TokenResponse response = new TokenResponse
             {
                 AccessToken = "access"
             };
 
-            TaskCompletionSource<TokenResponse> tcs = new TaskCompletionSource<TokenResponse>();
-            tcs.SetResult(response);
-            var result = SubtestLoadTokenAsync(tcs);
+            var result = await SubtestLoadTokenAsync(response);
             Assert.Equal(response, result);
         }
 
-        private TokenResponse SubtestLoadTokenAsync(TaskCompletionSource<TokenResponse> tcs)
+        private async Task<TokenResponse> SubtestLoadTokenAsync(TokenResponse response)
         {
-            var mock = new Mock<IDataStore>();
-            mock.Setup(ds => ds.GetAsync<TokenResponse>("user")).Returns(tcs.Task);
-            var flow = CreateFlow(dataStore: mock.Object);
-            var result = flow.LoadTokenAsync("user", CancellationToken.None).Result;
-            mock.Verify(ds => ds.GetAsync<TokenResponse>("user"));
+            var store = new FakeDataStore { TokenResponse = response };
+            var flow = CreateFlow(dataStore: store);
+            var result = await flow.LoadTokenAsync("user", default);
+            Assert.Equal("user", store.FetchedKey);
             return result;
         }
 
@@ -172,9 +229,9 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
         #endregion
 
         [Fact]
-        public void TestExchangeCodeForTokenAsync()
+        public async Task TestExchangeCodeForTokenAsync()
         {
-            var mock = new Mock<IDataStore>();
+            var store = new FakeDataStore();
             var handler = new FetchTokenMessageHandler();
             handler.AuthorizationCodeTokenRequest = new AuthorizationCodeTokenRequest()
             {
@@ -183,22 +240,17 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
                 Scope = "a"
             };
             MockHttpClientFactory mockFactory = new MockHttpClientFactory(handler);
-
-            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-            tcs.SetResult(null);
-            mock.Setup(ds => ds.StoreAsync("uSer", It.IsAny<TokenResponse>())).Returns(tcs.Task);
-
-            var flow = CreateFlow(httpClientFactory: mockFactory, scopes: new[] { "a" }, dataStore: mock.Object);
-            var response = flow.ExchangeCodeForTokenAsync("uSer", "c0de", "redIrect", CancellationToken.None).Result;
+            var flow = CreateFlow(httpClientFactory: mockFactory, scopes: new[] { "a" }, dataStore: store);
+            var response = await flow.ExchangeCodeForTokenAsync("uSer", "c0de", "redIrect", default);
             SubtestTokenResponse(response);
 
-            mock.Verify(ds => ds.StoreAsync("uSer", It.IsAny<TokenResponse>()));
+            Assert.Equal("uSer", store.StoredKey);
         }
 
         [Fact]
-        public void TestExchangeCodeForTokenAsync_NullScopes()
+        public async Task TestExchangeCodeForTokenAsync_NullScopes()
         {
-            var mock = new Mock<IDataStore>();
+            var store = new FakeDataStore();
             var handler = new FetchTokenMessageHandler();
             handler.AuthorizationCodeTokenRequest = new AuthorizationCodeTokenRequest()
             {
@@ -207,22 +259,17 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
                 Scope = null
             };
             MockHttpClientFactory mockFactory = new MockHttpClientFactory(handler);
-
-            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-            tcs.SetResult(null);
-            mock.Setup(ds => ds.StoreAsync("uSer", It.IsAny<TokenResponse>())).Returns(tcs.Task);
-
-            var flow = CreateFlow(httpClientFactory: mockFactory, scopes: null, dataStore: mock.Object);
-            var response = flow.ExchangeCodeForTokenAsync("uSer", "c0de", "redIrect", CancellationToken.None).Result;
+            var flow = CreateFlow(httpClientFactory: mockFactory, scopes: null, dataStore: store);
+            var response = await flow.ExchangeCodeForTokenAsync("uSer", "c0de", "redIrect", default);
             SubtestTokenResponse(response);
 
-            mock.Verify(ds => ds.StoreAsync("uSer", It.IsAny<TokenResponse>()));
+            Assert.Equal("uSer", store.StoredKey);
         }
 
         [Fact]
-        public void TestRefreshTokenAsync()
+        public async Task TestRefreshTokenAsync()
         {
-            var mock = new Mock<IDataStore>();
+            var store = new FakeDataStore();
             var handler = new FetchTokenMessageHandler();
             handler.RefreshTokenRequest = new RefreshTokenRequest()
             {
@@ -230,17 +277,11 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
                 Scope = "a"
             };
             MockHttpClientFactory mockFactory = new MockHttpClientFactory(handler);
-
-            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-            tcs.SetResult(null);
-            mock.Setup(ds => ds.StoreAsync("uSer", It.IsAny<TokenResponse>())).Returns(tcs.Task);
-
-            var flow = CreateFlow(httpClientFactory: mockFactory, scopes: new[] { "a" }, dataStore: mock.Object);
-            var response = flow.RefreshTokenAsync("uSer", "REFRESH", CancellationToken.None).Result;
+            var flow = CreateFlow(httpClientFactory: mockFactory, scopes: new[] { "a" }, dataStore: store);
+            var response = await flow.RefreshTokenAsync("uSer", "REFRESH", default);
             SubtestTokenResponse(response);
 
-
-            mock.Verify(ds => ds.StoreAsync("uSer", It.IsAny<TokenResponse>()));
+            Assert.Equal("uSer", store.StoredKey);
         }
 
         #region FetchToken
@@ -352,7 +393,7 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
         }
 
         [Fact]
-        public void TestFetchTokenAsync_AuthorizationCodeRequest()
+        public async Task TestFetchTokenAsync_AuthorizationCodeRequest()
         {
             var handler = new FetchTokenMessageHandler();
             handler.AuthorizationCodeTokenRequest = new AuthorizationCodeTokenRequest()
@@ -364,44 +405,43 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
             MockHttpClientFactory mockFactory = new MockHttpClientFactory(handler);
 
             var flow = CreateFlow(httpClientFactory: mockFactory);
-            var response = flow.FetchTokenAsync("user", handler.AuthorizationCodeTokenRequest,
-                CancellationToken.None).Result;
+            var response = await flow.FetchTokenAsync("user", handler.AuthorizationCodeTokenRequest, default);
             SubtestTokenResponse(response);
         }
 
         [Fact]
-        public void TestFetchTokenAsync_RefreshTokenRequest()
+        public async Task TestFetchTokenAsync_RefreshTokenRequest()
         {
             var handler = new FetchTokenMessageHandler();
             handler.RefreshTokenRequest = new RefreshTokenRequest()
-                {
-                    RefreshToken = "REFRESH",
-                    Scope = "a"
-                };
+            {
+                RefreshToken = "REFRESH",
+                Scope = "a"
+            };
 
             MockHttpClientFactory mockFactory = new MockHttpClientFactory(handler);
 
             var flow = CreateFlow(httpClientFactory: mockFactory);
-            var response = flow.FetchTokenAsync("user", handler.RefreshTokenRequest, CancellationToken.None).Result;
+            var response = await flow.FetchTokenAsync("user", handler.RefreshTokenRequest, default);
             SubtestTokenResponse(response);
         }
 
         [Fact]
-        public void TestFetchTokenAsync_AuthorizationCodeRequest_Error()
+        public async Task TestFetchTokenAsync_AuthorizationCodeRequest_Error()
         {
             var handler = new FetchTokenMessageHandler();
             handler.AuthorizationCodeTokenRequest = new AuthorizationCodeTokenRequest()
-                {
-                    Code = "c0de",
-                    RedirectUri = "redIrect",
-                    Scope = "a"
-                };
+            {
+                Code = "c0de",
+                RedirectUri = "redIrect",
+                Scope = "a"
+            };
             handler.Error = true;
-            SubtestFetchTokenAsync_Error(handler);
+            await SubtestFetchTokenAsync_Error(handler);
         }
 
         [Fact]
-        public void TestFetchTokenAsync_RefreshTokenRequest_Error()
+        public async Task TestFetchTokenAsync_RefreshTokenRequest_Error()
         {
             var handler = new FetchTokenMessageHandler();
             handler.RefreshTokenRequest = new RefreshTokenRequest()
@@ -410,31 +450,23 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
                     Scope = "a"
                 };
             handler.Error = true;
-            SubtestFetchTokenAsync_Error(handler);
+            await SubtestFetchTokenAsync_Error(handler);
         }
 
+        // TODO: Potentially rewrite these as a Theory with TheoryData. (Hard to do inline.)
         /// <summary>Subtest for receiving an error token response.</summary>
         /// <param name="handler">The message handler.</param>
-        private void SubtestFetchTokenAsync_Error(FetchTokenMessageHandler handler)
+        private async Task SubtestFetchTokenAsync_Error(FetchTokenMessageHandler handler)
         {
             MockHttpClientFactory mockFactory = new MockHttpClientFactory(handler);
             var flow = CreateFlow(httpClientFactory: mockFactory);
-            try
-            {
-                var request =
-                    (TokenRequest)handler.AuthorizationCodeTokenRequest ?? (TokenRequest)handler.RefreshTokenRequest;
-                var result = flow.FetchTokenAsync("user", request, CancellationToken.None).Result;
-                Assert.True(false, "Exception expected");
-            }
-            catch (AggregateException aex)
-            {
-                var ex = aex.InnerException as TokenResponseException;
-                Assert.NotNull(ex);
-                var result = ex.Error;
-                Assert.Equal("error", result.Error);
-                Assert.Equal("desc", result.ErrorDescription);
-                Assert.Equal("uri", result.ErrorUri);
-            }
+            var request = (TokenRequest) handler.AuthorizationCodeTokenRequest ?? handler.RefreshTokenRequest;
+            var exception = await Assert.ThrowsAsync<TokenResponseException>(() => flow.FetchTokenAsync("user", request, default));
+
+            var error = exception.Error;
+            Assert.Equal("error", error.Error);
+            Assert.Equal("desc", error.ErrorDescription);
+            Assert.Equal("uri", error.ErrorUri);
         }
 
         #endregion
@@ -444,8 +476,11 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
         /// <param name="scopes">The Scopes.</param>
         /// <param name="httpClientFactory">The HTTP client factory. If not set the default will be used.</param>
         /// <returns>Authorization code flow</returns>
-        private AuthorizationCodeFlow CreateFlow(IDataStore dataStore = null, IEnumerable<string> scopes = null,
-            IHttpClientFactory httpClientFactory = null)
+        private AuthorizationCodeFlow CreateFlow(
+            IDataStore dataStore = null,
+            IEnumerable<string> scopes = null,
+            IHttpClientFactory httpClientFactory = null,
+            ExponentialBackOffPolicy? exponentialBackOffPolicy = null)
         {
             var secrets = new ClientSecrets() { ClientId = "id", ClientSecret = "secret" };
             var initializer = new AuthorizationCodeFlow.Initializer(AuthorizationCodeUrl, TokenUrl)
@@ -459,6 +494,10 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
                 initializer.DataStore = dataStore;
             }
             initializer.Scopes = scopes;
+            if (exponentialBackOffPolicy.HasValue)
+            {
+                initializer.DefaultExponentialBackOffPolicy = exponentialBackOffPolicy.Value;
+            }
             return new AuthorizationCodeFlow(initializer);
         }
 
@@ -469,6 +508,30 @@ namespace Google.Apis.Auth.Tests.OAuth2.Flows
             Assert.Equal("r", response.RefreshToken);
             Assert.Equal(100, response.ExpiresInSeconds);
             Assert.Equal("b", response.Scope);
+        }
+
+        private class FakeDataStore : IDataStore
+        {
+            public string StoredKey { get; private set; }
+            public string FetchedKey { get; private set; }
+            public TokenResponse TokenResponse { get; set; }
+
+            public Task ClearAsync() => throw new NotImplementedException();
+
+            public Task DeleteAsync<T>(string key) => throw new NotImplementedException();
+
+            public Task<T> GetAsync<T>(string key)
+            {
+                FetchedKey = key;
+                return Task.FromResult((T) (object) TokenResponse);
+            }
+
+            public Task StoreAsync<T>(string key, T value)
+            {
+                StoredKey = key;
+                // Task.CompletedTask doesn't exist in older frameworks.
+                return Task.FromResult<object>(null);
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="initializer">The service initializer.</param>
         public CloudResourceManagerService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
+            EffectiveTags = new EffectiveTagsResource(this);
             Folders = new FoldersResource(this);
             Liens = new LiensResource(this);
             Operations = new OperationsResource(this);
@@ -42,6 +43,8 @@ namespace Google.Apis.CloudResourceManager.v3
             TagBindings = new TagBindingsResource(this);
             TagKeys = new TagKeysResource(this);
             TagValues = new TagValuesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudresourcemanager.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudresourcemanager.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -51,23 +54,16 @@ namespace Google.Apis.CloudResourceManager.v3
         public override string Name => "cloudresourcemanager";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudresourcemanager.googleapis.com/";
-        #else
-            "https://cloudresourcemanager.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudresourcemanager.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Resource Manager API.</summary>
         public class Scope
@@ -98,6 +94,9 @@ namespace Google.Apis.CloudResourceManager.v3
             /// </summary>
             public const string CloudPlatformReadOnly = "https://www.googleapis.com/auth/cloud-platform.read-only";
         }
+
+        /// <summary>Gets the EffectiveTags resource.</summary>
+        public virtual EffectiveTagsResource EffectiveTags { get; }
 
         /// <summary>Gets the Folders resource.</summary>
         public virtual FoldersResource Folders { get; }
@@ -305,6 +304,101 @@ namespace Google.Apis.CloudResourceManager.v3
         }
     }
 
+    /// <summary>The "effectiveTags" collection of methods.</summary>
+    public class EffectiveTagsResource
+    {
+        private const string Resource = "effectiveTags";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public EffectiveTagsResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>
+        /// Return a list of effective tags for the given Google Cloud resource, as specified in `parent`.
+        /// </summary>
+        public virtual ListRequest List()
+        {
+            return new ListRequest(this.service);
+        }
+
+        /// <summary>
+        /// Return a list of effective tags for the given Google Cloud resource, as specified in `parent`.
+        /// </summary>
+        public class ListRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.ListEffectiveTagsResponse>
+        {
+            /// <summary>Constructs a new List request.</summary>
+            public ListRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Optional. The maximum number of effective tags to return in the response. The server allows a maximum of
+            /// 300 effective tags to return in a single page. If unspecified, the server will use 100 as the default.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> PageSize { get; set; }
+
+            /// <summary>
+            /// Optional. A pagination token returned from a previous call to `ListEffectiveTags` that indicates from
+            /// where this listing should continue.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PageToken { get; set; }
+
+            /// <summary>
+            /// Required. The full resource name of a resource for which you want to list the effective tags. E.g.
+            /// "//cloudresourcemanager.googleapis.com/projects/123"
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Parent { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "list";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v3/effectiveTags";
+
+            /// <summary>Initializes List parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageSize",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageToken",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "parent",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
     /// <summary>The "folders" collection of methods.</summary>
     public class FoldersResource
     {
@@ -337,7 +431,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.CloudResourceManager.v3.Data.Folder body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -398,7 +492,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>
@@ -457,7 +551,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -511,12 +605,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.CloudResourceManager.v3.Data.GetIamPolicyRequest body, string resource)
         {
-            return new GetIamPolicyRequest(service, body, resource);
+            return new GetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -535,8 +629,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -579,7 +673,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -611,9 +705,10 @@ namespace Google.Apis.CloudResourceManager.v3
             public virtual string PageToken { get; set; }
 
             /// <summary>
-            /// Required. The resource name of the organization or folder whose folders are being listed. Must be of the
-            /// form `folders/{folder_id}` or `organizations/{org_id}`. Access to this method is controlled by checking
-            /// the `resourcemanager.folders.list` permission on the `parent`.
+            /// Required. The name of the parent resource whose folders are being listed. Only children of this parent
+            /// resource are listed; descendants are not listed. If the parent is a folder, use the value
+            /// `folders/{folder_id}`. If the parent is an organization, use the value `organizations/{org_id}`. Access
+            /// to this method is controlled by checking the `resourcemanager.folders.list` permission on the `parent`.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Parent { get; set; }
@@ -689,7 +784,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </param>
         public virtual MoveRequest Move(Google.Apis.CloudResourceManager.v3.Data.MoveFolderRequest body, string name)
         {
-            return new MoveRequest(service, body, name);
+            return new MoveRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -765,7 +860,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.CloudResourceManager.v3.Data.Folder body, string name)
         {
-            return new PatchRequest(service, body, name);
+            return new PatchRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -843,7 +938,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         public virtual SearchRequest Search()
         {
-            return new SearchRequest(service);
+            return new SearchRequest(this.service);
         }
 
         /// <summary>
@@ -878,10 +973,14 @@ namespace Google.Apis.CloudResourceManager.v3
             /// all accessible folders will be returned. Query expressions can be used to restrict results based upon
             /// displayName, state and parent, where the operators `=` (`:`) `NOT`, `AND` and `OR` can be used along
             /// with the suffix wildcard symbol `*`. The `displayName` field in a query expression should use escaped
-            /// quotes for values that include whitespace to prevent unexpected behavior. ``` | Field | Description |
+            /// quotes for values that include whitespace to prevent unexpected behavior.
+            /// ```
+            /// | Field | Description |
             /// |-------------------------|----------------------------------------| | displayName | Filters by
             /// displayName. | | parent | Filters by parent (for example: folders/123). | | state, lifecycleState |
-            /// Filters by state. | ``` Some example queries are: * Query `displayName=Test*` returns Folder resources
+            /// Filters by state. |
+            /// ```
+            /// Some example queries are: * Query `displayName=Test*` returns Folder resources
             /// whose display name starts with "Test". * Query `state=ACTIVE` returns Folder resources with `state` set
             /// to `ACTIVE`. * Query `parent=folders/123` returns Folder resources that have `folders/123` as a parent
             /// resource. * Query `parent=folders/123 AND state=ACTIVE` returns active Folder resources that have
@@ -938,12 +1037,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudResourceManager.v3.Data.SetIamPolicyRequest body, string resource)
         {
-            return new SetIamPolicyRequest(service, body, resource);
+            return new SetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -962,8 +1061,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -1004,12 +1103,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation for
-        /// the appropriate value for this field.
+        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudResourceManager.v3.Data.TestIamPermissionsRequest body, string resource)
         {
-            return new TestIamPermissionsRequest(service, body, resource);
+            return new TestIamPermissionsRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -1027,8 +1126,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -1076,7 +1175,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </param>
         public virtual UndeleteRequest Undelete(Google.Apis.CloudResourceManager.v3.Data.UndeleteFolderRequest body, string name)
         {
-            return new UndeleteRequest(service, body, name);
+            return new UndeleteRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -1156,7 +1255,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.CloudResourceManager.v3.Data.Lien body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -1204,7 +1303,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="name">Required. The name/identifier of the Lien to delete.</param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>
@@ -1256,7 +1355,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="name">Required. The name/identifier of the Lien.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -1307,7 +1406,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -1404,7 +1503,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -1470,7 +1569,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Fetches an organization resource identified by the specified resource name.</summary>
@@ -1522,12 +1621,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.CloudResourceManager.v3.Data.GetIamPolicyRequest body, string resource)
         {
-            return new GetIamPolicyRequest(service, body, resource);
+            return new GetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -1547,8 +1646,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -1587,18 +1686,18 @@ namespace Google.Apis.CloudResourceManager.v3
         /// Searches organization resources that are visible to the user and satisfy the specified filter. This method
         /// returns organizations in an unspecified order. New organizations do not necessarily appear at the end of the
         /// results, and may take a small amount of time to appear. Search will only return organizations on which the
-        /// user has the permission `resourcemanager.organizations.get`
+        /// user has the permission `resourcemanager.organizations.get` or has super admin privileges.
         /// </summary>
         public virtual SearchRequest Search()
         {
-            return new SearchRequest(service);
+            return new SearchRequest(this.service);
         }
 
         /// <summary>
         /// Searches organization resources that are visible to the user and satisfy the specified filter. This method
         /// returns organizations in an unspecified order. New organizations do not necessarily appear at the end of the
         /// results, and may take a small amount of time to appear. Search will only return organizations on which the
-        /// user has the permission `resourcemanager.organizations.get`
+        /// user has the permission `resourcemanager.organizations.get` or has super admin privileges.
         /// </summary>
         public class SearchRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.SearchOrganizationsResponse>
         {
@@ -1624,9 +1723,12 @@ namespace Google.Apis.CloudResourceManager.v3
 
             /// <summary>
             /// Optional. An optional query string used to filter the Organizations to return in the response. Query
-            /// rules are case-insensitive. ``` | Field | Description |
+            /// rules are case-insensitive.
+            /// ```
+            /// | Field | Description |
             /// |------------------|--------------------------------------------| | directoryCustomerId,
-            /// owner.directoryCustomerId | Filters by directory customer id. | | domain | Filters by domain. | ```
+            /// owner.directoryCustomerId | Filters by directory customer id. | | domain | Filters by domain. |
+            /// ```
             /// Organizations may be queried by `directoryCustomerId` or by `domain`, where the domain is a G Suite
             /// domain, for example: * Query `directorycustomerid:123456789` returns Organization resources with
             /// `owner.directory_customer_id` equal to `123456789`. * Query `domain:google.com` returns Organization
@@ -1682,12 +1784,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudResourceManager.v3.Data.SetIamPolicyRequest body, string resource)
         {
-            return new SetIamPolicyRequest(service, body, resource);
+            return new SetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -1706,8 +1808,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -1749,12 +1851,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation for
-        /// the appropriate value for this field.
+        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudResourceManager.v3.Data.TestIamPermissionsRequest body, string resource)
         {
-            return new TestIamPermissionsRequest(service, body, resource);
+            return new TestIamPermissionsRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -1773,8 +1875,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -1832,7 +1934,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.CloudResourceManager.v3.Data.Project body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -1885,7 +1987,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="name">Required. The name of the Project (for example, `projects/415104041262`).</param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>
@@ -1943,7 +2045,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="name">Required. The name of the project (for example, `projects/415104041262`).</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -1994,12 +2096,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.CloudResourceManager.v3.Data.GetIamPolicyRequest body, string resource)
         {
-            return new GetIamPolicyRequest(service, body, resource);
+            return new GetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -2018,8 +2120,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -2062,7 +2164,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -2094,8 +2196,9 @@ namespace Google.Apis.CloudResourceManager.v3
             public virtual string PageToken { get; set; }
 
             /// <summary>
-            /// Required. The name of the parent resource to list projects under. For example, setting this field to
-            /// 'folders/1234' would list all projects directly under that folder.
+            /// Required. The name of the parent resource whose projects are being listed. Only children of this parent
+            /// resource are listed; descendants are not listed. If the parent is a folder, use the value
+            /// `folders/{folder_id}`. If the parent is an organization, use the value `organizations/{org_id}`.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Parent { get; set; }
@@ -2167,7 +2270,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="name">Required. The name of the project to move.</param>
         public virtual MoveRequest Move(Google.Apis.CloudResourceManager.v3.Data.MoveProjectRequest body, string name)
         {
-            return new MoveRequest(service, body, name);
+            return new MoveRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -2234,7 +2337,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.CloudResourceManager.v3.Data.Project body, string name)
         {
-            return new PatchRequest(service, body, name);
+            return new PatchRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -2302,7 +2405,7 @@ namespace Google.Apis.CloudResourceManager.v3
         }
 
         /// <summary>
-        /// Search for projects that the caller has both `resourcemanager.projects.get` permission on, and also satisfy
+        /// Search for projects that the caller has the `resourcemanager.projects.get` permission on, and also satisfy
         /// the specified query. This method returns projects in an unspecified order. This method is eventually
         /// consistent with project mutations; this means that a newly created project may not appear in the results or
         /// recent updates to an existing project may not be reflected in the results. To retrieve the latest state of a
@@ -2310,11 +2413,11 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         public virtual SearchRequest Search()
         {
-            return new SearchRequest(service);
+            return new SearchRequest(this.service);
         }
 
         /// <summary>
-        /// Search for projects that the caller has both `resourcemanager.projects.get` permission on, and also satisfy
+        /// Search for projects that the caller has the `resourcemanager.projects.get` permission on, and also satisfy
         /// the specified query. This method returns projects in an unspecified order. This method is eventually
         /// consistent with project mutations; this means that a newly created project may not appear in the results or
         /// recent updates to an existing project may not be reflected in the results. To retrieve the latest state of a
@@ -2344,21 +2447,29 @@ namespace Google.Apis.CloudResourceManager.v3
 
             /// <summary>
             /// Optional. A query string for searching for projects that the caller has `resourcemanager.projects.get`
-            /// permission to. If multiple fields are included in the query, the it will return results that match any
-            /// of the fields. Some eligible fields are: ``` | Field | Description |
+            /// permission to. If multiple fields are included in the query, then it will return results that match any
+            /// of the fields. Some eligible fields are:
+            /// ```
+            /// | Field | Description |
             /// |-------------------------|----------------------------------------------| | displayName, name | Filters
             /// by displayName. | | parent | Project's parent (for example: folders/123, organizations/*). Prefer parent
             /// field over parent.type and parent.id.| | parent.type | Parent's type: `folder` or `organization`. | |
             /// parent.id | Parent's id number (for example: 123) | | id, projectId | Filters by projectId. | | state,
             /// lifecycleState | Filters by state. | | labels | Filters by label name or value. | | labels.\ (where
-            /// *key* is the name of a label) | Filters by label name.| ``` Search expressions are case insensitive.
-            /// Some examples queries: ``` | Query | Description |
+            /// *key* is the name of a label) | Filters by label name.|
+            /// ```
+            /// Search expressions are case insensitive.
+            /// Some examples queries:
+            /// ```
+            /// | Query | Description |
             /// |------------------|-----------------------------------------------------| | name:how* | The project's
             /// name starts with "how". | | name:Howl | The project's name is `Howl` or `howl`. | | name:HOWL |
             /// Equivalent to above. | | NAME:howl | Equivalent to above. | | labels.color:* | The project has the label
             /// `color`. | | labels.color:red | The project's label `color` has the value `red`. | | labels.color:red
-            /// labels.size:big | The project's label `color` has the value `red` and its label `size` has the value
-            /// `big`.| ``` If no query is specified, the call will return projects for which the user has the
+            /// labels.size:big | The project's label `color` has the value `red` or its label `size` has the value
+            /// `big`. |
+            /// ```
+            /// If no query is specified, the call will return projects for which the user has the
             /// `resourcemanager.projects.get` permission.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("query", Google.Apis.Util.RequestParameterType.Query)]
@@ -2418,22 +2529,21 @@ namespace Google.Apis.CloudResourceManager.v3
         /// the Cloud Platform console and must accept the invitation. + A user cannot be granted the owner role using
         /// `setIamPolicy()`. The user must be granted the owner role using the Cloud Platform Console and must
         /// explicitly accept the invitation. + Invitations to grant the owner role cannot be sent using
-        /// `setIamPolicy()`; they must be sent only using the Cloud Platform Console. + Membership changes that leave
-        /// the project without any owners that have accepted the Terms of Service (ToS) will be rejected. + If the
-        /// project is not part of an organization, there must be at least one owner who has accepted the Terms of
-        /// Service (ToS) agreement in the policy. Calling `setIamPolicy()` to remove the last ToS-accepted owner from
-        /// the policy will fail. This restriction also applies to legacy projects that no longer have owners who have
-        /// accepted the ToS. Edits to IAM policies will be rejected until the lack of a ToS-accepting owner is
-        /// rectified. + Calling this method requires enabling the App Engine Admin API.
+        /// `setIamPolicy()`; they must be sent only using the Cloud Platform Console. + If the project is not part of
+        /// an organization, there must be at least one owner who has accepted the Terms of Service (ToS) agreement in
+        /// the policy. Calling `setIamPolicy()` to remove the last ToS-accepted owner from the policy will fail. This
+        /// restriction also applies to legacy projects that no longer have owners who have accepted the ToS. Edits to
+        /// IAM policies will be rejected until the lack of a ToS-accepting owner is rectified. If the project is part
+        /// of an organization, you can remove all owners, potentially making the organization inaccessible.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudResourceManager.v3.Data.SetIamPolicyRequest body, string resource)
         {
-            return new SetIamPolicyRequest(service, body, resource);
+            return new SetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -2450,13 +2560,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// the Cloud Platform console and must accept the invitation. + A user cannot be granted the owner role using
         /// `setIamPolicy()`. The user must be granted the owner role using the Cloud Platform Console and must
         /// explicitly accept the invitation. + Invitations to grant the owner role cannot be sent using
-        /// `setIamPolicy()`; they must be sent only using the Cloud Platform Console. + Membership changes that leave
-        /// the project without any owners that have accepted the Terms of Service (ToS) will be rejected. + If the
-        /// project is not part of an organization, there must be at least one owner who has accepted the Terms of
-        /// Service (ToS) agreement in the policy. Calling `setIamPolicy()` to remove the last ToS-accepted owner from
-        /// the policy will fail. This restriction also applies to legacy projects that no longer have owners who have
-        /// accepted the ToS. Edits to IAM policies will be rejected until the lack of a ToS-accepting owner is
-        /// rectified. + Calling this method requires enabling the App Engine Admin API.
+        /// `setIamPolicy()`; they must be sent only using the Cloud Platform Console. + If the project is not part of
+        /// an organization, there must be at least one owner who has accepted the Terms of Service (ToS) agreement in
+        /// the policy. Calling `setIamPolicy()` to remove the last ToS-accepted owner from the policy will fail. This
+        /// restriction also applies to legacy projects that no longer have owners who have accepted the ToS. Edits to
+        /// IAM policies will be rejected until the lack of a ToS-accepting owner is rectified. If the project is part
+        /// of an organization, you can remove all owners, potentially making the organization inaccessible.
         /// </summary>
         public class SetIamPolicyRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.Policy>
         {
@@ -2469,8 +2578,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -2511,12 +2620,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation for
-        /// the appropriate value for this field.
+        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudResourceManager.v3.Data.TestIamPermissionsRequest body, string resource)
         {
-            return new TestIamPermissionsRequest(service, body, resource);
+            return new TestIamPermissionsRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -2534,8 +2643,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -2582,7 +2691,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </param>
         public virtual UndeleteRequest Undelete(Google.Apis.CloudResourceManager.v3.Data.UndeleteProjectRequest body, string name)
         {
-            return new UndeleteRequest(service, body, name);
+            return new UndeleteRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -2650,18 +2759,14 @@ namespace Google.Apis.CloudResourceManager.v3
             this.service = service;
         }
 
-        /// <summary>
-        /// Creates a TagBinding between a TagValue and a cloud resource (currently project, folder, or organization).
-        /// </summary>
+        /// <summary>Creates a TagBinding between a TagValue and a Google Cloud resource.</summary>
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.CloudResourceManager.v3.Data.TagBinding body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
-        /// <summary>
-        /// Creates a TagBinding between a TagValue and a cloud resource (currently project, folder, or organization).
-        /// </summary>
+        /// <summary>Creates a TagBinding between a TagValue and a Google Cloud resource.</summary>
         public class CreateRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.Operation>
         {
             /// <summary>Constructs a new Create request.</summary>
@@ -2715,7 +2820,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>Deletes a TagBinding.</summary>
@@ -2760,17 +2865,19 @@ namespace Google.Apis.CloudResourceManager.v3
         }
 
         /// <summary>
-        /// Lists the TagBindings for the given cloud resource, as specified with `parent`. NOTE: The `parent` field is
-        /// expected to be a full resource name: https://cloud.google.com/apis/design/resource_names#full_resource_name
+        /// Lists the TagBindings for the given Google Cloud resource, as specified with `parent`. NOTE: The `parent`
+        /// field is expected to be a full resource name:
+        /// https://cloud.google.com/apis/design/resource_names#full_resource_name
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
-        /// Lists the TagBindings for the given cloud resource, as specified with `parent`. NOTE: The `parent` field is
-        /// expected to be a full resource name: https://cloud.google.com/apis/design/resource_names#full_resource_name
+        /// Lists the TagBindings for the given Google Cloud resource, as specified with `parent`. NOTE: The `parent`
+        /// field is expected to be a full resource name:
+        /// https://cloud.google.com/apis/design/resource_names#full_resource_name
         /// </summary>
         public class ListRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.ListTagBindingsResponse>
         {
@@ -2858,18 +2965,18 @@ namespace Google.Apis.CloudResourceManager.v3
 
         /// <summary>
         /// Creates a new TagKey. If another request with the same parameters is sent while the original request is in
-        /// process, the second request will receive an error. A maximum of 300 TagKeys can exist under a parent at any
+        /// process, the second request will receive an error. A maximum of 1000 TagKeys can exist under a parent at any
         /// given time.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.CloudResourceManager.v3.Data.TagKey body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
         /// Creates a new TagKey. If another request with the same parameters is sent while the original request is in
-        /// process, the second request will receive an error. A maximum of 300 TagKeys can exist under a parent at any
+        /// process, the second request will receive an error. A maximum of 1000 TagKeys can exist under a parent at any
         /// given time.
         /// </summary>
         public class CreateRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.Operation>
@@ -2925,7 +3032,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>Deletes a TagKey. The TagKey cannot be deleted if it has any child TagValues.</summary>
@@ -3006,7 +3113,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="name">Required. A resource name in the format `tagKeys/{id}`, such as `tagKeys/123`.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -3057,12 +3164,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.CloudResourceManager.v3.Data.GetIamPolicyRequest body, string resource)
         {
-            return new GetIamPolicyRequest(service, body, resource);
+            return new GetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -3081,8 +3188,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -3117,10 +3224,63 @@ namespace Google.Apis.CloudResourceManager.v3
             }
         }
 
+        /// <summary>
+        /// Retrieves a TagKey by its namespaced name. This method will return `PERMISSION_DENIED` if the key does not
+        /// exist or the user does not have permission to view it.
+        /// </summary>
+        public virtual GetNamespacedRequest GetNamespaced()
+        {
+            return new GetNamespacedRequest(this.service);
+        }
+
+        /// <summary>
+        /// Retrieves a TagKey by its namespaced name. This method will return `PERMISSION_DENIED` if the key does not
+        /// exist or the user does not have permission to view it.
+        /// </summary>
+        public class GetNamespacedRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.TagKey>
+        {
+            /// <summary>Constructs a new GetNamespaced request.</summary>
+            public GetNamespacedRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. A namespaced tag key name in the format `{parentId}/{tagKeyShort}`, such as `42/foo` for a key
+            /// with short name "foo" under the organization with ID 42 or `r2-d2/bar` for a key with short name "bar"
+            /// under the project `r2-d2`.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Name { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getNamespaced";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v3/tagKeys/namespaced";
+
+            /// <summary>Initializes GetNamespaced parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
         /// <summary>Lists all TagKeys for a parent resource.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists all TagKeys for a parent resource.</summary>
@@ -3147,8 +3307,8 @@ namespace Google.Apis.CloudResourceManager.v3
             public virtual string PageToken { get; set; }
 
             /// <summary>
-            /// Required. The resource name of the new TagKey's parent. Must be of the form `folders/{folder_id}` or
-            /// `organizations/{org_id}`.
+            /// Required. The resource name of the TagKey's parent. Must be of the form `organizations/{org_id}` or
+            /// `projects/{project_id}` or `projects/{project_number}`
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Parent { get; set; }
@@ -3201,7 +3361,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.CloudResourceManager.v3.Data.TagKey body, string name)
         {
-            return new PatchRequest(service, body, name);
+            return new PatchRequest(this.service, body, name);
         }
 
         /// <summary>Updates the attributes of the TagKey resource.</summary>
@@ -3289,12 +3449,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudResourceManager.v3.Data.SetIamPolicyRequest body, string resource)
         {
-            return new SetIamPolicyRequest(service, body, resource);
+            return new SetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -3313,8 +3473,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -3355,12 +3515,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation for
-        /// the appropriate value for this field.
+        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudResourceManager.v3.Data.TestIamPermissionsRequest body, string resource)
         {
-            return new TestIamPermissionsRequest(service, body, resource);
+            return new TestIamPermissionsRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -3378,8 +3538,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -3427,22 +3587,286 @@ namespace Google.Apis.CloudResourceManager.v3
         public TagValuesResource(Google.Apis.Services.IClientService service)
         {
             this.service = service;
+            TagHolds = new TagHoldsResource(service);
+        }
+
+        /// <summary>Gets the TagHolds resource.</summary>
+        public virtual TagHoldsResource TagHolds { get; }
+
+        /// <summary>The "tagHolds" collection of methods.</summary>
+        public class TagHoldsResource
+        {
+            private const string Resource = "tagHolds";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public TagHoldsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// Creates a TagHold. Returns ALREADY_EXISTS if a TagHold with the same resource and origin exists under
+            /// the same TagValue.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. The resource name of the TagHold's parent TagValue. Must be of the form:
+            /// `tagValues/{tag-value-id}`.
+            /// </param>
+            public virtual CreateRequest Create(Google.Apis.CloudResourceManager.v3.Data.TagHold body, string parent)
+            {
+                return new CreateRequest(this.service, body, parent);
+            }
+
+            /// <summary>
+            /// Creates a TagHold. Returns ALREADY_EXISTS if a TagHold with the same resource and origin exists under
+            /// the same TagValue.
+            /// </summary>
+            public class CreateRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.Operation>
+            {
+                /// <summary>Constructs a new Create request.</summary>
+                public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudResourceManager.v3.Data.TagHold body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource name of the TagHold's parent TagValue. Must be of the form:
+                /// `tagValues/{tag-value-id}`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. Set to true to perform the validations necessary for creating the resource, but not
+                /// actually perform the action.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.CloudResourceManager.v3.Data.TagHold Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "create";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v3/{+parent}/tagHolds";
+
+                /// <summary>Initializes Create parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^tagValues/[^/]+$",
+                    });
+                    RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "validateOnly",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>Deletes a TagHold.</summary>
+            /// <param name="name">
+            /// Required. The resource name of the TagHold to delete. Must be of the form:
+            /// `tagValues/{tag-value-id}/tagHolds/{tag-hold-id}`.
+            /// </param>
+            public virtual DeleteRequest Delete(string name)
+            {
+                return new DeleteRequest(this.service, name);
+            }
+
+            /// <summary>Deletes a TagHold.</summary>
+            public class DeleteRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.Operation>
+            {
+                /// <summary>Constructs a new Delete request.</summary>
+                public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource name of the TagHold to delete. Must be of the form:
+                /// `tagValues/{tag-value-id}/tagHolds/{tag-hold-id}`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>
+                /// Optional. Set to true to perform the validations necessary for deleting the resource, but not
+                /// actually perform the action.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "delete";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "DELETE";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v3/{+name}";
+
+                /// <summary>Initializes Delete parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^tagValues/[^/]+/tagHolds/[^/]+$",
+                    });
+                    RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "validateOnly",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>Lists TagHolds under a TagValue.</summary>
+            /// <param name="parent">
+            /// Required. The resource name of the parent TagValue. Must be of the form: `tagValues/{tag-value-id}`.
+            /// </param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>Lists TagHolds under a TagValue.</summary>
+            public class ListRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.ListTagHoldsResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource name of the parent TagValue. Must be of the form: `tagValues/{tag-value-id}`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. Criteria used to select a subset of TagHolds parented by the TagValue to return. This
+                /// field follows the syntax defined by aip.dev/160; the `holder` and `origin` fields are supported for
+                /// filtering. Currently only `AND` syntax is supported. Some example queries are: * `holder =
+                /// //compute.googleapis.com/compute/projects/myproject/regions/us-east-1/instanceGroupManagers/instance-group`
+                /// * `origin = 35678234` * `holder =
+                /// //compute.googleapis.com/compute/projects/myproject/regions/us-east-1/instanceGroupManagers/instance-group
+                /// AND origin = 35678234`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
+
+                /// <summary>
+                /// Optional. The maximum number of TagHolds to return in the response. The server allows a maximum of
+                /// 300 TagHolds to return. If unspecified, the server will use 100 as the default.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>
+                /// Optional. A pagination token returned from a previous call to `ListTagHolds` that indicates where
+                /// this listing should continue from.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v3/{+parent}/tagHolds";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^tagValues/[^/]+$",
+                    });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
         }
 
         /// <summary>
         /// Creates a TagValue as a child of the specified TagKey. If a another request with the same parameters is sent
-        /// while the original request is in process the second request will receive an error. A maximum of 300
+        /// while the original request is in process the second request will receive an error. A maximum of 1000
         /// TagValues can exist under a TagKey at any given time.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.CloudResourceManager.v3.Data.TagValue body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
         /// Creates a TagValue as a child of the specified TagKey. If a another request with the same parameters is sent
-        /// while the original request is in process the second request will receive an error. A maximum of 300
+        /// while the original request is in process the second request will receive an error. A maximum of 1000
         /// TagValues can exist under a TagKey at any given time.
         /// </summary>
         public class CreateRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.Operation>
@@ -3495,7 +3919,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="name">Required. Resource name for TagValue to be deleted in the format tagValues/456.</param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>Deletes a TagValue. The TagValue cannot have any bindings when it is deleted.</summary>
@@ -3567,18 +3991,18 @@ namespace Google.Apis.CloudResourceManager.v3
         }
 
         /// <summary>
-        /// Retrieves TagValue. If the TagValue or namespaced name does not exist, or if the user does not have
-        /// permission to view it, this method will return `PERMISSION_DENIED`.
+        /// Retrieves a TagValue. This method will return `PERMISSION_DENIED` if the value does not exist or the user
+        /// does not have permission to view it.
         /// </summary>
         /// <param name="name">Required. Resource name for TagValue to be fetched in the format `tagValues/456`.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
-        /// Retrieves TagValue. If the TagValue or namespaced name does not exist, or if the user does not have
-        /// permission to view it, this method will return `PERMISSION_DENIED`.
+        /// Retrieves a TagValue. This method will return `PERMISSION_DENIED` if the value does not exist or the user
+        /// does not have permission to view it.
         /// </summary>
         public class GetRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.TagValue>
         {
@@ -3625,12 +4049,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.CloudResourceManager.v3.Data.GetIamPolicyRequest body, string resource)
         {
-            return new GetIamPolicyRequest(service, body, resource);
+            return new GetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -3650,8 +4074,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -3686,10 +4110,64 @@ namespace Google.Apis.CloudResourceManager.v3
             }
         }
 
+        /// <summary>
+        /// Retrieves a TagValue by its namespaced name. This method will return `PERMISSION_DENIED` if the value does
+        /// not exist or the user does not have permission to view it.
+        /// </summary>
+        public virtual GetNamespacedRequest GetNamespaced()
+        {
+            return new GetNamespacedRequest(this.service);
+        }
+
+        /// <summary>
+        /// Retrieves a TagValue by its namespaced name. This method will return `PERMISSION_DENIED` if the value does
+        /// not exist or the user does not have permission to view it.
+        /// </summary>
+        public class GetNamespacedRequest : CloudResourceManagerBaseServiceRequest<Google.Apis.CloudResourceManager.v3.Data.TagValue>
+        {
+            /// <summary>Constructs a new GetNamespaced request.</summary>
+            public GetNamespacedRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. A namespaced tag value name in the following format:
+            /// `{parentId}/{tagKeyShort}/{tagValueShort}` Examples: - `42/foo/abc` for a value with short name "abc"
+            /// under the key with short name "foo" under the organization with ID 42 - `r2-d2/bar/xyz` for a value with
+            /// short name "xyz" under the key with short name "bar" under the project with ID "r2-d2"
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Name { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getNamespaced";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v3/tagValues/namespaced";
+
+            /// <summary>Initializes GetNamespaced parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
         /// <summary>Lists all TagValues for a specific TagKey.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists all TagValues for a specific TagKey.</summary>
@@ -3716,7 +4194,8 @@ namespace Google.Apis.CloudResourceManager.v3
             public virtual string PageToken { get; set; }
 
             /// <summary>
-            /// Required. Resource name for TagKey, parent of the TagValues to be listed, in the format `tagKeys/123`.
+            /// Required. Resource name for the parent of the TagValues to be listed, in the format `tagKeys/123` or
+            /// `tagValues/123`.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Parent { get; set; }
@@ -3766,7 +4245,7 @@ namespace Google.Apis.CloudResourceManager.v3
         /// <param name="name">Immutable. Resource name for TagValue in the format `tagValues/456`.</param>
         public virtual PatchRequest Patch(Google.Apis.CloudResourceManager.v3.Data.TagValue body, string name)
         {
-            return new PatchRequest(service, body, name);
+            return new PatchRequest(this.service, body, name);
         }
 
         /// <summary>Updates the attributes of the TagValue resource.</summary>
@@ -3848,12 +4327,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudResourceManager.v3.Data.SetIamPolicyRequest body, string resource)
         {
-            return new SetIamPolicyRequest(service, body, resource);
+            return new SetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -3872,8 +4351,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -3915,12 +4394,12 @@ namespace Google.Apis.CloudResourceManager.v3
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation for
-        /// the appropriate value for this field.
+        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudResourceManager.v3.Data.TestIamPermissionsRequest body, string resource)
         {
-            return new TestIamPermissionsRequest(service, body, resource);
+            return new TestIamPermissionsRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -3939,8 +4418,8 @@ namespace Google.Apis.CloudResourceManager.v3
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -3988,7 +4467,8 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4043,16 +4523,37 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -4060,15 +4561,19 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -4154,9 +4659,42 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     /// </summary>
     public class CreateProjectMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Creation time of the project creation workflow.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// True if the project can be retrieved using `GetProject`. No other operations on the project are guaranteed
@@ -4243,10 +4781,60 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     }
 
     /// <summary>
+    /// An EffectiveTag represents a tag that applies to a resource during policy evaluation. Tags can be either
+    /// directly bound to a resource or inherited from its ancestor. EffectiveTag contains the name and namespaced_name
+    /// of the tag value and tag key, with additional fields of `inherited` to indicate the inheritance status of the
+    /// effective tag.
+    /// </summary>
+    public class EffectiveTag : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Indicates the inheritance status of a tag value attached to the given resource. If the tag value is
+        /// inherited from one of the resource's ancestors, inherited will be true. If false, then the tag value is
+        /// directly attached to the resource, inherited will be false.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inherited")]
+        public virtual System.Nullable<bool> Inherited { get; set; }
+
+        /// <summary>
+        /// The namespaced name of the TagKey. Can be in the form `{organization_id}/{tag_key_short_name}` or
+        /// `{project_id}/{tag_key_short_name}` or `{project_number}/{tag_key_short_name}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("namespacedTagKey")]
+        public virtual string NamespacedTagKey { get; set; }
+
+        /// <summary>
+        /// The namespaced name of the TagValue. Can be in the form
+        /// `{organization_id}/{tag_key_short_name}/{tag_value_short_name}` or
+        /// `{project_id}/{tag_key_short_name}/{tag_value_short_name}` or
+        /// `{project_number}/{tag_key_short_name}/{tag_value_short_name}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("namespacedTagValue")]
+        public virtual string NamespacedTagValue { get; set; }
+
+        /// <summary>The name of the TagKey, in the format `tagKeys/{id}`, such as `tagKeys/123`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagKey")]
+        public virtual string TagKey { get; set; }
+
+        /// <summary>
+        /// The parent name of the tag key. Must be in the format `organizations/{organization_id}` or
+        /// `projects/{project_number}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagKeyParentName")]
+        public virtual string TagKeyParentName { get; set; }
+
+        /// <summary>Resource name for TagValue in the format `tagValues/456`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagValue")]
+        public virtual string TagValue { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4303,13 +4891,79 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     /// </summary>
     public class Folder : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when the folder was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _deleteTimeRaw;
+
+        private object _deleteTime;
 
         /// <summary>Output only. Timestamp when the folder was requested to be deleted.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deleteTime")]
-        public virtual object DeleteTime { get; set; }
+        public virtual string DeleteTimeRaw
+        {
+            get => _deleteTimeRaw;
+            set
+            {
+                _deleteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deleteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeleteTimeDateTimeOffset instead.")]
+        public virtual object DeleteTime
+        {
+            get => _deleteTime;
+            set
+            {
+                _deleteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deleteTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeleteTimeRaw);
+            set => DeleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The folder's display name. A folder's display name must be unique amongst its siblings. For example, no two
@@ -4348,9 +5002,50 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        /// <summary>
+        /// Optional. Input only. Immutable. Tag keys/values directly bound to this folder. Each item in the map must be
+        /// expressed as " : ". For example: "123/environment" : "production", "123/costCenter" : "marketing" Note:
+        /// Currently this field is in Preview.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tags")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Tags { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Timestamp when the folder was last modified.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
     }
 
     /// <summary>Metadata describing a long running folder operation</summary>
@@ -4425,9 +5120,42 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     /// <summary>A Lien represents an encumbrance on the actions that can be performed on a resource.</summary>
     public class Lien : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The creation time of this Lien.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>A system-generated unique identifier for this Lien. Example: `liens/1234abcd`</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -4461,6 +5189,27 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("restrictions")]
         public virtual System.Collections.Generic.IList<string> Restrictions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response of ListEffectiveTags.</summary>
+    public class ListEffectiveTagsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A possibly paginated list of effective tags for the specified resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("effectiveTags")]
+        public virtual System.Collections.Generic.IList<EffectiveTag> EffectiveTags { get; set; }
+
+        /// <summary>
+        /// Pagination token. If the result set is too large to fit in a single response, this token is returned. It
+        /// encodes the position of the current result cursor. Feeding this value into a new list request with the
+        /// `page_token` parameter gives the next page of the results. When `next_page_token` is not filled in, there is
+        /// no next page and the list returned is the last page in the result set. Pagination tokens have a limited
+        /// lifetime.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4545,6 +5294,27 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         /// <summary>A possibly paginated list of TagBindings for the specified resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tagBindings")]
         public virtual System.Collections.Generic.IList<TagBinding> TagBindings { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The ListTagHolds response.</summary>
+    public class ListTagHoldsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Pagination token. If the result set is too large to fit in a single response, this token is returned. It
+        /// encodes the position of the current result cursor. Feeding this value into a new list request with the
+        /// `page_token` parameter gives the next page of the results. When `next_page_token` is not filled in, there is
+        /// no next page and the list returned is the last page in the result set. Pagination tokens have a limited
+        /// lifetime.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>A possibly paginated list of TagHolds.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagHolds")]
+        public virtual System.Collections.Generic.IList<TagHold> TagHolds { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4671,8 +5441,8 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -4690,13 +5460,79 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     /// </summary>
     public class Organization : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when the Organization was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _deleteTimeRaw;
+
+        private object _deleteTime;
 
         /// <summary>Output only. Timestamp when the Organization was requested for deletion.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deleteTime")]
-        public virtual object DeleteTime { get; set; }
+        public virtual string DeleteTimeRaw
+        {
+            get => _deleteTimeRaw;
+            set
+            {
+                _deleteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deleteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeleteTimeDateTimeOffset instead.")]
+        public virtual object DeleteTime
+        {
+            get => _deleteTime;
+            set
+            {
+                _deleteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deleteTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeleteTimeRaw);
+            set => DeleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Immutable. The G Suite / Workspace customer id used in the Directory API.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("directoryCustomerId")]
@@ -4728,9 +5564,42 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Timestamp when the Organization was last modified.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
     }
 
     /// <summary>
@@ -4742,18 +5611,26 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4808,13 +5685,79 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     /// </summary>
     public class Project : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Creation time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _deleteTimeRaw;
+
+        private object _deleteTime;
 
         /// <summary>Output only. The time at which this resource was requested for deletion.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deleteTime")]
-        public virtual object DeleteTime { get; set; }
+        public virtual string DeleteTimeRaw
+        {
+            get => _deleteTimeRaw;
+            set
+            {
+                _deleteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deleteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeleteTimeDateTimeOffset instead.")]
+        public virtual object DeleteTime
+        {
+            get => _deleteTime;
+            set
+            {
+                _deleteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deleteTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeleteTimeRaw);
+            set => DeleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. A user-assigned display name of the project. When present it must be between 4 to 30 characters.
@@ -4835,9 +5778,9 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         /// Optional. The labels associated with this project. Label keys must be between 1 and 63 characters long and
         /// must conform to the following regular expression: \[a-z\](\[-a-z0-9\]*\[a-z0-9\])?. Label values must be
         /// between 0 and 63 characters long and must conform to the regular expression
-        /// (\[a-z\](\[-a-z0-9\]*\[a-z0-9\])?)?. No more than 256 labels can be associated with a given resource.
-        /// Clients should store labels in a representation such as JSON that does not depend on specific characters
-        /// being disallowed. Example: `"myBusinessDimension" : "businessValue"`
+        /// (\[a-z\](\[-a-z0-9\]*\[a-z0-9\])?)?. No more than 64 labels can be associated with a given resource. Clients
+        /// should store labels in a representation such as JSON that does not depend on specific characters being
+        /// disallowed. Example: `"myBusinessDimension" : "businessValue"`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
@@ -4864,9 +5807,50 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        /// <summary>
+        /// Optional. Input only. Immutable. Tag keys/values directly bound to this project. Each item in the map must
+        /// be expressed as " : ". For example: "123/environment" : "production", "123/costCenter" : "marketing" Note:
+        /// Currently this field is in Preview.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tags")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Tags { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The most recent time this resource was modified.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
     }
 
     /// <summary>
@@ -4875,9 +5859,42 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     /// </summary>
     public class ProjectCreationStatus : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Creation time of the project creation workflow.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// True if the project can be retrieved using GetProject. No other operations on the project are guaranteed to
@@ -4962,7 +5979,7 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -5009,9 +6026,8 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     }
 
     /// <summary>
-    /// A TagBinding represents a connection between a TagValue and a cloud resource (currently project, folder, or
-    /// organization). Once a TagBinding is created, the TagValue is applied to all the descendants of the cloud
-    /// resource.
+    /// A TagBinding represents a connection between a TagValue and a cloud resource Once a TagBinding is created, the
+    /// TagValue is applied to all the descendants of the Google Cloud resource.
     /// </summary>
     public class TagBinding : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5034,6 +6050,91 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("tagValue")]
         public virtual string TagValue { get; set; }
 
+        /// <summary>
+        /// The namespaced name for the TagValue of the TagBinding. Must be in the format
+        /// `{parent_id}/{tag_key_short_name}/{short_name}`. For methods that support TagValue namespaced name, only one
+        /// of tag_value_namespaced_name or tag_value may be filled. Requests with both fields will be rejected.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagValueNamespacedName")]
+        public virtual string TagValueNamespacedName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A TagHold represents the use of a TagValue that is not captured by TagBindings. If a TagValue has any TagHolds,
+    /// deletion will be blocked. This resource is intended to be created in the same cloud location as the `holder`.
+    /// </summary>
+    public class TagHold : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The time this TagHold was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. A URL where an end user can learn more about removing this hold. E.g.
+        /// `https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("helpLink")]
+        public virtual string HelpLink { get; set; }
+
+        /// <summary>
+        /// Required. The name of the resource where the TagValue is being used. Must be less than 200 characters. E.g.
+        /// `//compute.googleapis.com/compute/projects/myproject/regions/us-east-1/instanceGroupManagers/instance-group`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("holder")]
+        public virtual string Holder { get; set; }
+
+        /// <summary>
+        /// Output only. The resource name of a TagHold. This is a String of the form:
+        /// `tagValues/{tag-value-id}/tagHolds/{tag-hold-id}` (e.g. `tagValues/123/tagHolds/456`). This resource name is
+        /// generated by the server.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Optional. An optional string representing the origin of this request. This field should include
+        /// human-understandable information to distinguish origins from each other. Must be less than 200 characters.
+        /// E.g. `migs-35678234`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("origin")]
+        public virtual string Origin { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -5041,9 +6142,42 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     /// <summary>A TagKey, used to group a set of TagValues.</summary>
     public class TagKey : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Creation time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. User-assigned description of the TagKey. Must not exceed 256 characters. Read-write.
@@ -5070,10 +6204,29 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         public virtual string NamespacedName { get; set; }
 
         /// <summary>
-        /// Immutable. The resource name of the new TagKey's parent. Must be of the form `organizations/{org_id}`.
+        /// Immutable. The resource name of the TagKey's parent. A TagKey can be parented by an Organization or a
+        /// Project. For a TagKey parented by an Organization, its parent must be in the form `organizations/{org_id}`.
+        /// For a TagKey parented by a Project, its parent can be in the form `projects/{project_id}` or
+        /// `projects/{project_number}`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("parent")]
         public virtual string Parent { get; set; }
+
+        /// <summary>
+        /// Optional. A purpose denotes that this Tag is intended for use in policies of a specific policy engine, and
+        /// will involve that policy engine in management operations involving this Tag. A purpose does not grant a
+        /// policy engine exclusive rights to the Tag, and it may be referenced by other policy engines. A purpose
+        /// cannot be changed once set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("purpose")]
+        public virtual string Purpose { get; set; }
+
+        /// <summary>
+        /// Optional. Purpose data corresponds to the policy system that the tag is intended for. See documentation for
+        /// `Purpose` for formatting of this field. Purpose data cannot be changed once set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("purposeData")]
+        public virtual System.Collections.Generic.IDictionary<string, string> PurposeData { get; set; }
 
         /// <summary>
         /// Required. Immutable. The user friendly name for a TagKey. The short name should be unique for TagKeys within
@@ -5083,9 +6236,42 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("shortName")]
         public virtual string ShortName { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Update time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
     }
 
     /// <summary>
@@ -5094,9 +6280,42 @@ namespace Google.Apis.CloudResourceManager.v3.Data
     /// </summary>
     public class TagValue : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Creation time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. User-assigned description of the TagValue. Must not exceed 256 characters. Read-write.
@@ -5116,8 +6335,10 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Output only. Namespaced name of the TagValue. Must be in the format
-        /// `{organization_id}/{tag_key_short_name}/{short_name}`.
+        /// Output only. The namespaced name of the TagValue. Can be in the form
+        /// `{organization_id}/{tag_key_short_name}/{tag_value_short_name}` or
+        /// `{project_id}/{tag_key_short_name}/{tag_value_short_name}` or
+        /// `{project_number}/{tag_key_short_name}/{tag_value_short_name}`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("namespacedName")]
         public virtual string NamespacedName { get; set; }
@@ -5137,16 +6358,49 @@ namespace Google.Apis.CloudResourceManager.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("shortName")]
         public virtual string ShortName { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Update time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
     }
 
     /// <summary>Request message for `TestIamPermissions` method.</summary>
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>

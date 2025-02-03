@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ namespace Google.Apis.Calendar.v3
             Events = new EventsResource(this);
             Freebusy = new FreebusyResource(this);
             Settings = new SettingsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://www.googleapis.com/calendar/v3/");
+            BatchUri = GetEffectiveUri(null, "https://www.googleapis.com/batch/calendar/v3");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -51,23 +53,16 @@ namespace Google.Apis.Calendar.v3
         public override string Name => "calendar";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://www.googleapis.com/calendar/v3/";
-        #else
-            "https://www.googleapis.com/calendar/v3/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "calendar/v3/";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://www.googleapis.com/batch/calendar/v3";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch/calendar/v3";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Calendar API.</summary>
         public class Scope
@@ -77,11 +72,52 @@ namespace Google.Apis.Calendar.v3
             /// </summary>
             public static string Calendar = "https://www.googleapis.com/auth/calendar";
 
+            /// <summary>See and change the sharing permissions of Google calendars you own</summary>
+            public static string CalendarAcls = "https://www.googleapis.com/auth/calendar.acls";
+
+            /// <summary>See the sharing permissions of Google calendars you own</summary>
+            public static string CalendarAclsReadonly = "https://www.googleapis.com/auth/calendar.acls.readonly";
+
+            /// <summary>Make secondary Google calendars, and see, create, change, and delete events on them</summary>
+            public static string CalendarAppCreated = "https://www.googleapis.com/auth/calendar.app.created";
+
+            /// <summary>See, add, and remove Google calendars you’re subscribed to</summary>
+            public static string CalendarCalendarlist = "https://www.googleapis.com/auth/calendar.calendarlist";
+
+            /// <summary>See the list of Google calendars you’re subscribed to</summary>
+            public static string CalendarCalendarlistReadonly = "https://www.googleapis.com/auth/calendar.calendarlist.readonly";
+
+            /// <summary>
+            /// See and change the properties of Google calendars you have access to, and create secondary calendars
+            /// </summary>
+            public static string CalendarCalendars = "https://www.googleapis.com/auth/calendar.calendars";
+
+            /// <summary>
+            /// See the title, description, default time zone, and other properties of Google calendars you have access
+            /// to
+            /// </summary>
+            public static string CalendarCalendarsReadonly = "https://www.googleapis.com/auth/calendar.calendars.readonly";
+
             /// <summary>View and edit events on all your calendars</summary>
             public static string CalendarEvents = "https://www.googleapis.com/auth/calendar.events";
 
+            /// <summary>See the availability on Google calendars you have access to</summary>
+            public static string CalendarEventsFreebusy = "https://www.googleapis.com/auth/calendar.events.freebusy";
+
+            /// <summary>See, create, change, and delete events on Google calendars you own</summary>
+            public static string CalendarEventsOwned = "https://www.googleapis.com/auth/calendar.events.owned";
+
+            /// <summary>See the events on Google calendars you own</summary>
+            public static string CalendarEventsOwnedReadonly = "https://www.googleapis.com/auth/calendar.events.owned.readonly";
+
+            /// <summary>See the events on public calendars</summary>
+            public static string CalendarEventsPublicReadonly = "https://www.googleapis.com/auth/calendar.events.public.readonly";
+
             /// <summary>View events on all your calendars</summary>
             public static string CalendarEventsReadonly = "https://www.googleapis.com/auth/calendar.events.readonly";
+
+            /// <summary>View your availability in your calendars</summary>
+            public static string CalendarFreebusy = "https://www.googleapis.com/auth/calendar.freebusy";
 
             /// <summary>See and download any calendar you can access using your Google Calendar</summary>
             public static string CalendarReadonly = "https://www.googleapis.com/auth/calendar.readonly";
@@ -98,11 +134,52 @@ namespace Google.Apis.Calendar.v3
             /// </summary>
             public const string Calendar = "https://www.googleapis.com/auth/calendar";
 
+            /// <summary>See and change the sharing permissions of Google calendars you own</summary>
+            public const string CalendarAcls = "https://www.googleapis.com/auth/calendar.acls";
+
+            /// <summary>See the sharing permissions of Google calendars you own</summary>
+            public const string CalendarAclsReadonly = "https://www.googleapis.com/auth/calendar.acls.readonly";
+
+            /// <summary>Make secondary Google calendars, and see, create, change, and delete events on them</summary>
+            public const string CalendarAppCreated = "https://www.googleapis.com/auth/calendar.app.created";
+
+            /// <summary>See, add, and remove Google calendars you’re subscribed to</summary>
+            public const string CalendarCalendarlist = "https://www.googleapis.com/auth/calendar.calendarlist";
+
+            /// <summary>See the list of Google calendars you’re subscribed to</summary>
+            public const string CalendarCalendarlistReadonly = "https://www.googleapis.com/auth/calendar.calendarlist.readonly";
+
+            /// <summary>
+            /// See and change the properties of Google calendars you have access to, and create secondary calendars
+            /// </summary>
+            public const string CalendarCalendars = "https://www.googleapis.com/auth/calendar.calendars";
+
+            /// <summary>
+            /// See the title, description, default time zone, and other properties of Google calendars you have access
+            /// to
+            /// </summary>
+            public const string CalendarCalendarsReadonly = "https://www.googleapis.com/auth/calendar.calendars.readonly";
+
             /// <summary>View and edit events on all your calendars</summary>
             public const string CalendarEvents = "https://www.googleapis.com/auth/calendar.events";
 
+            /// <summary>See the availability on Google calendars you have access to</summary>
+            public const string CalendarEventsFreebusy = "https://www.googleapis.com/auth/calendar.events.freebusy";
+
+            /// <summary>See, create, change, and delete events on Google calendars you own</summary>
+            public const string CalendarEventsOwned = "https://www.googleapis.com/auth/calendar.events.owned";
+
+            /// <summary>See the events on Google calendars you own</summary>
+            public const string CalendarEventsOwnedReadonly = "https://www.googleapis.com/auth/calendar.events.owned.readonly";
+
+            /// <summary>See the events on public calendars</summary>
+            public const string CalendarEventsPublicReadonly = "https://www.googleapis.com/auth/calendar.events.public.readonly";
+
             /// <summary>View events on all your calendars</summary>
             public const string CalendarEventsReadonly = "https://www.googleapis.com/auth/calendar.events.readonly";
+
+            /// <summary>View your availability in your calendars</summary>
+            public const string CalendarFreebusy = "https://www.googleapis.com/auth/calendar.freebusy";
 
             /// <summary>See and download any calendar you can access using your Google Calendar</summary>
             public const string CalendarReadonly = "https://www.googleapis.com/auth/calendar.readonly";
@@ -270,7 +347,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="ruleId">ACL rule identifier.</param>
         public virtual DeleteRequest Delete(string calendarId, string ruleId)
         {
-            return new DeleteRequest(service, calendarId, ruleId);
+            return new DeleteRequest(this.service, calendarId, ruleId);
         }
 
         /// <summary>Deletes an access control rule.</summary>
@@ -335,7 +412,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="ruleId">ACL rule identifier.</param>
         public virtual GetRequest Get(string calendarId, string ruleId)
         {
-            return new GetRequest(service, calendarId, ruleId);
+            return new GetRequest(this.service, calendarId, ruleId);
         }
 
         /// <summary>Returns an access control rule.</summary>
@@ -400,7 +477,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.Calendar.v3.Data.AclRule body, string calendarId)
         {
-            return new InsertRequest(service, body, calendarId);
+            return new InsertRequest(this.service, body, calendarId);
         }
 
         /// <summary>Creates an access control rule.</summary>
@@ -472,7 +549,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual ListRequest List(string calendarId)
         {
-            return new ListRequest(service, calendarId);
+            return new ListRequest(this.service, calendarId);
         }
 
         /// <summary>Returns the rules in the access control list for the calendar.</summary>
@@ -586,7 +663,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="ruleId">ACL rule identifier.</param>
         public virtual PatchRequest Patch(Google.Apis.Calendar.v3.Data.AclRule body, string calendarId, string ruleId)
         {
-            return new PatchRequest(service, body, calendarId, ruleId);
+            return new PatchRequest(this.service, body, calendarId, ruleId);
         }
 
         /// <summary>Updates an access control rule. This method supports patch semantics.</summary>
@@ -674,7 +751,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="ruleId">ACL rule identifier.</param>
         public virtual UpdateRequest Update(Google.Apis.Calendar.v3.Data.AclRule body, string calendarId, string ruleId)
         {
-            return new UpdateRequest(service, body, calendarId, ruleId);
+            return new UpdateRequest(this.service, body, calendarId, ruleId);
         }
 
         /// <summary>Updates an access control rule.</summary>
@@ -761,7 +838,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual WatchRequest Watch(Google.Apis.Calendar.v3.Data.Channel body, string calendarId)
         {
-            return new WatchRequest(service, body, calendarId);
+            return new WatchRequest(this.service, body, calendarId);
         }
 
         /// <summary>Watch for changes to ACL resources.</summary>
@@ -895,7 +972,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual DeleteRequest Delete(string calendarId)
         {
-            return new DeleteRequest(service, calendarId);
+            return new DeleteRequest(this.service, calendarId);
         }
 
         /// <summary>Removes a calendar from the user's calendar list.</summary>
@@ -946,7 +1023,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual GetRequest Get(string calendarId)
         {
-            return new GetRequest(service, calendarId);
+            return new GetRequest(this.service, calendarId);
         }
 
         /// <summary>Returns a calendar from the user's calendar list.</summary>
@@ -994,7 +1071,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="body">The body of the request.</param>
         public virtual InsertRequest Insert(Google.Apis.Calendar.v3.Data.CalendarListEntry body)
         {
-            return new InsertRequest(service, body);
+            return new InsertRequest(this.service, body);
         }
 
         /// <summary>Inserts an existing calendar into the user's calendar list.</summary>
@@ -1048,7 +1125,7 @@ namespace Google.Apis.Calendar.v3
         /// <summary>Returns the calendars on the user's calendar list.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Returns the calendars on the user's calendar list.</summary>
@@ -1197,7 +1274,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Calendar.v3.Data.CalendarListEntry body, string calendarId)
         {
-            return new PatchRequest(service, body, calendarId);
+            return new PatchRequest(this.service, body, calendarId);
         }
 
         /// <summary>
@@ -1274,7 +1351,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.Calendar.v3.Data.CalendarListEntry body, string calendarId)
         {
-            return new UpdateRequest(service, body, calendarId);
+            return new UpdateRequest(this.service, body, calendarId);
         }
 
         /// <summary>Updates an existing calendar on the user's calendar list.</summary>
@@ -1345,7 +1422,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="body">The body of the request.</param>
         public virtual WatchRequest Watch(Google.Apis.Calendar.v3.Data.Channel body)
         {
-            return new WatchRequest(service, body);
+            return new WatchRequest(this.service, body);
         }
 
         /// <summary>Watch for changes to CalendarList resources.</summary>
@@ -1516,7 +1593,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual ClearRequest Clear(string calendarId)
         {
-            return new ClearRequest(service, calendarId);
+            return new ClearRequest(this.service, calendarId);
         }
 
         /// <summary>
@@ -1572,7 +1649,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual DeleteRequest Delete(string calendarId)
         {
-            return new DeleteRequest(service, calendarId);
+            return new DeleteRequest(this.service, calendarId);
         }
 
         /// <summary>
@@ -1625,7 +1702,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual GetRequest Get(string calendarId)
         {
-            return new GetRequest(service, calendarId);
+            return new GetRequest(this.service, calendarId);
         }
 
         /// <summary>Returns metadata for a calendar.</summary>
@@ -1673,7 +1750,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="body">The body of the request.</param>
         public virtual InsertRequest Insert(Google.Apis.Calendar.v3.Data.Calendar body)
         {
-            return new InsertRequest(service, body);
+            return new InsertRequest(this.service, body);
         }
 
         /// <summary>Creates a secondary calendar.</summary>
@@ -1716,7 +1793,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Calendar.v3.Data.Calendar body, string calendarId)
         {
-            return new PatchRequest(service, body, calendarId);
+            return new PatchRequest(this.service, body, calendarId);
         }
 
         /// <summary>Updates metadata for a calendar. This method supports patch semantics.</summary>
@@ -1775,7 +1852,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.Calendar.v3.Data.Calendar body, string calendarId)
         {
-            return new UpdateRequest(service, body, calendarId);
+            return new UpdateRequest(this.service, body, calendarId);
         }
 
         /// <summary>Updates metadata for a calendar.</summary>
@@ -1845,7 +1922,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="body">The body of the request.</param>
         public virtual StopRequest Stop(Google.Apis.Calendar.v3.Data.Channel body)
         {
-            return new StopRequest(service, body);
+            return new StopRequest(this.service, body);
         }
 
         /// <summary>Stop watching resources through this channel</summary>
@@ -1898,7 +1975,7 @@ namespace Google.Apis.Calendar.v3
         /// <summary>Returns the color definitions for calendars and events.</summary>
         public virtual GetRequest Get()
         {
-            return new GetRequest(service);
+            return new GetRequest(this.service);
         }
 
         /// <summary>Returns the color definitions for calendars and events.</summary>
@@ -1949,7 +2026,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="eventId">Event identifier.</param>
         public virtual DeleteRequest Delete(string calendarId, string eventId)
         {
-            return new DeleteRequest(service, calendarId, eventId);
+            return new DeleteRequest(this.service, calendarId, eventId);
         }
 
         /// <summary>Deletes an event.</summary>
@@ -2053,7 +2130,10 @@ namespace Google.Apis.Calendar.v3
             }
         }
 
-        /// <summary>Returns an event.</summary>
+        /// <summary>
+        /// Returns an event based on its Google Calendar ID. To retrieve an event using its iCalendar ID, call the
+        /// events.list method using the iCalUID parameter.
+        /// </summary>
         /// <param name="calendarId">
         /// Calendar identifier. To retrieve calendar IDs call the calendarList.list method. If you want to access the
         /// primary calendar of the currently logged in user, use the "primary" keyword.
@@ -2061,10 +2141,13 @@ namespace Google.Apis.Calendar.v3
         /// <param name="eventId">Event identifier.</param>
         public virtual GetRequest Get(string calendarId, string eventId)
         {
-            return new GetRequest(service, calendarId, eventId);
+            return new GetRequest(this.service, calendarId, eventId);
         }
 
-        /// <summary>Returns an event.</summary>
+        /// <summary>
+        /// Returns an event based on its Google Calendar ID. To retrieve an event using its iCalendar ID, call the
+        /// events.list method using the iCalUID parameter.
+        /// </summary>
         public class GetRequest : CalendarBaseServiceRequest<Google.Apis.Calendar.v3.Data.Event>
         {
             /// <summary>Constructs a new Get request.</summary>
@@ -2164,7 +2247,10 @@ namespace Google.Apis.Calendar.v3
         }
 
         /// <summary>
-        /// Imports an event. This operation is used to add a private copy of an existing event to a calendar.
+        /// Imports an event. This operation is used to add a private copy of an existing event to a calendar. Only
+        /// events with an eventType of default may be imported. Deprecated behavior: If a non-default event is
+        /// imported, its type will be changed to default and any event-type-specific properties it may have will be
+        /// dropped.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="calendarId">
@@ -2173,11 +2259,14 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual ImportRequest Import(Google.Apis.Calendar.v3.Data.Event body, string calendarId)
         {
-            return new ImportRequest(service, body, calendarId);
+            return new ImportRequest(this.service, body, calendarId);
         }
 
         /// <summary>
-        /// Imports an event. This operation is used to add a private copy of an existing event to a calendar.
+        /// Imports an event. This operation is used to add a private copy of an existing event to a calendar. Only
+        /// events with an eventType of default may be imported. Deprecated behavior: If a non-default event is
+        /// imported, its type will be changed to default and any event-type-specific properties it may have will be
+        /// dropped.
         /// </summary>
         public class ImportRequest : CalendarBaseServiceRequest<Google.Apis.Calendar.v3.Data.Event>
         {
@@ -2265,7 +2354,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.Calendar.v3.Data.Event body, string calendarId)
         {
-            return new InsertRequest(service, body, calendarId);
+            return new InsertRequest(this.service, body, calendarId);
         }
 
         /// <summary>Creates an event.</summary>
@@ -2332,8 +2421,9 @@ namespace Google.Apis.Calendar.v3
                 ExternalOnly = 1,
 
                 /// <summary>
-                /// No notifications are sent. For calendar migration tasks, consider using the Events.import method
-                /// instead.
+                /// No notifications are sent. Warning: Using the value none can have significant adverse effects,
+                /// including events not syncing to external calendars or events being lost altogether for some users.
+                /// For calendar migration tasks, consider using the events.import method instead.
                 /// </summary>
                 [Google.Apis.Util.StringValueAttribute("none")]
                 None = 2,
@@ -2423,7 +2513,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="eventId">Recurring event identifier.</param>
         public virtual InstancesRequest Instances(string calendarId, string eventId)
         {
-            return new InstancesRequest(service, calendarId, eventId);
+            return new InstancesRequest(this.service, calendarId, eventId);
         }
 
         /// <summary>Returns instances of the specified recurring event.</summary>
@@ -2489,15 +2579,55 @@ namespace Google.Apis.Calendar.v3
             /// Upper bound (exclusive) for an event's start time to filter by. Optional. The default is not to filter
             /// by start time. Must be an RFC3339 timestamp with mandatory time zone offset.
             /// </summary>
+            public virtual System.DateTimeOffset? TimeMaxDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeMaxRaw);
+                set => TimeMaxRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
+            /// <summary>
+            /// String representation of <see cref="TimeMaxDateTimeOffset"/>, formatted for inclusion in the HTTP
+            /// request.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("timeMax", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual System.Nullable<System.DateTime> TimeMax { get; set; }
+            public virtual string TimeMaxRaw { get; private set; }
+
+            /// <summary>
+            /// <seealso cref="System.DateTime"/> representation of <see cref="TimeMaxDateTimeOffset"/>.
+            /// </summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeMaxDateTimeOffset instead.")]
+            public virtual System.DateTime? TimeMax
+            {
+                get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeMaxRaw);
+                set => TimeMaxRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
+            }
 
             /// <summary>
             /// Lower bound (inclusive) for an event's end time to filter by. Optional. The default is not to filter by
             /// end time. Must be an RFC3339 timestamp with mandatory time zone offset.
             /// </summary>
+            public virtual System.DateTimeOffset? TimeMinDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeMinRaw);
+                set => TimeMinRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
+            /// <summary>
+            /// String representation of <see cref="TimeMinDateTimeOffset"/>, formatted for inclusion in the HTTP
+            /// request.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("timeMin", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual System.Nullable<System.DateTime> TimeMin { get; set; }
+            public virtual string TimeMinRaw { get; private set; }
+
+            /// <summary>
+            /// <seealso cref="System.DateTime"/> representation of <see cref="TimeMinDateTimeOffset"/>.
+            /// </summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeMinDateTimeOffset instead.")]
+            public virtual System.DateTime? TimeMin
+            {
+                get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeMinRaw);
+                set => TimeMinRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
+            }
 
             /// <summary>
             /// Time zone used in the response. Optional. The default is the time zone of the calendar.
@@ -2616,7 +2746,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual ListRequest List(string calendarId)
         {
-            return new ListRequest(service, calendarId);
+            return new ListRequest(this.service, calendarId);
         }
 
         /// <summary>Returns events on the specified calendar.</summary>
@@ -2636,15 +2766,67 @@ namespace Google.Apis.Calendar.v3
             [Google.Apis.Util.RequestParameterAttribute("calendarId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string CalendarId { get; private set; }
 
-            /// <summary>
-            /// Deprecated and ignored. A value will always be returned in the email field for the organizer, creator
-            /// and attendees, even if no real email address is available (i.e. a generated, non-working value will be
-            /// provided).
-            /// </summary>
+            /// <summary>Deprecated and ignored.</summary>
             [Google.Apis.Util.RequestParameterAttribute("alwaysIncludeEmail", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> AlwaysIncludeEmail { get; set; }
 
-            /// <summary>Specifies event ID in the iCalendar format to be included in the response. Optional.</summary>
+            /// <summary>
+            /// Event types to return. Optional. This parameter can be repeated multiple times to return events of
+            /// different types. If unset, returns all event types.
+            /// </summary>
+            /// <remarks>
+            /// Use this property to set a single value for the parameter, or <see cref="EventTypesList"/> to set
+            /// multiple values. Do not set both properties.
+            /// </remarks>
+            [Google.Apis.Util.RequestParameterAttribute("eventTypes", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<EventTypesEnum> EventTypes { get; set; }
+
+            /// <summary>
+            /// Event types to return. Optional. This parameter can be repeated multiple times to return events of
+            /// different types. If unset, returns all event types.
+            /// </summary>
+            /// <remarks>
+            /// Use this property to set one or more values for the parameter. Do not set both this property and
+            /// <see cref="EventTypes"/>.
+            /// </remarks>
+            [Google.Apis.Util.RequestParameterAttribute("eventTypes", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<EventTypesEnum> EventTypesList { get; set; }
+
+            /// <summary>
+            /// Event types to return. Optional. This parameter can be repeated multiple times to return events of
+            /// different types. If unset, returns all event types.
+            /// </summary>
+            public enum EventTypesEnum
+            {
+                /// <summary>Special all-day events with an annual recurrence.</summary>
+                [Google.Apis.Util.StringValueAttribute("birthday")]
+                Birthday = 5,
+
+                /// <summary>Regular events.</summary>
+                [Google.Apis.Util.StringValueAttribute("default")]
+                Default__ = 0,
+
+                /// <summary>Focus time events.</summary>
+                [Google.Apis.Util.StringValueAttribute("focusTime")]
+                FocusTime = 1,
+
+                /// <summary>Events from Gmail.</summary>
+                [Google.Apis.Util.StringValueAttribute("fromGmail")]
+                FromGmail = 4,
+
+                /// <summary>Out of office events.</summary>
+                [Google.Apis.Util.StringValueAttribute("outOfOffice")]
+                OutOfOffice = 2,
+
+                /// <summary>Working location events.</summary>
+                [Google.Apis.Util.StringValueAttribute("workingLocation")]
+                WorkingLocation = 3,
+            }
+
+            /// <summary>
+            /// Specifies an event ID in the iCalendar format to be provided in the response. Optional. Use this if you
+            /// want to search for an event by its iCalendar ID.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("iCalUID", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string ICalUID { get; set; }
 
@@ -2699,8 +2881,14 @@ namespace Google.Apis.Calendar.v3
             public virtual Google.Apis.Util.Repeatable<string> PrivateExtendedProperty { get; set; }
 
             /// <summary>
-            /// Free text search terms to find events that match these terms in any field, except for extended
-            /// properties. Optional.
+            /// Free text search terms to find events that match these terms in the following fields:  - summary  -
+            /// description  - location  - attendee's displayName  - attendee's email  - organizer's displayName  -
+            /// organizer's email  - workingLocationProperties.officeLocation.buildingId  -
+            /// workingLocationProperties.officeLocation.deskId  - workingLocationProperties.officeLocation.label  -
+            /// workingLocationProperties.customLocation.label  These search terms also match predefined keywords
+            /// against all display title translations of working location, out-of-office, and focus-time events. For
+            /// example, searching for "Office" or "Bureau" returns working location events of type officeLocation,
+            /// whereas searching for "Out of office" or "Abwesend" returns out-of-office events. Optional.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("q", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Q { get; set; }
@@ -2738,9 +2926,10 @@ namespace Google.Apis.Calendar.v3
             /// events deleted since the previous list request will always be in the result set and it is not allowed to
             /// set showDeleted to False. There are several query parameters that cannot be specified together with
             /// nextSyncToken to ensure consistency of the client state.  These are:  - iCalUID  - orderBy  -
-            /// privateExtendedProperty  - q  - sharedExtendedProperty  - timeMin  - timeMax  - updatedMin If the
-            /// syncToken expires, the server will respond with a 410 GONE response code and the client should clear its
-            /// storage and perform a full synchronization without any syncToken. Learn more about incremental
+            /// privateExtendedProperty  - q  - sharedExtendedProperty  - timeMin  - timeMax  - updatedMin All other
+            /// query parameters should be the same as for the initial synchronization to avoid undefined behavior. If
+            /// the syncToken expires, the server will respond with a 410 GONE response code and the client should clear
+            /// its storage and perform a full synchronization without any syncToken. Learn more about incremental
             /// synchronization. Optional. The default is to return all entries.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("syncToken", Google.Apis.Util.RequestParameterType.Query)]
@@ -2752,8 +2941,28 @@ namespace Google.Apis.Calendar.v3
             /// 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z. Milliseconds may be provided but are ignored. If
             /// timeMin is set, timeMax must be greater than timeMin.
             /// </summary>
+            public virtual System.DateTimeOffset? TimeMaxDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeMaxRaw);
+                set => TimeMaxRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
+            /// <summary>
+            /// String representation of <see cref="TimeMaxDateTimeOffset"/>, formatted for inclusion in the HTTP
+            /// request.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("timeMax", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual System.Nullable<System.DateTime> TimeMax { get; set; }
+            public virtual string TimeMaxRaw { get; private set; }
+
+            /// <summary>
+            /// <seealso cref="System.DateTime"/> representation of <see cref="TimeMaxDateTimeOffset"/>.
+            /// </summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeMaxDateTimeOffset instead.")]
+            public virtual System.DateTime? TimeMax
+            {
+                get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeMaxRaw);
+                set => TimeMaxRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
+            }
 
             /// <summary>
             /// Lower bound (exclusive) for an event's end time to filter by. Optional. The default is not to filter by
@@ -2761,8 +2970,28 @@ namespace Google.Apis.Calendar.v3
             /// 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z. Milliseconds may be provided but are ignored. If
             /// timeMax is set, timeMin must be smaller than timeMax.
             /// </summary>
+            public virtual System.DateTimeOffset? TimeMinDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeMinRaw);
+                set => TimeMinRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
+            /// <summary>
+            /// String representation of <see cref="TimeMinDateTimeOffset"/>, formatted for inclusion in the HTTP
+            /// request.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("timeMin", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual System.Nullable<System.DateTime> TimeMin { get; set; }
+            public virtual string TimeMinRaw { get; private set; }
+
+            /// <summary>
+            /// <seealso cref="System.DateTime"/> representation of <see cref="TimeMinDateTimeOffset"/>.
+            /// </summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeMinDateTimeOffset instead.")]
+            public virtual System.DateTime? TimeMin
+            {
+                get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeMinRaw);
+                set => TimeMinRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
+            }
 
             /// <summary>
             /// Time zone used in the response. Optional. The default is the time zone of the calendar.
@@ -2775,8 +3004,28 @@ namespace Google.Apis.Calendar.v3
             /// entries deleted since this time will always be included regardless of showDeleted. Optional. The default
             /// is not to filter by last modification time.
             /// </summary>
+            public virtual System.DateTimeOffset? UpdatedMinDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(UpdatedMinRaw);
+                set => UpdatedMinRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
+            /// <summary>
+            /// String representation of <see cref="UpdatedMinDateTimeOffset"/>, formatted for inclusion in the HTTP
+            /// request.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("updatedMin", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual System.Nullable<System.DateTime> UpdatedMin { get; set; }
+            public virtual string UpdatedMinRaw { get; private set; }
+
+            /// <summary>
+            /// <seealso cref="System.DateTime"/> representation of <see cref="UpdatedMinDateTimeOffset"/>.
+            /// </summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdatedMinDateTimeOffset instead.")]
+            public virtual System.DateTime? UpdatedMin
+            {
+                get => Google.Apis.Util.Utilities.GetDateTimeFromString(UpdatedMinRaw);
+                set => UpdatedMinRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
+            }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "list";
@@ -2802,6 +3051,14 @@ namespace Google.Apis.Calendar.v3
                 RequestParameters.Add("alwaysIncludeEmail", new Google.Apis.Discovery.Parameter
                 {
                     Name = "alwaysIncludeEmail",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("eventTypes", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "eventTypes",
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = null,
@@ -2938,7 +3195,10 @@ namespace Google.Apis.Calendar.v3
             }
         }
 
-        /// <summary>Moves an event to another calendar, i.e. changes an event's organizer.</summary>
+        /// <summary>
+        /// Moves an event to another calendar, i.e. changes an event's organizer. Note that only default events can be
+        /// moved; birthday, focusTime, fromGmail, outOfOffice and workingLocation events cannot be moved.
+        /// </summary>
         /// <param name="calendarId">Calendar identifier of the source calendar where the event currently is on.</param>
         /// <param name="eventId">Event identifier.</param>
         /// <param name="destination">
@@ -2946,10 +3206,13 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual MoveRequest Move(string calendarId, string eventId, string destination)
         {
-            return new MoveRequest(service, calendarId, eventId, destination);
+            return new MoveRequest(this.service, calendarId, eventId, destination);
         }
 
-        /// <summary>Moves an event to another calendar, i.e. changes an event's organizer.</summary>
+        /// <summary>
+        /// Moves an event to another calendar, i.e. changes an event's organizer. Note that only default events can be
+        /// moved; birthday, focusTime, fromGmail, outOfOffice and workingLocation events cannot be moved.
+        /// </summary>
         public class MoveRequest : CalendarBaseServiceRequest<Google.Apis.Calendar.v3.Data.Event>
         {
             /// <summary>Constructs a new Move request.</summary>
@@ -3069,7 +3332,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="eventId">Event identifier.</param>
         public virtual PatchRequest Patch(Google.Apis.Calendar.v3.Data.Event body, string calendarId, string eventId)
         {
-            return new PatchRequest(service, body, calendarId, eventId);
+            return new PatchRequest(this.service, body, calendarId, eventId);
         }
 
         /// <summary>Updates an event. This method supports patch semantics.</summary>
@@ -3254,7 +3517,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="text">The text describing the event to be created.</param>
         public virtual QuickAddRequest QuickAdd(string calendarId, string text)
         {
-            return new QuickAddRequest(service, calendarId, text);
+            return new QuickAddRequest(this.service, calendarId, text);
         }
 
         /// <summary>Creates an event based on a simple text string.</summary>
@@ -3367,7 +3630,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="eventId">Event identifier.</param>
         public virtual UpdateRequest Update(Google.Apis.Calendar.v3.Data.Event body, string calendarId, string eventId)
         {
-            return new UpdateRequest(service, body, calendarId, eventId);
+            return new UpdateRequest(this.service, body, calendarId, eventId);
         }
 
         /// <summary>Updates an event.</summary>
@@ -3552,7 +3815,7 @@ namespace Google.Apis.Calendar.v3
         /// </param>
         public virtual WatchRequest Watch(Google.Apis.Calendar.v3.Data.Channel body, string calendarId)
         {
-            return new WatchRequest(service, body, calendarId);
+            return new WatchRequest(this.service, body, calendarId);
         }
 
         /// <summary>Watch for changes to Events resources.</summary>
@@ -3573,15 +3836,67 @@ namespace Google.Apis.Calendar.v3
             [Google.Apis.Util.RequestParameterAttribute("calendarId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string CalendarId { get; private set; }
 
-            /// <summary>
-            /// Deprecated and ignored. A value will always be returned in the email field for the organizer, creator
-            /// and attendees, even if no real email address is available (i.e. a generated, non-working value will be
-            /// provided).
-            /// </summary>
+            /// <summary>Deprecated and ignored.</summary>
             [Google.Apis.Util.RequestParameterAttribute("alwaysIncludeEmail", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> AlwaysIncludeEmail { get; set; }
 
-            /// <summary>Specifies event ID in the iCalendar format to be included in the response. Optional.</summary>
+            /// <summary>
+            /// Event types to return. Optional. This parameter can be repeated multiple times to return events of
+            /// different types. If unset, returns all event types.
+            /// </summary>
+            /// <remarks>
+            /// Use this property to set a single value for the parameter, or <see cref="EventTypesList"/> to set
+            /// multiple values. Do not set both properties.
+            /// </remarks>
+            [Google.Apis.Util.RequestParameterAttribute("eventTypes", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<EventTypesEnum> EventTypes { get; set; }
+
+            /// <summary>
+            /// Event types to return. Optional. This parameter can be repeated multiple times to return events of
+            /// different types. If unset, returns all event types.
+            /// </summary>
+            /// <remarks>
+            /// Use this property to set one or more values for the parameter. Do not set both this property and
+            /// <see cref="EventTypes"/>.
+            /// </remarks>
+            [Google.Apis.Util.RequestParameterAttribute("eventTypes", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<EventTypesEnum> EventTypesList { get; set; }
+
+            /// <summary>
+            /// Event types to return. Optional. This parameter can be repeated multiple times to return events of
+            /// different types. If unset, returns all event types.
+            /// </summary>
+            public enum EventTypesEnum
+            {
+                /// <summary>Special all-day events with an annual recurrence.</summary>
+                [Google.Apis.Util.StringValueAttribute("birthday")]
+                Birthday = 5,
+
+                /// <summary>Regular events.</summary>
+                [Google.Apis.Util.StringValueAttribute("default")]
+                Default__ = 0,
+
+                /// <summary>Focus time events.</summary>
+                [Google.Apis.Util.StringValueAttribute("focusTime")]
+                FocusTime = 1,
+
+                /// <summary>Events from Gmail.</summary>
+                [Google.Apis.Util.StringValueAttribute("fromGmail")]
+                FromGmail = 4,
+
+                /// <summary>Out of office events.</summary>
+                [Google.Apis.Util.StringValueAttribute("outOfOffice")]
+                OutOfOffice = 2,
+
+                /// <summary>Working location events.</summary>
+                [Google.Apis.Util.StringValueAttribute("workingLocation")]
+                WorkingLocation = 3,
+            }
+
+            /// <summary>
+            /// Specifies an event ID in the iCalendar format to be provided in the response. Optional. Use this if you
+            /// want to search for an event by its iCalendar ID.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("iCalUID", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string ICalUID { get; set; }
 
@@ -3636,8 +3951,14 @@ namespace Google.Apis.Calendar.v3
             public virtual Google.Apis.Util.Repeatable<string> PrivateExtendedProperty { get; set; }
 
             /// <summary>
-            /// Free text search terms to find events that match these terms in any field, except for extended
-            /// properties. Optional.
+            /// Free text search terms to find events that match these terms in the following fields:  - summary  -
+            /// description  - location  - attendee's displayName  - attendee's email  - organizer's displayName  -
+            /// organizer's email  - workingLocationProperties.officeLocation.buildingId  -
+            /// workingLocationProperties.officeLocation.deskId  - workingLocationProperties.officeLocation.label  -
+            /// workingLocationProperties.customLocation.label  These search terms also match predefined keywords
+            /// against all display title translations of working location, out-of-office, and focus-time events. For
+            /// example, searching for "Office" or "Bureau" returns working location events of type officeLocation,
+            /// whereas searching for "Out of office" or "Abwesend" returns out-of-office events. Optional.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("q", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Q { get; set; }
@@ -3675,9 +3996,10 @@ namespace Google.Apis.Calendar.v3
             /// events deleted since the previous list request will always be in the result set and it is not allowed to
             /// set showDeleted to False. There are several query parameters that cannot be specified together with
             /// nextSyncToken to ensure consistency of the client state.  These are:  - iCalUID  - orderBy  -
-            /// privateExtendedProperty  - q  - sharedExtendedProperty  - timeMin  - timeMax  - updatedMin If the
-            /// syncToken expires, the server will respond with a 410 GONE response code and the client should clear its
-            /// storage and perform a full synchronization without any syncToken. Learn more about incremental
+            /// privateExtendedProperty  - q  - sharedExtendedProperty  - timeMin  - timeMax  - updatedMin All other
+            /// query parameters should be the same as for the initial synchronization to avoid undefined behavior. If
+            /// the syncToken expires, the server will respond with a 410 GONE response code and the client should clear
+            /// its storage and perform a full synchronization without any syncToken. Learn more about incremental
             /// synchronization. Optional. The default is to return all entries.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("syncToken", Google.Apis.Util.RequestParameterType.Query)]
@@ -3689,8 +4011,28 @@ namespace Google.Apis.Calendar.v3
             /// 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z. Milliseconds may be provided but are ignored. If
             /// timeMin is set, timeMax must be greater than timeMin.
             /// </summary>
+            public virtual System.DateTimeOffset? TimeMaxDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeMaxRaw);
+                set => TimeMaxRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
+            /// <summary>
+            /// String representation of <see cref="TimeMaxDateTimeOffset"/>, formatted for inclusion in the HTTP
+            /// request.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("timeMax", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual System.Nullable<System.DateTime> TimeMax { get; set; }
+            public virtual string TimeMaxRaw { get; private set; }
+
+            /// <summary>
+            /// <seealso cref="System.DateTime"/> representation of <see cref="TimeMaxDateTimeOffset"/>.
+            /// </summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeMaxDateTimeOffset instead.")]
+            public virtual System.DateTime? TimeMax
+            {
+                get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeMaxRaw);
+                set => TimeMaxRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
+            }
 
             /// <summary>
             /// Lower bound (exclusive) for an event's end time to filter by. Optional. The default is not to filter by
@@ -3698,8 +4040,28 @@ namespace Google.Apis.Calendar.v3
             /// 2011-06-03T10:00:00-07:00, 2011-06-03T10:00:00Z. Milliseconds may be provided but are ignored. If
             /// timeMax is set, timeMin must be smaller than timeMax.
             /// </summary>
+            public virtual System.DateTimeOffset? TimeMinDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeMinRaw);
+                set => TimeMinRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
+            /// <summary>
+            /// String representation of <see cref="TimeMinDateTimeOffset"/>, formatted for inclusion in the HTTP
+            /// request.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("timeMin", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual System.Nullable<System.DateTime> TimeMin { get; set; }
+            public virtual string TimeMinRaw { get; private set; }
+
+            /// <summary>
+            /// <seealso cref="System.DateTime"/> representation of <see cref="TimeMinDateTimeOffset"/>.
+            /// </summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeMinDateTimeOffset instead.")]
+            public virtual System.DateTime? TimeMin
+            {
+                get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeMinRaw);
+                set => TimeMinRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
+            }
 
             /// <summary>
             /// Time zone used in the response. Optional. The default is the time zone of the calendar.
@@ -3712,8 +4074,28 @@ namespace Google.Apis.Calendar.v3
             /// entries deleted since this time will always be included regardless of showDeleted. Optional. The default
             /// is not to filter by last modification time.
             /// </summary>
+            public virtual System.DateTimeOffset? UpdatedMinDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(UpdatedMinRaw);
+                set => UpdatedMinRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
+            /// <summary>
+            /// String representation of <see cref="UpdatedMinDateTimeOffset"/>, formatted for inclusion in the HTTP
+            /// request.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("updatedMin", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual System.Nullable<System.DateTime> UpdatedMin { get; set; }
+            public virtual string UpdatedMinRaw { get; private set; }
+
+            /// <summary>
+            /// <seealso cref="System.DateTime"/> representation of <see cref="UpdatedMinDateTimeOffset"/>.
+            /// </summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdatedMinDateTimeOffset instead.")]
+            public virtual System.DateTime? UpdatedMin
+            {
+                get => Google.Apis.Util.Utilities.GetDateTimeFromString(UpdatedMinRaw);
+                set => UpdatedMinRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
+            }
 
             /// <summary>Gets or sets the body of this request.</summary>
             Google.Apis.Calendar.v3.Data.Channel Body { get; set; }
@@ -3745,6 +4127,14 @@ namespace Google.Apis.Calendar.v3
                 RequestParameters.Add("alwaysIncludeEmail", new Google.Apis.Discovery.Parameter
                 {
                     Name = "alwaysIncludeEmail",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("eventTypes", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "eventTypes",
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = null,
@@ -3900,7 +4290,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="body">The body of the request.</param>
         public virtual QueryRequest Query(Google.Apis.Calendar.v3.Data.FreeBusyRequest body)
         {
-            return new QueryRequest(service, body);
+            return new QueryRequest(this.service, body);
         }
 
         /// <summary>Returns free/busy information for a set of calendars.</summary>
@@ -3954,7 +4344,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="setting">The id of the user setting.</param>
         public virtual GetRequest Get(string setting)
         {
-            return new GetRequest(service, setting);
+            return new GetRequest(this.service, setting);
         }
 
         /// <summary>Returns a single user setting.</summary>
@@ -3998,7 +4388,7 @@ namespace Google.Apis.Calendar.v3
         /// <summary>Returns all user settings for the authenticated user.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Returns all user settings for the authenticated user.</summary>
@@ -4075,7 +4465,7 @@ namespace Google.Apis.Calendar.v3
         /// <param name="body">The body of the request.</param>
         public virtual WatchRequest Watch(Google.Apis.Calendar.v3.Data.Channel body)
         {
-            return new WatchRequest(service, body);
+            return new WatchRequest(this.service, body);
         }
 
         /// <summary>Watch for changes to Settings resources.</summary>
@@ -4206,8 +4596,9 @@ namespace Google.Apis.Calendar.v3.Data
         /// Provides read access to free/busy information.  - "reader" - Provides read access to the calendar. Private
         /// events will appear to users with reader access, but event details will be hidden.  - "writer" - Provides
         /// read and write access to the calendar. Private events will appear to users with writer access, and event
-        /// details will be visible.  - "owner" - Provides ownership of the calendar. This role has all of the
-        /// permissions of the writer role with the additional ability to see and manipulate ACLs.
+        /// details will be visible. Provides read access to the calendar's ACLs.  - "owner" - Provides ownership of the
+        /// calendar. This role has all of the permissions of the writer role with the additional ability to manipulate
+        /// ACLs.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -4545,9 +4936,18 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("updated")]
         public virtual string UpdatedRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(UpdatedRaw);
+            set => UpdatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="UpdatedRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> Updated
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdatedDateTimeOffset instead.")]
+        public virtual System.DateTime? Updated
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(UpdatedRaw);
             set => UpdatedRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -4606,9 +5006,8 @@ namespace Google.Apis.Calendar.v3.Data
         public virtual ConferenceParameters Parameters { get; set; }
 
         /// <summary>
-        /// The signature of the conference data. Generated on server side. Must be preserved while copying the
-        /// conference data between events, otherwise the conference data will not be copied. Unset for a conference
-        /// with a failed create request. Optional for a conference with a pending create request.
+        /// The signature of the conference data. Generated on server side. Unset for a conference with a failed create
+        /// request. Optional for a conference with a pending create request.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("signature")]
         public virtual string Signature { get; set; }
@@ -4838,9 +5237,8 @@ namespace Google.Apis.Calendar.v3.Data
         public virtual System.Nullable<bool> AnyoneCanAddSelf { get; set; }
 
         /// <summary>
-        /// File attachments for the event. Currently only Google Drive attachments are supported. In order to modify
-        /// attachments the supportsAttachments request parameter should be set to true. There can be at most 25
-        /// attachments per event,
+        /// File attachments for the event. In order to modify attachments the supportsAttachments request parameter
+        /// should be set to true. There can be at most 25 attachments per event,
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("attachments")]
         public virtual System.Collections.Generic.IList<EventAttachment> Attachments { get; set; }
@@ -4861,6 +5259,10 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("attendeesOmitted")]
         public virtual System.Nullable<bool> AttendeesOmitted { get; set; }
 
+        /// <summary>Birthday or special event data. Used if eventType is "birthday". Immutable.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("birthdayProperties")]
+        public virtual EventBirthdayProperties BirthdayProperties { get; set; }
+
         /// <summary>
         /// The color of the event. This is an ID referring to an entry in the event section of the colors definition
         /// (see the  colors endpoint). Optional.
@@ -4880,9 +5282,18 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("created")]
         public virtual string CreatedRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(CreatedRaw);
+            set => CreatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="CreatedRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> Created
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreatedDateTimeOffset instead.")]
+        public virtual System.DateTime? Created
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(CreatedRaw);
             set => CreatedRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -4914,8 +5325,11 @@ namespace Google.Apis.Calendar.v3.Data
         public virtual string ETag { get; set; }
 
         /// <summary>
-        /// Specific type of the event. Read-only. Possible values are:   - "default" - A regular event or not further
-        /// specified.  - "outOfOffice" - An out-of-office event.  - "focusTime" - A focus-time event.
+        /// Specific type of the event. This cannot be modified after the event is created. Possible values are:   -
+        /// "birthday" - A special all-day event with an annual recurrence.  - "default" - A regular event or not
+        /// further specified.  - "focusTime" - A focus-time event.  - "fromGmail" - An event from Gmail. This type of
+        /// event cannot be created.  - "outOfOffice" - An out-of-office event.  - "workingLocation" - A working
+        /// location event.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("eventType")]
         public virtual string EventType { get; set; }
@@ -4923,6 +5337,10 @@ namespace Google.Apis.Calendar.v3.Data
         /// <summary>Extended properties of the event.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("extendedProperties")]
         public virtual ExtendedPropertiesData ExtendedProperties { get; set; }
+
+        /// <summary>Focus Time event data. Used if eventType is focusTime.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("focusTimeProperties")]
+        public virtual EventFocusTimeProperties FocusTimeProperties { get; set; }
 
         /// <summary>
         /// A gadget that extends this event. Gadgets are deprecated; this structure is instead only used for returning
@@ -4960,10 +5378,11 @@ namespace Google.Apis.Calendar.v3.Data
 
         /// <summary>
         /// Event unique identifier as defined in RFC5545. It is used to uniquely identify events accross calendaring
-        /// systems and must be supplied when importing events via the import method. Note that the icalUID and the id
+        /// systems and must be supplied when importing events via the import method. Note that the iCalUID and the id
         /// are not identical and only one of them should be supplied at event creation time. One difference in their
         /// semantics is that in recurring events, all occurrences of one event have different ids while they all share
-        /// the same icalUIDs.
+        /// the same iCalUIDs. To retrieve an event using its iCalUID, call the events.list method using the iCalUID
+        /// parameter. To retrieve an event using its id, call the events.get method.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("iCalUID")]
         public virtual string ICalUID { get; set; }
@@ -5014,6 +5433,10 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("originalStartTime")]
         public virtual EventDateTime OriginalStartTime { get; set; }
 
+        /// <summary>Out of office event data. Used if eventType is outOfOffice.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("outOfOfficeProperties")]
+        public virtual EventOutOfOfficeProperties OutOfOfficeProperties { get; set; }
+
         /// <summary>
         /// If set to True, Event propagation is disabled. Note that it is not the same thing as Private event
         /// properties. Optional. Immutable. The default is False.
@@ -5036,7 +5459,10 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("recurringEventId")]
         public virtual string RecurringEventId { get; set; }
 
-        /// <summary>Information about the event's reminders for the authenticated user.</summary>
+        /// <summary>
+        /// Information about the event's reminders for the authenticated user. Note that changing reminders does not
+        /// also change the updated property of the enclosing event.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("reminders")]
         public virtual RemindersData Reminders { get; set; }
 
@@ -5093,13 +5519,25 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("transparency")]
         public virtual string Transparency { get; set; }
 
-        /// <summary>Last modification time of the event (as a RFC3339 timestamp). Read-only.</summary>
+        /// <summary>
+        /// Last modification time of the main event data (as a RFC3339 timestamp). Updating event reminders will not
+        /// cause this to change. Read-only.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updated")]
         public virtual string UpdatedRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(UpdatedRaw);
+            set => UpdatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="UpdatedRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> Updated
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdatedDateTimeOffset instead.")]
+        public virtual System.DateTime? Updated
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(UpdatedRaw);
             set => UpdatedRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -5114,6 +5552,10 @@ namespace Google.Apis.Calendar.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("visibility")]
         public virtual string Visibility { get; set; }
+
+        /// <summary>Working location event data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("workingLocationProperties")]
+        public virtual EventWorkingLocationProperties WorkingLocationProperties { get; set; }
 
         /// <summary>The creator of the event. Read-only.</summary>
         public class CreatorData
@@ -5225,7 +5667,10 @@ namespace Google.Apis.Calendar.v3.Data
             public virtual System.Nullable<bool> Self { get; set; }
         }
 
-        /// <summary>Information about the event's reminders for the authenticated user.</summary>
+        /// <summary>
+        /// Information about the event's reminders for the authenticated user. Note that changing reminders does not
+        /// also change the updated property of the enclosing event.
+        /// </summary>
         public class RemindersData
         {
             /// <summary>
@@ -5273,7 +5718,9 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("fileUrl")]
         public virtual string FileUrl { get; set; }
 
-        /// <summary>URL link to the attachment's icon. Read-only.</summary>
+        /// <summary>
+        /// URL link to the attachment's icon. This field can only be modified for custom third-party attachments.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("iconLink")]
         public virtual string IconLink { get; set; }
 
@@ -5331,8 +5778,13 @@ namespace Google.Apis.Calendar.v3.Data
 
         /// <summary>
         /// The attendee's response status. Possible values are:   - "needsAction" - The attendee has not responded to
-        /// the invitation.  - "declined" - The attendee has declined the invitation.  - "tentative" - The attendee has
-        /// tentatively accepted the invitation.  - "accepted" - The attendee has accepted the invitation.
+        /// the invitation (recommended for new events).  - "declined" - The attendee has declined the invitation.  -
+        /// "tentative" - The attendee has tentatively accepted the invitation.  - "accepted" - The attendee has
+        /// accepted the invitation.  Warning: If you add an event using the values declined, tentative, or accepted,
+        /// attendees with the "Add invitations to my calendar" setting set to "When I respond to invitation in email"
+        /// or "Only if the sender is known" might have their response reset to needsAction and won't see an event in
+        /// their calendar unless they change their response in the event invitation email. Furthermore, if more than
+        /// 200 guests are invited to the event, response status is not propagated to the guests.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("responseStatus")]
         public virtual string ResponseStatus { get; set; }
@@ -5343,6 +5795,37 @@ namespace Google.Apis.Calendar.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("self")]
         public virtual System.Nullable<bool> Self { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EventBirthdayProperties : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Resource name of the contact this birthday event is linked to. This can be used to fetch contact details
+        /// from People API. Format: "people/c12345". Read-only.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("contact")]
+        public virtual string Contact { get; set; }
+
+        /// <summary>
+        /// Custom type label specified for this event. This is populated if birthdayProperties.type is set to "custom".
+        /// Read-only.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customTypeName")]
+        public virtual string CustomTypeName { get; set; }
+
+        /// <summary>
+        /// Type of birthday or special event. Possible values are:   - "anniversary" - An anniversary other than
+        /// birthday. Always has a contact.  - "birthday" - A birthday event. This is the default value.  - "custom" - A
+        /// special date whose label is further specified in the customTypeName field. Always has a contact.  - "other"
+        /// - A special date which does not fall into the other categories, and does not have a custom label. Always has
+        /// a contact.  - "self" - Calendar owner's own birthday. Cannot have a contact.  The Calendar API only supports
+        /// creating events with the type "birthday". The type cannot be changed after the event is created.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5361,9 +5844,18 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("dateTime")]
         public virtual string DateTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(DateTimeRaw);
+            set => DateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="DateTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> DateTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DateTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? DateTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(DateTimeRaw);
             set => DateTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -5377,6 +5869,56 @@ namespace Google.Apis.Calendar.v3.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timeZone")]
         public virtual string TimeZone { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EventFocusTimeProperties : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Whether to decline meeting invitations which overlap Focus Time events. Valid values are declineNone,
+        /// meaning that no meeting invitations are declined; declineAllConflictingInvitations, meaning that all
+        /// conflicting meeting invitations that conflict with the event are declined; and
+        /// declineOnlyNewConflictingInvitations, meaning that only new conflicting meeting invitations which arrive
+        /// while the Focus Time event is present are to be declined.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("autoDeclineMode")]
+        public virtual string AutoDeclineMode { get; set; }
+
+        /// <summary>
+        /// The status to mark the user in Chat and related products. This can be available or doNotDisturb.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("chatStatus")]
+        public virtual string ChatStatus { get; set; }
+
+        /// <summary>
+        /// Response message to set if an existing event or new invitation is automatically declined by Calendar.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("declineMessage")]
+        public virtual string DeclineMessage { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EventOutOfOfficeProperties : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Whether to decline meeting invitations which overlap Out of office events. Valid values are declineNone,
+        /// meaning that no meeting invitations are declined; declineAllConflictingInvitations, meaning that all
+        /// conflicting meeting invitations that conflict with the event are declined; and
+        /// declineOnlyNewConflictingInvitations, meaning that only new conflicting meeting invitations which arrive
+        /// while the Out of office event is present are to be declined.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("autoDeclineMode")]
+        public virtual string AutoDeclineMode { get; set; }
+
+        /// <summary>
+        /// Response message to set if an existing event or new invitation is automatically declined by Calendar.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("declineMessage")]
+        public virtual string DeclineMessage { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5400,6 +5942,71 @@ namespace Google.Apis.Calendar.v3.Data
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
+    }
+
+    public class EventWorkingLocationProperties : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>If present, specifies that the user is working from a custom location.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customLocation")]
+        public virtual CustomLocationData CustomLocation { get; set; }
+
+        /// <summary>If present, specifies that the user is working at home.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("homeOffice")]
+        public virtual object HomeOffice { get; set; }
+
+        /// <summary>If present, specifies that the user is working from an office.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("officeLocation")]
+        public virtual OfficeLocationData OfficeLocation { get; set; }
+
+        /// <summary>
+        /// Type of the working location. Possible values are:   - "homeOffice" - The user is working at home.  -
+        /// "officeLocation" - The user is working from an office.  - "customLocation" - The user is working from a
+        /// custom location.  Any details are specified in a sub-field of the specified name, but this field may be
+        /// missing if empty. Any other fields are ignored. Required when adding working location properties.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+
+        /// <summary>If present, specifies that the user is working from a custom location.</summary>
+        public class CustomLocationData
+        {
+            /// <summary>An optional extra label for additional information.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("label")]
+            public virtual string Label { get; set; }
+        }
+
+        /// <summary>If present, specifies that the user is working from an office.</summary>
+        public class OfficeLocationData
+        {
+            /// <summary>
+            /// An optional building identifier. This should reference a building ID in the organization's Resources
+            /// database.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("buildingId")]
+            public virtual string BuildingId { get; set; }
+
+            /// <summary>An optional desk identifier.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("deskId")]
+            public virtual string DeskId { get; set; }
+
+            /// <summary>An optional floor identifier.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("floorId")]
+            public virtual string FloorId { get; set; }
+
+            /// <summary>An optional floor section identifier.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("floorSectionId")]
+            public virtual string FloorSectionId { get; set; }
+
+            /// <summary>
+            /// The office name that's displayed in Calendar Web and Mobile clients. We recommend you reference a
+            /// building name in the organization's Resources database.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("label")]
+            public virtual string Label { get; set; }
+        }
     }
 
     public class Events : Google.Apis.Requests.IDirectResponseSchema
@@ -5465,9 +6072,18 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("updated")]
         public virtual string UpdatedRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdatedRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdatedDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(UpdatedRaw);
+            set => UpdatedRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="UpdatedRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> Updated
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdatedDateTimeOffset instead.")]
+        public virtual System.DateTime? Updated
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(UpdatedRaw);
             set => UpdatedRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -5525,9 +6141,18 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeMax")]
         public virtual string TimeMaxRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimeMaxRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimeMaxDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeMaxRaw);
+            set => TimeMaxRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="TimeMaxRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> TimeMax
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeMaxDateTimeOffset instead.")]
+        public virtual System.DateTime? TimeMax
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeMaxRaw);
             set => TimeMaxRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -5537,9 +6162,18 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeMin")]
         public virtual string TimeMinRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimeMinRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimeMinDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeMinRaw);
+            set => TimeMinRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="TimeMinRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> TimeMin
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeMinDateTimeOffset instead.")]
+        public virtual System.DateTime? TimeMin
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeMinRaw);
             set => TimeMinRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -5581,9 +6215,18 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeMax")]
         public virtual string TimeMaxRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimeMaxRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimeMaxDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeMaxRaw);
+            set => TimeMaxRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="TimeMaxRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> TimeMax
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeMaxDateTimeOffset instead.")]
+        public virtual System.DateTime? TimeMax
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeMaxRaw);
             set => TimeMaxRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -5593,9 +6236,18 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeMin")]
         public virtual string TimeMinRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimeMinRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimeMinDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeMinRaw);
+            set => TimeMinRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="TimeMinRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> TimeMin
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeMinDateTimeOffset instead.")]
+        public virtual System.DateTime? TimeMin
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeMinRaw);
             set => TimeMinRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -5662,9 +6314,18 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("end")]
         public virtual string EndRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(EndRaw);
+            set => EndRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="EndRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> End
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndDateTimeOffset instead.")]
+        public virtual System.DateTime? End
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(EndRaw);
             set => EndRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -5674,9 +6335,18 @@ namespace Google.Apis.Calendar.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("start")]
         public virtual string StartRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(StartRaw);
+            set => StartRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="StartRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> Start
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartDateTimeOffset instead.")]
+        public virtual System.DateTime? Start
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(StartRaw);
             set => StartRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);

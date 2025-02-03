@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ namespace Google.Apis.DomainsRDAP.v1
             Ip = new IpResource(this);
             Nameserver = new NameserverResource(this);
             V1 = new V1Resource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://domainsrdap.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://domainsrdap.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -49,23 +51,16 @@ namespace Google.Apis.DomainsRDAP.v1
         public override string Name => "domainsrdap";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://domainsrdap.googleapis.com/";
-        #else
-            "https://domainsrdap.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://domainsrdap.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Gets the Autnum resource.</summary>
         public virtual AutnumResource Autnum { get; }
@@ -288,7 +283,7 @@ namespace Google.Apis.DomainsRDAP.v1
         /// <param name="autnumId"><c>null</c></param>
         public virtual GetRequest Get(string autnumId)
         {
-            return new GetRequest(service, autnumId);
+            return new GetRequest(this.service, autnumId);
         }
 
         /// <summary>
@@ -350,7 +345,7 @@ namespace Google.Apis.DomainsRDAP.v1
         /// <param name="domainName">Full domain name to look up. Example: "example.com"</param>
         public virtual GetRequest Get(string domainName)
         {
-            return new GetRequest(service, domainName);
+            return new GetRequest(this.service, domainName);
         }
 
         /// <summary>Look up RDAP information for a domain by name.</summary>
@@ -413,7 +408,7 @@ namespace Google.Apis.DomainsRDAP.v1
         /// <param name="entityId"><c>null</c></param>
         public virtual GetRequest Get(string entityId)
         {
-            return new GetRequest(service, entityId);
+            return new GetRequest(this.service, entityId);
         }
 
         /// <summary>
@@ -479,7 +474,7 @@ namespace Google.Apis.DomainsRDAP.v1
         /// <param name="ipId1"><c>null</c></param>
         public virtual GetRequest Get(string ipId, string ipId1)
         {
-            return new GetRequest(service, ipId, ipId1);
+            return new GetRequest(this.service, ipId, ipId1);
         }
 
         /// <summary>
@@ -556,7 +551,7 @@ namespace Google.Apis.DomainsRDAP.v1
         /// <param name="nameserverId"><c>null</c></param>
         public virtual GetRequest Get(string nameserverId)
         {
-            return new GetRequest(service, nameserverId);
+            return new GetRequest(this.service, nameserverId);
         }
 
         /// <summary>
@@ -620,7 +615,7 @@ namespace Google.Apis.DomainsRDAP.v1
         /// </summary>
         public virtual GetDomainsRequest GetDomains()
         {
-            return new GetDomainsRequest(service);
+            return new GetDomainsRequest(this.service);
         }
 
         /// <summary>
@@ -657,7 +652,7 @@ namespace Google.Apis.DomainsRDAP.v1
         /// </summary>
         public virtual GetEntitiesRequest GetEntities()
         {
-            return new GetEntitiesRequest(service);
+            return new GetEntitiesRequest(this.service);
         }
 
         /// <summary>
@@ -691,7 +686,7 @@ namespace Google.Apis.DomainsRDAP.v1
         /// <summary>Get help information for the RDAP API, including links to documentation.</summary>
         public virtual GetHelpRequest GetHelp()
         {
-            return new GetHelpRequest(service);
+            return new GetHelpRequest(this.service);
         }
 
         /// <summary>Get help information for the RDAP API, including links to documentation.</summary>
@@ -725,7 +720,7 @@ namespace Google.Apis.DomainsRDAP.v1
         /// </summary>
         public virtual GetIpRequest GetIp()
         {
-            return new GetIpRequest(service);
+            return new GetIpRequest(this.service);
         }
 
         /// <summary>
@@ -762,7 +757,7 @@ namespace Google.Apis.DomainsRDAP.v1
         /// </summary>
         public virtual GetNameserversRequest GetNameservers()
         {
-            return new GetNameserversRequest(service);
+            return new GetNameserversRequest(this.service);
         }
 
         /// <summary>

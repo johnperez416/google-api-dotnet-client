@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,7 +35,8 @@ namespace Google.Apis.MyBusinessVerifications.v1
         public MyBusinessVerificationsService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Locations = new LocationsResource(this);
-            VerificationTokens = new VerificationTokensResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://mybusinessverifications.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://mybusinessverifications.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,29 +46,19 @@ namespace Google.Apis.MyBusinessVerifications.v1
         public override string Name => "mybusinessverifications";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://mybusinessverifications.googleapis.com/";
-        #else
-            "https://mybusinessverifications.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://mybusinessverifications.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Gets the Locations resource.</summary>
         public virtual LocationsResource Locations { get; }
-
-        /// <summary>Gets the VerificationTokens resource.</summary>
-        public virtual VerificationTokensResource VerificationTokens { get; }
     }
 
     /// <summary>A base abstract class for MyBusinessVerifications requests.</summary>
@@ -291,7 +282,7 @@ namespace Google.Apis.MyBusinessVerifications.v1
             /// <param name="name">Required. Resource name of the verification to complete.</param>
             public virtual CompleteRequest Complete(Google.Apis.MyBusinessVerifications.v1.Data.CompleteVerificationRequest body, string name)
             {
-                return new CompleteRequest(service, body, name);
+                return new CompleteRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -348,7 +339,7 @@ namespace Google.Apis.MyBusinessVerifications.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>List verifications of a location, ordered by create time.</summary>
@@ -422,7 +413,7 @@ namespace Google.Apis.MyBusinessVerifications.v1
         /// <param name="location">Required. The location to verify.</param>
         public virtual FetchVerificationOptionsRequest FetchVerificationOptions(Google.Apis.MyBusinessVerifications.v1.Data.FetchVerificationOptionsRequest body, string location)
         {
-            return new FetchVerificationOptionsRequest(service, body, location);
+            return new FetchVerificationOptionsRequest(this.service, body, location);
         }
 
         /// <summary>Reports all eligible verification options for a location in a specific language.</summary>
@@ -474,7 +465,7 @@ namespace Google.Apis.MyBusinessVerifications.v1
         /// <param name="name">Required. Resource name of the location.</param>
         public virtual GetVoiceOfMerchantStateRequest GetVoiceOfMerchantState(string name)
         {
-            return new GetVoiceOfMerchantStateRequest(service, name);
+            return new GetVoiceOfMerchantStateRequest(this.service, name);
         }
 
         /// <summary>Gets the VoiceOfMerchant state.</summary>
@@ -520,7 +511,7 @@ namespace Google.Apis.MyBusinessVerifications.v1
         /// <param name="name">Required. Resource name of the location to verify.</param>
         public virtual VerifyRequest Verify(Google.Apis.MyBusinessVerifications.v1.Data.VerifyLocationRequest body, string name)
         {
-            return new VerifyRequest(service, body, name);
+            return new VerifyRequest(this.service, body, name);
         }
 
         /// <summary>Starts the verification process for a location.</summary>
@@ -565,68 +556,6 @@ namespace Google.Apis.MyBusinessVerifications.v1
                     DefaultValue = null,
                     Pattern = @"^locations/[^/]+$",
                 });
-            }
-        }
-    }
-
-    /// <summary>The "verificationTokens" collection of methods.</summary>
-    public class VerificationTokensResource
-    {
-        private const string Resource = "verificationTokens";
-
-        /// <summary>The service which this resource belongs to.</summary>
-        private readonly Google.Apis.Services.IClientService service;
-
-        /// <summary>Constructs a new resource.</summary>
-        public VerificationTokensResource(Google.Apis.Services.IClientService service)
-        {
-            this.service = service;
-        }
-
-        /// <summary>
-        /// Generates a token for the provided location data as a vetted
-        /// [partner](https://support.google.com/business/answer/7674102). Throws PERMISSION_DENIED if the caller is not
-        /// a vetted partner account. Throws FAILED_PRECONDITION if the caller's VettedStatus is INVALID.
-        /// </summary>
-        /// <param name="body">The body of the request.</param>
-        public virtual GenerateRequest Generate(Google.Apis.MyBusinessVerifications.v1.Data.GenerateVerificationTokenRequest body)
-        {
-            return new GenerateRequest(service, body);
-        }
-
-        /// <summary>
-        /// Generates a token for the provided location data as a vetted
-        /// [partner](https://support.google.com/business/answer/7674102). Throws PERMISSION_DENIED if the caller is not
-        /// a vetted partner account. Throws FAILED_PRECONDITION if the caller's VettedStatus is INVALID.
-        /// </summary>
-        public class GenerateRequest : MyBusinessVerificationsBaseServiceRequest<Google.Apis.MyBusinessVerifications.v1.Data.GenerateVerificationTokenResponse>
-        {
-            /// <summary>Constructs a new Generate request.</summary>
-            public GenerateRequest(Google.Apis.Services.IClientService service, Google.Apis.MyBusinessVerifications.v1.Data.GenerateVerificationTokenRequest body) : base(service)
-            {
-                Body = body;
-                InitParameters();
-            }
-
-            /// <summary>Gets or sets the body of this request.</summary>
-            Google.Apis.MyBusinessVerifications.v1.Data.GenerateVerificationTokenRequest Body { get; set; }
-
-            /// <summary>Returns the body of the request.</summary>
-            protected override object GetBody() => Body;
-
-            /// <summary>Gets the method name.</summary>
-            public override string MethodName => "generate";
-
-            /// <summary>Gets the HTTP method.</summary>
-            public override string HttpMethod => "POST";
-
-            /// <summary>Gets the REST path.</summary>
-            public override string RestPath => "v1/verificationTokens:generate";
-
-            /// <summary>Initializes Generate parameter list.</summary>
-            protected override void InitParameters()
-            {
-                base.InitParameters();
             }
         }
     }
@@ -676,11 +605,14 @@ namespace Google.Apis.MyBusinessVerifications.v1.Data
 
     /// <summary>
     /// Indicates that the location fails to comply with our
-    /// [guidelines](https://support.google.com/business/answer/3038177). To fix this issue, consult the [Help Center
-    /// Article](https://support.google.com/business/answer/4569145).
+    /// [guidelines](https://support.google.com/business/answer/3038177).
     /// </summary>
     public class ComplyWithGuidelines : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The reason why the location is being recommended to comply with guidelines.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("recommendationReason")]
+        public virtual string RecommendationReason { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -737,28 +669,6 @@ namespace Google.Apis.MyBusinessVerifications.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Request message for Verifications.GenerateVerificationToken.</summary>
-    public class GenerateVerificationTokenRequest : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>Required. The target location.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("location")]
-        public virtual Location Location { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>Response message for Verifications.GenerateVerificationToken.</summary>
-    public class GenerateVerificationTokenResponse : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>The generated token to verify the location.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("token")]
-        public virtual VerificationToken Token { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
     /// <summary>Response message for Verifications.ListVerifications.</summary>
     public class ListVerificationsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -779,80 +689,29 @@ namespace Google.Apis.MyBusinessVerifications.v1.Data
     }
 
     /// <summary>
-    /// A subset of location info. See the [help center article] (https://support.google.com/business/answer/3038177)
-    /// for a detailed description of these fields, or the [category
-    /// endpoint](/my-business/reference/rest/v4/categories) for a list of valid business categories.
-    /// </summary>
-    public class Location : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>
-        /// Required. A precise, accurate address to describe your business location. PO boxes or mailboxes located at
-        /// remote locations are not acceptable. At this time, you can specify a maximum of five `address_lines` values
-        /// in the address.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("address")]
-        public virtual PostalAddress Address { get; set; }
-
-        /// <summary>
-        /// Required. Location name should reflect your business's real-world name, as used consistently on your
-        /// storefront, website, and stationery, and as known to customers. Any additional information, when relevant,
-        /// can be included in other fields of the resource (for example, `Address`, `Categories`). Don't add
-        /// unnecessary information to your name (for example, prefer "Google" over "Google Inc. - Mountain View
-        /// Corporate Headquarters"). Don't include marketing taglines, store codes, special characters, hours or
-        /// closed/open status, phone numbers, website URLs, service/product information, location/address or
-        /// directions, or containment information (for example, "Chase ATM in Duane Reade").
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("name")]
-        public virtual string Name { get; set; }
-
-        /// <summary>
-        /// Required. Id of the category that best describes the core business this location engages in.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("primaryCategoryId")]
-        public virtual string PrimaryCategoryId { get; set; }
-
-        /// <summary>
-        /// Optional. A phone number that connects to your individual business location as directly as possible. Use a
-        /// local phone number instead of a central, call center helpline number whenever possible.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("primaryPhone")]
-        public virtual string PrimaryPhone { get; set; }
-
-        /// <summary>
-        /// Optional. A URL for this business. If possible, use a URL that represents this individual business location
-        /// instead of a generic website/URL that represents all locations, or the brand.
-        /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("websiteUri")]
-        public virtual string WebsiteUri { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>
-    /// Represents a postal address, e.g. for postal delivery or payments addresses. Given a postal address, a postal
-    /// service can deliver items to a premise, P.O. Box or similar. It is not intended to model geographical locations
-    /// (roads, towns, mountains). In typical usage an address would be created via user input or from importing
-    /// existing data, depending on the type of process. Advice on address input / editing: - Use an i18n-ready address
-    /// widget such as https://github.com/google/libaddressinput) - Users should not be presented with UI elements for
-    /// input or editing of fields outside countries where that field is used. For more guidance on how to use this
-    /// schema, please see: https://support.google.com/business/answer/6397478
+    /// Represents a postal address. For example for postal delivery or payments addresses. Given a postal address, a
+    /// postal service can deliver items to a premise, P.O. Box or similar. It is not intended to model geographical
+    /// locations (roads, towns, mountains). In typical usage an address would be created by user input or from
+    /// importing existing data, depending on the type of process. Advice on address input / editing: - Use an
+    /// internationalization-ready address widget such as https://github.com/google/libaddressinput) - Users should not
+    /// be presented with UI elements for input or editing of fields outside countries where that field is used. For
+    /// more guidance on how to use this schema, see: https://support.google.com/business/answer/6397478
     /// </summary>
     public class PostalAddress : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// Unstructured address lines describing the lower levels of an address. Because values in address_lines do not
-        /// have type information and may sometimes contain multiple values in a single field (e.g. "Austin, TX"), it is
-        /// important that the line order is clear. The order of address lines should be "envelope order" for the
-        /// country/region of the address. In places where this can vary (e.g. Japan), address_language is used to make
-        /// it explicit (e.g. "ja" for large-to-small ordering and "ja-Latn" or "en" for small-to-large). This way, the
-        /// most specific line of an address can be selected based on the language. The minimum permitted structural
-        /// representation of an address consists of a region_code with all remaining information placed in the
-        /// address_lines. It would be possible to format such an address very approximately without geocoding, but no
-        /// semantic reasoning could be made about any of the address components until it was at least partially
-        /// resolved. Creating an address only containing a region_code and address_lines, and then geocoding is the
-        /// recommended way to handle completely unstructured addresses (as opposed to guessing which parts of the
-        /// address should be localities or administrative areas).
+        /// have type information and may sometimes contain multiple values in a single field (For example "Austin,
+        /// TX"), it is important that the line order is clear. The order of address lines should be "envelope order"
+        /// for the country/region of the address. In places where this can vary (For example Japan), address_language
+        /// is used to make it explicit (For example "ja" for large-to-small ordering and "ja-Latn" or "en" for
+        /// small-to-large). This way, the most specific line of an address can be selected based on the language. The
+        /// minimum permitted structural representation of an address consists of a region_code with all remaining
+        /// information placed in the address_lines. It would be possible to format such an address very approximately
+        /// without geocoding, but no semantic reasoning could be made about any of the address components until it was
+        /// at least partially resolved. Creating an address only containing a region_code and address_lines, and then
+        /// geocoding is the recommended way to handle completely unstructured addresses (as opposed to guessing which
+        /// parts of the address should be localities or administrative areas).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("addressLines")]
         public virtual System.Collections.Generic.IList<string> AddressLines { get; set; }
@@ -860,8 +719,9 @@ namespace Google.Apis.MyBusinessVerifications.v1.Data
         /// <summary>
         /// Optional. Highest administrative subdivision which is used for postal addresses of a country or region. For
         /// example, this can be a state, a province, an oblast, or a prefecture. Specifically, for Spain this is the
-        /// province and not the autonomous community (e.g. "Barcelona" and not "Catalonia"). Many countries don't use
-        /// an administrative area in postal addresses. E.g. in Switzerland this should be left unpopulated.
+        /// province and not the autonomous community (For example "Barcelona" and not "Catalonia"). Many countries
+        /// don't use an administrative area in postal addresses. For example in Switzerland this should be left
+        /// unpopulated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("administrativeArea")]
         public virtual string AdministrativeArea { get; set; }
@@ -891,7 +751,7 @@ namespace Google.Apis.MyBusinessVerifications.v1.Data
 
         /// <summary>
         /// Optional. Postal code of the address. Not all countries use or require postal codes to be present, but where
-        /// they are used, they may trigger additional validation with other parts of the address (e.g. state/zip
+        /// they are used, they may trigger additional validation with other parts of the address (For example state/zip
         /// validation in the U.S.A.).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("postalCode")]
@@ -906,9 +766,9 @@ namespace Google.Apis.MyBusinessVerifications.v1.Data
 
         /// <summary>
         /// Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the
-        /// user to ensure the value is correct. See http://cldr.unicode.org/ and
-        /// http://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for
-        /// Switzerland.
+        /// user to ensure the value is correct. See https://cldr.unicode.org/ and
+        /// https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH"
+        /// for Switzerland.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("regionCode")]
         public virtual string RegionCode { get; set; }
@@ -922,9 +782,9 @@ namespace Google.Apis.MyBusinessVerifications.v1.Data
 
         /// <summary>
         /// Optional. Additional, country-specific, sorting code. This is not used in most regions. Where it is used,
-        /// the value is either a string like "CEDEX", optionally followed by a number (e.g. "CEDEX 7"), or just a
-        /// number alone, representing the "sector code" (Jamaica), "delivery area indicator" (Malawi) or "post office
-        /// indicator" (e.g. Côte d'Ivoire).
+        /// the value is either a string like "CEDEX", optionally followed by a number (For example "CEDEX 7"), or just
+        /// a number alone, representing the "sector code" (Jamaica), "delivery area indicator" (Malawi) or "post office
+        /// indicator" (For example Côte d'Ivoire).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sortingCode")]
         public virtual string SortingCode { get; set; }
@@ -963,9 +823,46 @@ namespace Google.Apis.MyBusinessVerifications.v1.Data
     /// <summary>A verification represents a verification attempt on a location.</summary>
     public class Verification : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Optional. Response announcement set only if the method is VETTED_PARTNER.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("announcement")]
+        public virtual string Announcement { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The timestamp when the verification is requested.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The method of the verification.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("method")]
@@ -992,6 +889,10 @@ namespace Google.Apis.MyBusinessVerifications.v1.Data
         /// <summary>Set only if the method is MAIL.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("addressData")]
         public virtual AddressVerificationData AddressData { get; set; }
+
+        /// <summary>Set only if the method is VETTED_PARTNER.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("announcement")]
+        public virtual string Announcement { get; set; }
 
         /// <summary>Set only if the method is EMAIL.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("emailData")]

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,10 @@ namespace Google.Apis.CloudKMS.v1
         /// <param name="initializer">The service initializer.</param>
         public CloudKMSService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
+            Folders = new FoldersResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudkms.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudkms.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +47,16 @@ namespace Google.Apis.CloudKMS.v1
         public override string Name => "cloudkms";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudkms.googleapis.com/";
-        #else
-            "https://cloudkms.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudkms.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Key Management Service (KMS) API.</summary>
         public class Scope
@@ -89,6 +85,9 @@ namespace Google.Apis.CloudKMS.v1
             /// <summary>View and manage your keys and secrets stored in Cloud Key Management Service</summary>
             public const string Cloudkms = "https://www.googleapis.com/auth/cloudkms";
         }
+
+        /// <summary>Gets the Folders resource.</summary>
+        public virtual FoldersResource Folders { get; }
 
         /// <summary>Gets the Projects resource.</summary>
         public virtual ProjectsResource Projects { get; }
@@ -275,6 +274,149 @@ namespace Google.Apis.CloudKMS.v1
         }
     }
 
+    /// <summary>The "folders" collection of methods.</summary>
+    public class FoldersResource
+    {
+        private const string Resource = "folders";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public FoldersResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>Returns the AutokeyConfig for a folder.</summary>
+        /// <param name="name">
+        /// Required. Name of the AutokeyConfig resource, e.g. `folders/{FOLDER_NUMBER}/autokeyConfig`.
+        /// </param>
+        public virtual GetAutokeyConfigRequest GetAutokeyConfig(string name)
+        {
+            return new GetAutokeyConfigRequest(this.service, name);
+        }
+
+        /// <summary>Returns the AutokeyConfig for a folder.</summary>
+        public class GetAutokeyConfigRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.AutokeyConfig>
+        {
+            /// <summary>Constructs a new GetAutokeyConfig request.</summary>
+            public GetAutokeyConfigRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. Name of the AutokeyConfig resource, e.g. `folders/{FOLDER_NUMBER}/autokeyConfig`.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getAutokeyConfig";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes GetAutokeyConfig parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^folders/[^/]+/autokeyConfig$",
+                });
+            }
+        }
+
+        /// <summary>
+        /// Updates the AutokeyConfig for a folder. The caller must have both `cloudkms.autokeyConfigs.update`
+        /// permission on the parent folder and `cloudkms.cryptoKeys.setIamPolicy` permission on the provided key
+        /// project. A KeyHandle creation in the folder's descendant projects will use this configuration to determine
+        /// where to create the resulting CryptoKey.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="name">
+        /// Identifier. Name of the AutokeyConfig resource, e.g. `folders/{FOLDER_NUMBER}/autokeyConfig`.
+        /// </param>
+        public virtual UpdateAutokeyConfigRequest UpdateAutokeyConfig(Google.Apis.CloudKMS.v1.Data.AutokeyConfig body, string name)
+        {
+            return new UpdateAutokeyConfigRequest(this.service, body, name);
+        }
+
+        /// <summary>
+        /// Updates the AutokeyConfig for a folder. The caller must have both `cloudkms.autokeyConfigs.update`
+        /// permission on the parent folder and `cloudkms.cryptoKeys.setIamPolicy` permission on the provided key
+        /// project. A KeyHandle creation in the folder's descendant projects will use this configuration to determine
+        /// where to create the resulting CryptoKey.
+        /// </summary>
+        public class UpdateAutokeyConfigRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.AutokeyConfig>
+        {
+            /// <summary>Constructs a new UpdateAutokeyConfig request.</summary>
+            public UpdateAutokeyConfigRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudKMS.v1.Data.AutokeyConfig body, string name) : base(service)
+            {
+                Name = name;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Identifier. Name of the AutokeyConfig resource, e.g. `folders/{FOLDER_NUMBER}/autokeyConfig`.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Required. Masks which fields of the AutokeyConfig to update, e.g. `keyProject`.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual object UpdateMask { get; set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.CloudKMS.v1.Data.AutokeyConfig Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "updateAutokeyConfig";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "PATCH";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes UpdateAutokeyConfig parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^folders/[^/]+/autokeyConfig$",
+                });
+                RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "updateMask",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
     /// <summary>The "projects" collection of methods.</summary>
     public class ProjectsResource
     {
@@ -305,8 +447,247 @@ namespace Google.Apis.CloudKMS.v1
             public LocationsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                EkmConfig = new EkmConfigResource(service);
                 EkmConnections = new EkmConnectionsResource(service);
+                KeyHandles = new KeyHandlesResource(service);
                 KeyRings = new KeyRingsResource(service);
+                Operations = new OperationsResource(service);
+            }
+
+            /// <summary>Gets the EkmConfig resource.</summary>
+            public virtual EkmConfigResource EkmConfig { get; }
+
+            /// <summary>The "ekmConfig" collection of methods.</summary>
+            public class EkmConfigResource
+            {
+                private const string Resource = "ekmConfig";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public EkmConfigResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Gets the access control policy for a resource. Returns an empty policy if the resource exists and
+                /// does not have a policy set.
+                /// </summary>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual GetIamPolicyRequest GetIamPolicy(string resource)
+                {
+                    return new GetIamPolicyRequest(this.service, resource);
+                }
+
+                /// <summary>
+                /// Gets the access control policy for a resource. Returns an empty policy if the resource exists and
+                /// does not have a policy set.
+                /// </summary>
+                public class GetIamPolicyRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.Policy>
+                {
+                    /// <summary>Constructs a new GetIamPolicy request.</summary>
+                    public GetIamPolicyRequest(Google.Apis.Services.IClientService service, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>
+                    /// Optional. The maximum policy version that will be used to format the policy. Valid values are 0,
+                    /// 1, and 3. Requests specifying an invalid value will be rejected. Requests for policies with any
+                    /// conditional role bindings must specify version 3. Policies with no conditional role bindings may
+                    /// specify any valid value or leave the field unset. The policy in the response might use the
+                    /// policy version that you specified, or it might use a lower policy version. For example, if you
+                    /// specify version 3, but the policy has no conditional role bindings, the response uses version 1.
+                    /// To learn which resources support conditions in their IAM policies, see the [IAM
+                    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("options.requestedPolicyVersion", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> OptionsRequestedPolicyVersion { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getIamPolicy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+resource}:getIamPolicy";
+
+                    /// <summary>Initializes GetIamPolicy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/ekmConfig$",
+                        });
+                        RequestParameters.Add("options.requestedPolicyVersion", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "options.requestedPolicyVersion",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Sets the access control policy on the specified resource. Replaces any existing policy. Can return
+                /// `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudKMS.v1.Data.SetIamPolicyRequest body, string resource)
+                {
+                    return new SetIamPolicyRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Sets the access control policy on the specified resource. Replaces any existing policy. Can return
+                /// `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors.
+                /// </summary>
+                public class SetIamPolicyRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.Policy>
+                {
+                    /// <summary>Constructs a new SetIamPolicy request.</summary>
+                    public SetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudKMS.v1.Data.SetIamPolicyRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudKMS.v1.Data.SetIamPolicyRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "setIamPolicy";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+resource}:setIamPolicy";
+
+                    /// <summary>Initializes SetIamPolicy parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/ekmConfig$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                /// this will return an empty set of permissions, not a `NOT_FOUND` error. Note: This operation is
+                /// designed to be used for building permission-aware UIs and command-line tools, not for authorization
+                /// checking. This operation may "fail open" without warning.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="resource">
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
+                /// </param>
+                public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudKMS.v1.Data.TestIamPermissionsRequest body, string resource)
+                {
+                    return new TestIamPermissionsRequest(this.service, body, resource);
+                }
+
+                /// <summary>
+                /// Returns permissions that a caller has on the specified resource. If the resource does not exist,
+                /// this will return an empty set of permissions, not a `NOT_FOUND` error. Note: This operation is
+                /// designed to be used for building permission-aware UIs and command-line tools, not for authorization
+                /// checking. This operation may "fail open" without warning.
+                /// </summary>
+                public class TestIamPermissionsRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.TestIamPermissionsResponse>
+                {
+                    /// <summary>Constructs a new TestIamPermissions request.</summary>
+                    public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudKMS.v1.Data.TestIamPermissionsRequest body, string resource) : base(service)
+                    {
+                        Resource = resource;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Resource { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudKMS.v1.Data.TestIamPermissionsRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "testIamPermissions";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+resource}:testIamPermissions";
+
+                    /// <summary>Initializes TestIamPermissions parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "resource",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/ekmConfig$",
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the EkmConnections resource.</summary>
@@ -326,17 +707,137 @@ namespace Google.Apis.CloudKMS.v1
                     this.service = service;
                 }
 
+                /// <summary>Creates a new EkmConnection in a given Project and Location.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The resource name of the location associated with the EkmConnection, in the format
+                /// `projects/*/locations/*`.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.CloudKMS.v1.Data.EkmConnection body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a new EkmConnection in a given Project and Location.</summary>
+                public class CreateRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.EkmConnection>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudKMS.v1.Data.EkmConnection body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the location associated with the EkmConnection, in the format
+                    /// `projects/*/locations/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. It must be unique within a location and match the regular expression
+                    /// `[a-zA-Z0-9_-]{1,63}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("ekmConnectionId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string EkmConnectionId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudKMS.v1.Data.EkmConnection Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/ekmConnections";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("ekmConnectionId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "ekmConnectionId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Returns metadata for a given EkmConnection.</summary>
+                /// <param name="name">Required. The name of the EkmConnection to get.</param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Returns metadata for a given EkmConnection.</summary>
+                public class GetRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.EkmConnection>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The name of the EkmConnection to get.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/ekmConnections/[^/]+$",
+                        });
+                    }
+                }
+
                 /// <summary>
                 /// Gets the access control policy for a resource. Returns an empty policy if the resource exists and
                 /// does not have a policy set.
                 /// </summary>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                 {
-                    return new GetIamPolicyRequest(service, resource);
+                    return new GetIamPolicyRequest(this.service, resource);
                 }
 
                 /// <summary>
@@ -353,8 +854,9 @@ namespace Google.Apis.CloudKMS.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -404,18 +906,205 @@ namespace Google.Apis.CloudKMS.v1
                     }
                 }
 
+                /// <summary>Lists EkmConnections.</summary>
+                /// <param name="parent">
+                /// Required. The resource name of the location associated with the EkmConnections to list, in the
+                /// format `projects/*/locations/*`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists EkmConnections.</summary>
+                public class ListRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.ListEkmConnectionsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the location associated with the EkmConnections to list, in the
+                    /// format `projects/*/locations/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Only include resources that match the filter in the response. For more information,
+                    /// see [Sorting and filtering list
+                    /// results](https://cloud.google.com/kms/docs/sorting-and-filtering).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. Specify how the results should be sorted. If not specified, the results will be sorted
+                    /// in the default order. For more information, see [Sorting and filtering list
+                    /// results](https://cloud.google.com/kms/docs/sorting-and-filtering).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// Optional. Optional limit on the number of EkmConnections to include in the response. Further
+                    /// EkmConnections can subsequently be obtained by including the
+                    /// ListEkmConnectionsResponse.next_page_token in a subsequent request. If unspecified, the server
+                    /// will pick an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. Optional pagination token, returned earlier via
+                    /// ListEkmConnectionsResponse.next_page_token.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/ekmConnections";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates an EkmConnection's metadata.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Output only. The resource name for the EkmConnection in the format
+                /// `projects/*/locations/*/ekmConnections/*`.
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.CloudKMS.v1.Data.EkmConnection body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates an EkmConnection's metadata.</summary>
+                public class PatchRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.EkmConnection>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudKMS.v1.Data.EkmConnection body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Output only. The resource name for the EkmConnection in the format
+                    /// `projects/*/locations/*/ekmConnections/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Required. List of fields to be updated in this request.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudKMS.v1.Data.EkmConnection Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/ekmConnections/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
                 /// <summary>
                 /// Sets the access control policy on the specified resource. Replaces any existing policy. Can return
                 /// `NOT_FOUND`, `INVALID_ARGUMENT`, and `PERMISSION_DENIED` errors.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudKMS.v1.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -433,8 +1122,9 @@ namespace Google.Apis.CloudKMS.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -477,12 +1167,13 @@ namespace Google.Apis.CloudKMS.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudKMS.v1.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -502,8 +1193,9 @@ namespace Google.Apis.CloudKMS.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -534,6 +1226,310 @@ namespace Google.Apis.CloudKMS.v1
                             ParameterType = "path",
                             DefaultValue = null,
                             Pattern = @"^projects/[^/]+/locations/[^/]+/ekmConnections/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Verifies that Cloud KMS can successfully connect to the external key manager specified by an
+                /// EkmConnection. If there is an error connecting to the EKM, this method returns a FAILED_PRECONDITION
+                /// status containing structured information as described at
+                /// https://cloud.google.com/kms/docs/reference/ekm_errors.
+                /// </summary>
+                /// <param name="name">Required. The name of the EkmConnection to verify.</param>
+                public virtual VerifyConnectivityRequest VerifyConnectivity(string name)
+                {
+                    return new VerifyConnectivityRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Verifies that Cloud KMS can successfully connect to the external key manager specified by an
+                /// EkmConnection. If there is an error connecting to the EKM, this method returns a FAILED_PRECONDITION
+                /// status containing structured information as described at
+                /// https://cloud.google.com/kms/docs/reference/ekm_errors.
+                /// </summary>
+                public class VerifyConnectivityRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.VerifyConnectivityResponse>
+                {
+                    /// <summary>Constructs a new VerifyConnectivity request.</summary>
+                    public VerifyConnectivityRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The name of the EkmConnection to verify.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "verifyConnectivity";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}:verifyConnectivity";
+
+                    /// <summary>Initializes VerifyConnectivity parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/ekmConnections/[^/]+$",
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the KeyHandles resource.</summary>
+            public virtual KeyHandlesResource KeyHandles { get; }
+
+            /// <summary>The "keyHandles" collection of methods.</summary>
+            public class KeyHandlesResource
+            {
+                private const string Resource = "keyHandles";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public KeyHandlesResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Creates a new KeyHandle, triggering the provisioning of a new CryptoKey for CMEK use with the given
+                /// resource type in the configured key project and the same location. GetOperation should be used to
+                /// resolve the resulting long-running operation and get the resulting KeyHandle and CryptoKey.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. Name of the resource project and location to create the KeyHandle in, e.g.
+                /// `projects/{PROJECT_ID}/locations/{LOCATION}`.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.CloudKMS.v1.Data.KeyHandle body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Creates a new KeyHandle, triggering the provisioning of a new CryptoKey for CMEK use with the given
+                /// resource type in the configured key project and the same location. GetOperation should be used to
+                /// resolve the resulting long-running operation and get the resulting KeyHandle and CryptoKey.
+                /// </summary>
+                public class CreateRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudKMS.v1.Data.KeyHandle body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the resource project and location to create the KeyHandle in, e.g.
+                    /// `projects/{PROJECT_ID}/locations/{LOCATION}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Id of the KeyHandle. Must be unique to the resource project and location. If not
+                    /// provided by the caller, a new UUID is used.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("keyHandleId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string KeyHandleId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudKMS.v1.Data.KeyHandle Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/keyHandles";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("keyHandleId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "keyHandleId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Returns the KeyHandle.</summary>
+                /// <param name="name">
+                /// Required. Name of the KeyHandle resource, e.g.
+                /// `projects/{PROJECT_ID}/locations/{LOCATION}/keyHandles/{KEY_HANDLE_ID}`.
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Returns the KeyHandle.</summary>
+                public class GetRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.KeyHandle>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the KeyHandle resource, e.g.
+                    /// `projects/{PROJECT_ID}/locations/{LOCATION}/keyHandles/{KEY_HANDLE_ID}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/keyHandles/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists KeyHandles.</summary>
+                /// <param name="parent">
+                /// Required. Name of the resource project and location from which to list KeyHandles, e.g.
+                /// `projects/{PROJECT_ID}/locations/{LOCATION}`.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists KeyHandles.</summary>
+                public class ListRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.ListKeyHandlesResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the resource project and location from which to list KeyHandles, e.g.
+                    /// `projects/{PROJECT_ID}/locations/{LOCATION}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Filter to apply when listing KeyHandles, e.g.
+                    /// `resource_type_selector="{SERVICE}.googleapis.com/{TYPE}"`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Optional. Optional limit on the number of KeyHandles to include in the response. The service may
+                    /// return fewer than this value. Further KeyHandles can subsequently be obtained by including the
+                    /// ListKeyHandlesResponse.next_page_token in a subsequent request. If unspecified, at most 100
+                    /// KeyHandles will be returned.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. Optional pagination token, returned earlier via
+                    /// ListKeyHandlesResponse.next_page_token.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/keyHandles";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
                         });
                     }
                 }
@@ -603,7 +1599,7 @@ namespace Google.Apis.CloudKMS.v1
                         /// </param>
                         public virtual AsymmetricDecryptRequest AsymmetricDecrypt(Google.Apis.CloudKMS.v1.Data.AsymmetricDecryptRequest body, string name)
                         {
-                            return new AsymmetricDecryptRequest(service, body, name);
+                            return new AsymmetricDecryptRequest(this.service, body, name);
                         }
 
                         /// <summary>
@@ -666,7 +1662,7 @@ namespace Google.Apis.CloudKMS.v1
                         /// </param>
                         public virtual AsymmetricSignRequest AsymmetricSign(Google.Apis.CloudKMS.v1.Data.AsymmetricSignRequest body, string name)
                         {
-                            return new AsymmetricSignRequest(service, body, name);
+                            return new AsymmetricSignRequest(this.service, body, name);
                         }
 
                         /// <summary>
@@ -729,7 +1725,7 @@ namespace Google.Apis.CloudKMS.v1
                         /// </param>
                         public virtual CreateRequest Create(Google.Apis.CloudKMS.v1.Data.CryptoKeyVersion body, string parent)
                         {
-                            return new CreateRequest(service, body, parent);
+                            return new CreateRequest(this.service, body, parent);
                         }
 
                         /// <summary>
@@ -793,7 +1789,7 @@ namespace Google.Apis.CloudKMS.v1
                         /// <param name="name">Required. The resource name of the CryptoKeyVersion to destroy.</param>
                         public virtual DestroyRequest Destroy(Google.Apis.CloudKMS.v1.Data.DestroyCryptoKeyVersionRequest body, string name)
                         {
-                            return new DestroyRequest(service, body, name);
+                            return new DestroyRequest(this.service, body, name);
                         }
 
                         /// <summary>
@@ -851,7 +1847,7 @@ namespace Google.Apis.CloudKMS.v1
                         /// <param name="name">Required. The name of the CryptoKeyVersion to get.</param>
                         public virtual GetRequest Get(string name)
                         {
-                            return new GetRequest(service, name);
+                            return new GetRequest(this.service, name);
                         }
 
                         /// <summary>Returns metadata for a given CryptoKeyVersion.</summary>
@@ -899,7 +1895,7 @@ namespace Google.Apis.CloudKMS.v1
                         /// <param name="name">Required. The name of the CryptoKeyVersion public key to get.</param>
                         public virtual GetPublicKeyRequest GetPublicKey(string name)
                         {
-                            return new GetPublicKeyRequest(service, name);
+                            return new GetPublicKeyRequest(this.service, name);
                         }
 
                         /// <summary>
@@ -956,7 +1952,7 @@ namespace Google.Apis.CloudKMS.v1
                         /// </param>
                         public virtual ImportRequest Import(Google.Apis.CloudKMS.v1.Data.ImportCryptoKeyVersionRequest body, string parent)
                         {
-                            return new ImportRequest(service, body, parent);
+                            return new ImportRequest(this.service, body, parent);
                         }
 
                         /// <summary>
@@ -1019,7 +2015,7 @@ namespace Google.Apis.CloudKMS.v1
                         /// </param>
                         public virtual ListRequest List(string parent)
                         {
-                            return new ListRequest(service, parent);
+                            return new ListRequest(this.service, parent);
                         }
 
                         /// <summary>Lists CryptoKeyVersions.</summary>
@@ -1165,7 +2161,7 @@ namespace Google.Apis.CloudKMS.v1
                         /// </param>
                         public virtual MacSignRequest MacSign(Google.Apis.CloudKMS.v1.Data.MacSignRequest body, string name)
                         {
-                            return new MacSignRequest(service, body, name);
+                            return new MacSignRequest(this.service, body, name);
                         }
 
                         /// <summary>
@@ -1228,7 +2224,7 @@ namespace Google.Apis.CloudKMS.v1
                         /// </param>
                         public virtual MacVerifyRequest MacVerify(Google.Apis.CloudKMS.v1.Data.MacVerifyRequest body, string name)
                         {
-                            return new MacVerifyRequest(service, body, name);
+                            return new MacVerifyRequest(this.service, body, name);
                         }
 
                         /// <summary>
@@ -1293,7 +2289,7 @@ namespace Google.Apis.CloudKMS.v1
                         /// </param>
                         public virtual PatchRequest Patch(Google.Apis.CloudKMS.v1.Data.CryptoKeyVersion body, string name)
                         {
-                            return new PatchRequest(service, body, name);
+                            return new PatchRequest(this.service, body, name);
                         }
 
                         /// <summary>
@@ -1361,6 +2357,134 @@ namespace Google.Apis.CloudKMS.v1
                         }
 
                         /// <summary>
+                        /// Decrypts data that was originally encrypted using a raw cryptographic mechanism. The
+                        /// CryptoKey.purpose must be RAW_ENCRYPT_DECRYPT.
+                        /// </summary>
+                        /// <param name="body">The body of the request.</param>
+                        /// <param name="name">
+                        /// Required. The resource name of the CryptoKeyVersion to use for decryption.
+                        /// </param>
+                        public virtual RawDecryptRequest RawDecrypt(Google.Apis.CloudKMS.v1.Data.RawDecryptRequest body, string name)
+                        {
+                            return new RawDecryptRequest(this.service, body, name);
+                        }
+
+                        /// <summary>
+                        /// Decrypts data that was originally encrypted using a raw cryptographic mechanism. The
+                        /// CryptoKey.purpose must be RAW_ENCRYPT_DECRYPT.
+                        /// </summary>
+                        public class RawDecryptRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.RawDecryptResponse>
+                        {
+                            /// <summary>Constructs a new RawDecrypt request.</summary>
+                            public RawDecryptRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudKMS.v1.Data.RawDecryptRequest body, string name) : base(service)
+                            {
+                                Name = name;
+                                Body = body;
+                                InitParameters();
+                            }
+
+                            /// <summary>
+                            /// Required. The resource name of the CryptoKeyVersion to use for decryption.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                            public virtual string Name { get; private set; }
+
+                            /// <summary>Gets or sets the body of this request.</summary>
+                            Google.Apis.CloudKMS.v1.Data.RawDecryptRequest Body { get; set; }
+
+                            /// <summary>Returns the body of the request.</summary>
+                            protected override object GetBody() => Body;
+
+                            /// <summary>Gets the method name.</summary>
+                            public override string MethodName => "rawDecrypt";
+
+                            /// <summary>Gets the HTTP method.</summary>
+                            public override string HttpMethod => "POST";
+
+                            /// <summary>Gets the REST path.</summary>
+                            public override string RestPath => "v1/{+name}:rawDecrypt";
+
+                            /// <summary>Initializes RawDecrypt parameter list.</summary>
+                            protected override void InitParameters()
+                            {
+                                base.InitParameters();
+                                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "name",
+                                    IsRequired = true,
+                                    ParameterType = "path",
+                                    DefaultValue = null,
+                                    Pattern = @"^projects/[^/]+/locations/[^/]+/keyRings/[^/]+/cryptoKeys/[^/]+/cryptoKeyVersions/[^/]+$",
+                                });
+                            }
+                        }
+
+                        /// <summary>
+                        /// Encrypts data using portable cryptographic primitives. Most users should choose Encrypt and
+                        /// Decrypt rather than their raw counterparts. The CryptoKey.purpose must be
+                        /// RAW_ENCRYPT_DECRYPT.
+                        /// </summary>
+                        /// <param name="body">The body of the request.</param>
+                        /// <param name="name">
+                        /// Required. The resource name of the CryptoKeyVersion to use for encryption.
+                        /// </param>
+                        public virtual RawEncryptRequest RawEncrypt(Google.Apis.CloudKMS.v1.Data.RawEncryptRequest body, string name)
+                        {
+                            return new RawEncryptRequest(this.service, body, name);
+                        }
+
+                        /// <summary>
+                        /// Encrypts data using portable cryptographic primitives. Most users should choose Encrypt and
+                        /// Decrypt rather than their raw counterparts. The CryptoKey.purpose must be
+                        /// RAW_ENCRYPT_DECRYPT.
+                        /// </summary>
+                        public class RawEncryptRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.RawEncryptResponse>
+                        {
+                            /// <summary>Constructs a new RawEncrypt request.</summary>
+                            public RawEncryptRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudKMS.v1.Data.RawEncryptRequest body, string name) : base(service)
+                            {
+                                Name = name;
+                                Body = body;
+                                InitParameters();
+                            }
+
+                            /// <summary>
+                            /// Required. The resource name of the CryptoKeyVersion to use for encryption.
+                            /// </summary>
+                            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                            public virtual string Name { get; private set; }
+
+                            /// <summary>Gets or sets the body of this request.</summary>
+                            Google.Apis.CloudKMS.v1.Data.RawEncryptRequest Body { get; set; }
+
+                            /// <summary>Returns the body of the request.</summary>
+                            protected override object GetBody() => Body;
+
+                            /// <summary>Gets the method name.</summary>
+                            public override string MethodName => "rawEncrypt";
+
+                            /// <summary>Gets the HTTP method.</summary>
+                            public override string HttpMethod => "POST";
+
+                            /// <summary>Gets the REST path.</summary>
+                            public override string RestPath => "v1/{+name}:rawEncrypt";
+
+                            /// <summary>Initializes RawEncrypt parameter list.</summary>
+                            protected override void InitParameters()
+                            {
+                                base.InitParameters();
+                                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                                {
+                                    Name = "name",
+                                    IsRequired = true,
+                                    ParameterType = "path",
+                                    DefaultValue = null,
+                                    Pattern = @"^projects/[^/]+/locations/[^/]+/keyRings/[^/]+/cryptoKeys/[^/]+/cryptoKeyVersions/[^/]+$",
+                                });
+                            }
+                        }
+
+                        /// <summary>
                         /// Restore a CryptoKeyVersion in the DESTROY_SCHEDULED state. Upon restoration of the
                         /// CryptoKeyVersion, state will be set to DISABLED, and destroy_time will be cleared.
                         /// </summary>
@@ -1368,7 +2492,7 @@ namespace Google.Apis.CloudKMS.v1
                         /// <param name="name">Required. The resource name of the CryptoKeyVersion to restore.</param>
                         public virtual RestoreRequest Restore(Google.Apis.CloudKMS.v1.Data.RestoreCryptoKeyVersionRequest body, string name)
                         {
-                            return new RestoreRequest(service, body, name);
+                            return new RestoreRequest(this.service, body, name);
                         }
 
                         /// <summary>
@@ -1428,7 +2552,7 @@ namespace Google.Apis.CloudKMS.v1
                     /// <param name="parent">Required. The name of the KeyRing associated with the CryptoKeys.</param>
                     public virtual CreateRequest Create(Google.Apis.CloudKMS.v1.Data.CryptoKey body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -1520,7 +2644,7 @@ namespace Google.Apis.CloudKMS.v1
                     /// </param>
                     public virtual DecryptRequest Decrypt(Google.Apis.CloudKMS.v1.Data.DecryptRequest body, string name)
                     {
-                        return new DecryptRequest(service, body, name);
+                        return new DecryptRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1584,7 +2708,7 @@ namespace Google.Apis.CloudKMS.v1
                     /// </param>
                     public virtual EncryptRequest Encrypt(Google.Apis.CloudKMS.v1.Data.EncryptRequest body, string name)
                     {
-                        return new EncryptRequest(service, body, name);
+                        return new EncryptRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1644,7 +2768,7 @@ namespace Google.Apis.CloudKMS.v1
                     /// <param name="name">Required. The name of the CryptoKey to get.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1692,12 +2816,13 @@ namespace Google.Apis.CloudKMS.v1
                     /// and does not have a policy set.
                     /// </summary>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                     {
-                        return new GetIamPolicyRequest(service, resource);
+                        return new GetIamPolicyRequest(this.service, resource);
                     }
 
                     /// <summary>
@@ -1714,8 +2839,9 @@ namespace Google.Apis.CloudKMS.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -1773,7 +2899,7 @@ namespace Google.Apis.CloudKMS.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists CryptoKeys.</summary>
@@ -1917,7 +3043,7 @@ namespace Google.Apis.CloudKMS.v1
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.CloudKMS.v1.Data.CryptoKey body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>Update a CryptoKey.</summary>
@@ -1986,12 +3112,13 @@ namespace Google.Apis.CloudKMS.v1
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudKMS.v1.Data.SetIamPolicyRequest body, string resource)
                     {
-                        return new SetIamPolicyRequest(service, body, resource);
+                        return new SetIamPolicyRequest(this.service, body, resource);
                     }
 
                     /// <summary>
@@ -2009,8 +3136,9 @@ namespace Google.Apis.CloudKMS.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being specified. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -2053,12 +3181,13 @@ namespace Google.Apis.CloudKMS.v1
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudKMS.v1.Data.TestIamPermissionsRequest body, string resource)
                     {
-                        return new TestIamPermissionsRequest(service, body, resource);
+                        return new TestIamPermissionsRequest(this.service, body, resource);
                     }
 
                     /// <summary>
@@ -2078,8 +3207,9 @@ namespace Google.Apis.CloudKMS.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -2122,7 +3252,7 @@ namespace Google.Apis.CloudKMS.v1
                     /// <param name="name">Required. The resource name of the CryptoKey to update.</param>
                     public virtual UpdatePrimaryVersionRequest UpdatePrimaryVersion(Google.Apis.CloudKMS.v1.Data.UpdateCryptoKeyPrimaryVersionRequest body, string name)
                     {
-                        return new UpdatePrimaryVersionRequest(service, body, name);
+                        return new UpdatePrimaryVersionRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -2196,7 +3326,7 @@ namespace Google.Apis.CloudKMS.v1
                     /// <param name="parent">Required. The name of the KeyRing associated with the ImportJobs.</param>
                     public virtual CreateRequest Create(Google.Apis.CloudKMS.v1.Data.ImportJob body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>Create a new ImportJob within a KeyRing. ImportJob.import_method is required.</summary>
@@ -2263,7 +3393,7 @@ namespace Google.Apis.CloudKMS.v1
                     /// <param name="name">Required. The name of the ImportJob to get.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Returns metadata for a given ImportJob.</summary>
@@ -2309,12 +3439,13 @@ namespace Google.Apis.CloudKMS.v1
                     /// and does not have a policy set.
                     /// </summary>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                     {
-                        return new GetIamPolicyRequest(service, resource);
+                        return new GetIamPolicyRequest(this.service, resource);
                     }
 
                     /// <summary>
@@ -2331,8 +3462,9 @@ namespace Google.Apis.CloudKMS.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -2390,7 +3522,7 @@ namespace Google.Apis.CloudKMS.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists ImportJobs.</summary>
@@ -2504,12 +3636,13 @@ namespace Google.Apis.CloudKMS.v1
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudKMS.v1.Data.SetIamPolicyRequest body, string resource)
                     {
-                        return new SetIamPolicyRequest(service, body, resource);
+                        return new SetIamPolicyRequest(this.service, body, resource);
                     }
 
                     /// <summary>
@@ -2527,8 +3660,9 @@ namespace Google.Apis.CloudKMS.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being specified. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -2571,12 +3705,13 @@ namespace Google.Apis.CloudKMS.v1
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudKMS.v1.Data.TestIamPermissionsRequest body, string resource)
                     {
-                        return new TestIamPermissionsRequest(service, body, resource);
+                        return new TestIamPermissionsRequest(this.service, body, resource);
                     }
 
                     /// <summary>
@@ -2596,8 +3731,9 @@ namespace Google.Apis.CloudKMS.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -2641,7 +3777,7 @@ namespace Google.Apis.CloudKMS.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CloudKMS.v1.Data.KeyRing body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Create a new KeyRing in a given Project and Location.</summary>
@@ -2711,7 +3847,7 @@ namespace Google.Apis.CloudKMS.v1
                 /// <param name="name">Required. The name of the KeyRing to get.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Returns metadata for a given KeyRing.</summary>
@@ -2757,12 +3893,13 @@ namespace Google.Apis.CloudKMS.v1
                 /// does not have a policy set.
                 /// </summary>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                 {
-                    return new GetIamPolicyRequest(service, resource);
+                    return new GetIamPolicyRequest(this.service, resource);
                 }
 
                 /// <summary>
@@ -2779,8 +3916,9 @@ namespace Google.Apis.CloudKMS.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -2837,7 +3975,7 @@ namespace Google.Apis.CloudKMS.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists KeyRings.</summary>
@@ -2949,12 +4087,13 @@ namespace Google.Apis.CloudKMS.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudKMS.v1.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -2972,8 +4111,9 @@ namespace Google.Apis.CloudKMS.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -3016,12 +4156,13 @@ namespace Google.Apis.CloudKMS.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudKMS.v1.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -3041,8 +4182,9 @@ namespace Google.Apis.CloudKMS.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -3078,6 +4220,75 @@ namespace Google.Apis.CloudKMS.v1
                 }
             }
 
+            /// <summary>Gets the Operations resource.</summary>
+            public virtual OperationsResource Operations { get; }
+
+            /// <summary>The "operations" collection of methods.</summary>
+            public class OperationsResource
+            {
+                private const string Resource = "operations";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public OperationsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
+                /// result at intervals as recommended by the API service.
+                /// </summary>
+                /// <param name="name">The name of the operation resource.</param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation
+                /// result at intervals as recommended by the API service.
+                /// </summary>
+                public class GetRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>The name of the operation resource.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/operations/[^/]+$",
+                        });
+                    }
+                }
+            }
+
             /// <summary>Generate random bytes using the Cloud KMS randomness source in the provided location.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="location">
@@ -3086,7 +4297,7 @@ namespace Google.Apis.CloudKMS.v1
             /// </param>
             public virtual GenerateRandomBytesRequest GenerateRandomBytes(Google.Apis.CloudKMS.v1.Data.GenerateRandomBytesRequest body, string location)
             {
-                return new GenerateRandomBytesRequest(service, body, location);
+                return new GenerateRandomBytesRequest(this.service, body, location);
             }
 
             /// <summary>Generate random bytes using the Cloud KMS randomness source in the provided location.</summary>
@@ -3141,7 +4352,7 @@ namespace Google.Apis.CloudKMS.v1
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -3182,11 +4393,56 @@ namespace Google.Apis.CloudKMS.v1
                 }
             }
 
+            /// <summary>Returns the EkmConfig singleton resource for a given project and location.</summary>
+            /// <param name="name">Required. The name of the EkmConfig to get.</param>
+            public virtual GetEkmConfigRequest GetEkmConfig(string name)
+            {
+                return new GetEkmConfigRequest(this.service, name);
+            }
+
+            /// <summary>Returns the EkmConfig singleton resource for a given project and location.</summary>
+            public class GetEkmConfigRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.EkmConfig>
+            {
+                /// <summary>Constructs a new GetEkmConfig request.</summary>
+                public GetEkmConfigRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>Required. The name of the EkmConfig to get.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "getEkmConfig";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes GetEkmConfig parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/locations/[^/]+/ekmConfig$",
+                    });
+                }
+            }
+
             /// <summary>Lists information about the supported locations for this service.</summary>
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -3205,7 +4461,7 @@ namespace Google.Apis.CloudKMS.v1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -3269,6 +4525,126 @@ namespace Google.Apis.CloudKMS.v1
                         Pattern = null,
                     });
                 }
+            }
+
+            /// <summary>Updates the EkmConfig singleton resource for a given project and location.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Output only. The resource name for the EkmConfig in the format `projects/*/locations/*/ekmConfig`.
+            /// </param>
+            public virtual UpdateEkmConfigRequest UpdateEkmConfig(Google.Apis.CloudKMS.v1.Data.EkmConfig body, string name)
+            {
+                return new UpdateEkmConfigRequest(this.service, body, name);
+            }
+
+            /// <summary>Updates the EkmConfig singleton resource for a given project and location.</summary>
+            public class UpdateEkmConfigRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.EkmConfig>
+            {
+                /// <summary>Constructs a new UpdateEkmConfig request.</summary>
+                public UpdateEkmConfigRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudKMS.v1.Data.EkmConfig body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Output only. The resource name for the EkmConfig in the format `projects/*/locations/*/ekmConfig`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Required. List of fields to be updated in this request.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual object UpdateMask { get; set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.CloudKMS.v1.Data.EkmConfig Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "updateEkmConfig";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "PATCH";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes UpdateEkmConfig parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/locations/[^/]+/ekmConfig$",
+                    });
+                    RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "updateMask",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+        }
+
+        /// <summary>Returns the effective Cloud KMS Autokey configuration for a given project.</summary>
+        /// <param name="parent">
+        /// Required. Name of the resource project to the show effective Cloud KMS Autokey configuration for. This may
+        /// be helpful for interrogating the effect of nested folder configurations on a given resource project.
+        /// </param>
+        public virtual ShowEffectiveAutokeyConfigRequest ShowEffectiveAutokeyConfig(string parent)
+        {
+            return new ShowEffectiveAutokeyConfigRequest(this.service, parent);
+        }
+
+        /// <summary>Returns the effective Cloud KMS Autokey configuration for a given project.</summary>
+        public class ShowEffectiveAutokeyConfigRequest : CloudKMSBaseServiceRequest<Google.Apis.CloudKMS.v1.Data.ShowEffectiveAutokeyConfigResponse>
+        {
+            /// <summary>Constructs a new ShowEffectiveAutokeyConfig request.</summary>
+            public ShowEffectiveAutokeyConfigRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+            {
+                Parent = parent;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. Name of the resource project to the show effective Cloud KMS Autokey configuration for. This
+            /// may be helpful for interrogating the effect of nested folder configurations on a given resource project.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Parent { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "showEffectiveAutokeyConfig";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+parent}:showEffectiveAutokeyConfig";
+
+            /// <summary>Initializes ShowEffectiveAutokeyConfig parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "parent",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^projects/[^/]+$",
+                });
             }
         }
     }
@@ -3447,7 +4823,8 @@ namespace Google.Apis.CloudKMS.v1.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3488,6 +4865,34 @@ namespace Google.Apis.CloudKMS.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Cloud KMS Autokey configuration for a folder.</summary>
+    public class AutokeyConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Name of the key project, e.g. `projects/{PROJECT_ID}` or `projects/{PROJECT_NUMBER}`, where Cloud
+        /// KMS Autokey will provision a new CryptoKey when a KeyHandle is created. On UpdateAutokeyConfig, the caller
+        /// will require `cloudkms.cryptoKeys.setIamPolicy` permission on this key project. Once configured, for Cloud
+        /// KMS Autokey to function properly, this key project must have the Cloud KMS API activated and the Cloud KMS
+        /// Service Agent for this key project must be granted the `cloudkms.admin` role (or pertinent permissions). A
+        /// request with an empty key project field will clear the configuration.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyProject")]
+        public virtual string KeyProject { get; set; }
+
+        /// <summary>
+        /// Identifier. Name of the AutokeyConfig resource, e.g. `folders/{FOLDER_NUMBER}/autokeyConfig`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Output only. The state for the AutokeyConfig.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Associates `members`, or principals, with a `role`.</summary>
     public class Binding : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3502,16 +4907,37 @@ namespace Google.Apis.CloudKMS.v1.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -3519,18 +4945,145 @@ namespace Google.Apis.CloudKMS.v1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A Certificate represents an X.509 certificate used to authenticate HTTPS connections to EKM replicas.
+    /// </summary>
+    public class Certificate : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. The issuer distinguished name in RFC 2253 format. Only present if parsed is true.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("issuer")]
+        public virtual string Issuer { get; set; }
+
+        private string _notAfterTimeRaw;
+
+        private object _notAfterTime;
+
+        /// <summary>
+        /// Output only. The certificate is not valid after this time. Only present if parsed is true.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("notAfterTime")]
+        public virtual string NotAfterTimeRaw
+        {
+            get => _notAfterTimeRaw;
+            set
+            {
+                _notAfterTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _notAfterTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="NotAfterTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use NotAfterTimeDateTimeOffset instead.")]
+        public virtual object NotAfterTime
+        {
+            get => _notAfterTime;
+            set
+            {
+                _notAfterTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _notAfterTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="NotAfterTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? NotAfterTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(NotAfterTimeRaw);
+            set => NotAfterTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _notBeforeTimeRaw;
+
+        private object _notBeforeTime;
+
+        /// <summary>
+        /// Output only. The certificate is not valid before this time. Only present if parsed is true.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("notBeforeTime")]
+        public virtual string NotBeforeTimeRaw
+        {
+            get => _notBeforeTimeRaw;
+            set
+            {
+                _notBeforeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _notBeforeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="NotBeforeTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use NotBeforeTimeDateTimeOffset instead.")]
+        public virtual object NotBeforeTime
+        {
+            get => _notBeforeTime;
+            set
+            {
+                _notBeforeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _notBeforeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="NotBeforeTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? NotBeforeTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(NotBeforeTimeRaw);
+            set => NotBeforeTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. True if the certificate was parsed successfully.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parsed")]
+        public virtual System.Nullable<bool> Parsed { get; set; }
+
+        /// <summary>Required. The raw certificate bytes in DER format.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rawDer")]
+        public virtual string RawDer { get; set; }
+
+        /// <summary>
+        /// Output only. The certificate serial number as a hex string. Only present if parsed is true.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serialNumber")]
+        public virtual string SerialNumber { get; set; }
+
+        /// <summary>
+        /// Output only. The SHA-256 certificate fingerprint as a hex string. Only present if parsed is true.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sha256Fingerprint")]
+        public virtual string Sha256Fingerprint { get; set; }
+
+        /// <summary>
+        /// Output only. The subject distinguished name in RFC 2253 format. Only present if parsed is true.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subject")]
+        public virtual string Subject { get; set; }
+
+        /// <summary>Output only. The subject Alternative DNS names. Only present if parsed is true.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subjectAlternativeDnsNames")]
+        public virtual System.Collections.Generic.IList<string> SubjectAlternativeDnsNames { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3564,13 +5117,56 @@ namespace Google.Apis.CloudKMS.v1.Data
     /// </summary>
     public class CryptoKey : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time at which this CryptoKey was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Immutable. The resource name of the backend environment where the key material for all CryptoKeyVersions
+        /// associated with this CryptoKey reside and where all related cryptographic operations are performed. Only
+        /// applicable if CryptoKeyVersions have a ProtectionLevel of EXTERNAL_VPC, with the resource name in the format
+        /// `projects/*/locations/*/ekmConnections/*`. Note, this list is non-exhaustive and may apply to additional
+        /// ProtectionLevels in the future.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cryptoKeyBackend")]
+        public virtual string CryptoKeyBackend { get; set; }
 
         /// <summary>
         /// Immutable. The period of time that versions of this key spend in the DESTROY_SCHEDULED state before
-        /// transitioning to DESTROYED. If not specified at creation time, the default duration is 24 hours.
+        /// transitioning to DESTROYED. If not specified at creation time, the default duration is 30 days.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("destroyScheduledDuration")]
         public virtual object DestroyScheduledDuration { get; set; }
@@ -3578,6 +5174,17 @@ namespace Google.Apis.CloudKMS.v1.Data
         /// <summary>Immutable. Whether this key may contain imported versions only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("importOnly")]
         public virtual System.Nullable<bool> ImportOnly { get; set; }
+
+        /// <summary>
+        /// Optional. The policy used for Key Access Justifications Policy Enforcement. If this field is present and
+        /// this key is enrolled in Key Access Justifications Policy Enforcement, the policy will be evaluated in
+        /// encrypt, decrypt, and sign operations, and the operation will fail if rejected by the policy. The policy is
+        /// defined by specifying zero or more allowed justification codes.
+        /// https://cloud.google.com/assured-workloads/key-access-justifications/docs/justification-codes By default,
+        /// this field is absent, and all justification codes are allowed.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyAccessJustificationsPolicy")]
+        public virtual KeyAccessJustificationsPolicy KeyAccessJustificationsPolicy { get; set; }
 
         /// <summary>
         /// Labels with user-defined metadata. For more information, see [Labeling
@@ -3593,6 +5200,10 @@ namespace Google.Apis.CloudKMS.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _nextRotationTimeRaw;
+
+        private object _nextRotationTime;
+
         /// <summary>
         /// At next_rotation_time, the Key Management Service will automatically: 1. Create a new version of this
         /// CryptoKey. 2. Mark the new version as primary. Key rotations performed manually via CreateCryptoKeyVersion
@@ -3600,7 +5211,38 @@ namespace Google.Apis.CloudKMS.v1.Data
         /// support automatic rotation. For other keys, this field must be omitted.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextRotationTime")]
-        public virtual object NextRotationTime { get; set; }
+        public virtual string NextRotationTimeRaw
+        {
+            get => _nextRotationTimeRaw;
+            set
+            {
+                _nextRotationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _nextRotationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="NextRotationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use NextRotationTimeDateTimeOffset instead.")]
+        public virtual object NextRotationTime
+        {
+            get => _nextRotationTime;
+            set
+            {
+                _nextRotationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _nextRotationTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="NextRotationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? NextRotationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(NextRotationTimeRaw);
+            set => NextRotationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. A copy of the "primary" CryptoKeyVersion that will be used by Encrypt when this CryptoKey is
@@ -3654,34 +5296,182 @@ namespace Google.Apis.CloudKMS.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("attestation")]
         public virtual KeyOperationAttestation Attestation { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time at which this CryptoKeyVersion was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _destroyEventTimeRaw;
+
+        private object _destroyEventTime;
 
         /// <summary>
         /// Output only. The time this CryptoKeyVersion's key material was destroyed. Only present if state is
         /// DESTROYED.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("destroyEventTime")]
-        public virtual object DestroyEventTime { get; set; }
+        public virtual string DestroyEventTimeRaw
+        {
+            get => _destroyEventTimeRaw;
+            set
+            {
+                _destroyEventTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _destroyEventTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DestroyEventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DestroyEventTimeDateTimeOffset instead.")]
+        public virtual object DestroyEventTime
+        {
+            get => _destroyEventTime;
+            set
+            {
+                _destroyEventTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _destroyEventTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="DestroyEventTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DestroyEventTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DestroyEventTimeRaw);
+            set => DestroyEventTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _destroyTimeRaw;
+
+        private object _destroyTime;
 
         /// <summary>
         /// Output only. The time this CryptoKeyVersion's key material is scheduled for destruction. Only present if
         /// state is DESTROY_SCHEDULED.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("destroyTime")]
-        public virtual object DestroyTime { get; set; }
+        public virtual string DestroyTimeRaw
+        {
+            get => _destroyTimeRaw;
+            set
+            {
+                _destroyTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _destroyTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DestroyTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DestroyTimeDateTimeOffset instead.")]
+        public virtual object DestroyTime
+        {
+            get => _destroyTime;
+            set
+            {
+                _destroyTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _destroyTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DestroyTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DestroyTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DestroyTimeRaw);
+            set => DestroyTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. The root cause of the most recent external destruction failure. Only present if state is
+        /// EXTERNAL_DESTRUCTION_FAILED.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("externalDestructionFailureReason")]
+        public virtual string ExternalDestructionFailureReason { get; set; }
 
         /// <summary>
         /// ExternalProtectionLevelOptions stores a group of additional fields for configuring a CryptoKeyVersion that
-        /// are specific to the EXTERNAL protection level.
+        /// are specific to the EXTERNAL protection level and EXTERNAL_VPC protection levels.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("externalProtectionLevelOptions")]
         public virtual ExternalProtectionLevelOptions ExternalProtectionLevelOptions { get; set; }
 
+        private string _generateTimeRaw;
+
+        private object _generateTime;
+
         /// <summary>Output only. The time this CryptoKeyVersion's key material was generated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("generateTime")]
-        public virtual object GenerateTime { get; set; }
+        public virtual string GenerateTimeRaw
+        {
+            get => _generateTimeRaw;
+            set
+            {
+                _generateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _generateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="GenerateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use GenerateTimeDateTimeOffset instead.")]
+        public virtual object GenerateTime
+        {
+            get => _generateTime;
+            set
+            {
+                _generateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _generateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="GenerateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? GenerateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(GenerateTimeRaw);
+            set => GenerateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. The root cause of the most recent generation failure. Only present if state is
+        /// GENERATION_FAILED.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("generationFailureReason")]
+        public virtual string GenerationFailureReason { get; set; }
 
         /// <summary>
         /// Output only. The root cause of the most recent import failure. Only present if state is IMPORT_FAILED.
@@ -3696,11 +5486,44 @@ namespace Google.Apis.CloudKMS.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("importJob")]
         public virtual string ImportJob { get; set; }
 
+        private string _importTimeRaw;
+
+        private object _importTime;
+
         /// <summary>
         /// Output only. The time at which this CryptoKeyVersion's key material was most recently imported.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("importTime")]
-        public virtual object ImportTime { get; set; }
+        public virtual string ImportTimeRaw
+        {
+            get => _importTimeRaw;
+            set
+            {
+                _importTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _importTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ImportTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ImportTimeDateTimeOffset instead.")]
+        public virtual object ImportTime
+        {
+            get => _importTime;
+            set
+            {
+                _importTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _importTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ImportTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ImportTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ImportTimeRaw);
+            set => ImportTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The resource name for this CryptoKeyVersion in the format
@@ -3859,14 +5682,114 @@ namespace Google.Apis.CloudKMS.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// An EkmConfig is a singleton resource that represents configuration parameters that apply to all CryptoKeys and
+    /// CryptoKeyVersions with a ProtectionLevel of EXTERNAL_VPC in a given project and location.
+    /// </summary>
+    public class EkmConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Resource name of the default EkmConnection. Setting this field to the empty string removes the
+        /// default.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("defaultEkmConnection")]
+        public virtual string DefaultEkmConnection { get; set; }
+
+        /// <summary>
+        /// Output only. The resource name for the EkmConfig in the format `projects/*/locations/*/ekmConfig`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An EkmConnection represents an individual EKM connection. It can be used for creating CryptoKeys and
+    /// CryptoKeyVersions with a ProtectionLevel of EXTERNAL_VPC, as well as performing cryptographic operations using
+    /// keys created within the EkmConnection.
+    /// </summary>
+    public class EkmConnection : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The time at which the EkmConnection was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. Identifies the EKM Crypto Space that this EkmConnection maps to. Note: This field is required if
+        /// KeyManagementMode is CLOUD_KMS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cryptoSpacePath")]
+        public virtual string CryptoSpacePath { get; set; }
+
+        /// <summary>Optional. Etag of the currently stored EkmConnection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Optional. Describes who can perform control plane operations on the EKM. If unset, this defaults to MANUAL.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyManagementMode")]
+        public virtual string KeyManagementMode { get; set; }
+
+        /// <summary>
+        /// Output only. The resource name for the EkmConnection in the format
+        /// `projects/*/locations/*/ekmConnections/*`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Optional. A list of ServiceResolvers where the EKM can be reached. There should be one ServiceResolver per
+        /// EKM replica. Currently, only a single ServiceResolver is supported.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceResolvers")]
+        public virtual System.Collections.Generic.IList<ServiceResolver> ServiceResolvers { get; set; }
+    }
+
     /// <summary>Request message for KeyManagementService.Encrypt.</summary>
     public class EncryptRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// Optional. Optional data that, if specified, must also be provided during decryption through
         /// DecryptRequest.additional_authenticated_data. The maximum size depends on the key version's
-        /// protection_level. For SOFTWARE keys, the AAD must be no larger than 64KiB. For HSM keys, the combined length
-        /// of the plaintext and additional_authenticated_data fields must be no larger than 8KiB.
+        /// protection_level. For SOFTWARE, EXTERNAL, and EXTERNAL_VPC keys the AAD must be no larger than 64KiB. For
+        /// HSM keys, the combined length of the plaintext and additional_authenticated_data fields must be no larger
+        /// than 8KiB.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("additionalAuthenticatedData")]
         public virtual string AdditionalAuthenticatedData { get; set; }
@@ -3888,8 +5811,9 @@ namespace Google.Apis.CloudKMS.v1.Data
 
         /// <summary>
         /// Required. The data to encrypt. Must be no larger than 64KiB. The maximum size depends on the key version's
-        /// protection_level. For SOFTWARE keys, the plaintext must be no larger than 64KiB. For HSM keys, the combined
-        /// length of the plaintext and additional_authenticated_data fields must be no larger than 8KiB.
+        /// protection_level. For SOFTWARE, EXTERNAL, and EXTERNAL_VPC keys, the plaintext must be no larger than 64KiB.
+        /// For HSM keys, the combined length of the plaintext and additional_authenticated_data fields must be no
+        /// larger than 8KiB.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("plaintext")]
         public virtual string Plaintext { get; set; }
@@ -4012,10 +5936,17 @@ namespace Google.Apis.CloudKMS.v1.Data
 
     /// <summary>
     /// ExternalProtectionLevelOptions stores a group of additional fields for configuring a CryptoKeyVersion that are
-    /// specific to the EXTERNAL protection level.
+    /// specific to the EXTERNAL protection level and EXTERNAL_VPC protection levels.
     /// </summary>
     public class ExternalProtectionLevelOptions : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The path to the external key material on the EKM when using EkmConnection e.g., "v0/my/key". Set this field
+        /// instead of external_key_uri when using an EkmConnection.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ekmConnectionKeyPath")]
+        public virtual string EkmConnectionKeyPath { get; set; }
+
         /// <summary>The URI for an external resource that this CryptoKeyVersion represents.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("externalKeyUri")]
         public virtual string ExternalKeyUri { get; set; }
@@ -4033,7 +5964,10 @@ namespace Google.Apis.CloudKMS.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("lengthBytes")]
         public virtual System.Nullable<int> LengthBytes { get; set; }
 
-        /// <summary>The ProtectionLevel to use when generating the random data. Defaults to SOFTWARE.</summary>
+        /// <summary>
+        /// The ProtectionLevel to use when generating the random data. Currently, only HSM protection level is
+        /// supported.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("protectionLevel")]
         public virtual string ProtectionLevel { get; set; }
 
@@ -4091,16 +6025,27 @@ namespace Google.Apis.CloudKMS.v1.Data
         public virtual string ImportJob { get; set; }
 
         /// <summary>
-        /// Wrapped key material produced with RSA_OAEP_3072_SHA1_AES_256 or RSA_OAEP_4096_SHA1_AES_256. This field
-        /// contains the concatenation of two wrapped keys: 1. An ephemeral AES-256 wrapping key wrapped with the
-        /// public_key using RSAES-OAEP with SHA-1, MGF1 with SHA-1, and an empty label. 2. The key to be imported,
-        /// wrapped with the ephemeral AES-256 key using AES-KWP (RFC 5649). If importing symmetric key material, it is
-        /// expected that the unwrapped key contains plain bytes. If importing asymmetric key material, it is expected
-        /// that the unwrapped key is in PKCS#8-encoded DER format (the PrivateKeyInfo structure from RFC 5208). This
-        /// format is the same as the format produced by PKCS#11 mechanism CKM_RSA_AES_KEY_WRAP.
+        /// Optional. This field has the same meaning as wrapped_key. Prefer to use that field in new work. Either that
+        /// field or this field (but not both) must be specified.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rsaAesWrappedKey")]
         public virtual string RsaAesWrappedKey { get; set; }
+
+        /// <summary>
+        /// Optional. The wrapped key material to import. Before wrapping, key material must be formatted. If importing
+        /// symmetric key material, the expected key material format is plain bytes. If importing asymmetric key
+        /// material, the expected key material format is PKCS#8-encoded DER (the PrivateKeyInfo structure from RFC
+        /// 5208). When wrapping with import methods (RSA_OAEP_3072_SHA1_AES_256 or RSA_OAEP_4096_SHA1_AES_256 or
+        /// RSA_OAEP_3072_SHA256_AES_256 or RSA_OAEP_4096_SHA256_AES_256), this field must contain the concatenation of:
+        /// 1. An ephemeral AES-256 wrapping key wrapped with the public_key using RSAES-OAEP with SHA-1/SHA-256, MGF1
+        /// with SHA-1/SHA-256, and an empty label. 2. The formatted key to be imported, wrapped with the ephemeral
+        /// AES-256 key using AES-KWP (RFC 5649). This format is the same as the format produced by PKCS#11 mechanism
+        /// CKM_RSA_AES_KEY_WRAP. When wrapping with import methods (RSA_OAEP_3072_SHA256 or RSA_OAEP_4096_SHA256), this
+        /// field must contain the formatted key to be imported, wrapped with the public_key using RSAES-OAEP with
+        /// SHA-256, MGF1 with SHA-256, and an empty label.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("wrappedKey")]
+        public virtual string WrappedKey { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4130,24 +6075,158 @@ namespace Google.Apis.CloudKMS.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("attestation")]
         public virtual KeyOperationAttestation Attestation { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time at which this ImportJob was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _expireEventTimeRaw;
+
+        private object _expireEventTime;
 
         /// <summary>Output only. The time this ImportJob expired. Only present if state is EXPIRED.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireEventTime")]
-        public virtual object ExpireEventTime { get; set; }
+        public virtual string ExpireEventTimeRaw
+        {
+            get => _expireEventTimeRaw;
+            set
+            {
+                _expireEventTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireEventTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireEventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireEventTimeDateTimeOffset instead.")]
+        public virtual object ExpireEventTime
+        {
+            get => _expireEventTime;
+            set
+            {
+                _expireEventTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireEventTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireEventTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireEventTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireEventTimeRaw);
+            set => ExpireEventTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
 
         /// <summary>
         /// Output only. The time at which this ImportJob is scheduled for expiration and can no longer be used to
         /// import key material.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _generateTimeRaw;
+
+        private object _generateTime;
 
         /// <summary>Output only. The time this ImportJob's key material was generated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("generateTime")]
-        public virtual object GenerateTime { get; set; }
+        public virtual string GenerateTimeRaw
+        {
+            get => _generateTimeRaw;
+            set
+            {
+                _generateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _generateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="GenerateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use GenerateTimeDateTimeOffset instead.")]
+        public virtual object GenerateTime
+        {
+            get => _generateTime;
+            set
+            {
+                _generateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _generateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="GenerateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? GenerateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(GenerateTimeRaw);
+            set => GenerateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required. Immutable. The wrapping method to be used for incoming key material.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("importMethod")]
@@ -4183,6 +6262,57 @@ namespace Google.Apis.CloudKMS.v1.Data
     }
 
     /// <summary>
+    /// A KeyAccessJustificationsPolicy specifies zero or more allowed AccessReason values for encrypt, decrypt, and
+    /// sign operations on a CryptoKey.
+    /// </summary>
+    public class KeyAccessJustificationsPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The list of allowed reasons for access to a CryptoKey. Zero allowed access reasons means all encrypt,
+        /// decrypt, and sign operations for the CryptoKey associated with this policy will fail.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowedAccessReasons")]
+        public virtual System.Collections.Generic.IList<string> AllowedAccessReasons { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Resource-oriented representation of a request to Cloud KMS Autokey and the resulting provisioning of a
+    /// CryptoKey.
+    /// </summary>
+    public class KeyHandle : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. Name of a CryptoKey that has been provisioned for Customer Managed Encryption Key (CMEK) use in
+        /// the KeyHandle project and location for the requested resource type. The CryptoKey project will reflect the
+        /// value configured in the AutokeyConfig on the resource project's ancestor folder at the time of the KeyHandle
+        /// creation. If more than one ancestor folder has a configured AutokeyConfig, the nearest of these
+        /// configurations is used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKey")]
+        public virtual string KmsKey { get; set; }
+
+        /// <summary>
+        /// Identifier. Name of the KeyHandle resource, e.g.
+        /// `projects/{PROJECT_ID}/locations/{LOCATION}/keyHandles/{KEY_HANDLE_ID}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Required. Indicates the resource type that the resulting CryptoKey is meant to protect, e.g.
+        /// `{SERVICE}.googleapis.com/{TYPE}`. See documentation for supported resource types.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceTypeSelector")]
+        public virtual string ResourceTypeSelector { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// Contains an HSM-generated attestation about a key operation. For more information, see [Verifying attestations]
     /// (https://cloud.google.com/kms/docs/attest-key).
     /// </summary>
@@ -4209,9 +6339,42 @@ namespace Google.Apis.CloudKMS.v1.Data
     /// <summary>A KeyRing is a toplevel logical grouping of CryptoKeys.</summary>
     public class KeyRing : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time at which this KeyRing was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The resource name for the KeyRing in the format `projects/*/locations/*/keyRings/*`.
@@ -4267,6 +6430,28 @@ namespace Google.Apis.CloudKMS.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Response message for EkmService.ListEkmConnections.</summary>
+    public class ListEkmConnectionsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of EkmConnections.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ekmConnections")]
+        public virtual System.Collections.Generic.IList<EkmConnection> EkmConnections { get; set; }
+
+        /// <summary>
+        /// A token to retrieve next page of results. Pass this value in ListEkmConnectionsRequest.page_token to
+        /// retrieve the next page of results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The total number of EkmConnections that matched the query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("totalSize")]
+        public virtual System.Nullable<int> TotalSize { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Response message for KeyManagementService.ListImportJobs.</summary>
     public class ListImportJobsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4284,6 +6469,24 @@ namespace Google.Apis.CloudKMS.v1.Data
         /// <summary>The total number of ImportJobs that matched the query.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("totalSize")]
         public virtual System.Nullable<int> TotalSize { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for Autokey.ListKeyHandles.</summary>
+    public class ListKeyHandlesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Resulting KeyHandles.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyHandles")]
+        public virtual System.Collections.Generic.IList<KeyHandle> KeyHandles { get; set; }
+
+        /// <summary>
+        /// A token to retrieve next page of results. Pass this value in ListKeyHandlesRequest.page_token to retrieve
+        /// the next page of results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4326,7 +6529,7 @@ namespace Google.Apis.CloudKMS.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -4473,7 +6676,7 @@ namespace Google.Apis.CloudKMS.v1.Data
         /// Optional. An optional CRC32C checksum of the MacVerifyRequest.mac. If specified, KeyManagementService will
         /// verify the integrity of the received MacVerifyRequest.mac using this checksum. KeyManagementService will
         /// report an error if the checksum verification fails. If you receive a checksum error, your client should
-        /// verify that CRC32C(MacVerifyRequest.tag) is equal to MacVerifyRequest.mac_crc32c, and if so, perform a
+        /// verify that CRC32C(MacVerifyRequest.mac) is equal to MacVerifyRequest.mac_crc32c, and if so, perform a
         /// limited number of retries. A persistent mismatch may indicate an issue in your computation of the CRC32C
         /// checksum. Note: This field is defined as int64 for reasons of compatibility across different languages.
         /// However, it is a non-negative integer, which will never exceed 2^32-1, and can be safely downconverted to
@@ -4539,6 +6742,49 @@ namespace Google.Apis.CloudKMS.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>This resource represents a long-running operation that is the result of a network API call.</summary>
+    public class Operation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed,
+        /// and either `error` or `response` is available.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("done")]
+        public virtual System.Nullable<bool> Done { get; set; }
+
+        /// <summary>The error result of the operation in case of failure or cancellation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("error")]
+        public virtual Status Error { get; set; }
+
+        /// <summary>
+        /// Service-specific metadata associated with the operation. It typically contains progress information and
+        /// common metadata such as create time. Some services might not provide such metadata. Any method that returns
+        /// a long-running operation should document the metadata type, if any.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Metadata { get; set; }
+
+        /// <summary>
+        /// The server-assigned name, which is only unique within the same service that originally returns it. If you
+        /// use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
+        /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
+        /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("response")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Response { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A
     /// `Policy` is a collection of `bindings`. A `binding` binds one or more `members`, or principals, to a single
@@ -4548,18 +6794,26 @@ namespace Google.Apis.CloudKMS.v1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4608,7 +6862,7 @@ namespace Google.Apis.CloudKMS.v1.Data
         public virtual System.Nullable<int> Version { get; set; }
     }
 
-    /// <summary>The public key for a given CryptoKeyVersion. Obtained via GetPublicKey.</summary>
+    /// <summary>The public keys for a given CryptoKeyVersion. Obtained via GetPublicKey.</summary>
     public class PublicKey : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The Algorithm associated with this key.</summary>
@@ -4650,9 +6904,337 @@ namespace Google.Apis.CloudKMS.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Request message for KeyManagementService.RawDecrypt.</summary>
+    public class RawDecryptRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Optional data that must match the data originally supplied in
+        /// RawEncryptRequest.additional_authenticated_data.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("additionalAuthenticatedData")]
+        public virtual string AdditionalAuthenticatedData { get; set; }
+
+        /// <summary>
+        /// Optional. An optional CRC32C checksum of the RawDecryptRequest.additional_authenticated_data. If specified,
+        /// KeyManagementService will verify the integrity of the received additional_authenticated_data using this
+        /// checksum. KeyManagementService will report an error if the checksum verification fails. If you receive a
+        /// checksum error, your client should verify that CRC32C(additional_authenticated_data) is equal to
+        /// additional_authenticated_data_crc32c, and if so, perform a limited number of retries. A persistent mismatch
+        /// may indicate an issue in your computation of the CRC32C checksum. Note: This field is defined as int64 for
+        /// reasons of compatibility across different languages. However, it is a non-negative integer, which will never
+        /// exceed 2^32-1, and can be safely downconverted to uint32 in languages that support this type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("additionalAuthenticatedDataCrc32c")]
+        public virtual System.Nullable<long> AdditionalAuthenticatedDataCrc32c { get; set; }
+
+        /// <summary>Required. The encrypted data originally returned in RawEncryptResponse.ciphertext.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ciphertext")]
+        public virtual string Ciphertext { get; set; }
+
+        /// <summary>
+        /// Optional. An optional CRC32C checksum of the RawDecryptRequest.ciphertext. If specified,
+        /// KeyManagementService will verify the integrity of the received ciphertext using this checksum.
+        /// KeyManagementService will report an error if the checksum verification fails. If you receive a checksum
+        /// error, your client should verify that CRC32C(ciphertext) is equal to ciphertext_crc32c, and if so, perform a
+        /// limited number of retries. A persistent mismatch may indicate an issue in your computation of the CRC32C
+        /// checksum. Note: This field is defined as int64 for reasons of compatibility across different languages.
+        /// However, it is a non-negative integer, which will never exceed 2^32-1, and can be safely downconverted to
+        /// uint32 in languages that support this type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ciphertextCrc32c")]
+        public virtual System.Nullable<long> CiphertextCrc32c { get; set; }
+
+        /// <summary>
+        /// Required. The initialization vector (IV) used during encryption, which must match the data originally
+        /// provided in RawEncryptResponse.initialization_vector.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("initializationVector")]
+        public virtual string InitializationVector { get; set; }
+
+        /// <summary>
+        /// Optional. An optional CRC32C checksum of the RawDecryptRequest.initialization_vector. If specified,
+        /// KeyManagementService will verify the integrity of the received initialization_vector using this checksum.
+        /// KeyManagementService will report an error if the checksum verification fails. If you receive a checksum
+        /// error, your client should verify that CRC32C(initialization_vector) is equal to
+        /// initialization_vector_crc32c, and if so, perform a limited number of retries. A persistent mismatch may
+        /// indicate an issue in your computation of the CRC32C checksum. Note: This field is defined as int64 for
+        /// reasons of compatibility across different languages. However, it is a non-negative integer, which will never
+        /// exceed 2^32-1, and can be safely downconverted to uint32 in languages that support this type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("initializationVectorCrc32c")]
+        public virtual System.Nullable<long> InitializationVectorCrc32c { get; set; }
+
+        /// <summary>
+        /// The length of the authentication tag that is appended to the end of the ciphertext. If unspecified (0), the
+        /// default value for the key's algorithm will be used (for AES-GCM, the default value is 16).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagLength")]
+        public virtual System.Nullable<int> TagLength { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for KeyManagementService.RawDecrypt.</summary>
+    public class RawDecryptResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The decrypted data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("plaintext")]
+        public virtual string Plaintext { get; set; }
+
+        /// <summary>
+        /// Integrity verification field. A CRC32C checksum of the returned RawDecryptResponse.plaintext. An integrity
+        /// check of plaintext can be performed by computing the CRC32C checksum of plaintext and comparing your results
+        /// to this field. Discard the response in case of non-matching checksum values, and perform a limited number of
+        /// retries. A persistent mismatch may indicate an issue in your computation of the CRC32C checksum. Note:
+        /// receiving this response message indicates that KeyManagementService is able to successfully decrypt the
+        /// ciphertext. Note: This field is defined as int64 for reasons of compatibility across different languages.
+        /// However, it is a non-negative integer, which will never exceed 2^32-1, and can be safely downconverted to
+        /// uint32 in languages that support this type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("plaintextCrc32c")]
+        public virtual System.Nullable<long> PlaintextCrc32c { get; set; }
+
+        /// <summary>The ProtectionLevel of the CryptoKeyVersion used in decryption.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protectionLevel")]
+        public virtual string ProtectionLevel { get; set; }
+
+        /// <summary>
+        /// Integrity verification field. A flag indicating whether
+        /// RawDecryptRequest.additional_authenticated_data_crc32c was received by KeyManagementService and used for the
+        /// integrity verification of additional_authenticated_data. A false value of this field indicates either that
+        /// // RawDecryptRequest.additional_authenticated_data_crc32c was left unset or that it was not delivered to
+        /// KeyManagementService. If you've set RawDecryptRequest.additional_authenticated_data_crc32c but this field is
+        /// still false, discard the response and perform a limited number of retries.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verifiedAdditionalAuthenticatedDataCrc32c")]
+        public virtual System.Nullable<bool> VerifiedAdditionalAuthenticatedDataCrc32c { get; set; }
+
+        /// <summary>
+        /// Integrity verification field. A flag indicating whether RawDecryptRequest.ciphertext_crc32c was received by
+        /// KeyManagementService and used for the integrity verification of the ciphertext. A false value of this field
+        /// indicates either that RawDecryptRequest.ciphertext_crc32c was left unset or that it was not delivered to
+        /// KeyManagementService. If you've set RawDecryptRequest.ciphertext_crc32c but this field is still false,
+        /// discard the response and perform a limited number of retries.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verifiedCiphertextCrc32c")]
+        public virtual System.Nullable<bool> VerifiedCiphertextCrc32c { get; set; }
+
+        /// <summary>
+        /// Integrity verification field. A flag indicating whether RawDecryptRequest.initialization_vector_crc32c was
+        /// received by KeyManagementService and used for the integrity verification of initialization_vector. A false
+        /// value of this field indicates either that RawDecryptRequest.initialization_vector_crc32c was left unset or
+        /// that it was not delivered to KeyManagementService. If you've set
+        /// RawDecryptRequest.initialization_vector_crc32c but this field is still false, discard the response and
+        /// perform a limited number of retries.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verifiedInitializationVectorCrc32c")]
+        public virtual System.Nullable<bool> VerifiedInitializationVectorCrc32c { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for KeyManagementService.RawEncrypt.</summary>
+    public class RawEncryptRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Optional data that, if specified, must also be provided during decryption through
+        /// RawDecryptRequest.additional_authenticated_data. This field may only be used in conjunction with an
+        /// algorithm that accepts additional authenticated data (for example, AES-GCM). The maximum size depends on the
+        /// key version's protection_level. For SOFTWARE keys, the plaintext must be no larger than 64KiB. For HSM keys,
+        /// the combined length of the plaintext and additional_authenticated_data fields must be no larger than 8KiB.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("additionalAuthenticatedData")]
+        public virtual string AdditionalAuthenticatedData { get; set; }
+
+        /// <summary>
+        /// Optional. An optional CRC32C checksum of the RawEncryptRequest.additional_authenticated_data. If specified,
+        /// KeyManagementService will verify the integrity of the received additional_authenticated_data using this
+        /// checksum. KeyManagementService will report an error if the checksum verification fails. If you receive a
+        /// checksum error, your client should verify that CRC32C(additional_authenticated_data) is equal to
+        /// additional_authenticated_data_crc32c, and if so, perform a limited number of retries. A persistent mismatch
+        /// may indicate an issue in your computation of the CRC32C checksum. Note: This field is defined as int64 for
+        /// reasons of compatibility across different languages. However, it is a non-negative integer, which will never
+        /// exceed 2^32-1, and can be safely downconverted to uint32 in languages that support this type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("additionalAuthenticatedDataCrc32c")]
+        public virtual System.Nullable<long> AdditionalAuthenticatedDataCrc32c { get; set; }
+
+        /// <summary>
+        /// Optional. A customer-supplied initialization vector that will be used for encryption. If it is not provided
+        /// for AES-CBC and AES-CTR, one will be generated. It will be returned in
+        /// RawEncryptResponse.initialization_vector.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("initializationVector")]
+        public virtual string InitializationVector { get; set; }
+
+        /// <summary>
+        /// Optional. An optional CRC32C checksum of the RawEncryptRequest.initialization_vector. If specified,
+        /// KeyManagementService will verify the integrity of the received initialization_vector using this checksum.
+        /// KeyManagementService will report an error if the checksum verification fails. If you receive a checksum
+        /// error, your client should verify that CRC32C(initialization_vector) is equal to
+        /// initialization_vector_crc32c, and if so, perform a limited number of retries. A persistent mismatch may
+        /// indicate an issue in your computation of the CRC32C checksum. Note: This field is defined as int64 for
+        /// reasons of compatibility across different languages. However, it is a non-negative integer, which will never
+        /// exceed 2^32-1, and can be safely downconverted to uint32 in languages that support this type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("initializationVectorCrc32c")]
+        public virtual System.Nullable<long> InitializationVectorCrc32c { get; set; }
+
+        /// <summary>
+        /// Required. The data to encrypt. Must be no larger than 64KiB. The maximum size depends on the key version's
+        /// protection_level. For SOFTWARE keys, the plaintext must be no larger than 64KiB. For HSM keys, the combined
+        /// length of the plaintext and additional_authenticated_data fields must be no larger than 8KiB.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("plaintext")]
+        public virtual string Plaintext { get; set; }
+
+        /// <summary>
+        /// Optional. An optional CRC32C checksum of the RawEncryptRequest.plaintext. If specified, KeyManagementService
+        /// will verify the integrity of the received plaintext using this checksum. KeyManagementService will report an
+        /// error if the checksum verification fails. If you receive a checksum error, your client should verify that
+        /// CRC32C(plaintext) is equal to plaintext_crc32c, and if so, perform a limited number of retries. A persistent
+        /// mismatch may indicate an issue in your computation of the CRC32C checksum. Note: This field is defined as
+        /// int64 for reasons of compatibility across different languages. However, it is a non-negative integer, which
+        /// will never exceed 2^32-1, and can be safely downconverted to uint32 in languages that support this type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("plaintextCrc32c")]
+        public virtual System.Nullable<long> PlaintextCrc32c { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for KeyManagementService.RawEncrypt.</summary>
+    public class RawEncryptResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The encrypted data. In the case of AES-GCM, the authentication tag is the tag_length bytes at the end of
+        /// this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ciphertext")]
+        public virtual string Ciphertext { get; set; }
+
+        /// <summary>
+        /// Integrity verification field. A CRC32C checksum of the returned RawEncryptResponse.ciphertext. An integrity
+        /// check of ciphertext can be performed by computing the CRC32C checksum of ciphertext and comparing your
+        /// results to this field. Discard the response in case of non-matching checksum values, and perform a limited
+        /// number of retries. A persistent mismatch may indicate an issue in your computation of the CRC32C checksum.
+        /// Note: This field is defined as int64 for reasons of compatibility across different languages. However, it is
+        /// a non-negative integer, which will never exceed 2^32-1, and can be safely downconverted to uint32 in
+        /// languages that support this type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ciphertextCrc32c")]
+        public virtual System.Nullable<long> CiphertextCrc32c { get; set; }
+
+        /// <summary>
+        /// The initialization vector (IV) generated by the service during encryption. This value must be stored and
+        /// provided in RawDecryptRequest.initialization_vector at decryption time.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("initializationVector")]
+        public virtual string InitializationVector { get; set; }
+
+        /// <summary>
+        /// Integrity verification field. A CRC32C checksum of the returned RawEncryptResponse.initialization_vector. An
+        /// integrity check of initialization_vector can be performed by computing the CRC32C checksum of
+        /// initialization_vector and comparing your results to this field. Discard the response in case of non-matching
+        /// checksum values, and perform a limited number of retries. A persistent mismatch may indicate an issue in
+        /// your computation of the CRC32C checksum. Note: This field is defined as int64 for reasons of compatibility
+        /// across different languages. However, it is a non-negative integer, which will never exceed 2^32-1, and can
+        /// be safely downconverted to uint32 in languages that support this type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("initializationVectorCrc32c")]
+        public virtual System.Nullable<long> InitializationVectorCrc32c { get; set; }
+
+        /// <summary>
+        /// The resource name of the CryptoKeyVersion used in encryption. Check this field to verify that the intended
+        /// resource was used for encryption.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ProtectionLevel of the CryptoKeyVersion used in encryption.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protectionLevel")]
+        public virtual string ProtectionLevel { get; set; }
+
+        /// <summary>The length of the authentication tag that is appended to the end of the ciphertext.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tagLength")]
+        public virtual System.Nullable<int> TagLength { get; set; }
+
+        /// <summary>
+        /// Integrity verification field. A flag indicating whether
+        /// RawEncryptRequest.additional_authenticated_data_crc32c was received by KeyManagementService and used for the
+        /// integrity verification of additional_authenticated_data. A false value of this field indicates either that
+        /// // RawEncryptRequest.additional_authenticated_data_crc32c was left unset or that it was not delivered to
+        /// KeyManagementService. If you've set RawEncryptRequest.additional_authenticated_data_crc32c but this field is
+        /// still false, discard the response and perform a limited number of retries.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verifiedAdditionalAuthenticatedDataCrc32c")]
+        public virtual System.Nullable<bool> VerifiedAdditionalAuthenticatedDataCrc32c { get; set; }
+
+        /// <summary>
+        /// Integrity verification field. A flag indicating whether RawEncryptRequest.initialization_vector_crc32c was
+        /// received by KeyManagementService and used for the integrity verification of initialization_vector. A false
+        /// value of this field indicates either that RawEncryptRequest.initialization_vector_crc32c was left unset or
+        /// that it was not delivered to KeyManagementService. If you've set
+        /// RawEncryptRequest.initialization_vector_crc32c but this field is still false, discard the response and
+        /// perform a limited number of retries.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verifiedInitializationVectorCrc32c")]
+        public virtual System.Nullable<bool> VerifiedInitializationVectorCrc32c { get; set; }
+
+        /// <summary>
+        /// Integrity verification field. A flag indicating whether RawEncryptRequest.plaintext_crc32c was received by
+        /// KeyManagementService and used for the integrity verification of the plaintext. A false value of this field
+        /// indicates either that RawEncryptRequest.plaintext_crc32c was left unset or that it was not delivered to
+        /// KeyManagementService. If you've set RawEncryptRequest.plaintext_crc32c but this field is still false,
+        /// discard the response and perform a limited number of retries.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verifiedPlaintextCrc32c")]
+        public virtual System.Nullable<bool> VerifiedPlaintextCrc32c { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for KeyManagementService.RestoreCryptoKeyVersion.</summary>
     public class RestoreCryptoKeyVersionRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A ServiceResolver represents an EKM replica that can be reached within an EkmConnection.</summary>
+    public class ServiceResolver : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. The filter applied to the endpoints of the resolved service. If no filter is specified, all
+        /// endpoints will be considered. An endpoint will be chosen arbitrarily from the filtered list for each
+        /// request. For endpoint filter syntax and examples, see
+        /// https://cloud.google.com/service-directory/docs/reference/rpc/google.cloud.servicedirectory.v1#resolveservicerequest.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endpointFilter")]
+        public virtual string EndpointFilter { get; set; }
+
+        /// <summary>Required. The hostname of the EKM replica used at TLS and HTTP layers.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hostname")]
+        public virtual string Hostname { get; set; }
+
+        /// <summary>
+        /// Required. A list of leaf server certificates used to authenticate HTTPS connections to the EKM replica.
+        /// Currently, a maximum of 10 Certificate is supported.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serverCertificates")]
+        public virtual System.Collections.Generic.IList<Certificate> ServerCertificates { get; set; }
+
+        /// <summary>
+        /// Required. The resource name of the Service Directory service pointing to an EKM replica, in the format
+        /// `projects/*/locations/*/namespaces/*/services/*`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceDirectoryService")]
+        public virtual string ServiceDirectoryService { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -4662,7 +7244,7 @@ namespace Google.Apis.CloudKMS.v1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -4679,11 +7261,51 @@ namespace Google.Apis.CloudKMS.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Response message for ShowEffectiveAutokeyConfig.</summary>
+    public class ShowEffectiveAutokeyConfigResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of the key project configured in the resource project's folder ancestry.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyProject")]
+        public virtual string KeyProject { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The `Status` type defines a logical error model that is suitable for different programming environments,
+    /// including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains
+    /// three pieces of data: error code, error message, and error details. You can find out more about this error model
+    /// and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).
+    /// </summary>
+    public class Status : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The status code, which should be an enum value of google.rpc.Code.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("code")]
+        public virtual System.Nullable<int> Code { get; set; }
+
+        /// <summary>
+        /// A list of messages that carry the error details. There is a common set of message types for APIs to use.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual System.Collections.Generic.IList<System.Collections.Generic.IDictionary<string, object>> Details { get; set; }
+
+        /// <summary>
+        /// A developer-facing error message, which should be in English. Any user-facing error message should be
+        /// localized and sent in the google.rpc.Status.details field, or localized by the client.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("message")]
+        public virtual string Message { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for `TestIamPermissions` method.</summary>
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>
@@ -4712,6 +7334,13 @@ namespace Google.Apis.CloudKMS.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cryptoKeyVersionId")]
         public virtual string CryptoKeyVersionId { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for EkmService.VerifyConnectivity.</summary>
+    public class VerifyConnectivityResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }

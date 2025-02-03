@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CloudOSLogin.v1
         public CloudOSLoginService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Users = new UsersResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://oslogin.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://oslogin.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CloudOSLogin.v1
         public override string Name => "oslogin";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://oslogin.googleapis.com/";
-        #else
-            "https://oslogin.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://oslogin.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud OS Login API.</summary>
         public class Scope
@@ -330,7 +325,7 @@ namespace Google.Apis.CloudOSLogin.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a POSIX account.</summary>
@@ -398,7 +393,7 @@ namespace Google.Apis.CloudOSLogin.v1
             /// <param name="parent">Required. The unique ID for the user in format `users/{user}`.</param>
             public virtual CreateRequest Create(Google.Apis.CloudOSLogin.v1.Data.SshPublicKey body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Create an SSH public key</summary>
@@ -453,7 +448,7 @@ namespace Google.Apis.CloudOSLogin.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes an SSH public key.</summary>
@@ -505,7 +500,7 @@ namespace Google.Apis.CloudOSLogin.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Retrieves an SSH public key.</summary>
@@ -560,7 +555,7 @@ namespace Google.Apis.CloudOSLogin.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.CloudOSLogin.v1.Data.SshPublicKey body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -633,7 +628,7 @@ namespace Google.Apis.CloudOSLogin.v1
         /// <param name="name">Required. The unique ID for the user in format `users/{user}`.</param>
         public virtual GetLoginProfileRequest GetLoginProfile(string name)
         {
-            return new GetLoginProfileRequest(service, name);
+            return new GetLoginProfileRequest(this.service, name);
         }
 
         /// <summary>
@@ -708,7 +703,7 @@ namespace Google.Apis.CloudOSLogin.v1
         /// <param name="parent">Required. The unique ID for the user in format `users/{user}`.</param>
         public virtual ImportSshPublicKeyRequest ImportSshPublicKey(Google.Apis.CloudOSLogin.v1.Data.SshPublicKey body, string parent)
         {
-            return new ImportSshPublicKeyRequest(service, body, parent);
+            return new ImportSshPublicKeyRequest(this.service, body, parent);
         }
 
         /// <summary>
@@ -732,6 +727,13 @@ namespace Google.Apis.CloudOSLogin.v1
             /// <summary>The project ID of the Google Cloud Platform project.</summary>
             [Google.Apis.Util.RequestParameterAttribute("projectId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string ProjectId { get; set; }
+
+            /// <summary>
+            /// Optional. The regions to which to assert that the key was written. If unspecified, defaults to all
+            /// regions. Regions are listed at https://cloud.google.com/about/locations#region.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("regions", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<string> Regions { get; set; }
 
             /// <summary>Gets or sets the body of this request.</summary>
             Google.Apis.CloudOSLogin.v1.Data.SshPublicKey Body { get; set; }
@@ -768,6 +770,14 @@ namespace Google.Apis.CloudOSLogin.v1
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("regions", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "regions",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
     }
@@ -777,8 +787,7 @@ namespace Google.Apis.CloudOSLogin.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {

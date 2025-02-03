@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,15 +35,21 @@ namespace Google.Apis.Drive.v3
         public DriveService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             About = new AboutResource(this);
+            Accessproposals = new AccessproposalsResource(this);
+            Apps = new AppsResource(this);
             Changes = new ChangesResource(this);
             Channels = new ChannelsResource(this);
             Comments = new CommentsResource(this);
             Drives = new DrivesResource(this);
             Files = new FilesResource(this);
+            Operation = new OperationResource(this);
+            Operations = new OperationsResource(this);
             Permissions = new PermissionsResource(this);
             Replies = new RepliesResource(this);
             Revisions = new RevisionsResource(this);
             Teamdrives = new TeamdrivesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://www.googleapis.com/drive/v3/");
+            BatchUri = GetEffectiveUri(null, "https://www.googleapis.com/batch/drive/v3");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -53,25 +59,18 @@ namespace Google.Apis.Drive.v3
         public override string Name => "drive";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://www.googleapis.com/drive/v3/";
-        #else
-            "https://www.googleapis.com/drive/v3/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "drive/v3/";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://www.googleapis.com/batch/drive/v3";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch/drive/v3";
-        #endif
 
-        /// <summary>Available OAuth 2.0 scopes for use with the Drive API.</summary>
+        /// <summary>Available OAuth 2.0 scopes for use with the Google Drive API.</summary>
         public class Scope
         {
             /// <summary>See, edit, create, and delete all of your Google Drive files</summary>
@@ -80,10 +79,16 @@ namespace Google.Apis.Drive.v3
             /// <summary>See, create, and delete its own configuration data in your Google Drive</summary>
             public static string DriveAppdata = "https://www.googleapis.com/auth/drive.appdata";
 
+            /// <summary>View your Google Drive apps</summary>
+            public static string DriveAppsReadonly = "https://www.googleapis.com/auth/drive.apps.readonly";
+
             /// <summary>
             /// See, edit, create, and delete only the specific Google Drive files you use with this app
             /// </summary>
             public static string DriveFile = "https://www.googleapis.com/auth/drive.file";
+
+            /// <summary>See and download your Google Drive files that were created or edited by Google Meet.</summary>
+            public static string DriveMeetReadonly = "https://www.googleapis.com/auth/drive.meet.readonly";
 
             /// <summary>View and manage metadata of files in your Google Drive</summary>
             public static string DriveMetadata = "https://www.googleapis.com/auth/drive.metadata";
@@ -101,7 +106,7 @@ namespace Google.Apis.Drive.v3
             public static string DriveScripts = "https://www.googleapis.com/auth/drive.scripts";
         }
 
-        /// <summary>Available OAuth 2.0 scope constants for use with the Drive API.</summary>
+        /// <summary>Available OAuth 2.0 scope constants for use with the Google Drive API.</summary>
         public static class ScopeConstants
         {
             /// <summary>See, edit, create, and delete all of your Google Drive files</summary>
@@ -110,10 +115,16 @@ namespace Google.Apis.Drive.v3
             /// <summary>See, create, and delete its own configuration data in your Google Drive</summary>
             public const string DriveAppdata = "https://www.googleapis.com/auth/drive.appdata";
 
+            /// <summary>View your Google Drive apps</summary>
+            public const string DriveAppsReadonly = "https://www.googleapis.com/auth/drive.apps.readonly";
+
             /// <summary>
             /// See, edit, create, and delete only the specific Google Drive files you use with this app
             /// </summary>
             public const string DriveFile = "https://www.googleapis.com/auth/drive.file";
+
+            /// <summary>See and download your Google Drive files that were created or edited by Google Meet.</summary>
+            public const string DriveMeetReadonly = "https://www.googleapis.com/auth/drive.meet.readonly";
 
             /// <summary>View and manage metadata of files in your Google Drive</summary>
             public const string DriveMetadata = "https://www.googleapis.com/auth/drive.metadata";
@@ -134,6 +145,12 @@ namespace Google.Apis.Drive.v3
         /// <summary>Gets the About resource.</summary>
         public virtual AboutResource About { get; }
 
+        /// <summary>Gets the Accessproposals resource.</summary>
+        public virtual AccessproposalsResource Accessproposals { get; }
+
+        /// <summary>Gets the Apps resource.</summary>
+        public virtual AppsResource Apps { get; }
+
         /// <summary>Gets the Changes resource.</summary>
         public virtual ChangesResource Changes { get; }
 
@@ -148,6 +165,12 @@ namespace Google.Apis.Drive.v3
 
         /// <summary>Gets the Files resource.</summary>
         public virtual FilesResource Files { get; }
+
+        /// <summary>Gets the Operation resource.</summary>
+        public virtual OperationResource Operation { get; }
+
+        /// <summary>Gets the Operations resource.</summary>
+        public virtual OperationsResource Operations { get; }
 
         /// <summary>Gets the Permissions resource.</summary>
         public virtual PermissionsResource Permissions { get; }
@@ -170,17 +193,49 @@ namespace Google.Apis.Drive.v3
         {
         }
 
-        /// <summary>Data format for the response.</summary>
+        /// <summary>V1 error format.</summary>
+        [Google.Apis.Util.RequestParameterAttribute("$.xgafv", Google.Apis.Util.RequestParameterType.Query)]
+        public virtual System.Nullable<XgafvEnum> Xgafv { get; set; }
+
+        /// <summary>V1 error format.</summary>
+        public enum XgafvEnum
+        {
+            /// <summary>v1 error format</summary>
+            [Google.Apis.Util.StringValueAttribute("1")]
+            Value1 = 0,
+
+            /// <summary>v2 error format</summary>
+            [Google.Apis.Util.StringValueAttribute("2")]
+            Value2 = 1,
+        }
+
+        /// <summary>OAuth access token.</summary>
+        [Google.Apis.Util.RequestParameterAttribute("access_token", Google.Apis.Util.RequestParameterType.Query)]
+        public virtual string AccessToken { get; set; }
+
+        /// <summary>Data format for response.</summary>
         [Google.Apis.Util.RequestParameterAttribute("alt", Google.Apis.Util.RequestParameterType.Query)]
         public virtual System.Nullable<AltEnum> Alt { get; set; }
 
-        /// <summary>Data format for the response.</summary>
+        /// <summary>Data format for response.</summary>
         public enum AltEnum
         {
             /// <summary>Responses with Content-Type of application/json</summary>
             [Google.Apis.Util.StringValueAttribute("json")]
             Json = 0,
+
+            /// <summary>Media download with context-dependent Content-Type</summary>
+            [Google.Apis.Util.StringValueAttribute("media")]
+            Media = 1,
+
+            /// <summary>Responses with Content-Type of application/x-protobuf</summary>
+            [Google.Apis.Util.StringValueAttribute("proto")]
+            Proto = 2,
         }
+
+        /// <summary>JSONP</summary>
+        [Google.Apis.Util.RequestParameterAttribute("callback", Google.Apis.Util.RequestParameterType.Query)]
+        public virtual string Callback { get; set; }
 
         /// <summary>Selector specifying which fields to include in a partial response.</summary>
         [Google.Apis.Util.RequestParameterAttribute("fields", Google.Apis.Util.RequestParameterType.Query)]
@@ -202,25 +257,54 @@ namespace Google.Apis.Drive.v3
         public virtual System.Nullable<bool> PrettyPrint { get; set; }
 
         /// <summary>
-        /// An opaque string that represents a user for quota purposes. Must not exceed 40 characters.
+        /// Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned to a
+        /// user, but should not exceed 40 characters.
         /// </summary>
         [Google.Apis.Util.RequestParameterAttribute("quotaUser", Google.Apis.Util.RequestParameterType.Query)]
         public virtual string QuotaUser { get; set; }
 
-        /// <summary>Deprecated. Please use quotaUser instead.</summary>
-        [Google.Apis.Util.RequestParameterAttribute("userIp", Google.Apis.Util.RequestParameterType.Query)]
-        public virtual string UserIp { get; set; }
+        /// <summary>Legacy upload protocol for media (e.g. "media", "multipart").</summary>
+        [Google.Apis.Util.RequestParameterAttribute("uploadType", Google.Apis.Util.RequestParameterType.Query)]
+        public virtual string UploadType { get; set; }
+
+        /// <summary>Upload protocol for media (e.g. "raw", "multipart").</summary>
+        [Google.Apis.Util.RequestParameterAttribute("upload_protocol", Google.Apis.Util.RequestParameterType.Query)]
+        public virtual string UploadProtocol { get; set; }
 
         /// <summary>Initializes Drive parameter list.</summary>
         protected override void InitParameters()
         {
             base.InitParameters();
+            RequestParameters.Add("$.xgafv", new Google.Apis.Discovery.Parameter
+            {
+                Name = "$.xgafv",
+                IsRequired = false,
+                ParameterType = "query",
+                DefaultValue = null,
+                Pattern = null,
+            });
+            RequestParameters.Add("access_token", new Google.Apis.Discovery.Parameter
+            {
+                Name = "access_token",
+                IsRequired = false,
+                ParameterType = "query",
+                DefaultValue = null,
+                Pattern = null,
+            });
             RequestParameters.Add("alt", new Google.Apis.Discovery.Parameter
             {
                 Name = "alt",
                 IsRequired = false,
                 ParameterType = "query",
                 DefaultValue = "json",
+                Pattern = null,
+            });
+            RequestParameters.Add("callback", new Google.Apis.Discovery.Parameter
+            {
+                Name = "callback",
+                IsRequired = false,
+                ParameterType = "query",
+                DefaultValue = null,
                 Pattern = null,
             });
             RequestParameters.Add("fields", new Google.Apis.Discovery.Parameter
@@ -263,9 +347,17 @@ namespace Google.Apis.Drive.v3
                 DefaultValue = null,
                 Pattern = null,
             });
-            RequestParameters.Add("userIp", new Google.Apis.Discovery.Parameter
+            RequestParameters.Add("uploadType", new Google.Apis.Discovery.Parameter
             {
-                Name = "userIp",
+                Name = "uploadType",
+                IsRequired = false,
+                ParameterType = "query",
+                DefaultValue = null,
+                Pattern = null,
+            });
+            RequestParameters.Add("upload_protocol", new Google.Apis.Discovery.Parameter
+            {
+                Name = "upload_protocol",
                 IsRequired = false,
                 ParameterType = "query",
                 DefaultValue = null,
@@ -288,13 +380,23 @@ namespace Google.Apis.Drive.v3
             this.service = service;
         }
 
-        /// <summary>Gets information about the user, the user's Drive, and system capabilities.</summary>
+        /// <summary>
+        /// Gets information about the user, the user's Drive, and system capabilities. For more information, see
+        /// [Return user info](https://developers.google.com/drive/api/guides/user-info). Required: The `fields`
+        /// parameter must be set. To return the exact fields you need, see [Return specific
+        /// fields](https://developers.google.com/drive/api/guides/fields-parameter).
+        /// </summary>
         public virtual GetRequest Get()
         {
-            return new GetRequest(service);
+            return new GetRequest(this.service);
         }
 
-        /// <summary>Gets information about the user, the user's Drive, and system capabilities.</summary>
+        /// <summary>
+        /// Gets information about the user, the user's Drive, and system capabilities. For more information, see
+        /// [Return user info](https://developers.google.com/drive/api/guides/user-info). Required: The `fields`
+        /// parameter must be set. To return the exact fields you need, see [Return specific
+        /// fields](https://developers.google.com/drive/api/guides/fields-parameter).
+        /// </summary>
         public class GetRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.About>
         {
             /// <summary>Constructs a new Get request.</summary>
@@ -320,6 +422,372 @@ namespace Google.Apis.Drive.v3
         }
     }
 
+    /// <summary>The "accessproposals" collection of methods.</summary>
+    public class AccessproposalsResource
+    {
+        private const string Resource = "accessproposals";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public AccessproposalsResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>Retrieves an AccessProposal by ID.</summary>
+        /// <param name="fileId">Required. The id of the item the request is on.</param>
+        /// <param name="proposalId">Required. The id of the access proposal to resolve.</param>
+        public virtual GetRequest Get(string fileId, string proposalId)
+        {
+            return new GetRequest(this.service, fileId, proposalId);
+        }
+
+        /// <summary>Retrieves an AccessProposal by ID.</summary>
+        public class GetRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.AccessProposal>
+        {
+            /// <summary>Constructs a new Get request.</summary>
+            public GetRequest(Google.Apis.Services.IClientService service, string fileId, string proposalId) : base(service)
+            {
+                FileId = fileId;
+                ProposalId = proposalId;
+                InitParameters();
+            }
+
+            /// <summary>Required. The id of the item the request is on.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("fileId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string FileId { get; private set; }
+
+            /// <summary>Required. The id of the access proposal to resolve.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("proposalId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string ProposalId { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "get";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "files/{fileId}/accessproposals/{proposalId}";
+
+            /// <summary>Initializes Get parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("fileId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "fileId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("proposalId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "proposalId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// List the AccessProposals on a file. Note: Only approvers are able to list AccessProposals on a file. If the
+        /// user is not an approver, returns a 403.
+        /// </summary>
+        /// <param name="fileId">Required. The id of the item the request is on.</param>
+        public virtual ListRequest List(string fileId)
+        {
+            return new ListRequest(this.service, fileId);
+        }
+
+        /// <summary>
+        /// List the AccessProposals on a file. Note: Only approvers are able to list AccessProposals on a file. If the
+        /// user is not an approver, returns a 403.
+        /// </summary>
+        public class ListRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.ListAccessProposalsResponse>
+        {
+            /// <summary>Constructs a new List request.</summary>
+            public ListRequest(Google.Apis.Services.IClientService service, string fileId) : base(service)
+            {
+                FileId = fileId;
+                InitParameters();
+            }
+
+            /// <summary>Required. The id of the item the request is on.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("fileId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string FileId { get; private set; }
+
+            /// <summary>Optional. The number of results per page</summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> PageSize { get; set; }
+
+            /// <summary>Optional. The continuation token on the list of access requests.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PageToken { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "list";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "files/{fileId}/accessproposals";
+
+            /// <summary>Initializes List parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("fileId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "fileId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageSize",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageToken",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>Used to approve or deny an Access Proposal.</summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="fileId">Required. The id of the item the request is on.</param>
+        /// <param name="proposalId">Required. The id of the access proposal to resolve.</param>
+        public virtual ResolveRequest Resolve(Google.Apis.Drive.v3.Data.ResolveAccessProposalRequest body, string fileId, string proposalId)
+        {
+            return new ResolveRequest(this.service, body, fileId, proposalId);
+        }
+
+        /// <summary>Used to approve or deny an Access Proposal.</summary>
+        public class ResolveRequest : DriveBaseServiceRequest<string>
+        {
+            /// <summary>Constructs a new Resolve request.</summary>
+            public ResolveRequest(Google.Apis.Services.IClientService service, Google.Apis.Drive.v3.Data.ResolveAccessProposalRequest body, string fileId, string proposalId) : base(service)
+            {
+                FileId = fileId;
+                ProposalId = proposalId;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Required. The id of the item the request is on.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("fileId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string FileId { get; private set; }
+
+            /// <summary>Required. The id of the access proposal to resolve.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("proposalId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string ProposalId { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Drive.v3.Data.ResolveAccessProposalRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "resolve";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "files/{fileId}/accessproposals/{proposalId}:resolve";
+
+            /// <summary>Initializes Resolve parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("fileId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "fileId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("proposalId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "proposalId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
+    /// <summary>The "apps" collection of methods.</summary>
+    public class AppsResource
+    {
+        private const string Resource = "apps";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public AppsResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>
+        /// Gets a specific app. For more information, see [Return user
+        /// info](https://developers.google.com/drive/api/guides/user-info).
+        /// </summary>
+        /// <param name="appId">The ID of the app.</param>
+        public virtual GetRequest Get(string appId)
+        {
+            return new GetRequest(this.service, appId);
+        }
+
+        /// <summary>
+        /// Gets a specific app. For more information, see [Return user
+        /// info](https://developers.google.com/drive/api/guides/user-info).
+        /// </summary>
+        public class GetRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.App>
+        {
+            /// <summary>Constructs a new Get request.</summary>
+            public GetRequest(Google.Apis.Services.IClientService service, string appId) : base(service)
+            {
+                AppId = appId;
+                InitParameters();
+            }
+
+            /// <summary>The ID of the app.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("appId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string AppId { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "get";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "apps/{appId}";
+
+            /// <summary>Initializes Get parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("appId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "appId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Lists a user's installed apps. For more information, see [Return user
+        /// info](https://developers.google.com/drive/api/guides/user-info).
+        /// </summary>
+        public virtual ListRequest List()
+        {
+            return new ListRequest(this.service);
+        }
+
+        /// <summary>
+        /// Lists a user's installed apps. For more information, see [Return user
+        /// info](https://developers.google.com/drive/api/guides/user-info).
+        /// </summary>
+        public class ListRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.AppList>
+        {
+            /// <summary>Constructs a new List request.</summary>
+            public ListRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>
+            /// A comma-separated list of file extensions to limit returned results. All results within the given app
+            /// query scope which can open any of the given file extensions are included in the response. If
+            /// `appFilterMimeTypes` are provided as well, the result is a union of the two resulting app lists.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("appFilterExtensions", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string AppFilterExtensions { get; set; }
+
+            /// <summary>
+            /// A comma-separated list of file extensions to limit returned results. All results within the given app
+            /// query scope which can open any of the given MIME types will be included in the response. If
+            /// `appFilterExtensions` are provided as well, the result is a union of the two resulting app lists.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("appFilterMimeTypes", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string AppFilterMimeTypes { get; set; }
+
+            /// <summary>
+            /// A language or locale code, as defined by BCP 47, with some extensions from Unicode's LDML format
+            /// (http://www.unicode.org/reports/tr35/).
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("languageCode", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string LanguageCode { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "list";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "apps";
+
+            /// <summary>Initializes List parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("appFilterExtensions", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "appFilterExtensions",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("appFilterMimeTypes", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "appFilterMimeTypes",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("languageCode", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "languageCode",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
     /// <summary>The "changes" collection of methods.</summary>
     public class ChangesResource
     {
@@ -334,13 +802,19 @@ namespace Google.Apis.Drive.v3
             this.service = service;
         }
 
-        /// <summary>Gets the starting pageToken for listing future changes.</summary>
+        /// <summary>
+        /// Gets the starting pageToken for listing future changes. For more information, see [Retrieve
+        /// changes](https://developers.google.com/drive/api/guides/manage-changes).
+        /// </summary>
         public virtual GetStartPageTokenRequest GetStartPageToken()
         {
-            return new GetStartPageTokenRequest(service);
+            return new GetStartPageTokenRequest(this.service);
         }
 
-        /// <summary>Gets the starting pageToken for listing future changes.</summary>
+        /// <summary>
+        /// Gets the starting pageToken for listing future changes. For more information, see [Retrieve
+        /// changes](https://developers.google.com/drive/api/guides/manage-changes).
+        /// </summary>
         public class GetStartPageTokenRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.StartPageToken>
         {
             /// <summary>Constructs a new GetStartPageToken request.</summary>
@@ -351,7 +825,7 @@ namespace Google.Apis.Drive.v3
 
             /// <summary>
             /// The ID of the shared drive for which the starting pageToken for listing future changes from that shared
-            /// drive is returned.
+            /// drive will be returned.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("driveId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string DriveId { get; set; }
@@ -360,11 +834,11 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
-            /// <summary>Deprecated use driveId instead.</summary>
+            /// <summary>Deprecated: Use `driveId` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("teamDriveId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string TeamDriveId { get; set; }
 
@@ -416,17 +890,23 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Lists the changes for a user or shared drive.</summary>
+        /// <summary>
+        /// Lists the changes for a user or shared drive. For more information, see [Retrieve
+        /// changes](https://developers.google.com/drive/api/guides/manage-changes).
+        /// </summary>
         /// <param name="pageToken">
         /// The token for continuing a previous list request on the next page. This should be set to the value of
         /// 'nextPageToken' from the previous response or to the response from the getStartPageToken method.
         /// </param>
         public virtual ListRequest List(string pageToken)
         {
-            return new ListRequest(service, pageToken);
+            return new ListRequest(this.service, pageToken);
         }
 
-        /// <summary>Lists the changes for a user or shared drive.</summary>
+        /// <summary>
+        /// Lists the changes for a user or shared drive. For more information, see [Retrieve
+        /// changes](https://developers.google.com/drive/api/guides/manage-changes).
+        /// </summary>
         public class ListRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.ChangeList>
         {
             /// <summary>Constructs a new List request.</summary>
@@ -444,8 +924,8 @@ namespace Google.Apis.Drive.v3
             public virtual string PageToken { get; private set; }
 
             /// <summary>
-            /// The shared drive from which changes are returned. If specified the change IDs will be reflective of the
-            /// shared drive; use the combined drive ID and change ID as an identifier.
+            /// The shared drive from which changes will be returned. If specified the change IDs will be reflective of
+            /// the shared drive; use the combined drive ID and change ID as an identifier.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("driveId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string DriveId { get; set; }
@@ -463,6 +943,12 @@ namespace Google.Apis.Drive.v3
             public virtual System.Nullable<bool> IncludeItemsFromAllDrives { get; set; }
 
             /// <summary>
+            /// A comma-separated list of IDs of labels to include in the `labelInfo` part of the response.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("includeLabels", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string IncludeLabels { get; set; }
+
+            /// <summary>
             /// Specifies which additional view's permissions to include in the response. Only 'published' is supported.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("includePermissionsForView", Google.Apis.Util.RequestParameterType.Query)]
@@ -475,7 +961,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("includeRemoved", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> IncludeRemoved { get; set; }
 
-            /// <summary>Deprecated use includeItemsFromAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `includeItemsFromAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("includeTeamDriveItems", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> IncludeTeamDriveItems { get; set; }
 
@@ -491,8 +977,8 @@ namespace Google.Apis.Drive.v3
             public virtual System.Nullable<bool> RestrictToMyDrive { get; set; }
 
             /// <summary>
-            /// A comma-separated list of spaces to query within the user corpus. Supported values are 'drive',
-            /// 'appDataFolder' and 'photos'.
+            /// A comma-separated list of spaces to query within the corpora. Supported values are 'drive' and
+            /// 'appDataFolder'.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("spaces", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Spaces { get; set; }
@@ -501,11 +987,11 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
-            /// <summary>Deprecated use driveId instead.</summary>
+            /// <summary>Deprecated: Use `driveId` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("teamDriveId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string TeamDriveId { get; set; }
 
@@ -552,6 +1038,14 @@ namespace Google.Apis.Drive.v3
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = "false",
+                    Pattern = null,
+                });
+                RequestParameters.Add("includeLabels", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "includeLabels",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
                     Pattern = null,
                 });
                 RequestParameters.Add("includePermissionsForView", new Google.Apis.Discovery.Parameter
@@ -629,7 +1123,10 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Subscribes to changes for a user.</summary>
+        /// <summary>
+        /// Subscribes to changes for a user. For more information, see [Notifications for resource
+        /// changes](https://developers.google.com/drive/api/guides/push).
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="pageToken">
         /// The token for continuing a previous list request on the next page. This should be set to the value of
@@ -637,10 +1134,13 @@ namespace Google.Apis.Drive.v3
         /// </param>
         public virtual WatchRequest Watch(Google.Apis.Drive.v3.Data.Channel body, string pageToken)
         {
-            return new WatchRequest(service, body, pageToken);
+            return new WatchRequest(this.service, body, pageToken);
         }
 
-        /// <summary>Subscribes to changes for a user.</summary>
+        /// <summary>
+        /// Subscribes to changes for a user. For more information, see [Notifications for resource
+        /// changes](https://developers.google.com/drive/api/guides/push).
+        /// </summary>
         public class WatchRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.Channel>
         {
             /// <summary>Constructs a new Watch request.</summary>
@@ -659,8 +1159,8 @@ namespace Google.Apis.Drive.v3
             public virtual string PageToken { get; private set; }
 
             /// <summary>
-            /// The shared drive from which changes are returned. If specified the change IDs will be reflective of the
-            /// shared drive; use the combined drive ID and change ID as an identifier.
+            /// The shared drive from which changes will be returned. If specified the change IDs will be reflective of
+            /// the shared drive; use the combined drive ID and change ID as an identifier.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("driveId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string DriveId { get; set; }
@@ -678,6 +1178,12 @@ namespace Google.Apis.Drive.v3
             public virtual System.Nullable<bool> IncludeItemsFromAllDrives { get; set; }
 
             /// <summary>
+            /// A comma-separated list of IDs of labels to include in the `labelInfo` part of the response.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("includeLabels", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string IncludeLabels { get; set; }
+
+            /// <summary>
             /// Specifies which additional view's permissions to include in the response. Only 'published' is supported.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("includePermissionsForView", Google.Apis.Util.RequestParameterType.Query)]
@@ -690,7 +1196,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("includeRemoved", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> IncludeRemoved { get; set; }
 
-            /// <summary>Deprecated use includeItemsFromAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `includeItemsFromAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("includeTeamDriveItems", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> IncludeTeamDriveItems { get; set; }
 
@@ -706,8 +1212,8 @@ namespace Google.Apis.Drive.v3
             public virtual System.Nullable<bool> RestrictToMyDrive { get; set; }
 
             /// <summary>
-            /// A comma-separated list of spaces to query within the user corpus. Supported values are 'drive',
-            /// 'appDataFolder' and 'photos'.
+            /// A comma-separated list of spaces to query within the corpora. Supported values are 'drive' and
+            /// 'appDataFolder'.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("spaces", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Spaces { get; set; }
@@ -716,11 +1222,11 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
-            /// <summary>Deprecated use driveId instead.</summary>
+            /// <summary>Deprecated: Use `driveId` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("teamDriveId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string TeamDriveId { get; set; }
 
@@ -773,6 +1279,14 @@ namespace Google.Apis.Drive.v3
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = "false",
+                    Pattern = null,
+                });
+                RequestParameters.Add("includeLabels", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "includeLabels",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
                     Pattern = null,
                 });
                 RequestParameters.Add("includePermissionsForView", new Google.Apis.Discovery.Parameter
@@ -865,14 +1379,20 @@ namespace Google.Apis.Drive.v3
             this.service = service;
         }
 
-        /// <summary>Stop watching resources through this channel</summary>
+        /// <summary>
+        /// Stops watching resources through this channel. For more information, see [Notifications for resource
+        /// changes](https://developers.google.com/drive/api/guides/push).
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual StopRequest Stop(Google.Apis.Drive.v3.Data.Channel body)
         {
-            return new StopRequest(service, body);
+            return new StopRequest(this.service, body);
         }
 
-        /// <summary>Stop watching resources through this channel</summary>
+        /// <summary>
+        /// Stops watching resources through this channel. For more information, see [Notifications for resource
+        /// changes](https://developers.google.com/drive/api/guides/push).
+        /// </summary>
         public class StopRequest : DriveBaseServiceRequest<string>
         {
             /// <summary>Constructs a new Stop request.</summary>
@@ -919,15 +1439,25 @@ namespace Google.Apis.Drive.v3
             this.service = service;
         }
 
-        /// <summary>Creates a new comment on a file.</summary>
+        /// <summary>
+        /// Creates a comment on a file. For more information, see [Manage comments and
+        /// replies](https://developers.google.com/drive/api/guides/manage-comments). Required: The `fields` parameter
+        /// must be set. To return the exact fields you need, see [Return specific
+        /// fields](https://developers.google.com/drive/api/guides/fields-parameter).
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="fileId">The ID of the file.</param>
         public virtual CreateRequest Create(Google.Apis.Drive.v3.Data.Comment body, string fileId)
         {
-            return new CreateRequest(service, body, fileId);
+            return new CreateRequest(this.service, body, fileId);
         }
 
-        /// <summary>Creates a new comment on a file.</summary>
+        /// <summary>
+        /// Creates a comment on a file. For more information, see [Manage comments and
+        /// replies](https://developers.google.com/drive/api/guides/manage-comments). Required: The `fields` parameter
+        /// must be set. To return the exact fields you need, see [Return specific
+        /// fields](https://developers.google.com/drive/api/guides/fields-parameter).
+        /// </summary>
         public class CreateRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.Comment>
         {
             /// <summary>Constructs a new Create request.</summary>
@@ -972,15 +1502,25 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Deletes a comment.</summary>
+        /// <summary>
+        /// Deletes a comment. For more information, see [Manage comments and
+        /// replies](https://developers.google.com/drive/api/guides/manage-comments). Required: The `fields` parameter
+        /// must be set. To return the exact fields you need, see [Return specific
+        /// fields](https://developers.google.com/drive/api/guides/fields-parameter).
+        /// </summary>
         /// <param name="fileId">The ID of the file.</param>
         /// <param name="commentId">The ID of the comment.</param>
         public virtual DeleteRequest Delete(string fileId, string commentId)
         {
-            return new DeleteRequest(service, fileId, commentId);
+            return new DeleteRequest(this.service, fileId, commentId);
         }
 
-        /// <summary>Deletes a comment.</summary>
+        /// <summary>
+        /// Deletes a comment. For more information, see [Manage comments and
+        /// replies](https://developers.google.com/drive/api/guides/manage-comments). Required: The `fields` parameter
+        /// must be set. To return the exact fields you need, see [Return specific
+        /// fields](https://developers.google.com/drive/api/guides/fields-parameter).
+        /// </summary>
         public class DeleteRequest : DriveBaseServiceRequest<string>
         {
             /// <summary>Constructs a new Delete request.</summary>
@@ -1031,15 +1571,25 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Gets a comment by ID.</summary>
+        /// <summary>
+        /// Gets a comment by ID. For more information, see [Manage comments and
+        /// replies](https://developers.google.com/drive/api/guides/manage-comments). Required: The `fields` parameter
+        /// must be set. To return the exact fields you need, see [Return specific
+        /// fields](https://developers.google.com/drive/api/guides/fields-parameter).
+        /// </summary>
         /// <param name="fileId">The ID of the file.</param>
         /// <param name="commentId">The ID of the comment.</param>
         public virtual GetRequest Get(string fileId, string commentId)
         {
-            return new GetRequest(service, fileId, commentId);
+            return new GetRequest(this.service, fileId, commentId);
         }
 
-        /// <summary>Gets a comment by ID.</summary>
+        /// <summary>
+        /// Gets a comment by ID. For more information, see [Manage comments and
+        /// replies](https://developers.google.com/drive/api/guides/manage-comments). Required: The `fields` parameter
+        /// must be set. To return the exact fields you need, see [Return specific
+        /// fields](https://developers.google.com/drive/api/guides/fields-parameter).
+        /// </summary>
         public class GetRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.Comment>
         {
             /// <summary>Constructs a new Get request.</summary>
@@ -1104,14 +1654,24 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Lists a file's comments.</summary>
+        /// <summary>
+        /// Lists a file's comments. For more information, see [Manage comments and
+        /// replies](https://developers.google.com/drive/api/guides/manage-comments). Required: The `fields` parameter
+        /// must be set. To return the exact fields you need, see [Return specific
+        /// fields](https://developers.google.com/drive/api/guides/fields-parameter).
+        /// </summary>
         /// <param name="fileId">The ID of the file.</param>
         public virtual ListRequest List(string fileId)
         {
-            return new ListRequest(service, fileId);
+            return new ListRequest(this.service, fileId);
         }
 
-        /// <summary>Lists a file's comments.</summary>
+        /// <summary>
+        /// Lists a file's comments. For more information, see [Manage comments and
+        /// replies](https://developers.google.com/drive/api/guides/manage-comments). Required: The `fields` parameter
+        /// must be set. To return the exact fields you need, see [Return specific
+        /// fields](https://developers.google.com/drive/api/guides/fields-parameter).
+        /// </summary>
         public class ListRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.CommentList>
         {
             /// <summary>Constructs a new List request.</summary>
@@ -1202,16 +1762,26 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Updates a comment with patch semantics.</summary>
+        /// <summary>
+        /// Updates a comment with patch semantics. For more information, see [Manage comments and
+        /// replies](https://developers.google.com/drive/api/guides/manage-comments). Required: The `fields` parameter
+        /// must be set. To return the exact fields you need, see [Return specific
+        /// fields](https://developers.google.com/drive/api/guides/fields-parameter).
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="fileId">The ID of the file.</param>
         /// <param name="commentId">The ID of the comment.</param>
         public virtual UpdateRequest Update(Google.Apis.Drive.v3.Data.Comment body, string fileId, string commentId)
         {
-            return new UpdateRequest(service, body, fileId, commentId);
+            return new UpdateRequest(this.service, body, fileId, commentId);
         }
 
-        /// <summary>Updates a comment with patch semantics.</summary>
+        /// <summary>
+        /// Updates a comment with patch semantics. For more information, see [Manage comments and
+        /// replies](https://developers.google.com/drive/api/guides/manage-comments). Required: The `fields` parameter
+        /// must be set. To return the exact fields you need, see [Return specific
+        /// fields](https://developers.google.com/drive/api/guides/fields-parameter).
+        /// </summary>
         public class UpdateRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.Comment>
         {
             /// <summary>Constructs a new Update request.</summary>
@@ -1284,20 +1854,20 @@ namespace Google.Apis.Drive.v3
             this.service = service;
         }
 
-        /// <summary>Creates a new shared drive.</summary>
+        /// <summary>Creates a shared drive.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="requestId">
-        /// An ID, such as a random UUID, which uniquely identifies this user's request for idempotent creation of a
-        /// shared drive. A repeated request by the same user and with the same request ID will avoid creating
-        /// duplicates by attempting to create the same shared drive. If the shared drive already exists a 409 error
-        /// will be returned.
+        /// Required. An ID, such as a random UUID, which uniquely identifies this user's request for idempotent
+        /// creation of a shared drive. A repeated request by the same user and with the same request ID will avoid
+        /// creating duplicates by attempting to create the same shared drive. If the shared drive already exists a 409
+        /// error will be returned.
         /// </param>
         public virtual CreateRequest Create(Google.Apis.Drive.v3.Data.Drive body, string requestId)
         {
-            return new CreateRequest(service, body, requestId);
+            return new CreateRequest(this.service, body, requestId);
         }
 
-        /// <summary>Creates a new shared drive.</summary>
+        /// <summary>Creates a shared drive.</summary>
         public class CreateRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.Drive>
         {
             /// <summary>Constructs a new Create request.</summary>
@@ -1309,10 +1879,10 @@ namespace Google.Apis.Drive.v3
             }
 
             /// <summary>
-            /// An ID, such as a random UUID, which uniquely identifies this user's request for idempotent creation of a
-            /// shared drive. A repeated request by the same user and with the same request ID will avoid creating
-            /// duplicates by attempting to create the same shared drive. If the shared drive already exists a 409 error
-            /// will be returned.
+            /// Required. An ID, such as a random UUID, which uniquely identifies this user's request for idempotent
+            /// creation of a shared drive. A repeated request by the same user and with the same request ID will avoid
+            /// creating duplicates by attempting to create the same shared drive. If the shared drive already exists a
+            /// 409 error will be returned.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string RequestId { get; private set; }
@@ -1348,17 +1918,17 @@ namespace Google.Apis.Drive.v3
         }
 
         /// <summary>
-        /// Permanently deletes a shared drive for which the user is an organizer. The shared drive cannot contain any
+        /// Permanently deletes a shared drive for which the user is an `organizer`. The shared drive cannot contain any
         /// untrashed items.
         /// </summary>
         /// <param name="driveId">The ID of the shared drive.</param>
         public virtual DeleteRequest Delete(string driveId)
         {
-            return new DeleteRequest(service, driveId);
+            return new DeleteRequest(this.service, driveId);
         }
 
         /// <summary>
-        /// Permanently deletes a shared drive for which the user is an organizer. The shared drive cannot contain any
+        /// Permanently deletes a shared drive for which the user is an `organizer`. The shared drive cannot contain any
         /// untrashed items.
         /// </summary>
         public class DeleteRequest : DriveBaseServiceRequest<string>
@@ -1373,6 +1943,20 @@ namespace Google.Apis.Drive.v3
             /// <summary>The ID of the shared drive.</summary>
             [Google.Apis.Util.RequestParameterAttribute("driveId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string DriveId { get; private set; }
+
+            /// <summary>
+            /// Whether any items inside the shared drive should also be deleted. This option is only supported when
+            /// `useDomainAdminAccess` is also set to `true`.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("allowItemDeletion", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> AllowItemDeletion { get; set; }
+
+            /// <summary>
+            /// Issue the request as a domain administrator; if set to true, then the requester will be granted access
+            /// if they are an administrator of the domain to which the shared drive belongs.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("useDomainAdminAccess", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> UseDomainAdminAccess { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "delete";
@@ -1395,6 +1979,22 @@ namespace Google.Apis.Drive.v3
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("allowItemDeletion", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "allowItemDeletion",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = "false",
+                    Pattern = null,
+                });
+                RequestParameters.Add("useDomainAdminAccess", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "useDomainAdminAccess",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = "false",
+                    Pattern = null,
+                });
             }
         }
 
@@ -1402,7 +2002,7 @@ namespace Google.Apis.Drive.v3
         /// <param name="driveId">The ID of the shared drive.</param>
         public virtual GetRequest Get(string driveId)
         {
-            return new GetRequest(service, driveId);
+            return new GetRequest(this.service, driveId);
         }
 
         /// <summary>Gets a shared drive's metadata by ID.</summary>
@@ -1462,7 +2062,7 @@ namespace Google.Apis.Drive.v3
         /// <param name="driveId">The ID of the shared drive.</param>
         public virtual HideRequest Hide(string driveId)
         {
-            return new HideRequest(service, driveId);
+            return new HideRequest(this.service, driveId);
         }
 
         /// <summary>Hides a shared drive from the default view.</summary>
@@ -1503,13 +2103,21 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Lists the user's shared drives.</summary>
+        /// <summary>
+        ///  Lists the user's shared drives. This method accepts the `q` parameter, which is a search query combining
+        /// one or more search terms. For more information, see the [Search for shared
+        /// drives](/drive/api/guides/search-shareddrives) guide.
+        /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
-        /// <summary>Lists the user's shared drives.</summary>
+        /// <summary>
+        ///  Lists the user's shared drives. This method accepts the `q` parameter, which is a search query combining
+        /// one or more search terms. For more information, see the [Search for shared
+        /// drives](/drive/api/guides/search-shareddrives) guide.
+        /// </summary>
         public class ListRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.DriveList>
         {
             /// <summary>Constructs a new List request.</summary>
@@ -1589,7 +2197,7 @@ namespace Google.Apis.Drive.v3
         /// <param name="driveId">The ID of the shared drive.</param>
         public virtual UnhideRequest Unhide(string driveId)
         {
-            return new UnhideRequest(service, driveId);
+            return new UnhideRequest(this.service, driveId);
         }
 
         /// <summary>Restores a shared drive to the default view.</summary>
@@ -1630,15 +2238,15 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Updates the metadate for a shared drive.</summary>
+        /// <summary>Updates the metadata for a shared drive.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="driveId">The ID of the shared drive.</param>
         public virtual UpdateRequest Update(Google.Apis.Drive.v3.Data.Drive body, string driveId)
         {
-            return new UpdateRequest(service, body, driveId);
+            return new UpdateRequest(this.service, body, driveId);
         }
 
-        /// <summary>Updates the metadate for a shared drive.</summary>
+        /// <summary>Updates the metadata for a shared drive.</summary>
         public class UpdateRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.Drive>
         {
             /// <summary>Constructs a new Update request.</summary>
@@ -1713,19 +2321,15 @@ namespace Google.Apis.Drive.v3
             this.service = service;
         }
 
-        /// <summary>
-        /// Creates a copy of a file and applies any requested updates with patch semantics. Folders cannot be copied.
-        /// </summary>
+        /// <summary>Creates a copy of a file and applies any requested updates with patch semantics.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="fileId">The ID of the file.</param>
         public virtual CopyRequest Copy(Google.Apis.Drive.v3.Data.File body, string fileId)
         {
-            return new CopyRequest(service, body, fileId);
+            return new CopyRequest(this.service, body, fileId);
         }
 
-        /// <summary>
-        /// Creates a copy of a file and applies any requested updates with patch semantics. Folders cannot be copied.
-        /// </summary>
+        /// <summary>Creates a copy of a file and applies any requested updates with patch semantics.</summary>
         public class CopyRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.File>
         {
             /// <summary>Constructs a new Copy request.</summary>
@@ -1755,6 +2359,12 @@ namespace Google.Apis.Drive.v3
             public virtual System.Nullable<bool> IgnoreDefaultVisibility { get; set; }
 
             /// <summary>
+            /// A comma-separated list of IDs of labels to include in the `labelInfo` part of the response.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("includeLabels", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string IncludeLabels { get; set; }
+
+            /// <summary>
             /// Specifies which additional view's permissions to include in the response. Only 'published' is supported.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("includePermissionsForView", Google.Apis.Util.RequestParameterType.Query)]
@@ -1776,7 +2386,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
@@ -1823,6 +2433,14 @@ namespace Google.Apis.Drive.v3
                     DefaultValue = "false",
                     Pattern = null,
                 });
+                RequestParameters.Add("includeLabels", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "includeLabels",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("includePermissionsForView", new Google.Apis.Discovery.Parameter
                 {
                     Name = "includePermissionsForView",
@@ -1866,14 +2484,40 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Creates a new file.</summary>
+        /// <summary>
+        ///  Creates a new file. This method supports an */upload* URI and accepts uploaded media with the following
+        /// characteristics: - *Maximum file size:* 5,120 GB - *Accepted Media MIME types:*`*/*` Note: Specify a valid
+        /// MIME type, rather than the literal `*/*` value. The literal `*/*` is only used to indicate that any valid
+        /// MIME type can be uploaded. For more information on uploading files, see [Upload file
+        /// data](/drive/api/guides/manage-uploads). Apps creating shortcuts with `files.create` must specify the MIME
+        /// type `application/vnd.google-apps.shortcut`. Apps should specify a file extension in the `name` property
+        /// when inserting files with the API. For example, an operation to insert a JPEG file should specify something
+        /// like `"name": "cat.jpg"` in the metadata. Subsequent `GET` requests include the read-only `fileExtension`
+        /// property populated with the extension originally specified in the `title` property. When a Google Drive user
+        /// requests to download a file, or when the file is downloaded through the sync client, Drive builds a full
+        /// filename (with extension) based on the title. In cases where the extension is missing, Drive attempts to
+        /// determine the extension based on the file's MIME type.
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.Drive.v3.Data.File body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
-        /// <summary>Creates a new file.</summary>
+        /// <summary>
+        ///  Creates a new file. This method supports an */upload* URI and accepts uploaded media with the following
+        /// characteristics: - *Maximum file size:* 5,120 GB - *Accepted Media MIME types:*`*/*` Note: Specify a valid
+        /// MIME type, rather than the literal `*/*` value. The literal `*/*` is only used to indicate that any valid
+        /// MIME type can be uploaded. For more information on uploading files, see [Upload file
+        /// data](/drive/api/guides/manage-uploads). Apps creating shortcuts with `files.create` must specify the MIME
+        /// type `application/vnd.google-apps.shortcut`. Apps should specify a file extension in the `name` property
+        /// when inserting files with the API. For example, an operation to insert a JPEG file should specify something
+        /// like `"name": "cat.jpg"` in the metadata. Subsequent `GET` requests include the read-only `fileExtension`
+        /// property populated with the extension originally specified in the `title` property. When a Google Drive user
+        /// requests to download a file, or when the file is downloaded through the sync client, Drive builds a full
+        /// filename (with extension) based on the title. In cases where the extension is missing, Drive attempts to
+        /// determine the extension based on the file's MIME type.
+        /// </summary>
         public class CreateRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.File>
         {
             /// <summary>Constructs a new Create request.</summary>
@@ -1894,6 +2538,12 @@ namespace Google.Apis.Drive.v3
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("ignoreDefaultVisibility", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> IgnoreDefaultVisibility { get; set; }
+
+            /// <summary>
+            /// A comma-separated list of IDs of labels to include in the `labelInfo` part of the response.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("includeLabels", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string IncludeLabels { get; set; }
 
             /// <summary>
             /// Specifies which additional view's permissions to include in the response. Only 'published' is supported.
@@ -1917,7 +2567,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
@@ -1958,6 +2608,14 @@ namespace Google.Apis.Drive.v3
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = "false",
+                    Pattern = null,
+                });
+                RequestParameters.Add("includeLabels", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "includeLabels",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
                     Pattern = null,
                 });
                 RequestParameters.Add("includePermissionsForView", new Google.Apis.Discovery.Parameter
@@ -2011,7 +2669,20 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Creates a new file.</summary>
+        /// <summary>
+        ///  Creates a new file. This method supports an */upload* URI and accepts uploaded media with the following
+        /// characteristics: - *Maximum file size:* 5,120 GB - *Accepted Media MIME types:*`*/*` Note: Specify a valid
+        /// MIME type, rather than the literal `*/*` value. The literal `*/*` is only used to indicate that any valid
+        /// MIME type can be uploaded. For more information on uploading files, see [Upload file
+        /// data](/drive/api/guides/manage-uploads). Apps creating shortcuts with `files.create` must specify the MIME
+        /// type `application/vnd.google-apps.shortcut`. Apps should specify a file extension in the `name` property
+        /// when inserting files with the API. For example, an operation to insert a JPEG file should specify something
+        /// like `"name": "cat.jpg"` in the metadata. Subsequent `GET` requests include the read-only `fileExtension`
+        /// property populated with the extension originally specified in the `title` property. When a Google Drive user
+        /// requests to download a file, or when the file is downloaded through the sync client, Drive builds a full
+        /// filename (with extension) based on the title. In cases where the extension is missing, Drive attempts to
+        /// determine the extension based on the file's MIME type.
+        /// </summary>
         /// <remarks>
         /// Considerations regarding <paramref name="stream"/>:
         /// <list type="bullet">
@@ -2040,17 +2711,49 @@ namespace Google.Apis.Drive.v3
         /// <summary>Create media upload which supports resumable upload.</summary>
         public class CreateMediaUpload : Google.Apis.Upload.ResumableUpload<Google.Apis.Drive.v3.Data.File, Google.Apis.Drive.v3.Data.File>
         {
-            /// <summary>Data format for the response.</summary>
+            /// <summary>V1 error format.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("$.xgafv", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<XgafvEnum> Xgafv { get; set; }
+
+            /// <summary>V1 error format.</summary>
+            public enum XgafvEnum
+            {
+                /// <summary>v1 error format</summary>
+                [Google.Apis.Util.StringValueAttribute("1")]
+                Value1 = 0,
+
+                /// <summary>v2 error format</summary>
+                [Google.Apis.Util.StringValueAttribute("2")]
+                Value2 = 1,
+            }
+
+            /// <summary>OAuth access token.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("access_token", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string AccessToken { get; set; }
+
+            /// <summary>Data format for response.</summary>
             [Google.Apis.Util.RequestParameterAttribute("alt", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<AltEnum> Alt { get; set; }
 
-            /// <summary>Data format for the response.</summary>
+            /// <summary>Data format for response.</summary>
             public enum AltEnum
             {
                 /// <summary>Responses with Content-Type of application/json</summary>
                 [Google.Apis.Util.StringValueAttribute("json")]
                 Json = 0,
+
+                /// <summary>Media download with context-dependent Content-Type</summary>
+                [Google.Apis.Util.StringValueAttribute("media")]
+                Media = 1,
+
+                /// <summary>Responses with Content-Type of application/x-protobuf</summary>
+                [Google.Apis.Util.StringValueAttribute("proto")]
+                Proto = 2,
             }
+
+            /// <summary>JSONP</summary>
+            [Google.Apis.Util.RequestParameterAttribute("callback", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Callback { get; set; }
 
             /// <summary>Selector specifying which fields to include in a partial response.</summary>
             [Google.Apis.Util.RequestParameterAttribute("fields", Google.Apis.Util.RequestParameterType.Query)]
@@ -2072,14 +2775,19 @@ namespace Google.Apis.Drive.v3
             public virtual System.Nullable<bool> PrettyPrint { get; set; }
 
             /// <summary>
-            /// An opaque string that represents a user for quota purposes. Must not exceed 40 characters.
+            /// Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned
+            /// to a user, but should not exceed 40 characters.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("quotaUser", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string QuotaUser { get; set; }
 
-            /// <summary>Deprecated. Please use quotaUser instead.</summary>
-            [Google.Apis.Util.RequestParameterAttribute("userIp", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual string UserIp { get; set; }
+            /// <summary>Legacy upload protocol for media (e.g. "media", "multipart").</summary>
+            [Google.Apis.Util.RequestParameterAttribute("uploadType", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string UploadType { get; set; }
+
+            /// <summary>Upload protocol for media (e.g. "raw", "multipart").</summary>
+            [Google.Apis.Util.RequestParameterAttribute("upload_protocol", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string UploadProtocol { get; set; }
 
             /// <summary>Deprecated. Creating files in multiple folders is no longer supported.</summary>
             [Google.Apis.Util.RequestParameterAttribute("enforceSingleParent", Google.Apis.Util.RequestParameterType.Query)]
@@ -2092,6 +2800,12 @@ namespace Google.Apis.Drive.v3
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("ignoreDefaultVisibility", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> IgnoreDefaultVisibility { get; set; }
+
+            /// <summary>
+            /// A comma-separated list of IDs of labels to include in the `labelInfo` part of the response.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("includeLabels", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string IncludeLabels { get; set; }
 
             /// <summary>
             /// Specifies which additional view's permissions to include in the response. Only 'published' is supported.
@@ -2115,7 +2829,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
@@ -2151,19 +2865,19 @@ namespace Google.Apis.Drive.v3
 
         /// <summary>
         /// Permanently deletes a file owned by the user without moving it to the trash. If the file belongs to a shared
-        /// drive the user must be an organizer on the parent. If the target is a folder, all descendants owned by the
-        /// user are also deleted.
+        /// drive, the user must be an `organizer` on the parent folder. If the target is a folder, all descendants
+        /// owned by the user are also deleted.
         /// </summary>
         /// <param name="fileId">The ID of the file.</param>
         public virtual DeleteRequest Delete(string fileId)
         {
-            return new DeleteRequest(service, fileId);
+            return new DeleteRequest(this.service, fileId);
         }
 
         /// <summary>
         /// Permanently deletes a file owned by the user without moving it to the trash. If the file belongs to a shared
-        /// drive the user must be an organizer on the parent. If the target is a folder, all descendants owned by the
-        /// user are also deleted.
+        /// drive, the user must be an `organizer` on the parent folder. If the target is a folder, all descendants
+        /// owned by the user are also deleted.
         /// </summary>
         public class DeleteRequest : DriveBaseServiceRequest<string>
         {
@@ -2179,7 +2893,7 @@ namespace Google.Apis.Drive.v3
             public virtual string FileId { get; private set; }
 
             /// <summary>
-            /// Deprecated. If an item is not in a shared drive and its last parent is deleted but the item itself is
+            /// Deprecated: If an item is not in a shared drive and its last parent is deleted but the item itself is
             /// not, the item will be placed under its owner's root.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("enforceSingleParent", Google.Apis.Util.RequestParameterType.Query)]
@@ -2189,7 +2903,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
@@ -2241,10 +2955,89 @@ namespace Google.Apis.Drive.v3
             }
         }
 
+        /// <summary>Downloads content of a file. Operations are valid for 24 hours from the time of creation.</summary>
+        /// <param name="fileId">Required. The ID of the file to download.</param>
+        public virtual DownloadRequest Download(string fileId)
+        {
+            return new DownloadRequest(this.service, fileId);
+        }
+
+        /// <summary>Downloads content of a file. Operations are valid for 24 hours from the time of creation.</summary>
+        public class DownloadRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.Operation>
+        {
+            /// <summary>Constructs a new Download request.</summary>
+            public DownloadRequest(Google.Apis.Services.IClientService service, string fileId) : base(service)
+            {
+                FileId = fileId;
+                InitParameters();
+            }
+
+            /// <summary>Required. The ID of the file to download.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("fileId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string FileId { get; private set; }
+
+            /// <summary>
+            /// Optional. The MIME type the file should be downloaded as. This field can only be set when downloading
+            /// Google Workspace documents. See [Export MIME types for Google Workspace
+            /// documents](/drive/api/guides/ref-export-formats) for the list of supported MIME types. If not set, a
+            /// Google Workspace document is downloaded with a default MIME type. The default MIME type might change in
+            /// the future.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("mimeType", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string MimeType { get; set; }
+
+            /// <summary>
+            /// Optional. The revision ID of the file to download. This field can only be set when downloading blob
+            /// files, Google Docs, and Google Sheets. Returns `INVALID_ARGUMENT` if downloading a specific revision on
+            /// the file is unsupported.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("revisionId", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string RevisionId { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "download";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "files/{fileId}/download";
+
+            /// <summary>Initializes Download parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("fileId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "fileId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("mimeType", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "mimeType",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("revisionId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "revisionId",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
         /// <summary>Permanently deletes all of the user's trashed files.</summary>
         public virtual EmptyTrashRequest EmptyTrash()
         {
-            return new EmptyTrashRequest(service);
+            return new EmptyTrashRequest(this.service);
         }
 
         /// <summary>Permanently deletes all of the user's trashed files.</summary>
@@ -2256,8 +3049,12 @@ namespace Google.Apis.Drive.v3
                 InitParameters();
             }
 
+            /// <summary>If set, empties the trash of the provided shared drive.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("driveId", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string DriveId { get; set; }
+
             /// <summary>
-            /// Deprecated. If an item is not in a shared drive and its last parent is deleted but the item itself is
+            /// Deprecated: If an item is not in a shared drive and its last parent is deleted but the item itself is
             /// not, the item will be placed under its owner's root.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("enforceSingleParent", Google.Apis.Util.RequestParameterType.Query)]
@@ -2276,6 +3073,14 @@ namespace Google.Apis.Drive.v3
             protected override void InitParameters()
             {
                 base.InitParameters();
+                RequestParameters.Add("driveId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "driveId",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("enforceSingleParent", new Google.Apis.Discovery.Parameter
                 {
                     Name = "enforceSingleParent",
@@ -2292,10 +3097,10 @@ namespace Google.Apis.Drive.v3
         /// the exported content is limited to 10MB.
         /// </summary>
         /// <param name="fileId">The ID of the file.</param>
-        /// <param name="mimeType">The MIME type of the format requested for this export.</param>
+        /// <param name="mimeType">Required. The MIME type of the format requested for this export.</param>
         public virtual ExportRequest Export(string fileId, string mimeType)
         {
-            return new ExportRequest(service, fileId, mimeType);
+            return new ExportRequest(this.service, fileId, mimeType);
         }
 
         /// <summary>
@@ -2317,7 +3122,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("fileId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string FileId { get; private set; }
 
-            /// <summary>The MIME type of the format requested for this export.</summary>
+            /// <summary>Required. The MIME type of the format requested for this export.</summary>
             [Google.Apis.Util.RequestParameterAttribute("mimeType", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string MimeType { get; private set; }
 
@@ -2369,9 +3174,7 @@ namespace Google.Apis.Drive.v3
             public virtual void Download(System.IO.Stream stream)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 mediaDownloader.Download(this.GenerateRequestUri(), stream);
             }
 
@@ -2384,9 +3187,7 @@ namespace Google.Apis.Drive.v3
             public virtual Google.Apis.Download.IDownloadProgress DownloadWithStatus(System.IO.Stream stream)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 return mediaDownloader.Download(this.GenerateRequestUri(), stream);
             }
 
@@ -2398,9 +3199,7 @@ namespace Google.Apis.Drive.v3
             public virtual System.Threading.Tasks.Task<Google.Apis.Download.IDownloadProgress> DownloadAsync(System.IO.Stream stream)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream);
             }
 
@@ -2413,13 +3212,10 @@ namespace Google.Apis.Drive.v3
                 System.Threading.CancellationToken cancellationToken)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream, cancellationToken);
             }
 
-            #if !NET40
             /// <summary>Synchronously download a range of the media into the given stream.</summary>
             /// <remarks>
             /// This method uses the <see cref="MediaDownloader"/> property to perform the download. Progress event
@@ -2445,13 +3241,12 @@ namespace Google.Apis.Drive.v3
                 mediaDownloader.Range = range;
                 return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream, cancellationToken);
             }
-            #endif
         }
 
         /// <summary>Generates a set of file IDs which can be provided in create or copy requests.</summary>
         public virtual GenerateIdsRequest GenerateIds()
         {
-            return new GenerateIdsRequest(service);
+            return new GenerateIdsRequest(this.service);
         }
 
         /// <summary>Generates a set of file IDs which can be provided in create or copy requests.</summary>
@@ -2476,7 +3271,7 @@ namespace Google.Apis.Drive.v3
 
             /// <summary>
             /// The type of items which the IDs can be used for. Supported values are 'files' and 'shortcuts'. Note that
-            /// 'shortcuts' are only supported in the drive 'space'. (Default: 'files')
+            /// 'shortcuts' are only supported in the `drive` 'space'. (Default: 'files')
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("type", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Type { get; set; }
@@ -2521,14 +3316,26 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Gets a file's metadata or content by ID.</summary>
+        /// <summary>
+        ///  Gets a file's metadata or content by ID. If you provide the URL parameter `alt=media`, then the response
+        /// includes the file contents in the response body. Downloading content with `alt=media` only works if the file
+        /// is stored in Drive. To download Google Docs, Sheets, and Slides use
+        /// [`files.export`](/drive/api/reference/rest/v3/files/export) instead. For more information, see [Download
+        /// &amp;amp; export files](/drive/api/guides/manage-downloads).
+        /// </summary>
         /// <param name="fileId">The ID of the file.</param>
         public virtual GetRequest Get(string fileId)
         {
-            return new GetRequest(service, fileId);
+            return new GetRequest(this.service, fileId);
         }
 
-        /// <summary>Gets a file's metadata or content by ID.</summary>
+        /// <summary>
+        ///  Gets a file's metadata or content by ID. If you provide the URL parameter `alt=media`, then the response
+        /// includes the file contents in the response body. Downloading content with `alt=media` only works if the file
+        /// is stored in Drive. To download Google Docs, Sheets, and Slides use
+        /// [`files.export`](/drive/api/reference/rest/v3/files/export) instead. For more information, see [Download
+        /// &amp;amp; export files](/drive/api/guides/manage-downloads).
+        /// </summary>
         public class GetRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.File>
         {
             /// <summary>Constructs a new Get request.</summary>
@@ -2545,10 +3352,17 @@ namespace Google.Apis.Drive.v3
 
             /// <summary>
             /// Whether the user is acknowledging the risk of downloading known malware or other abusive files. This is
-            /// only applicable when alt=media.
+            /// only applicable when the `alt` parameter is set to `media` and the user is the owner of the file or an
+            /// organizer of the shared drive in which the file resides.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("acknowledgeAbuse", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> AcknowledgeAbuse { get; set; }
+
+            /// <summary>
+            /// A comma-separated list of IDs of labels to include in the `labelInfo` part of the response.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("includeLabels", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string IncludeLabels { get; set; }
 
             /// <summary>
             /// Specifies which additional view's permissions to include in the response. Only 'published' is supported.
@@ -2560,7 +3374,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
@@ -2591,6 +3405,14 @@ namespace Google.Apis.Drive.v3
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = "false",
+                    Pattern = null,
+                });
+                RequestParameters.Add("includeLabels", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "includeLabels",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
                     Pattern = null,
                 });
                 RequestParameters.Add("includePermissionsForView", new Google.Apis.Discovery.Parameter
@@ -2636,9 +3458,7 @@ namespace Google.Apis.Drive.v3
             public virtual void Download(System.IO.Stream stream)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 mediaDownloader.Download(this.GenerateRequestUri(), stream);
             }
 
@@ -2651,9 +3471,7 @@ namespace Google.Apis.Drive.v3
             public virtual Google.Apis.Download.IDownloadProgress DownloadWithStatus(System.IO.Stream stream)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 return mediaDownloader.Download(this.GenerateRequestUri(), stream);
             }
 
@@ -2665,9 +3483,7 @@ namespace Google.Apis.Drive.v3
             public virtual System.Threading.Tasks.Task<Google.Apis.Download.IDownloadProgress> DownloadAsync(System.IO.Stream stream)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream);
             }
 
@@ -2680,13 +3496,10 @@ namespace Google.Apis.Drive.v3
                 System.Threading.CancellationToken cancellationToken)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream, cancellationToken);
             }
 
-            #if !NET40
             /// <summary>Synchronously download a range of the media into the given stream.</summary>
             /// <remarks>
             /// This method uses the <see cref="MediaDownloader"/> property to perform the download. Progress event
@@ -2712,16 +3525,27 @@ namespace Google.Apis.Drive.v3
                 mediaDownloader.Range = range;
                 return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream, cancellationToken);
             }
-            #endif
         }
 
-        /// <summary>Lists or searches files.</summary>
+        /// <summary>
+        ///  Lists the user's files. This method accepts the `q` parameter, which is a search query combining one or
+        /// more search terms. For more information, see the [Search for files &amp;amp;
+        /// folders](/drive/api/guides/search-files) guide. *Note:* This method returns *all* files by default,
+        /// including trashed files. If you don't want trashed files to appear in the list, use the `trashed=false`
+        /// query parameter to remove trashed files from the results.
+        /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
-        /// <summary>Lists or searches files.</summary>
+        /// <summary>
+        ///  Lists the user's files. This method accepts the `q` parameter, which is a search query combining one or
+        /// more search terms. For more information, see the [Search for files &amp;amp;
+        /// folders](/drive/api/guides/search-files) guide. *Note:* This method returns *all* files by default,
+        /// including trashed files. If you don't want trashed files to appear in the list, use the `trashed=false`
+        /// query parameter to remove trashed files from the results.
+        /// </summary>
         public class ListRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.FileList>
         {
             /// <summary>Constructs a new List request.</summary>
@@ -2731,30 +3555,25 @@ namespace Google.Apis.Drive.v3
             }
 
             /// <summary>
-            /// Groupings of files to which the query applies. Supported groupings are: 'user' (files created by, opened
-            /// by, or shared directly with the user), 'drive' (files in the specified shared drive as indicated by the
-            /// 'driveId'), 'domain' (files shared to the user's domain), and 'allDrives' (A combination of 'user' and
-            /// 'drive' for all drives where the user is a member). When able, use 'user' or 'drive', instead of
-            /// 'allDrives', for efficiency.
+            /// Bodies of items (files/documents) to which the query applies. Supported bodies are 'user', 'domain',
+            /// 'drive', and 'allDrives'. Prefer 'user' or 'drive' to 'allDrives' for efficiency. By default, corpora is
+            /// set to 'user'. However, this can change depending on the filter set through the 'q' parameter.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("corpora", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Corpora { get; set; }
 
-            /// <summary>The source of files to list. Deprecated: use 'corpora' instead.</summary>
+            /// <summary>Deprecated: The source of files to list. Use 'corpora' instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("corpus", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<CorpusEnum> Corpus { get; set; }
 
-            /// <summary>The source of files to list. Deprecated: use 'corpora' instead.</summary>
+            /// <summary>Deprecated: The source of files to list. Use 'corpora' instead.</summary>
             public enum CorpusEnum
             {
                 /// <summary>Files shared to the user's domain.</summary>
                 [Google.Apis.Util.StringValueAttribute("domain")]
                 Domain = 0,
 
-                /// <summary>
-                /// Files owned by or shared to the user. If a user has permissions on a Shared Drive, the files inside
-                /// it won't be retrieved unless the user has created, opened, or shared the file.
-                /// </summary>
+                /// <summary>Files owned by or shared to the user.</summary>
                 [Google.Apis.Util.StringValueAttribute("user")]
                 User = 1,
             }
@@ -2768,21 +3587,32 @@ namespace Google.Apis.Drive.v3
             public virtual System.Nullable<bool> IncludeItemsFromAllDrives { get; set; }
 
             /// <summary>
+            /// A comma-separated list of IDs of labels to include in the `labelInfo` part of the response.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("includeLabels", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string IncludeLabels { get; set; }
+
+            /// <summary>
             /// Specifies which additional view's permissions to include in the response. Only 'published' is supported.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("includePermissionsForView", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string IncludePermissionsForView { get; set; }
 
-            /// <summary>Deprecated use includeItemsFromAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `includeItemsFromAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("includeTeamDriveItems", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> IncludeTeamDriveItems { get; set; }
 
             /// <summary>
-            /// A comma-separated list of sort keys. Valid keys are 'createdTime', 'folder', 'modifiedByMeTime',
-            /// 'modifiedTime', 'name', 'name_natural', 'quotaBytesUsed', 'recency', 'sharedWithMeTime', 'starred', and
-            /// 'viewedByMeTime'. Each key sorts ascending by default, but may be reversed with the 'desc' modifier.
-            /// Example usage: ?orderBy=folder,modifiedTime desc,name. Please note that there is a current limitation
-            /// for users with approximately one million files in which the requested sort order is ignored.
+            /// A comma-separated list of sort keys. Valid keys are: * `createdTime`: When the file was created. *
+            /// `folder`: The folder ID. This field is sorted using alphabetical ordering. * `modifiedByMeTime`: The
+            /// last time the file was modified by the user. * `modifiedTime`: The last time the file was modified by
+            /// anyone. * `name`: The name of the file. This field is sorted using alphabetical ordering, so 1, 12, 2,
+            /// 22. * `name_natural`: The name of the file. This field is sorted using natural sort ordering, so 1, 2,
+            /// 12, 22. * `quotaBytesUsed`: The number of storage quota bytes used by the file. * `recency`: The most
+            /// recent timestamp from the file's date-time fields. * `sharedWithMeTime`: When the file was shared with
+            /// the user, if applicable. * `starred`: Whether the user has starred the file. * `viewedByMeTime`: The
+            /// last time the file was viewed by the user. Each key sorts ascending by default, but can be reversed with
+            /// the 'desc' modifier. Example usage: `?orderBy=folder,modifiedTime desc,name`.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string OrderBy { get; set; }
@@ -2802,13 +3632,14 @@ namespace Google.Apis.Drive.v3
             public virtual string PageToken { get; set; }
 
             /// <summary>
-            /// A query for filtering the file results. See the "Search for Files" guide for supported syntax.
+            /// A query for filtering the file results. See the "Search for files &amp;amp; folders" guide for supported
+            /// syntax.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("q", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Q { get; set; }
 
             /// <summary>
-            /// A comma-separated list of spaces to query within the corpus. Supported values are 'drive' and
+            /// A comma-separated list of spaces to query within the corpora. Supported values are 'drive' and
             /// 'appDataFolder'.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("spaces", Google.Apis.Util.RequestParameterType.Query)]
@@ -2818,11 +3649,11 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
-            /// <summary>Deprecated use driveId instead.</summary>
+            /// <summary>Deprecated: Use `driveId` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("teamDriveId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string TeamDriveId { get; set; }
 
@@ -2869,6 +3700,14 @@ namespace Google.Apis.Drive.v3
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = "false",
+                    Pattern = null,
+                });
+                RequestParameters.Add("includeLabels", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "includeLabels",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
                     Pattern = null,
                 });
                 RequestParameters.Add("includePermissionsForView", new Google.Apis.Discovery.Parameter
@@ -2954,22 +3793,159 @@ namespace Google.Apis.Drive.v3
             }
         }
 
+        /// <summary>Lists the labels on a file.</summary>
+        /// <param name="fileId">The ID for the file.</param>
+        public virtual ListLabelsRequest ListLabels(string fileId)
+        {
+            return new ListLabelsRequest(this.service, fileId);
+        }
+
+        /// <summary>Lists the labels on a file.</summary>
+        public class ListLabelsRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.LabelList>
+        {
+            /// <summary>Constructs a new ListLabels request.</summary>
+            public ListLabelsRequest(Google.Apis.Services.IClientService service, string fileId) : base(service)
+            {
+                FileId = fileId;
+                InitParameters();
+            }
+
+            /// <summary>The ID for the file.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("fileId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string FileId { get; private set; }
+
+            /// <summary>The maximum number of labels to return per page. When not set, defaults to 100.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("maxResults", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> MaxResults { get; set; }
+
+            /// <summary>
+            /// The token for continuing a previous list request on the next page. This should be set to the value of
+            /// 'nextPageToken' from the previous response.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PageToken { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "listLabels";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "files/{fileId}/listLabels";
+
+            /// <summary>Initializes ListLabels parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("fileId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "fileId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("maxResults", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "maxResults",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = "100",
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageToken",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
         /// <summary>
-        /// Updates a file's metadata and/or content. When calling this method, only populate fields in the request that
-        /// you want to modify. When updating fields, some fields might change automatically, such as modifiedDate. This
-        /// method supports patch semantics.
+        /// Modifies the set of labels applied to a file. Returns a list of the labels that were added or modified.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="fileId">The ID of the file to which the labels belong.</param>
+        public virtual ModifyLabelsRequest ModifyLabels(Google.Apis.Drive.v3.Data.ModifyLabelsRequest body, string fileId)
+        {
+            return new ModifyLabelsRequest(this.service, body, fileId);
+        }
+
+        /// <summary>
+        /// Modifies the set of labels applied to a file. Returns a list of the labels that were added or modified.
+        /// </summary>
+        public class ModifyLabelsRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.ModifyLabelsResponse>
+        {
+            /// <summary>Constructs a new ModifyLabels request.</summary>
+            public ModifyLabelsRequest(Google.Apis.Services.IClientService service, Google.Apis.Drive.v3.Data.ModifyLabelsRequest body, string fileId) : base(service)
+            {
+                FileId = fileId;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>The ID of the file to which the labels belong.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("fileId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string FileId { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Drive.v3.Data.ModifyLabelsRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "modifyLabels";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "files/{fileId}/modifyLabels";
+
+            /// <summary>Initializes ModifyLabels parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("fileId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "fileId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        ///  Updates a file's metadata and/or content. When calling this method, only populate fields in the request
+        /// that you want to modify. When updating fields, some fields might be changed automatically, such as
+        /// `modifiedDate`. This method supports patch semantics. This method supports an */upload* URI and accepts
+        /// uploaded media with the following characteristics: - *Maximum file size:* 5,120 GB - *Accepted Media MIME
+        /// types:*`*/*` Note: Specify a valid MIME type, rather than the literal `*/*` value. The literal `*/*` is only
+        /// used to indicate that any valid MIME type can be uploaded. For more information on uploading files, see
+        /// [Upload file data](/drive/api/guides/manage-uploads).
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="fileId">The ID of the file.</param>
         public virtual UpdateRequest Update(Google.Apis.Drive.v3.Data.File body, string fileId)
         {
-            return new UpdateRequest(service, body, fileId);
+            return new UpdateRequest(this.service, body, fileId);
         }
 
         /// <summary>
-        /// Updates a file's metadata and/or content. When calling this method, only populate fields in the request that
-        /// you want to modify. When updating fields, some fields might change automatically, such as modifiedDate. This
-        /// method supports patch semantics.
+        ///  Updates a file's metadata and/or content. When calling this method, only populate fields in the request
+        /// that you want to modify. When updating fields, some fields might be changed automatically, such as
+        /// `modifiedDate`. This method supports patch semantics. This method supports an */upload* URI and accepts
+        /// uploaded media with the following characteristics: - *Maximum file size:* 5,120 GB - *Accepted Media MIME
+        /// types:*`*/*` Note: Specify a valid MIME type, rather than the literal `*/*` value. The literal `*/*` is only
+        /// used to indicate that any valid MIME type can be uploaded. For more information on uploading files, see
+        /// [Upload file data](/drive/api/guides/manage-uploads).
         /// </summary>
         public class UpdateRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.File>
         {
@@ -2990,10 +3966,16 @@ namespace Google.Apis.Drive.v3
             public virtual string AddParents { get; set; }
 
             /// <summary>
-            /// Deprecated. Adding files to multiple folders is no longer supported. Use shortcuts instead.
+            /// Deprecated: Adding files to multiple folders is no longer supported. Use shortcuts instead.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("enforceSingleParent", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> EnforceSingleParent { get; set; }
+
+            /// <summary>
+            /// A comma-separated list of IDs of labels to include in the `labelInfo` part of the response.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("includeLabels", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string IncludeLabels { get; set; }
 
             /// <summary>
             /// Specifies which additional view's permissions to include in the response. Only 'published' is supported.
@@ -3021,7 +4003,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
@@ -3070,6 +4052,14 @@ namespace Google.Apis.Drive.v3
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = "false",
+                    Pattern = null,
+                });
+                RequestParameters.Add("includeLabels", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "includeLabels",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
                     Pattern = null,
                 });
                 RequestParameters.Add("includePermissionsForView", new Google.Apis.Discovery.Parameter
@@ -3132,9 +4122,13 @@ namespace Google.Apis.Drive.v3
         }
 
         /// <summary>
-        /// Updates a file's metadata and/or content. When calling this method, only populate fields in the request that
-        /// you want to modify. When updating fields, some fields might change automatically, such as modifiedDate. This
-        /// method supports patch semantics.
+        ///  Updates a file's metadata and/or content. When calling this method, only populate fields in the request
+        /// that you want to modify. When updating fields, some fields might be changed automatically, such as
+        /// `modifiedDate`. This method supports patch semantics. This method supports an */upload* URI and accepts
+        /// uploaded media with the following characteristics: - *Maximum file size:* 5,120 GB - *Accepted Media MIME
+        /// types:*`*/*` Note: Specify a valid MIME type, rather than the literal `*/*` value. The literal `*/*` is only
+        /// used to indicate that any valid MIME type can be uploaded. For more information on uploading files, see
+        /// [Upload file data](/drive/api/guides/manage-uploads).
         /// </summary>
         /// <remarks>
         /// Considerations regarding <paramref name="stream"/>:
@@ -3165,17 +4159,49 @@ namespace Google.Apis.Drive.v3
         /// <summary>Update media upload which supports resumable upload.</summary>
         public class UpdateMediaUpload : Google.Apis.Upload.ResumableUpload<Google.Apis.Drive.v3.Data.File, Google.Apis.Drive.v3.Data.File>
         {
-            /// <summary>Data format for the response.</summary>
+            /// <summary>V1 error format.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("$.xgafv", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<XgafvEnum> Xgafv { get; set; }
+
+            /// <summary>V1 error format.</summary>
+            public enum XgafvEnum
+            {
+                /// <summary>v1 error format</summary>
+                [Google.Apis.Util.StringValueAttribute("1")]
+                Value1 = 0,
+
+                /// <summary>v2 error format</summary>
+                [Google.Apis.Util.StringValueAttribute("2")]
+                Value2 = 1,
+            }
+
+            /// <summary>OAuth access token.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("access_token", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string AccessToken { get; set; }
+
+            /// <summary>Data format for response.</summary>
             [Google.Apis.Util.RequestParameterAttribute("alt", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<AltEnum> Alt { get; set; }
 
-            /// <summary>Data format for the response.</summary>
+            /// <summary>Data format for response.</summary>
             public enum AltEnum
             {
                 /// <summary>Responses with Content-Type of application/json</summary>
                 [Google.Apis.Util.StringValueAttribute("json")]
                 Json = 0,
+
+                /// <summary>Media download with context-dependent Content-Type</summary>
+                [Google.Apis.Util.StringValueAttribute("media")]
+                Media = 1,
+
+                /// <summary>Responses with Content-Type of application/x-protobuf</summary>
+                [Google.Apis.Util.StringValueAttribute("proto")]
+                Proto = 2,
             }
+
+            /// <summary>JSONP</summary>
+            [Google.Apis.Util.RequestParameterAttribute("callback", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Callback { get; set; }
 
             /// <summary>Selector specifying which fields to include in a partial response.</summary>
             [Google.Apis.Util.RequestParameterAttribute("fields", Google.Apis.Util.RequestParameterType.Query)]
@@ -3197,14 +4223,19 @@ namespace Google.Apis.Drive.v3
             public virtual System.Nullable<bool> PrettyPrint { get; set; }
 
             /// <summary>
-            /// An opaque string that represents a user for quota purposes. Must not exceed 40 characters.
+            /// Available to use for quota purposes for server-side applications. Can be any arbitrary string assigned
+            /// to a user, but should not exceed 40 characters.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("quotaUser", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string QuotaUser { get; set; }
 
-            /// <summary>Deprecated. Please use quotaUser instead.</summary>
-            [Google.Apis.Util.RequestParameterAttribute("userIp", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual string UserIp { get; set; }
+            /// <summary>Legacy upload protocol for media (e.g. "media", "multipart").</summary>
+            [Google.Apis.Util.RequestParameterAttribute("uploadType", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string UploadType { get; set; }
+
+            /// <summary>Upload protocol for media (e.g. "raw", "multipart").</summary>
+            [Google.Apis.Util.RequestParameterAttribute("upload_protocol", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string UploadProtocol { get; set; }
 
             /// <summary>The ID of the file.</summary>
             [Google.Apis.Util.RequestParameterAttribute("fileId", Google.Apis.Util.RequestParameterType.Path)]
@@ -3215,10 +4246,16 @@ namespace Google.Apis.Drive.v3
             public virtual string AddParents { get; set; }
 
             /// <summary>
-            /// Deprecated. Adding files to multiple folders is no longer supported. Use shortcuts instead.
+            /// Deprecated: Adding files to multiple folders is no longer supported. Use shortcuts instead.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("enforceSingleParent", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> EnforceSingleParent { get; set; }
+
+            /// <summary>
+            /// A comma-separated list of IDs of labels to include in the `labelInfo` part of the response.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("includeLabels", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string IncludeLabels { get; set; }
 
             /// <summary>
             /// Specifies which additional view's permissions to include in the response. Only 'published' is supported.
@@ -3246,7 +4283,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
@@ -3281,15 +4318,15 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Subscribes to changes to a file</summary>
+        /// <summary>Subscribes to changes to a file.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="fileId">The ID of the file.</param>
         public virtual WatchRequest Watch(Google.Apis.Drive.v3.Data.Channel body, string fileId)
         {
-            return new WatchRequest(service, body, fileId);
+            return new WatchRequest(this.service, body, fileId);
         }
 
-        /// <summary>Subscribes to changes to a file</summary>
+        /// <summary>Subscribes to changes to a file.</summary>
         public class WatchRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.Channel>
         {
             /// <summary>Constructs a new Watch request.</summary>
@@ -3297,7 +4334,6 @@ namespace Google.Apis.Drive.v3
             {
                 FileId = fileId;
                 Body = body;
-                MediaDownloader = new Google.Apis.Download.MediaDownloader(service);
                 InitParameters();
             }
 
@@ -3307,10 +4343,17 @@ namespace Google.Apis.Drive.v3
 
             /// <summary>
             /// Whether the user is acknowledging the risk of downloading known malware or other abusive files. This is
-            /// only applicable when alt=media.
+            /// only applicable when the `alt` parameter is set to `media` and the user is the owner of the file or an
+            /// organizer of the shared drive in which the file resides.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("acknowledgeAbuse", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> AcknowledgeAbuse { get; set; }
+
+            /// <summary>
+            /// A comma-separated list of IDs of labels to include in the `labelInfo` part of the response.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("includeLabels", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string IncludeLabels { get; set; }
 
             /// <summary>
             /// Specifies which additional view's permissions to include in the response. Only 'published' is supported.
@@ -3322,7 +4365,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
@@ -3361,6 +4404,14 @@ namespace Google.Apis.Drive.v3
                     DefaultValue = "false",
                     Pattern = null,
                 });
+                RequestParameters.Add("includeLabels", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "includeLabels",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("includePermissionsForView", new Google.Apis.Discovery.Parameter
                 {
                     Name = "includePermissionsForView",
@@ -3386,101 +4437,284 @@ namespace Google.Apis.Drive.v3
                     Pattern = null,
                 });
             }
+        }
+    }
 
-            /// <summary>Gets the media downloader.</summary>
-            public Google.Apis.Download.IMediaDownloader MediaDownloader { get; private set; }
+    /// <summary>The "operation" collection of methods.</summary>
+    public class OperationResource
+    {
+        private const string Resource = "operation";
 
-            /// <summary>
-            /// <para>Synchronously download the media into the given stream.</para>
-            /// <para>
-            /// Warning: This method hides download errors; use <see cref="DownloadWithStatus(System.IO.Stream)"/>
-            /// instead.
-            /// </para>
-            /// </summary>
-            /// <remarks>
-            /// This method uses the <see cref="MediaDownloader"/> property to perform the download. Progress event
-            /// handlers and other configuration may be performed using that property prior to calling this method.
-            /// </remarks>
-            public virtual void Download(System.IO.Stream stream)
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public OperationResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>
+        /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the
+        /// operation, but success is not guaranteed. If the server doesn't support this method, it returns
+        /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether
+        /// the cancellation succeeded or whether the operation completed despite cancellation. On successful
+        /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
+        /// with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
+        /// </summary>
+        /// <param name="name">The name of the operation resource to be cancelled.</param>
+        public virtual CancelRequest Cancel(string name)
+        {
+            return new CancelRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the
+        /// operation, but success is not guaranteed. If the server doesn't support this method, it returns
+        /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether
+        /// the cancellation succeeded or whether the operation completed despite cancellation. On successful
+        /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
+        /// with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
+        /// </summary>
+        public class CancelRequest : DriveBaseServiceRequest<string>
+        {
+            /// <summary>Constructs a new Cancel request.</summary>
+            public CancelRequest(Google.Apis.Services.IClientService service, string name) : base(service)
             {
-                var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
-                mediaDownloader.Range = null;
-                #endif
-                mediaDownloader.Download(this.GenerateRequestUri(), stream);
+                Name = name;
+                InitParameters();
             }
 
-            /// <summary>Synchronously download the media into the given stream.</summary>
-            /// <remarks>
-            /// This method uses the <see cref="MediaDownloader"/> property to perform the download. Progress event
-            /// handlers and other configuration may be performed using that property prior to calling this method.
-            /// </remarks>
-            /// <returns>The final status of the download; including whether the download succeeded or failed.</returns>
-            public virtual Google.Apis.Download.IDownloadProgress DownloadWithStatus(System.IO.Stream stream)
+            /// <summary>The name of the operation resource to be cancelled.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "cancel";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "operation/{name}:cancel";
+
+            /// <summary>Initializes Cancel parameter list.</summary>
+            protected override void InitParameters()
             {
-                var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
-                mediaDownloader.Range = null;
-                #endif
-                return mediaDownloader.Download(this.GenerateRequestUri(), stream);
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Deletes a long-running operation. This method indicates that the client is no longer interested in the
+        /// operation result. It does not cancel the operation. If the server doesn't support this method, it returns
+        /// `google.rpc.Code.UNIMPLEMENTED`.
+        /// </summary>
+        /// <param name="name">The name of the operation resource to be deleted.</param>
+        public virtual DeleteRequest Delete(string name)
+        {
+            return new DeleteRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Deletes a long-running operation. This method indicates that the client is no longer interested in the
+        /// operation result. It does not cancel the operation. If the server doesn't support this method, it returns
+        /// `google.rpc.Code.UNIMPLEMENTED`.
+        /// </summary>
+        public class DeleteRequest : DriveBaseServiceRequest<string>
+        {
+            /// <summary>Constructs a new Delete request.</summary>
+            public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
             }
 
-            /// <summary>Asynchronously download the media into the given stream.</summary>
-            /// <remarks>
-            /// This method uses the <see cref="MediaDownloader"/> property to perform the download. Progress event
-            /// handlers and other configuration may be performed using that property prior to calling this method.
-            /// </remarks>
-            public virtual System.Threading.Tasks.Task<Google.Apis.Download.IDownloadProgress> DownloadAsync(System.IO.Stream stream)
+            /// <summary>The name of the operation resource to be deleted.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "delete";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "DELETE";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "operation/{name}";
+
+            /// <summary>Initializes Delete parameter list.</summary>
+            protected override void InitParameters()
             {
-                var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
-                mediaDownloader.Range = null;
-                #endif
-                return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream);
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
+    /// <summary>The "operations" collection of methods.</summary>
+    public class OperationsResource
+    {
+        private const string Resource = "operations";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public OperationsResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>
+        /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation result
+        /// at intervals as recommended by the API service.
+        /// </summary>
+        /// <param name="name">The name of the operation resource.</param>
+        public virtual GetRequest Get(string name)
+        {
+            return new GetRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation result
+        /// at intervals as recommended by the API service.
+        /// </summary>
+        public class GetRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.Operation>
+        {
+            /// <summary>Constructs a new Get request.</summary>
+            public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
             }
 
-            /// <summary>Asynchronously download the media into the given stream.</summary>
-            /// <remarks>
-            /// This method uses the <see cref="MediaDownloader"/> property to perform the download. Progress event
-            /// handlers and other configuration may be performed using that property prior to calling this method.
-            /// </remarks>
-            public virtual System.Threading.Tasks.Task<Google.Apis.Download.IDownloadProgress> DownloadAsync(System.IO.Stream stream,
-                System.Threading.CancellationToken cancellationToken)
+            /// <summary>The name of the operation resource.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "get";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "operations/{name}";
+
+            /// <summary>Initializes Get parameter list.</summary>
+            protected override void InitParameters()
             {
-                var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
-                mediaDownloader.Range = null;
-                #endif
-                return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream, cancellationToken);
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
+        /// it returns `UNIMPLEMENTED`.
+        /// </summary>
+        public virtual ListRequest List()
+        {
+            return new ListRequest(this.service);
+        }
+
+        /// <summary>
+        /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
+        /// it returns `UNIMPLEMENTED`.
+        /// </summary>
+        public class ListRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.ListOperationsResponse>
+        {
+            /// <summary>Constructs a new List request.</summary>
+            public ListRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
             }
 
-            #if !NET40
-            /// <summary>Synchronously download a range of the media into the given stream.</summary>
-            /// <remarks>
-            /// This method uses the <see cref="MediaDownloader"/> property to perform the download. Progress event
-            /// handlers and other configuration may be performed using that property prior to calling this method.
-            /// </remarks>
-            public virtual Google.Apis.Download.IDownloadProgress DownloadRange(System.IO.Stream stream, System.Net.Http.Headers.RangeHeaderValue range)
-            {
-                var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                mediaDownloader.Range = range;
-                return mediaDownloader.Download(this.GenerateRequestUri(), stream);
-            }
+            /// <summary>The standard list filter.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Filter { get; set; }
 
-            /// <summary>Asynchronously download a range of the media into the given stream.</summary>
-            /// <remarks>
-            /// This method uses the <see cref="MediaDownloader"/> property to perform the download. Progress event
-            /// handlers and other configuration may be performed using that property prior to calling this method.
-            /// </remarks>
-            public virtual System.Threading.Tasks.Task<Google.Apis.Download.IDownloadProgress> DownloadRangeAsync(System.IO.Stream stream,
-                System.Net.Http.Headers.RangeHeaderValue range,
-                System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+            /// <summary>The name of the operation's parent resource.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Name { get; set; }
+
+            /// <summary>The standard list page size.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> PageSize { get; set; }
+
+            /// <summary>The standard list page token.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PageToken { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "list";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "operations";
+
+            /// <summary>Initializes List parameter list.</summary>
+            protected override void InitParameters()
             {
-                var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                mediaDownloader.Range = range;
-                return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream, cancellationToken);
+                base.InitParameters();
+                RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "filter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageSize",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageToken",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
-            #endif
         }
     }
 
@@ -3498,15 +4732,21 @@ namespace Google.Apis.Drive.v3
             this.service = service;
         }
 
-        /// <summary>Creates a permission for a file or shared drive.</summary>
+        /// <summary>
+        /// Creates a permission for a file or shared drive. **Warning:** Concurrent permissions operations on the same
+        /// file are not supported; only the last update is applied.
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="fileId">The ID of the file or shared drive.</param>
         public virtual CreateRequest Create(Google.Apis.Drive.v3.Data.Permission body, string fileId)
         {
-            return new CreateRequest(service, body, fileId);
+            return new CreateRequest(this.service, body, fileId);
         }
 
-        /// <summary>Creates a permission for a file or shared drive.</summary>
+        /// <summary>
+        /// Creates a permission for a file or shared drive. **Warning:** Concurrent permissions operations on the same
+        /// file are not supported; only the last update is applied.
+        /// </summary>
         public class CreateRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.Permission>
         {
             /// <summary>Constructs a new Create request.</summary>
@@ -3525,14 +4765,14 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("emailMessage", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string EmailMessage { get; set; }
 
-            /// <summary>Deprecated. See moveToNewOwnersRoot for details.</summary>
+            /// <summary>Deprecated: See `moveToNewOwnersRoot` for details.</summary>
             [Google.Apis.Util.RequestParameterAttribute("enforceSingleParent", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> EnforceSingleParent { get; set; }
 
             /// <summary>
             /// This parameter will only take effect if the item is not in a shared drive and the request is attempting
-            /// to transfer the ownership of the item. If set to true, the item will be moved to the new owner's My
-            /// Drive root folder and all prior parents removed. If set to false, parents are not changed.
+            /// to transfer the ownership of the item. If set to `true`, the item will be moved to the new owner's My
+            /// Drive root folder and all prior parents removed. If set to `false`, parents are not changed.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("moveToNewOwnersRoot", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> MoveToNewOwnersRoot { get; set; }
@@ -3548,17 +4788,13 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
             /// <summary>
             /// Whether to transfer ownership to the specified user and downgrade the current owner to a writer. This
-            /// parameter is required as an acknowledgement of the side effect. File owners can only transfer ownership
-            /// of files existing on My Drive. Files existing in a shared drive are owned by the organization that owns
-            /// that shared drive. Ownership transfers are not supported for files and folders in shared drives.
-            /// Organizers of a shared drive can move items from that shared drive into their My Drive which transfers
-            /// the ownership to them.
+            /// parameter is required as an acknowledgement of the side effect.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("transferOwnership", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> TransferOwnership { get; set; }
@@ -3665,15 +4901,21 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Deletes a permission.</summary>
+        /// <summary>
+        /// Deletes a permission. **Warning:** Concurrent permissions operations on the same file are not supported;
+        /// only the last update is applied.
+        /// </summary>
         /// <param name="fileId">The ID of the file or shared drive.</param>
         /// <param name="permissionId">The ID of the permission.</param>
         public virtual DeleteRequest Delete(string fileId, string permissionId)
         {
-            return new DeleteRequest(service, fileId, permissionId);
+            return new DeleteRequest(this.service, fileId, permissionId);
         }
 
-        /// <summary>Deletes a permission.</summary>
+        /// <summary>
+        /// Deletes a permission. **Warning:** Concurrent permissions operations on the same file are not supported;
+        /// only the last update is applied.
+        /// </summary>
         public class DeleteRequest : DriveBaseServiceRequest<string>
         {
             /// <summary>Constructs a new Delete request.</summary>
@@ -3696,7 +4938,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
@@ -3769,7 +5011,7 @@ namespace Google.Apis.Drive.v3
         /// <param name="permissionId">The ID of the permission.</param>
         public virtual GetRequest Get(string fileId, string permissionId)
         {
-            return new GetRequest(service, fileId, permissionId);
+            return new GetRequest(this.service, fileId, permissionId);
         }
 
         /// <summary>Gets a permission by ID.</summary>
@@ -3795,7 +5037,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
@@ -3867,7 +5109,7 @@ namespace Google.Apis.Drive.v3
         /// <param name="fileId">The ID of the file or shared drive.</param>
         public virtual ListRequest List(string fileId)
         {
-            return new ListRequest(service, fileId);
+            return new ListRequest(this.service, fileId);
         }
 
         /// <summary>Lists a file's or shared drive's permissions.</summary>
@@ -3909,7 +5151,7 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
@@ -3993,16 +5235,22 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Updates a permission with patch semantics.</summary>
+        /// <summary>
+        /// Updates a permission with patch semantics. **Warning:** Concurrent permissions operations on the same file
+        /// are not supported; only the last update is applied.
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="fileId">The ID of the file or shared drive.</param>
         /// <param name="permissionId">The ID of the permission.</param>
         public virtual UpdateRequest Update(Google.Apis.Drive.v3.Data.Permission body, string fileId, string permissionId)
         {
-            return new UpdateRequest(service, body, fileId, permissionId);
+            return new UpdateRequest(this.service, body, fileId, permissionId);
         }
 
-        /// <summary>Updates a permission with patch semantics.</summary>
+        /// <summary>
+        /// Updates a permission with patch semantics. **Warning:** Concurrent permissions operations on the same file
+        /// are not supported; only the last update is applied.
+        /// </summary>
         public class UpdateRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.Permission>
         {
             /// <summary>Constructs a new Update request.</summary>
@@ -4030,17 +5278,13 @@ namespace Google.Apis.Drive.v3
             [Google.Apis.Util.RequestParameterAttribute("supportsAllDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsAllDrives { get; set; }
 
-            /// <summary>Deprecated use supportsAllDrives instead.</summary>
+            /// <summary>Deprecated: Use `supportsAllDrives` instead.</summary>
             [Google.Apis.Util.RequestParameterAttribute("supportsTeamDrives", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> SupportsTeamDrives { get; set; }
 
             /// <summary>
             /// Whether to transfer ownership to the specified user and downgrade the current owner to a writer. This
-            /// parameter is required as an acknowledgement of the side effect. File owners can only transfer ownership
-            /// of files existing on My Drive. Files existing in a shared drive are owned by the organization that owns
-            /// that shared drive. Ownership transfers are not supported for files and folders in shared drives.
-            /// Organizers of a shared drive can move items from that shared drive into their My Drive which transfers
-            /// the ownership to them.
+            /// parameter is required as an acknowledgement of the side effect.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("transferOwnership", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> TransferOwnership { get; set; }
@@ -4146,16 +5390,16 @@ namespace Google.Apis.Drive.v3
             this.service = service;
         }
 
-        /// <summary>Creates a new reply to a comment.</summary>
+        /// <summary>Creates a reply to a comment.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="fileId">The ID of the file.</param>
         /// <param name="commentId">The ID of the comment.</param>
         public virtual CreateRequest Create(Google.Apis.Drive.v3.Data.Reply body, string fileId, string commentId)
         {
-            return new CreateRequest(service, body, fileId, commentId);
+            return new CreateRequest(this.service, body, fileId, commentId);
         }
 
-        /// <summary>Creates a new reply to a comment.</summary>
+        /// <summary>Creates a reply to a comment.</summary>
         public class CreateRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.Reply>
         {
             /// <summary>Constructs a new Create request.</summary>
@@ -4219,7 +5463,7 @@ namespace Google.Apis.Drive.v3
         /// <param name="replyId">The ID of the reply.</param>
         public virtual DeleteRequest Delete(string fileId, string commentId, string replyId)
         {
-            return new DeleteRequest(service, fileId, commentId, replyId);
+            return new DeleteRequest(this.service, fileId, commentId, replyId);
         }
 
         /// <summary>Deletes a reply.</summary>
@@ -4292,7 +5536,7 @@ namespace Google.Apis.Drive.v3
         /// <param name="replyId">The ID of the reply.</param>
         public virtual GetRequest Get(string fileId, string commentId, string replyId)
         {
-            return new GetRequest(service, fileId, commentId, replyId);
+            return new GetRequest(this.service, fileId, commentId, replyId);
         }
 
         /// <summary>Gets a reply by ID.</summary>
@@ -4378,7 +5622,7 @@ namespace Google.Apis.Drive.v3
         /// <param name="commentId">The ID of the comment.</param>
         public virtual ListRequest List(string fileId, string commentId)
         {
-            return new ListRequest(service, fileId, commentId);
+            return new ListRequest(this.service, fileId, commentId);
         }
 
         /// <summary>Lists a comment's replies.</summary>
@@ -4480,7 +5724,7 @@ namespace Google.Apis.Drive.v3
         /// <param name="replyId">The ID of the reply.</param>
         public virtual UpdateRequest Update(Google.Apis.Drive.v3.Data.Reply body, string fileId, string commentId, string replyId)
         {
-            return new UpdateRequest(service, body, fileId, commentId, replyId);
+            return new UpdateRequest(this.service, body, fileId, commentId, replyId);
         }
 
         /// <summary>Updates a reply with patch semantics.</summary>
@@ -4578,7 +5822,7 @@ namespace Google.Apis.Drive.v3
         /// <param name="revisionId">The ID of the revision.</param>
         public virtual DeleteRequest Delete(string fileId, string revisionId)
         {
-            return new DeleteRequest(service, fileId, revisionId);
+            return new DeleteRequest(this.service, fileId, revisionId);
         }
 
         /// <summary>
@@ -4641,7 +5885,7 @@ namespace Google.Apis.Drive.v3
         /// <param name="revisionId">The ID of the revision.</param>
         public virtual GetRequest Get(string fileId, string revisionId)
         {
-            return new GetRequest(service, fileId, revisionId);
+            return new GetRequest(this.service, fileId, revisionId);
         }
 
         /// <summary>Gets a revision's metadata or content by ID.</summary>
@@ -4666,7 +5910,8 @@ namespace Google.Apis.Drive.v3
 
             /// <summary>
             /// Whether the user is acknowledging the risk of downloading known malware or other abusive files. This is
-            /// only applicable when alt=media.
+            /// only applicable when the `alt` parameter is set to `media` and the user is the owner of the file or an
+            /// organizer of the shared drive in which the file resides.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("acknowledgeAbuse", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> AcknowledgeAbuse { get; set; }
@@ -4727,9 +5972,7 @@ namespace Google.Apis.Drive.v3
             public virtual void Download(System.IO.Stream stream)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 mediaDownloader.Download(this.GenerateRequestUri(), stream);
             }
 
@@ -4742,9 +5985,7 @@ namespace Google.Apis.Drive.v3
             public virtual Google.Apis.Download.IDownloadProgress DownloadWithStatus(System.IO.Stream stream)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 return mediaDownloader.Download(this.GenerateRequestUri(), stream);
             }
 
@@ -4756,9 +5997,7 @@ namespace Google.Apis.Drive.v3
             public virtual System.Threading.Tasks.Task<Google.Apis.Download.IDownloadProgress> DownloadAsync(System.IO.Stream stream)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream);
             }
 
@@ -4771,13 +6010,10 @@ namespace Google.Apis.Drive.v3
                 System.Threading.CancellationToken cancellationToken)
             {
                 var mediaDownloader = (Google.Apis.Download.MediaDownloader)MediaDownloader;
-                #if !NET40
                 mediaDownloader.Range = null;
-                #endif
                 return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream, cancellationToken);
             }
 
-            #if !NET40
             /// <summary>Synchronously download a range of the media into the given stream.</summary>
             /// <remarks>
             /// This method uses the <see cref="MediaDownloader"/> property to perform the download. Progress event
@@ -4803,14 +6039,13 @@ namespace Google.Apis.Drive.v3
                 mediaDownloader.Range = range;
                 return mediaDownloader.DownloadAsync(this.GenerateRequestUri(), stream, cancellationToken);
             }
-            #endif
         }
 
         /// <summary>Lists a file's revisions.</summary>
         /// <param name="fileId">The ID of the file.</param>
         public virtual ListRequest List(string fileId)
         {
-            return new ListRequest(service, fileId);
+            return new ListRequest(this.service, fileId);
         }
 
         /// <summary>Lists a file's revisions.</summary>
@@ -4884,7 +6119,7 @@ namespace Google.Apis.Drive.v3
         /// <param name="revisionId">The ID of the revision.</param>
         public virtual UpdateRequest Update(Google.Apis.Drive.v3.Data.Revision body, string fileId, string revisionId)
         {
-            return new UpdateRequest(service, body, fileId, revisionId);
+            return new UpdateRequest(this.service, body, fileId, revisionId);
         }
 
         /// <summary>Updates a revision with patch semantics.</summary>
@@ -4960,19 +6195,20 @@ namespace Google.Apis.Drive.v3
             this.service = service;
         }
 
-        /// <summary>Deprecated use drives.create instead.</summary>
+        /// <summary>Deprecated: Use `drives.create` instead.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="requestId">
-        /// An ID, such as a random UUID, which uniquely identifies this user's request for idempotent creation of a
-        /// Team Drive. A repeated request by the same user and with the same request ID will avoid creating duplicates
-        /// by attempting to create the same Team Drive. If the Team Drive already exists a 409 error will be returned.
+        /// Required. An ID, such as a random UUID, which uniquely identifies this user's request for idempotent
+        /// creation of a Team Drive. A repeated request by the same user and with the same request ID will avoid
+        /// creating duplicates by attempting to create the same Team Drive. If the Team Drive already exists a 409
+        /// error will be returned.
         /// </param>
         public virtual CreateRequest Create(Google.Apis.Drive.v3.Data.TeamDrive body, string requestId)
         {
-            return new CreateRequest(service, body, requestId);
+            return new CreateRequest(this.service, body, requestId);
         }
 
-        /// <summary>Deprecated use drives.create instead.</summary>
+        /// <summary>Deprecated: Use `drives.create` instead.</summary>
         public class CreateRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.TeamDrive>
         {
             /// <summary>Constructs a new Create request.</summary>
@@ -4984,10 +6220,10 @@ namespace Google.Apis.Drive.v3
             }
 
             /// <summary>
-            /// An ID, such as a random UUID, which uniquely identifies this user's request for idempotent creation of a
-            /// Team Drive. A repeated request by the same user and with the same request ID will avoid creating
-            /// duplicates by attempting to create the same Team Drive. If the Team Drive already exists a 409 error
-            /// will be returned.
+            /// Required. An ID, such as a random UUID, which uniquely identifies this user's request for idempotent
+            /// creation of a Team Drive. A repeated request by the same user and with the same request ID will avoid
+            /// creating duplicates by attempting to create the same Team Drive. If the Team Drive already exists a 409
+            /// error will be returned.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("requestId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string RequestId { get; private set; }
@@ -5022,14 +6258,14 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Deprecated use drives.delete instead.</summary>
+        /// <summary>Deprecated: Use `drives.delete` instead.</summary>
         /// <param name="teamDriveId">The ID of the Team Drive</param>
         public virtual DeleteRequest Delete(string teamDriveId)
         {
-            return new DeleteRequest(service, teamDriveId);
+            return new DeleteRequest(this.service, teamDriveId);
         }
 
-        /// <summary>Deprecated use drives.delete instead.</summary>
+        /// <summary>Deprecated: Use `drives.delete` instead.</summary>
         public class DeleteRequest : DriveBaseServiceRequest<string>
         {
             /// <summary>Constructs a new Delete request.</summary>
@@ -5067,14 +6303,14 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Deprecated use drives.get instead.</summary>
+        /// <summary>Deprecated: Use `drives.get` instead.</summary>
         /// <param name="teamDriveId">The ID of the Team Drive</param>
         public virtual GetRequest Get(string teamDriveId)
         {
-            return new GetRequest(service, teamDriveId);
+            return new GetRequest(this.service, teamDriveId);
         }
 
-        /// <summary>Deprecated use drives.get instead.</summary>
+        /// <summary>Deprecated: Use `drives.get` instead.</summary>
         public class GetRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.TeamDrive>
         {
             /// <summary>Constructs a new Get request.</summary>
@@ -5127,13 +6363,13 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Deprecated use drives.list instead.</summary>
+        /// <summary>Deprecated: Use `drives.list` instead.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
-        /// <summary>Deprecated use drives.list instead.</summary>
+        /// <summary>Deprecated: Use `drives.list` instead.</summary>
         public class ListRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.TeamDriveList>
         {
             /// <summary>Constructs a new List request.</summary>
@@ -5209,15 +6445,15 @@ namespace Google.Apis.Drive.v3
             }
         }
 
-        /// <summary>Deprecated use drives.update instead</summary>
+        /// <summary>Deprecated: Use `drives.update` instead.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="teamDriveId">The ID of the Team Drive</param>
         public virtual UpdateRequest Update(Google.Apis.Drive.v3.Data.TeamDrive body, string teamDriveId)
         {
-            return new UpdateRequest(service, body, teamDriveId);
+            return new UpdateRequest(this.service, body, teamDriveId);
         }
 
-        /// <summary>Deprecated use drives.update instead</summary>
+        /// <summary>Deprecated: Use `drives.update` instead.</summary>
         public class UpdateRequest : DriveBaseServiceRequest<Google.Apis.Drive.v3.Data.TeamDrive>
         {
             /// <summary>Constructs a new Update request.</summary>
@@ -5291,7 +6527,7 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("canCreateDrives")]
         public virtual System.Nullable<bool> CanCreateDrives { get; set; }
 
-        /// <summary>Deprecated - use canCreateDrives instead.</summary>
+        /// <summary>Deprecated: Use `canCreateDrives` instead.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("canCreateTeamDrives")]
         public virtual System.Nullable<bool> CanCreateTeamDrives { get; set; }
 
@@ -5311,7 +6547,7 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("importFormats")]
         public virtual System.Collections.Generic.IDictionary<string, System.Collections.Generic.IList<string>> ImportFormats { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#about".</summary>
+        /// <summary>Identifies what kind of resource this is. Value: the fixed string `"drive#about"`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5323,11 +6559,15 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("maxUploadSize")]
         public virtual System.Nullable<long> MaxUploadSize { get; set; }
 
-        /// <summary>The user's storage quota limits and usage. All fields are measured in bytes.</summary>
+        /// <summary>
+        /// The user's storage quota limits and usage. For users that are part of an organization with pooled storage,
+        /// information about the limit and usage across all services is for the organization, rather than the
+        /// individual user. All fields are measured in bytes.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storageQuota")]
         public virtual StorageQuotaData StorageQuota { get; set; }
 
-        /// <summary>Deprecated - use driveThemes instead.</summary>
+        /// <summary>Deprecated: Use `driveThemes` instead.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("teamDriveThemes")]
         public virtual System.Collections.Generic.IList<TeamDriveThemesData> TeamDriveThemes { get; set; }
 
@@ -5354,16 +6594,25 @@ namespace Google.Apis.Drive.v3.Data
             public virtual string Id { get; set; }
         }
 
-        /// <summary>The user's storage quota limits and usage. All fields are measured in bytes.</summary>
+        /// <summary>
+        /// The user's storage quota limits and usage. For users that are part of an organization with pooled storage,
+        /// information about the limit and usage across all services is for the organization, rather than the
+        /// individual user. All fields are measured in bytes.
+        /// </summary>
         public class StorageQuotaData
         {
             /// <summary>
-            /// The usage limit, if applicable. This will not be present if the user has unlimited storage.
+            /// The usage limit, if applicable. This will not be present if the user has unlimited storage. For users
+            /// that are part of an organization with pooled storage, this is the limit for the organization, rather
+            /// than the individual user.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("limit")]
             public virtual System.Nullable<long> Limit { get; set; }
 
-            /// <summary>The total usage across all services.</summary>
+            /// <summary>
+            /// The total usage across all services. For users that are part of an organization with pooled storage,
+            /// this is the usage across all services for the organization, rather than the individual user.
+            /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("usage")]
             public virtual System.Nullable<long> Usage { get; set; }
 
@@ -5376,27 +6625,287 @@ namespace Google.Apis.Drive.v3.Data
             public virtual System.Nullable<long> UsageInDriveTrash { get; set; }
         }
 
-        /// <summary>Deprecated - use driveThemes instead.</summary>
+        /// <summary>Deprecated: Use `driveThemes` instead.</summary>
         public class TeamDriveThemesData
         {
-            /// <summary>Deprecated - use driveThemes/backgroundImageLink instead.</summary>
+            /// <summary>Deprecated: Use `driveThemes/backgroundImageLink` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("backgroundImageLink")]
             public virtual string BackgroundImageLink { get; set; }
 
-            /// <summary>Deprecated - use driveThemes/colorRgb instead.</summary>
+            /// <summary>Deprecated: Use `driveThemes/colorRgb` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("colorRgb")]
             public virtual string ColorRgb { get; set; }
 
-            /// <summary>Deprecated - use driveThemes/id instead.</summary>
+            /// <summary>Deprecated: Use `driveThemes/id` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("id")]
             public virtual string Id { get; set; }
         }
     }
 
+    /// <summary>The Access Proposal resource for outstanding access proposals on a file</summary>
+    public class AccessProposal : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>The creation time</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The file id that the proposal for access is on</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileId")]
+        public virtual string FileId { get; set; }
+
+        /// <summary>The id of the access proposal</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("proposalId")]
+        public virtual string ProposalId { get; set; }
+
+        /// <summary>The email address of the user that will receive permissions if accepted</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("recipientEmailAddress")]
+        public virtual string RecipientEmailAddress { get; set; }
+
+        /// <summary>The message that the requester added to the proposal</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestMessage")]
+        public virtual string RequestMessage { get; set; }
+
+        /// <summary>The email address of the requesting user</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requesterEmailAddress")]
+        public virtual string RequesterEmailAddress { get; set; }
+
+        /// <summary>A wrapper for the role and view of an access proposal.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rolesAndViews")]
+        public virtual System.Collections.Generic.IList<AccessProposalRoleAndView> RolesAndViews { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A wrapper for the role and view of an access proposal.</summary>
+    public class AccessProposalRoleAndView : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The role that was proposed by the requester New values may be added in the future, but the following are
+        /// currently possible: * `writer` * `commenter` * `reader`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("role")]
+        public virtual string Role { get; set; }
+
+        /// <summary>
+        /// Indicates the view for this access proposal. Only populated for proposals that belong to a view. `published`
+        /// is the only supported value.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("view")]
+        public virtual string View { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The `apps` resource provides a list of apps that a user has installed, with information about each app's
+    /// supported MIME types, file extensions, and other details. Some resource methods (such as `apps.get`) require an
+    /// `appId`. Use the `apps.list` method to retrieve the ID for an installed application.
+    /// </summary>
+    public class App : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Whether the app is authorized to access data on the user's Drive.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("authorized")]
+        public virtual System.Nullable<bool> Authorized { get; set; }
+
+        /// <summary>
+        /// The template URL to create a file with this app in a given folder. The template contains the {folderId} to
+        /// be replaced by the folder ID house the new file.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createInFolderTemplate")]
+        public virtual string CreateInFolderTemplate { get; set; }
+
+        /// <summary>The URL to create a file with this app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createUrl")]
+        public virtual string CreateUrl { get; set; }
+
+        /// <summary>
+        /// Whether the app has Drive-wide scope. An app with Drive-wide scope can access all files in the user's Drive.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hasDriveWideScope")]
+        public virtual System.Nullable<bool> HasDriveWideScope { get; set; }
+
+        /// <summary>The various icons for the app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("icons")]
+        public virtual System.Collections.Generic.IList<AppIcons> Icons { get; set; }
+
+        /// <summary>The ID of the app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>Whether the app is installed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("installed")]
+        public virtual System.Nullable<bool> Installed { get; set; }
+
+        /// <summary>
+        /// Output only. Identifies what kind of resource this is. Value: the fixed string "drive#app".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>A long description of the app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("longDescription")]
+        public virtual string LongDescription { get; set; }
+
+        /// <summary>The name of the app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// The type of object this app creates such as a Chart. If empty, the app name should be used instead.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("objectType")]
+        public virtual string ObjectType { get; set; }
+
+        /// <summary>
+        /// The template URL for opening files with this app. The template contains {ids} or {exportIds} to be replaced
+        /// by the actual file IDs. For more information, see Open Files for the full documentation.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("openUrlTemplate")]
+        public virtual string OpenUrlTemplate { get; set; }
+
+        /// <summary>The list of primary file extensions.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryFileExtensions")]
+        public virtual System.Collections.Generic.IList<string> PrimaryFileExtensions { get; set; }
+
+        /// <summary>The list of primary MIME types.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryMimeTypes")]
+        public virtual System.Collections.Generic.IList<string> PrimaryMimeTypes { get; set; }
+
+        /// <summary>The ID of the product listing for this app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("productId")]
+        public virtual string ProductId { get; set; }
+
+        /// <summary>A link to the product listing for this app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("productUrl")]
+        public virtual string ProductUrl { get; set; }
+
+        /// <summary>The list of secondary file extensions.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("secondaryFileExtensions")]
+        public virtual System.Collections.Generic.IList<string> SecondaryFileExtensions { get; set; }
+
+        /// <summary>The list of secondary MIME types.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("secondaryMimeTypes")]
+        public virtual System.Collections.Generic.IList<string> SecondaryMimeTypes { get; set; }
+
+        /// <summary>A short description of the app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("shortDescription")]
+        public virtual string ShortDescription { get; set; }
+
+        /// <summary>Whether this app supports creating objects.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("supportsCreate")]
+        public virtual System.Nullable<bool> SupportsCreate { get; set; }
+
+        /// <summary>Whether this app supports importing from Google Docs.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("supportsImport")]
+        public virtual System.Nullable<bool> SupportsImport { get; set; }
+
+        /// <summary>Whether this app supports opening more than one file.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("supportsMultiOpen")]
+        public virtual System.Nullable<bool> SupportsMultiOpen { get; set; }
+
+        /// <summary>Whether this app supports creating files when offline.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("supportsOfflineCreate")]
+        public virtual System.Nullable<bool> SupportsOfflineCreate { get; set; }
+
+        /// <summary>Whether the app is selected as the default handler for the types it supports.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("useByDefault")]
+        public virtual System.Nullable<bool> UseByDefault { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class AppIcons : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Category of the icon. Allowed values are: * `application` - The icon for the application. * `document` - The
+        /// icon for a file associated with the app. * `documentShared` - The icon for a shared file associated with the
+        /// app.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("category")]
+        public virtual string Category { get; set; }
+
+        /// <summary>URL for the icon.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("iconUrl")]
+        public virtual string IconUrl { get; set; }
+
+        /// <summary>Size of the icon. Represented as the maximum of the width and height.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("size")]
+        public virtual System.Nullable<int> Size { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A list of third-party applications which the user has installed or given access to Google Drive.
+    /// </summary>
+    public class AppList : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The list of app IDs that the user has specified to use by default. The list is in reverse-priority order
+        /// (lowest to highest).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("defaultAppIds")]
+        public virtual System.Collections.Generic.IList<string> DefaultAppIds { get; set; }
+
+        /// <summary>The list of apps.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("items")]
+        public virtual System.Collections.Generic.IList<App> Items { get; set; }
+
+        /// <summary>
+        /// Output only. Identifies what kind of resource this is. Value: the fixed string "drive#appList".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>A link back to this list.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selfLink")]
+        public virtual string SelfLink { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A change to a file or shared drive.</summary>
     public class Change : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The type of the change. Possible values are file and drive.</summary>
+        /// <summary>The type of the change. Possible values are `file` and `drive`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("changeType")]
         public virtual string ChangeType { get; set; }
 
@@ -5422,7 +6931,7 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("fileId")]
         public virtual string FileId { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#change".</summary>
+        /// <summary>Identifies what kind of resource this is. Value: the fixed string `"drive#change"`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5433,11 +6942,11 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("removed")]
         public virtual System.Nullable<bool> Removed { get; set; }
 
-        /// <summary>Deprecated - use drive instead.</summary>
+        /// <summary>Deprecated: Use `drive` instead.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("teamDrive")]
         public virtual TeamDrive TeamDrive { get; set; }
 
-        /// <summary>Deprecated - use driveId instead.</summary>
+        /// <summary>Deprecated: Use `driveId` instead.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("teamDriveId")]
         public virtual string TeamDriveId { get; set; }
 
@@ -5445,15 +6954,24 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("time")]
         public virtual string TimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TimeRaw);
+            set => TimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="TimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> Time
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeDateTimeOffset instead.")]
+        public virtual System.DateTime? Time
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(TimeRaw);
             set => TimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
         }
 
-        /// <summary>Deprecated - use changeType instead.</summary>
+        /// <summary>Deprecated: Use `changeType` instead.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
@@ -5471,21 +6989,20 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("changes")]
         public virtual System.Collections.Generic.IList<Change> Changes { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#changeList".</summary>
+        /// <summary>Identifies what kind of resource this is. Value: the fixed string `"drive#changeList"`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
         /// The starting page token for future changes. This will be present only if the end of the current changes list
-        /// has been reached.
+        /// has been reached. The page token doesn't expire.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("newStartPageToken")]
         public virtual string NewStartPageToken { get; set; }
 
         /// <summary>
         /// The page token for the next page of changes. This will be absent if the end of the changes list has been
-        /// reached. If the token is rejected for any reason, it should be discarded, and pagination should be restarted
-        /// from the first page of results.
+        /// reached. The page token doesn't expire.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -5494,7 +7011,7 @@ namespace Google.Apis.Drive.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>An notification channel used to watch for resource changes.</summary>
+    /// <summary>A notification channel used to watch for resource changes.</summary>
     public class Channel : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The address where notifications are delivered for this channel.</summary>
@@ -5512,7 +7029,7 @@ namespace Google.Apis.Drive.v3.Data
         public virtual string Id { get; set; }
 
         /// <summary>
-        /// Identifies this as a notification channel used to watch for changes to a resource, which is "api#channel".
+        /// Identifies this as a notification channel used to watch for changes to a resource, which is `api#channel`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
@@ -5544,8 +7061,7 @@ namespace Google.Apis.Drive.v3.Data
         public virtual string Token { get; set; }
 
         /// <summary>
-        /// The type of delivery mechanism used for this channel. Valid values are "web_hook" (or "webhook"). Both
-        /// values refer to a channel where Http requests are used to deliver messages.
+        /// The type of delivery mechanism used for this channel. Valid values are "web_hook" or "webhook".
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
@@ -5554,25 +7070,28 @@ namespace Google.Apis.Drive.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A comment on a file.</summary>
+    /// <summary>
+    /// A comment on a file. Some resource methods (such as `comments.update`) require a `commentId`. Use the
+    /// `comments.list` method to retrieve the ID for a comment in a file.
+    /// </summary>
     public class Comment : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// A region of the document represented as a JSON string. For details on defining anchor properties, refer to
-        /// Add comments and replies.
+        /// [Manage comments and replies](https://developers.google.com/drive/api/v3/manage-comments).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("anchor")]
         public virtual string Anchor { get; set; }
 
         /// <summary>
-        /// The author of the comment. The author's email address and permission ID will not be populated.
+        /// Output only. The author of the comment. The author's email address and permission ID will not be populated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("author")]
         public virtual User Author { get; set; }
 
         /// <summary>
-        /// The plain text content of the comment. This field is used for setting the content, while htmlContent should
-        /// be displayed.
+        /// The plain text content of the comment. This field is used for setting the content, while `htmlContent`
+        /// should be displayed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("content")]
         public virtual string Content { get; set; }
@@ -5581,27 +7100,38 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("createdTime")]
         public virtual string CreatedTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreatedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreatedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(CreatedTimeRaw);
+            set => CreatedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="CreatedTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> CreatedTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreatedTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? CreatedTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(CreatedTimeRaw);
             set => CreatedTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
         }
 
-        /// <summary>Whether the comment has been deleted. A deleted comment has no content.</summary>
+        /// <summary>Output only. Whether the comment has been deleted. A deleted comment has no content.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deleted")]
         public virtual System.Nullable<bool> Deleted { get; set; }
 
-        /// <summary>The content of the comment with HTML formatting.</summary>
+        /// <summary>Output only. The content of the comment with HTML formatting.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("htmlContent")]
         public virtual string HtmlContent { get; set; }
 
-        /// <summary>The ID of the comment.</summary>
+        /// <summary>Output only. The ID of the comment.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#comment".</summary>
+        /// <summary>
+        /// Output only. Identifies what kind of resource this is. Value: the fixed string `"drive#comment"`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5609,9 +7139,18 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("modifiedTime")]
         public virtual string ModifiedTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ModifiedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ModifiedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ModifiedTimeRaw);
+            set => ModifiedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ModifiedTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ModifiedTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ModifiedTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ModifiedTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ModifiedTimeRaw);
             set => ModifiedTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -5624,11 +7163,11 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("quotedFileContent")]
         public virtual QuotedFileContentData QuotedFileContent { get; set; }
 
-        /// <summary>The full list of replies to the comment in chronological order.</summary>
+        /// <summary>Output only. The full list of replies to the comment in chronological order.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("replies")]
         public virtual System.Collections.Generic.IList<Reply> Replies { get; set; }
 
-        /// <summary>Whether the comment has been resolved by one of its replies.</summary>
+        /// <summary>Output only. Whether the comment has been resolved by one of its replies.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resolved")]
         public virtual System.Nullable<bool> Resolved { get; set; }
 
@@ -5661,14 +7200,15 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("comments")]
         public virtual System.Collections.Generic.IList<Comment> Comments { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#commentList".</summary>
+        /// <summary>Identifies what kind of resource this is. Value: the fixed string `"drive#commentList"`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
         /// The page token for the next page of comments. This will be absent if the end of the comments list has been
         /// reached. If the token is rejected for any reason, it should be discarded, and pagination should be restarted
-        /// from the first page of results.
+        /// from the first page of results. The page token is typically valid for several hours. However, if new items
+        /// are added or removed, your expected results might differ.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -5681,6 +7221,13 @@ namespace Google.Apis.Drive.v3.Data
     public class ContentRestriction : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Whether the content restriction can only be modified or removed by a user who owns the file. For files in
+        /// shared drives, any user with `organizer` capabilities can modify or remove this content restriction.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ownerRestricted")]
+        public virtual System.Nullable<bool> OwnerRestricted { get; set; }
+
+        /// <summary>
         /// Whether the content of the file is read-only. If a file is read-only, a new revision of the file may not be
         /// added, comments may not be added or modified, and the title of the file may not be modified.
         /// </summary>
@@ -5689,12 +7236,14 @@ namespace Google.Apis.Drive.v3.Data
 
         /// <summary>
         /// Reason for why the content of the file is restricted. This is only mutable on requests that also set
-        /// readOnly=true.
+        /// `readOnly=true`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("reason")]
         public virtual string Reason { get; set; }
 
-        /// <summary>The user who set the content restriction. Only populated if readOnly is true.</summary>
+        /// <summary>
+        /// Output only. The user who set the content restriction. Only populated if `readOnly` is true.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("restrictingUser")]
         public virtual User RestrictingUser { get; set; }
 
@@ -5705,16 +7254,35 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("restrictionTime")]
         public virtual string RestrictionTimeRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="RestrictionTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RestrictionTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(RestrictionTimeRaw);
+            set => RestrictionTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="RestrictionTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> RestrictionTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RestrictionTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? RestrictionTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(RestrictionTimeRaw);
             set => RestrictionTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
         }
 
         /// <summary>
-        /// The type of the content restriction. Currently the only possible value is globalContentRestriction.
+        /// Output only. Whether the content restriction was applied by the system, for example due to an esignature.
+        /// Users cannot modify or remove system restricted content restrictions.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("systemRestricted")]
+        public virtual System.Nullable<bool> SystemRestricted { get; set; }
+
+        /// <summary>
+        /// Output only. The type of the content restriction. Currently the only possible value is
+        /// `globalContentRestriction`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
@@ -5723,28 +7291,31 @@ namespace Google.Apis.Drive.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Representation of a shared drive.</summary>
+    /// <summary>
+    /// Representation of a shared drive. Some resource methods (such as `drives.update`) require a `driveId`. Use the
+    /// `drives.list` method to retrieve the ID for a shared drive.
+    /// </summary>
     public class Drive : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// An image file and cropping parameters from which a background image for this shared drive is set. This is a
-        /// write only field; it can only be set on drive.drives.update requests that don't set themeId. When specified,
-        /// all fields of the backgroundImageFile must be set.
+        /// write only field; it can only be set on `drive.drives.update` requests that don't set `themeId`. When
+        /// specified, all fields of the `backgroundImageFile` must be set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("backgroundImageFile")]
         public virtual BackgroundImageFileData BackgroundImageFile { get; set; }
 
-        /// <summary>A short-lived link to this shared drive's background image.</summary>
+        /// <summary>Output only. A short-lived link to this shared drive's background image.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("backgroundImageLink")]
         public virtual string BackgroundImageLink { get; set; }
 
-        /// <summary>Capabilities the current user has on this shared drive.</summary>
+        /// <summary>Output only. Capabilities the current user has on this shared drive.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("capabilities")]
         public virtual CapabilitiesData Capabilities { get; set; }
 
         /// <summary>
-        /// The color of this shared drive as an RGB hex string. It can only be set on a drive.drives.update request
-        /// that does not set themeId.
+        /// The color of this shared drive as an RGB hex string. It can only be set on a `drive.drives.update` request
+        /// that does not set `themeId`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("colorRgb")]
         public virtual string ColorRgb { get; set; }
@@ -5753,9 +7324,18 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("createdTime")]
         public virtual string CreatedTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreatedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreatedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(CreatedTimeRaw);
+            set => CreatedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="CreatedTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> CreatedTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreatedTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? CreatedTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(CreatedTimeRaw);
             set => CreatedTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -5766,12 +7346,14 @@ namespace Google.Apis.Drive.v3.Data
         public virtual System.Nullable<bool> Hidden { get; set; }
 
         /// <summary>
-        /// The ID of this shared drive which is also the ID of the top level folder of this shared drive.
+        /// Output only. The ID of this shared drive which is also the ID of the top level folder of this shared drive.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#drive".</summary>
+        /// <summary>
+        /// Output only. Identifies what kind of resource this is. Value: the fixed string `"drive#drive"`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -5779,15 +7361,26 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
-        /// <summary>A set of restrictions that apply to this shared drive or items inside this shared drive.</summary>
+        /// <summary>
+        /// Output only. The organizational unit of this shared drive. This field is only populated on `drives.list`
+        /// responses when the `useDomainAdminAccess` parameter is set to `true`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("orgUnitId")]
+        public virtual string OrgUnitId { get; set; }
+
+        /// <summary>
+        /// A set of restrictions that apply to this shared drive or items inside this shared drive. Note that
+        /// restrictions can't be set when creating a shared drive. To add a restriction, first create a shared drive
+        /// and then use `drives.update` to add restrictions.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("restrictions")]
         public virtual RestrictionsData Restrictions { get; set; }
 
         /// <summary>
-        /// The ID of the theme from which the background image and color will be set. The set of possible driveThemes
-        /// can be retrieved from a drive.about.get response. When not specified on a drive.drives.create request, a
+        /// The ID of the theme from which the background image and color will be set. The set of possible `driveThemes`
+        /// can be retrieved from a `drive.about.get` response. When not specified on a `drive.drives.create` request, a
         /// random theme is chosen from which the background image and color are set. This is a write-only field; it can
-        /// only be set on requests that don't set colorRgb or backgroundImageFile.
+        /// only be set on requests that don't set `colorRgb` or `backgroundImageFile`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("themeId")]
         public virtual string ThemeId { get; set; }
@@ -5797,8 +7390,8 @@ namespace Google.Apis.Drive.v3.Data
 
         /// <summary>
         /// An image file and cropping parameters from which a background image for this shared drive is set. This is a
-        /// write only field; it can only be set on drive.drives.update requests that don't set themeId. When specified,
-        /// all fields of the backgroundImageFile must be set.
+        /// write only field; it can only be set on `drive.drives.update` requests that don't set `themeId`. When
+        /// specified, all fields of the `backgroundImageFile` must be set.
         /// </summary>
         public class BackgroundImageFileData
         {
@@ -5832,96 +7425,128 @@ namespace Google.Apis.Drive.v3.Data
             public virtual System.Nullable<float> YCoordinate { get; set; }
         }
 
-        /// <summary>Capabilities the current user has on this shared drive.</summary>
+        /// <summary>Output only. Capabilities the current user has on this shared drive.</summary>
         public class CapabilitiesData
         {
-            /// <summary>Whether the current user can add children to folders in this shared drive.</summary>
+            /// <summary>
+            /// Output only. Whether the current user can add children to folders in this shared drive.
+            /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canAddChildren")]
             public virtual System.Nullable<bool> CanAddChildren { get; set; }
 
             /// <summary>
-            /// Whether the current user can change the copyRequiresWriterPermission restriction of this shared drive.
+            /// Output only. Whether the current user can change the `copyRequiresWriterPermission` restriction of this
+            /// shared drive.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canChangeCopyRequiresWriterPermissionRestriction")]
             public virtual System.Nullable<bool> CanChangeCopyRequiresWriterPermissionRestriction { get; set; }
 
             /// <summary>
-            /// Whether the current user can change the domainUsersOnly restriction of this shared drive.
+            /// Output only. Whether the current user can change the `domainUsersOnly` restriction of this shared drive.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canChangeDomainUsersOnlyRestriction")]
             public virtual System.Nullable<bool> CanChangeDomainUsersOnlyRestriction { get; set; }
 
-            /// <summary>Whether the current user can change the background of this shared drive.</summary>
+            /// <summary>Output only. Whether the current user can change the background of this shared drive.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canChangeDriveBackground")]
             public virtual System.Nullable<bool> CanChangeDriveBackground { get; set; }
 
             /// <summary>
-            /// Whether the current user can change the driveMembersOnly restriction of this shared drive.
+            /// Output only. Whether the current user can change the `driveMembersOnly` restriction of this shared
+            /// drive.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canChangeDriveMembersOnlyRestriction")]
             public virtual System.Nullable<bool> CanChangeDriveMembersOnlyRestriction { get; set; }
 
-            /// <summary>Whether the current user can comment on files in this shared drive.</summary>
+            /// <summary>
+            /// Output only. Whether the current user can change the `sharingFoldersRequiresOrganizerPermission`
+            /// restriction of this shared drive.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("canChangeSharingFoldersRequiresOrganizerPermissionRestriction")]
+            public virtual System.Nullable<bool> CanChangeSharingFoldersRequiresOrganizerPermissionRestriction { get; set; }
+
+            /// <summary>Output only. Whether the current user can comment on files in this shared drive.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canComment")]
             public virtual System.Nullable<bool> CanComment { get; set; }
 
-            /// <summary>Whether the current user can copy files in this shared drive.</summary>
+            /// <summary>Output only. Whether the current user can copy files in this shared drive.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canCopy")]
             public virtual System.Nullable<bool> CanCopy { get; set; }
 
-            /// <summary>Whether the current user can delete children from folders in this shared drive.</summary>
+            /// <summary>
+            /// Output only. Whether the current user can delete children from folders in this shared drive.
+            /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canDeleteChildren")]
             public virtual System.Nullable<bool> CanDeleteChildren { get; set; }
 
             /// <summary>
-            /// Whether the current user can delete this shared drive. Attempting to delete the shared drive may still
-            /// fail if there are untrashed items inside the shared drive.
+            /// Output only. Whether the current user can delete this shared drive. Attempting to delete the shared
+            /// drive may still fail if there are untrashed items inside the shared drive.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canDeleteDrive")]
             public virtual System.Nullable<bool> CanDeleteDrive { get; set; }
 
-            /// <summary>Whether the current user can download files in this shared drive.</summary>
+            /// <summary>Output only. Whether the current user can download files in this shared drive.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canDownload")]
             public virtual System.Nullable<bool> CanDownload { get; set; }
 
-            /// <summary>Whether the current user can edit files in this shared drive</summary>
+            /// <summary>Output only. Whether the current user can edit files in this shared drive</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canEdit")]
             public virtual System.Nullable<bool> CanEdit { get; set; }
 
-            /// <summary>Whether the current user can list the children of folders in this shared drive.</summary>
+            /// <summary>
+            /// Output only. Whether the current user can list the children of folders in this shared drive.
+            /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canListChildren")]
             public virtual System.Nullable<bool> CanListChildren { get; set; }
 
             /// <summary>
-            /// Whether the current user can add members to this shared drive or remove them or change their role.
+            /// Output only. Whether the current user can add members to this shared drive or remove them or change
+            /// their role.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canManageMembers")]
             public virtual System.Nullable<bool> CanManageMembers { get; set; }
 
             /// <summary>
-            /// Whether the current user can read the revisions resource of files in this shared drive.
+            /// Output only. Whether the current user can read the revisions resource of files in this shared drive.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canReadRevisions")]
             public virtual System.Nullable<bool> CanReadRevisions { get; set; }
 
-            /// <summary>Whether the current user can rename files or folders in this shared drive.</summary>
+            /// <summary>
+            /// Output only. Whether the current user can rename files or folders in this shared drive.
+            /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canRename")]
             public virtual System.Nullable<bool> CanRename { get; set; }
 
-            /// <summary>Whether the current user can rename this shared drive.</summary>
+            /// <summary>Output only. Whether the current user can rename this shared drive.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canRenameDrive")]
             public virtual System.Nullable<bool> CanRenameDrive { get; set; }
 
-            /// <summary>Whether the current user can share files or folders in this shared drive.</summary>
+            /// <summary>
+            /// Output only. Whether the current user can reset the shared drive restrictions to defaults.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("canResetDriveRestrictions")]
+            public virtual System.Nullable<bool> CanResetDriveRestrictions { get; set; }
+
+            /// <summary>
+            /// Output only. Whether the current user can share files or folders in this shared drive.
+            /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canShare")]
             public virtual System.Nullable<bool> CanShare { get; set; }
 
-            /// <summary>Whether the current user can trash children from folders in this shared drive.</summary>
+            /// <summary>
+            /// Output only. Whether the current user can trash children from folders in this shared drive.
+            /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canTrashChildren")]
             public virtual System.Nullable<bool> CanTrashChildren { get; set; }
         }
 
-        /// <summary>A set of restrictions that apply to this shared drive or items inside this shared drive.</summary>
+        /// <summary>
+        /// A set of restrictions that apply to this shared drive or items inside this shared drive. Note that
+        /// restrictions can't be set when creating a shared drive. To add a restriction, first create a shared drive
+        /// and then use `drives.update` to add restrictions.
+        /// </summary>
         public class RestrictionsData
         {
             /// <summary>
@@ -5932,8 +7557,8 @@ namespace Google.Apis.Drive.v3.Data
 
             /// <summary>
             /// Whether the options to copy, print, or download files inside this shared drive, should be disabled for
-            /// readers and commenters. When this restriction is set to true, it will override the similarly named field
-            /// to true for any file inside this shared drive.
+            /// readers and commenters. When this restriction is set to `true`, it will override the similarly named
+            /// field to `true` for any file inside this shared drive.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("copyRequiresWriterPermission")]
             public virtual System.Nullable<bool> CopyRequiresWriterPermission { get; set; }
@@ -5949,6 +7574,13 @@ namespace Google.Apis.Drive.v3.Data
             /// <summary>Whether access to items inside this shared drive is restricted to its members.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("driveMembersOnly")]
             public virtual System.Nullable<bool> DriveMembersOnly { get; set; }
+
+            /// <summary>
+            /// If true, only users with the organizer role can share folders. If false, users with either the organizer
+            /// role or the file organizer role can share folders.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("sharingFoldersRequiresOrganizerPermission")]
+            public virtual System.Nullable<bool> SharingFoldersRequiresOrganizerPermission { get; set; }
         }
     }
 
@@ -5962,14 +7594,15 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("drives")]
         public virtual System.Collections.Generic.IList<Drive> Drives { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#driveList".</summary>
+        /// <summary>Identifies what kind of resource this is. Value: the fixed string `"drive#driveList"`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
         /// The page token for the next page of shared drives. This will be absent if the end of the list has been
         /// reached. If the token is rejected for any reason, it should be discarded, and pagination should be restarted
-        /// from the first page of results.
+        /// from the first page of results. The page token is typically valid for several hours. However, if new items
+        /// are added or removed, your expected results might differ.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -5978,7 +7611,10 @@ namespace Google.Apis.Drive.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The metadata for a file.</summary>
+    /// <summary>
+    /// The metadata for a file. Some resource methods (such as `files.update`) require a `fileId`. Use the `files.list`
+    /// method to retrieve the ID for a file.
+    /// </summary>
     public class File : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -5991,8 +7627,8 @@ namespace Google.Apis.Drive.v3.Data
         public virtual System.Collections.Generic.IDictionary<string, string> AppProperties { get; set; }
 
         /// <summary>
-        /// Capabilities the current user has on this file. Each capability corresponds to a fine-grained action that a
-        /// user may take.
+        /// Output only. Capabilities the current user has on this file. Each capability corresponds to a fine-grained
+        /// action that a user may take.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("capabilities")]
         public virtual CapabilitiesData Capabilities { get; set; }
@@ -6019,9 +7655,18 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("createdTime")]
         public virtual string CreatedTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreatedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreatedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(CreatedTimeRaw);
+            set => CreatedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="CreatedTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> CreatedTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreatedTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? CreatedTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(CreatedTimeRaw);
             set => CreatedTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -6031,66 +7676,69 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual string Description { get; set; }
 
-        /// <summary>ID of the shared drive the file resides in. Only populated for items in shared drives.</summary>
+        /// <summary>
+        /// Output only. ID of the shared drive the file resides in. Only populated for items in shared drives.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("driveId")]
         public virtual string DriveId { get; set; }
 
         /// <summary>
-        /// Whether the file has been explicitly trashed, as opposed to recursively trashed from a parent folder.
+        /// Output only. Whether the file has been explicitly trashed, as opposed to recursively trashed from a parent
+        /// folder.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("explicitlyTrashed")]
         public virtual System.Nullable<bool> ExplicitlyTrashed { get; set; }
 
-        /// <summary>Links for exporting Docs Editors files to specific formats.</summary>
+        /// <summary>Output only. Links for exporting Docs Editors files to specific formats.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("exportLinks")]
         public virtual System.Collections.Generic.IDictionary<string, string> ExportLinks { get; set; }
 
         /// <summary>
-        /// The final component of fullFileExtension. This is only available for files with binary content in Google
-        /// Drive.
+        /// Output only. The final component of `fullFileExtension`. This is only available for files with binary
+        /// content in Google Drive.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fileExtension")]
         public virtual string FileExtension { get; set; }
 
         /// <summary>
-        /// The color for a folder or shortcut to a folder as an RGB hex string. The supported colors are published in
-        /// the folderColorPalette field of the About resource. If an unsupported color is specified, the closest color
-        /// in the palette will be used instead.
+        /// The color for a folder or a shortcut to a folder as an RGB hex string. The supported colors are published in
+        /// the `folderColorPalette` field of the About resource. If an unsupported color is specified, the closest
+        /// color in the palette is used instead.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("folderColorRgb")]
         public virtual string FolderColorRgb { get; set; }
 
         /// <summary>
-        /// The full file extension extracted from the name field. May contain multiple concatenated extensions, such as
-        /// "tar.gz". This is only available for files with binary content in Google Drive. This is automatically
-        /// updated when the name field changes, however it is not cleared if the new name does not contain a valid
-        /// extension.
+        /// Output only. The full file extension extracted from the `name` field. May contain multiple concatenated
+        /// extensions, such as "tar.gz". This is only available for files with binary content in Google Drive. This is
+        /// automatically updated when the `name` field changes, however it is not cleared if the new name does not
+        /// contain a valid extension.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fullFileExtension")]
         public virtual string FullFileExtension { get; set; }
 
         /// <summary>
-        /// Whether there are permissions directly on this file. This field is only populated for items in shared
-        /// drives.
+        /// Output only. Whether there are permissions directly on this file. This field is only populated for items in
+        /// shared drives.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hasAugmentedPermissions")]
         public virtual System.Nullable<bool> HasAugmentedPermissions { get; set; }
 
         /// <summary>
-        /// Whether this file has a thumbnail. This does not indicate whether the requesting app has access to the
-        /// thumbnail. To check access, look for the presence of the thumbnailLink field.
+        /// Output only. Whether this file has a thumbnail. This does not indicate whether the requesting app has access
+        /// to the thumbnail. To check access, look for the presence of the thumbnailLink field.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hasThumbnail")]
         public virtual System.Nullable<bool> HasThumbnail { get; set; }
 
         /// <summary>
-        /// The ID of the file's head revision. This is currently only available for files with binary content in Google
-        /// Drive.
+        /// Output only. The ID of the file's head revision. This is currently only available for files with binary
+        /// content in Google Drive.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("headRevisionId")]
         public virtual string HeadRevisionId { get; set; }
 
-        /// <summary>A static, unauthenticated link to the file's icon.</summary>
+        /// <summary>Output only. A static, unauthenticated link to the file's icon.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("iconLink")]
         public virtual string IconLink { get; set; }
 
@@ -6098,19 +7746,28 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
 
-        /// <summary>Additional metadata about image media, if available.</summary>
+        /// <summary>Output only. Additional metadata about image media, if available.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("imageMediaMetadata")]
         public virtual ImageMediaMetadataData ImageMediaMetadata { get; set; }
 
-        /// <summary>Whether the file was created or opened by the requesting app.</summary>
+        /// <summary>Output only. Whether the file was created or opened by the requesting app.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("isAppAuthorized")]
         public virtual System.Nullable<bool> IsAppAuthorized { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#file".</summary>
+        /// <summary>
+        /// Output only. Identifies what kind of resource this is. Value: the fixed string `"drive#file"`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
-        /// <summary>The last user to modify the file.</summary>
+        /// <summary>Output only. An overview of the labels on the file.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labelInfo")]
+        public virtual LabelInfoData LabelInfo { get; set; }
+
+        /// <summary>
+        /// Output only. The last user to modify the file. This field is only populated when the last modification was
+        /// performed by a signed-in user.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastModifyingUser")]
         public virtual User LastModifyingUser { get; set; }
 
@@ -6119,22 +7776,22 @@ namespace Google.Apis.Drive.v3.Data
         public virtual LinkShareMetadataData LinkShareMetadata { get; set; }
 
         /// <summary>
-        /// The MD5 checksum for the content of the file. This is only applicable to files with binary content in Google
-        /// Drive.
+        /// Output only. The MD5 checksum for the content of the file. This is only applicable to files with binary
+        /// content in Google Drive.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("md5Checksum")]
         public virtual string Md5Checksum { get; set; }
 
         /// <summary>
-        /// The MIME type of the file. Google Drive will attempt to automatically detect an appropriate value from
-        /// uploaded content if no value is provided. The value cannot be changed unless a new revision is uploaded. If
-        /// a file is created with a Google Doc MIME type, the uploaded content will be imported if possible. The
-        /// supported import formats are published in the About resource.
+        /// The MIME type of the file. Google Drive attempts to automatically detect an appropriate value from uploaded
+        /// content, if no value is provided. The value cannot be changed unless a new revision is uploaded. If a file
+        /// is created with a Google Doc MIME type, the uploaded content is imported, if possible. The supported import
+        /// formats are published in the About resource.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mimeType")]
         public virtual string MimeType { get; set; }
 
-        /// <summary>Whether the file has been modified by this user.</summary>
+        /// <summary>Output only. Whether the file has been modified by this user.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("modifiedByMe")]
         public virtual System.Nullable<bool> ModifiedByMe { get; set; }
 
@@ -6142,24 +7799,44 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("modifiedByMeTime")]
         public virtual string ModifiedByMeTimeRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ModifiedByMeTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ModifiedByMeTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ModifiedByMeTimeRaw);
+            set => ModifiedByMeTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ModifiedByMeTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ModifiedByMeTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ModifiedByMeTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ModifiedByMeTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ModifiedByMeTimeRaw);
             set => ModifiedByMeTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
         }
 
         /// <summary>
-        /// The last time the file was modified by anyone (RFC 3339 date-time). Note that setting modifiedTime will also
+        /// he last time the file was modified by anyone (RFC 3339 date-time). Note that setting modifiedTime will also
         /// update modifiedByMeTime for the user.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("modifiedTime")]
         public virtual string ModifiedTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ModifiedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ModifiedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ModifiedTimeRaw);
+            set => ModifiedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ModifiedTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ModifiedTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ModifiedTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ModifiedTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ModifiedTimeRaw);
             set => ModifiedTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -6174,39 +7851,40 @@ namespace Google.Apis.Drive.v3.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The original filename of the uploaded content if available, or else the original value of the name field.
+        /// The original filename of the uploaded content if available, or else the original value of the `name` field.
         /// This is only available for files with binary content in Google Drive.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("originalFilename")]
         public virtual string OriginalFilename { get; set; }
 
-        /// <summary>Whether the user owns the file. Not populated for items in shared drives.</summary>
+        /// <summary>Output only. Whether the user owns the file. Not populated for items in shared drives.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ownedByMe")]
         public virtual System.Nullable<bool> OwnedByMe { get; set; }
 
         /// <summary>
-        /// The owner of this file. Only certain legacy files may have more than one owner. This field isn't populated
-        /// for items in shared drives.
+        /// Output only. The owner of this file. Only certain legacy files may have more than one owner. This field
+        /// isn't populated for items in shared drives.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("owners")]
         public virtual System.Collections.Generic.IList<User> Owners { get; set; }
 
         /// <summary>
-        /// The IDs of the parent folders which contain the file. If not specified as part of a create request, the file
-        /// will be placed directly in the user's My Drive folder. If not specified as part of a copy request, the file
-        /// will inherit any discoverable parents of the source file. Update requests must use the addParents and
-        /// removeParents parameters to modify the parents list.
+        /// The ID of the parent folder containing the file. A file can only have one parent folder; specifying multiple
+        /// parents isn't supported. If not specified as part of a create request, the file is placed directly in the
+        /// user's My Drive folder. If not specified as part of a copy request, the file inherits any discoverable
+        /// parent of the source file. Update requests must use the `addParents` and `removeParents` parameters to
+        /// modify the parents list.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("parents")]
         public virtual System.Collections.Generic.IList<string> Parents { get; set; }
 
-        /// <summary>List of permission IDs for users with access to this file.</summary>
+        /// <summary>Output only. List of permission IDs for users with access to this file.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("permissionIds")]
         public virtual System.Collections.Generic.IList<string> PermissionIds { get; set; }
 
         /// <summary>
-        /// The full list of permissions for the file. This is only available if the requesting user can share the file.
-        /// Not populated for items in shared drives.
+        /// Output only. The full list of permissions for the file. This is only available if the requesting user can
+        /// share the file. Not populated for items in shared drives.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("permissions")]
         public virtual System.Collections.Generic.IList<Permission> Permissions { get; set; }
@@ -6219,17 +7897,31 @@ namespace Google.Apis.Drive.v3.Data
         public virtual System.Collections.Generic.IDictionary<string, string> Properties { get; set; }
 
         /// <summary>
-        /// The number of storage quota bytes used by the file. This includes the head revision as well as previous
-        /// revisions with keepForever enabled.
+        /// Output only. The number of storage quota bytes used by the file. This includes the head revision as well as
+        /// previous revisions with `keepForever` enabled.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("quotaBytesUsed")]
         public virtual System.Nullable<long> QuotaBytesUsed { get; set; }
 
-        /// <summary>A key needed to access the item via a shared link.</summary>
+        /// <summary>Output only. A key needed to access the item via a shared link.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resourceKey")]
         public virtual string ResourceKey { get; set; }
 
-        /// <summary>Whether the file has been shared. Not populated for items in shared drives.</summary>
+        /// <summary>
+        /// Output only. The SHA1 checksum associated with this file, if available. This field is only populated for
+        /// files with content stored in Google Drive; it is not populated for Docs Editors or shortcut files.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sha1Checksum")]
+        public virtual string Sha1Checksum { get; set; }
+
+        /// <summary>
+        /// Output only. The SHA256 checksum associated with this file, if available. This field is only populated for
+        /// files with content stored in Google Drive; it is not populated for Docs Editors or shortcut files.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sha256Checksum")]
+        public virtual string Sha256Checksum { get; set; }
+
+        /// <summary>Output only. Whether the file has been shared. Not populated for items in shared drives.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("shared")]
         public virtual System.Nullable<bool> Shared { get; set; }
 
@@ -6237,35 +7929,46 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sharedWithMeTime")]
         public virtual string SharedWithMeTimeRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="SharedWithMeTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SharedWithMeTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(SharedWithMeTimeRaw);
+            set => SharedWithMeTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="SharedWithMeTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> SharedWithMeTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SharedWithMeTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? SharedWithMeTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(SharedWithMeTimeRaw);
             set => SharedWithMeTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
         }
 
-        /// <summary>The user who shared the file with the requesting user, if applicable.</summary>
+        /// <summary>Output only. The user who shared the file with the requesting user, if applicable.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sharingUser")]
         public virtual User SharingUser { get; set; }
 
         /// <summary>
         /// Shortcut file details. Only populated for shortcut files, which have the mimeType field set to
-        /// application/vnd.google-apps.shortcut.
+        /// `application/vnd.google-apps.shortcut`. Can only be set on `files.create` requests.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("shortcutDetails")]
         public virtual ShortcutDetailsData ShortcutDetails { get; set; }
 
         /// <summary>
-        /// The size of the file's content in bytes. This is applicable to binary files in Google Drive and Google Docs
-        /// files.
+        /// Output only. Size in bytes of blobs and first party editor files. Won't be populated for files that have no
+        /// size, like shortcuts and folders.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("size")]
         public virtual System.Nullable<long> Size { get; set; }
 
         /// <summary>
-        /// The list of spaces which contain the file. The currently supported values are 'drive', 'appDataFolder' and
-        /// 'photos'.
+        /// Output only. The list of spaces which contain the file. The currently supported values are 'drive',
+        /// 'appDataFolder' and 'photos'.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("spaces")]
         public virtual System.Collections.Generic.IList<string> Spaces { get; set; }
@@ -6274,27 +7977,27 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("starred")]
         public virtual System.Nullable<bool> Starred { get; set; }
 
-        /// <summary>Deprecated - use driveId instead.</summary>
+        /// <summary>Deprecated: Output only. Use `driveId` instead.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("teamDriveId")]
         public virtual string TeamDriveId { get; set; }
 
         /// <summary>
-        /// A short-lived link to the file's thumbnail, if available. Typically lasts on the order of hours. Only
-        /// populated when the requesting app can access the file's content. If the file isn't shared publicly, the URL
-        /// returned in Files.thumbnailLink must be fetched using a credentialed request.
+        /// Output only. A short-lived link to the file's thumbnail, if available. Typically lasts on the order of
+        /// hours. Not intended for direct usage on web applications due to [Cross-Origin Resource Sharing
+        /// (CORS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) policies, consider using a proxy server.
+        /// Only populated when the requesting app can access the file's content. If the file isn't shared publicly, the
+        /// URL returned in `Files.thumbnailLink` must be fetched using a credentialed request.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("thumbnailLink")]
         public virtual string ThumbnailLink { get; set; }
 
-        /// <summary>The thumbnail version for use in thumbnail cache invalidation.</summary>
+        /// <summary>Output only. The thumbnail version for use in thumbnail cache invalidation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("thumbnailVersion")]
         public virtual System.Nullable<long> ThumbnailVersion { get; set; }
 
         /// <summary>
         /// Whether the file has been trashed, either explicitly or from a trashed parent folder. Only the owner may
-        /// trash a file. The trashed item is excluded from all files.list responses returned for any user who does not
-        /// own the file. However, all users with access to the file can see the trashed item metadata in an API
-        /// response. All users with access can copy, download, export, and share the file.
+        /// trash a file, and other users cannot see files in the owner's trash.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("trashed")]
         public virtual System.Nullable<bool> Trashed { get; set; }
@@ -6305,32 +8008,44 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("trashedTime")]
         public virtual string TrashedTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TrashedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TrashedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(TrashedTimeRaw);
+            set => TrashedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="TrashedTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> TrashedTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TrashedTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? TrashedTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(TrashedTimeRaw);
             set => TrashedTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
         }
 
         /// <summary>
-        /// If the file has been explicitly trashed, the user who trashed it. Only populated for items in shared drives.
+        /// Output only. If the file has been explicitly trashed, the user who trashed it. Only populated for items in
+        /// shared drives.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("trashingUser")]
         public virtual User TrashingUser { get; set; }
 
         /// <summary>
-        /// A monotonically increasing version number for the file. This reflects every change made to the file on the
-        /// server, even those not visible to the user.
+        /// Output only. A monotonically increasing version number for the file. This reflects every change made to the
+        /// file on the server, even those not visible to the user.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
         public virtual System.Nullable<long> Version { get; set; }
 
-        /// <summary>Additional metadata about video media. This may not be available immediately upon upload.</summary>
+        /// <summary>
+        /// Output only. Additional metadata about video media. This may not be available immediately upon upload.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("videoMediaMetadata")]
         public virtual VideoMediaMetadataData VideoMediaMetadata { get; set; }
 
-        /// <summary>Whether the file has been viewed by this user.</summary>
+        /// <summary>Output only. Whether the file has been viewed by this user.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("viewedByMe")]
         public virtual System.Nullable<bool> ViewedByMe { get; set; }
 
@@ -6338,31 +8053,44 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("viewedByMeTime")]
         public virtual string ViewedByMeTimeRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ViewedByMeTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ViewedByMeTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ViewedByMeTimeRaw);
+            set => ViewedByMeTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ViewedByMeTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ViewedByMeTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ViewedByMeTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ViewedByMeTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ViewedByMeTimeRaw);
             set => ViewedByMeTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
         }
 
-        /// <summary>Deprecated - use copyRequiresWriterPermission instead.</summary>
+        /// <summary>Deprecated: Use `copyRequiresWriterPermission` instead.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("viewersCanCopyContent")]
         public virtual System.Nullable<bool> ViewersCanCopyContent { get; set; }
 
         /// <summary>
-        /// A link for downloading the content of the file in a browser. This is only available for files with binary
-        /// content in Google Drive.
+        /// Output only. A link for downloading the content of the file in a browser. This is only available for files
+        /// with binary content in Google Drive.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("webContentLink")]
         public virtual string WebContentLink { get; set; }
 
-        /// <summary>A link for opening the file in a relevant Google editor or viewer in a browser.</summary>
+        /// <summary>
+        /// Output only. A link for opening the file in a relevant Google editor or viewer in a browser.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("webViewLink")]
         public virtual string WebViewLink { get; set; }
 
         /// <summary>
-        /// Whether users with only writer permission can modify the file's permissions. Not populated for items in
+        /// Whether users with only `writer` permission can modify the file's permissions. Not populated for items in
         /// shared drives.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("writersCanShare")]
@@ -6372,209 +8100,246 @@ namespace Google.Apis.Drive.v3.Data
         public virtual string ETag { get; set; }
 
         /// <summary>
-        /// Capabilities the current user has on this file. Each capability corresponds to a fine-grained action that a
-        /// user may take.
+        /// Output only. Capabilities the current user has on this file. Each capability corresponds to a fine-grained
+        /// action that a user may take.
         /// </summary>
         public class CapabilitiesData
         {
             /// <summary>
-            /// Whether the current user is the pending owner of the file. Not populated for shared drive files.
+            /// Output only. Whether the current user is the pending owner of the file. Not populated for shared drive
+            /// files.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canAcceptOwnership")]
             public virtual System.Nullable<bool> CanAcceptOwnership { get; set; }
 
             /// <summary>
-            /// Whether the current user can add children to this folder. This is always false when the item is not a
-            /// folder.
+            /// Output only. Whether the current user can add children to this folder. This is always false when the
+            /// item is not a folder.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canAddChildren")]
             public virtual System.Nullable<bool> CanAddChildren { get; set; }
 
             /// <summary>
-            /// Whether the current user can add a folder from another drive (different shared drive or My Drive) to
-            /// this folder. This is false when the item is not a folder. Only populated for items in shared drives.
+            /// Output only. Whether the current user can add a folder from another drive (different shared drive or My
+            /// Drive) to this folder. This is false when the item is not a folder. Only populated for items in shared
+            /// drives.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canAddFolderFromAnotherDrive")]
             public virtual System.Nullable<bool> CanAddFolderFromAnotherDrive { get; set; }
 
             /// <summary>
-            /// Whether the current user can add a parent for the item without removing an existing parent in the same
-            /// request. Not populated for shared drive files.
+            /// Output only. Whether the current user can add a parent for the item without removing an existing parent
+            /// in the same request. Not populated for shared drive files.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canAddMyDriveParent")]
             public virtual System.Nullable<bool> CanAddMyDriveParent { get; set; }
 
             /// <summary>
-            /// Whether the current user can change the copyRequiresWriterPermission restriction of this file.
+            /// Output only. Whether the current user can change the `copyRequiresWriterPermission` restriction of this
+            /// file.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canChangeCopyRequiresWriterPermission")]
             public virtual System.Nullable<bool> CanChangeCopyRequiresWriterPermission { get; set; }
 
             /// <summary>
-            /// Whether the current user can change the securityUpdateEnabled field on link share metadata.
+            /// Output only. Whether the current user can change the securityUpdateEnabled field on link share metadata.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canChangeSecurityUpdateEnabled")]
             public virtual System.Nullable<bool> CanChangeSecurityUpdateEnabled { get; set; }
 
-            /// <summary>Deprecated</summary>
+            /// <summary>Deprecated: Output only.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canChangeViewersCanCopyContent")]
             public virtual System.Nullable<bool> CanChangeViewersCanCopyContent { get; set; }
 
-            /// <summary>Whether the current user can comment on this file.</summary>
+            /// <summary>Output only. Whether the current user can comment on this file.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canComment")]
             public virtual System.Nullable<bool> CanComment { get; set; }
 
             /// <summary>
-            /// Whether the current user can copy this file. For an item in a shared drive, whether the current user can
-            /// copy non-folder descendants of this item, or this item itself if it is not a folder.
+            /// Output only. Whether the current user can copy this file. For an item in a shared drive, whether the
+            /// current user can copy non-folder descendants of this item, or this item itself if it is not a folder.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canCopy")]
             public virtual System.Nullable<bool> CanCopy { get; set; }
 
-            /// <summary>Whether the current user can delete this file.</summary>
+            /// <summary>Output only. Whether the current user can delete this file.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canDelete")]
             public virtual System.Nullable<bool> CanDelete { get; set; }
 
             /// <summary>
-            /// Whether the current user can delete children of this folder. This is false when the item is not a
-            /// folder. Only populated for items in shared drives.
+            /// Output only. Whether the current user can delete children of this folder. This is false when the item is
+            /// not a folder. Only populated for items in shared drives.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canDeleteChildren")]
             public virtual System.Nullable<bool> CanDeleteChildren { get; set; }
 
-            /// <summary>Whether the current user can download this file.</summary>
+            /// <summary>Output only. Whether the current user can download this file.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canDownload")]
             public virtual System.Nullable<bool> CanDownload { get; set; }
 
             /// <summary>
-            /// Whether the current user can edit this file. Other factors may limit the type of changes a user can make
-            /// to a file. For example, see canChangeCopyRequiresWriterPermission or canModifyContent.
+            /// Output only. Whether the current user can edit this file. Other factors may limit the type of changes a
+            /// user can make to a file. For example, see `canChangeCopyRequiresWriterPermission` or `canModifyContent`.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canEdit")]
             public virtual System.Nullable<bool> CanEdit { get; set; }
 
             /// <summary>
-            /// Whether the current user can list the children of this folder. This is always false when the item is not
-            /// a folder.
+            /// Output only. Whether the current user can list the children of this folder. This is always false when
+            /// the item is not a folder.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canListChildren")]
             public virtual System.Nullable<bool> CanListChildren { get; set; }
 
-            /// <summary>Whether the current user can modify the content of this file.</summary>
+            /// <summary>Output only. Whether the current user can modify the content of this file.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canModifyContent")]
             public virtual System.Nullable<bool> CanModifyContent { get; set; }
 
-            /// <summary>Whether the current user can modify restrictions on content of this file.</summary>
+            /// <summary>
+            /// Deprecated: Output only. Use one of `canModifyEditorContentRestriction`,
+            /// `canModifyOwnerContentRestriction` or `canRemoveContentRestriction`.
+            /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canModifyContentRestriction")]
             public virtual System.Nullable<bool> CanModifyContentRestriction { get; set; }
 
             /// <summary>
-            /// Whether the current user can move children of this folder outside of the shared drive. This is false
-            /// when the item is not a folder. Only populated for items in shared drives.
+            /// Output only. Whether the current user can add or modify content restrictions on the file which are
+            /// editor restricted.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("canModifyEditorContentRestriction")]
+            public virtual System.Nullable<bool> CanModifyEditorContentRestriction { get; set; }
+
+            /// <summary>Output only. Whether the current user can modify the labels on the file.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("canModifyLabels")]
+            public virtual System.Nullable<bool> CanModifyLabels { get; set; }
+
+            /// <summary>
+            /// Output only. Whether the current user can add or modify content restrictions which are owner restricted.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("canModifyOwnerContentRestriction")]
+            public virtual System.Nullable<bool> CanModifyOwnerContentRestriction { get; set; }
+
+            /// <summary>
+            /// Output only. Whether the current user can move children of this folder outside of the shared drive. This
+            /// is false when the item is not a folder. Only populated for items in shared drives.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canMoveChildrenOutOfDrive")]
             public virtual System.Nullable<bool> CanMoveChildrenOutOfDrive { get; set; }
 
-            /// <summary>Deprecated - use canMoveChildrenOutOfDrive instead.</summary>
+            /// <summary>Deprecated: Output only. Use `canMoveChildrenOutOfDrive` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canMoveChildrenOutOfTeamDrive")]
             public virtual System.Nullable<bool> CanMoveChildrenOutOfTeamDrive { get; set; }
 
             /// <summary>
-            /// Whether the current user can move children of this folder within this drive. This is false when the item
-            /// is not a folder. Note that a request to move the child may still fail depending on the current user's
-            /// access to the child and to the destination folder.
+            /// Output only. Whether the current user can move children of this folder within this drive. This is false
+            /// when the item is not a folder. Note that a request to move the child may still fail depending on the
+            /// current user's access to the child and to the destination folder.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canMoveChildrenWithinDrive")]
             public virtual System.Nullable<bool> CanMoveChildrenWithinDrive { get; set; }
 
-            /// <summary>Deprecated - use canMoveChildrenWithinDrive instead.</summary>
+            /// <summary>Deprecated: Output only. Use `canMoveChildrenWithinDrive` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canMoveChildrenWithinTeamDrive")]
             public virtual System.Nullable<bool> CanMoveChildrenWithinTeamDrive { get; set; }
 
-            /// <summary>Deprecated - use canMoveItemOutOfDrive instead.</summary>
+            /// <summary>Deprecated: Output only. Use `canMoveItemOutOfDrive` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canMoveItemIntoTeamDrive")]
             public virtual System.Nullable<bool> CanMoveItemIntoTeamDrive { get; set; }
 
             /// <summary>
-            /// Whether the current user can move this item outside of this drive by changing its parent. Note that a
-            /// request to change the parent of the item may still fail depending on the new parent that is being added.
+            /// Output only. Whether the current user can move this item outside of this drive by changing its parent.
+            /// Note that a request to change the parent of the item may still fail depending on the new parent that is
+            /// being added.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canMoveItemOutOfDrive")]
             public virtual System.Nullable<bool> CanMoveItemOutOfDrive { get; set; }
 
-            /// <summary>Deprecated - use canMoveItemOutOfDrive instead.</summary>
+            /// <summary>Deprecated: Output only. Use `canMoveItemOutOfDrive` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canMoveItemOutOfTeamDrive")]
             public virtual System.Nullable<bool> CanMoveItemOutOfTeamDrive { get; set; }
 
             /// <summary>
-            /// Whether the current user can move this item within this drive. Note that a request to change the parent
-            /// of the item may still fail depending on the new parent that is being added and the parent that is being
-            /// removed.
+            /// Output only. Whether the current user can move this item within this drive. Note that a request to
+            /// change the parent of the item may still fail depending on the new parent that is being added and the
+            /// parent that is being removed.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canMoveItemWithinDrive")]
             public virtual System.Nullable<bool> CanMoveItemWithinDrive { get; set; }
 
-            /// <summary>Deprecated - use canMoveItemWithinDrive instead.</summary>
+            /// <summary>Deprecated: Output only. Use `canMoveItemWithinDrive` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canMoveItemWithinTeamDrive")]
             public virtual System.Nullable<bool> CanMoveItemWithinTeamDrive { get; set; }
 
-            /// <summary>Deprecated - use canMoveItemWithinDrive or canMoveItemOutOfDrive instead.</summary>
+            /// <summary>
+            /// Deprecated: Output only. Use `canMoveItemWithinDrive` or `canMoveItemOutOfDrive` instead.
+            /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canMoveTeamDriveItem")]
             public virtual System.Nullable<bool> CanMoveTeamDriveItem { get; set; }
 
             /// <summary>
-            /// Whether the current user can read the shared drive to which this file belongs. Only populated for items
-            /// in shared drives.
+            /// Output only. Whether the current user can read the shared drive to which this file belongs. Only
+            /// populated for items in shared drives.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canReadDrive")]
             public virtual System.Nullable<bool> CanReadDrive { get; set; }
 
+            /// <summary>Output only. Whether the current user can read the labels on the file.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("canReadLabels")]
+            public virtual System.Nullable<bool> CanReadLabels { get; set; }
+
             /// <summary>
-            /// Whether the current user can read the revisions resource of this file. For a shared drive item, whether
-            /// revisions of non-folder descendants of this item, or this item itself if it is not a folder, can be
-            /// read.
+            /// Output only. Whether the current user can read the revisions resource of this file. For a shared drive
+            /// item, whether revisions of non-folder descendants of this item, or this item itself if it is not a
+            /// folder, can be read.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canReadRevisions")]
             public virtual System.Nullable<bool> CanReadRevisions { get; set; }
 
-            /// <summary>Deprecated - use canReadDrive instead.</summary>
+            /// <summary>Deprecated: Output only. Use `canReadDrive` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canReadTeamDrive")]
             public virtual System.Nullable<bool> CanReadTeamDrive { get; set; }
 
             /// <summary>
-            /// Whether the current user can remove children from this folder. This is always false when the item is not
-            /// a folder. For a folder in a shared drive, use canDeleteChildren or canTrashChildren instead.
+            /// Output only. Whether the current user can remove children from this folder. This is always false when
+            /// the item is not a folder. For a folder in a shared drive, use `canDeleteChildren` or `canTrashChildren`
+            /// instead.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canRemoveChildren")]
             public virtual System.Nullable<bool> CanRemoveChildren { get; set; }
 
             /// <summary>
-            /// Whether the current user can remove a parent from the item without adding another parent in the same
-            /// request. Not populated for shared drive files.
+            /// Output only. Whether there is a content restriction on the file that can be removed by the current user.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("canRemoveContentRestriction")]
+            public virtual System.Nullable<bool> CanRemoveContentRestriction { get; set; }
+
+            /// <summary>
+            /// Output only. Whether the current user can remove a parent from the item without adding another parent in
+            /// the same request. Not populated for shared drive files.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canRemoveMyDriveParent")]
             public virtual System.Nullable<bool> CanRemoveMyDriveParent { get; set; }
 
-            /// <summary>Whether the current user can rename this file.</summary>
+            /// <summary>Output only. Whether the current user can rename this file.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canRename")]
             public virtual System.Nullable<bool> CanRename { get; set; }
 
-            /// <summary>Whether the current user can modify the sharing settings for this file.</summary>
+            /// <summary>Output only. Whether the current user can modify the sharing settings for this file.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canShare")]
             public virtual System.Nullable<bool> CanShare { get; set; }
 
-            /// <summary>Whether the current user can move this file to trash.</summary>
+            /// <summary>Output only. Whether the current user can move this file to trash.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canTrash")]
             public virtual System.Nullable<bool> CanTrash { get; set; }
 
             /// <summary>
-            /// Whether the current user can trash children of this folder. This is false when the item is not a folder.
-            /// Only populated for items in shared drives.
+            /// Output only. Whether the current user can trash children of this folder. This is false when the item is
+            /// not a folder. Only populated for items in shared drives.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canTrashChildren")]
             public virtual System.Nullable<bool> CanTrashChildren { get; set; }
 
-            /// <summary>Whether the current user can restore this file from trash.</summary>
+            /// <summary>Output only. Whether the current user can restore this file from trash.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canUntrash")]
             public virtual System.Nullable<bool> CanUntrash { get; set; }
         }
@@ -6612,160 +8377,176 @@ namespace Google.Apis.Drive.v3.Data
             }
         }
 
-        /// <summary>Additional metadata about image media, if available.</summary>
+        /// <summary>Output only. Additional metadata about image media, if available.</summary>
         public class ImageMediaMetadataData
         {
-            /// <summary>The aperture used to create the photo (f-number).</summary>
+            /// <summary>Output only. The aperture used to create the photo (f-number).</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("aperture")]
             public virtual System.Nullable<float> Aperture { get; set; }
 
-            /// <summary>The make of the camera used to create the photo.</summary>
+            /// <summary>Output only. The make of the camera used to create the photo.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("cameraMake")]
             public virtual string CameraMake { get; set; }
 
-            /// <summary>The model of the camera used to create the photo.</summary>
+            /// <summary>Output only. The model of the camera used to create the photo.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("cameraModel")]
             public virtual string CameraModel { get; set; }
 
-            /// <summary>The color space of the photo.</summary>
+            /// <summary>Output only. The color space of the photo.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("colorSpace")]
             public virtual string ColorSpace { get; set; }
 
-            /// <summary>The exposure bias of the photo (APEX value).</summary>
+            /// <summary>Output only. The exposure bias of the photo (APEX value).</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("exposureBias")]
             public virtual System.Nullable<float> ExposureBias { get; set; }
 
-            /// <summary>The exposure mode used to create the photo.</summary>
+            /// <summary>Output only. The exposure mode used to create the photo.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("exposureMode")]
             public virtual string ExposureMode { get; set; }
 
-            /// <summary>The length of the exposure, in seconds.</summary>
+            /// <summary>Output only. The length of the exposure, in seconds.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("exposureTime")]
             public virtual System.Nullable<float> ExposureTime { get; set; }
 
-            /// <summary>Whether a flash was used to create the photo.</summary>
+            /// <summary>Output only. Whether a flash was used to create the photo.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("flashUsed")]
             public virtual System.Nullable<bool> FlashUsed { get; set; }
 
-            /// <summary>The focal length used to create the photo, in millimeters.</summary>
+            /// <summary>Output only. The focal length used to create the photo, in millimeters.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("focalLength")]
             public virtual System.Nullable<float> FocalLength { get; set; }
 
-            /// <summary>The height of the image in pixels.</summary>
+            /// <summary>Output only. The height of the image in pixels.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("height")]
             public virtual System.Nullable<int> Height { get; set; }
 
-            /// <summary>The ISO speed used to create the photo.</summary>
+            /// <summary>Output only. The ISO speed used to create the photo.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("isoSpeed")]
             public virtual System.Nullable<int> IsoSpeed { get; set; }
 
-            /// <summary>The lens used to create the photo.</summary>
+            /// <summary>Output only. The lens used to create the photo.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("lens")]
             public virtual string Lens { get; set; }
 
-            /// <summary>Geographic location information stored in the image.</summary>
+            /// <summary>Output only. Geographic location information stored in the image.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("location")]
             public virtual LocationData Location { get; set; }
 
             /// <summary>
-            /// The smallest f-number of the lens at the focal length used to create the photo (APEX value).
+            /// Output only. The smallest f-number of the lens at the focal length used to create the photo (APEX
+            /// value).
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("maxApertureValue")]
             public virtual System.Nullable<float> MaxApertureValue { get; set; }
 
-            /// <summary>The metering mode used to create the photo.</summary>
+            /// <summary>Output only. The metering mode used to create the photo.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("meteringMode")]
             public virtual string MeteringMode { get; set; }
 
             /// <summary>
-            /// The number of clockwise 90 degree rotations applied from the image's original orientation.
+            /// Output only. The number of clockwise 90 degree rotations applied from the image's original orientation.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("rotation")]
             public virtual System.Nullable<int> Rotation { get; set; }
 
-            /// <summary>The type of sensor used to create the photo.</summary>
+            /// <summary>Output only. The type of sensor used to create the photo.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("sensor")]
             public virtual string Sensor { get; set; }
 
-            /// <summary>The distance to the subject of the photo, in meters.</summary>
+            /// <summary>Output only. The distance to the subject of the photo, in meters.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("subjectDistance")]
             public virtual System.Nullable<int> SubjectDistance { get; set; }
 
-            /// <summary>The date and time the photo was taken (EXIF DateTime).</summary>
+            /// <summary>Output only. The date and time the photo was taken (EXIF DateTime).</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("time")]
             public virtual string Time { get; set; }
 
-            /// <summary>The white balance mode used to create the photo.</summary>
+            /// <summary>Output only. The white balance mode used to create the photo.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("whiteBalance")]
             public virtual string WhiteBalance { get; set; }
 
-            /// <summary>The width of the image in pixels.</summary>
+            /// <summary>Output only. The width of the image in pixels.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("width")]
             public virtual System.Nullable<int> Width { get; set; }
 
-            /// <summary>Geographic location information stored in the image.</summary>
+            /// <summary>Output only. Geographic location information stored in the image.</summary>
             public class LocationData
             {
-                /// <summary>The altitude stored in the image.</summary>
+                /// <summary>Output only. The altitude stored in the image.</summary>
                 [Newtonsoft.Json.JsonPropertyAttribute("altitude")]
                 public virtual System.Nullable<double> Altitude { get; set; }
 
-                /// <summary>The latitude stored in the image.</summary>
+                /// <summary>Output only. The latitude stored in the image.</summary>
                 [Newtonsoft.Json.JsonPropertyAttribute("latitude")]
                 public virtual System.Nullable<double> Latitude { get; set; }
 
-                /// <summary>The longitude stored in the image.</summary>
+                /// <summary>Output only. The longitude stored in the image.</summary>
                 [Newtonsoft.Json.JsonPropertyAttribute("longitude")]
                 public virtual System.Nullable<double> Longitude { get; set; }
             }
         }
 
+        /// <summary>Output only. An overview of the labels on the file.</summary>
+        public class LabelInfoData
+        {
+            /// <summary>
+            /// Output only. The set of labels on the file as requested by the label IDs in the `includeLabels`
+            /// parameter. By default, no labels are returned.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+            public virtual System.Collections.Generic.IList<Label> Labels { get; set; }
+        }
+
         /// <summary>Contains details about the link URLs that clients are using to refer to this item.</summary>
         public class LinkShareMetadataData
         {
-            /// <summary>Whether the file is eligible for security update.</summary>
+            /// <summary>Output only. Whether the file is eligible for security update.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("securityUpdateEligible")]
             public virtual System.Nullable<bool> SecurityUpdateEligible { get; set; }
 
-            /// <summary>Whether the security update is enabled for this file.</summary>
+            /// <summary>Output only. Whether the security update is enabled for this file.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("securityUpdateEnabled")]
             public virtual System.Nullable<bool> SecurityUpdateEnabled { get; set; }
         }
 
         /// <summary>
         /// Shortcut file details. Only populated for shortcut files, which have the mimeType field set to
-        /// application/vnd.google-apps.shortcut.
+        /// `application/vnd.google-apps.shortcut`. Can only be set on `files.create` requests.
         /// </summary>
         public class ShortcutDetailsData
         {
-            /// <summary>The ID of the file that this shortcut points to.</summary>
+            /// <summary>
+            /// The ID of the file that this shortcut points to. Can only be set on `files.create` requests.
+            /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("targetId")]
             public virtual string TargetId { get; set; }
 
             /// <summary>
-            /// The MIME type of the file that this shortcut points to. The value of this field is a snapshot of the
-            /// target's MIME type, captured when the shortcut is created.
+            /// Output only. The MIME type of the file that this shortcut points to. The value of this field is a
+            /// snapshot of the target's MIME type, captured when the shortcut is created.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("targetMimeType")]
             public virtual string TargetMimeType { get; set; }
 
-            /// <summary>The ResourceKey for the target file.</summary>
+            /// <summary>Output only. The ResourceKey for the target file.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("targetResourceKey")]
             public virtual string TargetResourceKey { get; set; }
         }
 
-        /// <summary>Additional metadata about video media. This may not be available immediately upon upload.</summary>
+        /// <summary>
+        /// Output only. Additional metadata about video media. This may not be available immediately upon upload.
+        /// </summary>
         public class VideoMediaMetadataData
         {
-            /// <summary>The duration of the video in milliseconds.</summary>
+            /// <summary>Output only. The duration of the video in milliseconds.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("durationMillis")]
             public virtual System.Nullable<long> DurationMillis { get; set; }
 
-            /// <summary>The height of the video in pixels.</summary>
+            /// <summary>Output only. The height of the video in pixels.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("height")]
             public virtual System.Nullable<int> Height { get; set; }
 
-            /// <summary>The width of the video in pixels.</summary>
+            /// <summary>Output only. The width of the video in pixels.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("width")]
             public virtual System.Nullable<int> Width { get; set; }
         }
@@ -6782,22 +8563,23 @@ namespace Google.Apis.Drive.v3.Data
         public virtual System.Collections.Generic.IList<File> Files { get; set; }
 
         /// <summary>
-        /// Whether the search process was incomplete. If true, then some search results may be missing, since all
-        /// documents were not searched. This may occur when searching multiple drives with the "allDrives" corpora, but
-        /// all corpora could not be searched. When this happens, it is suggested that clients narrow their query by
-        /// choosing a different corpus such as "user" or "drive".
+        /// Whether the search process was incomplete. If true, then some search results might be missing, since all
+        /// documents were not searched. This can occur when searching multiple drives with the 'allDrives' corpora, but
+        /// all corpora couldn't be searched. When this happens, it's suggested that clients narrow their query by
+        /// choosing a different corpus such as 'user' or 'drive'.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("incompleteSearch")]
         public virtual System.Nullable<bool> IncompleteSearch { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#fileList".</summary>
+        /// <summary>Identifies what kind of resource this is. Value: the fixed string `"drive#fileList"`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
         /// The page token for the next page of files. This will be absent if the end of the files list has been
         /// reached. If the token is rejected for any reason, it should be discarded, and pagination should be restarted
-        /// from the first page of results.
+        /// from the first page of results. The page token is typically valid for several hours. However, if new items
+        /// are added or removed, your expected results might differ.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -6813,7 +8595,7 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("ids")]
         public virtual System.Collections.Generic.IList<string> Ids { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#generatedIds".</summary>
+        /// <summary>Identifies what kind of resource this is. Value: the fixed string `"drive#generatedIds"`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -6825,31 +8607,304 @@ namespace Google.Apis.Drive.v3.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Representation of label and label fields.</summary>
+    public class Label : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A map of the fields on the label, keyed by the field's ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fields")]
+        public virtual System.Collections.Generic.IDictionary<string, LabelField> Fields { get; set; }
+
+        /// <summary>The ID of the label.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>This is always drive#label</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>The revision ID of the label.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("revisionId")]
+        public virtual string RevisionId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Representation of field, which is a typed key-value pair.</summary>
+    public class LabelField : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Only present if valueType is dateString. RFC 3339 formatted date: YYYY-MM-DD.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dateString")]
+        public virtual System.Collections.Generic.IList<string> DateString { get; set; }
+
+        /// <summary>The identifier of this label field.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>Only present if `valueType` is `integer`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("integer")]
+        public virtual System.Collections.Generic.IList<System.Nullable<long>> Integer { get; set; }
+
+        /// <summary>This is always drive#labelField.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>Only present if `valueType` is `selection`</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selection")]
+        public virtual System.Collections.Generic.IList<string> Selection { get; set; }
+
+        /// <summary>Only present if `valueType` is `text`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("text")]
+        public virtual System.Collections.Generic.IList<string> Text { get; set; }
+
+        /// <summary>Only present if `valueType` is `user`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("user")]
+        public virtual System.Collections.Generic.IList<User> User { get; set; }
+
+        /// <summary>
+        /// The field type. While new values may be supported in the future, the following are currently allowed: *
+        /// `dateString` * `integer` * `selection` * `text` * `user`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("valueType")]
+        public virtual string ValueType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A modification to a label's field.</summary>
+    public class LabelFieldModification : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ID of the field to be modified.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fieldId")]
+        public virtual string FieldId { get; set; }
+
+        /// <summary>This is always drive#labelFieldModification.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>
+        /// Replaces the value of a dateString Field with these new values. The string must be in the RFC 3339 full-date
+        /// format: YYYY-MM-DD.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("setDateValues")]
+        public virtual System.Collections.Generic.IList<string> SetDateValues { get; set; }
+
+        /// <summary>Replaces the value of an `integer` field with these new values.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("setIntegerValues")]
+        public virtual System.Collections.Generic.IList<System.Nullable<long>> SetIntegerValues { get; set; }
+
+        /// <summary>Replaces a `selection` field with these new values.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("setSelectionValues")]
+        public virtual System.Collections.Generic.IList<string> SetSelectionValues { get; set; }
+
+        /// <summary>Sets the value of a `text` field.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("setTextValues")]
+        public virtual System.Collections.Generic.IList<string> SetTextValues { get; set; }
+
+        /// <summary>Replaces a `user` field with these new values. The values must be valid email addresses.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("setUserValues")]
+        public virtual System.Collections.Generic.IList<string> SetUserValues { get; set; }
+
+        /// <summary>Unsets the values for this field.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unsetValues")]
+        public virtual System.Nullable<bool> UnsetValues { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A list of labels applied to a file.</summary>
+    public class LabelList : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>This is always drive#labelList</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>The list of labels.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IList<Label> Labels { get; set; }
+
+        /// <summary>
+        /// The page token for the next page of labels. This field will be absent if the end of the list has been
+        /// reached. If the token is rejected for any reason, it should be discarded, and pagination should be restarted
+        /// from the first page of results. The page token is typically valid for several hours. However, if new items
+        /// are added or removed, your expected results might differ.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
-    /// A permission for a file. A permission grants a user, group, domain or the world access to a file or a folder
-    /// hierarchy.
+    /// A modification to a label on a file. A LabelModification can be used to apply a label to a file, update an
+    /// existing label on a file, or remove a label from a file.
+    /// </summary>
+    public class LabelModification : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of modifications to this label's fields.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fieldModifications")]
+        public virtual System.Collections.Generic.IList<LabelFieldModification> FieldModifications { get; set; }
+
+        /// <summary>This is always drive#labelModification.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>The ID of the label to modify.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labelId")]
+        public virtual string LabelId { get; set; }
+
+        /// <summary>If true, the label will be removed from the file.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("removeLabel")]
+        public virtual System.Nullable<bool> RemoveLabel { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response to an Access Proposal list request.</summary>
+    public class ListAccessProposalsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The list of Access Proposals. This field is only populated in v3 and v3beta.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("accessProposals")]
+        public virtual System.Collections.Generic.IList<AccessProposal> AccessProposals { get; set; }
+
+        /// <summary>
+        /// The continuation token for the next page of results. This will be absent if the end of the results list has
+        /// been reached. If the token is rejected for any reason, it should be discarded, and pagination should be
+        /// restarted from the first page of results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response message for Operations.ListOperations.</summary>
+    public class ListOperationsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The standard List next-page token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>A list of operations that matches the specified filter in the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("operations")]
+        public virtual System.Collections.Generic.IList<Operation> Operations { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A request to modify the set of labels on a file. This request may contain many modifications that will either
+    /// all succeed or all fail atomically.
+    /// </summary>
+    public class ModifyLabelsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>This is always drive#modifyLabelsRequest.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>The list of modifications to apply to the labels on the file.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labelModifications")]
+        public virtual System.Collections.Generic.IList<LabelModification> LabelModifications { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Response to a ModifyLabels request. This contains only those labels which were added or updated by the request.
+    /// </summary>
+    public class ModifyLabelsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>This is always drive#modifyLabelsResponse</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>The list of labels which were added or updated by the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("modifiedLabels")]
+        public virtual System.Collections.Generic.IList<Label> ModifiedLabels { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>This resource represents a long-running operation that is the result of a network API call.</summary>
+    public class Operation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If the value is `false`, it means the operation is still in progress. If `true`, the operation is completed,
+        /// and either `error` or `response` is available.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("done")]
+        public virtual System.Nullable<bool> Done { get; set; }
+
+        /// <summary>The error result of the operation in case of failure or cancellation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("error")]
+        public virtual Status Error { get; set; }
+
+        /// <summary>
+        /// Service-specific metadata associated with the operation. It typically contains progress information and
+        /// common metadata such as create time. Some services might not provide such metadata. Any method that returns
+        /// a long-running operation should document the metadata type, if any.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Metadata { get; set; }
+
+        /// <summary>
+        /// The server-assigned name, which is only unique within the same service that originally returns it. If you
+        /// use the default HTTP mapping, the `name` should be a resource name ending with `operations/{unique_id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
+        /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
+        /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("response")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Response { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A permission for a file. A permission grants a user, group, domain, or the world access to a file or a folder
+    /// hierarchy. By default, permissions requests only return a subset of fields. Permission kind, ID, type, and role
+    /// are always returned. To retrieve specific fields, see
+    /// https://developers.google.com/drive/api/guides/fields-parameter. Some resource methods (such as
+    /// `permissions.update`) require a `permissionId`. Use the `permissions.list` method to retrieve the ID for a file,
+    /// folder, or shared drive.
     /// </summary>
     public class Permission : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// Whether the permission allows the file to be discovered through search. This is only applicable for
-        /// permissions of type domain or anyone.
+        /// permissions of type `domain` or `anyone`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("allowFileDiscovery")]
         public virtual System.Nullable<bool> AllowFileDiscovery { get; set; }
 
         /// <summary>
-        /// Whether the account associated with this permission has been deleted. This field only pertains to user and
-        /// group permissions.
+        /// Output only. Whether the account associated with this permission has been deleted. This field only pertains
+        /// to user and group permissions.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deleted")]
         public virtual System.Nullable<bool> Deleted { get; set; }
 
         /// <summary>
-        /// The "pretty" name of the value of the permission. The following is a list of examples for each type of
-        /// permission:   - user - User's full name, as defined for their Google account, such as "Joe Smith."  - group
-        /// - Name of the Google Group, such as "The Company Administrators."  - domain - String domain name, such as
-        /// "thecompany.com."  - anyone - No displayName is present.
+        /// Output only. The "pretty" name of the value of the permission. The following is a list of examples for each
+        /// type of permission: * `user` - User's full name, as defined for their Google account, such as "Joe Smith." *
+        /// `group` - Name of the Google Group, such as "The Company Administrators." * `domain` - String domain name,
+        /// such as "thecompany.com." * `anyone` - No `displayName` is present.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
@@ -6864,70 +8919,84 @@ namespace Google.Apis.Drive.v3.Data
 
         /// <summary>
         /// The time at which this permission will expire (RFC 3339 date-time). Expiration times have the following
-        /// restrictions:   - They can only be set on user and group permissions  - The time must be in the future  -
-        /// The time cannot be more than a year in the future
+        /// restrictions: - They can only be set on user and group permissions - The time must be in the future - The
+        /// time cannot be more than a year in the future
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expirationTime")]
         public virtual string ExpirationTimeRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpirationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpirationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ExpirationTimeRaw);
+            set => ExpirationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ExpirationTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ExpirationTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpirationTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ExpirationTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ExpirationTimeRaw);
             set => ExpirationTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
         }
 
         /// <summary>
-        /// The ID of this permission. This is a unique identifier for the grantee, and is published in User resources
-        /// as permissionId. IDs should be treated as opaque values.
+        /// Output only. The ID of this permission. This is a unique identifier for the grantee, and is published in
+        /// User resources as `permissionId`. IDs should be treated as opaque values.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#permission".</summary>
+        /// <summary>
+        /// Output only. Identifies what kind of resource this is. Value: the fixed string `"drive#permission"`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
-        /// Whether the account associated with this permission is a pending owner. Only populated for user type
+        /// Whether the account associated with this permission is a pending owner. Only populated for `user` type
         /// permissions for files that are not in a shared drive.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pendingOwner")]
         public virtual System.Nullable<bool> PendingOwner { get; set; }
 
         /// <summary>
-        /// Details of whether the permissions on this shared drive item are inherited or directly on this item. This is
-        /// an output-only field which is present only for shared drive items.
+        /// Output only. Details of whether the permissions on this shared drive item are inherited or directly on this
+        /// item. This is an output-only field which is present only for shared drive items.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("permissionDetails")]
         public virtual System.Collections.Generic.IList<PermissionDetailsData> PermissionDetails { get; set; }
 
-        /// <summary>A link to the user's profile photo, if available.</summary>
+        /// <summary>Output only. A link to the user's profile photo, if available.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("photoLink")]
         public virtual string PhotoLink { get; set; }
 
         /// <summary>
         /// The role granted by this permission. While new values may be supported in the future, the following are
-        /// currently allowed:   - owner  - organizer  - fileOrganizer  - writer  - commenter  - reader
+        /// currently allowed: * `owner` * `organizer` * `fileOrganizer` * `writer` * `commenter` * `reader`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
 
-        /// <summary>Deprecated - use permissionDetails instead.</summary>
+        /// <summary>Output only. Deprecated: Output only. Use `permissionDetails` instead.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("teamDrivePermissionDetails")]
         public virtual System.Collections.Generic.IList<TeamDrivePermissionDetailsData> TeamDrivePermissionDetails { get; set; }
 
         /// <summary>
-        /// The type of the grantee. Valid values are:   - user  - group  - domain  - anyone  When creating a
-        /// permission, if type is user or group, you must provide an emailAddress for the user or group. When type is
-        /// domain, you must provide a domain. There isn't extra information required for a anyone type.
+        /// The type of the grantee. Valid values are: * `user` * `group` * `domain` * `anyone` When creating a
+        /// permission, if `type` is `user` or `group`, you must provide an `emailAddress` for the user or group. When
+        /// `type` is `domain`, you must provide a `domain`. There isn't extra information required for an `anyone`
+        /// type.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
         /// <summary>
-        /// Indicates the view for this permission. Only populated for permissions that belong to a view. published is
+        /// Indicates the view for this permission. Only populated for permissions that belong to a view. 'published' is
         /// the only supported value.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("view")]
@@ -6937,54 +9006,55 @@ namespace Google.Apis.Drive.v3.Data
         public virtual string ETag { get; set; }
 
         /// <summary>
-        /// Details of whether the permissions on this shared drive item are inherited or directly on this item. This is
-        /// an output-only field which is present only for shared drive items.
+        /// Output only. Details of whether the permissions on this shared drive item are inherited or directly on this
+        /// item. This is an output-only field which is present only for shared drive items.
         /// </summary>
         public class PermissionDetailsData
         {
             /// <summary>
-            /// Whether this permission is inherited. This field is always populated. This is an output-only field.
+            /// Output only. Whether this permission is inherited. This field is always populated. This is an
+            /// output-only field.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("inherited")]
             public virtual System.Nullable<bool> Inherited { get; set; }
 
             /// <summary>
-            /// The ID of the item from which this permission is inherited. This is an output-only field.
+            /// Output only. The ID of the item from which this permission is inherited. This is an output-only field.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("inheritedFrom")]
             public virtual string InheritedFrom { get; set; }
 
             /// <summary>
-            /// The permission type for this user. While new values may be added in future, the following are currently
-            /// possible:   - file  - member
+            /// Output only. The permission type for this user. While new values may be added in future, the following
+            /// are currently possible: * `file` * `member`
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("permissionType")]
             public virtual string PermissionType { get; set; }
 
             /// <summary>
-            /// The primary role for this user. While new values may be added in the future, the following are currently
-            /// possible:   - organizer  - fileOrganizer  - writer  - commenter  - reader
+            /// Output only. The primary role for this user. While new values may be added in the future, the following
+            /// are currently possible: * `organizer` * `fileOrganizer` * `writer` * `commenter` * `reader`
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("role")]
             public virtual string Role { get; set; }
         }
 
-        /// <summary>Deprecated - use permissionDetails instead.</summary>
+        /// <summary>Output only. Deprecated: Output only. Use `permissionDetails` instead.</summary>
         public class TeamDrivePermissionDetailsData
         {
-            /// <summary>Deprecated - use permissionDetails/inherited instead.</summary>
+            /// <summary>Deprecated: Output only. Use `permissionDetails/inherited` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("inherited")]
             public virtual System.Nullable<bool> Inherited { get; set; }
 
-            /// <summary>Deprecated - use permissionDetails/inheritedFrom instead.</summary>
+            /// <summary>Deprecated: Output only. Use `permissionDetails/inheritedFrom` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("inheritedFrom")]
             public virtual string InheritedFrom { get; set; }
 
-            /// <summary>Deprecated - use permissionDetails/role instead.</summary>
+            /// <summary>Deprecated: Output only. Use `permissionDetails/role` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("role")]
             public virtual string Role { get; set; }
 
-            /// <summary>Deprecated - use permissionDetails/permissionType instead.</summary>
+            /// <summary>Deprecated: Output only. Use `permissionDetails/permissionType` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("teamDrivePermissionType")]
             public virtual string TeamDrivePermissionType { get; set; }
         }
@@ -6993,14 +9063,17 @@ namespace Google.Apis.Drive.v3.Data
     /// <summary>A list of permissions for a file.</summary>
     public class PermissionList : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#permissionList".</summary>
+        /// <summary>
+        /// Identifies what kind of resource this is. Value: the fixed string `"drive#permissionList"`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
         /// The page token for the next page of permissions. This field will be absent if the end of the permissions
         /// list has been reached. If the token is rejected for any reason, it should be discarded, and pagination
-        /// should be restarted from the first page of results.
+        /// should be restarted from the first page of results. The page token is typically valid for several hours.
+        /// However, if new items are added or removed, your expected results might differ.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -7016,24 +9089,27 @@ namespace Google.Apis.Drive.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A reply to a comment on a file.</summary>
+    /// <summary>
+    /// A reply to a comment on a file. Some resource methods (such as `replies.update`) require a `replyId`. Use the
+    /// `replies.list` method to retrieve the ID for a reply.
+    /// </summary>
     public class Reply : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The action the reply performed to the parent comment. Valid values are:   - resolve  - reopen
+        /// The action the reply performed to the parent comment. Valid values are: * `resolve` * `reopen`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("action")]
         public virtual string Action { get; set; }
 
         /// <summary>
-        /// The author of the reply. The author's email address and permission ID will not be populated.
+        /// Output only. The author of the reply. The author's email address and permission ID will not be populated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("author")]
         public virtual User Author { get; set; }
 
         /// <summary>
-        /// The plain text content of the reply. This field is used for setting the content, while htmlContent should be
-        /// displayed. This is required on creates if no action is specified.
+        /// The plain text content of the reply. This field is used for setting the content, while `htmlContent` should
+        /// be displayed. This is required on creates if no `action` is specified.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("content")]
         public virtual string Content { get; set; }
@@ -7042,27 +9118,38 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("createdTime")]
         public virtual string CreatedTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreatedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreatedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(CreatedTimeRaw);
+            set => CreatedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="CreatedTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> CreatedTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreatedTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? CreatedTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(CreatedTimeRaw);
             set => CreatedTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
         }
 
-        /// <summary>Whether the reply has been deleted. A deleted reply has no content.</summary>
+        /// <summary>Output only. Whether the reply has been deleted. A deleted reply has no content.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deleted")]
         public virtual System.Nullable<bool> Deleted { get; set; }
 
-        /// <summary>The content of the reply with HTML formatting.</summary>
+        /// <summary>Output only. The content of the reply with HTML formatting.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("htmlContent")]
         public virtual string HtmlContent { get; set; }
 
-        /// <summary>The ID of the reply.</summary>
+        /// <summary>Output only. The ID of the reply.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#reply".</summary>
+        /// <summary>
+        /// Output only. Identifies what kind of resource this is. Value: the fixed string `"drive#reply"`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -7070,9 +9157,18 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("modifiedTime")]
         public virtual string ModifiedTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ModifiedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ModifiedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ModifiedTimeRaw);
+            set => ModifiedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ModifiedTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ModifiedTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ModifiedTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ModifiedTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ModifiedTimeRaw);
             set => ModifiedTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -7085,14 +9181,15 @@ namespace Google.Apis.Drive.v3.Data
     /// <summary>A list of replies to a comment on a file.</summary>
     public class ReplyList : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#replyList".</summary>
+        /// <summary>Identifies what kind of resource this is. Value: the fixed string `"drive#replyList"`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
         /// The page token for the next page of replies. This will be absent if the end of the replies list has been
         /// reached. If the token is rejected for any reason, it should be discarded, and pagination should be restarted
-        /// from the first page of results.
+        /// from the first page of results. The page token is typically valid for several hours. However, if new items
+        /// are added or removed, your expected results might differ.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -7108,14 +9205,47 @@ namespace Google.Apis.Drive.v3.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The metadata for a revision to a file.</summary>
+    /// <summary>Request message for resolving an AccessProposal on a file.</summary>
+    public class ResolveAccessProposalRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The action to take on the AccessProposal.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("action")]
+        public virtual string Action { get; set; }
+
+        /// <summary>
+        /// Optional. The roles the approver has allowed, if any. Note: This field is required for the `ACCEPT` action.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("role")]
+        public virtual System.Collections.Generic.IList<string> Role { get; set; }
+
+        /// <summary>
+        /// Optional. Whether to send an email to the requester when the AccessProposal is denied or accepted.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sendNotification")]
+        public virtual System.Nullable<bool> SendNotification { get; set; }
+
+        /// <summary>
+        /// Optional. Indicates the view for this access proposal. This should only be set when the proposal belongs to
+        /// a view. `published` is the only supported value.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("view")]
+        public virtual string View { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The metadata for a revision to a file. Some resource methods (such as `revisions.update`) require a
+    /// `revisionId`. Use the `revisions.list` method to retrieve the ID for a revision.
+    /// </summary>
     public class Revision : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Links for exporting Docs Editors files to specific formats.</summary>
+        /// <summary>Output only. Links for exporting Docs Editors files to specific formats.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("exportLinks")]
         public virtual System.Collections.Generic.IDictionary<string, string> ExportLinks { get; set; }
 
-        /// <summary>The ID of the revision.</summary>
+        /// <summary>Output only. The ID of the revision.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
 
@@ -7127,21 +9257,27 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("keepForever")]
         public virtual System.Nullable<bool> KeepForever { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#revision".</summary>
+        /// <summary>
+        /// Output only. Identifies what kind of resource this is. Value: the fixed string `"drive#revision"`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
-        /// <summary>The last user to modify this revision.</summary>
+        /// <summary>
+        /// Output only. The last user to modify this revision. This field is only populated when the last modification
+        /// was performed by a signed-in user.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastModifyingUser")]
         public virtual User LastModifyingUser { get; set; }
 
         /// <summary>
-        /// The MD5 checksum of the revision's content. This is only applicable to files with binary content in Drive.
+        /// Output only. The MD5 checksum of the revision's content. This is only applicable to files with binary
+        /// content in Drive.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("md5Checksum")]
         public virtual string Md5Checksum { get; set; }
 
-        /// <summary>The MIME type of the revision.</summary>
+        /// <summary>Output only. The MIME type of the revision.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mimeType")]
         public virtual string MimeType { get; set; }
 
@@ -7149,17 +9285,26 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("modifiedTime")]
         public virtual string ModifiedTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ModifiedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ModifiedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ModifiedTimeRaw);
+            set => ModifiedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ModifiedTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> ModifiedTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ModifiedTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? ModifiedTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(ModifiedTimeRaw);
             set => ModifiedTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
         }
 
         /// <summary>
-        /// The original filename used to create this revision. This is only applicable to files with binary content in
-        /// Drive.
+        /// Output only. The original filename used to create this revision. This is only applicable to files with
+        /// binary content in Drive.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("originalFilename")]
         public virtual string OriginalFilename { get; set; }
@@ -7175,7 +9320,9 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("published")]
         public virtual System.Nullable<bool> Published { get; set; }
 
-        /// <summary>A link to the published revision. This is only populated for Google Sites files.</summary>
+        /// <summary>
+        /// Output only. A link to the published revision. This is only populated for Docs Editors files.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("publishedLink")]
         public virtual string PublishedLink { get; set; }
 
@@ -7186,7 +9333,8 @@ namespace Google.Apis.Drive.v3.Data
         public virtual System.Nullable<bool> PublishedOutsideDomain { get; set; }
 
         /// <summary>
-        /// The size of the revision's content in bytes. This is only applicable to files with binary content in Drive.
+        /// Output only. The size of the revision's content in bytes. This is only applicable to files with binary
+        /// content in Drive.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("size")]
         public virtual System.Nullable<long> Size { get; set; }
@@ -7198,14 +9346,15 @@ namespace Google.Apis.Drive.v3.Data
     /// <summary>A list of revisions of a file.</summary>
     public class RevisionList : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#revisionList".</summary>
+        /// <summary>Identifies what kind of resource this is. Value: the fixed string `"drive#revisionList"`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
         /// The page token for the next page of revisions. This will be absent if the end of the revisions list has been
         /// reached. If the token is rejected for any reason, it should be discarded, and pagination should be restarted
-        /// from the first page of results.
+        /// from the first page of results. The page token is typically valid for several hours. However, if new items
+        /// are added or removed, your expected results might differ.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -7223,13 +9372,44 @@ namespace Google.Apis.Drive.v3.Data
 
     public class StartPageToken : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#startPageToken".</summary>
+        /// <summary>
+        /// Identifies what kind of resource this is. Value: the fixed string `"drive#startPageToken"`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
-        /// <summary>The starting page token for listing changes.</summary>
+        /// <summary>The starting page token for listing future changes. The page token doesn't expire.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startPageToken")]
         public virtual string StartPageTokenValue { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The `Status` type defines a logical error model that is suitable for different programming environments,
+    /// including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains
+    /// three pieces of data: error code, error message, and error details. You can find out more about this error model
+    /// and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).
+    /// </summary>
+    public class Status : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The status code, which should be an enum value of google.rpc.Code.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("code")]
+        public virtual System.Nullable<int> Code { get; set; }
+
+        /// <summary>
+        /// A list of messages that carry the error details. There is a common set of message types for APIs to use.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual System.Collections.Generic.IList<System.Collections.Generic.IDictionary<string, object>> Details { get; set; }
+
+        /// <summary>
+        /// A developer-facing error message, which should be in English. Any user-facing error message should be
+        /// localized and sent in the google.rpc.Status.details field, or localized by the client.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("message")]
+        public virtual string Message { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7240,8 +9420,8 @@ namespace Google.Apis.Drive.v3.Data
     {
         /// <summary>
         /// An image file and cropping parameters from which a background image for this Team Drive is set. This is a
-        /// write only field; it can only be set on drive.teamdrives.update requests that don't set themeId. When
-        /// specified, all fields of the backgroundImageFile must be set.
+        /// write only field; it can only be set on `drive.teamdrives.update` requests that don't set `themeId`. When
+        /// specified, all fields of the `backgroundImageFile` must be set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("backgroundImageFile")]
         public virtual BackgroundImageFileData BackgroundImageFile { get; set; }
@@ -7255,8 +9435,8 @@ namespace Google.Apis.Drive.v3.Data
         public virtual CapabilitiesData Capabilities { get; set; }
 
         /// <summary>
-        /// The color of this Team Drive as an RGB hex string. It can only be set on a drive.teamdrives.update request
-        /// that does not set themeId.
+        /// The color of this Team Drive as an RGB hex string. It can only be set on a `drive.teamdrives.update` request
+        /// that does not set `themeId`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("colorRgb")]
         public virtual string ColorRgb { get; set; }
@@ -7265,9 +9445,18 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("createdTime")]
         public virtual string CreatedTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreatedTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreatedTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(CreatedTimeRaw);
+            set => CreatedTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="CreatedTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> CreatedTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreatedTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? CreatedTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(CreatedTimeRaw);
             set => CreatedTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -7279,7 +9468,7 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#teamDrive".</summary>
+        /// <summary>Identifies what kind of resource this is. Value: the fixed string `"drive#teamDrive"`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
@@ -7287,15 +9476,23 @@ namespace Google.Apis.Drive.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        /// <summary>
+        /// The organizational unit of this shared drive. This field is only populated on `drives.list` responses when
+        /// the `useDomainAdminAccess` parameter is set to `true`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("orgUnitId")]
+        public virtual string OrgUnitId { get; set; }
+
         /// <summary>A set of restrictions that apply to this Team Drive or items inside this Team Drive.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("restrictions")]
         public virtual RestrictionsData Restrictions { get; set; }
 
         /// <summary>
         /// The ID of the theme from which the background image and color will be set. The set of possible
-        /// teamDriveThemes can be retrieved from a drive.about.get response. When not specified on a
-        /// drive.teamdrives.create request, a random theme is chosen from which the background image and color are set.
-        /// This is a write-only field; it can only be set on requests that don't set colorRgb or backgroundImageFile.
+        /// `teamDriveThemes` can be retrieved from a `drive.about.get` response. When not specified on a
+        /// `drive.teamdrives.create` request, a random theme is chosen from which the background image and color are
+        /// set. This is a write-only field; it can only be set on requests that don't set `colorRgb` or
+        /// `backgroundImageFile`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("themeId")]
         public virtual string ThemeId { get; set; }
@@ -7305,8 +9502,8 @@ namespace Google.Apis.Drive.v3.Data
 
         /// <summary>
         /// An image file and cropping parameters from which a background image for this Team Drive is set. This is a
-        /// write only field; it can only be set on drive.teamdrives.update requests that don't set themeId. When
-        /// specified, all fields of the backgroundImageFile must be set.
+        /// write only field; it can only be set on `drive.teamdrives.update` requests that don't set `themeId`. When
+        /// specified, all fields of the `backgroundImageFile` must be set.
         /// </summary>
         public class BackgroundImageFileData
         {
@@ -7348,23 +9545,30 @@ namespace Google.Apis.Drive.v3.Data
             public virtual System.Nullable<bool> CanAddChildren { get; set; }
 
             /// <summary>
-            /// Whether the current user can change the copyRequiresWriterPermission restriction of this Team Drive.
+            /// Whether the current user can change the `copyRequiresWriterPermission` restriction of this Team Drive.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canChangeCopyRequiresWriterPermissionRestriction")]
             public virtual System.Nullable<bool> CanChangeCopyRequiresWriterPermissionRestriction { get; set; }
 
             /// <summary>
-            /// Whether the current user can change the domainUsersOnly restriction of this Team Drive.
+            /// Whether the current user can change the `domainUsersOnly` restriction of this Team Drive.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canChangeDomainUsersOnlyRestriction")]
             public virtual System.Nullable<bool> CanChangeDomainUsersOnlyRestriction { get; set; }
+
+            /// <summary>
+            /// Whether the current user can change the `sharingFoldersRequiresOrganizerPermission` restriction of this
+            /// Team Drive.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("canChangeSharingFoldersRequiresOrganizerPermissionRestriction")]
+            public virtual System.Nullable<bool> CanChangeSharingFoldersRequiresOrganizerPermissionRestriction { get; set; }
 
             /// <summary>Whether the current user can change the background of this Team Drive.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canChangeTeamDriveBackground")]
             public virtual System.Nullable<bool> CanChangeTeamDriveBackground { get; set; }
 
             /// <summary>
-            /// Whether the current user can change the teamMembersOnly restriction of this Team Drive.
+            /// Whether the current user can change the `teamMembersOnly` restriction of this Team Drive.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canChangeTeamMembersOnlyRestriction")]
             public virtual System.Nullable<bool> CanChangeTeamMembersOnlyRestriction { get; set; }
@@ -7410,7 +9614,7 @@ namespace Google.Apis.Drive.v3.Data
             [Newtonsoft.Json.JsonPropertyAttribute("canReadRevisions")]
             public virtual System.Nullable<bool> CanReadRevisions { get; set; }
 
-            /// <summary>Deprecated - use canDeleteChildren or canTrashChildren instead.</summary>
+            /// <summary>Deprecated: Use `canDeleteChildren` or `canTrashChildren` instead.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canRemoveChildren")]
             public virtual System.Nullable<bool> CanRemoveChildren { get; set; }
 
@@ -7421,6 +9625,10 @@ namespace Google.Apis.Drive.v3.Data
             /// <summary>Whether the current user can rename this Team Drive.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canRenameTeamDrive")]
             public virtual System.Nullable<bool> CanRenameTeamDrive { get; set; }
+
+            /// <summary>Whether the current user can reset the Team Drive restrictions to defaults.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("canResetTeamDriveRestrictions")]
+            public virtual System.Nullable<bool> CanResetTeamDriveRestrictions { get; set; }
 
             /// <summary>Whether the current user can share files or folders in this Team Drive.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("canShare")]
@@ -7442,8 +9650,8 @@ namespace Google.Apis.Drive.v3.Data
 
             /// <summary>
             /// Whether the options to copy, print, or download files inside this Team Drive, should be disabled for
-            /// readers and commenters. When this restriction is set to true, it will override the similarly named field
-            /// to true for any file inside this Team Drive.
+            /// readers and commenters. When this restriction is set to `true`, it will override the similarly named
+            /// field to `true` for any file inside this Team Drive.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("copyRequiresWriterPermission")]
             public virtual System.Nullable<bool> CopyRequiresWriterPermission { get; set; }
@@ -7457,6 +9665,13 @@ namespace Google.Apis.Drive.v3.Data
             public virtual System.Nullable<bool> DomainUsersOnly { get; set; }
 
             /// <summary>
+            /// If true, only users with the organizer role can share folders. If false, users with either the organizer
+            /// role or the file organizer role can share folders.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("sharingFoldersRequiresOrganizerPermission")]
+            public virtual System.Nullable<bool> SharingFoldersRequiresOrganizerPermission { get; set; }
+
+            /// <summary>
             /// Whether access to items inside this Team Drive is restricted to members of this Team Drive.
             /// </summary>
             [Newtonsoft.Json.JsonPropertyAttribute("teamMembersOnly")]
@@ -7467,14 +9682,17 @@ namespace Google.Apis.Drive.v3.Data
     /// <summary>A list of Team Drives.</summary>
     public class TeamDriveList : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#teamDriveList".</summary>
+        /// <summary>
+        /// Identifies what kind of resource this is. Value: the fixed string `"drive#teamDriveList"`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
         /// The page token for the next page of Team Drives. This will be absent if the end of the Team Drives list has
         /// been reached. If the token is rejected for any reason, it should be discarded, and pagination should be
-        /// restarted from the first page of results.
+        /// restarted from the first page of results. The page token is typically valid for several hours. However, if
+        /// new items are added or removed, your expected results might differ.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -7493,30 +9711,32 @@ namespace Google.Apis.Drive.v3.Data
     /// <summary>Information about a Drive user.</summary>
     public class User : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>A plain text displayable name for this user.</summary>
+        /// <summary>Output only. A plain text displayable name for this user.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
         /// <summary>
-        /// The email address of the user. This may not be present in certain contexts if the user has not made their
-        /// email address visible to the requester.
+        /// Output only. The email address of the user. This may not be present in certain contexts if the user has not
+        /// made their email address visible to the requester.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("emailAddress")]
         public virtual string EmailAddress { get; set; }
 
-        /// <summary>Identifies what kind of resource this is. Value: the fixed string "drive#user".</summary>
+        /// <summary>
+        /// Output only. Identifies what kind of resource this is. Value: the fixed string `"drive#user"`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
-        /// <summary>Whether this user is the requesting user.</summary>
+        /// <summary>Output only. Whether this user is the requesting user.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("me")]
         public virtual System.Nullable<bool> Me { get; set; }
 
-        /// <summary>The user's ID as visible in Permission resources.</summary>
+        /// <summary>Output only. The user's ID as visible in Permission resources.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("permissionId")]
         public virtual string PermissionId { get; set; }
 
-        /// <summary>A link to the user's profile photo, if available.</summary>
+        /// <summary>Output only. A link to the user's profile photo, if available.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("photoLink")]
         public virtual string PhotoLink { get; set; }
 

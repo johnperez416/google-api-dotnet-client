@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.BigtableAdmin.v2
         {
             Operations = new OperationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://bigtableadmin.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://bigtableadmin.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.BigtableAdmin.v2
         public override string Name => "bigtableadmin";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://bigtableadmin.googleapis.com/";
-        #else
-            "https://bigtableadmin.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://bigtableadmin.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Bigtable Admin API.</summary>
         public class Scope
@@ -375,27 +370,17 @@ namespace Google.Apis.BigtableAdmin.v2
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 public class ListRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.ListOperationsResponse>
                 {
@@ -473,125 +458,13 @@ namespace Google.Apis.BigtableAdmin.v2
         }
 
         /// <summary>
-        /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the
-        /// operation, but success is not guaranteed. If the server doesn't support this method, it returns
-        /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether
-        /// the cancellation succeeded or whether the operation completed despite cancellation. On successful
-        /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
-        /// with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
-        /// </summary>
-        /// <param name="name">The name of the operation resource to be cancelled.</param>
-        public virtual CancelRequest Cancel(string name)
-        {
-            return new CancelRequest(service, name);
-        }
-
-        /// <summary>
-        /// Starts asynchronous cancellation on a long-running operation. The server makes a best effort to cancel the
-        /// operation, but success is not guaranteed. If the server doesn't support this method, it returns
-        /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether
-        /// the cancellation succeeded or whether the operation completed despite cancellation. On successful
-        /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
-        /// with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
-        /// </summary>
-        public class CancelRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Empty>
-        {
-            /// <summary>Constructs a new Cancel request.</summary>
-            public CancelRequest(Google.Apis.Services.IClientService service, string name) : base(service)
-            {
-                Name = name;
-                InitParameters();
-            }
-
-            /// <summary>The name of the operation resource to be cancelled.</summary>
-            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
-            public virtual string Name { get; private set; }
-
-            /// <summary>Gets the method name.</summary>
-            public override string MethodName => "cancel";
-
-            /// <summary>Gets the HTTP method.</summary>
-            public override string HttpMethod => "POST";
-
-            /// <summary>Gets the REST path.</summary>
-            public override string RestPath => "v2/{+name}:cancel";
-
-            /// <summary>Initializes Cancel parameter list.</summary>
-            protected override void InitParameters()
-            {
-                base.InitParameters();
-                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
-                {
-                    Name = "name",
-                    IsRequired = true,
-                    ParameterType = "path",
-                    DefaultValue = null,
-                    Pattern = @"^operations/.*$",
-                });
-            }
-        }
-
-        /// <summary>
-        /// Deletes a long-running operation. This method indicates that the client is no longer interested in the
-        /// operation result. It does not cancel the operation. If the server doesn't support this method, it returns
-        /// `google.rpc.Code.UNIMPLEMENTED`.
-        /// </summary>
-        /// <param name="name">The name of the operation resource to be deleted.</param>
-        public virtual DeleteRequest Delete(string name)
-        {
-            return new DeleteRequest(service, name);
-        }
-
-        /// <summary>
-        /// Deletes a long-running operation. This method indicates that the client is no longer interested in the
-        /// operation result. It does not cancel the operation. If the server doesn't support this method, it returns
-        /// `google.rpc.Code.UNIMPLEMENTED`.
-        /// </summary>
-        public class DeleteRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Empty>
-        {
-            /// <summary>Constructs a new Delete request.</summary>
-            public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
-            {
-                Name = name;
-                InitParameters();
-            }
-
-            /// <summary>The name of the operation resource to be deleted.</summary>
-            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
-            public virtual string Name { get; private set; }
-
-            /// <summary>Gets the method name.</summary>
-            public override string MethodName => "delete";
-
-            /// <summary>Gets the HTTP method.</summary>
-            public override string HttpMethod => "DELETE";
-
-            /// <summary>Gets the REST path.</summary>
-            public override string RestPath => "v2/{+name}";
-
-            /// <summary>Initializes Delete parameter list.</summary>
-            protected override void InitParameters()
-            {
-                base.InitParameters();
-                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
-                {
-                    Name = "name",
-                    IsRequired = true,
-                    ParameterType = "path",
-                    DefaultValue = null,
-                    Pattern = @"^operations/.*$",
-                });
-            }
-        }
-
-        /// <summary>
         /// Gets the latest state of a long-running operation. Clients can use this method to poll the operation result
         /// at intervals as recommended by the API service.
         /// </summary>
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -697,7 +570,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.BigtableAdmin.v2.Data.AppProfile body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates an app profile within an instance.</summary>
@@ -782,7 +655,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes an app profile from an instance.</summary>
@@ -845,7 +718,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets information about an app profile.</summary>
@@ -897,7 +770,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists information about app profiles in an instance.</summary>
@@ -980,7 +853,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.BigtableAdmin.v2.Data.AppProfile body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates an app profile within an instance.</summary>
@@ -1075,6 +948,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 {
                     this.service = service;
                     Backups = new BackupsResource(service);
+                    HotTablets = new HotTabletsResource(service);
                 }
 
                 /// <summary>Gets the Backups resource.</summary>
@@ -1095,6 +969,73 @@ namespace Google.Apis.BigtableAdmin.v2
                     }
 
                     /// <summary>
+                    /// Copy a Cloud Bigtable backup to a new backup in the destination cluster located in the
+                    /// destination instance and project.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// Required. The name of the destination cluster that will contain the backup copy. The cluster
+                    /// must already exist. Values are of the form:
+                    /// `projects/{project}/instances/{instance}/clusters/{cluster}`.
+                    /// </param>
+                    public virtual CopyRequest Copy(Google.Apis.BigtableAdmin.v2.Data.CopyBackupRequest body, string parent)
+                    {
+                        return new CopyRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>
+                    /// Copy a Cloud Bigtable backup to a new backup in the destination cluster located in the
+                    /// destination instance and project.
+                    /// </summary>
+                    public class CopyRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Copy request.</summary>
+                        public CopyRequest(Google.Apis.Services.IClientService service, Google.Apis.BigtableAdmin.v2.Data.CopyBackupRequest body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The name of the destination cluster that will contain the backup copy. The cluster
+                        /// must already exist. Values are of the form:
+                        /// `projects/{project}/instances/{instance}/clusters/{cluster}`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.BigtableAdmin.v2.Data.CopyBackupRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "copy";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+parent}/backups:copy";
+
+                        /// <summary>Initializes Copy parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/clusters/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
                     /// Starts creating a new Cloud Bigtable Backup. The returned backup long-running operation can be
                     /// used to track creation of the backup. The metadata field type is CreateBackupMetadata. The
                     /// response field type is Backup, if successful. Cancelling the returned operation will stop the
@@ -1108,7 +1049,7 @@ namespace Google.Apis.BigtableAdmin.v2
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.BigtableAdmin.v2.Data.Backup body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -1189,7 +1130,7 @@ namespace Google.Apis.BigtableAdmin.v2
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes a pending or completed Cloud Bigtable backup.</summary>
@@ -1240,7 +1181,7 @@ namespace Google.Apis.BigtableAdmin.v2
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets metadata on a pending or completed Cloud Bigtable Backup.</summary>
@@ -1285,21 +1226,22 @@ namespace Google.Apis.BigtableAdmin.v2
                     }
 
                     /// <summary>
-                    /// Gets the access control policy for a Table resource. Returns an empty policy if the resource
+                    /// Gets the access control policy for a Bigtable resource. Returns an empty policy if the resource
                     /// exists but does not have a policy set.
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.BigtableAdmin.v2.Data.GetIamPolicyRequest body, string resource)
                     {
-                        return new GetIamPolicyRequest(service, body, resource);
+                        return new GetIamPolicyRequest(this.service, body, resource);
                     }
 
                     /// <summary>
-                    /// Gets the access control policy for a Table resource. Returns an empty policy if the resource
+                    /// Gets the access control policy for a Bigtable resource. Returns an empty policy if the resource
                     /// exists but does not have a policy set.
                     /// </summary>
                     public class GetIamPolicyRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Policy>
@@ -1313,8 +1255,9 @@ namespace Google.Apis.BigtableAdmin.v2
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -1358,7 +1301,7 @@ namespace Google.Apis.BigtableAdmin.v2
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists Cloud Bigtable backups. Returns both completed and pending backups.</summary>
@@ -1497,7 +1440,7 @@ namespace Google.Apis.BigtableAdmin.v2
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.BigtableAdmin.v2.Data.Backup body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>Updates a pending or completed Cloud Bigtable Backup.</summary>
@@ -1569,20 +1512,21 @@ namespace Google.Apis.BigtableAdmin.v2
                     }
 
                     /// <summary>
-                    /// Sets the access control policy on a Table resource. Replaces any existing policy.
+                    /// Sets the access control policy on a Bigtable resource. Replaces any existing policy.
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.BigtableAdmin.v2.Data.SetIamPolicyRequest body, string resource)
                     {
-                        return new SetIamPolicyRequest(service, body, resource);
+                        return new SetIamPolicyRequest(this.service, body, resource);
                     }
 
                     /// <summary>
-                    /// Sets the access control policy on a Table resource. Replaces any existing policy.
+                    /// Sets the access control policy on a Bigtable resource. Replaces any existing policy.
                     /// </summary>
                     public class SetIamPolicyRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Policy>
                     {
@@ -1595,8 +1539,9 @@ namespace Google.Apis.BigtableAdmin.v2
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being specified. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -1631,18 +1576,19 @@ namespace Google.Apis.BigtableAdmin.v2
                         }
                     }
 
-                    /// <summary>Returns permissions that the caller has on the specified table resource.</summary>
+                    /// <summary>Returns permissions that the caller has on the specified Bigtable resource.</summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.BigtableAdmin.v2.Data.TestIamPermissionsRequest body, string resource)
                     {
-                        return new TestIamPermissionsRequest(service, body, resource);
+                        return new TestIamPermissionsRequest(this.service, body, resource);
                     }
 
-                    /// <summary>Returns permissions that the caller has on the specified table resource.</summary>
+                    /// <summary>Returns permissions that the caller has on the specified Bigtable resource.</summary>
                     public class TestIamPermissionsRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.TestIamPermissionsResponse>
                     {
                         /// <summary>Constructs a new TestIamPermissions request.</summary>
@@ -1654,8 +1600,9 @@ namespace Google.Apis.BigtableAdmin.v2
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -1691,7 +1638,195 @@ namespace Google.Apis.BigtableAdmin.v2
                     }
                 }
 
-                /// <summary>Creates a cluster within an instance.</summary>
+                /// <summary>Gets the HotTablets resource.</summary>
+                public virtual HotTabletsResource HotTablets { get; }
+
+                /// <summary>The "hotTablets" collection of methods.</summary>
+                public class HotTabletsResource
+                {
+                    private const string Resource = "hotTablets";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public HotTabletsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Lists hot tablets in a cluster, within the time range provided. Hot tablets are ordered based on
+                    /// CPU usage.
+                    /// </summary>
+                    /// <param name="parent">
+                    /// Required. The cluster name to list hot tablets. Value is in the following form:
+                    /// `projects/{project}/instances/{instance}/clusters/{cluster}`.
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>
+                    /// Lists hot tablets in a cluster, within the time range provided. Hot tablets are ordered based on
+                    /// CPU usage.
+                    /// </summary>
+                    public class ListRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.ListHotTabletsResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The cluster name to list hot tablets. Value is in the following form:
+                        /// `projects/{project}/instances/{instance}/clusters/{cluster}`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        private object _endTime;
+
+                        /// <summary>
+                        /// String representation of <see cref="EndTimeDateTimeOffset"/>, formatted for inclusion in the
+                        /// HTTP request.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("endTime", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string EndTimeRaw { get; private set; }
+
+                        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+                        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+                        public virtual object EndTime
+                        {
+                            get => _endTime;
+                            set
+                            {
+                                EndTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                                _endTime = value;
+                            }
+                        }
+
+                        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+                        {
+                            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+                            set
+                            {
+                                EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                                _endTime = value;
+                            }
+                        }
+
+                        /// <summary>
+                        /// Maximum number of results per page. A page_size that is empty or zero lets the server choose
+                        /// the number of items to return. A page_size which is strictly positive will return at most
+                        /// that many items. A negative page_size will cause an error. Following the first request,
+                        /// subsequent paginated calls do not need a page_size field. If a page_size is set in
+                        /// subsequent calls, it must match the page_size given in the first request.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>The value of `next_page_token` returned by a previous call.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        private object _startTime;
+
+                        /// <summary>
+                        /// String representation of <see cref="StartTimeDateTimeOffset"/>, formatted for inclusion in
+                        /// the HTTP request.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("startTime", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string StartTimeRaw { get; private set; }
+
+                        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+                        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+                        public virtual object StartTime
+                        {
+                            get => _startTime;
+                            set
+                            {
+                                StartTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                                _startTime = value;
+                            }
+                        }
+
+                        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+                        {
+                            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+                            set
+                            {
+                                StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                                _startTime = value;
+                            }
+                        }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+parent}/hotTablets";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/clusters/[^/]+$",
+                            });
+                            RequestParameters.Add("endTime", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "endTime",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("startTime", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "startTime",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// Creates a cluster within an instance. Note that exactly one of Cluster.serve_nodes and
+                /// Cluster.cluster_config.cluster_autoscaling_config can be set. If serve_nodes is set to non-zero,
+                /// then the cluster is manually scaled. If cluster_config.cluster_autoscaling_config is non-empty, then
+                /// autoscaling is enabled.
+                /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. The unique name of the instance in which to create the new cluster. Values are of the form
@@ -1699,10 +1834,15 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.BigtableAdmin.v2.Data.Cluster body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
-                /// <summary>Creates a cluster within an instance.</summary>
+                /// <summary>
+                /// Creates a cluster within an instance. Note that exactly one of Cluster.serve_nodes and
+                /// Cluster.cluster_config.cluster_autoscaling_config can be set. If serve_nodes is set to non-zero,
+                /// then the cluster is manually scaled. If cluster_config.cluster_autoscaling_config is non-empty, then
+                /// autoscaling is enabled.
+                /// </summary>
                 public class CreateRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Operation>
                 {
                     /// <summary>Constructs a new Create request.</summary>
@@ -1772,7 +1912,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes a cluster from an instance.</summary>
@@ -1823,7 +1963,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets information about a cluster.</summary>
@@ -1875,7 +2015,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists information about clusters in an instance.</summary>
@@ -1934,6 +2074,12 @@ namespace Google.Apis.BigtableAdmin.v2
 
                 /// <summary>
                 /// Partially updates a cluster within a project. This method is the preferred way to update a Cluster.
+                /// To enable and update autoscaling, set cluster_config.cluster_autoscaling_config. When autoscaling is
+                /// enabled, serve_nodes is treated as an OUTPUT_ONLY field, meaning that updates to it are ignored.
+                /// Note that an update cannot simultaneously set serve_nodes to non-zero and
+                /// cluster_config.cluster_autoscaling_config to non-empty, and also specify both in the update_mask. To
+                /// disable autoscaling, clear cluster_config.cluster_autoscaling_config, and explicitly set a
+                /// serve_node count via the update_mask.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -1942,11 +2088,17 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual PartialUpdateClusterRequest PartialUpdateCluster(Google.Apis.BigtableAdmin.v2.Data.Cluster body, string name)
                 {
-                    return new PartialUpdateClusterRequest(service, body, name);
+                    return new PartialUpdateClusterRequest(this.service, body, name);
                 }
 
                 /// <summary>
                 /// Partially updates a cluster within a project. This method is the preferred way to update a Cluster.
+                /// To enable and update autoscaling, set cluster_config.cluster_autoscaling_config. When autoscaling is
+                /// enabled, serve_nodes is treated as an OUTPUT_ONLY field, meaning that updates to it are ignored.
+                /// Note that an update cannot simultaneously set serve_nodes to non-zero and
+                /// cluster_config.cluster_autoscaling_config to non-empty, and also specify both in the update_mask. To
+                /// disable autoscaling, clear cluster_config.cluster_autoscaling_config, and explicitly set a
+                /// serve_node count via the update_mask.
                 /// </summary>
                 public class PartialUpdateClusterRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Operation>
                 {
@@ -1965,9 +2117,7 @@ namespace Google.Apis.BigtableAdmin.v2
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
 
-                    /// <summary>
-                    /// Required. The subset of Cluster fields which should be replaced. Must be explicitly set.
-                    /// </summary>
+                    /// <summary>Required. The subset of Cluster fields which should be replaced.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual object UpdateMask { get; set; }
 
@@ -2010,8 +2160,8 @@ namespace Google.Apis.BigtableAdmin.v2
                 }
 
                 /// <summary>
-                /// Updates a cluster within an instance. UpdateCluster is deprecated. Please use PartialUpdateCluster
-                /// instead.
+                /// Updates a cluster within an instance. Note that UpdateCluster does not support updating
+                /// cluster_config.cluster_autoscaling_config. In order to update it, you must use PartialUpdateCluster.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -2020,12 +2170,12 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual UpdateRequest Update(Google.Apis.BigtableAdmin.v2.Data.Cluster body, string name)
                 {
-                    return new UpdateRequest(service, body, name);
+                    return new UpdateRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Updates a cluster within an instance. UpdateCluster is deprecated. Please use PartialUpdateCluster
-                /// instead.
+                /// Updates a cluster within an instance. Note that UpdateCluster does not support updating
+                /// cluster_config.cluster_autoscaling_config. In order to update it, you must use PartialUpdateCluster.
                 /// </summary>
                 public class UpdateRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Operation>
                 {
@@ -2090,6 +2240,666 @@ namespace Google.Apis.BigtableAdmin.v2
                 public TablesResource(Google.Apis.Services.IClientService service)
                 {
                     this.service = service;
+                    AuthorizedViews = new AuthorizedViewsResource(service);
+                }
+
+                /// <summary>Gets the AuthorizedViews resource.</summary>
+                public virtual AuthorizedViewsResource AuthorizedViews { get; }
+
+                /// <summary>The "authorizedViews" collection of methods.</summary>
+                public class AuthorizedViewsResource
+                {
+                    private const string Resource = "authorizedViews";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public AuthorizedViewsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>Creates a new AuthorizedView in a table.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// Required. This is the name of the table the AuthorizedView belongs to. Values are of the form
+                    /// `projects/{project}/instances/{instance}/tables/{table}`.
+                    /// </param>
+                    public virtual CreateRequest Create(Google.Apis.BigtableAdmin.v2.Data.AuthorizedView body, string parent)
+                    {
+                        return new CreateRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>Creates a new AuthorizedView in a table.</summary>
+                    public class CreateRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Create request.</summary>
+                        public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.BigtableAdmin.v2.Data.AuthorizedView body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. This is the name of the table the AuthorizedView belongs to. Values are of the
+                        /// form `projects/{project}/instances/{instance}/tables/{table}`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Required. The id of the AuthorizedView to create. This AuthorizedView must not already
+                        /// exist. The `authorized_view_id` appended to `parent` forms the full AuthorizedView name of
+                        /// the form
+                        /// `projects/{project}/instances/{instance}/tables/{table}/authorizedView/{authorized_view}`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("authorizedViewId", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string AuthorizedViewId { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.BigtableAdmin.v2.Data.AuthorizedView Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "create";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+parent}/authorizedViews";
+
+                        /// <summary>Initializes Create parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/tables/[^/]+$",
+                            });
+                            RequestParameters.Add("authorizedViewId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "authorizedViewId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Permanently deletes a specified AuthorizedView.</summary>
+                    /// <param name="name">
+                    /// Required. The unique name of the AuthorizedView to be deleted. Values are of the form
+                    /// `projects/{project}/instances/{instance}/tables/{table}/authorizedViews/{authorized_view}`.
+                    /// </param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>Permanently deletes a specified AuthorizedView.</summary>
+                    public class DeleteRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Empty>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The unique name of the AuthorizedView to be deleted. Values are of the form
+                        /// `projects/{project}/instances/{instance}/tables/{table}/authorizedViews/{authorized_view}`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>
+                        /// Optional. The current etag of the AuthorizedView. If an etag is provided and does not match
+                        /// the current etag of the AuthorizedView, deletion will be blocked and an ABORTED error will
+                        /// be returned.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("etag", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string Etag { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/tables/[^/]+/authorizedViews/[^/]+$",
+                            });
+                            RequestParameters.Add("etag", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "etag",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Gets information from a specified AuthorizedView.</summary>
+                    /// <param name="name">
+                    /// Required. The unique name of the requested AuthorizedView. Values are of the form
+                    /// `projects/{project}/instances/{instance}/tables/{table}/authorizedViews/{authorized_view}`.
+                    /// </param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>Gets information from a specified AuthorizedView.</summary>
+                    public class GetRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.AuthorizedView>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The unique name of the requested AuthorizedView. Values are of the form
+                        /// `projects/{project}/instances/{instance}/tables/{table}/authorizedViews/{authorized_view}`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>
+                        /// Optional. The resource_view to be applied to the returned AuthorizedView's fields. Default
+                        /// to BASIC.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("view", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<ViewEnum> View { get; set; }
+
+                        /// <summary>
+                        /// Optional. The resource_view to be applied to the returned AuthorizedView's fields. Default
+                        /// to BASIC.
+                        /// </summary>
+                        public enum ViewEnum
+                        {
+                            /// <summary>Uses the default view for each method as documented in the request.</summary>
+                            [Google.Apis.Util.StringValueAttribute("RESPONSE_VIEW_UNSPECIFIED")]
+                            RESPONSEVIEWUNSPECIFIED = 0,
+
+                            /// <summary>Only populates `name`.</summary>
+                            [Google.Apis.Util.StringValueAttribute("NAME_ONLY")]
+                            NAMEONLY = 1,
+
+                            /// <summary>
+                            /// Only populates the AuthorizedView's basic metadata. This includes: name,
+                            /// deletion_protection, etag.
+                            /// </summary>
+                            [Google.Apis.Util.StringValueAttribute("BASIC")]
+                            BASIC = 2,
+
+                            /// <summary>Populates every fields.</summary>
+                            [Google.Apis.Util.StringValueAttribute("FULL")]
+                            FULL = 3,
+                        }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/tables/[^/]+/authorizedViews/[^/]+$",
+                            });
+                            RequestParameters.Add("view", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "view",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Gets the access control policy for a Bigtable resource. Returns an empty policy if the resource
+                    /// exists but does not have a policy set.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </param>
+                    public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.BigtableAdmin.v2.Data.GetIamPolicyRequest body, string resource)
+                    {
+                        return new GetIamPolicyRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Gets the access control policy for a Bigtable resource. Returns an empty policy if the resource
+                    /// exists but does not have a policy set.
+                    /// </summary>
+                    public class GetIamPolicyRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Policy>
+                    {
+                        /// <summary>Constructs a new GetIamPolicy request.</summary>
+                        public GetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.BigtableAdmin.v2.Data.GetIamPolicyRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.BigtableAdmin.v2.Data.GetIamPolicyRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "getIamPolicy";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+resource}:getIamPolicy";
+
+                        /// <summary>Initializes GetIamPolicy parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/tables/[^/]+/authorizedViews/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Lists all AuthorizedViews from a specific table.</summary>
+                    /// <param name="parent">
+                    /// Required. The unique name of the table for which AuthorizedViews should be listed. Values are of
+                    /// the form `projects/{project}/instances/{instance}/tables/{table}`.
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists all AuthorizedViews from a specific table.</summary>
+                    public class ListRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.ListAuthorizedViewsResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The unique name of the table for which AuthorizedViews should be listed. Values
+                        /// are of the form `projects/{project}/instances/{instance}/tables/{table}`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Optional. Maximum number of results per page. A page_size of zero lets the server choose the
+                        /// number of items to return. A page_size which is strictly positive will return at most that
+                        /// many items. A negative page_size will cause an error. Following the first request,
+                        /// subsequent paginated calls are not required to pass a page_size. If a page_size is set in
+                        /// subsequent calls, it must match the page_size given in the first request.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>Optional. The value of `next_page_token` returned by a previous call.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>
+                        /// Optional. The resource_view to be applied to the returned AuthorizedViews' fields. Default
+                        /// to NAME_ONLY.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("view", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<ViewEnum> View { get; set; }
+
+                        /// <summary>
+                        /// Optional. The resource_view to be applied to the returned AuthorizedViews' fields. Default
+                        /// to NAME_ONLY.
+                        /// </summary>
+                        public enum ViewEnum
+                        {
+                            /// <summary>Uses the default view for each method as documented in the request.</summary>
+                            [Google.Apis.Util.StringValueAttribute("RESPONSE_VIEW_UNSPECIFIED")]
+                            RESPONSEVIEWUNSPECIFIED = 0,
+
+                            /// <summary>Only populates `name`.</summary>
+                            [Google.Apis.Util.StringValueAttribute("NAME_ONLY")]
+                            NAMEONLY = 1,
+
+                            /// <summary>
+                            /// Only populates the AuthorizedView's basic metadata. This includes: name,
+                            /// deletion_protection, etag.
+                            /// </summary>
+                            [Google.Apis.Util.StringValueAttribute("BASIC")]
+                            BASIC = 2,
+
+                            /// <summary>Populates every fields.</summary>
+                            [Google.Apis.Util.StringValueAttribute("FULL")]
+                            FULL = 3,
+                        }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+parent}/authorizedViews";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/tables/[^/]+$",
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("view", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "view",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Updates an AuthorizedView in a table.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">
+                    /// Identifier. The name of this AuthorizedView. Values are of the form
+                    /// `projects/{project}/instances/{instance}/tables/{table}/authorizedViews/{authorized_view}`
+                    /// </param>
+                    public virtual PatchRequest Patch(Google.Apis.BigtableAdmin.v2.Data.AuthorizedView body, string name)
+                    {
+                        return new PatchRequest(this.service, body, name);
+                    }
+
+                    /// <summary>Updates an AuthorizedView in a table.</summary>
+                    public class PatchRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Patch request.</summary>
+                        public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.BigtableAdmin.v2.Data.AuthorizedView body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Identifier. The name of this AuthorizedView. Values are of the form
+                        /// `projects/{project}/instances/{instance}/tables/{table}/authorizedViews/{authorized_view}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>
+                        /// Optional. If true, ignore the safety checks when updating the AuthorizedView.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("ignoreWarnings", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<bool> IgnoreWarnings { get; set; }
+
+                        /// <summary>
+                        /// Optional. The list of fields to update. A mask specifying which fields in the AuthorizedView
+                        /// resource should be updated. This mask is relative to the AuthorizedView resource, not to the
+                        /// request message. A field will be overwritten if it is in the mask. If empty, all fields set
+                        /// in the request will be overwritten. A special value `*` means to overwrite all fields
+                        /// (including fields not set in the request).
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual object UpdateMask { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.BigtableAdmin.v2.Data.AuthorizedView Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "patch";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "PATCH";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+name}";
+
+                        /// <summary>Initializes Patch parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/tables/[^/]+/authorizedViews/[^/]+$",
+                            });
+                            RequestParameters.Add("ignoreWarnings", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "ignoreWarnings",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "updateMask",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Sets the access control policy on a Bigtable resource. Replaces any existing policy.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </param>
+                    public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.BigtableAdmin.v2.Data.SetIamPolicyRequest body, string resource)
+                    {
+                        return new SetIamPolicyRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>
+                    /// Sets the access control policy on a Bigtable resource. Replaces any existing policy.
+                    /// </summary>
+                    public class SetIamPolicyRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Policy>
+                    {
+                        /// <summary>Constructs a new SetIamPolicy request.</summary>
+                        public SetIamPolicyRequest(Google.Apis.Services.IClientService service, Google.Apis.BigtableAdmin.v2.Data.SetIamPolicyRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.BigtableAdmin.v2.Data.SetIamPolicyRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "setIamPolicy";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+resource}:setIamPolicy";
+
+                        /// <summary>Initializes SetIamPolicy parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/tables/[^/]+/authorizedViews/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Returns permissions that the caller has on the specified Bigtable resource.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="resource">
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
+                    /// </param>
+                    public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.BigtableAdmin.v2.Data.TestIamPermissionsRequest body, string resource)
+                    {
+                        return new TestIamPermissionsRequest(this.service, body, resource);
+                    }
+
+                    /// <summary>Returns permissions that the caller has on the specified Bigtable resource.</summary>
+                    public class TestIamPermissionsRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.TestIamPermissionsResponse>
+                    {
+                        /// <summary>Constructs a new TestIamPermissions request.</summary>
+                        public TestIamPermissionsRequest(Google.Apis.Services.IClientService service, Google.Apis.BigtableAdmin.v2.Data.TestIamPermissionsRequest body, string resource) : base(service)
+                        {
+                            Resource = resource;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Resource { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.BigtableAdmin.v2.Data.TestIamPermissionsRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "testIamPermissions";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2/{+resource}:testIamPermissions";
+
+                        /// <summary>Initializes TestIamPermissions parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("resource", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "resource",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/instances/[^/]+/tables/[^/]+/authorizedViews/[^/]+$",
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>
@@ -2103,7 +2913,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual CheckConsistencyRequest CheckConsistency(Google.Apis.BigtableAdmin.v2.Data.CheckConsistencyRequest body, string name)
                 {
-                    return new CheckConsistencyRequest(service, body, name);
+                    return new CheckConsistencyRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -2168,7 +2978,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.BigtableAdmin.v2.Data.CreateTableRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -2229,7 +3039,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Permanently deletes a specified table and all of its data.</summary>
@@ -2275,7 +3085,9 @@ namespace Google.Apis.BigtableAdmin.v2
 
                 /// <summary>
                 /// Permanently drop/delete a row range from a specified table. The request can specify whether to
-                /// delete all rows in a table, or only those that match a particular prefix.
+                /// delete all rows in a table, or only those that match a particular prefix. Note that row key prefixes
+                /// used here are treated as service data. For more information about how service data is handled, see
+                /// the [Google Cloud Privacy Notice](https://cloud.google.com/terms/cloud-privacy-notice).
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -2284,12 +3096,14 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual DropRowRangeRequest DropRowRange(Google.Apis.BigtableAdmin.v2.Data.DropRowRangeRequest body, string name)
                 {
-                    return new DropRowRangeRequest(service, body, name);
+                    return new DropRowRangeRequest(this.service, body, name);
                 }
 
                 /// <summary>
                 /// Permanently drop/delete a row range from a specified table. The request can specify whether to
-                /// delete all rows in a table, or only those that match a particular prefix.
+                /// delete all rows in a table, or only those that match a particular prefix. Note that row key prefixes
+                /// used here are treated as service data. For more information about how service data is handled, see
+                /// the [Google Cloud Privacy Notice](https://cloud.google.com/terms/cloud-privacy-notice).
                 /// </summary>
                 public class DropRowRangeRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Empty>
                 {
@@ -2350,7 +3164,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual GenerateConsistencyTokenRequest GenerateConsistencyToken(Google.Apis.BigtableAdmin.v2.Data.GenerateConsistencyTokenRequest body, string name)
                 {
-                    return new GenerateConsistencyTokenRequest(service, body, name);
+                    return new GenerateConsistencyTokenRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -2412,7 +3226,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets metadata information about the specified table.</summary>
@@ -2465,7 +3279,14 @@ namespace Google.Apis.BigtableAdmin.v2
                         [Google.Apis.Util.StringValueAttribute("ENCRYPTION_VIEW")]
                         ENCRYPTIONVIEW = 5,
 
-                        /// <summary>Populates all fields.</summary>
+                        /// <summary>
+                        /// Only populates `name` and fields related to the table's stats (e.g. TableStats and
+                        /// ColumnFamilyStats).
+                        /// </summary>
+                        [Google.Apis.Util.StringValueAttribute("STATS_VIEW")]
+                        STATSVIEW = 6,
+
+                        /// <summary>Populates all fields except for stats. See STATS_VIEW to request stats.</summary>
                         [Google.Apis.Util.StringValueAttribute("FULL")]
                         FULL = 4,
                     }
@@ -2503,22 +3324,23 @@ namespace Google.Apis.BigtableAdmin.v2
                 }
 
                 /// <summary>
-                /// Gets the access control policy for a Table resource. Returns an empty policy if the resource exists
-                /// but does not have a policy set.
+                /// Gets the access control policy for a Bigtable resource. Returns an empty policy if the resource
+                /// exists but does not have a policy set.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.BigtableAdmin.v2.Data.GetIamPolicyRequest body, string resource)
                 {
-                    return new GetIamPolicyRequest(service, body, resource);
+                    return new GetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
-                /// Gets the access control policy for a Table resource. Returns an empty policy if the resource exists
-                /// but does not have a policy set.
+                /// Gets the access control policy for a Bigtable resource. Returns an empty policy if the resource
+                /// exists but does not have a policy set.
                 /// </summary>
                 public class GetIamPolicyRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Policy>
                 {
@@ -2531,8 +3353,9 @@ namespace Google.Apis.BigtableAdmin.v2
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -2574,7 +3397,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists all tables served from a specified instance.</summary>
@@ -2609,15 +3432,15 @@ namespace Google.Apis.BigtableAdmin.v2
                     public virtual string PageToken { get; set; }
 
                     /// <summary>
-                    /// The view to be applied to the returned tables' fields. Only NAME_ONLY view (default) and
-                    /// REPLICATION_VIEW are supported.
+                    /// The view to be applied to the returned tables' fields. Only NAME_ONLY view (default),
+                    /// REPLICATION_VIEW and ENCRYPTION_VIEW are supported.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("view", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual System.Nullable<ViewEnum> View { get; set; }
 
                     /// <summary>
-                    /// The view to be applied to the returned tables' fields. Only NAME_ONLY view (default) and
-                    /// REPLICATION_VIEW are supported.
+                    /// The view to be applied to the returned tables' fields. Only NAME_ONLY view (default),
+                    /// REPLICATION_VIEW and ENCRYPTION_VIEW are supported.
                     /// </summary>
                     public enum ViewEnum
                     {
@@ -2643,7 +3466,14 @@ namespace Google.Apis.BigtableAdmin.v2
                         [Google.Apis.Util.StringValueAttribute("ENCRYPTION_VIEW")]
                         ENCRYPTIONVIEW = 5,
 
-                        /// <summary>Populates all fields.</summary>
+                        /// <summary>
+                        /// Only populates `name` and fields related to the table's stats (e.g. TableStats and
+                        /// ColumnFamilyStats).
+                        /// </summary>
+                        [Google.Apis.Util.StringValueAttribute("STATS_VIEW")]
+                        STATSVIEW = 6,
+
+                        /// <summary>Populates all fields except for stats. See STATS_VIEW to request stats.</summary>
                         [Google.Apis.Util.StringValueAttribute("FULL")]
                         FULL = 4,
                     }
@@ -2708,7 +3538,7 @@ namespace Google.Apis.BigtableAdmin.v2
                 /// </param>
                 public virtual ModifyColumnFamiliesRequest ModifyColumnFamilies(Google.Apis.BigtableAdmin.v2.Data.ModifyColumnFamiliesRequest body, string name)
                 {
-                    return new ModifyColumnFamiliesRequest(service, body, name);
+                    return new ModifyColumnFamiliesRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -2763,26 +3593,104 @@ namespace Google.Apis.BigtableAdmin.v2
                     }
                 }
 
+                /// <summary>Updates a specified table.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// The unique name of the table. Values are of the form
+                /// `projects/{project}/instances/{instance}/tables/_a-zA-Z0-9*`. Views: `NAME_ONLY`, `SCHEMA_VIEW`,
+                /// `REPLICATION_VIEW`, `STATS_VIEW`, `FULL`
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.BigtableAdmin.v2.Data.Table body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates a specified table.</summary>
+                public class PatchRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.BigtableAdmin.v2.Data.Table body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// The unique name of the table. Values are of the form
+                    /// `projects/{project}/instances/{instance}/tables/_a-zA-Z0-9*`. Views: `NAME_ONLY`, `SCHEMA_VIEW`,
+                    /// `REPLICATION_VIEW`, `STATS_VIEW`, `FULL`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. The list of fields to update. A mask specifying which fields (e.g.
+                    /// `change_stream_config`) in the `table` field should be updated. This mask is relative to the
+                    /// `table` field, not to the request message. The wildcard (*) path is currently not supported.
+                    /// Currently UpdateTable is only supported for the following fields: * `change_stream_config` *
+                    /// `change_stream_config.retention_period` * `deletion_protection` If `column_families` is set in
+                    /// `update_mask`, it will return an UNIMPLEMENTED error.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.BigtableAdmin.v2.Data.Table Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instances/[^/]+/tables/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
                 /// <summary>
-                /// Create a new table by restoring from a completed backup. The new table must be in the same project
-                /// as the instance containing the backup. The returned table long-running operation can be used to
-                /// track the progress of the operation, and to cancel it. The metadata field type is
+                /// Create a new table by restoring from a completed backup. The returned table long-running operation
+                /// can be used to track the progress of the operation, and to cancel it. The metadata field type is
                 /// RestoreTableMetadata. The response type is Table, if successful.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
-                /// Required. The name of the instance in which to create the restored table. This instance must be in
-                /// the same project as the source backup. Values are of the form `projects//instances/`.
+                /// Required. The name of the instance in which to create the restored table. Values are of the form
+                /// `projects//instances/`.
                 /// </param>
                 public virtual RestoreRequest Restore(Google.Apis.BigtableAdmin.v2.Data.RestoreTableRequest body, string parent)
                 {
-                    return new RestoreRequest(service, body, parent);
+                    return new RestoreRequest(this.service, body, parent);
                 }
 
                 /// <summary>
-                /// Create a new table by restoring from a completed backup. The new table must be in the same project
-                /// as the instance containing the backup. The returned table long-running operation can be used to
-                /// track the progress of the operation, and to cancel it. The metadata field type is
+                /// Create a new table by restoring from a completed backup. The returned table long-running operation
+                /// can be used to track the progress of the operation, and to cancel it. The metadata field type is
                 /// RestoreTableMetadata. The response type is Table, if successful.
                 /// </summary>
                 public class RestoreRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Operation>
@@ -2796,8 +3704,8 @@ namespace Google.Apis.BigtableAdmin.v2
                     }
 
                     /// <summary>
-                    /// Required. The name of the instance in which to create the restored table. This instance must be
-                    /// in the same project as the source backup. Values are of the form `projects//instances/`.
+                    /// Required. The name of the instance in which to create the restored table. Values are of the form
+                    /// `projects//instances/`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -2832,18 +3740,23 @@ namespace Google.Apis.BigtableAdmin.v2
                     }
                 }
 
-                /// <summary>Sets the access control policy on a Table resource. Replaces any existing policy.</summary>
+                /// <summary>
+                /// Sets the access control policy on a Bigtable resource. Replaces any existing policy.
+                /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.BigtableAdmin.v2.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
-                /// <summary>Sets the access control policy on a Table resource. Replaces any existing policy.</summary>
+                /// <summary>
+                /// Sets the access control policy on a Bigtable resource. Replaces any existing policy.
+                /// </summary>
                 public class SetIamPolicyRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Policy>
                 {
                     /// <summary>Constructs a new SetIamPolicy request.</summary>
@@ -2855,8 +3768,9 @@ namespace Google.Apis.BigtableAdmin.v2
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -2891,18 +3805,19 @@ namespace Google.Apis.BigtableAdmin.v2
                     }
                 }
 
-                /// <summary>Returns permissions that the caller has on the specified table resource.</summary>
+                /// <summary>Returns permissions that the caller has on the specified Bigtable resource.</summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.BigtableAdmin.v2.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
-                /// <summary>Returns permissions that the caller has on the specified table resource.</summary>
+                /// <summary>Returns permissions that the caller has on the specified Bigtable resource.</summary>
                 public class TestIamPermissionsRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.TestIamPermissionsResponse>
                 {
                     /// <summary>Constructs a new TestIamPermissions request.</summary>
@@ -2914,8 +3829,9 @@ namespace Google.Apis.BigtableAdmin.v2
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -2949,9 +3865,73 @@ namespace Google.Apis.BigtableAdmin.v2
                         });
                     }
                 }
+
+                /// <summary>Restores a specified table which was accidentally deleted.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. The unique name of the table to be restored. Values are of the form
+                /// `projects/{project}/instances/{instance}/tables/{table}`.
+                /// </param>
+                public virtual UndeleteRequest Undelete(Google.Apis.BigtableAdmin.v2.Data.UndeleteTableRequest body, string name)
+                {
+                    return new UndeleteRequest(this.service, body, name);
+                }
+
+                /// <summary>Restores a specified table which was accidentally deleted.</summary>
+                public class UndeleteRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Operation>
+                {
+                    /// <summary>Constructs a new Undelete request.</summary>
+                    public UndeleteRequest(Google.Apis.Services.IClientService service, Google.Apis.BigtableAdmin.v2.Data.UndeleteTableRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The unique name of the table to be restored. Values are of the form
+                    /// `projects/{project}/instances/{instance}/tables/{table}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.BigtableAdmin.v2.Data.UndeleteTableRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "undelete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2/{+name}:undelete";
+
+                    /// <summary>Initializes Undelete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/instances/[^/]+/tables/[^/]+$",
+                        });
+                    }
+                }
             }
 
-            /// <summary>Create an instance within a project.</summary>
+            /// <summary>
+            /// Create an instance within a project. Note that exactly one of Cluster.serve_nodes and
+            /// Cluster.cluster_config.cluster_autoscaling_config can be set. If serve_nodes is set to non-zero, then
+            /// the cluster is manually scaled. If cluster_config.cluster_autoscaling_config is non-empty, then
+            /// autoscaling is enabled.
+            /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Required. The unique name of the project in which to create the new instance. Values are of the form
@@ -2959,10 +3939,15 @@ namespace Google.Apis.BigtableAdmin.v2
             /// </param>
             public virtual CreateRequest Create(Google.Apis.BigtableAdmin.v2.Data.CreateInstanceRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
-            /// <summary>Create an instance within a project.</summary>
+            /// <summary>
+            /// Create an instance within a project. Note that exactly one of Cluster.serve_nodes and
+            /// Cluster.cluster_config.cluster_autoscaling_config can be set. If serve_nodes is set to non-zero, then
+            /// the cluster is manually scaled. If cluster_config.cluster_autoscaling_config is non-empty, then
+            /// autoscaling is enabled.
+            /// </summary>
             public class CreateRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Operation>
             {
                 /// <summary>Constructs a new Create request.</summary>
@@ -3017,7 +4002,7 @@ namespace Google.Apis.BigtableAdmin.v2
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Delete an instance from a project.</summary>
@@ -3068,7 +4053,7 @@ namespace Google.Apis.BigtableAdmin.v2
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about an instance.</summary>
@@ -3118,12 +4103,12 @@ namespace Google.Apis.BigtableAdmin.v2
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual GetIamPolicyRequest GetIamPolicy(Google.Apis.BigtableAdmin.v2.Data.GetIamPolicyRequest body, string resource)
             {
-                return new GetIamPolicyRequest(service, body, resource);
+                return new GetIamPolicyRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -3141,8 +4126,9 @@ namespace Google.Apis.BigtableAdmin.v2
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -3184,7 +4170,7 @@ namespace Google.Apis.BigtableAdmin.v2
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists information about instances in a project.</summary>
@@ -3250,7 +4236,7 @@ namespace Google.Apis.BigtableAdmin.v2
             /// </param>
             public virtual PartialUpdateInstanceRequest PartialUpdateInstance(Google.Apis.BigtableAdmin.v2.Data.Instance body, string name)
             {
-                return new PartialUpdateInstanceRequest(service, body, name);
+                return new PartialUpdateInstanceRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -3320,12 +4306,12 @@ namespace Google.Apis.BigtableAdmin.v2
             /// <summary>Sets the access control policy on an instance resource. Replaces any existing policy.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.BigtableAdmin.v2.Data.SetIamPolicyRequest body, string resource)
             {
-                return new SetIamPolicyRequest(service, body, resource);
+                return new SetIamPolicyRequest(this.service, body, resource);
             }
 
             /// <summary>Sets the access control policy on an instance resource. Replaces any existing policy.</summary>
@@ -3340,8 +4326,9 @@ namespace Google.Apis.BigtableAdmin.v2
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -3379,12 +4366,12 @@ namespace Google.Apis.BigtableAdmin.v2
             /// <summary>Returns permissions that the caller has on the specified instance resource.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.BigtableAdmin.v2.Data.TestIamPermissionsRequest body, string resource)
             {
-                return new TestIamPermissionsRequest(service, body, resource);
+                return new TestIamPermissionsRequest(this.service, body, resource);
             }
 
             /// <summary>Returns permissions that the caller has on the specified instance resource.</summary>
@@ -3399,8 +4386,9 @@ namespace Google.Apis.BigtableAdmin.v2
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -3445,7 +4433,7 @@ namespace Google.Apis.BigtableAdmin.v2
             /// </param>
             public virtual UpdateRequest Update(Google.Apis.BigtableAdmin.v2.Data.Instance body, string name)
             {
-                return new UpdateRequest(service, body, name);
+                return new UpdateRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -3516,56 +4504,11 @@ namespace Google.Apis.BigtableAdmin.v2
                 this.service = service;
             }
 
-            /// <summary>Gets information about a location.</summary>
-            /// <param name="name">Resource name for the location.</param>
-            public virtual GetRequest Get(string name)
-            {
-                return new GetRequest(service, name);
-            }
-
-            /// <summary>Gets information about a location.</summary>
-            public class GetRequest : BigtableAdminBaseServiceRequest<Google.Apis.BigtableAdmin.v2.Data.Location>
-            {
-                /// <summary>Constructs a new Get request.</summary>
-                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
-                {
-                    Name = name;
-                    InitParameters();
-                }
-
-                /// <summary>Resource name for the location.</summary>
-                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
-                public virtual string Name { get; private set; }
-
-                /// <summary>Gets the method name.</summary>
-                public override string MethodName => "get";
-
-                /// <summary>Gets the HTTP method.</summary>
-                public override string HttpMethod => "GET";
-
-                /// <summary>Gets the REST path.</summary>
-                public override string RestPath => "v2/{+name}";
-
-                /// <summary>Initializes Get parameter list.</summary>
-                protected override void InitParameters()
-                {
-                    base.InitParameters();
-                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
-                    {
-                        Name = "name",
-                        IsRequired = true,
-                        ParameterType = "path",
-                        DefaultValue = null,
-                        Pattern = @"^projects/[^/]+/locations/[^/]+$",
-                    });
-                }
-            }
-
             /// <summary>Lists information about the supported locations for this service.</summary>
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -3584,7 +4527,7 @@ namespace Google.Apis.BigtableAdmin.v2
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -3660,6 +4603,12 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// </summary>
     public class AppProfile : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// Specifies that this app profile is intended for read-only usage via the Data Boost feature.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataBoostIsolationReadOnly")]
+        public virtual DataBoostIsolationReadOnly DataBoostIsolationReadOnly { get; set; }
+
         /// <summary>Long form description of the use case for this AppProfile.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual string Description { get; set; }
@@ -3685,9 +4634,20 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        /// <summary>
+        /// This field has been deprecated in favor of `standard_isolation.priority`. If you set this field,
+        /// `standard_isolation.priority` will be set instead. The priority of requests sent using this app profile.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("priority")]
+        public virtual string Priority { get; set; }
+
         /// <summary>Use a single-cluster routing policy.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("singleClusterRouting")]
         public virtual SingleClusterRouting SingleClusterRouting { get; set; }
+
+        /// <summary>The standard options used for isolating this app profile's traffic from other use cases.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("standardIsolation")]
+        public virtual StandardIsolation StandardIsolation { get; set; }
     }
 
     /// <summary>
@@ -3700,7 +4660,8 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3741,6 +4702,56 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>An Authorized View of a Cloud Bigtable Table.</summary>
+    public class AuthorizedView : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Set to true to make the AuthorizedView protected against deletion. The parent Table and containing Instance
+        /// cannot be deleted if an AuthorizedView has this bit set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deletionProtection")]
+        public virtual System.Nullable<bool> DeletionProtection { get; set; }
+
+        /// <summary>
+        /// The etag for this AuthorizedView. If this is provided on update, it must match the server's etag. The server
+        /// returns ABORTED error on a mismatched etag.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Identifier. The name of this AuthorizedView. Values are of the form
+        /// `projects/{project}/instances/{instance}/tables/{table}/authorizedViews/{authorized_view}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>An AuthorizedView permitting access to an explicit subset of a Table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subsetView")]
+        public virtual GoogleBigtableAdminV2AuthorizedViewSubsetView SubsetView { get; set; }
+    }
+
+    /// <summary>Defines an automated backup policy for a table</summary>
+    public class AutomatedBackupPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// How frequently automated backups should occur. The only supported value at this time is 24 hours. An
+        /// undefined frequency is treated as 24 hours.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("frequency")]
+        public virtual object Frequency { get; set; }
+
+        /// <summary>
+        /// Required. How long the automated backups should be retained. Values must be at least 3 days and at most 90
+        /// days.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("retentionPeriod")]
+        public virtual object RetentionPeriod { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Limits for the number of nodes a Cluster can autoscale up/down to.</summary>
     public class AutoscalingLimits : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3761,10 +4772,20 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     {
         /// <summary>
         /// The cpu utilization that the Autoscaler should be trying to achieve. This number is on a scale from 0 (no
-        /// utilization) to 100 (total utilization).
+        /// utilization) to 100 (total utilization), and is limited between 10 and 80, otherwise it will return
+        /// INVALID_ARGUMENT error.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cpuUtilizationPercent")]
         public virtual System.Nullable<int> CpuUtilizationPercent { get; set; }
+
+        /// <summary>
+        /// The storage utilization that the Autoscaler should be trying to achieve. This number is limited between 2560
+        /// (2.5TiB) and 5120 (5TiB) for a SSD cluster and between 8192 (8TiB) and 16384 (16TiB) for an HDD cluster,
+        /// otherwise it will return INVALID_ARGUMENT error. If this value is set to 0, it will be treated as if it were
+        /// set to the default value: 2560 for SSD, 8192 for HDD.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("storageUtilizationGibPerNode")]
+        public virtual System.Nullable<int> StorageUtilizationGibPerNode { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3773,24 +4794,138 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// <summary>A backup of a Cloud Bigtable table.</summary>
     public class Backup : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Indicates the backup type of the backup.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backupType")]
+        public virtual string BackupType { get; set; }
+
         /// <summary>Output only. The encryption information for the backup.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("encryptionInfo")]
         public virtual EncryptionInfo EncryptionInfo { get; set; }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>
         /// Output only. `end_time` is the time that the backup was finished. The row data in the backup will be no
         /// newer than this timestamp.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
 
         /// <summary>
-        /// Required. The expiration time of the backup, with microseconds granularity that must be at least 6 hours and
-        /// at most 30 days from the time the request is received. Once the `expire_time` has passed, Cloud Bigtable
-        /// will delete the backup and free the resources used by the backup.
+        /// Required. The expiration time of the backup. When creating a backup or updating its `expire_time`, the value
+        /// must be greater than the backup creation time by: - At least 6 hours - At most 90 days Once the
+        /// `expire_time` has passed, Cloud Bigtable will delete the backup.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _hotToStandardTimeRaw;
+
+        private object _hotToStandardTime;
+
+        /// <summary>
+        /// The time at which the hot backup will be converted to a standard backup. Once the `hot_to_standard_time` has
+        /// passed, Cloud Bigtable will convert the hot backup to a standard backup. This value must be greater than the
+        /// backup creation time by: - At least 24 hours This field only applies for hot backups. When creating or
+        /// updating a standard backup, attempting to set this field will fail the request.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hotToStandardTime")]
+        public virtual string HotToStandardTimeRaw
+        {
+            get => _hotToStandardTimeRaw;
+            set
+            {
+                _hotToStandardTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _hotToStandardTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="HotToStandardTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use HotToStandardTimeDateTimeOffset instead.")]
+        public virtual object HotToStandardTime
+        {
+            get => _hotToStandardTime;
+            set
+            {
+                _hotToStandardTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _hotToStandardTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="HotToStandardTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? HotToStandardTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(HotToStandardTimeRaw);
+            set => HotToStandardTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// A globally unique identifier for the backup which cannot be changed. Values are of the form
@@ -3806,6 +4941,13 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual System.Nullable<long> SizeBytes { get; set; }
 
         /// <summary>
+        /// Output only. Name of the backup from which this backup was copied. If a backup is not created by copying a
+        /// backup, this field will be empty. Values are of the form: projects//instances//clusters//backups/
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceBackup")]
+        public virtual string SourceBackup { get; set; }
+
+        /// <summary>
         /// Required. Immutable. Name of the table from which this backup was created. This needs to be in the same
         /// instance as the backup. Values are of the form
         /// `projects/{project}/instances/{instance}/tables/{source_table}`.
@@ -3813,12 +4955,45 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sourceTable")]
         public virtual string SourceTable { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>
         /// Output only. `start_time` is the time that the backup was started (i.e. approximately the time the
         /// CreateBackup request is received). The row data in this backup will be no older than this timestamp.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The current state of the backup.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -3835,23 +5010,96 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("backup")]
         public virtual string Backup { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// Output only. This time that the backup was finished. Row data in the backup will be no newer than this
         /// timestamp.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. Name of the backup from which this backup was copied. If a backup is not created by copying a
+        /// backup, this field will be empty. Values are of the form: projects//instances//clusters//backups/
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceBackup")]
+        public virtual string SourceBackup { get; set; }
 
         /// <summary>Output only. Name of the table the backup was created from.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceTable")]
         public virtual string SourceTable { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>
         /// Output only. The time that the backup was started. Row data in the backup will be no older than this
         /// timestamp.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3871,16 +5119,37 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -3888,18 +5157,37 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Change stream configuration.</summary>
+    public class ChangeStreamConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// How long the change stream should be retained. Change stream data older than the retention period will not
+        /// be returned when reading the change stream from the table. Values must be at least 1 day and at most 7 days,
+        /// and will be truncated to microsecond granularity.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("retentionPeriod")]
+        public virtual object RetentionPeriod { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3911,6 +5199,20 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         /// <summary>Required. The token created using GenerateConsistencyToken for the Table.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("consistencyToken")]
         public virtual string ConsistencyToken { get; set; }
+
+        /// <summary>
+        /// Checks that reads using an app profile with `DataBoostIsolationReadOnly` can see all writes committed before
+        /// the token was created, but only if the read and write target the same cluster.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataBoostReadLocalWrites")]
+        public virtual DataBoostReadLocalWrites DataBoostReadLocalWrites { get; set; }
+
+        /// <summary>
+        /// Checks that reads using an app profile with `StandardIsolation` can see all writes committed before the
+        /// token was created, even if the read and write target different clusters.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("standardReadRemoteWrites")]
+        public virtual StandardReadRemoteWrites StandardReadRemoteWrites { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3965,9 +5267,13 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        /// <summary>Immutable. The node scaling factor of this cluster.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nodeScalingFactor")]
+        public virtual string NodeScalingFactor { get; set; }
+
         /// <summary>
-        /// Required. The number of nodes allocated to this cluster. More nodes enable higher throughput and more
-        /// consistent performance.
+        /// The number of nodes in the cluster. If no value is set, Cloud Bigtable automatically allocates nodes based
+        /// on your data footprint and optimized for 50% storage utilization.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("serveNodes")]
         public virtual System.Nullable<int> ServeNodes { get; set; }
@@ -3998,11 +5304,7 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// <summary>Configuration for a cluster.</summary>
     public class ClusterConfig : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>
-        /// Autoscaling configuration for this cluster. Note that when creating or updating a cluster, exactly one of
-        /// serve_nodes or cluster_autoscaling_config must be set. If serve_nodes is set, then serve_nodes is fixed and
-        /// autoscaling is turned off. If cluster_autoscaling_config is set, then serve_nodes will be autoscaled.
-        /// </summary>
+        /// <summary>Autoscaling configuration for this cluster.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("clusterAutoscalingConfig")]
         public virtual ClusterAutoscalingConfig ClusterAutoscalingConfig { get; set; }
 
@@ -4040,6 +5342,260 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("gcRule")]
         public virtual GcRule GcRule { get; set; }
 
+        /// <summary>
+        /// Output only. Only available with STATS_VIEW, this includes summary statistics about column family contents.
+        /// For statistics over an entire table, see TableStats above.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stats")]
+        public virtual ColumnFamilyStats Stats { get; set; }
+
+        /// <summary>
+        /// The type of data stored in each of this family's cell values, including its full encoding. If omitted, the
+        /// family only serves raw untyped bytes. For now, only the `Aggregate` type is supported. `Aggregate` can only
+        /// be set at family creation and is immutable afterwards. If `value_type` is `Aggregate`, written data must be
+        /// compatible with: * `value_type.input_type` for `AddInput` mutations
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("valueType")]
+        public virtual Type ValueType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Approximate statistics related to a single column family within a table. This information may change rapidly,
+    /// interpreting these values at a point in time may already preset out-of-date information. Everything below is
+    /// approximate, unless otherwise specified.
+    /// </summary>
+    public class ColumnFamilyStats : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// How many cells are present per column qualifier in this column family, averaged over all rows containing any
+        /// column in the column family. e.g. For column family "family" in a table with 3 rows: * A row with 3 cells in
+        /// "family:col" and 1 cell in "other:col" (3 cells / 1 column in "family") * A row with 1 cell in "family:col",
+        /// 7 cells in "family:other_col", and 7 cells in "other:data" (8 cells / 2 columns in "family") * A row with 3
+        /// cells in "other:col" (0 columns in "family", "family" not present) would report (3 + 8 + 0)/(1 + 2 + 0) =
+        /// 3.66 in this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("averageCellsPerColumn")]
+        public virtual System.Nullable<double> AverageCellsPerColumn { get; set; }
+
+        /// <summary>
+        /// How many column qualifiers are present in this column family, averaged over all rows in the table. e.g. For
+        /// column family "family" in a table with 3 rows: * A row with cells in "family:col" and "other:col" (1 column
+        /// in "family") * A row with cells in "family:col", "family:other_col", and "other:data" (2 columns in
+        /// "family") * A row with cells in "other:col" (0 columns in "family", "family" not present) would report (1 +
+        /// 2 + 0)/3 = 1.5 in this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("averageColumnsPerRow")]
+        public virtual System.Nullable<double> AverageColumnsPerRow { get; set; }
+
+        /// <summary>
+        /// How much space the data in the column family occupies. This is roughly how many bytes would be needed to
+        /// read the contents of the entire column family (e.g. by streaming all contents out).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("logicalDataBytes")]
+        public virtual System.Nullable<long> LogicalDataBytes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata type for the google.longrunning.Operation returned by CopyBackup.</summary>
+    public class CopyBackupMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The name of the backup being created through the copy operation. Values are of the form
+        /// `projects//instances//clusters//backups/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The progress of the CopyBackup operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("progress")]
+        public virtual OperationProgress Progress { get; set; }
+
+        /// <summary>Information about the source backup that is being copied from.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceBackupInfo")]
+        public virtual BackupInfo SourceBackupInfo { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for CopyBackup.</summary>
+    public class CopyBackupRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The id of the new backup. The `backup_id` along with `parent` are combined as
+        /// {parent}/backups/{backup_id} to create the full backup name, of the form:
+        /// `projects/{project}/instances/{instance}/clusters/{cluster}/backups/{backup_id}`. This string must be
+        /// between 1 and 50 characters in length and match the regex _a-zA-Z0-9*.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backupId")]
+        public virtual string BackupId { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>
+        /// Required. Required. The expiration time of the copied backup with microsecond granularity that must be at
+        /// least 6 hours and at most 30 days from the time the request is received. Once the `expire_time` has passed,
+        /// Cloud Bigtable will delete the backup and free the resources used by the backup.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Required. The source backup to be copied from. The source backup needs to be in READY state for it to be
+        /// copied. Copying a copied backup is not allowed. Once CopyBackup is in progress, the source backup cannot be
+        /// deleted or cleaned up on expiration until CopyBackup is finished. Values are of the form:
+        /// `projects//instances//clusters//backups/`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceBackup")]
+        public virtual string SourceBackup { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The metadata for the Operation returned by CreateAuthorizedView.</summary>
+    public class CreateAuthorizedViewMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _finishTimeRaw;
+
+        private object _finishTime;
+
+        /// <summary>The time at which the operation failed or was completed successfully.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("finishTime")]
+        public virtual string FinishTimeRaw
+        {
+            get => _finishTimeRaw;
+            set
+            {
+                _finishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _finishTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FinishTimeDateTimeOffset instead.")]
+        public virtual object FinishTime
+        {
+            get => _finishTime;
+            set
+            {
+                _finishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _finishTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FinishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FinishTimeRaw);
+            set => FinishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The request that prompted the initiation of this CreateAuthorizedView operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("originalRequest")]
+        public virtual CreateAuthorizedViewRequest OriginalRequest { get; set; }
+
+        private string _requestTimeRaw;
+
+        private object _requestTime;
+
+        /// <summary>The time at which the original request was received.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestTime")]
+        public virtual string RequestTimeRaw
+        {
+            get => _requestTimeRaw;
+            set
+            {
+                _requestTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestTimeDateTimeOffset instead.")]
+        public virtual object RequestTime
+        {
+            get => _requestTime;
+            set
+            {
+                _requestTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestTimeRaw);
+            set => RequestTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for CreateAuthorizedView</summary>
+    public class CreateAuthorizedViewRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The AuthorizedView to create.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("authorizedView")]
+        public virtual AuthorizedView AuthorizedView { get; set; }
+
+        /// <summary>
+        /// Required. The id of the AuthorizedView to create. This AuthorizedView must not already exist. The
+        /// `authorized_view_id` appended to `parent` forms the full AuthorizedView name of the form
+        /// `projects/{project}/instances/{instance}/tables/{table}/authorizedView/{authorized_view}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("authorizedViewId")]
+        public virtual string AuthorizedViewId { get; set; }
+
+        /// <summary>
+        /// Required. This is the name of the table the AuthorizedView belongs to. Values are of the form
+        /// `projects/{project}/instances/{instance}/tables/{table}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parent")]
+        public virtual string Parent { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -4047,9 +5603,42 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// <summary>Metadata type for the operation returned by CreateBackup.</summary>
     public class CreateBackupMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>If set, the time at which this operation finished or was cancelled.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The name of the backup being created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -4059,9 +5648,42 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sourceTable")]
         public virtual string SourceTable { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time at which this operation started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4070,17 +5692,83 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// <summary>The metadata for the Operation returned by CreateCluster.</summary>
     public class CreateClusterMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _finishTimeRaw;
+
+        private object _finishTime;
+
         /// <summary>The time at which the operation failed or was completed successfully.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finishTime")]
-        public virtual object FinishTime { get; set; }
+        public virtual string FinishTimeRaw
+        {
+            get => _finishTimeRaw;
+            set
+            {
+                _finishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _finishTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FinishTimeDateTimeOffset instead.")]
+        public virtual object FinishTime
+        {
+            get => _finishTime;
+            set
+            {
+                _finishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _finishTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FinishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FinishTimeRaw);
+            set => FinishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The request that prompted the initiation of this CreateCluster operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("originalRequest")]
         public virtual CreateClusterRequest OriginalRequest { get; set; }
 
+        private string _requestTimeRaw;
+
+        private object _requestTime;
+
         /// <summary>The time at which the original request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestTime")]
-        public virtual object RequestTime { get; set; }
+        public virtual string RequestTimeRaw
+        {
+            get => _requestTimeRaw;
+            set
+            {
+                _requestTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestTimeDateTimeOffset instead.")]
+        public virtual object RequestTime
+        {
+            get => _requestTime;
+            set
+            {
+                _requestTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestTimeRaw);
+            set => RequestTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Keys: the full `name` of each table that existed in the instance when CreateCluster was first called, i.e.
@@ -4123,17 +5811,83 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// <summary>The metadata for the Operation returned by CreateInstance.</summary>
     public class CreateInstanceMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _finishTimeRaw;
+
+        private object _finishTime;
+
         /// <summary>The time at which the operation failed or was completed successfully.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finishTime")]
-        public virtual object FinishTime { get; set; }
+        public virtual string FinishTimeRaw
+        {
+            get => _finishTimeRaw;
+            set
+            {
+                _finishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _finishTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FinishTimeDateTimeOffset instead.")]
+        public virtual object FinishTime
+        {
+            get => _finishTime;
+            set
+            {
+                _finishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _finishTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FinishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FinishTimeRaw);
+            set => FinishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The request that prompted the initiation of this CreateInstance operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("originalRequest")]
         public virtual CreateInstanceRequest OriginalRequest { get; set; }
 
+        private string _requestTimeRaw;
+
+        private object _requestTime;
+
         /// <summary>The time at which the original request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestTime")]
-        public virtual object RequestTime { get; set; }
+        public virtual string RequestTimeRaw
+        {
+            get => _requestTimeRaw;
+            set
+            {
+                _requestTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestTimeDateTimeOffset instead.")]
+        public virtual object RequestTime
+        {
+            get => _requestTime;
+            set
+            {
+                _requestTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestTimeRaw);
+            set => RequestTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4145,7 +5899,7 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         /// <summary>
         /// Required. The clusters to be created within the instance, mapped by desired cluster ID, e.g., just
         /// `mycluster` rather than `projects/myproject/instances/myinstance/clusters/mycluster`. Fields marked
-        /// `OutputOnly` must be left blank. Currently, at most four clusters can be specified.
+        /// `OutputOnly` must be left blank.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("clusters")]
         public virtual System.Collections.Generic.IDictionary<string, Cluster> Clusters { get; set; }
@@ -4202,6 +5956,30 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Data Boost is a serverless compute capability that lets you run high-throughput read jobs and queries on your
+    /// Bigtable data, without impacting the performance of the clusters that handle your application traffic. Data
+    /// Boost supports read-only use cases with single-cluster routing.
+    /// </summary>
+    public class DataBoostIsolationReadOnly : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The Compute Billing Owner for this Data Boost App Profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("computeBillingOwner")]
+        public virtual string ComputeBillingOwner { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Checks that all writes before the consistency token was generated in the same cluster are readable by Databoost.
+    /// </summary>
+    public class DataBoostReadLocalWrites : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for google.bigtable.admin.v2.BigtableTableAdmin.DropRowRange</summary>
     public class DropRowRangeRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4220,8 +5998,7 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4236,9 +6013,8 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         /// Describes the Cloud KMS encryption key that will be used to protect the destination Bigtable cluster. The
         /// requirements for this key are: 1) The Cloud Bigtable service account associated with the project that
         /// contains this cluster must be granted the `cloudkms.cryptoKeyEncrypterDecrypter` role on the CMEK key. 2)
-        /// Only regional keys can be used and the region of the CMEK key must match the region of the cluster. 3) All
-        /// clusters within an instance must use the same CMEK key. Values are of the form
-        /// `projects/{project}/locations/{location}/keyRings/{keyring}/cryptoKeys/{key}`
+        /// Only regional keys can be used and the region of the CMEK key must match the region of the cluster. Values
+        /// are of the form `projects/{project}/locations/{location}/keyRings/{keyring}/cryptoKeys/{key}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
         public virtual string KmsKeyName { get; set; }
@@ -4319,31 +6095,6 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Added to the error payload.</summary>
-    public class FailureTrace : Google.Apis.Requests.IDirectResponseSchema
-    {
-        [Newtonsoft.Json.JsonPropertyAttribute("frames")]
-        public virtual System.Collections.Generic.IList<Frame> Frames { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    public class Frame : Google.Apis.Requests.IDirectResponseSchema
-    {
-        [Newtonsoft.Json.JsonPropertyAttribute("targetName")]
-        public virtual string TargetName { get; set; }
-
-        [Newtonsoft.Json.JsonPropertyAttribute("workflowGuid")]
-        public virtual string WorkflowGuid { get; set; }
-
-        [Newtonsoft.Json.JsonPropertyAttribute("zoneId")]
-        public virtual string ZoneId { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
     /// <summary>Rule for determining which cells to delete during garbage collection.</summary>
     public class GcRule : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4403,14 +6154,457 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     public class GetPolicyOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Optional. The policy format version to be returned. Valid values are 0, 1, and 3. Requests specifying an
-        /// invalid value will be rejected. Requests for policies with any conditional bindings must specify version 3.
-        /// Policies without any conditional bindings may specify any valid value or leave the field unset. To learn
-        /// which resources support conditions in their IAM policies, see the [IAM
-        /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies).
+        /// Optional. The maximum policy version that will be used to format the policy. Valid values are 0, 1, and 3.
+        /// Requests specifying an invalid value will be rejected. Requests for policies with any conditional role
+        /// bindings must specify version 3. Policies with no conditional role bindings may specify any valid value or
+        /// leave the field unset. The policy in the response might use the policy version that you specified, or it
+        /// might use a lower policy version. For example, if you specify version 3, but the policy has no conditional
+        /// role bindings, the response uses version 1. To learn which resources support conditions in their IAM
+        /// policies, see the [IAM documentation](https://cloud.google.com/iam/help/conditions/resource-policies).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestedPolicyVersion")]
         public virtual System.Nullable<int> RequestedPolicyVersion { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Subsets of a column family that are included in this AuthorizedView.</summary>
+    public class GoogleBigtableAdminV2AuthorizedViewFamilySubsets : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Prefixes for qualifiers to be included in the AuthorizedView. Every qualifier starting with one of these
+        /// prefixes is included in the AuthorizedView. To provide access to all qualifiers, include the empty string as
+        /// a prefix ("").
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("qualifierPrefixes")]
+        public virtual System.Collections.Generic.IList<string> QualifierPrefixes { get; set; }
+
+        /// <summary>Individual exact column qualifiers to be included in the AuthorizedView.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("qualifiers")]
+        public virtual System.Collections.Generic.IList<string> Qualifiers { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Defines a simple AuthorizedView that is a subset of the underlying Table.</summary>
+    public class GoogleBigtableAdminV2AuthorizedViewSubsetView : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Map from column family name to the columns in this family to be included in the AuthorizedView.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("familySubsets")]
+        public virtual System.Collections.Generic.IDictionary<string, GoogleBigtableAdminV2AuthorizedViewFamilySubsets> FamilySubsets { get; set; }
+
+        /// <summary>
+        /// Row prefixes to be included in the AuthorizedView. To provide access to all rows, include the empty string
+        /// as a prefix ("").
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rowPrefixes")]
+        public virtual System.Collections.Generic.IList<string> RowPrefixes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A value that combines incremental updates into a summarized value. Data is never directly written or read using
+    /// type `Aggregate`. Writes provide either the `input_type` or `state_type`, and reads always return the
+    /// `state_type` .
+    /// </summary>
+    public class GoogleBigtableAdminV2TypeAggregate : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>HyperLogLogPlusPlusUniqueCount aggregator.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hllppUniqueCount")]
+        public virtual GoogleBigtableAdminV2TypeAggregateHyperLogLogPlusPlusUniqueCount HllppUniqueCount { get; set; }
+
+        /// <summary>
+        /// Type of the inputs that are accumulated by this `Aggregate`. Use `AddInput` mutations to accumulate new
+        /// inputs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inputType")]
+        public virtual Type InputType { get; set; }
+
+        /// <summary>Max aggregator.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("max")]
+        public virtual GoogleBigtableAdminV2TypeAggregateMax Max { get; set; }
+
+        /// <summary>Min aggregator.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("min")]
+        public virtual GoogleBigtableAdminV2TypeAggregateMin Min { get; set; }
+
+        /// <summary>
+        /// Output only. Type that holds the internal accumulator state for the `Aggregate`. This is a function of the
+        /// `input_type` and `aggregator` chosen.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stateType")]
+        public virtual Type StateType { get; set; }
+
+        /// <summary>Sum aggregator.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sum")]
+        public virtual GoogleBigtableAdminV2TypeAggregateSum Sum { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Computes an approximate unique count over the input values. When using raw data as input, be careful to use a
+    /// consistent encoding. Otherwise the same value encoded differently could count more than once, or two distinct
+    /// values could count as identical. Input: Any, or omit for Raw State: TBD Special state conversions: `Int64` (the
+    /// unique count estimate)
+    /// </summary>
+    public class GoogleBigtableAdminV2TypeAggregateHyperLogLogPlusPlusUniqueCount : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Computes the max of the input values. Allowed input: `Int64` State: same as input</summary>
+    public class GoogleBigtableAdminV2TypeAggregateMax : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Computes the min of the input values. Allowed input: `Int64` State: same as input</summary>
+    public class GoogleBigtableAdminV2TypeAggregateMin : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Computes the sum of the input values. Allowed input: `Int64` State: same as input</summary>
+    public class GoogleBigtableAdminV2TypeAggregateSum : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An ordered list of elements of a given type. Values of type `Array` are stored in `Value.array_value`.
+    /// </summary>
+    public class GoogleBigtableAdminV2TypeArray : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The type of the elements in the array. This must not be `Array`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("elementType")]
+        public virtual Type ElementType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>bool Values of type `Bool` are stored in `Value.bool_value`.</summary>
+    public class GoogleBigtableAdminV2TypeBool : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Bytes Values of type `Bytes` are stored in `Value.bytes_value`.</summary>
+    public class GoogleBigtableAdminV2TypeBytes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The encoding to use when converting to or from lower level types.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("encoding")]
+        public virtual GoogleBigtableAdminV2TypeBytesEncoding Encoding { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Rules used to convert to or from lower level types.</summary>
+    public class GoogleBigtableAdminV2TypeBytesEncoding : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Use `Raw` encoding.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("raw")]
+        public virtual GoogleBigtableAdminV2TypeBytesEncodingRaw Raw { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Leaves the value as-is. Sorted mode: all values are supported. Distinct mode: all values are supported.
+    /// </summary>
+    public class GoogleBigtableAdminV2TypeBytesEncodingRaw : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Date Values of type `Date` are stored in `Value.date_value`.</summary>
+    public class GoogleBigtableAdminV2TypeDate : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Float32 Values of type `Float32` are stored in `Value.float_value`.</summary>
+    public class GoogleBigtableAdminV2TypeFloat32 : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Float64 Values of type `Float64` are stored in `Value.float_value`.</summary>
+    public class GoogleBigtableAdminV2TypeFloat64 : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Int64 Values of type `Int64` are stored in `Value.int_value`.</summary>
+    public class GoogleBigtableAdminV2TypeInt64 : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The encoding to use when converting to or from lower level types.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("encoding")]
+        public virtual GoogleBigtableAdminV2TypeInt64Encoding Encoding { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Rules used to convert to or from lower level types.</summary>
+    public class GoogleBigtableAdminV2TypeInt64Encoding : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Use `BigEndianBytes` encoding.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bigEndianBytes")]
+        public virtual GoogleBigtableAdminV2TypeInt64EncodingBigEndianBytes BigEndianBytes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Encodes the value as an 8-byte big-endian two's complement value. Sorted mode: non-negative values are
+    /// supported. Distinct mode: all values are supported. Compatible with: - BigQuery `BINARY` encoding - HBase
+    /// `Bytes.toBytes` - Java `ByteBuffer.putLong()` with `ByteOrder.BIG_ENDIAN`
+    /// </summary>
+    public class GoogleBigtableAdminV2TypeInt64EncodingBigEndianBytes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Deprecated: ignored if set.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bytesType")]
+        public virtual GoogleBigtableAdminV2TypeBytes BytesType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A mapping of keys to values of a given type. Values of type `Map` are stored in a `Value.array_value` where each
+    /// entry is another `Value.array_value` with two elements (the key and the value, in that order). Normally encoded
+    /// Map values won't have repeated keys, however, clients are expected to handle the case in which they do. If the
+    /// same key appears multiple times, the _last_ value takes precedence.
+    /// </summary>
+    public class GoogleBigtableAdminV2TypeMap : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The type of a map key. Only `Bytes`, `String`, and `Int64` are allowed as key types.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keyType")]
+        public virtual Type KeyType { get; set; }
+
+        /// <summary>The type of the values in a map.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("valueType")]
+        public virtual Type ValueType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>String Values of type `String` are stored in `Value.string_value`.</summary>
+    public class GoogleBigtableAdminV2TypeString : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The encoding to use when converting to or from lower level types.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("encoding")]
+        public virtual GoogleBigtableAdminV2TypeStringEncoding Encoding { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Rules used to convert to or from lower level types.</summary>
+    public class GoogleBigtableAdminV2TypeStringEncoding : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Use `Utf8Bytes` encoding.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("utf8Bytes")]
+        public virtual GoogleBigtableAdminV2TypeStringEncodingUtf8Bytes Utf8Bytes { get; set; }
+
+        /// <summary>Deprecated: if set, converts to an empty `utf8_bytes`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("utf8Raw")]
+        public virtual GoogleBigtableAdminV2TypeStringEncodingUtf8Raw Utf8Raw { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// UTF-8 encoding. Sorted mode: - All values are supported. - Code point order is preserved. Distinct mode: all
+    /// values are supported. Compatible with: - BigQuery `TEXT` encoding - HBase `Bytes.toBytes` - Java
+    /// `String#getBytes(StandardCharsets.UTF_8)`
+    /// </summary>
+    public class GoogleBigtableAdminV2TypeStringEncodingUtf8Bytes : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Deprecated: prefer the equivalent `Utf8Bytes`.</summary>
+    public class GoogleBigtableAdminV2TypeStringEncodingUtf8Raw : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A structured data value, consisting of fields which map to dynamically typed values. Values of type `Struct` are
+    /// stored in `Value.array_value` where entries are in the same order and number as `field_types`.
+    /// </summary>
+    public class GoogleBigtableAdminV2TypeStruct : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The names and types of the fields in this struct.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fields")]
+        public virtual System.Collections.Generic.IList<GoogleBigtableAdminV2TypeStructField> Fields { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A struct field and its type.</summary>
+    public class GoogleBigtableAdminV2TypeStructField : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The field name (optional). Fields without a `field_name` are considered anonymous and cannot be referenced
+        /// by name.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fieldName")]
+        public virtual string FieldName { get; set; }
+
+        /// <summary>The type of values in this field.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual Type Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Timestamp Values of type `Timestamp` are stored in `Value.timestamp_value`.</summary>
+    public class GoogleBigtableAdminV2TypeTimestamp : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A tablet is a defined by a start and end key and is explained in
+    /// https://cloud.google.com/bigtable/docs/overview#architecture and
+    /// https://cloud.google.com/bigtable/docs/performance#optimization. A Hot tablet is a tablet that exhibits high
+    /// average cpu usage during the time interval from start time to end time.
+    /// </summary>
+    public class HotTablet : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Tablet End Key (inclusive).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endKey")]
+        public virtual string EndKey { get; set; }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>Output only. The end time of the hot tablet.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The unique name of the hot tablet. Values are of the form
+        /// `projects/{project}/instances/{instance}/clusters/{cluster}/hotTablets/[a-zA-Z0-9_-]*`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Output only. The average CPU usage spent by a node on this tablet over the start_time to end_time time
+        /// range. The percentage is the amount of CPU used by the node to serve the tablet, from 0% (tablet was not
+        /// interacted with) to 100% (the node spent all cycles serving the hot tablet).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nodeCpuUsagePercent")]
+        public virtual System.Nullable<float> NodeCpuUsagePercent { get; set; }
+
+        /// <summary>Tablet Start Key (inclusive).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startKey")]
+        public virtual string StartKey { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>Output only. The start time of the hot tablet.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Name of the table that contains the tablet. Values are of the form
+        /// `projects/{project}/instances/{instance}/tables/_a-zA-Z0-9*`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableName")]
+        public virtual string TableName { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4422,12 +6616,45 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// </summary>
     public class Instance : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
-        /// Output only. A server-assigned timestamp representing when this Instance was created. For instances created
-        /// before this field was added (August 2021), this value is `seconds: 0, nanos: 1`.
+        /// Output only. A commit timestamp representing when this Instance was created. For instances created before
+        /// this field was added (August 2021), this value is `seconds: 0, nanos: 1`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Required. The descriptive name for this instance as it appears in UIs. Can be changed at any time, but
@@ -4437,9 +6664,9 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual string DisplayName { get; set; }
 
         /// <summary>
-        /// Required. Labels are a flexible and lightweight mechanism for organizing cloud resources into groups that
-        /// reflect a customer's organizational needs and deployment strategies. They can be used to filter resources
-        /// and aggregate metrics. * Label keys must be between 1 and 63 characters long and must conform to the regular
+        /// Labels are a flexible and lightweight mechanism for organizing cloud resources into groups that reflect a
+        /// customer's organizational needs and deployment strategies. They can be used to filter resources and
+        /// aggregate metrics. * Label keys must be between 1 and 63 characters long and must conform to the regular
         /// expression: `\p{Ll}\p{Lo}{0,62}`. * Label values must be between 0 and 63 characters long and must conform
         /// to the regular expression: `[\p{Ll}\p{Lo}\p{N}_-]{0,63}`. * No more than 64 labels can be associated with a
         /// given resource. * Keys and values must both be under 128 bytes.
@@ -4453,11 +6680,19 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        /// <summary>Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzi")]
+        public virtual System.Nullable<bool> SatisfiesPzi { get; set; }
+
+        /// <summary>Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzs")]
+        public virtual System.Nullable<bool> SatisfiesPzs { get; set; }
+
         /// <summary>Output only. The current state of the instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
-        /// <summary>Required. The type of the instance. Defaults to `PRODUCTION`.</summary>
+        /// <summary>The type of the instance. Defaults to `PRODUCTION`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
@@ -4502,6 +6737,24 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Response message for google.bigtable.admin.v2.BigtableTableAdmin.ListAuthorizedViews</summary>
+    public class ListAuthorizedViewsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The AuthorizedViews present in the requested table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("authorizedViews")]
+        public virtual System.Collections.Generic.IList<AuthorizedView> AuthorizedViews { get; set; }
+
+        /// <summary>
+        /// Set if not all tables could be returned in a single response. Pass this value to `page_token` in another
+        /// request to get the next page of results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The response for ListBackups.</summary>
     public class ListBackupsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4535,6 +6788,29 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual System.Collections.Generic.IList<string> FailedLocations { get; set; }
 
         /// <summary>DEPRECATED: This field is unused and ignored.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for BigtableInstanceAdmin.ListHotTablets.</summary>
+    public class ListHotTabletsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// List of hot tablets in the tables of the requested cluster that fall within the requested time range. Hot
+        /// tablets are ordered by node cpu usage percent. If there are multiple hot tablets that correspond to the same
+        /// tablet within a 15-minute interval, only the hot tablet with the highest node cpu usage will be included in
+        /// the response.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hotTablets")]
+        public virtual System.Collections.Generic.IList<HotTablet> HotTablets { get; set; }
+
+        /// <summary>
+        /// Set if not all hot tablets could be returned in a single response. Pass this value to `page_token` in
+        /// another request to get the next page of results.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
 
@@ -4614,7 +6890,7 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -4670,6 +6946,13 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("update")]
         public virtual ColumnFamily Update { get; set; }
 
+        /// <summary>
+        /// Optional. A mask specifying which fields (e.g. `gc_rule`) in the `update` mod should be updated, ignored for
+        /// other modification types. If unset or empty, we treat it as updating `gc_rule` to be backward compatible.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
+        public virtual object UpdateMask { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -4677,6 +6960,10 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// <summary>Request message for google.bigtable.admin.v2.BigtableTableAdmin.ModifyColumnFamilies</summary>
     public class ModifyColumnFamiliesRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Optional. If true, ignore safety checks when modifying the column families.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ignoreWarnings")]
+        public virtual System.Nullable<bool> IgnoreWarnings { get; set; }
+
         /// <summary>
         /// Required. Modifications to be atomically applied to the specified table's families. Entries are applied in
         /// order, meaning that earlier modifications can be masked by later ones (in the case of repeated updates to
@@ -4702,6 +6989,13 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("clusterIds")]
         public virtual System.Collections.Generic.IList<string> ClusterIds { get; set; }
+
+        /// <summary>
+        /// Row affinity sticky routing based on the row key of the request. Requests that span multiple rows are routed
+        /// non-deterministically.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rowAffinity")]
+        public virtual RowAffinity RowAffinity { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4737,8 +7031,8 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -4753,17 +7047,83 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// <summary>Encapsulates progress related information for a Cloud Bigtable long running operation.</summary>
     public class OperationProgress : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>If set, the time at which this operation failed or was completed successfully.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Percent completion of the operation. Values are between 0 and 100 inclusive.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("progressPercent")]
         public virtual System.Nullable<int> ProgressPercent { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Time the request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4791,16 +7151,83 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// <summary>The metadata for the Operation returned by PartialUpdateCluster.</summary>
     public class PartialUpdateClusterMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _finishTimeRaw;
+
+        private object _finishTime;
+
         /// <summary>The time at which the operation failed or was completed successfully.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finishTime")]
-        public virtual object FinishTime { get; set; }
+        public virtual string FinishTimeRaw
+        {
+            get => _finishTimeRaw;
+            set
+            {
+                _finishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _finishTimeRaw = value;
+            }
+        }
 
+        /// <summary><seealso cref="object"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FinishTimeDateTimeOffset instead.")]
+        public virtual object FinishTime
+        {
+            get => _finishTime;
+            set
+            {
+                _finishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _finishTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FinishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FinishTimeRaw);
+            set => FinishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The original request for PartialUpdateCluster.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("originalRequest")]
         public virtual PartialUpdateClusterRequest OriginalRequest { get; set; }
 
+        private string _requestTimeRaw;
+
+        private object _requestTime;
+
         /// <summary>The time at which the original request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestTime")]
-        public virtual object RequestTime { get; set; }
+        public virtual string RequestTimeRaw
+        {
+            get => _requestTimeRaw;
+            set
+            {
+                _requestTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestTimeDateTimeOffset instead.")]
+        public virtual object RequestTime
+        {
+            get => _requestTime;
+            set
+            {
+                _requestTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestTimeRaw);
+            set => RequestTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4815,7 +7242,7 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cluster")]
         public virtual Cluster Cluster { get; set; }
 
-        /// <summary>Required. The subset of Cluster fields which should be replaced. Must be explicitly set.</summary>
+        /// <summary>Required. The subset of Cluster fields which should be replaced.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
         public virtual object UpdateMask { get; set; }
 
@@ -4847,18 +7274,26 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4935,7 +7370,7 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         /// <summary>
         /// If exists, the name of the long-running operation that will be used to track the post-restore optimization
         /// process to optimize the performance of the restored table. The metadata type of the long-running operation
-        /// is OptimizeRestoreTableMetadata. The response type is Empty. This long-running operation may be
+        /// is OptimizeRestoredTableMetadata. The response type is Empty. This long-running operation may be
         /// automatically created by the system if applicable after the RestoreTable long-running operation completes
         /// successfully. This operation may not be created if the table is already optimized or the restore was not
         /// successful.
@@ -4975,12 +7410,26 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// If enabled, Bigtable will route the request based on the row key of the request, rather than randomly. Instead,
+    /// each row key will be assigned to a cluster, and will stick to that cluster. If clusters are added or removed,
+    /// then this may affect which row keys stick to which clusters. To avoid this, users can use a cluster group to
+    /// specify which clusters are to be used. In this case, new clusters that are not a part of the cluster group will
+    /// not be routed to, and routing will be unaffected by the new cluster. Moreover, clusters specified in the cluster
+    /// group cannot be deleted unless removed from the cluster group.
+    /// </summary>
+    public class RowAffinity : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for `SetIamPolicy` method.</summary>
     public class SetIamPolicyRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -5029,6 +7478,26 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Standard options for isolating this app profile's traffic from other use cases.</summary>
+    public class StandardIsolation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The priority of requests sent using this app profile.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("priority")]
+        public virtual string Priority { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Checks that all writes before the consistency token was generated are replicated in every cluster and readable.
+    /// </summary>
+    public class StandardReadRemoteWrites : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// The `Status` type defines a logical error model that is suitable for different programming environments,
     /// including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains
@@ -5065,6 +7534,19 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     public class Table : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// If specified, automated backups are enabled for this table. Otherwise, automated backups are disabled.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("automatedBackupPolicy")]
+        public virtual AutomatedBackupPolicy AutomatedBackupPolicy { get; set; }
+
+        /// <summary>
+        /// If specified, enable the change stream on this table. Otherwise, the change stream is disabled and the
+        /// change stream is not retained.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("changeStreamConfig")]
+        public virtual ChangeStreamConfig ChangeStreamConfig { get; set; }
+
+        /// <summary>
         /// Output only. Map from cluster ID to per-cluster table state. If it could not be determined whether or not
         /// the table has data in a particular cluster (for example, if its zone is unavailable), then there will be an
         /// entry for the cluster with UNKNOWN `replication_status`. Views: `REPLICATION_VIEW`, `ENCRYPTION_VIEW`,
@@ -5074,10 +7556,19 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual System.Collections.Generic.IDictionary<string, ClusterState> ClusterStates { get; set; }
 
         /// <summary>
-        /// The column families configured for this table, mapped by column family ID. Views: `SCHEMA_VIEW`, `FULL`
+        /// The column families configured for this table, mapped by column family ID. Views: `SCHEMA_VIEW`,
+        /// `STATS_VIEW`, `FULL`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("columnFamilies")]
         public virtual System.Collections.Generic.IDictionary<string, ColumnFamily> ColumnFamilies { get; set; }
+
+        /// <summary>
+        /// Set to true to make the table protected against data loss. i.e. deleting the following resources through
+        /// Admin APIs are prohibited: * The table. * The column families in the table. * The instance containing the
+        /// table. Note one can still delete the data stored in the table through Data APIs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deletionProtection")]
+        public virtual System.Nullable<bool> DeletionProtection { get; set; }
 
         /// <summary>
         /// Immutable. The granularity (i.e. `MILLIS`) at which timestamps are stored in this table. Timestamps not
@@ -5090,7 +7581,7 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         /// <summary>
         /// The unique name of the table. Values are of the form
         /// `projects/{project}/instances/{instance}/tables/_a-zA-Z0-9*`. Views: `NAME_ONLY`, `SCHEMA_VIEW`,
-        /// `REPLICATION_VIEW`, `FULL`
+        /// `REPLICATION_VIEW`, `STATS_VIEW`, `FULL`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -5101,6 +7592,14 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("restoreInfo")]
         public virtual RestoreInfo RestoreInfo { get; set; }
+
+        /// <summary>
+        /// Output only. Only available with STATS_VIEW, this includes summary statistics about the entire table
+        /// contents. For statistics about a specific column family, see ColumnFamilyStats in the mapped ColumnFamily
+        /// collection above.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stats")]
+        public virtual TableStats Stats { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5127,11 +7626,52 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Approximate statistics related to a table. These statistics are calculated infrequently, while simultaneously,
+    /// data in the table can change rapidly. Thus the values reported here (e.g. row count) are very likely out-of
+    /// date, even the instant they are received in this API. Thus, only treat these values as approximate. IMPORTANT:
+    /// Everything below is approximate, unless otherwise specified.
+    /// </summary>
+    public class TableStats : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// How many cells are present per column (column family, column qualifier) combinations, averaged over all
+        /// columns in all rows in the table. e.g. A table with 2 rows: * A row with 3 cells in "family:col" and 1 cell
+        /// in "other:col" (4 cells / 2 columns) * A row with 1 cell in "family:col", 7 cells in "family:other_col", and
+        /// 7 cells in "other:data" (15 cells / 3 columns) would report (4 + 15)/(2 + 3) = 3.8 in this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("averageCellsPerColumn")]
+        public virtual System.Nullable<double> AverageCellsPerColumn { get; set; }
+
+        /// <summary>
+        /// How many (column family, column qualifier) combinations are present per row in the table, averaged over all
+        /// rows in the table. e.g. A table with 2 rows: * A row with cells in "family:col" and "other:col" (2 distinct
+        /// columns) * A row with cells in "family:col", "family:other_col", and "other:data" (3 distinct columns) would
+        /// report (2 + 3)/2 = 2.5 in this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("averageColumnsPerRow")]
+        public virtual System.Nullable<double> AverageColumnsPerRow { get; set; }
+
+        /// <summary>
+        /// This is roughly how many bytes would be needed to read the entire table (e.g. by streaming all contents
+        /// out).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("logicalDataBytes")]
+        public virtual System.Nullable<long> LogicalDataBytes { get; set; }
+
+        /// <summary>How many rows are in the table.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rowCount")]
+        public virtual System.Nullable<long> RowCount { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for `TestIamPermissions` method.</summary>
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>
@@ -5149,6 +7689,168 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("permissions")]
         public virtual System.Collections.Generic.IList<string> Permissions { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// `Type` represents the type of data that is written to, read from, or stored in Bigtable. It is heavily based on
+    /// the GoogleSQL standard to help maintain familiarity and consistency across products and features. For
+    /// compatibility with Bigtable's existing untyped APIs, each `Type` includes an `Encoding` which describes how to
+    /// convert to or from the underlying data. Each encoding can operate in one of two modes: - Sorted: In this mode,
+    /// Bigtable guarantees that `Encode(X) &amp;lt;= Encode(Y)` if and only if `X &amp;lt;= Y`. This is useful anywhere
+    /// sort order is important, for example when encoding keys. - Distinct: In this mode, Bigtable guarantees that if
+    /// `X != Y` then `Encode(X) != Encode(Y)`. However, the converse is not guaranteed. For example, both "{'foo': '1',
+    /// 'bar': '2'}" and "{'bar': '2', 'foo': '1'}" are valid encodings of the same JSON value. The API clearly
+    /// documents which mode is used wherever an encoding can be configured. Each encoding also documents which values
+    /// are supported in which modes. For example, when encoding INT64 as a numeric STRING, negative numbers cannot be
+    /// encoded in sorted mode. This is because `INT64(1) &amp;gt; INT64(-1)`, but `STRING("-00001") &amp;gt;
+    /// STRING("00001")`.
+    /// </summary>
+    public class Type : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Aggregate</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("aggregateType")]
+        public virtual GoogleBigtableAdminV2TypeAggregate AggregateType { get; set; }
+
+        /// <summary>Array</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("arrayType")]
+        public virtual GoogleBigtableAdminV2TypeArray ArrayType { get; set; }
+
+        /// <summary>Bool</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("boolType")]
+        public virtual GoogleBigtableAdminV2TypeBool BoolType { get; set; }
+
+        /// <summary>Bytes</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bytesType")]
+        public virtual GoogleBigtableAdminV2TypeBytes BytesType { get; set; }
+
+        /// <summary>Date</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dateType")]
+        public virtual GoogleBigtableAdminV2TypeDate DateType { get; set; }
+
+        /// <summary>Float32</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("float32Type")]
+        public virtual GoogleBigtableAdminV2TypeFloat32 Float32Type { get; set; }
+
+        /// <summary>Float64</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("float64Type")]
+        public virtual GoogleBigtableAdminV2TypeFloat64 Float64Type { get; set; }
+
+        /// <summary>Int64</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("int64Type")]
+        public virtual GoogleBigtableAdminV2TypeInt64 Int64Type { get; set; }
+
+        /// <summary>Map</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mapType")]
+        public virtual GoogleBigtableAdminV2TypeMap MapType { get; set; }
+
+        /// <summary>String</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stringType")]
+        public virtual GoogleBigtableAdminV2TypeString StringType { get; set; }
+
+        /// <summary>Struct</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("structType")]
+        public virtual GoogleBigtableAdminV2TypeStruct StructType { get; set; }
+
+        /// <summary>Timestamp</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timestampType")]
+        public virtual GoogleBigtableAdminV2TypeTimestamp TimestampType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Metadata type for the operation returned by google.bigtable.admin.v2.BigtableTableAdmin.UndeleteTable.
+    /// </summary>
+    public class UndeleteTableMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>If set, the time at which this operation finished or was cancelled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The name of the table being restored.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>The time at which this operation started.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request message for google.bigtable.admin.v2.BigtableTableAdmin.UndeleteTable</summary>
+    public class UndeleteTableRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -5171,20 +7873,199 @@ namespace Google.Apis.BigtableAdmin.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Metadata for the google.longrunning.Operation returned by UpdateAuthorizedView.</summary>
+    public class UpdateAuthorizedViewMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _finishTimeRaw;
+
+        private object _finishTime;
+
+        /// <summary>The time at which the operation failed or was completed successfully.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("finishTime")]
+        public virtual string FinishTimeRaw
+        {
+            get => _finishTimeRaw;
+            set
+            {
+                _finishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _finishTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FinishTimeDateTimeOffset instead.")]
+        public virtual object FinishTime
+        {
+            get => _finishTime;
+            set
+            {
+                _finishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _finishTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FinishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FinishTimeRaw);
+            set => FinishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The request that prompted the initiation of this UpdateAuthorizedView operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("originalRequest")]
+        public virtual UpdateAuthorizedViewRequest OriginalRequest { get; set; }
+
+        private string _requestTimeRaw;
+
+        private object _requestTime;
+
+        /// <summary>The time at which the original request was received.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestTime")]
+        public virtual string RequestTimeRaw
+        {
+            get => _requestTimeRaw;
+            set
+            {
+                _requestTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestTimeDateTimeOffset instead.")]
+        public virtual object RequestTime
+        {
+            get => _requestTime;
+            set
+            {
+                _requestTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestTimeRaw);
+            set => RequestTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for UpdateAuthorizedView.</summary>
+    public class UpdateAuthorizedViewRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The AuthorizedView to update. The `name` in `authorized_view` is used to identify the
+        /// AuthorizedView. AuthorizedView name must in this format:
+        /// `projects/{project}/instances/{instance}/tables/{table}/authorizedViews/{authorized_view}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("authorizedView")]
+        public virtual AuthorizedView AuthorizedView { get; set; }
+
+        /// <summary>Optional. If true, ignore the safety checks when updating the AuthorizedView.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ignoreWarnings")]
+        public virtual System.Nullable<bool> IgnoreWarnings { get; set; }
+
+        /// <summary>
+        /// Optional. The list of fields to update. A mask specifying which fields in the AuthorizedView resource should
+        /// be updated. This mask is relative to the AuthorizedView resource, not to the request message. A field will
+        /// be overwritten if it is in the mask. If empty, all fields set in the request will be overwritten. A special
+        /// value `*` means to overwrite all fields (including fields not set in the request).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
+        public virtual object UpdateMask { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The metadata for the Operation returned by UpdateCluster.</summary>
     public class UpdateClusterMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _finishTimeRaw;
+
+        private object _finishTime;
+
         /// <summary>The time at which the operation failed or was completed successfully.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finishTime")]
-        public virtual object FinishTime { get; set; }
+        public virtual string FinishTimeRaw
+        {
+            get => _finishTimeRaw;
+            set
+            {
+                _finishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _finishTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FinishTimeDateTimeOffset instead.")]
+        public virtual object FinishTime
+        {
+            get => _finishTime;
+            set
+            {
+                _finishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _finishTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FinishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FinishTimeRaw);
+            set => FinishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The request that prompted the initiation of this UpdateCluster operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("originalRequest")]
         public virtual Cluster OriginalRequest { get; set; }
 
+        private string _requestTimeRaw;
+
+        private object _requestTime;
+
         /// <summary>The time at which the original request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestTime")]
-        public virtual object RequestTime { get; set; }
+        public virtual string RequestTimeRaw
+        {
+            get => _requestTimeRaw;
+            set
+            {
+                _requestTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestTimeDateTimeOffset instead.")]
+        public virtual object RequestTime
+        {
+            get => _requestTime;
+            set
+            {
+                _requestTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestTimeRaw);
+            set => RequestTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5193,17 +8074,168 @@ namespace Google.Apis.BigtableAdmin.v2.Data
     /// <summary>The metadata for the Operation returned by UpdateInstance.</summary>
     public class UpdateInstanceMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _finishTimeRaw;
+
+        private object _finishTime;
+
         /// <summary>The time at which the operation failed or was completed successfully.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finishTime")]
-        public virtual object FinishTime { get; set; }
+        public virtual string FinishTimeRaw
+        {
+            get => _finishTimeRaw;
+            set
+            {
+                _finishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _finishTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FinishTimeDateTimeOffset instead.")]
+        public virtual object FinishTime
+        {
+            get => _finishTime;
+            set
+            {
+                _finishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _finishTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FinishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FinishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FinishTimeRaw);
+            set => FinishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The request that prompted the initiation of this UpdateInstance operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("originalRequest")]
         public virtual PartialUpdateInstanceRequest OriginalRequest { get; set; }
 
+        private string _requestTimeRaw;
+
+        private object _requestTime;
+
         /// <summary>The time at which the original request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestTime")]
-        public virtual object RequestTime { get; set; }
+        public virtual string RequestTimeRaw
+        {
+            get => _requestTimeRaw;
+            set
+            {
+                _requestTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestTimeDateTimeOffset instead.")]
+        public virtual object RequestTime
+        {
+            get => _requestTime;
+            set
+            {
+                _requestTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestTimeRaw);
+            set => RequestTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata type for the operation returned by UpdateTable.</summary>
+    public class UpdateTableMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>If set, the time at which this operation finished or was canceled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The name of the table being updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>The time at which this operation started.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

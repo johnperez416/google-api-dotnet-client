@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ namespace Google.Apis.DeploymentManager.v2
             Operations = new OperationsResource(this);
             Resources = new ResourcesResource(this);
             Types = new TypesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://deploymentmanager.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://deploymentmanager.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -48,23 +50,16 @@ namespace Google.Apis.DeploymentManager.v2
         public override string Name => "deploymentmanager";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://deploymentmanager.googleapis.com/";
-        #else
-            "https://deploymentmanager.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://deploymentmanager.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Deployment Manager V2 API.</summary>
         public class Scope
@@ -333,7 +328,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="deployment">The name of the deployment for this request.</param>
         public virtual CancelPreviewRequest CancelPreview(Google.Apis.DeploymentManager.v2.Data.DeploymentsCancelPreviewRequest body, string project, string deployment)
         {
-            return new CancelPreviewRequest(service, body, project, deployment);
+            return new CancelPreviewRequest(this.service, body, project, deployment);
         }
 
         /// <summary>Cancels and removes the preview currently associated with the deployment.</summary>
@@ -399,7 +394,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="deployment">The name of the deployment for this request.</param>
         public virtual DeleteRequest Delete(string project, string deployment)
         {
-            return new DeleteRequest(service, project, deployment);
+            return new DeleteRequest(this.service, project, deployment);
         }
 
         /// <summary>Deletes a deployment and all of the resources in the deployment.</summary>
@@ -436,6 +431,9 @@ namespace Google.Apis.DeploymentManager.v2
                 [Google.Apis.Util.StringValueAttribute("ABANDON")]
                 ABANDON = 1,
             }
+
+            [Google.Apis.Util.RequestParameterAttribute("header.bypassBillingFilter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> HeaderBypassBillingFilter { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "delete";
@@ -474,6 +472,14 @@ namespace Google.Apis.DeploymentManager.v2
                     DefaultValue = "DELETE",
                     Pattern = null,
                 });
+                RequestParameters.Add("header.bypassBillingFilter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "header.bypassBillingFilter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
 
@@ -482,7 +488,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="deployment">The name of the deployment for this request.</param>
         public virtual GetRequest Get(string project, string deployment)
         {
-            return new GetRequest(service, project, deployment);
+            return new GetRequest(this.service, project, deployment);
         }
 
         /// <summary>Gets information about a specific deployment.</summary>
@@ -503,6 +509,9 @@ namespace Google.Apis.DeploymentManager.v2
             /// <summary>The name of the deployment for this request.</summary>
             [Google.Apis.Util.RequestParameterAttribute("deployment", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Deployment { get; private set; }
+
+            [Google.Apis.Util.RequestParameterAttribute("header.bypassBillingFilter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> HeaderBypassBillingFilter { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "get";
@@ -533,6 +542,14 @@ namespace Google.Apis.DeploymentManager.v2
                     DefaultValue = null,
                     Pattern = @"[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
                 });
+                RequestParameters.Add("header.bypassBillingFilter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "header.bypassBillingFilter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
 
@@ -543,7 +560,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="resource">Name or id of the resource for this request.</param>
         public virtual GetIamPolicyRequest GetIamPolicy(string project, string resource)
         {
-            return new GetIamPolicyRequest(service, project, resource);
+            return new GetIamPolicyRequest(this.service, project, resource);
         }
 
         /// <summary>
@@ -566,6 +583,9 @@ namespace Google.Apis.DeploymentManager.v2
             /// <summary>Name or id of the resource for this request.</summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
+
+            [Google.Apis.Util.RequestParameterAttribute("header.bypassBillingFilter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> HeaderBypassBillingFilter { get; set; }
 
             /// <summary>Requested IAM Policy version.</summary>
             [Google.Apis.Util.RequestParameterAttribute("optionsRequestedPolicyVersion", Google.Apis.Util.RequestParameterType.Query)]
@@ -600,6 +620,14 @@ namespace Google.Apis.DeploymentManager.v2
                     DefaultValue = null,
                     Pattern = @"[a-z](?:[-a-z0-9_]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
                 });
+                RequestParameters.Add("header.bypassBillingFilter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "header.bypassBillingFilter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("optionsRequestedPolicyVersion", new Google.Apis.Discovery.Parameter
                 {
                     Name = "optionsRequestedPolicyVersion",
@@ -616,7 +644,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="project">The project ID for this request.</param>
         public virtual InsertRequest Insert(Google.Apis.DeploymentManager.v2.Data.Deployment body, string project)
         {
-            return new InsertRequest(service, body, project);
+            return new InsertRequest(this.service, body, project);
         }
 
         /// <summary>Creates a deployment and all of the resources described by the deployment manifest.</summary>
@@ -649,6 +677,9 @@ namespace Google.Apis.DeploymentManager.v2
                 [Google.Apis.Util.StringValueAttribute("ACQUIRE")]
                 ACQUIRE = 1,
             }
+
+            [Google.Apis.Util.RequestParameterAttribute("header.bypassBillingFilter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> HeaderBypassBillingFilter { get; set; }
 
             /// <summary>
             /// If set to true, creates a deployment and creates "shell" resources but does not actually instantiate
@@ -695,6 +726,14 @@ namespace Google.Apis.DeploymentManager.v2
                     DefaultValue = "CREATE_OR_ACQUIRE",
                     Pattern = null,
                 });
+                RequestParameters.Add("header.bypassBillingFilter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "header.bypassBillingFilter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("preview", new Google.Apis.Discovery.Parameter
                 {
                     Name = "preview",
@@ -710,7 +749,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="project">The project ID for this request.</param>
         public virtual ListRequest List(string project)
         {
-            return new ListRequest(service, project);
+            return new ListRequest(this.service, project);
         }
 
         /// <summary>Lists all deployments for a given project.</summary>
@@ -728,21 +767,40 @@ namespace Google.Apis.DeploymentManager.v2
             public virtual string Project { get; private set; }
 
             /// <summary>
-            /// A filter expression that filters resources listed in the response. The expression must specify the field
-            /// name, an operator, and the value that you want to use for filtering. The value must be a string, a
-            /// number, or a boolean. The operator must be either `=`, `!=`, `&amp;gt;`, `&amp;lt;`, `&amp;lt;=`,
-            /// `&amp;gt;=` or `:`. For example, if you are filtering Compute Engine instances, you can exclude
-            /// instances named `example-instance` by specifying `name != example-instance`. The `:` operator can be
-            /// used with string fields to match substrings. For non-string fields it is equivalent to the `=` operator.
-            /// The `:*` comparison can be used to test whether a key has been defined. For example, to find all objects
-            /// with `owner` label use: ``` labels.owner:* ``` You can also filter nested fields. For example, you could
-            /// specify `scheduling.automaticRestart = false` to include instances only if they are not scheduled for
-            /// automatic restarts. You can use filtering on nested fields to filter based on resource labels. To filter
-            /// on multiple expressions, provide each separate expression within parentheses. For example: ```
-            /// (scheduling.automaticRestart = true) (cpuPlatform = "Intel Skylake") ``` By default, each expression is
-            /// an `AND` expression. However, you can include `AND` and `OR` expressions explicitly. For example: ```
-            /// (cpuPlatform = "Intel Skylake") OR (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
-            /// true) ```
+            /// A filter expression that filters resources listed in the response. Most Compute resources support two
+            /// types of filter expressions: expressions that support regular expressions and expressions that follow
+            /// API improvement proposal AIP-160. These two types of filter expressions cannot be mixed in one request.
+            /// If you want to use AIP-160, your expression must specify the field name, an operator, and the value that
+            /// you want to use for filtering. The value must be a string, a number, or a boolean. The operator must be
+            /// either `=`, `!=`, `&amp;gt;`, `&amp;lt;`, `&amp;lt;=`, `&amp;gt;=` or `:`. For example, if you are
+            /// filtering Compute Engine instances, you can exclude instances named `example-instance` by specifying
+            /// `name != example-instance`. The `:*` comparison can be used to test whether a key has been defined. For
+            /// example, to find all objects with `owner` label use:
+            /// ```
+            /// labels.owner:*
+            /// ```
+            /// You can also filter nested
+            /// fields. For example, you could specify `scheduling.automaticRestart = false` to include instances only
+            /// if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based
+            /// on resource labels. To filter on multiple expressions, provide each separate expression within
+            /// parentheses. For example:
+            /// ```
+            /// (scheduling.automaticRestart = true) (cpuPlatform = "Intel Skylake")
+            /// ```
+            /// By default, each expression is an `AND` expression. However, you can include `AND` and `OR` expressions
+            /// explicitly. For example:
+            /// ```
+            /// (cpuPlatform = "Intel Skylake") OR (cpuPlatform = "Intel Broadwell") AND
+            /// (scheduling.automaticRestart = true)
+            /// ```
+            /// If you want to use a regular expression, use the `eq` (equal)
+            /// or `ne` (not equal) operator against a single un-parenthesized expression with or without quotes or
+            /// against multiple parenthesized expressions. Examples: `fieldname eq unquoted literal` `fieldname eq
+            /// 'single quoted literal'` `fieldname eq "double quoted literal"` `(fieldname1 eq literal) (fieldname2 ne
+            /// "literal")` The literal value is interpreted as a regular expression using Google RE2 library syntax.
+            /// The literal value must match the entire field. For example, to filter for instances that do not end with
+            /// name "instance", you would use `name ne .*instance`. You cannot combine constraints on multiple fields
+            /// using regular expressions.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; set; }
@@ -834,7 +892,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="deployment">The name of the deployment for this request.</param>
         public virtual PatchRequest Patch(Google.Apis.DeploymentManager.v2.Data.Deployment body, string project, string deployment)
         {
-            return new PatchRequest(service, body, project, deployment);
+            return new PatchRequest(this.service, body, project, deployment);
         }
 
         /// <summary>Patches a deployment and all of the resources described by the deployment manifest.</summary>
@@ -888,6 +946,9 @@ namespace Google.Apis.DeploymentManager.v2
                 [Google.Apis.Util.StringValueAttribute("ABANDON")]
                 ABANDON = 1,
             }
+
+            [Google.Apis.Util.RequestParameterAttribute("header.bypassBillingFilter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> HeaderBypassBillingFilter { get; set; }
 
             /// <summary>
             /// If set to true, updates the deployment and creates and updates the "shell" resources but does not
@@ -952,6 +1013,14 @@ namespace Google.Apis.DeploymentManager.v2
                     DefaultValue = "DELETE",
                     Pattern = null,
                 });
+                RequestParameters.Add("header.bypassBillingFilter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "header.bypassBillingFilter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("preview", new Google.Apis.Discovery.Parameter
                 {
                     Name = "preview",
@@ -969,7 +1038,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="resource">Name or id of the resource for this request.</param>
         public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.DeploymentManager.v2.Data.GlobalSetPolicyRequest body, string project, string resource)
         {
-            return new SetIamPolicyRequest(service, body, project, resource);
+            return new SetIamPolicyRequest(this.service, body, project, resource);
         }
 
         /// <summary>Sets the access control policy on the specified resource. Replaces any existing policy.</summary>
@@ -1039,7 +1108,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="deployment">The name of the deployment for this request.</param>
         public virtual StopRequest Stop(Google.Apis.DeploymentManager.v2.Data.DeploymentsStopRequest body, string project, string deployment)
         {
-            return new StopRequest(service, body, project, deployment);
+            return new StopRequest(this.service, body, project, deployment);
         }
 
         /// <summary>
@@ -1109,7 +1178,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="resource">Name or id of the resource for this request.</param>
         public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.DeploymentManager.v2.Data.TestPermissionsRequest body, string project, string resource)
         {
-            return new TestIamPermissionsRequest(service, body, project, resource);
+            return new TestIamPermissionsRequest(this.service, body, project, resource);
         }
 
         /// <summary>Returns permissions that a caller has on the specified resource.</summary>
@@ -1131,6 +1200,9 @@ namespace Google.Apis.DeploymentManager.v2
             /// <summary>Name or id of the resource for this request.</summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
+
+            [Google.Apis.Util.RequestParameterAttribute("header.bypassBillingFilter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> HeaderBypassBillingFilter { get; set; }
 
             /// <summary>Gets or sets the body of this request.</summary>
             Google.Apis.DeploymentManager.v2.Data.TestPermissionsRequest Body { get; set; }
@@ -1167,6 +1239,14 @@ namespace Google.Apis.DeploymentManager.v2
                     DefaultValue = null,
                     Pattern = @"[a-z](?:[-a-z0-9_]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
                 });
+                RequestParameters.Add("header.bypassBillingFilter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "header.bypassBillingFilter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
 
@@ -1176,7 +1256,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="deployment">The name of the deployment for this request.</param>
         public virtual UpdateRequest Update(Google.Apis.DeploymentManager.v2.Data.Deployment body, string project, string deployment)
         {
-            return new UpdateRequest(service, body, project, deployment);
+            return new UpdateRequest(this.service, body, project, deployment);
         }
 
         /// <summary>Updates a deployment and all of the resources described by the deployment manifest.</summary>
@@ -1230,6 +1310,9 @@ namespace Google.Apis.DeploymentManager.v2
                 [Google.Apis.Util.StringValueAttribute("ABANDON")]
                 ABANDON = 1,
             }
+
+            [Google.Apis.Util.RequestParameterAttribute("header.bypassBillingFilter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> HeaderBypassBillingFilter { get; set; }
 
             /// <summary>
             /// If set to true, updates the deployment and creates and updates the "shell" resources but does not
@@ -1294,6 +1377,14 @@ namespace Google.Apis.DeploymentManager.v2
                     DefaultValue = "DELETE",
                     Pattern = null,
                 });
+                RequestParameters.Add("header.bypassBillingFilter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "header.bypassBillingFilter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("preview", new Google.Apis.Discovery.Parameter
                 {
                     Name = "preview",
@@ -1326,7 +1417,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="manifest">The name of the manifest for this request.</param>
         public virtual GetRequest Get(string project, string deployment, string manifest)
         {
-            return new GetRequest(service, project, deployment, manifest);
+            return new GetRequest(this.service, project, deployment, manifest);
         }
 
         /// <summary>Gets information about a specific manifest.</summary>
@@ -1352,6 +1443,9 @@ namespace Google.Apis.DeploymentManager.v2
             /// <summary>The name of the manifest for this request.</summary>
             [Google.Apis.Util.RequestParameterAttribute("manifest", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Manifest { get; private set; }
+
+            [Google.Apis.Util.RequestParameterAttribute("header.bypassBillingFilter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> HeaderBypassBillingFilter { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "get";
@@ -1390,6 +1484,14 @@ namespace Google.Apis.DeploymentManager.v2
                     DefaultValue = null,
                     Pattern = @"[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
                 });
+                RequestParameters.Add("header.bypassBillingFilter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "header.bypassBillingFilter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
 
@@ -1398,7 +1500,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="deployment">The name of the deployment for this request.</param>
         public virtual ListRequest List(string project, string deployment)
         {
-            return new ListRequest(service, project, deployment);
+            return new ListRequest(this.service, project, deployment);
         }
 
         /// <summary>Lists all manifests for a given deployment.</summary>
@@ -1421,21 +1523,40 @@ namespace Google.Apis.DeploymentManager.v2
             public virtual string Deployment { get; private set; }
 
             /// <summary>
-            /// A filter expression that filters resources listed in the response. The expression must specify the field
-            /// name, an operator, and the value that you want to use for filtering. The value must be a string, a
-            /// number, or a boolean. The operator must be either `=`, `!=`, `&amp;gt;`, `&amp;lt;`, `&amp;lt;=`,
-            /// `&amp;gt;=` or `:`. For example, if you are filtering Compute Engine instances, you can exclude
-            /// instances named `example-instance` by specifying `name != example-instance`. The `:` operator can be
-            /// used with string fields to match substrings. For non-string fields it is equivalent to the `=` operator.
-            /// The `:*` comparison can be used to test whether a key has been defined. For example, to find all objects
-            /// with `owner` label use: ``` labels.owner:* ``` You can also filter nested fields. For example, you could
-            /// specify `scheduling.automaticRestart = false` to include instances only if they are not scheduled for
-            /// automatic restarts. You can use filtering on nested fields to filter based on resource labels. To filter
-            /// on multiple expressions, provide each separate expression within parentheses. For example: ```
-            /// (scheduling.automaticRestart = true) (cpuPlatform = "Intel Skylake") ``` By default, each expression is
-            /// an `AND` expression. However, you can include `AND` and `OR` expressions explicitly. For example: ```
-            /// (cpuPlatform = "Intel Skylake") OR (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
-            /// true) ```
+            /// A filter expression that filters resources listed in the response. Most Compute resources support two
+            /// types of filter expressions: expressions that support regular expressions and expressions that follow
+            /// API improvement proposal AIP-160. These two types of filter expressions cannot be mixed in one request.
+            /// If you want to use AIP-160, your expression must specify the field name, an operator, and the value that
+            /// you want to use for filtering. The value must be a string, a number, or a boolean. The operator must be
+            /// either `=`, `!=`, `&amp;gt;`, `&amp;lt;`, `&amp;lt;=`, `&amp;gt;=` or `:`. For example, if you are
+            /// filtering Compute Engine instances, you can exclude instances named `example-instance` by specifying
+            /// `name != example-instance`. The `:*` comparison can be used to test whether a key has been defined. For
+            /// example, to find all objects with `owner` label use:
+            /// ```
+            /// labels.owner:*
+            /// ```
+            /// You can also filter nested
+            /// fields. For example, you could specify `scheduling.automaticRestart = false` to include instances only
+            /// if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based
+            /// on resource labels. To filter on multiple expressions, provide each separate expression within
+            /// parentheses. For example:
+            /// ```
+            /// (scheduling.automaticRestart = true) (cpuPlatform = "Intel Skylake")
+            /// ```
+            /// By default, each expression is an `AND` expression. However, you can include `AND` and `OR` expressions
+            /// explicitly. For example:
+            /// ```
+            /// (cpuPlatform = "Intel Skylake") OR (cpuPlatform = "Intel Broadwell") AND
+            /// (scheduling.automaticRestart = true)
+            /// ```
+            /// If you want to use a regular expression, use the `eq` (equal)
+            /// or `ne` (not equal) operator against a single un-parenthesized expression with or without quotes or
+            /// against multiple parenthesized expressions. Examples: `fieldname eq unquoted literal` `fieldname eq
+            /// 'single quoted literal'` `fieldname eq "double quoted literal"` `(fieldname1 eq literal) (fieldname2 ne
+            /// "literal")` The literal value is interpreted as a regular expression using Google RE2 library syntax.
+            /// The literal value must match the entire field. For example, to filter for instances that do not end with
+            /// name "instance", you would use `name ne .*instance`. You cannot combine constraints on multiple fields
+            /// using regular expressions.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; set; }
@@ -1549,7 +1670,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="operation">The name of the operation for this request.</param>
         public virtual GetRequest Get(string project, string operation)
         {
-            return new GetRequest(service, project, operation);
+            return new GetRequest(this.service, project, operation);
         }
 
         /// <summary>Gets information about a specific operation.</summary>
@@ -1570,6 +1691,9 @@ namespace Google.Apis.DeploymentManager.v2
             /// <summary>The name of the operation for this request.</summary>
             [Google.Apis.Util.RequestParameterAttribute("operation", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Operation { get; private set; }
+
+            [Google.Apis.Util.RequestParameterAttribute("header.bypassBillingFilter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> HeaderBypassBillingFilter { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "get";
@@ -1600,6 +1724,14 @@ namespace Google.Apis.DeploymentManager.v2
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("header.bypassBillingFilter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "header.bypassBillingFilter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
 
@@ -1607,7 +1739,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="project">The project ID for this request.</param>
         public virtual ListRequest List(string project)
         {
-            return new ListRequest(service, project);
+            return new ListRequest(this.service, project);
         }
 
         /// <summary>Lists all operations for a project.</summary>
@@ -1625,21 +1757,40 @@ namespace Google.Apis.DeploymentManager.v2
             public virtual string Project { get; private set; }
 
             /// <summary>
-            /// A filter expression that filters resources listed in the response. The expression must specify the field
-            /// name, an operator, and the value that you want to use for filtering. The value must be a string, a
-            /// number, or a boolean. The operator must be either `=`, `!=`, `&amp;gt;`, `&amp;lt;`, `&amp;lt;=`,
-            /// `&amp;gt;=` or `:`. For example, if you are filtering Compute Engine instances, you can exclude
-            /// instances named `example-instance` by specifying `name != example-instance`. The `:` operator can be
-            /// used with string fields to match substrings. For non-string fields it is equivalent to the `=` operator.
-            /// The `:*` comparison can be used to test whether a key has been defined. For example, to find all objects
-            /// with `owner` label use: ``` labels.owner:* ``` You can also filter nested fields. For example, you could
-            /// specify `scheduling.automaticRestart = false` to include instances only if they are not scheduled for
-            /// automatic restarts. You can use filtering on nested fields to filter based on resource labels. To filter
-            /// on multiple expressions, provide each separate expression within parentheses. For example: ```
-            /// (scheduling.automaticRestart = true) (cpuPlatform = "Intel Skylake") ``` By default, each expression is
-            /// an `AND` expression. However, you can include `AND` and `OR` expressions explicitly. For example: ```
-            /// (cpuPlatform = "Intel Skylake") OR (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
-            /// true) ```
+            /// A filter expression that filters resources listed in the response. Most Compute resources support two
+            /// types of filter expressions: expressions that support regular expressions and expressions that follow
+            /// API improvement proposal AIP-160. These two types of filter expressions cannot be mixed in one request.
+            /// If you want to use AIP-160, your expression must specify the field name, an operator, and the value that
+            /// you want to use for filtering. The value must be a string, a number, or a boolean. The operator must be
+            /// either `=`, `!=`, `&amp;gt;`, `&amp;lt;`, `&amp;lt;=`, `&amp;gt;=` or `:`. For example, if you are
+            /// filtering Compute Engine instances, you can exclude instances named `example-instance` by specifying
+            /// `name != example-instance`. The `:*` comparison can be used to test whether a key has been defined. For
+            /// example, to find all objects with `owner` label use:
+            /// ```
+            /// labels.owner:*
+            /// ```
+            /// You can also filter nested
+            /// fields. For example, you could specify `scheduling.automaticRestart = false` to include instances only
+            /// if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based
+            /// on resource labels. To filter on multiple expressions, provide each separate expression within
+            /// parentheses. For example:
+            /// ```
+            /// (scheduling.automaticRestart = true) (cpuPlatform = "Intel Skylake")
+            /// ```
+            /// By default, each expression is an `AND` expression. However, you can include `AND` and `OR` expressions
+            /// explicitly. For example:
+            /// ```
+            /// (cpuPlatform = "Intel Skylake") OR (cpuPlatform = "Intel Broadwell") AND
+            /// (scheduling.automaticRestart = true)
+            /// ```
+            /// If you want to use a regular expression, use the `eq` (equal)
+            /// or `ne` (not equal) operator against a single un-parenthesized expression with or without quotes or
+            /// against multiple parenthesized expressions. Examples: `fieldname eq unquoted literal` `fieldname eq
+            /// 'single quoted literal'` `fieldname eq "double quoted literal"` `(fieldname1 eq literal) (fieldname2 ne
+            /// "literal")` The literal value is interpreted as a regular expression using Google RE2 library syntax.
+            /// The literal value must match the entire field. For example, to filter for instances that do not end with
+            /// name "instance", you would use `name ne .*instance`. You cannot combine constraints on multiple fields
+            /// using regular expressions.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; set; }
@@ -1746,7 +1897,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="resource">The name of the resource for this request.</param>
         public virtual GetRequest Get(string project, string deployment, string resource)
         {
-            return new GetRequest(service, project, deployment, resource);
+            return new GetRequest(this.service, project, deployment, resource);
         }
 
         /// <summary>Gets information about a single resource.</summary>
@@ -1772,6 +1923,9 @@ namespace Google.Apis.DeploymentManager.v2
             /// <summary>The name of the resource for this request.</summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
+
+            [Google.Apis.Util.RequestParameterAttribute("header.bypassBillingFilter", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> HeaderBypassBillingFilter { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "get";
@@ -1810,6 +1964,14 @@ namespace Google.Apis.DeploymentManager.v2
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("header.bypassBillingFilter", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "header.bypassBillingFilter",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
 
@@ -1818,7 +1980,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="deployment">The name of the deployment for this request.</param>
         public virtual ListRequest List(string project, string deployment)
         {
-            return new ListRequest(service, project, deployment);
+            return new ListRequest(this.service, project, deployment);
         }
 
         /// <summary>Lists all resources in a given deployment.</summary>
@@ -1841,21 +2003,40 @@ namespace Google.Apis.DeploymentManager.v2
             public virtual string Deployment { get; private set; }
 
             /// <summary>
-            /// A filter expression that filters resources listed in the response. The expression must specify the field
-            /// name, an operator, and the value that you want to use for filtering. The value must be a string, a
-            /// number, or a boolean. The operator must be either `=`, `!=`, `&amp;gt;`, `&amp;lt;`, `&amp;lt;=`,
-            /// `&amp;gt;=` or `:`. For example, if you are filtering Compute Engine instances, you can exclude
-            /// instances named `example-instance` by specifying `name != example-instance`. The `:` operator can be
-            /// used with string fields to match substrings. For non-string fields it is equivalent to the `=` operator.
-            /// The `:*` comparison can be used to test whether a key has been defined. For example, to find all objects
-            /// with `owner` label use: ``` labels.owner:* ``` You can also filter nested fields. For example, you could
-            /// specify `scheduling.automaticRestart = false` to include instances only if they are not scheduled for
-            /// automatic restarts. You can use filtering on nested fields to filter based on resource labels. To filter
-            /// on multiple expressions, provide each separate expression within parentheses. For example: ```
-            /// (scheduling.automaticRestart = true) (cpuPlatform = "Intel Skylake") ``` By default, each expression is
-            /// an `AND` expression. However, you can include `AND` and `OR` expressions explicitly. For example: ```
-            /// (cpuPlatform = "Intel Skylake") OR (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
-            /// true) ```
+            /// A filter expression that filters resources listed in the response. Most Compute resources support two
+            /// types of filter expressions: expressions that support regular expressions and expressions that follow
+            /// API improvement proposal AIP-160. These two types of filter expressions cannot be mixed in one request.
+            /// If you want to use AIP-160, your expression must specify the field name, an operator, and the value that
+            /// you want to use for filtering. The value must be a string, a number, or a boolean. The operator must be
+            /// either `=`, `!=`, `&amp;gt;`, `&amp;lt;`, `&amp;lt;=`, `&amp;gt;=` or `:`. For example, if you are
+            /// filtering Compute Engine instances, you can exclude instances named `example-instance` by specifying
+            /// `name != example-instance`. The `:*` comparison can be used to test whether a key has been defined. For
+            /// example, to find all objects with `owner` label use:
+            /// ```
+            /// labels.owner:*
+            /// ```
+            /// You can also filter nested
+            /// fields. For example, you could specify `scheduling.automaticRestart = false` to include instances only
+            /// if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based
+            /// on resource labels. To filter on multiple expressions, provide each separate expression within
+            /// parentheses. For example:
+            /// ```
+            /// (scheduling.automaticRestart = true) (cpuPlatform = "Intel Skylake")
+            /// ```
+            /// By default, each expression is an `AND` expression. However, you can include `AND` and `OR` expressions
+            /// explicitly. For example:
+            /// ```
+            /// (cpuPlatform = "Intel Skylake") OR (cpuPlatform = "Intel Broadwell") AND
+            /// (scheduling.automaticRestart = true)
+            /// ```
+            /// If you want to use a regular expression, use the `eq` (equal)
+            /// or `ne` (not equal) operator against a single un-parenthesized expression with or without quotes or
+            /// against multiple parenthesized expressions. Examples: `fieldname eq unquoted literal` `fieldname eq
+            /// 'single quoted literal'` `fieldname eq "double quoted literal"` `(fieldname1 eq literal) (fieldname2 ne
+            /// "literal")` The literal value is interpreted as a regular expression using Google RE2 library syntax.
+            /// The literal value must match the entire field. For example, to filter for instances that do not end with
+            /// name "instance", you would use `name ne .*instance`. You cannot combine constraints on multiple fields
+            /// using regular expressions.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; set; }
@@ -1968,7 +2149,7 @@ namespace Google.Apis.DeploymentManager.v2
         /// <param name="project">The project ID for this request.</param>
         public virtual ListRequest List(string project)
         {
-            return new ListRequest(service, project);
+            return new ListRequest(this.service, project);
         }
 
         /// <summary>Lists all resource types for Deployment Manager.</summary>
@@ -1986,21 +2167,40 @@ namespace Google.Apis.DeploymentManager.v2
             public virtual string Project { get; private set; }
 
             /// <summary>
-            /// A filter expression that filters resources listed in the response. The expression must specify the field
-            /// name, an operator, and the value that you want to use for filtering. The value must be a string, a
-            /// number, or a boolean. The operator must be either `=`, `!=`, `&amp;gt;`, `&amp;lt;`, `&amp;lt;=`,
-            /// `&amp;gt;=` or `:`. For example, if you are filtering Compute Engine instances, you can exclude
-            /// instances named `example-instance` by specifying `name != example-instance`. The `:` operator can be
-            /// used with string fields to match substrings. For non-string fields it is equivalent to the `=` operator.
-            /// The `:*` comparison can be used to test whether a key has been defined. For example, to find all objects
-            /// with `owner` label use: ``` labels.owner:* ``` You can also filter nested fields. For example, you could
-            /// specify `scheduling.automaticRestart = false` to include instances only if they are not scheduled for
-            /// automatic restarts. You can use filtering on nested fields to filter based on resource labels. To filter
-            /// on multiple expressions, provide each separate expression within parentheses. For example: ```
-            /// (scheduling.automaticRestart = true) (cpuPlatform = "Intel Skylake") ``` By default, each expression is
-            /// an `AND` expression. However, you can include `AND` and `OR` expressions explicitly. For example: ```
-            /// (cpuPlatform = "Intel Skylake") OR (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
-            /// true) ```
+            /// A filter expression that filters resources listed in the response. Most Compute resources support two
+            /// types of filter expressions: expressions that support regular expressions and expressions that follow
+            /// API improvement proposal AIP-160. These two types of filter expressions cannot be mixed in one request.
+            /// If you want to use AIP-160, your expression must specify the field name, an operator, and the value that
+            /// you want to use for filtering. The value must be a string, a number, or a boolean. The operator must be
+            /// either `=`, `!=`, `&amp;gt;`, `&amp;lt;`, `&amp;lt;=`, `&amp;gt;=` or `:`. For example, if you are
+            /// filtering Compute Engine instances, you can exclude instances named `example-instance` by specifying
+            /// `name != example-instance`. The `:*` comparison can be used to test whether a key has been defined. For
+            /// example, to find all objects with `owner` label use:
+            /// ```
+            /// labels.owner:*
+            /// ```
+            /// You can also filter nested
+            /// fields. For example, you could specify `scheduling.automaticRestart = false` to include instances only
+            /// if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based
+            /// on resource labels. To filter on multiple expressions, provide each separate expression within
+            /// parentheses. For example:
+            /// ```
+            /// (scheduling.automaticRestart = true) (cpuPlatform = "Intel Skylake")
+            /// ```
+            /// By default, each expression is an `AND` expression. However, you can include `AND` and `OR` expressions
+            /// explicitly. For example:
+            /// ```
+            /// (cpuPlatform = "Intel Skylake") OR (cpuPlatform = "Intel Broadwell") AND
+            /// (scheduling.automaticRestart = true)
+            /// ```
+            /// If you want to use a regular expression, use the `eq` (equal)
+            /// or `ne` (not equal) operator against a single un-parenthesized expression with or without quotes or
+            /// against multiple parenthesized expressions. Examples: `fieldname eq unquoted literal` `fieldname eq
+            /// 'single quoted literal'` `fieldname eq "double quoted literal"` `(fieldname1 eq literal) (fieldname2 ne
+            /// "literal")` The literal value is interpreted as a regular expression using Google RE2 library syntax.
+            /// The literal value must match the entire field. For example, to filter for instances that do not end with
+            /// name "instance", you would use `name ne .*instance`. You cannot combine constraints on multiple fields
+            /// using regular expressions.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; set; }
@@ -2099,7 +2299,8 @@ namespace Google.Apis.DeploymentManager.v2.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2154,16 +2355,37 @@ namespace Google.Apis.DeploymentManager.v2.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -2171,18 +2393,51 @@ namespace Google.Apis.DeploymentManager.v2.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class BulkInsertOperationStatus : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>[Output Only] Count of VMs successfully created so far.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createdVmCount")]
+        public virtual System.Nullable<int> CreatedVmCount { get; set; }
+
+        /// <summary>[Output Only] Count of VMs that got deleted during rollback.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deletedVmCount")]
+        public virtual System.Nullable<int> DeletedVmCount { get; set; }
+
+        /// <summary>[Output Only] Count of VMs that started creating but encountered an error.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("failedToCreateVmCount")]
+        public virtual System.Nullable<int> FailedToCreateVmCount { get; set; }
+
+        /// <summary>
+        /// [Output Only] Creation status of BulkInsert operation - information if the flow is rolling forward or
+        /// rolling back.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual string Status { get; set; }
+
+        /// <summary>[Output Only] Count of VMs originally planned to be created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetVmCount")]
+        public virtual System.Nullable<int> TargetVmCount { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2193,6 +2448,21 @@ namespace Google.Apis.DeploymentManager.v2.Data
         /// <summary>The contents of the file.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("content")]
         public virtual string Content { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes additional debugging info.</summary>
+    public class DebugInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Additional debugging information provided by the server.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("detail")]
+        public virtual string Detail { get; set; }
+
+        /// <summary>The stack trace entries indicating where the error occurred.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stackEntries")]
+        public virtual System.Collections.Generic.IList<string> StackEntries { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2391,6 +2661,47 @@ namespace Google.Apis.DeploymentManager.v2.Data
     }
 
     /// <summary>
+    /// Describes the cause of the error with structured details. Example of an error when contacting the
+    /// "pubsub.googleapis.com" API when it is not enabled: { "reason": "API_DISABLED" "domain": "googleapis.com"
+    /// "metadata": { "resource": "projects/123", "service": "pubsub.googleapis.com" } } This response indicates that
+    /// the pubsub.googleapis.com API is not enabled. Example of an error that is returned when attempting to create a
+    /// Spanner instance in a region that is out of stock: { "reason": "STOCKOUT" "domain": "spanner.googleapis.com",
+    /// "metadata": { "availableRegions": "us-central1,us-east2" } }
+    /// </summary>
+    public class ErrorInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The logical grouping to which the "reason" belongs. The error domain is typically the registered service
+        /// name of the tool or product that generates the error. Example: "pubsub.googleapis.com". If the error is
+        /// generated by some common infrastructure, the error domain must be a globally unique value that identifies
+        /// the infrastructure. For Google API infrastructure, the error domain is "googleapis.com".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domain")]
+        public virtual string Domain { get; set; }
+
+        /// <summary>
+        /// Additional structured details about this error. Keys must match a regular expression of `a-z+` but should
+        /// ideally be lowerCamelCase. Also, they must be limited to 64 characters in length. When identifying the
+        /// current value of an exceeded limit, the units should be contained in the key, not the value. For example,
+        /// rather than `{"instanceLimit": "100/request"}`, should be returned as, `{"instanceLimitPerRequest": "100"}`,
+        /// if the client exceeds the number of instances that can be created in a single (batch) request.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metadatas")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Metadatas { get; set; }
+
+        /// <summary>
+        /// The reason of the error. This is a constant value that identifies the proximate cause of the error. Error
+        /// reasons are unique within a particular domain of errors. This should be at most 63 characters and match a
+        /// regular expression of `A-Z+[A-Z0-9]`, which represents UPPER_SNAKE_CASE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reason")]
+        public virtual string Reason { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// Represents a textual expression in the Common Expression Language (CEL) syntax. CEL is a C-like expression
     /// language. The syntax and semantics of CEL are documented at https://github.com/google/cel-spec. Example
     /// (Comparison): title: "Summary size limit" description: "Determines if a summary is less than 100 chars"
@@ -2455,6 +2766,39 @@ namespace Google.Apis.DeploymentManager.v2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
         public virtual Policy Policy { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
+        public virtual object UpdateMask { get; set; }
+    }
+
+    /// <summary>
+    /// Provides links to documentation or for performing an out of band action. For example, if a quota check failed
+    /// with an error indicating the calling project hasn't enabled the accessed service, this can contain a URL
+    /// pointing directly to the right place in the developer console to flip the bit.
+    /// </summary>
+    public class Help : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>URL(s) pointing to additional information on handling the current error.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("links")]
+        public virtual System.Collections.Generic.IList<HelpLink> Links { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes a URL link.</summary>
+    public class HelpLink : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Describes what the link offers.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>The URL of the link.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("url")]
+        public virtual string Url { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
     }
 
     public class ImportFile : Google.Apis.Requests.IDirectResponseSchema
@@ -2466,6 +2810,36 @@ namespace Google.Apis.DeploymentManager.v2.Data
         /// <summary>The name of the file.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class InstancesBulkInsertOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Status information per location (location name is key). Example key: zones/us-central1-a</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("perLocationStatus")]
+        public virtual System.Collections.Generic.IDictionary<string, BulkInsertOperationStatus> PerLocationStatus { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Provides a localized error message that is safe to return to the user which can be attached to an RPC error.
+    /// </summary>
+    public class LocalizedMessage : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The locale used following the specification defined at https://www.rfc-editor.org/rfc/bcp/bcp47.txt.
+        /// Examples are: "en-US", "fr-CH", "es-MX"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("locale")]
+        public virtual string Locale { get; set; }
+
+        /// <summary>The localized error message in the above locale.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("message")]
+        public virtual string Message { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2543,8 +2917,9 @@ namespace Google.Apis.DeploymentManager.v2.Data
     /// [Zonal](/compute/docs/reference/rest/{$api_version}/zoneOperations) You can use an operation resource to manage
     /// asynchronous API requests. For more information, read Handling API responses. Operations can be global, regional
     /// or zonal. - For global operations, use the `globalOperations` resource. - For regional operations, use the
-    /// `regionOperations` resource. - For zonal operations, use the `zonalOperations` resource. For more information,
-    /// read Global, Regional, and Zonal Resources.
+    /// `regionOperations` resource. - For zonal operations, use the `zoneOperations` resource. For more information,
+    /// read Global, Regional, and Zonal Resources. Note that completed Operation resources have a limited retention
+    /// period.
     /// </summary>
     public class Operation : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2602,6 +2977,9 @@ namespace Google.Apis.DeploymentManager.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("insertTime")]
         public virtual string InsertTime { get; set; }
 
+        [Newtonsoft.Json.JsonPropertyAttribute("instancesBulkInsertOperationMetadata")]
+        public virtual InstancesBulkInsertOperationMetadata InstancesBulkInsertOperationMetadata { get; set; }
+
         /// <summary>[Output Only] Type of the resource. Always `compute#operation` for Operation resources.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
@@ -2640,6 +3018,17 @@ namespace Google.Apis.DeploymentManager.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("selfLink")]
         public virtual string SelfLink { get; set; }
 
+        /// <summary>[Output Only] Server-defined URL for this resource with the resource id.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selfLinkWithId")]
+        public virtual string SelfLinkWithId { get; set; }
+
+        /// <summary>
+        /// [Output Only] If the operation is for projects.setCommonInstanceMetadata, this field will contain
+        /// information on all underlying zonal actions and their state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("setCommonInstanceMetadataOperationMetadata")]
+        public virtual SetCommonInstanceMetadataOperationMetadata SetCommonInstanceMetadataOperationMetadata { get; set; }
+
         /// <summary>
         /// [Output Only] The time that this operation was started by the server. This value is in RFC3339 text format.
         /// </summary>
@@ -2665,12 +3054,15 @@ namespace Google.Apis.DeploymentManager.v2.Data
 
         /// <summary>
         /// [Output Only] The URL of the resource that the operation modifies. For operations related to creating a
-        /// snapshot, this points to the persistent disk that the snapshot was created from.
+        /// snapshot, this points to the disk that the snapshot was created from.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("targetLink")]
         public virtual string TargetLink { get; set; }
 
-        /// <summary>[Output Only] User who requested the operation, for example: `user@example.com`.</summary>
+        /// <summary>
+        /// [Output Only] User who requested the operation, for example: `user@example.com` or `alice_smith_identifier
+        /// (global/workforcePools/example-com-us-employees)`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("user")]
         public virtual string User { get; set; }
 
@@ -2703,9 +3095,28 @@ namespace Google.Apis.DeploymentManager.v2.Data
             /// <summary>[Output Only] The array of errors encountered while processing this operation.</summary>
             public class ErrorsData
             {
+                /// <summary>
+                /// [Output Only] Optional error details WARNING: DO NOT MAKE VISIBLE This is for internal use-only
+                /// (like componentization) (thus the visibility "none") and in case of public exposure it is strongly
+                /// recommended to follow pattern of: https://aip.dev/193 and expose as details field.
+                /// </summary>
+                [Newtonsoft.Json.JsonPropertyAttribute("arguments")]
+                public virtual System.Collections.Generic.IList<string> Arguments { get; set; }
+
                 /// <summary>[Output Only] The error type identifier for this error.</summary>
                 [Newtonsoft.Json.JsonPropertyAttribute("code")]
                 public virtual string Code { get; set; }
+
+                [Newtonsoft.Json.JsonPropertyAttribute("debugInfo")]
+                public virtual DebugInfo DebugInfo { get; set; }
+
+                /// <summary>
+                /// [Output Only] An optional list of messages that contain the error details. There is a set of defined
+                /// message types to use for providing details.The syntax depends on the error code. For example,
+                /// QuotaExceededInfo will have details when the error code is QUOTA_EXCEEDED.
+                /// </summary>
+                [Newtonsoft.Json.JsonPropertyAttribute("errorDetails")]
+                public virtual System.Collections.Generic.IList<ErrorDetailsData> ErrorDetails { get; set; }
 
                 /// <summary>
                 /// [Output Only] Indicates the field in the request that caused the error. This property is optional.
@@ -2716,6 +3127,26 @@ namespace Google.Apis.DeploymentManager.v2.Data
                 /// <summary>[Output Only] An optional, human-readable error message.</summary>
                 [Newtonsoft.Json.JsonPropertyAttribute("message")]
                 public virtual string Message { get; set; }
+
+                /// <summary>
+                /// [Output Only] An optional list of messages that contain the error details. There is a set of defined
+                /// message types to use for providing details.The syntax depends on the error code. For example,
+                /// QuotaExceededInfo will have details when the error code is QUOTA_EXCEEDED.
+                /// </summary>
+                public class ErrorDetailsData
+                {
+                    [Newtonsoft.Json.JsonPropertyAttribute("errorInfo")]
+                    public virtual ErrorInfo ErrorInfo { get; set; }
+
+                    [Newtonsoft.Json.JsonPropertyAttribute("help")]
+                    public virtual Help Help { get; set; }
+
+                    [Newtonsoft.Json.JsonPropertyAttribute("localizedMessage")]
+                    public virtual LocalizedMessage LocalizedMessage { get; set; }
+
+                    [Newtonsoft.Json.JsonPropertyAttribute("quotaInfo")]
+                    public virtual QuotaExceededInfo QuotaInfo { get; set; }
+                }
             }
         }
 
@@ -2793,18 +3224,26 @@ namespace Google.Apis.DeploymentManager.v2.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2851,6 +3290,39 @@ namespace Google.Apis.DeploymentManager.v2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
         public virtual System.Nullable<int> Version { get; set; }
+    }
+
+    /// <summary>Additional details for quota exceeded error for resource quota.</summary>
+    public class QuotaExceededInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The map holding related quota dimensions.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dimensions")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Dimensions { get; set; }
+
+        /// <summary>
+        /// Future quota limit being rolled out. The limit's unit depends on the quota type or metric.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("futureLimit")]
+        public virtual System.Nullable<double> FutureLimit { get; set; }
+
+        /// <summary>Current effective quota limit. The limit's unit depends on the quota type or metric.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("limit")]
+        public virtual System.Nullable<double> Limit { get; set; }
+
+        /// <summary>The name of the quota limit.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("limitName")]
+        public virtual string LimitName { get; set; }
+
+        /// <summary>The Compute Engine quota metric name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metricName")]
+        public virtual string MetricName { get; set; }
+
+        /// <summary>Rollout status of the future quota limit.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rolloutStatus")]
+        public virtual string RolloutStatus { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
     }
 
     public class Resource : Google.Apis.Requests.IDirectResponseSchema
@@ -3037,9 +3509,28 @@ namespace Google.Apis.DeploymentManager.v2.Data
             /// <summary>[Output Only] The array of errors encountered while processing this operation.</summary>
             public class ErrorsData
             {
+                /// <summary>
+                /// [Output Only] Optional error details WARNING: DO NOT MAKE VISIBLE This is for internal use-only
+                /// (like componentization) (thus the visibility "none") and in case of public exposure it is strongly
+                /// recommended to follow pattern of: https://aip.dev/193 and expose as details field.
+                /// </summary>
+                [Newtonsoft.Json.JsonPropertyAttribute("arguments")]
+                public virtual System.Collections.Generic.IList<string> Arguments { get; set; }
+
                 /// <summary>[Output Only] The error type identifier for this error.</summary>
                 [Newtonsoft.Json.JsonPropertyAttribute("code")]
                 public virtual string Code { get; set; }
+
+                [Newtonsoft.Json.JsonPropertyAttribute("debugInfo")]
+                public virtual DebugInfo DebugInfo { get; set; }
+
+                /// <summary>
+                /// [Output Only] An optional list of messages that contain the error details. There is a set of defined
+                /// message types to use for providing details.The syntax depends on the error code. For example,
+                /// QuotaExceededInfo will have details when the error code is QUOTA_EXCEEDED.
+                /// </summary>
+                [Newtonsoft.Json.JsonPropertyAttribute("errorDetails")]
+                public virtual System.Collections.Generic.IList<ErrorDetailsData> ErrorDetails { get; set; }
 
                 /// <summary>
                 /// [Output Only] Indicates the field in the request that caused the error. This property is optional.
@@ -3050,6 +3541,26 @@ namespace Google.Apis.DeploymentManager.v2.Data
                 /// <summary>[Output Only] An optional, human-readable error message.</summary>
                 [Newtonsoft.Json.JsonPropertyAttribute("message")]
                 public virtual string Message { get; set; }
+
+                /// <summary>
+                /// [Output Only] An optional list of messages that contain the error details. There is a set of defined
+                /// message types to use for providing details.The syntax depends on the error code. For example,
+                /// QuotaExceededInfo will have details when the error code is QUOTA_EXCEEDED.
+                /// </summary>
+                public class ErrorDetailsData
+                {
+                    [Newtonsoft.Json.JsonPropertyAttribute("errorInfo")]
+                    public virtual ErrorInfo ErrorInfo { get; set; }
+
+                    [Newtonsoft.Json.JsonPropertyAttribute("help")]
+                    public virtual Help Help { get; set; }
+
+                    [Newtonsoft.Json.JsonPropertyAttribute("localizedMessage")]
+                    public virtual LocalizedMessage LocalizedMessage { get; set; }
+
+                    [Newtonsoft.Json.JsonPropertyAttribute("quotaInfo")]
+                    public virtual QuotaExceededInfo QuotaInfo { get; set; }
+                }
             }
         }
 
@@ -3113,6 +3624,68 @@ namespace Google.Apis.DeploymentManager.v2.Data
         /// <summary>Resources contained in this list response.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resources")]
         public virtual System.Collections.Generic.IList<Resource> Resources { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class SetCommonInstanceMetadataOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>[Output Only] The client operation id.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("clientOperationId")]
+        public virtual string ClientOperationId { get; set; }
+
+        /// <summary>
+        /// [Output Only] Status information per location (location name is key). Example key: zones/us-central1-a
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("perLocationOperations")]
+        public virtual System.Collections.Generic.IDictionary<string, SetCommonInstanceMetadataOperationMetadataPerLocationOperationInfo> PerLocationOperations { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class SetCommonInstanceMetadataOperationMetadataPerLocationOperationInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>[Output Only] If state is `ABANDONED` or `FAILED`, this field is populated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("error")]
+        public virtual Status Error { get; set; }
+
+        /// <summary>
+        /// [Output Only] Status of the action, which can be one of the following: `PROPAGATING`, `PROPAGATED`,
+        /// `ABANDONED`, `FAILED`, or `DONE`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The `Status` type defines a logical error model that is suitable for different programming environments,
+    /// including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains
+    /// three pieces of data: error code, error message, and error details. You can find out more about this error model
+    /// and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).
+    /// </summary>
+    public class Status : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The status code, which should be an enum value of google.rpc.Code.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("code")]
+        public virtual System.Nullable<int> Code { get; set; }
+
+        /// <summary>
+        /// A list of messages that carry the error details. There is a common set of message types for APIs to use.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual System.Collections.Generic.IList<System.Collections.Generic.IDictionary<string, object>> Details { get; set; }
+
+        /// <summary>
+        /// A developer-facing error message, which should be in English. Any user-facing error message should be
+        /// localized and sent in the google.rpc.Status.details field, or localized by the client.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("message")]
+        public virtual string Message { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

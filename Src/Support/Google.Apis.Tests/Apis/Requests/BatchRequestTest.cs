@@ -216,19 +216,19 @@ Content-Length: 202
                 this.successful2ndResponse = successful2ndReponse;
             }
 
-            protected override Task<HttpResponseMessage> SendAsyncCore(HttpRequestMessage request,
+            protected override async Task<HttpResponseMessage> SendAsyncCore(HttpRequestMessage request,
                 CancellationToken cancellationToken)
             {
                 // Verify Request Message
                 var contentType = request.Content.Headers.ContentType;
                 Assert.Equal("multipart/mixed", contentType.MediaType.ToString());
-                Assert.Equal(1, contentType.Parameters.Count);
-                Assert.True(contentType.Parameters.First().ToString().StartsWith("boundary="),
+                var parameter = Assert.Single(contentType.Parameters);
+                Assert.True(parameter.ToString().StartsWith("boundary=", StringComparison.Ordinal),
                     "Parameter should start with boundary=");
-                var boundary = contentType.Parameters.First().ToString().Substring("boundary=".Length).
+                var boundary = parameter.ToString().Substring("boundary=".Length).
                     Replace("\"", "");
                 var expectedContent = ExpectedContentMessage.Replace("BOUNDARY", boundary);
-                var actualContent = request.Content.ReadAsStringAsync().Result;
+                var actualContent = await request.Content.ReadAsStringAsync();
                 Assert.Equal(expectedContent, NormalizeLineEndings(actualContent));
 
                 HttpResponseMessage response = new HttpResponseMessage();
@@ -239,9 +239,7 @@ Content-Length: 202
                     Encoding.UTF8, "multipart/mixed");
                 response.Content.Headers.ContentType.Parameters.Add(new NameValueHeaderValue("boundary", boundary));
 
-                TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-                tcs.SetResult(response);
-                return tcs.Task;
+                return response;
             }
         }
 
@@ -318,7 +316,7 @@ Content-Length: 202
                 {
                     Assert.Null(tuple.Item1); // no response
                     RequestError reqError = tuple.Item2; // error
-                    Assert.Equal(1, reqError.Errors.Count);
+                    Assert.Single(reqError.Errors);
                     Assert.Equal(404, reqError.Code);
                     Assert.Equal("Not Found", reqError.Message);
                     Assert.NotNull(reqError.ErrorResponseContent);
@@ -332,7 +330,7 @@ Content-Length: 202
         }
 
         [Fact]
-        public void ExecuteAsync_NoCallback_Test()
+        public async Task ExecuteAsync_NoCallback_Test()
         {
             var handler = new BatchMessageHandler(true);
             var initializer = new BaseClientService.Initializer()
@@ -356,12 +354,12 @@ Content-Length: 202
                 });
                 batch.Queue<MockResponse>(request1, null);
                 batch.Queue<MockResponse>(request2, null);
-                batch.ExecuteAsync().Wait();
+                await batch.ExecuteAsync();
             }
         }
 
         [Fact]
-        public void CreateOuterRequestContent_Test()
+        public async Task CreateOuterRequestContent_Test()
         {
             using (var service = new MockClientService("http://sample.com"))
             {
@@ -376,8 +374,8 @@ Content-Length: 202
                     Name = "Name1-1"
                 });
 
-                var content = BatchRequest.CreateOuterRequestContent(new[] { request1, request2 }).Result;
-                var requestStr = content.ReadAsStringAsync().Result;
+                var content = await BatchRequest.CreateOuterRequestContent(new[] { request1, request2 });
+                var requestStr = await content.ReadAsStringAsync();
 
                 // Read the boundary.
                 string boundary = null;
@@ -392,7 +390,7 @@ Content-Length: 202
         }
 
         [Fact]
-        public void CreateIndividualRequest_Test()
+        public async Task CreateIndividualRequest_Test()
         {
             var expectedMessage = NormalizeLineEndings(@"POST http://sample.com/5?q=20
 If-Match: ""123""
@@ -408,14 +406,14 @@ Content-Length:  40
                         ETag = "\"123\"",
                         Name = "Name"
                     });
-                var content = BatchRequest.CreateIndividualRequest(request).Result;
-                var requestStr = content.ReadAsStringAsync().Result;
+                var content = await BatchRequest.CreateIndividualRequest(request);
+                var requestStr = await content.ReadAsStringAsync();
                 Assert.Equal(expectedMessage, NormalizeLineEndings(requestStr));
             }
         }
 
         [Fact]
-        public void CreateRequestContentString_Test()
+        public async Task CreateRequestContentString_Test()
         {
             var expectedMessage = NormalizeLineEndings(@"GET http://test.com:2020/
 Accept-Encoding: gzip
@@ -429,7 +427,7 @@ hello world
             request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
             request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-            var requestStr = BatchRequest.CreateRequestContentString(request).Result;
+            var requestStr = await BatchRequest.CreateRequestContentString(request);
             Assert.Equal(expectedMessage, NormalizeLineEndings(requestStr));
         }
 
@@ -459,7 +457,7 @@ hello world
                 {
                     StatusCode = HttpStatusCode.BadRequest,
                     ReasonPhrase = "Bad Request",
-                    Content = _responseContent == null ? null : new StringContent(_responseContent, Encoding.UTF8, "application/jsong")
+                    Content = _responseContent == null ? null : new StringContent(_responseContent, Encoding.UTF8, "application/json")
                 });
         }
 
@@ -495,7 +493,7 @@ hello world
                 });
                 
                 batchRequest.Queue<MockResponse>( request, (c, e, i, m) =>
-                    Assert.True(false, "The batch endpoint call should have failed. Callbacks for individual requests shouldn't be called."));
+                    Assert.Fail("The batch endpoint call should have failed. Callbacks for individual requests shouldn't be called."));
 
                 HttpRequestException outerException = await Assert.ThrowsAsync<HttpRequestException>(() => batchRequest.ExecuteAsync());
 
@@ -521,6 +519,13 @@ hello world
         public async Task BatchEndpointErrorNonJsonContent()
         {
             string nonJsonContent = "Invalid JSON";
+            string expectedExceptionMessage = "The service TestService has thrown an exception. HttpStatusCode is BadRequest. No error message was specified.";
+            string expectedExceptionToStringContent =
+                $"The service TestService has thrown an exception.{Environment.NewLine}" +
+                $"HttpStatusCode is BadRequest.{Environment.NewLine}" +
+                $"No JSON error details were specified.{Environment.NewLine}" +
+                $"Raw error details are: {nonJsonContent}";
+
             using (var service = new MockClientService( new BaseClientService.Initializer()
             {
                 HttpClientFactory = new MockHttpClientFactory(new BatchEndpointErrorMessageHandler(nonJsonContent))
@@ -534,7 +539,7 @@ hello world
                 });
 
                 batchRequest.Queue<MockResponse>(request, (c, e, i, m) =>
-                   Assert.True(false, "The batch endpoint call should have failed. Callbacks for individual requests shouldn't be called."));
+                   Assert.Fail("The batch endpoint call should have failed. Callbacks for individual requests shouldn't be called."));
 
                 HttpRequestException outerException = await Assert.ThrowsAsync<HttpRequestException>(() => batchRequest.ExecuteAsync());
 
@@ -544,8 +549,9 @@ hello world
                 GoogleApiException innerException = Assert.IsType<GoogleApiException>(outerException.InnerException);
 
                 Assert.Equal(HttpStatusCode.BadRequest, innerException.HttpStatusCode);
-                Assert.Null(innerException.Error);
-                Assert.Equal(nonJsonContent, innerException.Message);
+                Assert.True(innerException.Error.IsOnlyRawContent);
+                Assert.Equal(expectedExceptionMessage, innerException.Message);
+                Assert.Contains(expectedExceptionToStringContent, innerException.ToString());
 
                 Assert.IsAssignableFrom<JsonException>(innerException.InnerException);
             }
@@ -554,6 +560,8 @@ hello world
         [Fact]
         public async Task BatchEndpointErrorNullContent()
         {
+            string expectedExceptionMessage = "The service TestService has thrown an exception. HttpStatusCode is BadRequest. No error message was specified.";
+
             using (var service = new MockClientService( new BaseClientService.Initializer()
             {
                 HttpClientFactory = new MockHttpClientFactory(new BatchEndpointErrorMessageHandler(null))
@@ -567,7 +575,7 @@ hello world
                 });
 
                 batchRequest.Queue<MockResponse>(request, (c, e, i, m) =>
-                   Assert.True(false, "The batch endpoint call should have failed. Callbacks for individual requests shouldn't be called."));
+                   Assert.Fail("The batch endpoint call should have failed. Callbacks for individual requests shouldn't be called."));
 
                 HttpRequestException outerException = await Assert.ThrowsAsync<HttpRequestException>(() => batchRequest.ExecuteAsync());
 
@@ -576,14 +584,88 @@ hello world
 
                 GoogleApiException innerException = Assert.IsType<GoogleApiException>(outerException.InnerException);
                 Assert.Equal(HttpStatusCode.BadRequest, innerException.HttpStatusCode);
+#if NET6_0_OR_GREATER
+                // Even though we tell our handler to return a response with null content,
+                // in .NET 6 we get a StringContent with empty string content.
+                // This just documents that behaviour.
+                Assert.Equal("", innerException.Error.ErrorResponseContent);
+                string expectedExceptionToStringContent =
+                    $"The service TestService has thrown an exception.{Environment.NewLine}" +
+                    $"HttpStatusCode is BadRequest.{Environment.NewLine}" +
+                    $"No JSON error details were specified.{Environment.NewLine}" +
+                    $"Raw error details are empty or white spaces only.";
+#else
                 Assert.Null(innerException.Error);
-                Assert.Contains("unexpectedly null", innerException.Message);
+                string expectedExceptionToStringContent =
+                    $"The service TestService has thrown an exception.{Environment.NewLine}" +
+                    $"HttpStatusCode is BadRequest.{Environment.NewLine}" +
+                    $"No error details were specified.";
+#endif
+                Assert.Equal(expectedExceptionMessage, innerException.Message);
+                Assert.Contains(expectedExceptionToStringContent, innerException.ToString());
             }
         }
 
-        // Line endings in HttpContent are different between mono & .NET.
-        private static string NormalizeLineEndings(string s) {
-            return Regex.Replace(s, @"\r\n|\n", "\r\n");
+        [Fact]
+        public async Task ParseAsHttpResponse_NormalContent()
+        {
+            string content = @"Content-Type: application/http
+
+HTTP/1.1 200 OK
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+Content-Type: application/json
+
+{}
+";
+            var response = BatchRequest.ParseAsHttpResponse(content);
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
+            Assert.Equal("{}", (await response.Content.ReadAsStringAsync()).Trim());
         }
+
+        [Fact]
+        public async Task ParseAsHttpResponse_NoContent()
+        {
+            string content = @"Content-Type: application/http
+
+HTTP/1.1 204 No content
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+
+";
+            var response = BatchRequest.ParseAsHttpResponse(content);
+            var httpContent = response.Content;
+            Assert.NotNull(content);
+
+#if NET6_0_OR_GREATER
+            Assert.Null(httpContent.Headers.ContentType);
+#else
+            Assert.Equal("text/plain", httpContent.Headers.ContentType.MediaType);
+#endif
+            Assert.Equal("", (await response.Content.ReadAsStringAsync()).Trim());
+        }
+
+        [Fact]
+        public async Task ParseAsHttpResponse_ContentButNoContentType()
+        {
+            string content = @"Content-Type: application/http
+
+HTTP/1.1 200 OK
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+
+{}
+";
+            var response = BatchRequest.ParseAsHttpResponse(content);
+            Assert.Equal("text/plain", response.Content.Headers.ContentType.MediaType);
+            Assert.Equal("{}", (await response.Content.ReadAsStringAsync()).Trim());
+        }
+
+        // Line endings in HttpContent are different between mono & .NET.
+        private static string NormalizeLineEndings(string s) =>
+            Regex.Replace(s, @"\r\n|\n", "\r\n");
     }
 }

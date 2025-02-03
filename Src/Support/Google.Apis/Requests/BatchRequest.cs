@@ -57,8 +57,9 @@ namespace Google.Apis.Requests
 
         /// <summary>A concrete type callback for an individual response.</summary>
         /// <typeparam name="TResponse">The response type.</typeparam>
-        /// <param name="content">The content response or <c>null</c> if the request failed.</param>
-        /// <param name="error">Error or <c>null</c> if the request succeeded.</param>
+        /// <param name="content">The parsed content response or <c>null</c> if the request failed or the response
+        /// could not be parsed using the associated <see cref="IClientService.Serializer"/>.</param>
+        /// <param name="error">Error or <c>null</c> if the request succeeded and response content was parsed succesfully.</param>
         /// <param name="index">The request index.</param>
         /// <param name="message">The HTTP individual response.</param>
         public delegate void OnResponse<in TResponse>
@@ -76,8 +77,9 @@ namespace Google.Apis.Requests
             public Type ResponseType { get; set; }
 
             /// <summary>A callback method which will be called after an individual response was parsed.</summary>
-            /// <param name="content">The content response or <c>null</c> if the request failed.</param>
-            /// <param name="error">Error or <c>null</c> if the request succeeded.</param>
+            /// <param name="content">The parsed content response or <c>null</c> if the request failed or the response
+            /// could not be parsed using the associated <see cref="IClientService.Serializer"/>.</param>
+            /// <param name="error">Error or <c>null</c> if the request succeeded and response content was parsed succesfully.</param>
             /// <param name="index">The request index.</param>
             /// <param name="message">The HTTP individual response.</param>
             public virtual void OnResponse(object content, RequestError error, int index, HttpResponseMessage message)
@@ -133,10 +135,7 @@ namespace Google.Apis.Requests
         }
 
         /// <summary>Gets the count of all queued requests.</summary>
-        public int Count
-        {
-            get { return allRequests.Count; }
-        }
+        public int Count => allRequests.Count;
 
         /// <summary>Queues an individual request.</summary>
         /// <typeparam name="TResponse">The response's type.</typeparam>
@@ -151,11 +150,11 @@ namespace Google.Apis.Requests
             }
 
             allRequests.Add(new InnerRequest<TResponse>
-                {
-                    ClientRequest = request,
-                    ResponseType = typeof(TResponse),
-                    OnResponseCallback = callback,
-                });
+            {
+                ClientRequest = request,
+                ResponseType = typeof(TResponse),
+                OnResponseCallback = callback,
+            });
         }
 
         /// <summary>Asynchronously executes the batch request.</summary>
@@ -168,25 +167,30 @@ namespace Google.Apis.Requests
         /// <param name="cancellationToken">Cancellation token to cancel operation.</param>
         public async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (Count < 1)
+            if (Count == 0)
+            {
                 return;
+            }
 
             ConfigurableHttpClient httpClient = service.HttpClient;
 
             var requests = from r in allRequests
                            select r.ClientRequest;
             HttpContent outerContent = await CreateOuterRequestContent(requests).ConfigureAwait(false);
-            var result = await httpClient.PostAsync(new Uri(batchUrl), outerContent, cancellationToken)
-                .ConfigureAwait(false);
 
-            // Will throw as meaningful an exception as possible if there was an error.
-            await EnsureSuccessAsync(result).ConfigureAwait(false);
+            string fullContent;
+            string boundary;
+            using (var result = await httpClient.PostAsync(new Uri(batchUrl), outerContent, cancellationToken).ConfigureAwait(false))
+            {
+                // Will throw as meaningful an exception as possible if there was an error.
+                await EnsureSuccessAsync(result).ConfigureAwait(false);
 
-            // Get the boundary separator.
-            const string boundaryKey = "boundary=";
-            var fullContent = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var contentType = result.Content.Headers.GetValues("Content-Type").First();
-            var boundary = contentType.Substring(contentType.IndexOf(boundaryKey) + boundaryKey.Length);
+                // Get the boundary separator.
+                const string boundaryKey = "boundary=";
+                var contentType = result.Content.Headers.GetValues("Content-Type").First();
+                boundary = contentType.Substring(contentType.IndexOf(boundaryKey, StringComparison.Ordinal) + boundaryKey.Length);
+                fullContent = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+            }
 
             int requestIndex = 0;
             // While there is still content to read, parse the current HTTP response.
@@ -194,13 +198,13 @@ namespace Google.Apis.Requests
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var startIndex = fullContent.IndexOf("--" + boundary);
+                var startIndex = fullContent.IndexOf("--" + boundary, StringComparison.Ordinal);
                 if (startIndex == -1)
                 {
                     break;
                 }
                 fullContent = fullContent.Substring(startIndex + boundary.Length + 2);
-                var endIndex = fullContent.IndexOf("--" + boundary);
+                var endIndex = fullContent.IndexOf("--" + boundary, StringComparison.Ordinal);
                 if (endIndex == -1)
                 {
                     break;
@@ -212,15 +216,38 @@ namespace Google.Apis.Requests
                 {
                     // Parse the current content object.
                     var responseContent = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var content = service.Serializer.Deserialize(responseContent,
-                        allRequests[requestIndex].ResponseType);
+                    object deserializedContent = null;
+                    RequestError error = null;
+                    try
+                    {
+                        deserializedContent = service.Serializer.Deserialize(responseContent,
+                            allRequests[requestIndex].ResponseType);
+                    }
+                    catch (Exception ex)
+                    {
+                        error = new RequestError
+                        {
+                            Message = $"The response was read but could not be deserialized using the {nameof(service.Serializer)}.{Environment.NewLine}" +
+                                $"The exception thrown on deserializaton was:{Environment.NewLine}" +
+                                $"{ex}",
+                        };
+                    }
 
-                    allRequests[requestIndex].OnResponse(content, null, requestIndex, responseMessage);
+                    allRequests[requestIndex].OnResponse(deserializedContent, error, requestIndex, responseMessage);
                 }
                 else
                 {
-                    // Parse the error from the current response.
-                    var error = await service.DeserializeError(responseMessage).ConfigureAwait(false);
+                    RequestError error;
+                    try
+                    {
+                        // Parse the error from the current response.
+                        error = await service.DeserializeError(responseMessage).ConfigureAwait(false);
+                    }
+                    catch (GoogleApiException ex) when (ex.Error is object)
+                    {
+                        error = ex.Error;
+                    }
+
                     allRequests[requestIndex].OnResponse(null, error, requestIndex, responseMessage);
                 }
 
@@ -233,23 +260,20 @@ namespace Google.Apis.Requests
         {
             if (!result.IsSuccessStatusCode)
             {
-                Exception innerException = null;
+                Exception innerException;
                 try
                 {
                     // Try to parse the error from the current response.
                     RequestError error = await service.DeserializeError(result).ConfigureAwait(false);
-                    // If we were able to get an error object, wrap it in a GoogleApiException
-                    // and throw that to use as the inner exception.
-                    if (error != null)
+                    // If DeserializeError didn't threw, then we got an error object.
+                    // We wrap it in a GoogleApiException and throw that to use as the inner exception.
+                    // We throw here instead of simply creating a new GoogleApiException
+                    // so as to get the StackTrace.
+                    throw new GoogleApiException(service.Name)
                     {
-                        // We throw here instead of simply creating a new GoogleApiException
-                        // so as to get the StackTrace.
-                        throw new GoogleApiException(service.Name, error.ToString())
-                        {
-                            Error = error,
-                            HttpStatusCode = result.StatusCode
-                        };
-                    }
+                        Error = error,
+                        HttpStatusCode = result.StatusCode
+                    };
                 }
                 catch (Exception ex)
                 {
@@ -265,13 +289,12 @@ namespace Google.Apis.Requests
                     // Now that we may have more error detail, let's call EnsureSuccessStatusCode.
                     // We don't want to introduce breaking changes for users that relied on
                     // HttpRequestException before, and importantly on its message format which is the only
-                    // way they could access the HttpStatusCode.
+                    // way they could access the HttpStatusCode (pre .NET 5).
                     result.EnsureSuccessStatusCode();
                 }
-                // If innerException is null that means that our attempt to obtain error information
-                // couldn't parse a RequestError but also didn't throw. So we really don't have any
-                // more information to add. We don't need to do anything.
-                catch (HttpRequestException original) when (innerException != null)
+                // innerException is never null, either it's the one thrown by DeserializeError
+                // or is the one thrown by us that wraps the deserialized error object.
+                catch (HttpRequestException original)
                 {
                     throw new HttpRequestException(original.Message, innerException);
                 }
@@ -290,16 +313,22 @@ namespace Google.Apis.Requests
 
                 // Extract empty lines.
                 while (string.IsNullOrEmpty(line))
+                {
                     line = reader.ReadLine();
+                }
 
                 // Extract the outer header.
                 while (!string.IsNullOrEmpty(line))
+                {
                     line = reader.ReadLine();
+                }
 
                 // Extract the status code.
                 line = reader.ReadLine();
                 while (string.IsNullOrEmpty(line))
+                {
                     line = reader.ReadLine();
+                }
                 int code = int.Parse(line.Split(' ')[1]);
                 response.StatusCode = (HttpStatusCode)code;
 
@@ -312,9 +341,12 @@ namespace Google.Apis.Requests
                     var value = line.Substring(separatorIndex + 1).Trim();
                     // Check if the header already exists, and if so append its value 
                     // to the existing value. Fixes issue #548.
-                    if (headersDic.ContainsKey(key)) {
+                    if (headersDic.ContainsKey(key))
+                    {
                         headersDic[key] = headersDic[key] + ", " + value;
-                    } else {
+                    }
+                    else
+                    {
                         headersDic.Add(key, value);
                     }
                 }
@@ -326,7 +358,25 @@ namespace Google.Apis.Requests
                     mediaType = headersDic["Content-Type"].Split(';', ' ')[0];
                     headersDic.Remove("Content-Type");
                 }
-                response.Content = new StringContent(reader.ReadToEnd(), Encoding.UTF8, mediaType);
+
+                string contentBody = reader.ReadToEnd();
+                // In .NET 6+, the default HttpResponseMessage.Content is an EmptyContent, which is fine
+                // - we don't need to change it if we don't have any content. In earlier versions,
+                // the Content property is null by default, but historically we've always populated it.
+                // We don't want to break users, so we want to continue to make sure it's never null.
+                if (contentBody != "" || !string.IsNullOrEmpty(mediaType) || response.Content is null)
+                {
+                    // As of .NET 7, the StringContent constructor fails with a null or empty
+                    // media type. If there's no actual content, we can leave the HttpResponseMessage.Content
+                    // at its default empty value; but if we've got content but no media type,
+                    // we want to pass that to the callback. This would be a very odd situation, but
+                    // text/plain is a reasonable "default media type" here.
+                    if (string.IsNullOrEmpty(mediaType))
+                    {
+                        mediaType = "text/plain";
+                    }
+                    response.Content = new StringContent(contentBody, Encoding.UTF8, mediaType);
+                }
 
                 // Add the headers to the response.
                 foreach (var keyValue in headersDic)
@@ -342,8 +392,7 @@ namespace Google.Apis.Requests
                     // improperly strict. https://bugzilla.xamarin.com/show_bug.cgi?id=39569
                     if (!headers.TryAddWithoutValidation(keyValue.Key, keyValue.Value))
                     {
-                        throw new FormatException(String.Format(
-                            "Could not parse header {0} from batch reply", keyValue.Key));
+                        throw new FormatException($"Could not parse header {keyValue.Key} from batch reply");
                     }
                 }
 
@@ -366,17 +415,8 @@ namespace Google.Apis.Requests
                 mixedContent.Add(await CreateIndividualRequest(request).ConfigureAwait(false));
             }
 
-            // Batch request currently doesn't support GZip. Uncomment when the issue will be resolved.
-            // https://code.google.com/p/google-api-dotnet-client/issues/detail?id=409
-            /*if (service.GZipEnabled)
-            {
-                var content = HttpServiceExtenstions.CreateZipContent(await mixedContent.ReadAsStringAsync()
-                    .ConfigureAwait(false));
-                content.Headers.ContentType = mixedContent.Headers.ContentType;
-                return content;
-            }*/
+            // Note: Batch request currently doesn't support GZip.
             return mixedContent;
-
         }
 
         /// <summary>Creates the individual server request.</summary>
@@ -387,7 +427,7 @@ namespace Google.Apis.Requests
             string requestContent = await CreateRequestContentString(requestMessage).ConfigureAwait(false);
 
             var content = new StringContent(requestContent);
-            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/http");
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/http");
             return content;
         }
 
@@ -405,7 +445,7 @@ namespace Google.Apis.Requests
             foreach (var otherHeader in requestMessage.Headers)
             {
                 sb.Append(Environment.NewLine)
-                    .AppendFormat(("{0}: {1}"), otherHeader.Key, String.Join(", ", otherHeader.Value.ToArray()));
+                    .AppendFormat("{0}: {1}", otherHeader.Key, string.Join(", ", otherHeader.Value.ToArray()));
             }
 
             // Add content headers.
@@ -414,7 +454,7 @@ namespace Google.Apis.Requests
                 foreach (var contentHeader in requestMessage.Content.Headers)
                 {
                     sb.Append(Environment.NewLine)
-                        .AppendFormat("{0}: {1}", contentHeader.Key, String.Join(", ", contentHeader.Value.ToArray()));
+                        .AppendFormat("{0}: {1}", contentHeader.Key, string.Join(", ", contentHeader.Value.ToArray()));
                 }
             }
 
@@ -424,7 +464,6 @@ namespace Google.Apis.Requests
                 sb.Append(Environment.NewLine);
                 var content = await requestMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                 sb.Append("Content-Length:  ").Append(content.Length);
-
                 sb.Append(Environment.NewLine).Append(Environment.NewLine).Append(content);
             }
 
